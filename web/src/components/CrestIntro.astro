@@ -16,13 +16,20 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   let timeout: ReturnType<typeof setTimeout>;
+  const INTRO_MS = 3000;
+  let shownAt: number | null = null;
   let active = false;
   let manual = false;
+  function readyForCrest() {
+    document.documentElement.dataset.introReady = 'true';
+    window.dispatchEvent(new Event('su:intro-ready'));
+  }
   function dismiss() {
     active = false;
     if (intro) intro.hidden = true;
     video?.pause();
     clearTimeout(timeout);
+    readyForCrest();
     if (replay) { replay.textContent = 'Replay intro'; replay.removeAttribute('aria-busy'); }
     if (manual) replay?.focus({ preventScroll:true });
   }
@@ -30,6 +37,7 @@
     if (!intro || !video || active) return;
     manual = explicit;
     active = true;
+    shownAt = null;
     if (replay) { replay.textContent = 'Loading intro…'; replay.setAttribute('aria-busy','true'); }
     if (!video.getAttribute('src')) video.src = '/assets/brand/intro-2026.mp4';
     video.currentTime = 0;
@@ -38,10 +46,12 @@
     video.play().catch(dismiss);
   }
   video?.addEventListener('playing', () => {
-    if (!active || !intro) return;
+    if (!active || !intro || shownAt !== null) return;
+    shownAt = performance.now();
     intro.hidden = false;
     clearTimeout(timeout);
-    timeout = setTimeout(dismiss, Math.max(0, 3000 - video.currentTime * 1000));
+    // One wall-clock deadline: buffering/resume must never extend the intro.
+    timeout = setTimeout(dismiss, INTRO_MS);
     try { sessionStorage.setItem('su-crest-intro-2026', 'seen'); } catch {}
   });
   video?.addEventListener('ended', dismiss);
@@ -55,4 +65,5 @@
   try { seen = sessionStorage.getItem('su-crest-intro-2026') === 'seen'; } catch {}
   const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
   if ((!seen || navigation?.type === 'reload') && !motion.matches && !connection?.saveData) playIntro();
+  else readyForCrest();
 </script>

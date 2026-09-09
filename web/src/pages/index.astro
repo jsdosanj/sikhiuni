@@ -50,7 +50,7 @@ const ld = {
         <div class="crest-study">
           <div class="crest-stage">
             <img class="crest-fallback" src="/assets/brand/crest-2026.webp" alt="Sikhi University coat of arms" width="1254" height="1254" fetchpriority="high" />
-            <model-viewer id="su-crest-model" src="/assets/brand/crest-3d-detail-2026.glb" alt="Sikhi University crest in 3D. Drag to explore." camera-orbit="0deg 90deg 100%" field-of-view="30deg" camera-controls disable-zoom interaction-prompt="none" exposure="1" shadow-intensity="0.5" environment-image="neutral" loading="eager"></model-viewer>
+            <model-viewer id="su-crest-model" data-src="/assets/brand/crest-3d-detail-2026.glb" alt="Sikhi University crest in 3D. Drag to explore." camera-orbit="0deg 90deg 100%" field-of-view="30deg" camera-controls disable-zoom interaction-prompt="none" exposure="1" shadow-intensity="0.5" environment-image="neutral" loading="eager"></model-viewer>
           </div>
           <p class="crest-caption">Learn · Reflect · Serve</p>
           <button id="replay-intro" type="button" class="home-text-link mx-auto block mt-3 px-3 py-2 text-sm">Replay intro</button>
@@ -66,6 +66,11 @@ const ld = {
   </header>
   <script>
     const crest = document.getElementById('su-crest-model');
+    function loadCrest() {
+      if (crest && !crest.hasAttribute('src')) crest.setAttribute('src', crest.dataset.src!);
+    }
+    if (document.documentElement.dataset.introReady === 'true') loadCrest();
+    else window.addEventListener('su:intro-ready', loadCrest, { once:true });
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let played = false;
