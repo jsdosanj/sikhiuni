@@ -1,21 +1,36 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { phases, dojos, guides, capstones, explore } from '../../lib/institute';
+import { phases, dojos, guides, capstones, paths, schools, explore } from '../../lib/institute';
 
+// Grouped by sub-school so the catalogue reads the same way the Institute is
+// organised: the AI School first, then the Cybersecurity School.
 const groups = [
-  { label: 'AI Engineering — the phase spine', items: phases },
-  { label: 'Sikh Code', items: [...dojos, ...guides] },
-  { label: 'Capstone', items: capstones },
+  { label: 'AI School — the phase spine', items: phases },
+  { label: 'AI School — Sikh Code', items: [...dojos, ...guides] },
+  { label: 'AI School — capstone', items: capstones },
+  { label: 'Cybersecurity School — the paths', items: paths },
 ];
 ---
-<Base title="Catalogue — Institute of Technology" description="Every course in the Institute of Technology — the AI-engineering phase spine, the Sikh Code courses, and the Build for the Panth capstone." institute>
+<Base title="Catalogue — Institute of Technology" description="Every course in the Institute of Technology — the AI School's phase spine, Sikh Code and the capstone, and the Cybersecurity School's five paths." institute>
   <InstituteRail />
 
   <section class="i-wrap i-catwrap">
     <span class="i-label">/technology/catalog</span>
     <h1>Catalogue</h1>
-    <p class="i-prose">Everything in the Institute: the twenty-phase AI-engineering spine, the Sikh Code courses, the &ldquo;Build for the Panth&rdquo; capstone, the college-fair booths, and the Open Source Atlas.</p>
+    <p class="i-prose">Everything in the Institute, in its two schools. The <a href="/technology/school/ai">AI School</a>: the twenty-phase AI-engineering spine, the Sikh Code courses, and the &ldquo;Build for the Panth&rdquo; capstone. The <a href="/technology/school/cybersecurity">Cybersecurity School</a>: five paths from foundations to the range. Plus the college-fair booths and the Open Source Atlas.</p>
+
+    <ul class="i-catschools">
+      {schools.map((s) => (
+        <li>
+          <a class="i-catschool" href={`/technology/school/${s.slug}`}>
+            <span class="i-mono i-catschool-mark" aria-hidden="true">{s.mark}</span>
+            <span class="i-catschool-title">{s.title}</span>
+            <span class="i-prose i-catschool-tag">{s.tagline}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
 
     {groups.map((g) => (
       <div class="i-catgroup">
@@ -33,6 +48,7 @@ const groups = [
                     {'lessonCount' in t && t.lessonCount ? `${t.lessonCount} lessons` : null}
                     {'topicCount' in t && t.topicCount ? `${t.topicCount} topics` : null}
                     {'projectCount' in t && t.projectCount ? `${t.projectCount} projects` : null}
+                    {'moduleCount' in t && t.moduleCount ? `${t.moduleCount} modules` : null}
                     {' · '}{t.license}{' · '}{t.status}
                   </span>
                 </a>
@@ -75,6 +91,14 @@ const groups = [
     .i-catwrap { padding: 40px 24px 72px; }
     .i-catwrap > h1 { margin: 6px 0 10px; font-size: clamp(26px, 4vw, 36px); }
     .i-catwrap > p { max-width: 62ch; margin-bottom: 32px; }
+    .i-catschools { list-style: none; display: grid; gap: 12px; margin: 0 0 8px; padding: 0; }
+    @media (min-width: 700px) { .i-catschools { grid-template-columns: 1fr 1fr; } }
+    .i-catschool { display: block; padding: 14px 18px; border: 1px solid var(--i-line); border-radius: var(--i-r-md); background: var(--i-surface); text-decoration: none; transition: border-color 150ms; }
+    .i-catschool:hover { border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line)); }
+    .i-catschool-mark { color: var(--i-filament); font-size: 15px; letter-spacing: 0.06em; }
+    .i-catschool-title { display: block; margin-top: 4px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 17px; color: var(--i-ink); }
+    .i-catschool-tag { display: block; margin-top: 2px; font-size: 13.5px; }
+
     .i-catgroup { margin-top: 28px; }
     .i-catgroup > .i-label { display: block; margin-bottom: 10px; }
     .i-catlist { list-style: none; margin: 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); }

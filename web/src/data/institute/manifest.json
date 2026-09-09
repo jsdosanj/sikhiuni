@@ -3,11 +3,32 @@
   "generated": "2026-08-28",
   "shipShape": "minimum-lovable-institute-full",
   "wedge": "The Sikh community's own institution now teaches the skills that pay — inside a platform its youth already trust, in the community's voice, and pointed at building for the Panth.",
-  "notes": "AISF phases imported (149 lessons, source rohitg00/ai-engineering-from-scratch). Lesson bodies in imported/<track>/; our seva intros + lab checks in ours/<track>/ (merged at build). 'Build for the Panth' capstone + the Claude Code guide + both Sikh Code dojos published (dojo engines in lib/institute/dojo/, content in dojo/*.json, guide in guide/*.json, briefs in capstone/*.json). MLI content complete.",
+  "notes": "AISF phases imported (149 lessons, source rohitg00/ai-engineering-from-scratch). Lesson bodies in imported/<track>/; our seva intros + lab checks in ours/<track>/ (merged at build). 'Build for the Panth' capstone + the Claude Code guide + both Sikh Code dojos published (dojo engines in lib/institute/dojo/, content in dojo/*.json, guide in guide/*.json, briefs in capstone/*.json). MLI content complete. Split into two sub-schools (2026-09): the AI School (every track above) and the Cybersecurity School (cyber-* path tracks, modules in cyber/<track>.json).",
+  "schools": [
+    {
+      "id": "ai",
+      "slug": "ai",
+      "title": "AI School",
+      "label": "school of artificial intelligence",
+      "mark": "[ai]",
+      "tagline": "Build the systems.",
+      "blurb": "The twenty-phase AI-engineering spine, the Sikh Code dojos, the Claude Code guide, and the Build for the Panth capstone — from your first line of Python to a shipped agent."
+    },
+    {
+      "id": "cyber",
+      "slug": "cybersecurity",
+      "title": "Cybersecurity School",
+      "label": "school of cybersecurity",
+      "mark": "[sec]",
+      "tagline": "Defend what the Panth builds.",
+      "blurb": "Five paths — foundations, defence, offence, the range, and a track for the teachers running a Khalsa school or a gurdwara youth programme. Our syllabus and framing; the labs themselves are free ranges we send you to, never rehosted."
+    }
+  ],
   "tracks": [
     {
       "id": "aisf-00-setup",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 0,
       "slug": "00-setup-and-tooling",
@@ -23,6 +44,7 @@
     {
       "id": "aisf-02-ml",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 2,
       "slug": "02-ml-fundamentals",
@@ -38,6 +60,7 @@
     {
       "id": "aisf-03-deep-learning",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 3,
       "slug": "03-deep-learning-core",
@@ -53,6 +76,7 @@
     {
       "id": "aisf-07-transformers",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 7,
       "slug": "07-transformers-deep-dive",
@@ -68,6 +92,7 @@
     {
       "id": "aisf-11-llm-engineering",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 11,
       "slug": "11-llm-engineering",
@@ -83,6 +108,7 @@
     {
       "id": "aisf-13-tools-protocols",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 13,
       "slug": "13-tools-and-protocols",
@@ -98,6 +124,7 @@
     {
       "id": "aisf-14-agent-engineering",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 14,
       "slug": "14-agent-engineering",
@@ -113,6 +140,7 @@
     {
       "id": "aisf-01-math",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 1,
       "slug": "01-math-foundations",
@@ -128,6 +156,7 @@
     {
       "id": "aisf-04-vision",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 4,
       "slug": "04-computer-vision",
@@ -143,6 +172,7 @@
     {
       "id": "aisf-05-nlp",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 5,
       "slug": "05-nlp-foundations-to-advanced",
@@ -158,6 +188,7 @@
     {
       "id": "aisf-06-speech",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 6,
       "slug": "06-speech-and-audio",
@@ -173,6 +204,7 @@
     {
       "id": "aisf-08-genai",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 8,
       "slug": "08-generative-ai",
@@ -188,6 +220,7 @@
     {
       "id": "aisf-09-rl",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 9,
       "slug": "09-reinforcement-learning",
@@ -203,6 +236,7 @@
     {
       "id": "aisf-10-llms-from-scratch",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 10,
       "slug": "10-llms-from-scratch",
@@ -218,6 +252,7 @@
     {
       "id": "aisf-12-multimodal",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 12,
       "slug": "12-multimodal-ai",
@@ -233,6 +268,7 @@
     {
       "id": "aisf-15-autonomous",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 15,
       "slug": "15-autonomous-systems",
@@ -248,6 +284,7 @@
     {
       "id": "aisf-16-multi-agent",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 16,
       "slug": "16-multi-agent-and-swarms",
@@ -263,6 +300,7 @@
     {
       "id": "aisf-17-infra",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 17,
       "slug": "17-infrastructure-and-production",
@@ -278,6 +316,7 @@
     {
       "id": "aisf-18-ethics",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 18,
       "slug": "18-ethics-safety-alignment",
@@ -293,6 +332,7 @@
     {
       "id": "aisf-19-capstone",
       "kind": "phase",
+      "school": "ai",
       "source": "aisf",
       "num": 19,
       "slug": "19-capstone-projects",
@@ -308,6 +348,7 @@
     {
       "id": "sikh-code-foundations",
       "kind": "dojo",
+      "school": "ai",
       "source": "sikhi.io",
       "engine": "terminal",
       "title": "Sikh Code — Learn Coding",
@@ -322,6 +363,7 @@
     {
       "id": "sikh-code-agentic",
       "kind": "dojo",
+      "school": "ai",
       "source": "sikhi.io",
       "engine": "dojo",
       "title": "Sikh Code — Learn Agentic Coding",
@@ -336,6 +378,7 @@
     {
       "id": "claude-code-guide",
       "kind": "guide",
+      "school": "ai",
       "source": "sikhi.io",
       "title": "Claude Code Guide",
       "level": 100,
@@ -348,6 +391,7 @@
     {
       "id": "build-for-the-panth",
       "kind": "capstone",
+      "school": "ai",
       "source": "ours",
       "title": "Build for the Panth",
       "level": 400,
@@ -357,6 +401,86 @@
       "license": "CC-BY-SA-4.0",
       "professor": "sikh-code",
       "summary": "Pick one project and ship it: a Gurbani search tool, a gurdwara event board, an archive-OCR helper, a langar/seva coordinator, or a Punjabi-learning bot. Finishing it plus the phase exams earns the Institute certificate."
+    },
+    {
+      "id": "cyber-00-foundations",
+      "kind": "path",
+      "school": "cyber",
+      "source": "acsu",
+      "num": 0,
+      "slug": "00-security-foundations",
+      "title": "Security Foundations",
+      "level": 100,
+      "prereq": null,
+      "moduleCount": 6,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "acsu",
+      "summary": "Before red or blue: what a network actually does, how Linux answers to a shell, what the CIA triad buys you, and how to research a target you have never seen. The pre-security path, done properly."
+    },
+    {
+      "id": "cyber-01-defence",
+      "kind": "path",
+      "school": "cyber",
+      "source": "acsu",
+      "num": 1,
+      "slug": "01-blue-team-defence",
+      "title": "Blue Team — Defence & Response",
+      "level": 200,
+      "prereq": "cyber-00-foundations",
+      "moduleCount": 6,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "acsu",
+      "summary": "The side of security most people are actually paid for: log triage in a SIEM, incident response, disk and memory forensics, threat intelligence, and malware analysis — practised on real, free blue-team ranges."
+    },
+    {
+      "id": "cyber-02-offence",
+      "kind": "path",
+      "school": "cyber",
+      "source": "acsu",
+      "num": 2,
+      "slug": "02-red-team-offence",
+      "title": "Red Team — Offensive Security",
+      "level": 200,
+      "prereq": "cyber-00-foundations",
+      "moduleCount": 7,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "acsu",
+      "summary": "Learn to break in so you can tell someone how to stop it: reconnaissance, scanning, the OWASP Top 10, privilege escalation, and an honest introduction to reverse engineering and binary exploitation."
+    },
+    {
+      "id": "cyber-03-range",
+      "kind": "path",
+      "school": "cyber",
+      "source": "acsu",
+      "num": 3,
+      "slug": "03-the-range",
+      "title": "The Range — Applied Practice",
+      "level": 300,
+      "prereq": "cyber-02-offence",
+      "moduleCount": 5,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "acsu",
+      "summary": "No new theory. Capture-the-flag boxes, container and Kubernetes escapes, recent CVEs including Log4Shell and Spring4Shell, and a short shelf of genuinely hard machines for when the easy ones stop teaching you anything."
+    },
+    {
+      "id": "cyber-04-schools",
+      "kind": "path",
+      "school": "cyber",
+      "source": "niccs",
+      "num": 4,
+      "slug": "04-cyber-for-schools",
+      "title": "Cyber for Schools & Families",
+      "level": 100,
+      "prereq": null,
+      "moduleCount": 5,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "niccs",
+      "summary": "For the ਸੰਗਤ that teaches: Khalsa school staff, gurdwara youth programmes, and parents. Classroom-ready K-12 cyber curriculum, a free browser cyber range for students, career profiles, and the ransomware guidance a school actually needs."
     }
   ],
   "explore": [
@@ -383,6 +507,22 @@
       "href": "https://libre.academy/",
       "wave": "depth",
       "blurb": "A local-first desktop app: 90+ interactive coding courses, no account, native compilers offline — and it turns any technical PDF or EPUB into a course with generated exercises. Its book-derived packs sit under non-commercial and no-derivatives licences, so this stand links out rather than rehosting."
+    },
+    {
+      "id": "sans",
+      "title": "SANS Institute",
+      "kind": "booth",
+      "href": "https://www.sans.org/security-resources/download",
+      "wave": "cyber",
+      "blurb": "The security profession's reference shelf: free posters, cheat sheets, security policy templates, and whitepapers, by discipline. Free to download and copyright SANS — licensed for non-commercial use, so this stand links out and rehosts nothing."
+    },
+    {
+      "id": "niccs",
+      "title": "NICCS · CISA",
+      "kind": "booth",
+      "href": "https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators",
+      "wave": "cyber",
+      "blurb": "The US government's cyber-education portal, and the K-12 classroom resources it funds through CYBER.ORG: curriculum by grade band, a browser-based cyber range free to educators, career profiles, and ransomware guidance written for schools."
     }
   ],
   "resources": [
@@ -505,6 +645,26 @@
       "author": "Udacity",
       "price": "paid",
       "blurb": "Project-graded, mentor-supported programs in AI, ML engineering, and data — a paid, structured on-ramp for when self-study needs a deadline and a reviewer."
+    },
+    {
+      "id": "awesome-cyber-security-university",
+      "title": "Awesome Cyber Security University",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://brootware.github.io/awesome-cyber-security-university/",
+      "author": "Oaker Min (brootware) and contributors",
+      "price": "free",
+      "blurb": "The CC0 roadmap the Cybersecurity School's four practitioner paths are sequenced from — free, learn-by-doing security training in order, from pre-security to hard boxes. Go to the source when you want the full list rather than our narrowed syllabus."
+    },
+    {
+      "id": "sans-cheat-sheets",
+      "title": "The ultimate list of SANS cheat sheets",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://www.sans.org/blog/the-ultimate-list-of-sans-cheat-sheets",
+      "author": "SANS Institute",
+      "price": "free",
+      "blurb": "Every SANS cheat sheet in one index — forensics, incident response, pen testing, cloud. Free to download; copyright SANS, licensed for non-commercial use. Bookmark it on your first day in the Cybersecurity School."
     }
   ],
   "deferred": {

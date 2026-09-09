@@ -29,5 +29,27 @@
       { "label": "sikhi.io", "href": "https://sikhi.io" }
     ],
     "license": "CC-BY-SA-4.0"
+  },
+  "acsu": {
+    "name": "Awesome Cyber Security University",
+    "kind": "org",
+    "role": "Curation — Oaker Min (brootware) and contributors",
+    "bio": "A community-curated roadmap of free, learn-by-doing security training, released into the public domain under CC0 1.0. The Cybersecurity School's four practitioner paths follow its sequencing — pre-security, blue team, red team, then applied practice. Modifications: re-cut into the Institute's module structure, with Sikhi University's own objectives, teaching notes, and seva-framed intros written around each module. The labs themselves are hosted by the platforms that run them and are linked, never rehosted.",
+    "links": [
+      { "label": "brootware.github.io/awesome-cyber-security-university", "href": "https://brootware.github.io/awesome-cyber-security-university/" },
+      { "label": "github.com/brootware/awesome-cyber-security-university", "href": "https://github.com/brootware/awesome-cyber-security-university" }
+    ],
+    "license": "CC0-1.0"
+  },
+  "niccs": {
+    "name": "NICCS · CISA",
+    "kind": "org",
+    "role": "National Initiative for Cybersecurity Careers and Studies",
+    "bio": "NICCS is the US Cybersecurity and Infrastructure Security Agency's education portal. Through the Cybersecurity Education and Training Assistance Program (CETAP) it funds CYBER.ORG, whose K-12 curriculum, CYBERPortal, and browser-based cyber range are free to educators. The Institute's 'Cyber for Schools & Families' path is a reading map over those public resources — every item links out to NICCS, CISA, or CYBER.ORG. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.",
+    "links": [
+      { "label": "niccs.cisa.gov", "href": "https://niccs.cisa.gov/" },
+      { "label": "cyber.org", "href": "https://cyber.org/educational-cybersecurity-resources" }
+    ],
+    "license": "US Government work — public domain (17 U.S.C. § 105)"
   }
 }

@@ -1,0 +1,120 @@
+{
+  "track": "cyber-02-offence",
+  "school": "cyber",
+  "blurb": "Reconnaissance, scanning, the OWASP Top 10, privilege escalation, and an honest introduction to reverse engineering and binary exploitation.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "adaptedFrom": {
+    "name": "Awesome Cyber Security University",
+    "href": "https://brootware.github.io/awesome-cyber-security-university/",
+    "license": "CC0-1.0",
+    "note": "Module sequencing follows the CC0 red-team roadmap. Objectives, teaching notes, and framing are written by Sikhi University. No lab content is rehosted — every lab opens on the platform that runs it."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "authorisation-first",
+      "title": "Authorisation first",
+      "objective": "State, for any test you run, who authorised it, what is in scope, and what you will do if you find something you were not looking for.",
+      "teach": "Every technique in this path is legal in a lab and a criminal offence against a system you were not given. That is not a disclaimer we are appending; it is the first thing a professional learns, and the thing that separates this path from the thing it superficially resembles. Read the engagement material before the tooling. If a module ever tempts you to try something \"just to see\" against a system you do not own — that is the moment the training was for.",
+      "labs": [
+        { "title": "Red Team Fundamentals", "provider": "TryHackMe", "href": "https://tryhackme.com/room/redteamfundamentals", "cost": "free · account" },
+        { "title": "Red Team Engagements", "provider": "TryHackMe", "href": "https://tryhackme.com/room/redteamengagements", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "recon-and-scanning",
+      "title": "Reconnaissance and scanning",
+      "objective": "Enumerate a target's hosts, ports, services, and subdomains, and read a scan result rather than merely producing one.",
+      "teach": "Beginners run a scanner and paste the output. Practitioners run a scanner and know which three lines matter. Learn the multiplexer first so long-running scans survive a dropped connection, then work through host discovery, service and version detection, and subdomain enumeration. Time spent here is repaid at every later stage: almost every successful engagement is won during enumeration.",
+      "labs": [
+        { "title": "tmux", "provider": "TryHackMe", "href": "https://tryhackme.com/room/rptmux", "cost": "free · account" },
+        { "title": "Nmap, curl and netcat", "provider": "echoCTF.RED", "href": "https://echoctf.red/challenge/1", "cost": "free · account" },
+        { "title": "Nmap quick start", "provider": "LabEx", "href": "https://labex.io/tutorials/quick-start-with-nmap-free-tutorials-400132", "cost": "free tier" },
+        { "title": "RustScan", "provider": "TryHackMe", "href": "https://tryhackme.com/room/rustscan", "cost": "free · account" },
+        { "title": "Subdomain Enumeration", "provider": "TryHackMe", "href": "https://tryhackme.com/room/subdomainenumeration", "cost": "free · account" },
+        { "title": "Red Team Recon", "provider": "TryHackMe", "href": "https://tryhackme.com/room/redteamrecon", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "tooling",
+      "title": "The exploitation toolchain",
+      "objective": "Use Metasploit and Hydra deliberately — knowing what each module does before you fire it — and get an initial foothold on a practice box.",
+      "teach": "A framework is a force multiplier for someone who already understands the attack and a liability for someone who does not. Read each module's source before you run it: you are executing someone else's code against a target, and on a real engagement you will be asked what it did. Credential attacks come with a matching lesson in defence — every failed login you generate is a detection someone else should be writing.",
+      "labs": [
+        { "title": "Metasploit — Introduction", "provider": "TryHackMe", "href": "https://tryhackme.com/room/metasploitintro", "cost": "free · account" },
+        { "title": "Hydra", "provider": "TryHackMe", "href": "https://tryhackme.com/room/hydra", "cost": "free · account" },
+        { "title": "Vulnversity", "provider": "TryHackMe", "href": "https://tryhackme.com/room/vulnversity", "cost": "free · account" },
+        { "title": "Blue", "provider": "TryHackMe", "href": "https://tryhackme.com/room/blue", "cost": "free · account" },
+        { "title": "Simple CTF", "provider": "TryHackMe", "href": "https://tryhackme.com/room/easyctf", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "hashes-and-crypto",
+      "title": "Hashes, encodings, and where they leak",
+      "objective": "Identify a hash by its shape, crack a weak one, and explain why salting and a slow algorithm defeat you.",
+      "teach": "Cracking is the part of offence that teaches the most defence. Once you have watched an unsalted MD5 list fall in seconds and a properly salted, slow hash refuse to move at all, password storage stops being an abstract recommendation. Steganography and file-carving sit alongside it here because in practice the credential is rarely where you expected it to be.",
+      "labs": [
+        { "title": "Crack the Hash", "provider": "TryHackMe", "href": "https://tryhackme.com/room/crackthehash", "cost": "free · account" },
+        { "title": "Agent Sudo", "provider": "TryHackMe", "href": "https://tryhackme.com/room/agentsudoctf", "cost": "free · account" },
+        { "title": "The Cod Caper", "provider": "TryHackMe", "href": "https://tryhackme.com/room/thecodcaper", "cost": "free · account" },
+        { "title": "Basic Pentesting", "provider": "TryHackMe", "href": "https://tryhackme.com/room/basicpentestingjt", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "web",
+      "title": "The web — OWASP Top 10 in practice",
+      "objective": "Find and exploit injection, broken access control, and file-inclusion flaws in a deliberately vulnerable application, then describe the fix.",
+      "teach": "Most of what gets breached is a web application, which makes this the highest-value module in the path. Work the Top 10 as a checklist first, then take Juice Shop apart at your own pace — it contains a graded challenge for nearly every category. Finish each finding the way a report does: the request that proved it, the impact, and the one-line change that closes it.",
+      "labs": [
+        { "title": "OWASP Top 10", "provider": "TryHackMe", "href": "https://tryhackme.com/room/owasptop10", "cost": "free · account" },
+        { "title": "OWASP Juice Shop", "provider": "TryHackMe", "href": "https://tryhackme.com/room/owaspjuiceshop", "cost": "free · account" },
+        { "title": "Injection", "provider": "TryHackMe", "href": "https://tryhackme.com/room/injection", "cost": "free · account" },
+        { "title": "Inclusion", "provider": "TryHackMe", "href": "https://tryhackme.com/room/inclusion", "cost": "free · account" },
+        { "title": "Overpass", "provider": "TryHackMe", "href": "https://tryhackme.com/room/overpass", "cost": "free · account" },
+        { "title": "Bolt", "provider": "TryHackMe", "href": "https://tryhackme.com/room/bolt", "cost": "free · account" },
+        { "title": "Natas — web wargame", "provider": "OverTheWire", "href": "https://overthewire.org/wargames/natas/", "cost": "free" }
+      ]
+    },
+    {
+      "num": 6,
+      "slug": "privilege-escalation",
+      "title": "Privilege escalation",
+      "objective": "Turn a low-privilege shell into administrative access on both Linux and Windows, using misconfiguration before exploitation.",
+      "teach": "Getting a shell is rarely the end of the assessment; it is the beginning of the interesting half. Most escalation is not an exploit at all but a misconfiguration — a writable service binary, an over-permissive sudo rule, a scheduled task running as SYSTEM. Learn to enumerate first and reach for a kernel exploit last, which is also the order that will not crash your client's production host.",
+      "labs": [
+        { "title": "Linux PrivEsc", "provider": "TryHackMe", "href": "https://tryhackme.com/room/linuxprivesc", "cost": "free · account" },
+        { "title": "Linux PrivEsc Arena", "provider": "TryHackMe", "href": "https://tryhackme.com/room/linuxprivescarena", "cost": "free · account" },
+        { "title": "Windows PrivEsc", "provider": "TryHackMe", "href": "https://tryhackme.com/room/windows10privesc", "cost": "free · account" },
+        { "title": "Windows PrivEsc Arena", "provider": "TryHackMe", "href": "https://tryhackme.com/room/windowsprivescarena", "cost": "free · account" },
+        { "title": "Bypassing UAC", "provider": "TryHackMe", "href": "https://tryhackme.com/room/bypassinguac", "cost": "free · account" },
+        { "title": "Kenobi", "provider": "TryHackMe", "href": "https://tryhackme.com/room/kenobi", "cost": "free · account" },
+        { "title": "Ignite", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ignite", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 7,
+      "slug": "reversing-and-pwn",
+      "title": "Reverse engineering and binary exploitation",
+      "objective": "Open a compiled binary in a disassembler, follow its logic, and understand how a buffer overflow becomes control of execution.",
+      "teach": "This is the deepest and slowest module in the path, and the one that pays off for the longest. Assembly and a disassembler let you answer questions about software nobody gave you the source to — which is most malware, most firmware, and a good deal of commercial code. Expect this to take considerably longer than the modules before it. That is the correct experience, not a sign you have gone wrong.",
+      "labs": [
+        { "title": "Windows x64 Assembly", "provider": "TryHackMe", "href": "https://tryhackme.com/room/win64assembly", "cost": "free · account" },
+        { "title": "Reverse Engineering", "provider": "TryHackMe", "href": "https://tryhackme.com/room/reverseengineering", "cost": "free · account" },
+        { "title": "Ghidra", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ccghidra", "cost": "free · account" },
+        { "title": "Radare2", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ccradare2", "cost": "free · account" },
+        { "title": "Reversing ELF", "provider": "TryHackMe", "href": "https://tryhackme.com/room/reverselfiles", "cost": "free · account" },
+        { "title": "Intro to pwntools", "provider": "TryHackMe", "href": "https://tryhackme.com/room/introtopwntools", "cost": "free · account" },
+        { "title": "Dumping Router Firmware", "provider": "TryHackMe", "href": "https://tryhackme.com/room/rfirmware", "cost": "free · account" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "SANS posters and cheat sheets", "provider": "SANS Institute", "href": "https://www.sans.org/posters", "note": "Including the pen-test reference sheets. Copyright SANS, licensed for non-commercial use — read them there, do not redistribute." },
+    { "title": "SANS free security resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Tools, cheat sheets, and the security policy templates worth reading before you write a report." }
+  ]
+}

@@ -5,13 +5,27 @@
 import manifest from '../data/institute/manifest.json';
 import professorsRaw from '../data/institute/professors.json';
 
-export type TrackKind = 'phase' | 'dojo' | 'guide' | 'capstone';
+export type TrackKind = 'phase' | 'dojo' | 'guide' | 'capstone' | 'path';
 export type TrackStatus = 'planned' | 'draft' | 'published';
+export type SchoolId = 'ai' | 'cyber';
+
+/** A sub-school of the Institute. Both are declared in manifest.schools. */
+export interface School {
+  id: SchoolId;
+  slug: string;
+  title: string;
+  label: string;
+  /** A monospace type mark — the schools' equivalent of the booth motifs. */
+  mark: string;
+  tagline: string;
+  blurb: string;
+}
 
 export interface Track {
   id: string;
   kind: TrackKind;
-  source: 'aisf' | 'sikhi.io' | 'ours';
+  school: SchoolId;
+  source: 'aisf' | 'sikhi.io' | 'ours' | 'acsu' | 'niccs';
   title: string;
   summary: string;
   level: number;
@@ -24,7 +38,33 @@ export interface Track {
   lessonCount?: number;
   topicCount?: number;
   projectCount?: number;
+  moduleCount?: number;
   engine?: 'terminal' | 'dojo';
+}
+
+/** A module of a `path` track — our teaching note plus the free labs it sends you to. */
+export interface PathLab {
+  title: string;
+  provider: string;
+  href: string;
+  cost: string;
+}
+export interface PathModule {
+  num: number;
+  slug: string;
+  title: string;
+  objective: string;
+  teach: string;
+  labs: PathLab[];
+}
+export interface PathTrack {
+  track: string;
+  school: SchoolId;
+  blurb: string;
+  license: string;
+  adaptedFrom: { name: string; href: string; license: string; note: string };
+  modules: PathModule[];
+  bench: { title: string; provider: string; href: string; note: string }[];
 }
 
 export interface Booth {
@@ -68,17 +108,33 @@ export const deferred = (manifest as any).deferred as {
 };
 export const professors: Record<string, InstituteProfessor> = professorsRaw as any;
 
+export const schools: School[] = (manifest as any).schools;
+
 export const phases = tracks.filter((t) => t.kind === 'phase').sort((a, b) => (a.num ?? 0) - (b.num ?? 0));
 export const dojos = tracks.filter((t) => t.kind === 'dojo');
 export const guides = tracks.filter((t) => t.kind === 'guide');
 export const capstones = tracks.filter((t) => t.kind === 'capstone');
+/** The Cybersecurity School's practitioner paths, in order. */
+export const paths = tracks.filter((t) => t.kind === 'path').sort((a, b) => (a.num ?? 0) - (b.num ?? 0));
 
 export const trackById = (id: string): Track | undefined => tracks.find((t) => t.id === id);
 export const professorOf = (t: Track): InstituteProfessor | undefined => professors[t.professor];
+export const tracksOf = (id: SchoolId): Track[] => tracks.filter((t) => t.school === id);
 
 /** Route slug for a track's overview page: /technology/track/<slug>. */
 export const trackSlug = (t: Track): string =>
-  t.kind === 'phase' && t.slug ? t.slug : t.id;
+  (t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id;
+
+/**
+ * Wrap the Gurmukhi runs in a plain-text string so each one gets a real
+ * Gurmukhi face and `lang="pa"` (DESIGN-INSTITUTE.md §Non-negotiables). Returns
+ * HTML, so the input is escaped first — use with `set:html`.
+ */
+const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+export const gurmukhiHtml = (s: string): string =>
+  s.replace(/[&<>"']/g, (c) => ESC[c])
+    .replace(/[਀-੿]+(?:[ ‍]+[਀-੿]+)*/g,
+      (run) => `<span class="gur" lang="pa">${run}</span>`);
 
 /** Total planned lessons across the built spine (for the "N lessons" copy). */
 export const totalLessons: number = phases.reduce((n, p) => n + (p.lessonCount ?? 0), 0);

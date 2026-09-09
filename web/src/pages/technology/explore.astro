@@ -10,11 +10,13 @@ const MARKS: Record<string, string> = {
   freecodecamp: '{ }',
   'class-central': '///',
   'libre-academy': '[ ]',
+  sans: '###',
+  niccs: 'K12',
 };
 ---
 <Base
   title="Explore free courses — Institute of Technology"
-  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula and course directories — freeCodeCamp, Class Central, Libre.academy."
+  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, and the security reference shelves — freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA."
   institute
 >
   <InstituteRail />
@@ -22,7 +24,7 @@ const MARKS: Record<string, string> = {
   <section class="i-wrap i-exp-head">
     <span class="i-label">/technology/explore</span>
     <h1>The college fair</h1>
-    <p class="i-prose">The Institute's own courses come first — you finish those and earn its certificate. This hall is for after: when you want breadth, a different teaching style, or an interactive challenge platform. Each stand links straight out.</p>
+    <p class="i-prose">The Institute's own courses come first — you finish those and earn its certificate. This hall is for after: when you want breadth, a different teaching style, an interactive challenge platform, or the reference shelf the security profession actually keeps open. Each stand links straight out.</p>
   </section>
 
   <section class="i-wrap i-fair">
@@ -40,6 +42,16 @@ const MARKS: Record<string, string> = {
           {b.id === 'class-central' && (
             <span class="i-booth-fine">
               A course-discovery aggregator. &ldquo;Class Central&rdquo; is a trademark of Class Central SL, used here nominatively to name the service &mdash; no affiliation or endorsement is claimed. Course listings, ratings, and editorial content are Class Central&rsquo;s own.
+            </span>
+          )}
+          {b.id === 'sans' && (
+            <span class="i-booth-fine">
+              SANS courseware and reference material is copyright the Escal Institute of Advanced Technologies, Inc., free to download and licensed for non-commercial use &mdash; it is not openly licensed, so this stand links out and rehosts nothing. &ldquo;SANS&rdquo; is their trademark, used nominatively. Sikhi University is not affiliated with, sponsored by, or endorsed by SANS.
+            </span>
+          )}
+          {b.id === 'niccs' && (
+            <span class="i-booth-fine">
+              NICCS and CISA pages are US Government works in the public domain (17&nbsp;U.S.C. &sect;&nbsp;105); the K-12 curriculum and cyber range are CYBER.ORG&rsquo;s own and free to educators under CYBER.ORG&rsquo;s terms. Nothing is rehosted and no agency seal or logo is used. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.
             </span>
           )}
           {b.id === 'libre-academy' && (
@@ -129,6 +141,30 @@ const MARKS: Record<string, string> = {
     .i-booth-libre-academy .i-booth-fine { color: #7c6f61; }
     .i-booth-libre-academy .i-booth-go { color: #e0734d; }
     .i-booth-libre-academy:hover { border-color: #e0734d; }
+
+    /* SANS: deep navy, their red accent, a poster-grid mark. */
+    .i-booth-sans {
+      background: #10203a; border-color: #1e3358;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #b9c6da;
+    }
+    .i-booth-sans .i-booth-mark { color: #ef6461; letter-spacing: -0.06em; }
+    .i-booth-sans .i-booth-name { color: #ffffff; font-weight: 700; }
+    .i-booth-sans .i-booth-fine { color: #8496b0; }
+    .i-booth-sans .i-booth-go { color: #ef6461; font-weight: 600; }
+    .i-booth-sans:hover { border-color: #ef6461; }
+
+    /* NICCS · CISA: a federal-site light card — Public Sans feel, agency navy. */
+    .i-booth-niccs {
+      background: #f4f7fb; border-color: #ccd8e6;
+      font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #33455c;
+    }
+    .i-booth-niccs .i-booth-mark { color: #005288; font-weight: 700; letter-spacing: -0.02em; }
+    .i-booth-niccs .i-booth-name { color: #0b2239; font-weight: 700; }
+    .i-booth-niccs .i-booth-fine { color: #56657d; }
+    .i-booth-niccs .i-booth-go { color: #b21e35; font-weight: 600; }
+    .i-booth-niccs:hover { border-color: #005288; }
 
     .i-exp-foot { padding: 16px 24px 72px; }
     .i-exp-foot p { max-width: 62ch; }

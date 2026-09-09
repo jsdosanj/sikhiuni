@@ -1,0 +1,86 @@
+{
+  "track": "cyber-03-range",
+  "school": "cyber",
+  "blurb": "No new theory. Capture-the-flag boxes, container and Kubernetes escapes, recent CVEs, and a short shelf of genuinely hard machines.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "adaptedFrom": {
+    "name": "Awesome Cyber Security University",
+    "href": "https://brootware.github.io/awesome-cyber-security-university/",
+    "license": "CC0-1.0",
+    "note": "Module sequencing follows the CC0 practice roadmap. Objectives, teaching notes, and framing are written by Sikhi University. No lab content is rehosted — every lab opens on the platform that runs it."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "wargames",
+      "title": "Wargames — the daily practice",
+      "objective": "Work through a graded wargame ladder where each level teaches exactly one command or idea.",
+      "teach": "Bandit is the closest thing this field has to a scale exercise: thirty-odd levels, each solvable with one idea, played entirely over SSH with no account and no VPN. It is the right thing to do on a day when you have twenty minutes rather than an evening. Do not read the walkthrough. The whole value is in the stuck part.",
+      "labs": [
+        { "title": "Bandit", "provider": "OverTheWire", "href": "https://overthewire.org/wargames/bandit/", "cost": "free" },
+        { "title": "Natas", "provider": "OverTheWire", "href": "https://overthewire.org/wargames/natas/", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "full-boxes",
+      "title": "Full boxes, start to root",
+      "objective": "Take an unfamiliar machine from a single IP address to root, and write the engagement notes as you go.",
+      "teach": "A full box exercises everything at once — enumeration, a foothold, escalation — with nobody telling you which stage you are in. Keep notes from the first scan, not from the moment you succeed; the notes are the deliverable a client actually pays for, and the habit is far harder to add later than to start with.",
+      "labs": [
+        { "title": "Pickle Rick", "provider": "TryHackMe", "href": "https://tryhackme.com/room/picklerick", "cost": "free · account" },
+        { "title": "Bounty Hacker", "provider": "TryHackMe", "href": "https://tryhackme.com/room/cowboyhacker", "cost": "free · account" },
+        { "title": "Smag Grotto", "provider": "TryHackMe", "href": "https://tryhackme.com/room/smaggrotto", "cost": "free · account" },
+        { "title": "Dogcat", "provider": "TryHackMe", "href": "https://tryhackme.com/room/dogcat", "cost": "free · account" },
+        { "title": "Lian Yu", "provider": "TryHackMe", "href": "https://tryhackme.com/room/lianyu", "cost": "free · account" },
+        { "title": "Post-Exploitation Basics", "provider": "TryHackMe", "href": "https://tryhackme.com/room/postexploit", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "cloud-and-containers",
+      "title": "Containers, Kubernetes, and Active Directory",
+      "objective": "Escape a misconfigured container, attack a Kubernetes cluster, and enumerate an Active Directory domain.",
+      "teach": "This is where practice meets what organisations actually run. A container is a process with optimistic boundaries, and the classic escapes are all misconfiguration rather than exotic exploitation. Active Directory belongs beside them because it is still the backbone of nearly every enterprise network — and still where most intrusions become domain-wide.",
+      "labs": [
+        { "title": "The Great Escape — Docker", "provider": "TryHackMe", "href": "https://tryhackme.com/room/thegreatescape", "cost": "free · account" },
+        { "title": "Insekube — Kubernetes", "provider": "TryHackMe", "href": "https://tryhackme.com/room/insekube", "cost": "free · account" },
+        { "title": "Attacktive Directory", "provider": "TryHackMe", "href": "https://tryhackme.com/room/attacktivedirectory", "cost": "free · account" },
+        { "title": "Retro", "provider": "TryHackMe", "href": "https://tryhackme.com/room/retro", "cost": "free · account" },
+        { "title": "Blueprint", "provider": "TryHackMe", "href": "https://tryhackme.com/room/blueprint", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "recent-cves",
+      "title": "Recent CVEs, while they still matter",
+      "objective": "Read a fresh advisory, reproduce the vulnerability in a lab, and decide what you would tell an operations team to do tonight.",
+      "teach": "Log4Shell, Spring4Shell, and PwnKit are worth reproducing not for the exploit but for the shape of the week around it: an advisory with incomplete information, a patch that does not apply cleanly, and someone asking whether you are affected. That is the actual job. Keep this module current — the specific CVEs age, but the exercise does not.",
+      "labs": [
+        { "title": "Solar — exploiting Log4Shell", "provider": "TryHackMe", "href": "https://tryhackme.com/room/solar", "cost": "free · account" },
+        { "title": "Spring4Shell", "provider": "TryHackMe", "href": "https://tryhackme.com/room/spring4shell", "cost": "free · account" },
+        { "title": "PwnKit — CVE-2021-4034", "provider": "TryHackMe", "href": "https://tryhackme.com/room/pwnkit", "cost": "free · account" },
+        { "title": "Most Recent Threats", "provider": "TryHackMe", "href": "https://tryhackme.com/module/recent-threats", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "hard-boxes",
+      "title": "When the easy ones stop teaching you",
+      "objective": "Attempt a machine you cannot finish in an evening, and keep a log of everything you ruled out.",
+      "teach": "These are hard, and being stuck on one for days is the intended experience. The discipline that gets you through is written record: what you tried, what it returned, and why you eliminated it. That log is also the thing that makes you employable, because it is the difference between someone who found the answer and someone who can explain how.",
+      "labs": [
+        { "title": "Buffer Overflow Prep", "provider": "TryHackMe", "href": "https://tryhackme.com/room/bufferoverflowprep", "cost": "free · account" },
+        { "title": "Year of the Owl", "provider": "TryHackMe", "href": "https://tryhackme.com/room/yearoftheowl", "cost": "free · account" },
+        { "title": "Theseus", "provider": "TryHackMe", "href": "https://tryhackme.com/room/theseus", "cost": "free · account" },
+        { "title": "Ra", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ra", "cost": "free · account" },
+        { "title": "IronCorp", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ironcorp", "cost": "free · account" },
+        { "title": "Racetrack Bank", "provider": "TryHackMe", "href": "https://tryhackme.com/room/racetrackbank", "cost": "free · account" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "SANS free security resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Keep the cheat sheets open while you work a box. Copyright SANS, non-commercial use." }
+  ]
+}

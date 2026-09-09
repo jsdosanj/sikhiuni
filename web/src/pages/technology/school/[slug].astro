@@ -1,0 +1,134 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { schools, tracksOf, trackSlug, professorOf, gurmukhiHtml } from '../../../lib/institute';
+import type { School, Track } from '../../../lib/institute';
+
+// One page, both sub-schools: the AI School and the Cybersecurity School. The
+// groups below are derived from the school's own tracks, so a new track shows
+// up here the moment it lands in the manifest.
+export function getStaticPaths() {
+  return schools.map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+const { s } = Astro.props as { s: School };
+
+const mine = tracksOf(s.id).filter((t) => t.status === 'published');
+const spine = mine.filter((t) => t.kind === 'phase' || t.kind === 'path')
+  .sort((a, b) => (a.num ?? 0) - (b.num ?? 0));
+const aside = mine.filter((t) => t.kind === 'dojo' || t.kind === 'guide' || t.kind === 'capstone');
+
+const examBanks = import.meta.glob('../../../data/institute/exam/*.json', { eager: true });
+const intros = import.meta.glob('../../../data/institute/ours/*/intro.json', { eager: true });
+const hasExam = (id: string) => !!examBanks[`../../../data/institute/exam/${id}.json`];
+const introOf = (id: string) => {
+  const mod = intros[`../../../data/institute/ours/${id}/intro.json`] as any;
+  return (mod && (mod.default ?? mod)?.blurb) as string | undefined;
+};
+
+const unit = (t: Track) =>
+  t.kind === 'path' ? `${t.moduleCount} modules`
+  : t.kind === 'phase' ? `${t.lessonCount} lessons`
+  : t.kind === 'dojo' ? `${t.topicCount} topics`
+  : t.kind === 'capstone' ? `${t.projectCount} projects`
+  : 'guide';
+
+// The credit line is per-school because the sources differ: MIT-licensed
+// curriculum on one side, a CC0 roadmap and public-domain federal material on
+// the other.
+const credits = [...new Set(mine.map((t) => professorOf(t)).filter(Boolean).map((p) => p!.name))];
+
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `Sikhi University · Institute of Technology · ${s.title}`,
+  description: s.blurb, parentOrganization: { '@type': 'EducationalOrganization', name: 'Sikhi University · Institute of Technology' },
+};
+---
+<Base title={`${s.title} — Institute of Technology`} description={s.blurb} institute ogType="article">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <InstituteRail />
+
+  <header class="i-shead">
+    <div class="i-wrap">
+      <span class="i-label i-mono">// {s.label}</span>
+      <h1 class="i-shead-h"><span class="i-mono i-shead-mark" aria-hidden="true">{s.mark}</span> {s.title}</h1>
+      <p class="i-shead-tag">{s.tagline}</p>
+      <p class="i-prose i-shead-blurb">{s.blurb}</p>
+      <p class="i-mono i-shead-meta">
+        {spine.length + aside.length} courses &middot; {credits.join(', ')}
+      </p>
+    </div>
+  </header>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">01 — the spine &middot; work these in order</span>
+    <h2>{s.id === 'cyber' ? 'The paths' : 'The curriculum'}</h2>
+    <ol class="i-slist">
+      {spine.map((t) => (
+        <li class="i-panel i-srow">
+          <span class="i-corner">{String(t.num ?? 0).padStart(2, '0')}</span>
+          <a class="i-srow-title" href={`/technology/track/${trackSlug(t)}`}>{t.title}</a>
+          <p class="i-prose i-srow-sum" set:html={gurmukhiHtml(introOf(t.id) || t.summary)} />
+          <span class="i-mono i-srow-meta">
+            {unit(t)} &middot; {t.level}-level
+            {t.kind === 'phase' ? ` · ${hasExam(t.id) ? 'exam + cert' : 'reading'}` : ''}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  {aside.length > 0 && (
+    <section class="i-wrap i-sec">
+      <span class="i-label">02 — alongside the spine</span>
+      <h2>Also in this school</h2>
+      <div class="i-card-grid">
+        {aside.map((t) => (
+          <a class="i-panel i-card" href={`/technology/track/${trackSlug(t)}`}>
+            <span class="i-corner">{t.kind}</span>
+            <strong class="i-card-title">{t.title}</strong>
+            <span class="i-prose i-card-sum">{t.summary}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="i-wrap i-sec i-sec-last">
+    <p class="i-prose">
+      Every course in both schools is listed on the <a href="/technology/catalog">catalogue</a>.
+      Full attribution and licences: <a href="/technology/licenses">sources &amp; licenses</a>.
+    </p>
+    <p>
+      {schools.filter((o) => o.id !== s.id).map((o) => (
+        <a class="i-btn i-btn-ghost" href={`/technology/school/${o.slug}`}>{o.title} &rarr;</a>
+      ))}
+      <a class="i-btn i-btn-ghost" href="/technology">&larr; The Institute</a>
+    </p>
+  </section>
+
+  <style>
+    .i-shead { border-bottom: 1px solid var(--i-line); padding: 40px 0 34px; background: var(--i-ground-deep); }
+    .i-shead-h { margin: 10px 0 0; font-size: clamp(26px, 4.4vw, 42px); }
+    .i-shead-mark { color: var(--i-filament); font-size: 0.62em; letter-spacing: 0.04em; }
+    .i-shead-tag { margin: 12px 0 0; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 18px; color: var(--i-filament); }
+    .i-shead-blurb { margin-top: 12px; font-size: 16px; max-width: 62ch; }
+    .i-shead-meta { margin-top: 14px; font-size: 11.5px; color: var(--i-muted); letter-spacing: 0.06em; }
+
+    .i-sec { padding: 44px 24px; border-bottom: 1px solid var(--i-line-soft); }
+    .i-sec-last { border-bottom: 0; }
+    .i-sec > .i-label { display: block; margin-bottom: 8px; }
+    .i-sec > h2 { margin: 0 0 18px; font-size: clamp(20px, 3vw, 27px); }
+
+    .i-slist { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; max-width: 780px; }
+    .i-srow-title { display: block; margin-top: 8px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 17px; color: var(--i-ink); text-decoration: none; }
+    .i-srow-title:hover { color: var(--i-filament); }
+    .i-srow-sum { margin: 6px 0 0; font-size: 14px; }
+    .i-srow-meta { display: block; margin-top: 9px; font-size: 10.5px; color: var(--i-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .i-card-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .i-card { display: block; text-decoration: none; }
+    .i-card:hover { border-color: color-mix(in srgb, var(--i-signal) 40%, var(--i-line)); }
+    .i-card-title { display: block; margin-top: 8px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 16px; color: var(--i-ink); }
+    .i-card-sum { display: block; margin-top: 6px; font-size: 13.5px; }
+  </style>
+</Base>
