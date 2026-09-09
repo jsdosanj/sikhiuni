@@ -12,6 +12,7 @@ const MARKS: Record<string, string> = {
   'libre-academy': '[ ]',
   sans: '###',
   niccs: 'K12',
+  'cert-prep': '(*)',
 };
 ---
 <Base
@@ -52,6 +53,11 @@ const MARKS: Record<string, string> = {
           {b.id === 'niccs' && (
             <span class="i-booth-fine">
               NICCS and CISA pages are US Government works in the public domain (17&nbsp;U.S.C. &sect;&nbsp;105); the K-12 curriculum and cyber range are CYBER.ORG&rsquo;s own and free to educators under CYBER.ORG&rsquo;s terms. Nothing is rehosted and no agency seal or logo is used. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.
+            </span>
+          )}
+          {b.id === 'cert-prep' && (
+            <span class="i-booth-fine">
+              A Dosanjh Labs project, from the same team as Sikhi University &mdash; a sibling site, not a third party. PMP is a registered mark of the Project Management Institute, CISM of ISACA, and Security+ of CompTIA; neither Sikhi University nor Dosanjh Labs is affiliated with, sponsored by, or endorsed by any of them, and the certifications are awarded by those bodies alone.
             </span>
           )}
           {b.id === 'libre-academy' && (
@@ -165,6 +171,19 @@ const MARKS: Record<string, string> = {
     .i-booth-niccs .i-booth-fine { color: #56657d; }
     .i-booth-niccs .i-booth-go { color: #b21e35; font-weight: 600; }
     .i-booth-niccs:hover { border-color: #005288; }
+
+    /* Cert Prep: a sibling site, so it wears the family's navy + saffron
+       rather than mimicking someone else's brand. */
+    .i-booth-cert-prep {
+      background: #0b1e3a; border-color: #1c3457;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #c2cfe4;
+    }
+    .i-booth-cert-prep .i-booth-mark { color: #e0a33c; letter-spacing: -0.04em; }
+    .i-booth-cert-prep .i-booth-name { color: #ffffff; font-weight: 700; }
+    .i-booth-cert-prep .i-booth-fine { color: #8b9cb8; }
+    .i-booth-cert-prep .i-booth-go { color: #e0a33c; font-weight: 600; }
+    .i-booth-cert-prep:hover { border-color: #e0a33c; }
 
     .i-exp-foot { padding: 16px 24px 72px; }
     .i-exp-foot p { max-width: 62ch; }

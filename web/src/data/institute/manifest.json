@@ -523,6 +523,14 @@
       "href": "https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators",
       "wave": "cyber",
       "blurb": "The US government's cyber-education portal, and the K-12 classroom resources it funds through CYBER.ORG: curriculum by grade band, a browser-based cyber range free to educators, career profiles, and ransomware guidance written for schools."
+    },
+    {
+      "id": "cert-prep",
+      "title": "Cert Prep",
+      "kind": "booth",
+      "href": "https://cert-prep.dosanjhlabs.com/",
+      "wave": "certs",
+      "blurb": "Professional certification preparation — PMP, CISM, and CompTIA Security+. A Dosanjh Labs project from the same team as Sikhi University, and free: the Institute teaches you the work, this drills you for the exam that gets you hired."
     }
   ],
   "resources": [
