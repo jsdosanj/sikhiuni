@@ -49,12 +49,26 @@ export interface PathLab {
   href: string;
   cost: string;
 }
+/**
+ * A named framework reproduced inside a module — a numbered risk list, a
+ * control set. Only for sources whose licence permits it (the OWASP Agentic
+ * Skills Top 10 is CC BY-SA 4.0, the same licence our paths carry); anything
+ * more restrictive stays a link in `labs`. `note` carries the attribution the
+ * licence requires, and is rendered, not just stored.
+ */
+export interface PathChecklist {
+  label: string;
+  note: string;
+  items: { id: string; title: string; note: string }[];
+}
+
 export interface PathModule {
   num: number;
   slug: string;
   title: string;
   objective: string;
   teach: string;
+  checklist?: PathChecklist;
   labs: PathLab[];
 }
 export interface PathTrack {

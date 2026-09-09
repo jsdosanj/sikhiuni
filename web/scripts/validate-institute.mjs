@@ -156,6 +156,23 @@ for (const t of (m.tracks || []).filter((x) => x.kind === 'path')) {
     if (mod.num !== i + 1) err(`${f}: modules[${i}] num should be ${i + 1}, got ${mod.num}`);
     if (slugs.has(mod.slug)) err(`${f}: duplicate module slug "${mod.slug}"`);
     slugs.add(mod.slug);
+    // A reproduced framework must carry its attribution. The only reason we may
+    // quote one at all is its licence, and CC BY-SA has conditions — an
+    // unattributed checklist is a licence breach, so fail the build on it.
+    if (mod.checklist) {
+      const c = mod.checklist;
+      if (!c.label) err(`${f}: ${mod.slug}: checklist needs a label`);
+      if (typeof c.note !== 'string' || c.note.trim().length < 20) {
+        err(`${f}: ${mod.slug}: checklist needs an attribution note naming the source and its licence`);
+      }
+      if (!Array.isArray(c.items) || c.items.length === 0) err(`${f}: ${mod.slug}: checklist has no items`);
+      const seen = new Set();
+      for (const it of c.items || []) {
+        if (!it.id || !it.title || !it.note) err(`${f}: ${mod.slug}: checklist item needs id, title and note`);
+        if (seen.has(it.id)) err(`${f}: ${mod.slug}: duplicate checklist id "${it.id}"`);
+        seen.add(it.id);
+      }
+    }
     if (!Array.isArray(mod.labs) || mod.labs.length === 0) err(`${f}: module "${mod.slug}" has no labs`);
     for (const lab of mod.labs || []) {
       if (!lab.title || !lab.provider) err(`${f}: ${mod.slug}: a lab is missing title/provider`);

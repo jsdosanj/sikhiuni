@@ -522,6 +522,22 @@
       "license": "CC-BY-SA-4.0",
       "professor": "it-vendor-training",
       "summary": "The helpdesk-to-administrator path, built on Apple's and Microsoft's own free training: supporting Apple devices, deploying and managing a fleet, holding a Mac estate to a security baseline, and the Microsoft credentials that prove it."
+    },
+    {
+      "id": "cyber-06-ai-security",
+      "kind": "path",
+      "school": "cyber",
+      "source": "ours",
+      "num": 6,
+      "slug": "06-ai-and-agentic-security",
+      "title": "AI & Agentic Security",
+      "level": 300,
+      "prereq": "cyber-00-foundations",
+      "moduleCount": 4,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "owasp-genai",
+      "summary": "The other half of this building, read as an attack surface: prompt injection that has no patch, agents acting with your credentials, and the skill supply chain that is already being poisoned. Mapped to OWASP's three 2026 lists."
     }
   ],
   "explore": [

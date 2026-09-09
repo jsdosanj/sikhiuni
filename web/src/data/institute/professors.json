@@ -72,5 +72,16 @@
       { "label": "learn.microsoft.com/credentials", "href": "https://learn.microsoft.com/en-us/credentials/" }
     ],
     "license": "Vendor content — link-out only, no content used"
+  },
+  "owasp-genai": {
+    "name": "OWASP GenAI Security Project",
+    "kind": "org",
+    "role": "Community frameworks — Top 10 for LLM Applications, for Agentic Applications, and the Agentic Skills Top 10",
+    "bio": "A global open-source project documenting the security risks of generative and agentic AI. Its three 2026 lists are the spine of the Institute's AI & Agentic Security path: the LLM Top 10, the Top 10 for Agentic Applications, and the Agentic Skills Top 10 (project lead Ken Huang), the last of which is licensed CC BY-SA 4.0 and so is quoted here with attribution and share-alike rather than only linked. The teaching notes and the ordering are Sikhi University's; the attack scenarios and mitigations live in OWASP's own documents and are deliberately not copied. OWASP is a registered trademark of the OWASP Foundation; Sikhi University is not affiliated with, sponsored by, or endorsed by the OWASP Foundation.",
+    "links": [
+      { "label": "genai.owasp.org", "href": "https://genai.owasp.org/" },
+      { "label": "owasp.org/www-project-agentic-skills-top-10", "href": "https://owasp.org/www-project-agentic-skills-top-10/" }
+    ],
+    "license": "CC-BY-SA-4.0 (Agentic Skills Top 10) · other lists linked, not copied"
   }
 }
