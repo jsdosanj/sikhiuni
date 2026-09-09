@@ -22,6 +22,15 @@
       "mark": "[sec]",
       "tagline": "Defend what the Panth builds.",
       "blurb": "Five paths — foundations, defence, offence, the range, and a track for the teachers running a Khalsa school or a gurdwara youth programme. Our syllabus and framing; the labs themselves are free ranges we send you to, never rehosted."
+    },
+    {
+      "id": "it",
+      "slug": "it",
+      "title": "School of IT",
+      "label": "school of information technology",
+      "mark": "[it]",
+      "tagline": "Keep the estate running.",
+      "blurb": "The work that keeps an organisation's machines, accounts and devices working — Apple and Microsoft's own free training, mapped into a path, ending in credentials employers already recognise."
     }
   ],
   "tracks": [
@@ -481,6 +490,38 @@
       "license": "CC-BY-SA-4.0",
       "professor": "niccs",
       "summary": "For the ਸੰਗਤ that teaches: Khalsa school staff, gurdwara youth programmes, and parents. Classroom-ready K-12 cyber curriculum, a free browser cyber range for students, career profiles, and the ransomware guidance a school actually needs."
+    },
+    {
+      "id": "cyber-05-cloud",
+      "kind": "path",
+      "school": "cyber",
+      "source": "ours",
+      "num": 5,
+      "slug": "05-cloud-security",
+      "title": "Cloud Security",
+      "level": 300,
+      "prereq": "cyber-00-foundations",
+      "moduleCount": 6,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "cloudsec-labs",
+      "summary": "Where the workloads actually live. The shared-responsibility model, then deliberately broken environments on AWS, Azure, Google Cloud, Kubernetes and CI/CD — attacked and then hardened, one platform at a time."
+    },
+    {
+      "id": "it-00-support",
+      "kind": "path",
+      "school": "it",
+      "source": "ours",
+      "num": 0,
+      "slug": "00-it-support",
+      "title": "IT Support",
+      "level": 100,
+      "prereq": null,
+      "moduleCount": 4,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "it-vendor-training",
+      "summary": "The helpdesk-to-administrator path, built on Apple's and Microsoft's own free training: supporting Apple devices, deploying and managing a fleet, holding a Mac estate to a security baseline, and the Microsoft credentials that prove it."
     }
   ],
   "explore": [
@@ -531,6 +572,14 @@
       "href": "https://cert-prep.dosanjhlabs.com/",
       "wave": "certs",
       "blurb": "Professional certification preparation — PMP, CISM, and CompTIA Security+. A Dosanjh Labs project from the same team as Sikhi University, and free: the Institute teaches you the work, this drills you for the exam that gets you hired."
+    },
+    {
+      "id": "google-skills",
+      "title": "Google Skills",
+      "kind": "booth",
+      "href": "https://www.skills.google/",
+      "wave": "cloud",
+      "blurb": "Google's own training platform — formerly Cloud Skills Boost, formerly Qwiklabs. Over a thousand courses whose labs hand you a live Google Cloud environment for the duration, not a simulation, and free skill badges for finishing them. The Google Cloud career certificates sit behind a monthly subscription; the labs and badges do not."
     }
   ],
   "resources": [
@@ -673,6 +722,26 @@
       "author": "SANS Institute",
       "price": "free",
       "blurb": "Every SANS cheat sheet in one index — forensics, incident response, pen testing, cloud. Free to download; copyright SANS, licensed for non-commercial use. Bookmark it on your first day in the Cybersecurity School."
+    },
+    {
+      "id": "awesome-cloudsec-labs",
+      "title": "Awesome CloudSec Labs",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://github.com/iknowjason/Awesome-CloudSec-Labs",
+      "author": "Jason Ostrom (iknowjason) and contributors",
+      "price": "free",
+      "blurb": "The directory the Cloud Security path's labs were found through — CTFs, self-hosted workshops and deliberately vulnerable cloud environments across AWS, Azure, GCP, Kubernetes and CI/CD. It carries no stated licence, so we link it rather than reproduce it; go here for the full catalogue."
+    },
+    {
+      "id": "undercode-free-certs",
+      "title": "Free cybersecurity and cloud certification courses",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://undercodetesting.com/free-cybersecurity-and-cloud-certification-courses/",
+      "author": "Undercode Testing",
+      "price": "free",
+      "blurb": "A community roundup of free security and cloud certification courses. An aggregator, not a curriculum — worth a scan when you want a vendor course this Institute has not mapped. Their editorial, their list; we link and copy nothing."
     }
   ],
   "deferred": {

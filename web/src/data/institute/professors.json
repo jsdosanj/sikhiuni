@@ -51,5 +51,26 @@
       { "label": "cyber.org", "href": "https://cyber.org/educational-cybersecurity-resources" }
     ],
     "license": "US Government work — public domain (17 U.S.C. § 105)"
+  },
+  "cloudsec-labs": {
+    "name": "Awesome CloudSec Labs",
+    "kind": "org",
+    "role": "Directory — Jason Ostrom (iknowjason) and contributors",
+    "bio": "A directory of free cloud-native security labs: CTFs, self-hosted workshops, and deliberately vulnerable environments across AWS, Azure, Google Cloud, Kubernetes and CI/CD. Unlike the CC0 roadmap behind this school's other paths, it carries no stated licence, so the Institute does not adapt it — the Cloud Security path's own module structure and every teaching note are Sikhi University's, and this directory is credited and linked as where the labs were found. Each lab keeps its own licence and is linked at its own home; check that licence before you run one.",
+    "links": [
+      { "label": "github.com/iknowjason/Awesome-CloudSec-Labs", "href": "https://github.com/iknowjason/Awesome-CloudSec-Labs" }
+    ],
+    "license": "No stated licence — linked, never adapted"
+  },
+  "it-vendor-training": {
+    "name": "Apple and Microsoft IT training",
+    "kind": "org",
+    "role": "Vendor training — Apple Inc. and Microsoft Corporation",
+    "bio": "Apple Professional Training and Microsoft Learn both publish their IT curriculum free and self-paced, and both award credentials employers already recognise. The Institute's IT Support path is a reading map over those two catalogues, written by Sikhi University, with every course linked at its vendor's own site — no course text, video, lab, or assessment is reproduced here. Apple, Mac, macOS, Apple Business Manager and Apple School Manager are trademarks of Apple Inc.; Microsoft, Azure, Windows and Microsoft 365 are trademarks of Microsoft Corporation. Sikhi University is not affiliated with, sponsored by, or endorsed by either company, and neither certifies this path.",
+    "links": [
+      { "label": "it-training.apple.com", "href": "https://it-training.apple.com/" },
+      { "label": "learn.microsoft.com/credentials", "href": "https://learn.microsoft.com/en-us/credentials/" }
+    ],
+    "license": "Vendor content — link-out only, no content used"
   }
 }

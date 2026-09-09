@@ -17,8 +17,8 @@ const STATUSES = new Set(['planned', 'draft', 'published']);
 const SOURCES = new Set(['aisf', 'sikhi.io', 'ours', 'acsu', 'niccs']);
 
 // ---- sub-schools -----------------------------------------------------------
-// The Institute is split into the AI School and the Cybersecurity School. Every
-// track names one; every school is declared here once.
+// The Institute is split into the AI School, the Cybersecurity School and the
+// School of IT. Every track names one; every school is declared here once.
 const schoolIds = new Set();
 for (const s of m.schools || []) {
   if (!s.id) { err('school with no id'); continue; }
@@ -28,7 +28,9 @@ for (const s of m.schools || []) {
     if (!s[f]) err(`school ${s.id}: missing ${f}`);
   }
 }
-if (schoolIds.size < 2) err('manifest.schools must declare both sub-schools (ai, cyber)');
+for (const req of ['ai', 'cyber', 'it']) {
+  if (!schoolIds.has(req)) err(`manifest.schools is missing the "${req}" sub-school`);
+}
 
 for (const t of m.tracks || []) {
   if (!t.id) { err('track with no id'); continue; }
@@ -110,15 +112,28 @@ if (existsSync(IMP)) {
   }
 }
 
-// ---- Cybersecurity School paths -------------------------------------------
-// A `path` track carries our modules in cyber/<track>.json. Everything it points
+// ---- `path` tracks (Cybersecurity School, School of IT) --------------------
+// A `path` track carries our modules in paths/<track>.json. Everything it points
 // at is somebody else's, so the gate here is licensing as much as shape: every
 // lab must be an absolute https link out (or an internal /technology route), and
 // the upstream credit must name a source and its licence.
-const CYBER = 'src/data/institute/cyber';
-const COSTS = new Set(['free', 'free · account', 'free tier', 'free for educators']);
+//
+// The cost vocabulary is fixed on purpose. A learner deciding what they can
+// afford is the one reader who cannot tolerate vague copy, so "free" may not be
+// stretched to cover a free course with a $149 exam behind it, or a self-hosted
+// lab that bills their own cloud account while it runs.
+const PATHS = 'src/data/institute/paths';
+const COSTS = new Set([
+  'free',                   // no account, no money
+  'free · account',         // free, sign-up required
+  'free tier',              // the free tier of a paid platform
+  'free for educators',     // free to verified teachers
+  'free · your cloud bill', // self-hosted: you pay your own provider to run it
+  'free course · paid exam',// the training is free, the certification exam is not
+  'paid',                   // costs money
+]);
 for (const t of (m.tracks || []).filter((x) => x.kind === 'path')) {
-  const f = `${CYBER}/${t.id}.json`;
+  const f = `${PATHS}/${t.id}.json`;
   if (!existsSync(f)) { err(`${t.id}: kind "path" but ${f} is missing`); continue; }
   let p;
   try { p = JSON.parse(readFileSync(f, 'utf-8')); }

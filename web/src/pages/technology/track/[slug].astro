@@ -8,7 +8,7 @@ import capstone from '../../../data/institute/capstone/briefs.json';
 const indexes = import.meta.glob('../../../data/institute/imported/*/index.json', { eager: true });
 const examBanks = import.meta.glob('../../../data/institute/exam/*.json', { eager: true });
 const intros = import.meta.glob('../../../data/institute/ours/*/intro.json', { eager: true });
-const cyberPaths = import.meta.glob('../../../data/institute/cyber/*.json', { eager: true });
+const pathData_ = import.meta.glob('../../../data/institute/paths/*.json', { eager: true });
 
 export function getStaticPaths() {
   return tracks.map((t) => ({ params: { slug: trackSlug(t) }, props: { t } }));
@@ -38,7 +38,7 @@ const isDojo = t.kind === 'dojo' && t.status === 'published';
 
 // Cybersecurity School paths (C-modules): our teaching note per module, then the
 // free labs it sends you to. Nothing is rehosted — every lab opens at its source.
-const pathMod = cyberPaths[`../../../data/institute/cyber/${t.id}.json`] as any;
+const pathMod = pathData_[`../../../data/institute/paths/${t.id}.json`] as any;
 const pathData: PathTrack | null = pathMod ? (pathMod.default ?? pathMod) : null;
 const isPath = t.kind === 'path' && t.status === 'published' && !!pathData;
 
@@ -57,7 +57,7 @@ const ld = {
   <header class="i-thead">
     <div class="i-wrap">
       <span class="i-label i-mono">
-        {t.kind}{typeof t.num === 'number' ? ` · ${t.kind === 'path' ? 'c' : 'f'}${String(t.num).padStart(2, '0')}` : ''} · {t.license}
+        {t.kind}{typeof t.num === 'number' ? ` · ${t.kind === 'path' ? 'p' : 'f'}${String(t.num).padStart(2, '0')}` : ''} · {t.license}
       </span>
       <h1>{t.title}</h1>
       <p class="i-prose i-thead-sum" set:html={gurmukhiHtml(seva?.blurb || idx?.blurb || t.summary)} />
@@ -132,10 +132,22 @@ const ld = {
           Each module below is a step: what you should be able to do at the end of it, a note
           from us on why it matters and how to approach it, and the free labs where you actually
           do the work. <strong>The labs are not hosted here.</strong> Every one opens on the
-          platform that runs it, and each card says which platform and what it costs &mdash;
-          most want a free account, a couple sit on a platform's free tier, none want your money.
+          platform that runs it, and each card says which platform and what it honestly costs
+          &mdash; most are free or free with an account, but some vendor exams are paid and some
+          self-hosted labs bill your own cloud account while they run. Read the cost line before
+          you click.
         </p>
       </div>
+
+      {pathData!.warning && (
+        <div class="i-panel i-path-warn" role="note">
+          <span class="i-corner">before you deploy anything</span>
+          <p class="i-prose">
+            <span class="i-warn-glyph" aria-hidden="true">&#9651;</span>
+            {pathData!.warning}
+          </p>
+        </div>
+      )}
 
       <ol class="i-modlist">
         {pathData!.modules.map((mod) => (
@@ -184,8 +196,10 @@ const ld = {
       )}
 
       <p class="i-prose i-path-credit">
-        Sequencing adapted from <a href={pathData!.adaptedFrom.href} target="_blank" rel="noopener">{pathData!.adaptedFrom.name}</a>
-        {' '}({pathData!.adaptedFrom.license}). {pathData!.adaptedFrom.note} Teaching notes by {prof?.name || 'Sikhi University'}, CC BY-SA 4.0.
+        {pathData!.creditLabel || 'Sequencing adapted from'}{' '}
+        <a href={pathData!.adaptedFrom.href} target="_blank" rel="noopener">{pathData!.adaptedFrom.name}</a>
+        {' '}({pathData!.adaptedFrom.license}). {pathData!.adaptedFrom.note} Module structure and
+        teaching notes by Sikhi University, CC BY-SA 4.0.
         See <a href="/technology/licenses">sources &amp; licenses</a>.
       </p>
     </section>
@@ -286,6 +300,14 @@ const ld = {
        free labs it sends you out to. */
     .i-path-note { max-width: 760px; margin-bottom: 26px; }
     .i-path-note .i-prose { margin: 8px 0 0; font-size: 14px; }
+    /* A caution, not a failure: --filament plus a triangle glyph, never colour
+       alone (DESIGN-INSTITUTE.md §Color, semantic). */
+    .i-path-warn {
+      max-width: 760px; margin-bottom: 26px;
+      border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line));
+    }
+    .i-path-warn .i-prose { margin: 8px 0 0; font-size: 14px; }
+    .i-warn-glyph { color: var(--i-filament); font-weight: 700; margin-right: 8px; }
     .i-modlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; max-width: 760px; }
     .i-mod-title { margin: 8px 0 0; font-size: 19px; }
     .i-mod-obj { margin: 10px 0 0; font-size: 14px; }

@@ -13,11 +13,12 @@ const MARKS: Record<string, string> = {
   sans: '###',
   niccs: 'K12',
   'cert-prep': '(*)',
+  'google-skills': '::.',
 };
 ---
 <Base
   title="Explore free courses — Institute of Technology"
-  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, and the security reference shelves — freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA."
+  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, vendor training, and the security reference shelves — freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA, Google Skills."
   institute
 >
   <InstituteRail />
@@ -53,6 +54,11 @@ const MARKS: Record<string, string> = {
           {b.id === 'niccs' && (
             <span class="i-booth-fine">
               NICCS and CISA pages are US Government works in the public domain (17&nbsp;U.S.C. &sect;&nbsp;105); the K-12 curriculum and cyber range are CYBER.ORG&rsquo;s own and free to educators under CYBER.ORG&rsquo;s terms. Nothing is rehosted and no agency seal or logo is used. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.
+            </span>
+          )}
+          {b.id === 'google-skills' && (
+            <span class="i-booth-fine">
+              Formerly Cloud Skills Boost, formerly Qwiklabs. Labs and skill badges are free with an account; the Google Cloud career certificates are a paid Google subscription, which we neither resell nor discount. Badges and certificates are issued by Google alone. &ldquo;Google&rdquo; and &ldquo;Google Cloud&rdquo; are trademarks of Google&nbsp;LLC, used nominatively; Sikhi University is not affiliated with, sponsored by, or endorsed by Google.
             </span>
           )}
           {b.id === 'cert-prep' && (
@@ -184,6 +190,18 @@ const MARKS: Record<string, string> = {
     .i-booth-cert-prep .i-booth-fine { color: #8b9cb8; }
     .i-booth-cert-prep .i-booth-go { color: #e0a33c; font-weight: 600; }
     .i-booth-cert-prep:hover { border-color: #e0a33c; }
+
+    /* Google Skills: their light card, the four brand hues as type colour only. */
+    .i-booth-google-skills {
+      background: #ffffff; border-color: #dadce0;
+      font-family: "Google Sans", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: #444746;
+    }
+    .i-booth-google-skills .i-booth-mark { color: #1967d2; letter-spacing: -0.04em; }
+    .i-booth-google-skills .i-booth-name { color: #202124; font-weight: 700; }
+    .i-booth-google-skills .i-booth-fine { color: #5f6368; }
+    .i-booth-google-skills .i-booth-go { color: #188038; font-weight: 600; }
+    .i-booth-google-skills:hover { border-color: #1967d2; }
 
     .i-exp-foot { padding: 16px 24px 72px; }
     .i-exp-foot p { max-width: 62ch; }

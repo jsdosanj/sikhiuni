@@ -7,7 +7,7 @@ import professorsRaw from '../data/institute/professors.json';
 
 export type TrackKind = 'phase' | 'dojo' | 'guide' | 'capstone' | 'path';
 export type TrackStatus = 'planned' | 'draft' | 'published';
-export type SchoolId = 'ai' | 'cyber';
+export type SchoolId = 'ai' | 'cyber' | 'it';
 
 /** A sub-school of the Institute. Both are declared in manifest.schools. */
 export interface School {
@@ -62,7 +62,11 @@ export interface PathTrack {
   school: SchoolId;
   blurb: string;
   license: string;
+  /** Verb for the upstream credit line — not every path *adapts* its source. */
+  creditLabel?: string;
   adaptedFrom: { name: string; href: string; license: string; note: string };
+  /** A standing caution shown above the modules (e.g. labs that bill your cloud account). */
+  warning?: string;
   modules: PathModule[];
   bench: { title: string; provider: string; href: string; note: string }[];
 }
@@ -114,12 +118,14 @@ export const phases = tracks.filter((t) => t.kind === 'phase').sort((a, b) => (a
 export const dojos = tracks.filter((t) => t.kind === 'dojo');
 export const guides = tracks.filter((t) => t.kind === 'guide');
 export const capstones = tracks.filter((t) => t.kind === 'capstone');
-/** The Cybersecurity School's practitioner paths, in order. */
+/** Every `path` track, in order. Scope with `pathsOf` — two schools use them. */
 export const paths = tracks.filter((t) => t.kind === 'path').sort((a, b) => (a.num ?? 0) - (b.num ?? 0));
 
 export const trackById = (id: string): Track | undefined => tracks.find((t) => t.id === id);
 export const professorOf = (t: Track): InstituteProfessor | undefined => professors[t.professor];
 export const tracksOf = (id: SchoolId): Track[] => tracks.filter((t) => t.school === id);
+/** One school's `path` tracks, in order. */
+export const pathsOf = (id: SchoolId): Track[] => paths.filter((t) => t.school === id);
 
 /** Route slug for a track's overview page: /technology/track/<slug>. */
 export const trackSlug = (t: Track): string =>

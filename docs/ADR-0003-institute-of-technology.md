@@ -21,15 +21,17 @@ real community tools). That is the part freeCodeCamp structurally cannot have.
 phases, the Open Source Atlas, and two more explore booths are deferred to depth waves after
 a cohort soft-launch.
 
-### Amendment 1 — two sub-schools (2026-09-09)
-The wing is split into **two named sub-schools**, declared once in `manifest.schools` and
+### Amendment 1 — sub-schools (2026-09-09)
+The wing is split into **named sub-schools**, declared once in `manifest.schools` and
 carried on every track as a `school` field:
 
 - **AI School** (`ai`) — everything that already existed: the 20 AISF phases, both Sikh Code
   dojos, the Claude Code guide, the "Build for the Panth" capstone. No content change.
-- **Cybersecurity School** (`cyber`) — new. Five `kind: "path"` tracks: foundations, blue team,
-  red team, the range, and "Cyber for Schools & Families" for Khalsa-school staff and gurdwara
-  youth programmes.
+- **Cybersecurity School** (`cyber`) — new. Six `kind: "path"` tracks: foundations, blue team,
+  red team, the range, cloud security, and "Cyber for Schools & Families" for Khalsa-school
+  staff and gurdwara youth programmes.
+- **School of IT** (`it`) — new. One path: IT Support, a reading map over Apple Professional
+  Training and Microsoft Learn, ending in credentials employers filter on.
 
 **Why a new track kind rather than reusing `phase`.** A `phase` owns its lesson bodies
 (`imported/<track>/`) and can carry a server-graded exam. A `path` owns *no* lesson bodies at
@@ -41,8 +43,21 @@ build if a lab href is anything but an absolute `https` link out (or an internal
 credential lives with the range that graded you, not with us.
 
 Routes added: `/technology/school/<slug>` for each school; the hub, catalogue, and sitemap
-group by school. Both schools use the one `--filament` accent (D2 reserves `--signal` for
-live/correct states) and are told apart by a monospace mark and label.
+group by school. Every school uses the one `--filament` accent (D2 reserves `--signal` for
+live/correct states) and they are told apart by a monospace mark and label.
+
+**Cost vocabulary is a fixed enum, not free text** (`COSTS` in `validate-institute.mjs`). A
+learner deciding what they can afford is the reader least able to tolerate vague copy, so
+"free" may not be stretched over a free course with a paid exam behind it
+(`free course · paid exam`) or a self-hosted lab that bills the student's own cloud account
+while it runs (`free · your cloud bill`). The Cloud Security path also carries a standing
+`warning` above its modules: those labs are vulnerable by design, so an abandoned one is both
+a bill and somebody else's foothold.
+
+**Not every path adapts its source.** `creditLabel` sets the verb on the attribution line —
+"Sequencing adapted from" for the CC0 roadmap, "Labs discovered through" for the unlicensed
+cloud directory, "Courses published by" for the vendor training. Getting that verb wrong would
+claim a licence we do not have.
 
 ## Architecture
 - **Same spine, extended, not forked.** `Base.astro` gains an `institute` prop (fonts,
@@ -65,7 +80,7 @@ live/correct states) and are told apart by a monospace mark and label.
 - **Booths** (`/institute/explore`): link-out only, each skinned to its source, no logos, a
   "not affiliated" line. freeCodeCamp for the MLI; SANS and NICCS · CISA added with the
   Cybersecurity School.
-- **Paths** (Amendment 1): `data/institute/cyber/<track>.json` — modules (objective, teaching
+- **Paths** (Amendment 1): `data/institute/paths/<track>.json` — modules (objective, teaching
   note, labs) plus a `bench` shelf of reference links. Nothing is fetched or mirrored at build
   time; the file holds only our prose and other people's URLs.
 

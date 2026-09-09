@@ -1,7 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { phases, dojos, guides, capstones, paths, schools, WEDGE, totalLessons } from '../../lib/institute';
+import { phases, dojos, guides, capstones, pathsOf, schools, WEDGE, totalLessons } from '../../lib/institute';
+
+const cyberPaths = pathsOf('cyber');
+const itPaths = pathsOf('it');
 
 // Which phases carry a server-graded exam + certificate, and which are
 // reading tracks for now (source has no quiz bank yet).
@@ -18,8 +21,9 @@ const goals = [
   { label: 'I want to build agents', to: '/technology/track/14-agent-engineering', hint: 'the agent loop from first principles — memory, planning, multi-step work' },
   { label: 'I want to work in security', to: '/technology/track/00-security-foundations', hint: 'the pre-security path first — networks, Linux, and research — then pick defence or offence' },
   { label: 'I teach, and want to bring cyber into a classroom', to: '/technology/track/04-cyber-for-schools', hint: 'free K-12 curriculum, a browser cyber range, and the ransomware guidance a school actually needs' },
+  { label: 'I want an IT job, and a credential to show for it', to: '/technology/track/00-it-support', hint: "Apple's and Microsoft's own free training — device support, fleet deployment, then a credential employers filter on" },
 ];
-const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybersecurity. Learn to code, build AI systems, defend what you build, and ship a project for the Panth.';
+const desc = 'Sikhi University’s engineering wing — three schools: AI, Cybersecurity, and IT. Learn to code, build AI systems, defend what you build, keep an estate running, and ship a project for the Panth.';
 ---
 <Base title="Institute of Technology — Sikhi University" description={desc} institute>
   <InstituteRail />
@@ -30,7 +34,7 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
       <div class="i-thresh-copy">
         <span class="i-label" style="color:var(--i-signal)">// entering — f00 · the institute</span>
         <h1 class="i-thresh-h">You have entered the<br /><span class="i-amber">Institute of Technology</span><span class="i-caret" aria-hidden="true">&nbsp;</span></h1>
-        <p class="i-prose i-lede">The university’s engineering wing, in two schools: one that teaches you to build the systems, one that teaches you to defend them. A working building, lit at night.</p>
+        <p class="i-prose i-lede">The university’s engineering wing, in three schools: one that teaches you to build the systems, one that teaches you to defend them, one that keeps them running. A working building, lit at night.</p>
         <p class="i-wedge i-mono">{WEDGE}</p>
         <a class="i-btn i-btn-primary i-thresh-cta" href="#i-goal-router">Pick a goal &rarr;</a>
       </div>
@@ -47,7 +51,8 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
         <dl class="i-bench-rows">
           <div><dt>schools</dt><dd>{schools.map((s) => s.title).join(' · ')}</dd></div>
           <div><dt>ai school</dt><dd>{phases.length} phases &middot; ~{totalLessons} lessons</dd></div>
-          <div><dt>cyber school</dt><dd>{paths.length} paths &middot; red, blue &amp; the classroom</dd></div>
+          <div><dt>cyber school</dt><dd>{cyberPaths.length} paths &middot; red, blue, cloud &amp; the classroom</dd></div>
+          <div><dt>school of it</dt><dd>{itPaths.length} path &middot; support, deployment &amp; credentials</dd></div>
           <div><dt>sikh code</dt><dd>2 dojos &middot; the Claude Code guide</dd></div>
           <div><dt>code lab</dt><dd>python &middot; javascript &middot; html &mdash; in your browser</dd></div>
           <div><dt>credential</dt><dd>ai phase exam &rarr; verifiable certificate</dd></div>
@@ -58,8 +63,8 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
   </header>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">01 — the two schools</span>
-    <h2>The Institute has two schools. Both are free, both are open.</h2>
+    <span class="i-label">01 — the three schools</span>
+    <h2>The Institute has three schools. All free, all open.</h2>
     <div class="i-schools">
       {schools.map((s) => (
         <a class="i-panel i-school" href={`/technology/school/${s.slug}`}>
@@ -105,11 +110,11 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">04 — <a href="/technology/school/cybersecurity">Cybersecurity School</a> &middot; {paths.length} paths</span>
+    <span class="i-label">04 — <a href="/technology/school/cybersecurity">Cybersecurity School</a> &middot; {cyberPaths.length} paths</span>
     <h2>Cybersecurity</h2>
-    <p class="i-prose">Foundations first, then defence or offence, then the range &mdash; plus a path for the people who teach. The sequencing is adapted from <a href="https://brootware.github.io/awesome-cyber-security-university/" target="_blank" rel="noopener">Awesome Cyber Security University</a> (CC0 1.0); the teaching notes are ours. <strong>The labs are not hosted here</strong> &mdash; each module sends you to the free range that runs it. Reference material from <a href="https://www.sans.org/security-resources/download" target="_blank" rel="noopener">SANS</a> and the K-12 classroom resources from <a href="https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators" target="_blank" rel="noopener">NICCS&nbsp;&middot;&nbsp;CISA</a> are linked, never rehosted.</p>
+    <p class="i-prose">Foundations first, then defence or offence, then the range and the cloud &mdash; plus a path for the people who teach. The sequencing is adapted from <a href="https://brootware.github.io/awesome-cyber-security-university/" target="_blank" rel="noopener">Awesome Cyber Security University</a> (CC0 1.0); the teaching notes are ours. <strong>The labs are not hosted here</strong> &mdash; each module sends you to the free range that runs it. Reference material from <a href="https://www.sans.org/security-resources/download" target="_blank" rel="noopener">SANS</a> and the K-12 classroom resources from <a href="https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators" target="_blank" rel="noopener">NICCS&nbsp;&middot;&nbsp;CISA</a> are linked, never rehosted.</p>
     <ol class="i-spine">
-      {paths.map((p) => (
+      {cyberPaths.map((p) => (
         <li class="i-spine-row">
           <span class="i-spine-num i-mono">{String(p.num).padStart(2, '0')}</span>
           <a class="i-spine-title" href={`/technology/track/${p.slug}`}>{p.title}</a>
@@ -121,7 +126,23 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">05 — sikh code</span>
+    <span class="i-label">05 — <a href="/technology/school/it">School of IT</a> &middot; {itPaths.length} path</span>
+    <h2>IT Support</h2>
+    <p class="i-prose">The work that keeps an organisation's machines, accounts and devices working &mdash; and the fastest route in this building from nothing to a paid job. Built on <a href="https://it-training.apple.com/" target="_blank" rel="noopener">Apple Professional Training</a> and <a href="https://learn.microsoft.com/en-us/credentials/" target="_blank" rel="noopener">Microsoft Learn</a>, both of which publish their IT curriculum free and self-paced on their own sites. We wrote the path; they teach the courses, and <strong>every one opens at its vendor</strong>. The training is free; several of the exams are not, and each card says which.</p>
+    <ol class="i-spine">
+      {itPaths.map((p) => (
+        <li class="i-spine-row">
+          <span class="i-spine-num i-mono">{String(p.num).padStart(2, '0')}</span>
+          <a class="i-spine-title" href={`/technology/track/${p.slug}`}>{p.title}</a>
+          <span class="i-spine-meta i-mono">{p.moduleCount} modules</span>
+          <span class="i-spine-status i-mono">{p.level}-level</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">06 — sikh code</span>
     <h2>Learn to code, in our voice</h2>
     <div class="i-card-grid">
       {[...dojos, ...guides, ...capstones].map((t) => (
@@ -140,7 +161,7 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">06 — the letters after your name</span>
+    <span class="i-label">07 — the letters after your name</span>
     <h2>Certifications</h2>
     <p class="i-prose">The Institute teaches you the work. Hiring, especially in security and delivery, also gates on a certificate from a body that has never met you. <a href="https://cert-prep.dosanjhlabs.com/" target="_blank" rel="noopener">Cert&nbsp;Prep</a> is our sibling site for exactly that gap &mdash; <strong>PMP</strong>, <strong>CISM</strong>, and <strong>CompTIA&nbsp;Security+</strong>, free, from the same team. Sit it alongside either school: Security+ pairs with the <a href="/technology/school/cybersecurity">Cybersecurity School</a>'s foundations, CISM with its defence path, PMP with shipping anything at all.</p>
     <p>
@@ -152,7 +173,7 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
   </section>
 
   <section class="i-wrap i-sec i-sec-last">
-    <span class="i-label">07 — when you want breadth</span>
+    <span class="i-label">08 — when you want breadth</span>
     <h2>Explore free courses elsewhere</h2>
     <p class="i-prose">The Institute's own courses come first — you finish those and earn its certificate. When you want a wider on-ramp or an interactive challenge platform, the <a href="/technology/explore">college fair</a> sends you out to freeCodeCamp and more.</p>
     <p class="i-prose">And when you are ready to build: the <a href="/technology/atlas">Open Source Atlas</a> is ~12,500 AI and engineering projects, each with a line on what it could do for the Panth.</p>
@@ -244,7 +265,7 @@ const desc = 'Sikhi University’s engineering wing — two schools, AI and Cybe
     /* The two sub-schools. One accent for both (D2 keeps --signal for live
        states only) — they are told apart by the mono mark and the label. */
     .i-schools { display: grid; gap: 16px; }
-    @media (min-width: 760px) { .i-schools { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 760px) { .i-schools { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
     .i-school { display: block; text-decoration: none; }
     .i-school:hover { border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line)); }
     .i-school-mark { display: block; margin-top: 10px; font-size: 22px; color: var(--i-filament); letter-spacing: 0.06em; }

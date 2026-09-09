@@ -54,7 +54,7 @@ const ld = {
       <p class="i-shead-tag">{s.tagline}</p>
       <p class="i-prose i-shead-blurb">{s.blurb}</p>
       <p class="i-mono i-shead-meta">
-        {spine.length + aside.length} courses &middot; {credits.join(', ')}
+        {spine.length + aside.length} course{spine.length + aside.length === 1 ? '' : 's'} &middot; {credits.join(', ')}
       </p>
     </div>
   </header>
