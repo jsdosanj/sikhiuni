@@ -19,7 +19,7 @@
 .crest-stage { position:relative; height:clamp(380px,43vw,620px); display:grid; place-items:center; isolation:isolate; }
 .crest-ground-shadow { position:absolute; width:52%; height:6%; bottom:0; left:24%; border-radius:50%; background:radial-gradient(ellipse, rgb(var(--c-ink) / .2), transparent 70%); filter:blur(8px); pointer-events:none; }
 .crest-fallback { position:absolute; height:94%; width:92%; object-fit:contain; filter:drop-shadow(0 16px 12px rgb(var(--c-ink) / .12)); }
-.crest-stage model-viewer { width:100%; height:100%; z-index:1; opacity:0; background:transparent; --poster-color:transparent; touch-action:pan-y; }
+.crest-stage model-viewer { width:100%; height:100%; z-index:1; opacity:0; background:transparent; --poster-color:transparent; --progress-bar-height:0px; --progress-bar-color:transparent; touch-action:pan-y; }
 .crest-loaded model-viewer { opacity:1; }
 .crest-loaded .crest-fallback { visibility:hidden; }
 .home-facts { display:grid; grid-template-columns:1fr 1fr 1fr 1.25fr; border-top:1px solid var(--home-rule); padding:24px 0 28px; }
