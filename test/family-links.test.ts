@@ -96,11 +96,20 @@ describe("the dashboard actually renders the row", () => {
     // it would vanish the moment the page finished loading.
     const dashOpen = src.indexOf('<div id="dash">');
     const tiles = src.indexOf('data-testid="family-tiles"');
-    const sectionEnd = src.indexOf("</section>");
     expect(dashOpen).toBeGreaterThan(-1);
     expect(tiles).toBeGreaterThan(dashOpen);
-    expect(tiles).toBeLessThan(sectionEnd);
-    // ...and it is a sibling, not a descendant: #dash closes before it.
-    expect(src.slice(dashOpen, tiles)).toContain("</div>");
+    // Track nested divs: any earlier closing div alone does not prove that
+    // the replaceable account container has closed before the family row.
+    let depth = 0;
+    let dashEnd = -1;
+    for (const tag of src.slice(dashOpen).matchAll(/<\/?div\b[^>]*>/g)) {
+      depth += tag[0].startsWith('</') ? -1 : 1;
+      if (depth === 0) { dashEnd = dashOpen + tag.index! + tag[0].length; break; }
+    }
+    expect(dashEnd).toBeGreaterThan(dashOpen);
+    expect(dashEnd).toBeLessThan(tiles);
+    // The outer dashboard section is still open, despite nested focus sections.
+    const sections = src.slice(0, tiles).match(/<\/?section\b[^>]*>/g) || [];
+    expect(sections.reduce((n, tag) => n + (tag.startsWith('</') ? -1 : 1), 0)).toBe(1);
   });
 });

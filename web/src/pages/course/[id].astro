@@ -1,4 +1,5 @@
 ---
+import { stageName } from '../../lib/stages';
 import Base from '../../layouts/Base.astro';
 import Avatar from '../../components/Avatar.astro';
 import Icon from '../../components/Icon.astro';
@@ -17,7 +18,7 @@ try {
     const cv = vj.courses && vj.courses[c.id];
     quotesVerified = !!(cv && cv.verified > 0 && !cv.mismatch && !cv.uncovered);
   }
-} catch (e) { /* verification data absent (e.g. astro dev) — no badge */ }
+} catch (e) { /* verification data absent (e.g. astro dev), no badge */ }
 const profCourseCount = courses.filter((x) => x.professor === c.professor && x.status === 'published').length;
 const bio = profBio(c.professor);
 const bioShort = bio ? (bio.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.')) : '';
@@ -54,10 +55,10 @@ const breadcrumb = {
   ],
 };
 // SERP titles truncate near 60 chars. Course titles are long and descriptive
-// (good), so only append the " — Sikhi University" brand suffix when the title
+// (good), so only append the ", Sikhi University" brand suffix when the title
 // still fits; otherwise let the course title stand alone (og:site_name already
 // carries the brand). The <h1> in the page keeps the full title regardless.
-const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi University`;
+const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`;
 ---
 <Base title={pageTitle} description={c.summary} ogType="article" autoTranslate={false} ambient="study">
   <script type="application/ld+json" set:html={ldJson(ld)} slot="head" />
@@ -79,7 +80,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       <div class="mt-4 flex flex-wrap items-center gap-x-7 gap-y-2.5 font-mono text-[11px] uppercase tracking-[.12em] text-white/78">
         <span><span class="text-white/58" data-i18n="course.professorlabel">Professor:</span> <a class="text-saffron normal-case tracking-normal hover:text-white" href={`/professor/${profSlug(c.professor)}`} data-no-i18n>{c.professor}</a></span>
         <span data-no-i18n>{lessons.length} lesson{lessons.length === 1 ? '' : 's'}</span>
-        <span data-no-i18n>Level {c.level}</span>
+        <span data-no-i18n>{stageName(c.level)}</span>
         {c.aiCreated && <span class="chip-status border-saffron text-saffron" data-i18n="course.aibadge">Created by AI</span>}
         {quotesVerified && <a href="/integrity" class="chip-status border-ok text-ok hover:text-white" title="Every quoted shabad matches the canonical text of Sri Guru Granth Sahib Ji" data-i18n="course.verified">Quotes verified</a>}
       </div>
@@ -140,10 +141,10 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       {c.level >= 200 && (
         <div class="mb-6 rounded-xl2 border border-line bg-surface p-4 font-sans text-sm text-muted">
           <strong class="text-navy" data-i18n="course.prereq.badge">Prerequisite recommended.</strong>{' '}
-          {c.level === 200 && <>This is a 200-level course. To get the most out of it, we recommend completing the <a class="underline text-navy" href="/catalog">100-level courses</a> first.</>}
-          {c.level === 300 && <>This is a 300-level course. We recommend completing <a class="underline text-navy" href="/catalog">200-level courses</a> before diving in — they build the foundation this course assumes.</>}
-          {c.level === 400 && <>This is a 400-level course. You'll get the most from it after completing <a class="underline text-navy" href="/catalog">300-level courses</a>, which cover the concepts this course builds on.</>}
-          {c.level >= 500 && <>This is a graduate-level (500-level) course. It assumes a solid background in the subject — we recommend working through <a class="underline text-navy" href="/catalog">400-level courses</a> (or equivalent 200–300 level courses in this topic) before starting.</>}
+          {c.level === 200 && <>This is a Explore course. To get the most out of it, we recommend completing the <a class="underline text-navy" href="/catalog">Discover courses</a> first.</>}
+          {c.level === 300 && <>This is a Practise course. We recommend completing <a class="underline text-navy" href="/catalog">Explore courses</a> before diving in, they build the foundation this course assumes.</>}
+          {c.level === 400 && <>This is a Deepen course. You'll get the most from it after completing <a class="underline text-navy" href="/catalog">Practise courses</a>, which cover the concepts this course builds on.</>}
+          {c.level >= 500 && <>This is a Research course. It assumes a solid background in the subject, we recommend working through <a class="underline text-navy" href="/catalog">Deepen courses</a> (or equivalent Explore or Practise courses in this topic) before starting.</>}
         </div>
       )}
 
@@ -158,7 +159,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
 
       {c.terms && c.terms.length > 0 && (
         <section class="mb-8">
-          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.terms.h">Key terms —</span> <span lang="pa">ਸ਼ਬਦਾਵਲੀ</span></h2>
+          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.terms.h">Key terms -</span> <span lang="pa">ਸ਼ਬਦਾਵਲੀ</span></h2>
           <div class="mt-3 grid gap-3 sm:grid-cols-2">
             {c.terms.map((t) => (
               <div class="card-lift p-4">
@@ -205,7 +206,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
               </div>
               <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed" set:html={expandYoutubeEmbeds(ls.html)} />
               <div class="mt-5 border-t border-dashed border-line pt-4">
-                <label class="inline-flex items-center gap-1.5 font-sans text-xs text-muted"><Icon name="note" class="h-3.5 w-3.5" /><span data-i18n="course.notes.label">Your notes — saved on this device</span></label>
+                <label class="inline-flex items-center gap-1.5 font-sans text-xs text-muted"><Icon name="note" class="h-3.5 w-3.5" /><span data-i18n="course.notes.label">Your notes, saved on this device</span></label>
                 <textarea data-note={i} aria-label={`Your notes for lesson ${i + 1}`} rows="3" class="mt-1 w-full rounded-lg border border-line bg-paper p-2 text-[0.95rem]" placeholder="Write your notes…" data-i18n-ph="course.notes.ph"></textarea>
                 <div class="mt-3 flex flex-wrap gap-2.5">
                   <button data-done={i} class="btn border-navy bg-navy text-white hover:bg-navy-strong">Mark complete</button>
@@ -220,14 +221,14 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       </section>
 
       <section id="gurbani-refs" class="mb-8 hidden">
-        <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.gurbani.h">Gurbani Verses —</span> <span class="gur text-saffron-deep" lang="pa">ਗੁਰਬਾਣੀ</span></h2>
+        <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.gurbani.h">Gurbani Verses -</span> <span class="gur text-saffron-deep" lang="pa">ਗੁਰਬਾਣੀ</span></h2>
         <p class="mt-1 font-sans text-sm text-muted"><span data-i18n="course.gurbani.sub">Lines from Sri Guru Granth Sahib Ji referenced in this course.</span>{quotesVerified ? <> Every quoted shabad here is <a class="underline" href="/integrity">machine-verified</a> against the canonical text.</> : null}</p>
         <div id="gurbani-refs-list" class="mt-4 space-y-3"></div>
       </section>
 
       {c.granthRef && (
         <section id="granth-panel" class="mb-8" data-granth-src={c.granthRef.src} data-granth-start={c.granthRef.start} data-granth-end={c.granthRef.end}>
-          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span>From the Granth —</span> <span class="gur text-saffron-deep" lang="pa">{c.granthRef.label.split('·')[0].trim()}</span></h2>
+          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span>From the Granth -</span> <span class="gur text-saffron-deep" lang="pa">{c.granthRef.label.split('·')[0].trim()}</span></h2>
           <p class="mt-1 font-sans text-sm text-muted">
             {c.granthRef.label} · Ang {c.granthRef.start}{c.granthRef.end > c.granthRef.start ? `–${c.granthRef.end}` : ''}, rendered verbatim from the reader corpus. Tap any line for its published translation and ਅਰਥ.
             <a class="ml-1 font-semibold text-navy underline" href={`/santhiya?src=${c.granthRef.src}&ang=${c.granthRef.start}`}>Read with Santhya audio →</a>
@@ -244,8 +245,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       )}
 
       <section id="parallel-panel" class="mb-8 hidden">
-        <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span>Parallel text —</span> <span class="gur text-saffron-deep" lang="pa">ਪਾਠ ਤੇ ਅਰਥ</span></h2>
-        <p class="mt-1 font-sans text-sm text-muted">The work page by page: the author's original Gurmukhi beside its published English translation (OCR — refer to the original for an authoritative reading).</p>
+        <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span>Parallel text -</span> <span class="gur text-saffron-deep" lang="pa">ਪਾਠ ਤੇ ਅਰਥ</span></h2>
+        <p class="mt-1 font-sans text-sm text-muted">The work page by page: the author's original Gurmukhi beside its published English translation (OCR, refer to the original for an authoritative reading).</p>
         <div class="card-lift mt-4">
           <div class="flex items-center justify-between gap-3 font-sans text-sm">
             <button id="pp-prev" class="rounded-lg border border-line px-3 py-1.5 hover:border-saffron" aria-label="Previous page">←</button>
@@ -277,12 +278,12 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
               <blockquote class={`pl-4 text-[0.97rem] italic leading-relaxed text-muted ${c.sourceText.gurmukhi ? 'mt-3 border-l-4 border-line' : 'border-l-4 border-saffron text-navy'}`}>{c.sourceText.english}</blockquote>
             )}
             <figcaption class="mt-3 font-sans text-xs text-muted">
-              — from <strong>{c.sourceText.work}</strong>.
+             , from <strong>{c.sourceText.work}</strong>.
               {c.sourceText.gurmukhi && c.sourceText.english
-                ? " Gurmukhi is the author's original text (OCR); the English is a machine translation. Both are short study excerpts — refer to the original for an authoritative reading."
+                ? " Gurmukhi is the author's original text (OCR); the English is a machine translation. Both are short study excerpts, refer to the original for an authoritative reading."
                 : c.sourceText.gurmukhi
-                  ? " This is the author's original Gurmukhi text (OCR), shown as a study excerpt — OCR may contain errors."
-                  : ' Shown as a short study excerpt — refer to the original for an authoritative reading.'}
+                  ? " This is the author's original Gurmukhi text (OCR), shown as a study excerpt, OCR may contain errors."
+                  : ' Shown as a short study excerpt, refer to the original for an authoritative reading.'}
               {c.sourceText.sikhArchiveUrl
                 ? <a class="ml-1 font-semibold text-navy underline" href={c.sourceText.sikhArchiveUrl} target="_blank" rel="noopener" data-i18n="course.sourcetext.readarchive">Read the full work on Sikh Archive ↗</a>
                 : <a class="ml-1 font-semibold text-navy underline" href={c.sourceText.url} target="_blank" rel="noopener" data-i18n="course.sourcetext.readsikhlibrary">Read the full work on SikhLibrary ↗</a>}
@@ -301,7 +302,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
     <div class="grid gap-6 lg:grid-cols-2">
       {c.terms && c.terms.length > 0 && (
         <section id="flashcards" class="card-lift p-5">
-          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.flashcards.h">Flashcards —</span> <span lang="pa">ਕਾਰਡ ਅਭਿਆਸ</span></h2>
+          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold"><span data-i18n="course.flashcards.h">Flashcards -</span> <span lang="pa">ਕਾਰਡ ਅਭਿਆਸ</span></h2>
           <p class="mt-1 font-sans text-sm text-muted" data-i18n="course.flashcards.sub">Click a card to flip it and reveal the definition.</p>
           <div class="mt-4 relative">
             <!-- Card display -->
@@ -347,7 +348,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
 
       <section class="card-lift p-6">
         <h2 class="text-xl font-bold" data-i18n="course.readsource.h">Read the source texts</h2>
-        <p class="mt-1" data-i18n="course.readsource.sub">Read the primary sources for yourself — the Gurbani in our read-along reader, and the original works in the source library.</p>
+        <p class="mt-1" data-i18n="course.readsource.sub">Read the primary sources for yourself, the Gurbani in our read-along reader, and the original works in the source library.</p>
         <div class="mt-3 flex flex-wrap gap-3">
           <a class="btn" href="/santhiya?src=sggs"><Icon name="book" class="h-4 w-4" /><span data-i18n="course.readsource.readgurbani">Read Gurbani (reader)</span></a>
           {c.sourceText?.sikhArchiveUrl && (
@@ -416,16 +417,48 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
     const set = (k, v) => { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch {} };
     const doneKey = 'done_' + id, scoreKey = 'score_' + id; let done = get(doneKey, {});
     // Write progress + grade to the server (the source of truth); localStorage is a cache.
-    function push() {
-      return fetch('/api/progress', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ courseId: id, done: Object.keys(done).filter((k) => done[k]).map(Number) }) }).catch(() => {});
+    // Coalesce rapid taps and serialize patches; never replace other lessons
+    // with a stale whole-course snapshot from this device.
+    let progressUserId = get('progress_user_' + id, null);
+    const pendingProgress = new Map<number, boolean>();
+    function loadPending() { if(!progressUserId)return; const rows=get('progress_pending_' + progressUserId + '_' + id, []); if(Array.isArray(rows)) rows.forEach(row=>{if(Array.isArray(row)&&Number.isInteger(row[0])&&typeof row[1]==='boolean'&&!pendingProgress.has(row[0]))pendingProgress.set(row[0],row[1]);}); }
+    function savePending() { if(progressUserId)set('progress_pending_' + progressUserId + '_' + id,[...pendingProgress]); }
+    loadPending();
+    let progressSending = false, progressTimer;
+    const syncStatus = document.createElement('p');
+    syncStatus.className = 'mt-3 text-sm text-muted'; syncStatus.setAttribute('role', 'status');
+    document.getElementById('lesson-rail')?.appendChild(syncStatus);
+    function push(lessonId, completed) {
+      pendingProgress.set(Number(lessonId), !!completed); savePending();
+      syncStatus.textContent = 'Saved on this device. Syncing…';
+      clearTimeout(progressTimer); progressTimer = setTimeout(flushProgress, 600);
     }
+    async function flushProgress() {
+      if(progressSending || !pendingProgress.size) return;
+      if(!progressUserId){syncStatus.textContent='Saved on this device. Sign in to sync progress.';return;}
+      progressSending = true;
+      try {
+        while(pendingProgress.size) {
+          const [lessonId, completed] = pendingProgress.entries().next().value;
+          const response = await fetch('/api/progress', { method:'POST', credentials:'same-origin', keepalive:true, headers:{'content-type':'application/json'}, body:JSON.stringify({courseId:id,lessonId,completed,expectedUserId:progressUserId}) });
+          if(!response.ok) { syncStatus.textContent = response.status===401 ? 'Saved on this device. Sign in to sync progress.' : 'Saved on this device. Cloud sync failed; retry when connected.'; return; }
+          if(pendingProgress.get(lessonId)===completed) pendingProgress.delete(lessonId); savePending();
+        }
+        syncStatus.textContent = 'Progress saved to your account.';
+      } catch { syncStatus.textContent = 'Saved on this device. Waiting for a connection to sync.'; }
+      finally { progressSending=false; }
+    }
+    window.addEventListener('online', flushProgress);
+    window.addEventListener('pagehide', flushProgress);
     // Cross-device pull: the server's record wins, so grades survive a cleared device.
     fetch('/api/progress', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
       if (!d || !d.progress) return;
+      if(d.userId) { if(progressUserId && progressUserId!==d.userId)pendingProgress.clear(); progressUserId=d.userId;set('progress_user_' + id,d.userId);loadPending();savePending(); }
+      flushProgress();
       const row = d.progress.filter((p) => p.course_id === id)[0]; if (!row) return;
       try { JSON.parse(row.done || '[]').forEach((i) => { done[i] = true; }); set(doneKey, done); } catch {}
       if (row.passed_score != null) { set(scoreKey, row.passed_score); if (row.passed_score >= 80) set('passed_' + id, row.passed_score); }
+      pendingProgress.forEach((completed,lessonId)=>{if(completed)done[lessonId]=true;else delete done[lessonId];});set(doneKey,done);
       refresh();
     }).catch(() => {});
     // Announcements posted by this course's teacher(s).
@@ -434,7 +467,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       el.innerHTML = `<h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold">Announcements</h2><div class="mt-3 space-y-3">${list.slice(0, 5).map((a) => `<div class="rounded-xl2 border-l-4 border-saffron bg-surface p-4"><div class="font-sans text-xs text-muted">${esc(a.author_name || '')}</div>${a.title ? `<div class="mt-1 font-bold text-navy">${esc(a.title)}</div>` : ''}<p class="mt-1 text-[0.97rem]">${esc(a.body)}</p></div>`).join('')}</div>`;
     }).catch(() => {});
-    // Explicit enrollment toggle — server is the source of truth; localStorage mirrors it for instant UI.
+    // Explicit enrollment toggle, server is the source of truth; localStorage mirrors it for instant UI.
     (function () {
       const btn = document.getElementById('enroll-btn'); if (!btn) return;
       const ek = 'enrolled_course_' + id;
@@ -468,8 +501,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
         const onMsg = (ev) => {
           if (!ev.data || ev.data.type !== 'pack-cached' || ev.data.id !== id) return;
           navigator.serviceWorker.removeEventListener('message', onMsg); btn.disabled = false;
-          if (ev.data.ok) { set(savedKey, true); lbl.textContent = 'Saved offline'; window.suToast && window.suToast('Saved for offline — text and images work without a connection.', 'ok'); }
-          else { lbl.textContent = 'Save offline'; window.suToast && window.suToast('Could not save offline — please try again.', 'error'); }
+          if (ev.data.ok) { set(savedKey, true); lbl.textContent = 'Saved offline'; window.suToast && window.suToast('Saved for offline, text and images work without a connection.', 'ok'); }
+          else { lbl.textContent = 'Save offline'; window.suToast && window.suToast('Could not save offline, please try again.', 'error'); }
         };
         navigator.serviceWorker.addEventListener('message', onMsg);
         navigator.serviceWorker.controller.postMessage({ type: 'cache-pack', id: id, urls: Array.from(new Set(urls)) });
@@ -547,7 +580,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       if (ring) { const circ = 2 * Math.PI * 34; ring.style.strokeDasharray = String(circ); ring.style.strokeDashoffset = String(circ * (1 - pct / 100)); }
       document.querySelectorAll('[data-done]').forEach((b) => { const i = b.dataset.done; b.innerHTML = done[i] ? iconSvg('check', 'inline-block h-4 w-4 align-[-0.15em]') + ' Completed' : 'Mark complete'; b.classList.toggle('border-saffron', !!done[i]); });
       // Lesson rail: highlight the next not-yet-completed lesson (decorative
-      // nav only — every lesson's real content is already server-rendered
+      // nav only, every lesson's real content is already server-rendered
       // above, unaffected by this state).
       const railRows = document.querySelectorAll('[data-rail-row]');
       let nextIdx = -1;
@@ -562,11 +595,11 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
         if (title) { title.classList.toggle('text-navy', active); title.classList.toggle('font-semibold', active); title.classList.toggle('text-muted', !active); }
       });
     }
-    document.querySelectorAll('[data-note]').forEach((t) => { const k = 'note_' + id + '_' + t.dataset.note; t.value = get(k, ''); t.addEventListener('input', () => set(k, t.value)); });
-    document.querySelectorAll('[data-done]').forEach((b) => b.addEventListener('click', () => { const i = b.dataset.done; done[i] = !done[i]; if (!done[i]) delete done[i]; else recordActivity(); set(doneKey, done); refresh(); push(); }));
+    document.querySelectorAll('[data-note]').forEach((t) => { const k = 'note_' + id + '_' + t.dataset.note; t.value = get(k, ''); t.addEventListener('input', () => { set(k, t.value); set('note_saved_' + id + '_' + t.dataset.note, new Date().toISOString()); }); });
+    document.querySelectorAll('[data-done]').forEach((b) => b.addEventListener('click', () => { const i = b.dataset.done; done[i] = !done[i]; if (!done[i]) delete done[i]; else recordActivity(); set(doneKey, done); refresh(); push(i, !!done[i]); }));
     const submit = document.getElementById('quiz-submit');
     // Gated courses own their own quiz-submit wiring (see the gated-content
-    // script below) — the real question count isn't known until it loads.
+    // script below), the real question count isn't known until it loads.
     if (submit && !__d.gated) submit.addEventListener('click', async () => {
       // Collect the chosen option index per question; the SERVER grades it.
       const answers = [];
@@ -576,8 +609,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       let res;
       try { res = await fetch('/api/quiz', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ courseId: id, answers }) }).then((x) => x.json()); } catch (e) { res = null; }
       submit.disabled = false; submit.textContent = 'Submit test';
-      if (!res || typeof res.passed !== 'boolean') { r.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Could not submit your test — please try again.</div>'; return; }
-      // The server returns the score only on a pass — a failing attempt is just
+      if (!res || typeof res.passed !== 'boolean') { r.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Could not submit your test, please try again.</div>'; return; }
+      // The server returns the score only on a pass, a failing attempt is just
       // the boolean, so the score can't be used to reverse-engineer the key.
       const score = res.score;
       const wasPassed = get('passed_' + id, 0) >= 80;
@@ -585,12 +618,12 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       recordActivity();
       if (res.passed) {
         const cert = res.signedIn ? ` <a class="underline" href="/cert?course=${id}">View your certificate →</a>` : ' <a class="underline" href="/login">Sign in</a> to save this and earn a certificate.';
-        r.innerHTML = `<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm"><strong>Passed — ${score}%.</strong> Course complete.${cert}</div>`;
+        r.innerHTML = `<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm"><strong>Passed, ${score}%.</strong> Course complete.${cert}</div>`;
         if (!wasPassed) celebratePass(score, !!res.signedIn);
       } else r.innerHTML = `<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>Not yet.</strong> You need 80%. Review the lessons and try again.</div>`;
       r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
-    // Pass celebration overlay — only fires on a NEW pass (never on page load).
+    // Pass celebration overlay, only fires on a NEW pass (never on page load).
     function celebratePass(score, signedIn) {
       const ov = document.getElementById('pass-celebrate'); if (!ov) return;
       const scoreEl = document.getElementById('pass-celebrate-score');
@@ -629,7 +662,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
         front.textContent = stripHtml(t.t);
         back.textContent = t.m;
         back.classList.add('hidden');
-        hint.innerHTML = known[idx] ? iconSvg('check', 'inline-block h-3.5 w-3.5 align-[-0.15em]') + ' Learned — click to review' : 'Click to reveal';
+        hint.innerHTML = known[idx] ? iconSvg('check', 'inline-block h-3.5 w-3.5 align-[-0.15em]') + ' Learned, click to review' : 'Click to reveal';
         hint.className = known[idx] ? 'mt-4 font-sans text-xs text-ok' : 'mt-4 font-sans text-xs text-muted/60';
         card.classList.toggle('border-ok', !!known[idx]);
         card.classList.toggle('bg-ok/5', !!known[idx]);
@@ -707,9 +740,9 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
             submitBtn.disabled = true; submitBtn.textContent = 'Submitting…';
             let r; try { r = await fetch('/api/quiz', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ courseId: id, answers }) }).then((x) => x.json()); } catch (e) { r = null; }
             submitBtn.disabled = false; submitBtn.textContent = 'Submit test';
-            if (!r || typeof r.passed !== 'boolean') { result.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Could not submit your test — please try again.</div>'; return; }
+            if (!r || typeof r.passed !== 'boolean') { result.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Could not submit your test, please try again.</div>'; return; }
             result.innerHTML = r.passed
-              ? `<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm"><strong>Passed — ${r.score}%.</strong> Course complete.</div>`
+              ? `<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm"><strong>Passed, ${r.score}%.</strong> Course complete.</div>`
               : `<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>Not yet.</strong> You need 80%. Review the lessons and try again.</div>`;
             result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           });
@@ -746,7 +779,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       });
       var starsGroup = document.getElementById('rate-stars');
       if (starsGroup) starsGroup.addEventListener('mouseleave', function () { paint(stars); });
-      function loadRating() { api('/api/ratings?courseId=' + encodeURIComponent(id)).then(function (r) { if (r.ok) document.getElementById('rate-summary').innerHTML = r.d.count ? (iconSvg('star-filled', 'inline-block h-4 w-4 align-[-0.15em] text-saffron') + ' ' + r.d.avg + ' · ' + r.d.count + ' rating' + (r.d.count == 1 ? '' : 's')) : 'No ratings yet — be the first.'; }); }
+      function loadRating() { api('/api/ratings?courseId=' + encodeURIComponent(id)).then(function (r) { if (r.ok) document.getElementById('rate-summary').innerHTML = r.d.count ? (iconSvg('star-filled', 'inline-block h-4 w-4 align-[-0.15em] text-saffron') + ' ' + r.d.avg + ' · ' + r.d.count + ' rating' + (r.d.count == 1 ? '' : 's')) : 'No ratings yet, be the first.'; }); }
       loadRating();
       document.getElementById('rate-submit').onclick = function () {
         if (!stars) { document.getElementById('rate-msg').textContent = 'Pick a star rating.'; return; }
@@ -756,7 +789,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
           if (r.ok) loadRating();
         });
       };
-      // Assignments — only shown once /api/assignments confirms the signed-in
+      // Assignments, only shown once /api/assignments confirms the signed-in
       // user is enrolled (server-gated; a 403 just means "hide this section").
       function loadAssignments() {
         api('/api/assignments?courseId=' + encodeURIComponent(id)).then(function (r) {
@@ -768,7 +801,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
           document.getElementById('assign-list').innerHTML = list.map(function (a) {
             var statusLine = a.my_status === 'graded' ? '<span class="pill bg-saffron-soft text-saffron-deep">Graded: ' + esc(a.my_grade) + '/' + esc(a.points) + '</span>'
               : a.my_status === 'submitted' ? '<span class="pill bg-paper text-muted">Submitted' + (a.my_late ? ' (late)' : '') + '</span>'
-              : a.status === 'closed' ? '<span class="pill bg-paper text-muted">Closed — no submission</span>'
+              : a.status === 'closed' ? '<span class="pill bg-paper text-muted">Closed, no submission</span>'
               : '';
           return '<div class="rounded-lg border border-line bg-surface p-3" data-assignment="' + esc(a.id) + '" data-allow-file="' + (a.allow_file ? '1' : '0') + '" data-closed="' + (a.status === 'closed' ? '1' : '0') + '">' +
               '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + (a.due_at ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.due_at).toLocaleDateString()) + '</span>' : '') + statusLine + '</div>' +
@@ -808,7 +841,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       }
       loadAssignments();
 
-      // Discussion — depth-1 threading: each root can carry replies[]. Instructor
+      // Discussion, depth-1 threading: each root can carry replies[]. Instructor
       // and scholar/verified badges come pre-computed from the server (author_role,
       // verified); pinned roots sort first (server-side), locked roots hide the
       // reply affordance.
@@ -862,7 +895,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
           var m = (r.d && r.d.messages) || [];
           document.getElementById('disc-list').innerHTML = m.length ? m.map(function (x) {
             return messageHtml(x, false) + (x.replies || []).map(function (rep) { return messageHtml(rep, true); }).join('');
-          }).join('') : '<p class="text-sm text-muted">No messages yet — start the conversation.</p>';
+          }).join('') : '<p class="text-sm text-muted">No messages yet, start the conversation.</p>';
           wireRowActions();
         });
       }
@@ -876,12 +909,12 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
       };
     })();
 
-    // Gurbani verse viewer — scan lessons for "Ang N" refs, fetch from OUR OWN
+    // Gurbani verse viewer, scan lessons for "Ang N" refs, fetch from OUR OWN
     // verified corpus (the same /assets/gurbani/sggs/<ang>.json the /santhiya
-    // reader and verify-gurbani.mjs's build-time accuracy gate both use — not
+    // reader and verify-gurbani.mjs's build-time accuracy gate both use, not
     // a third-party API), and link straight into that reader (which now has a
     // dedicated recording for nearly every Ang) so a student doesn't just see
-    // an isolated static verse — they can read AND listen along at that exact
+    // an isolated static verse, they can read AND listen along at that exact
     // Ang. Previously fetched from api.banidb.com: an external dependency
     // disconnected from the site's own verified text.
     (function () {
@@ -974,7 +1007,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title} — Sikhi Universi
   <script>
     // "From the Granth" panel: pages through the course's granthRef ang range,
     // verbatim from the local corpus; each line opens the line-study drawer
-    // (published BaniDB translations + ਅਰਥ — see lib/line-study).
+    // (published BaniDB translations + ਅਰਥ, see lib/line-study).
     import { openLineStudy } from '../../lib/line-study';
     (function () {
       var panel = document.getElementById('granth-panel');

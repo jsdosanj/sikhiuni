@@ -20,7 +20,7 @@ const isTerminal = t.engine === 'terminal';
 
 const covers = isTerminal
   ? ['Variables', 'Strings', 'Conditionals', 'Loops', 'Functions', 'Arrays & objects', 'Errors', 'Classes & async', 'Comments']
-  : ['Setup — /init, /memory, /mcp, /permissions, /skills', 'Daily — /plan, /model, /compact, /context, /btw', 'Parallel — /agents, /batch, /background, /fork', 'Shipping — /diff, /code-review, /security-review, /simplify', 'Sessions — /clear, /resume, /branch, /rename', 'Troubleshooting — /rewind, /doctor, /debug, /usage'];
+  : ['Setup, /init, /memory, /mcp, /permissions, /skills', 'Daily, /plan, /model, /compact, /context, /btw', 'Parallel, /agents, /batch, /background, /fork', 'Shipping, /diff, /code-review, /security-review, /simplify', 'Sessions, /clear, /resume, /branch, /rename', 'Troubleshooting, /rewind, /doctor, /debug, /usage'];
 
 const ld = {
   '@context': 'https://schema.org',
@@ -34,7 +34,7 @@ const ld = {
   ...(prof ? { author: { '@type': 'Organization', name: prof.name } } : {}),
 };
 ---
-<Base title={`${t.title} — Institute of Technology`} description={t.summary} institute ogType="article">
+<Base title={`${t.title}, Institute of Technology`} description={t.summary} institute ogType="article">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <InstituteRail />
 
@@ -46,7 +46,7 @@ const ld = {
       <p class="i-prose i-dojo-sum">
         {isTerminal
           ? 'Watch each topic type itself out and explain what it teaches, line by line. Use the tabs or the arrows to move between topics; pause any time.'
-          : 'The real Claude Code command set. It runs a scripted tour — press any key, or type / to drive it yourself: arrow to select, tab to complete, enter to run.'}
+          : 'The real Claude Code command set. It runs a scripted tour, press any key, or type / to drive it yourself: arrow to select, tab to complete, enter to run.'}
       </p>
     </div>
   </header>

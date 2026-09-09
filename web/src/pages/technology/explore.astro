@@ -4,7 +4,7 @@ import InstituteRail from '../../components/institute/InstituteRail.astro';
 import { explore, gurmukhiHtml } from '../../lib/institute';
 
 // Per-booth chrome. Each stand deliberately breaks the Institute's design
-// system to read like its source (DESIGN-INSTITUTE.md §college-fair) — no
+// system to read like its source (DESIGN-INSTITUTE.md §college-fair), no
 // logos, no scraped screenshots, just type + colour.
 const MARKS: Record<string, string> = {
   freecodecamp: '{ }',
@@ -17,8 +17,8 @@ const MARKS: Record<string, string> = {
 };
 ---
 <Base
-  title="Explore free courses — Institute of Technology"
-  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, vendor training, and the security reference shelves — freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA, Google Skills."
+  title="Explore free courses, Institute of Technology"
+  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, vendor training, and the security reference shelves, freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA, Google Skills."
   institute
 >
   <InstituteRail />
@@ -26,7 +26,7 @@ const MARKS: Record<string, string> = {
   <section class="i-wrap i-exp-head">
     <span class="i-label">/technology/explore</span>
     <h1>The college fair</h1>
-    <p class="i-prose">The Institute's own courses come first — you finish those and earn its certificate. This hall is for after: when you want breadth, a different teaching style, an interactive challenge platform, or the reference shelf the security profession actually keeps open. Each stand links straight out.</p>
+    <p class="i-prose">The Institute's own courses come first, you finish those and earn its certificate. This hall is for after: when you want breadth, a different teaching style, an interactive challenge platform, or the reference shelf the security profession actually keeps open. Each stand links straight out.</p>
   </section>
 
   <section class="i-wrap i-fair">
@@ -166,7 +166,7 @@ const MARKS: Record<string, string> = {
     .i-booth-sans .i-booth-go { color: #ef6461; font-weight: 600; }
     .i-booth-sans:hover { border-color: #ef6461; }
 
-    /* NICCS · CISA: a federal-site light card — Public Sans feel, agency navy. */
+    /* NICCS · CISA: a federal-site light card, Public Sans feel, agency navy. */
     .i-booth-niccs {
       background: #f4f7fb; border-color: #ccd8e6;
       font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;

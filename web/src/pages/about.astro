@@ -3,13 +3,13 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import { ldJson } from '../lib/site';
 const offers = [
-  ['books', 'Real courses, by topic', 'Dozens of courses across theology, philosophy, history, language, spirituality, music, the arts — and modern skills like AI.'],
+  ['books', 'Real courses, by topic', 'Dozens of courses across theology, philosophy, history, language, spirituality, music, the arts, and modern skills like AI.'],
   ['cap', 'Taught from the sources', "Courses are drawn from the works of leading Sikh scholars and writers, each acting as the course's professor."],
   ['compass', 'Guided learning paths', 'Ordered tracks take you from the basics to deeper study, so you always know what to learn next.'],
   ['note', 'Tests & certificates', 'Each course ends with a test. Pass with 80%+ to unlock the next course and earn a printable certificate.'],
-  ['accessibility', 'Open & accessible', 'Read-aloud, larger text, high-contrast mode, offline access — built so everyone can use it.'],
+  ['accessibility', 'Open & accessible', 'Read-aloud, larger text, high-contrast mode, offline access, built so everyone can use it.'],
   ['globe', 'Free, forever for now', 'Every course is free today. We may add paid offerings later, but open access stays at our core.'],
-  ['cap', 'Graduate seminars', '500-level advanced seminars across every subject — research-focused, scholarly, for serious students who want to go as deep as possible.'],
+  ['cap', 'Graduate seminars', '500-level advanced seminars across every subject, research-focused, scholarly, for serious students who want to go as deep as possible.'],
 ];
 const steps = [
   ['Browse or follow a path.', 'Pick a topic, search the catalogue, or follow a guided learning path.'],
@@ -18,12 +18,12 @@ const steps = [
   ['Pass the test, earn a certificate.', 'Score 80%+ to complete a course and unlock what comes next.'],
 ];
 const faqs = [
-  ['Is Sikhi University really free?', 'Yes. Every course, lesson, test and learning path is free today, with no sign-up required to start learning — pick a course and begin straight away.'],
-  ['Do I need an account?', "No account is needed to start a course. You only need to sign in — free — to save your progress across devices and to download a certificate after you pass a course's test. Signing up takes a username, an email and a code we send you."],
-  ['Is Sikhi University an accredited university?', "No. Sikhi University is not an accredited institution, and its courses and academic-ladder programs (Certificate through Giani) are for self-development only — they don't confer an accredited degree."],
-  ['What does the "Created by AI" label mean?', 'Some courses are drafted with AI to make broad teaching possible quickly. Every such course is clearly labelled "Created by AI" and reviewed for accuracy, and every Gurbani quote across the site is machine-verified against the canonical text of Sri Guru Granth Sahib Ji at build time — see the /integrity page for the method and numbers.'],
-  ['How does Sikhi University relate to the Sikh Archive?', 'The Sikh Archive (sikharchive.net) is a companion project — a growing library of Sikh primary sources and free courses. Sikhi University courses link out to it for deeper reading, and the two are designed to work hand in hand.'],
-  ['What subjects can I study?', 'Sikh theology, philosophy, history, language (Gurmukhi/Punjabi), spiritual practice, music (Gurmat Sangeet), art and architecture, comparative religion, ethics, and modern life skills — hundreds of free courses organised into guided learning paths from foundations to advanced study.'],
+  ['Is Sikhi University really free?', 'Yes. Every course, lesson, test and learning path is free today, with no sign-up required to start learning, pick a course and begin straight away.'],
+  ['Do I need an account?', "No account is needed to start a course. You only need to sign in, free, to save your progress across devices and to download a certificate after you pass a course's test. Signing up takes a username, an email and a code we send you."],
+  ['Is Sikhi University an accredited university?', "No. Sikhi University is not an accredited institution, and its courses and academic-ladder programs (Certificate through Giani) are for self-development only, they don't confer an accredited degree."],
+  ['What does the "Created by AI" label mean?', 'Some courses are drafted with AI to make broad teaching possible quickly. Every such course is clearly labelled "Created by AI" and reviewed for accuracy, and every Gurbani quote across the site is machine-verified against the canonical text of Sri Guru Granth Sahib Ji at build time, see the /integrity page for the method and numbers.'],
+  ['How does Sikhi University relate to the Sikh Archive?', 'The Sikh Archive (sikharchive.net) is a companion project, a growing library of Sikh primary sources and free courses. Sikhi University courses link out to it for deeper reading, and the two are designed to work hand in hand.'],
+  ['What subjects can I study?', 'Sikh theology, philosophy, history, language (Gurmukhi/Punjabi), spiritual practice, music (Gurmat Sangeet), art and architecture, comparative religion, ethics, and modern life skills, hundreds of free courses organised into guided learning paths from foundations to advanced study.'],
 ];
 const faqLd = {
   '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -33,20 +33,20 @@ const faqLd = {
 // lines 1583-1602). Not invented copy: the prototype's own mission h1 ("From
 // the wisdom of our ancestors...") and its four pillar titles are near-
 // verbatim the real copy already shipped in index.astro's #mission-section
-// (home.mission.eyebrow/heading + the four mission cards) — reused here
+// (home.mission.eyebrow/heading + the four mission cards), reused here
 // verbatim (Decision 9a: keep existing copy/keys wherever possible), so this
 // hero needs zero new i18n keys. The hero paragraph is a verbatim prefix of
 // the same real homepage sentence; the "basics to depths" / "relationship
 // with Waheguru" clauses it omits are exactly what the pillar grid below
 // elaborates, so nothing is lost, only reordered.
 const pillars: [string, string][] = [
-  ['Learn from our ancestors', 'The Gurus, scholars, saints and soldiers whose lives and writings light the way — taught from authentic sources.'],
+  ['Learn from our ancestors', 'The Gurus, scholars, saints and soldiers whose lives and writings light the way, taught from authentic sources.'],
   ['From the basics to the depths', 'Start with the simplest questions and follow them as far as you dare. The deeper you go, the more there is.'],
-  ['Sri Guru Granth Sahib Ji', 'The living Guru and the universal Truth. Every path here leads back to the Shabad — read it for yourself in our reader.'],
-  ['A relationship with Waheguru', 'Not just knowledge, but Naam, Simran and seva — a living, personal bond with the Divine.'],
+  ['Sri Guru Granth Sahib Ji', 'The living Guru and the universal Truth. Every path here leads back to the Shabad, read it for yourself in our reader.'],
+  ['A relationship with Waheguru', 'Not just knowledge, but Naam, Simran and seva, a living, personal bond with the Divine.'],
 ];
 ---
-<Base title="About — Sikhi University" description="Why Sikhi University exists: a free, open space for anyone, anywhere to dig deeper into Sikhi and modern skills." ambient="hall" bgImage="/assets/backgrounds/about.jpg">
+<Base title="About, Sikhi University" description="Why Sikhi University exists: a free, open space for anyone, anywhere to dig deeper into Sikhi and modern skills." ambient="hall" bgImage="/assets/backgrounds/about.jpg">
   <script type="application/ld+json" set:html={ldJson(faqLd)} slot="head" />
 
   <!-- Mission hero (isabout 1585-1591): dark hero-midnight band, mono eyebrow
@@ -56,13 +56,13 @@ const pillars: [string, string][] = [
       <div class="relative max-w-[58ch]">
         <p class="eyebrow text-saffron" data-i18n="home.mission.eyebrow">Our mission</p>
         <h1 class="text-display mt-4 text-white" data-i18n="home.mission.heading">From the wisdom of our ancestors to a living bond with Waheguru</h1>
-        <p class="mt-5 text-lg leading-relaxed text-white/80">We learn from those who came before us — the Gurus, the scholars, the saints and the soldiers — and carry their light forward, until one truth becomes unmistakable: that <strong>Sri Guru Granth Sahib Ji</strong> is the living Guru.</p>
+        <p class="mt-5 text-lg leading-relaxed text-white/80">We learn from those who came before us, the Gurus, the scholars, the saints and the soldiers, and carry their light forward, until one truth becomes unmistakable: that <strong>Sri Guru Granth Sahib Ji</strong> is the living Guru.</p>
       </div>
     </div>
   </div>
 
   <!-- 4-pillar ruled grid (isabout 1592-1600): a full-bleed light band right
-       under the dark hero — same edge-to-edge convention the Offers band
+       under the dark hero, same edge-to-edge convention the Offers band
        below already uses. Border-top-2 navy cells + mono numerals, no
        cards, no glass. -->
   <div class="bg-paper border-b border-line">
@@ -79,19 +79,19 @@ const pillars: [string, string][] = [
     </div>
   </div>
 
-  <!-- Why we built it (no prototype block for this — real site content kept
+  <!-- Why we built it (no prototype block for this, real site content kept
        verbatim, de-glassed to a flat surface panel per Decision 5). -->
   <section class="wrap py-14">
     <div class="rounded-xl2 border border-line bg-surface max-w-4xl xl:max-w-5xl p-8 sm:p-10">
       <p class="eyebrow text-saffron-deep" data-i18n="about.why.eyebrow">Our purpose</p>
       <h2 class="mt-2 text-2xl font-bold" data-i18n="about.why.h2">Why we built Sikhi University</h2>
-      <p class="mt-1 font-sans text-sm text-saffron-deep uppercase tracking-widest"><span class="gur" lang="pa">ਸਿੱਖ</span> <span data-i18n="about.why.tagline">— the learner who never stops</span></p>
+      <p class="mt-1 font-sans text-sm text-saffron-deep uppercase tracking-widest"><span class="gur" lang="pa">ਸਿੱਖ</span> <span data-i18n="about.why.tagline">- the learner who never stops</span></p>
       <div class="mt-4 space-y-4 text-lg leading-relaxed">
-        <p>The word <span class="gur">ਸਿੱਖ</span> literally means <em>learner</em> — one who sits at the feet of the Guru and never stops seeking. Gurbani's call to seek, to ask, to grow is not a suggestion; it is written into our very name. A Sikh is defined not by the knowledge they already have, but by their lifelong commitment to learning.</p>
-        <p data-i18n="about.why.p2">Sikhi is deep. Its history spans five centuries, its scripture holds the voices of the Gurus, the Bhagats, the Bhatts and devoted Gursikhs, and its philosophy speaks to the biggest questions of life. Yet for most people there has never been one welcoming, structured place to learn it — to move from a first question to real understanding.</p>
-        <p>But something else is breaking too. The writings of the Gurus and the great Gursikhs — penned in Punjabi, Braj Bhasha, Sant Bhasha, Persian, and Sanskrit — are becoming inaccessible to most of our global community. Children grow up in Toronto, London, Auckland, and São Paulo. They want to connect with <span class="gur">ਗੁਰੂ ਸਾਹਿਬ</span>. They want to read the <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span>. But the languages have changed, the scholars are hard to reach, and the gap between the Guru's wisdom and their daily life keeps growing.</p>
-        <p>Languages drift. Generations lose threads. Community connections thin. But the longing for <span class="gur">ਵਾਹਿਗੁਰੂ</span> does not disappear — it just goes unanswered.</p>
-        <p>We built Sikhi University to answer that longing — a calm, organised home where a curious beginner and a serious scholar are equally welcome. Every course here is a bridge: from the depth of the Guru Sahib's writings to the heart of a Sikh alive today. No fees. No barriers. The medium is English. The sources are authentic. And the destination is always the same: your own, personal, unbreakable bond with <span class="gur">ਵਾਹਿਗੁਰੂ</span>.</p>
+        <p>The word <span class="gur">ਸਿੱਖ</span> literally means <em>learner</em>, one who sits at the feet of the Guru and never stops seeking. Gurbani's call to seek, to ask, to grow is not a suggestion; it is written into our very name. A Sikh is defined not by the knowledge they already have, but by their lifelong commitment to learning.</p>
+        <p data-i18n="about.why.p2">Sikhi is deep. Its history spans five centuries, its scripture holds the voices of the Gurus, the Bhagats, the Bhatts and devoted Gursikhs, and its philosophy speaks to the biggest questions of life. Yet for most people there has never been one welcoming, structured place to learn it, to move from a first question to real understanding.</p>
+        <p>But something else is breaking too. The writings of the Gurus and the great Gursikhs, penned in Punjabi, Braj Bhasha, Sant Bhasha, Persian, and Sanskrit, are becoming inaccessible to most of our global community. Children grow up in Toronto, London, Auckland, and São Paulo. They want to connect with <span class="gur">ਗੁਰੂ ਸਾਹਿਬ</span>. They want to read the <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span>. But the languages have changed, the scholars are hard to reach, and the gap between the Guru's wisdom and their daily life keeps growing.</p>
+        <p>Languages drift. Generations lose threads. Community connections thin. But the longing for <span class="gur">ਵਾਹਿਗੁਰੂ</span> does not disappear, it just goes unanswered.</p>
+        <p>We built Sikhi University to answer that longing, a calm, organised home where a curious beginner and a serious scholar are equally welcome. Every course here is a bridge: from the depth of the Guru Sahib's writings to the heart of a Sikh alive today. No fees. No barriers. The medium is English. The sources are authentic. And the destination is always the same: your own, personal, unbreakable bond with <span class="gur">ਵਾਹਿਗੁਰੂ</span>.</p>
       </div>
     </div>
   </section>
@@ -133,7 +133,7 @@ const pillars: [string, string][] = [
     </div>
   </section>
 
-  <!-- FAQ: ruled single-column list (Decision 6 — list-like Q&amp;A data
+  <!-- FAQ: ruled single-column list (Decision 6, list-like Q&amp;A data
        renders as ruled rows, not a card grid), inside the same floating-panel
        convention as the rest of this dark-ambient page. -->
   <section class="wrap pb-14">
@@ -160,7 +160,7 @@ const pillars: [string, string][] = [
         <Icon name="folder" class="h-9 w-9 shrink-0 text-saffron-deep" />
         <div>
           <h2 class="text-xl font-bold" data-i18n="about.archive.h2">Together with the Sikh Archive</h2>
-          <p class="mt-2 max-w-2xl text-muted"><span data-i18n="about.archive.p1a">Sikhi University works alongside the</span> <strong data-i18n="about.archive.p1b">Sikh Archive</strong> <span data-i18n="about.archive.p1c">— a growing library of Sikh sources, history and free courses. Our courses point you there to read deeper, and the two sites are designed to work hand in hand.</span></p>
+          <p class="mt-2 max-w-2xl text-muted"><span data-i18n="about.archive.p1a">Sikhi University works alongside the</span> <strong data-i18n="about.archive.p1b">Sikh Archive</strong> <span data-i18n="about.archive.p1c">- a growing library of Sikh sources, history and free courses. Our courses point you there to read deeper, and the two sites are designed to work hand in hand.</span></p>
           <a class="btn mt-4" href="https://sikharchive.net" target="_blank" rel="noopener" data-i18n="about.archive.cta">Visit the Sikh Archive →</a>
         </div>
       </div>
@@ -171,7 +171,7 @@ const pillars: [string, string][] = [
   <section class="wrap pb-14">
     <div class="rounded-xl2 border border-line bg-surface max-w-4xl xl:max-w-5xl p-8 sm:p-10">
       <h2 class="text-2xl font-bold" data-i18n="about.accuracy.h2">A note on accuracy</h2>
-      <p class="mt-3 text-lg leading-relaxed">Accuracy is sacred to us. Many courses are drafted with AI to make broad teaching possible quickly, and every one carries a clear <strong data-i18n="about.accuracy.label">"Created by AI"</strong> label. Every <span class="gur">ਸ਼ਬਦ</span> quoted in a course is machine-verified against the canonical text of <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span> at build time — a quote that doesn't match, or cites the wrong ang, cannot ship. See the numbers and the method on our <a class="underline" href="/integrity">content-integrity page</a>, or download the catalogue metadata and verification report as an openly-licensed dataset on our <a class="underline" href="/open-data">open data page</a>. AI-drafted prose is reviewed for accuracy, Gurbani is handled with reverence, and we welcome corrections — use the <a class="underline" href="/feedback">feedback page</a> to tell us anything we should fix.</p>
+      <p class="mt-3 text-lg leading-relaxed">Accuracy is sacred to us. Many courses are drafted with AI to make broad teaching possible quickly, and every one carries a clear <strong data-i18n="about.accuracy.label">"Created by AI"</strong> label. Every <span class="gur">ਸ਼ਬਦ</span> quoted in a course is machine-verified against the canonical text of <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span> at build time, a quote that doesn't match, or cites the wrong ang, cannot ship. See the numbers and the method on our <a class="underline" href="/integrity">content-integrity page</a>, or download the catalogue metadata and verification report as an openly-licensed dataset on our <a class="underline" href="/open-data">open data page</a>. AI-drafted prose is reviewed for accuracy, Gurbani is handled with reverence, and we welcome corrections, use the <a class="underline" href="/feedback">feedback page</a> to tell us anything we should fix.</p>
       <a class="btn btn-primary mt-6" href="/catalog" data-i18n="about.accuracy.cta">Start learning →</a>
     </div>
   </section>
@@ -182,7 +182,7 @@ const pillars: [string, string][] = [
       <h2 class="text-2xl font-bold" data-i18n="about.sacred.h2">Sacred content &amp; disclaimer</h2>
       <div class="mt-4 space-y-3 text-[0.97rem] leading-relaxed text-muted">
         <p data-i18n="about.sacred.p1">Sikhi University is an independent educational resource. It is not a religious authority, and it is not affiliated with, sponsored by, or endorsed by the Shiromani Gurdwara Parbandhak Committee (SGPC), the Akal Takht, any Takht, any Gurdwara, or any other Sikh institution.</p>
-        <p>Our content — especially material drafted with the help of AI — is provided for learning and may contain errors. It is not a substitute for guidance from the <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span>, the <span class="gur">ਪੰਜ ਪਿਆਰੇ</span>, Granthis, or qualified scholars. For matters of faith, practice, or doctrine, please turn to authentic sources and your local <span class="gur">ਸੰਗਤ</span>.</p>
+        <p>Our content, especially material drafted with the help of AI, is provided for learning and may contain errors. It is not a substitute for guidance from the <span class="gur">ਸ੍ਰੀ ਗੁਰੂ ਗਰੰਥ ਸਾਹਿਬ ਜੀ</span>, the <span class="gur">ਪੰਜ ਪਿਆਰੇ</span>, Granthis, or qualified scholars. For matters of faith, practice, or doctrine, please turn to authentic sources and your local <span class="gur">ਸੰਗਤ</span>.</p>
         <p data-i18n="about.sacred.p3">Gurbani is presented with reverence and to the best of our ability for accuracy; even so, we encourage you to verify it against authentic, authoritative sources. The platform makes no warranty as to the completeness or accuracy of any content and is not liable for any reliance placed on it.</p>
       </div>
     </div>

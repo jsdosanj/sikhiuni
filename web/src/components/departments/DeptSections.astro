@@ -1,5 +1,6 @@
 ---
-// The shared "body" of every department landing page — consistent, premium
+import { stageName } from '../../lib/stages';
+// The shared "body" of every department landing page, consistent, premium
 // sections below each page's bespoke hero. Uniqueness lives in the hero + the
 // per-department signature module each page renders above this.
 import DeptAccordion from './DeptAccordion.astro';
@@ -59,13 +60,13 @@ const relatedPaths = paths
     <section class="dept-sec wrap" data-rise>
       <p class="dept-kicker">Signature courses</p>
       <h2 class="dept-h2">Where to begin</h2>
-      <p class="dept-lead">Three courses that show the range of the department — an opening, a deep reading, a graduate seminar.</p>
+      <p class="dept-lead">Three courses that show the range of the department, an opening, a deep reading, a graduate seminar.</p>
       <div class="dept-featured" data-spotlight>
         {featured.map((c, i) => (
           <a class="dept-feat" href={`/course/${c.id}`} data-rise>
-            <span class="dept-feat-badge">{['Foundations', 'Deep reading', 'Graduate'][i] || `${c.level} level`}</span>
+            <span class="dept-feat-badge">{['Foundations', 'Deep reading', 'Graduate'][i] || `${stageName(c.level)}`}</span>
             <span class="dept-feat-title">{c.title}</span>
-            <span class="dept-feat-meta">{c.level} level &middot; {c.professor}</span>
+            <span class="dept-feat-meta">{stageName(c.level)} &middot; {c.professor}</span>
             <span class="dept-feat-sum">{c.summary}</span>
             <span class="dept-feat-go">Open the course &rarr;</span>
           </a>
@@ -79,7 +80,7 @@ const relatedPaths = paths
     <section class="dept-sec wrap" data-rise>
       <p class="dept-kicker">Faculty &amp; sources</p>
       <h2 class="dept-h2">Taught from the authorities</h2>
-      <p class="dept-lead">Courses here are attributed to — and drawn from — the scholars whose work is definitive in the field.</p>
+      <p class="dept-lead">Courses here are attributed to, and drawn from, the scholars whose work is definitive in the field.</p>
       <div class="dept-faculty">
         {faculty.map((f) => (
           <a class="dept-prof" href={`/professor/${profSlug(f.name)}`} data-rise>
@@ -126,7 +127,7 @@ const relatedPaths = paths
   <!-- Closing band -->
   <section class="dept-close dept-grain">
     <h2>Start where your question is</h2>
-    <p>You do not need a background, an application, or a fee. Pick a course and begin — the department is here whenever you want to go deeper.</p>
+    <p>You do not need a background, an application, or a fee. Pick a course and begin, the department is here whenever you want to go deeper.</p>
     <div class="dept-close-actions">
       <a class="dept-btn dept-btn-solid" href="#catalogue">Browse the {courses.length} courses</a>
       <a class="dept-btn dept-btn-ghost" href="/departments">All departments &rarr;</a>

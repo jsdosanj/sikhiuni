@@ -12,18 +12,18 @@ const ld = {
   parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
 const eras = [
-  ['1469', 'Guru Nānak Sāhib', 'The founding — and the first of the ten Gurus. The Udāsīs, and a new way of seeing.'],
+  ['1469', 'Guru Nānak Sāhib', 'The founding, and the first of the ten Gurus. The Udāsīs, and a new way of seeing.'],
   ['1604', 'The Ādi Granth', 'Guru Arjan Sāhib compiles the scripture and installs it at Darbār Sāhib.'],
   ['1699', 'The Khālsā', 'Guru Gobind Singh Jī gives the Panth its form on Vaisākhī at Anandpur.'],
-  ['1799', 'Sarkār-i-Khālsā', 'Ranjīt Singh takes Lahore — four decades of Sikh sovereignty across Punjab.'],
+  ['1799', 'Sarkār-i-Khālsā', 'Ranjīt Singh takes Lahore, four decades of Sikh sovereignty across Punjab.'],
   ['1849', 'Annexation', 'The Sikh kingdom falls to the East India Company after the Anglo-Sikh wars.'],
   ['1920', 'The Akālī Lehar', 'The Gurdwārā reform movement; the SGPC is founded.'],
-  ['1947', 'Partition', 'Punjab is cut in two — the largest forced migration in recorded history.'],
+  ['1947', 'Partition', 'Punjab is cut in two, the largest forced migration in recorded history.'],
   ['1984', 'Ghallūghārā', 'The attack on Darbār Sāhib, and the years that followed.'],
   ['Now', 'A global Panth', 'Sikhs on every continent, and the questions the diaspora carries.'],
 ];
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page hi-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -42,7 +42,7 @@ const eras = [
             </figure>
             <div>
               <p class="hi-kicker">Five and a half centuries, Nānak to now</p>
-              <h2 class="hi-h">Walk it like a museum — every course sits on this line</h2>
+              <h2 class="hi-h">Walk it like a museum, every course sits on this line</h2>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ const eras = [
   </div>
 
   <style>
-    .hi-sig { background: linear-gradient(180deg, #241609, #170f07); color: #ecd9c4; padding: clamp(3.5rem, 8vw, 6rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
+    .hi-sig { background: linear-gradient(180deg, #1a3554, #10243b); color: #ecd9c4; padding: clamp(3.5rem, 8vw, 6rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
     .hi-head { display: flex; align-items: center; gap: 22px; }
     .hi-glass { margin: 0; flex: none; width: 64px; color: color-mix(in srgb, var(--dept) 50%, #fff); }
     .hi-hg { width: 100%; height: auto; }

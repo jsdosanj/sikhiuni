@@ -1,4 +1,5 @@
 ---
+import { stageName } from '../lib/stages';
 import { topicName } from '../lib/data';
 import type { Course } from '../lib/data';
 import Icon from './Icon.astro';
@@ -14,10 +15,10 @@ const levelStrip = c.level < 200 ? 'bg-ok' : c.level < 400 ? 'bg-saffron' : 'bg-
   <span aria-hidden="true" class={`absolute inset-x-0 top-0 h-[3px] ${levelStrip}`}></span>
   <div class="mb-1.5 flex flex-wrap items-center gap-2 font-sans text-xs text-muted">
     <span class="pill bg-paper text-navy">{topicName(c.topic)}</span>
-    <span class="pill bg-paper text-muted">{c.level} level</span>
+    <span class="pill bg-paper text-muted">{stageName(c.level)}</span>
     {c.aiCreated && <span class="pill bg-saffron-soft text-saffron-deep">Created by AI</span>}
     {verified && <span class="pill inline-flex items-center gap-1 bg-white text-ok ring-1 ring-black/5" title="Every quoted shabad matches the canonical text of Sri Guru Granth Sahib Ji"><Icon name="check" class="h-3 w-3" />Verified</span>}
-    {c.gated && <span class="pill bg-navy/10 text-navy" title="Offered through a partner institution — full content requires cohort access">Institutional</span>}
+    {c.gated && <span class="pill bg-navy/10 text-navy" title="Offered through a partner institution, full content requires cohort access">Institutional</span>}
   </div>
   <h3 class="line-clamp-2 text-lg font-bold leading-snug text-navy group-hover:text-saffron-deep" data-no-i18n>{c.title}</h3>
   <div class="mt-0.5 truncate font-sans text-xs text-muted"><span data-i18n="card.prof">Prof.</span> <span data-no-i18n>{c.professor}</span></div>

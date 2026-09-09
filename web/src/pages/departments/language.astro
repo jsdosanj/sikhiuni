@@ -11,14 +11,14 @@ const ld = {
   url: 'https://sikhiuni.com/departments/language',
   parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
-// Gurmukhi vowel signs + a few classical roots — the phonetic scaffolding the
+// Gurmukhi vowel signs + a few classical roots, the phonetic scaffolding the
 // school teaches first. Each "materialises" from scattered ink on scroll.
 const glyphs = [
   ['ਅ', 'a'], ['ਆ', 'ā'], ['ਇ', 'i'], ['ਈ', 'ī'], ['ਉ', 'u'], ['ਊ', 'ū'],
   ['ਏ', 'e'], ['ਐ', 'ai'], ['ਓ', 'o'], ['ਔ', 'au'], ['ੰ', 'ṃ'], ['ੱ', '˘'],
 ];
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page lang-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -36,7 +36,7 @@ const glyphs = [
             ))}
           </div>
           <p class="lg-note">
-            The school begins here — the lagāṇ-mātrā and the uchaaran that fix the meaning — then moves to
+            The school begins here, the lagāṇ-mātrā and the uchaaran that fix the meaning, then moves to
             the grammar, the registers (Sant Bhāṣā, Braj, Persian), and the reference shelf that lets a
             reader check their own work.
           </p>
@@ -52,7 +52,7 @@ const glyphs = [
       background: radial-gradient(130% 100% at 82% -10%, #2b2f7a, #1a1c47 55%, #0f1030);
       color: #dfe1f4; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line));
     }
-    /* a slow field of drifting ink motes — the "particles" the scripts form from */
+    /* a slow field of drifting ink motes, the "particles" the scripts form from */
     .lg-field { position: absolute; inset: 0; pointer-events: none; }
     .lg-field i {
       position: absolute; left: var(--x); top: var(--y);

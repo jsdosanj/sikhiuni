@@ -53,8 +53,8 @@ const ld = {
 };
 ---
 <Base
-  title={`${lesson.title} — ${track?.title || 'Institute of Technology'}`}
-  description={lesson.tagline || `${lesson.title} — a lesson in ${track?.title || 'the Institute of Technology'}.`}
+  title={`${lesson.title}, ${track?.title || 'Institute of Technology'}`}
+  description={lesson.tagline || `${lesson.title}, a lesson in ${track?.title || 'the Institute of Technology'}.`}
   institute ogType="article"
 >
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
@@ -80,7 +80,7 @@ const ld = {
 
     {codeEntries.length > 0 && (
       <section class="i-lesson-code">
-        <span class="i-label">the code — run it on your machine from the repo root</span>
+        <span class="i-label">the code, run it on your machine from the repo root</span>
         {codeEntries.map(([k, src]) => (
           <details class="i-panel" open={k === 'py'}>
             <summary class="i-corner">{LANG_NAME[k] || k}</summary>
@@ -88,7 +88,7 @@ const ld = {
           </details>
         ))}
         <p class="i-prose" style="font-size:13px;color:var(--i-muted)">
-          Rust and Julia don't run in the browser lab — copy the code and run it locally.
+          Rust and Julia don't run in the browser lab, copy the code and run it locally.
           {lab ? ' The exercise below runs right here.' : ' Python and JavaScript exercises run right here in some lessons.'}
         </p>
       </section>
@@ -96,7 +96,7 @@ const ld = {
 
     {lab && (
       <section class="i-lesson-lab">
-        <span class="i-label">{lab.prompt ? 'exercise' : 'try it — the bench runs in your browser'}</span>
+        <span class="i-label">{lab.prompt ? 'exercise' : 'try it, the bench runs in your browser'}</span>
         {lab.prompt && <p class="i-prose i-lesson-lab-prompt" set:html={lab.prompt}></p>}
         <CodeLab
           id={labId}
@@ -108,7 +108,7 @@ const ld = {
         />
         {(lab.lang || 'js') === 'py' && (
           <p class="i-prose" style="font-size:12.5px;color:var(--i-muted);margin-top:8px">
-            The first Run downloads Python (Pyodide) in your browser — a few seconds once, then it is instant.
+            The first Run downloads Python (Pyodide) in your browser, a few seconds once, then it is instant.
           </p>
         )}
       </section>
@@ -181,7 +181,7 @@ const ld = {
     }
     .i-lesson-prose :global(.i-lesson-figure) { font-size: 13px; color: var(--i-muted); }
     /* Imported diagram (![alt](../assets/x.svg)). The source SVGs are drawn for
-       a light page, so they sit on a light card in both themes — same call the
+       a light page, so they sit on a light card in both themes, same call the
        Atlas makes for GitHub's OG cards. */
     .i-lesson-prose :global(.i-lesson-fig) {
       margin: 0 0 18px; padding: 14px; border: 1px solid var(--i-line);

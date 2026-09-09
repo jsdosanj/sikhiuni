@@ -15,24 +15,24 @@ const hasExam = (id: string) => !!examBanks[`../../data/institute/exam/${id}.jso
 // right place. Wave 1 targets the track overview / catalogue; Wave 4+ deep-links
 // to the first lesson.
 const goals = [
-  { label: "I'm new to coding", to: '/technology/track/00-setup-and-tooling', hint: 'start with the tooling, then the fundamentals — the from-scratch Sikh Code dojo lands in the next wave' },
+  { label: "I'm new to coding", to: '/technology/track/00-setup-and-tooling', hint: 'start with the tooling, then the fundamentals, the from-scratch Sikh Code dojo lands in the next wave' },
   { label: 'I know some ML', to: '/technology/track/02-ml-fundamentals', hint: 'classical machine learning, then deep learning and transformers' },
   { label: 'I want to build with LLMs', to: '/technology/track/11-llm-engineering', hint: 'prompting, RAG, evals, serving, observability' },
-  { label: 'I want to build agents', to: '/technology/track/14-agent-engineering', hint: 'the agent loop from first principles — memory, planning, multi-step work' },
-  { label: 'I want to work in security', to: '/technology/track/00-security-foundations', hint: 'the pre-security path first — networks, Linux, and research — then pick defence or offence' },
+  { label: 'I want to build agents', to: '/technology/track/14-agent-engineering', hint: 'the agent loop from first principles, memory, planning, multi-step work' },
+  { label: 'I want to work in security', to: '/technology/track/00-security-foundations', hint: 'the pre-security path first, networks, Linux, and research, then pick defence or offence' },
   { label: 'I teach, and want to bring cyber into a classroom', to: '/technology/track/04-cyber-for-schools', hint: 'free K-12 curriculum, a browser cyber range, and the ransomware guidance a school actually needs' },
-  { label: 'I want an IT job, and a credential to show for it', to: '/technology/track/00-it-support', hint: "Apple's and Microsoft's own free training — device support, fleet deployment, then a credential employers filter on" },
+  { label: 'I want an IT job, and a credential to show for it', to: '/technology/track/00-it-support', hint: "Apple's and Microsoft's own free training, device support, fleet deployment, then a credential employers filter on" },
 ];
-const desc = 'Sikhi University’s engineering wing — three schools: AI, Cybersecurity, and IT. Learn to code, build AI systems, defend what you build, keep an estate running, and ship a project for the Panth.';
+const desc = 'Sikhi University’s engineering wing, three schools: AI, Cybersecurity, and IT. Learn to code, build AI systems, defend what you build, keep an estate running, and ship a project for the Panth.';
 ---
-<Base title="Institute of Technology — Sikhi University" description={desc} institute>
+<Base title="Institute of Technology, Sikhi University" description={desc} institute>
   <InstituteRail />
 
   <header class="i-threshold">
     <span class="i-powerline" aria-hidden="true"></span>
     <div class="i-wrap i-thresh-grid">
       <div class="i-thresh-copy">
-        <span class="i-label" style="color:var(--i-signal)">// entering — f00 · the institute</span>
+        <span class="i-label" style="color:var(--i-signal)">// entering, f00 · the institute</span>
         <h1 class="i-thresh-h">You have entered the<br /><span class="i-amber">Institute of Technology</span><span class="i-caret" aria-hidden="true">&nbsp;</span></h1>
         <p class="i-prose i-lede">The university’s engineering wing, in three schools: one that teaches you to build the systems, one that teaches you to defend them, one that keeps them running. A working building, lit at night.</p>
         <p class="i-wedge i-mono">{WEDGE}</p>
@@ -63,7 +63,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </header>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">01 — the three schools</span>
+    <span class="i-label">01, the three schools</span>
     <h2>The Institute has three schools. All free, all open.</h2>
     <div class="i-schools">
       {schools.map((s) => (
@@ -80,7 +80,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec" id="i-goal-router">
-    <span class="i-label">02 — choose what you want to build</span>
+    <span class="i-label">02, choose what you want to build</span>
     <h2>Pick one goal. You do not need to scan every lesson first.</h2>
     <div class="i-goals">
       {goals.map((g) => (
@@ -94,7 +94,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">03 — <a href="/technology/school/ai">AI School</a> &middot; {phases.length} phases &middot; ~{totalLessons} lessons</span>
+    <span class="i-label">03, <a href="/technology/school/ai">AI School</a> &middot; {phases.length} phases &middot; ~{totalLessons} lessons</span>
     <h2>AI Engineering</h2>
     <p class="i-prose">Adapted from <a href="https://aiengineeringfromscratch.com">AI Engineering from Scratch</a> by Rohit Ghumare, used under the MIT License &mdash; reformatted into the Institute's structure, with a browser code lab, server-graded quizzes, and phase exams. All {phases.length} phases are live; a few of the newest are reading tracks until their exams are written.</p>
     <ol class="i-spine">
@@ -110,7 +110,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">04 — <a href="/technology/school/cybersecurity">Cybersecurity School</a> &middot; {cyberPaths.length} paths</span>
+    <span class="i-label">04, <a href="/technology/school/cybersecurity">Cybersecurity School</a> &middot; {cyberPaths.length} paths</span>
     <h2>Cybersecurity</h2>
     <p class="i-prose">Foundations first, then defence or offence, then the range, the cloud, and the AI systems the school across the corridor teaches you to build &mdash; plus a path for the people who teach. The sequencing is adapted from <a href="https://brootware.github.io/awesome-cyber-security-university/" target="_blank" rel="noopener">Awesome Cyber Security University</a> (CC0 1.0); the teaching notes are ours. <strong>The labs are not hosted here</strong> &mdash; each module sends you to the free range that runs it. Reference material from <a href="https://www.sans.org/security-resources/download" target="_blank" rel="noopener">SANS</a> and the K-12 classroom resources from <a href="https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators" target="_blank" rel="noopener">NICCS&nbsp;&middot;&nbsp;CISA</a> are linked, never rehosted.</p>
     <ol class="i-spine">
@@ -126,7 +126,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">05 — <a href="/technology/school/it">School of IT</a> &middot; {itPaths.length} path</span>
+    <span class="i-label">05, <a href="/technology/school/it">School of IT</a> &middot; {itPaths.length} path</span>
     <h2>IT Support</h2>
     <p class="i-prose">The work that keeps an organisation's machines, accounts and devices working &mdash; and the fastest route in this building from nothing to a paid job. Built on <a href="https://it-training.apple.com/" target="_blank" rel="noopener">Apple Professional Training</a> and <a href="https://learn.microsoft.com/en-us/credentials/" target="_blank" rel="noopener">Microsoft Learn</a>, both of which publish their IT curriculum free and self-paced on their own sites. We wrote the path; they teach the courses, and <strong>every one opens at its vendor</strong>. The training is free; several of the exams are not, and each card says which.</p>
     <ol class="i-spine">
@@ -142,7 +142,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">06 — sikh code</span>
+    <span class="i-label">06, sikh code</span>
     <h2>Learn to code, in our voice</h2>
     <div class="i-card-grid">
       {[...dojos, ...guides, ...capstones].map((t) => (
@@ -155,13 +155,13 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
       <a class="i-panel i-card" href="/technology/claude">
         <span class="i-corner">claude</span>
         <strong class="i-card-title">Learning Claude</strong>
-        <span class="i-prose i-card-sum">Our Claude Code guide and agentic dojo, plus a map of Anthropic's own free Academy — 23 courses on Claude, the API, MCP and agents.</span>
+        <span class="i-prose i-card-sum">Our Claude Code guide and agentic dojo, plus a map of Anthropic's own free Academy, 23 courses on Claude, the API, MCP and agents.</span>
       </a>
     </div>
   </section>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">07 — the letters after your name</span>
+    <span class="i-label">07, the letters after your name</span>
     <h2>Certifications</h2>
     <p class="i-prose">The Institute teaches you the work. Hiring, especially in security and delivery, also gates on a certificate from a body that has never met you. <a href="https://cert-prep.dosanjhlabs.com/" target="_blank" rel="noopener">Cert&nbsp;Prep</a> is our sibling site for exactly that gap &mdash; <strong>PMP</strong>, <strong>CISM</strong>, and <strong>CompTIA&nbsp;Security+</strong>, free, from the same team. Sit it alongside either school: Security+ pairs with the <a href="/technology/school/cybersecurity">Cybersecurity School</a>'s foundations, CISM with its defence path, PMP with shipping anything at all.</p>
     <p>
@@ -173,9 +173,9 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
   </section>
 
   <section class="i-wrap i-sec i-sec-last">
-    <span class="i-label">08 — when you want breadth</span>
+    <span class="i-label">08, when you want breadth</span>
     <h2>Explore free courses elsewhere</h2>
-    <p class="i-prose">The Institute's own courses come first — you finish those and earn its certificate. When you want a wider on-ramp or an interactive challenge platform, the <a href="/technology/explore">college fair</a> sends you out to freeCodeCamp and more.</p>
+    <p class="i-prose">The Institute's own courses come first, you finish those and earn its certificate. When you want a wider on-ramp or an interactive challenge platform, the <a href="/technology/explore">college fair</a> sends you out to freeCodeCamp and more.</p>
     <p class="i-prose">And when you are ready to build: the <a href="/technology/atlas">Open Source Atlas</a> is ~12,500 AI and engineering projects, each with a line on what it could do for the Panth.</p>
     <p class="i-prose">For books, curated link directories, and paid courses, see <a href="/technology/resources">more resources</a>.</p>
     <p>
@@ -250,7 +250,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
     .i-bench-ok { color: var(--i-signal); }
     @media (max-width: 899px) { .i-bench { max-width: 460px; } }
     /* Entrance rides the same "power-on, once per session" gate as the
-       wordmark — the script adds .lit; repeat visits / reduced-motion get
+       wordmark, the script adds .lit; repeat visits / reduced-motion get
        the panel already in place. */
     .i-bench.lit { animation: i-bench-lit 620ms var(--i-ease, cubic-bezier(.2, .7, .3, 1)) 240ms both; }
     @keyframes i-bench-lit { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -263,7 +263,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
     .i-sec > p { margin: 0 0 22px; }
 
     /* The two sub-schools. One accent for both (D2 keeps --signal for live
-       states only) — they are told apart by the mono mark and the label. */
+       states only), they are told apart by the mono mark and the label. */
     .i-schools { display: grid; gap: 16px; }
     @media (min-width: 760px) { .i-schools { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
     .i-school { display: block; text-decoration: none; }

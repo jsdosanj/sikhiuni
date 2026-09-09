@@ -7,7 +7,7 @@
 //
 // Assets are R2-backed, served through the existing /media/ Worker route.
 // That route only serves keys matching ^(santhya|audio|gurbani|media)/, so
-// everything here lives under an R2 key prefix of "media/hero/" — hence the
+// everything here lives under an R2 key prefix of "media/hero/", hence the
 // doubled "/media/media/hero/..." URL below (first /media/ = the route,
 // second media/hero/ = the R2 key). Upload the contents of
 // r2-upload-staging/hero/ (repo-root-sibling, gitignored, not committed) to
@@ -19,7 +19,7 @@ const BASE = "/media/media/hero";
 
 <style>
   /* Vintage College Dept is registered globally in public/fonts/fonts.css
-     (inlined by Base.astro on every page) — no local @font-face needed here. */
+     (inlined by Base.astro on every page), no local @font-face needed here. */
 
   #ch-stage{
     position:relative;
@@ -185,7 +185,7 @@ const BASE = "/media/media/hero";
   function preloadWindow(center){
     for (var d = -WINDOW_RADIUS; d <= WINDOW_RADIUS; d++) loadFrame(center + d);
     // Evict decoded bitmaps outside the window (+ a small margin so the lerp
-    // catch-up in tick() doesn't thrash reload at the edge) — otherwise all
+    // catch-up in tick() doesn't thrash reload at the edge), otherwise all
     // 213 frames stay decoded in memory for the life of the page.
     var evictMargin = WINDOW_RADIUS + 6;
     for (var i = 0; i < FRAME_COUNT; i++){

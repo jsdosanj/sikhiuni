@@ -6,27 +6,27 @@ import Icon from '../components/Icon.astro';
 const paSegs = (s: string) =>
   s.split(/([਀-੿][਀-੿\s]*)/).filter(Boolean).map((x) => ({ pa: /[਀-੿]/.test(x), x }));
 const texts = [
-  { gur: 'ਬਾਲ ਉਪਦੇਸ਼', en: 'Baal Updesh', d: "The complete beginner's primer — the alphabet, the extra letters, the numerals, and the full Muharni (every consonant through the ten vowel signs). Where every reader begins.", href: '/baal-updesh', live: true },
-  { gur: 'ਨਿਤਨੇਮ', en: 'Nitnem', d: 'The daily banis — the foundation of a Sikh reading practice.', href: '/collection/nitnem', live: true },
+  { gur: 'ਬਾਲ ਉਪਦੇਸ਼', en: 'Baal Updesh', d: "The complete beginner's primer, the alphabet, the extra letters, the numerals, and the full Muharni (every consonant through the ten vowel signs). Where every reader begins.", href: '/baal-updesh', live: true },
+  { gur: 'ਨਿਤਨੇਮ', en: 'Nitnem', d: 'The daily banis, the foundation of a Sikh reading practice.', href: '/collection/nitnem', live: true },
   { gur: 'ਸੁੰਦਰ ਗੁਟਕਾ', en: 'Sundar Gutka', d: 'The common collection of daily and occasional banis.', href: '/collection/sundar-gutka', live: true },
   { gur: 'ਪੰਜ ਗ੍ਰੰਥੀ', en: 'Panj Granthi', d: 'Five longer baanis: Sukhmani Sahib, Asa di Vaar, Baavan Akhri, Sidh Gosht and Dakhni Oankaar.', href: '/collection/panj-granthi', live: true },
-  { gur: 'ਦਸ ਗ੍ਰੰਥੀ', en: 'Das Granthi', d: 'Ten baanis of the Dasam Granth — the compositions associated with Guru Gobind Singh Ji.', href: '/collection/das-granthi', live: true },
+  { gur: 'ਦਸ ਗ੍ਰੰਥੀ', en: 'Das Granthi', d: 'Ten baanis of the Dasam Granth, the compositions associated with Guru Gobind Singh Ji.', href: '/collection/das-granthi', live: true },
   { gur: 'ਸ੍ਰੀ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ', en: 'Sri Guru Granth Sahib Ji', d: 'The complete Granth, Ang by Ang, with Santhya audio (Bhagat Jaswant Singh Ji Daudar) and word-by-word read-along.', href: '/santhiya?src=sggs', live: true },
-  { gur: 'ਦਸਮ ਗ੍ਰੰਥ', en: 'Dasam Granth', d: 'The compositions associated with Guru Gobind Singh Ji — Ang-by-Ang read-along (text).', href: '/santhiya?src=dasam', live: true },
-  { gur: 'ਸਰਬਲੋਹ ਗ੍ਰੰਥ', en: 'Sri Sarbloh Granth Sahib', d: 'The complete Sri Sarbloh Granth Sahib (the Khalsa Mahima) — Ang by Ang read-along.', href: '/santhiya?src=sarbloh', live: true },
-  { gur: 'ਪੰਜ ਗ੍ਰੰਥਾਵਲੀ', en: 'Panj Granthavali', d: 'Five non-Gurbani granths (Chanakya Niti, Sarukatavali, Bhavrasamrit, Vichar Mala, Adhyatam Prakash) — placed last as supplementary, non-Gurbani works.', href: '/collection/panj-granthavali', live: true },
-  { gur: 'ਭਗਤੀ ਅਭਿਆਸ', en: 'Bhagti Abhyas — Meditation & Contemplation', d: 'Simran and meditation as the foundation of the Sikh jeevan. Without Bhagti, all knowledge is empty — ਗਿਆਨੀ ਭੂਲੇ ਬਿਨੁ ਭਗਤੀ ਅਭਿਮਾਨੀ. Begin here.', href: '/collection/bhagti-abhyas', live: true },
-  { gur: 'ਇਤਿਹਾਸਕ ਗ੍ਰੰਥ', en: 'Historical Chronicles', d: 'The great historical works: Suraj Prakash, Sri Nanak Prakash, Gurbilas Patshahi 6 & 10, Panth Prakash, Twarikh Guru Khalsa, and Bansavalinama — all in the Sikh Archive reader.', href: '/collection/historical-chronicles', live: true },
+  { gur: 'ਦਸਮ ਗ੍ਰੰਥ', en: 'Dasam Granth', d: 'The compositions associated with Guru Gobind Singh Ji, Ang-by-Ang read-along (text).', href: '/santhiya?src=dasam', live: true },
+  { gur: 'ਸਰਬਲੋਹ ਗ੍ਰੰਥ', en: 'Sri Sarbloh Granth Sahib', d: 'The complete Sri Sarbloh Granth Sahib (the Khalsa Mahima), Ang by Ang read-along.', href: '/santhiya?src=sarbloh', live: true },
+  { gur: 'ਪੰਜ ਗ੍ਰੰਥਾਵਲੀ', en: 'Panj Granthavali', d: 'Five non-Gurbani granths (Chanakya Niti, Sarukatavali, Bhavrasamrit, Vichar Mala, Adhyatam Prakash), placed last as supplementary, non-Gurbani works.', href: '/collection/panj-granthavali', live: true },
+  { gur: 'ਭਗਤੀ ਅਭਿਆਸ', en: 'Bhagti Abhyas, Meditation & Contemplation', d: 'Simran and meditation as the foundation of the Sikh jeevan. Without Bhagti, all knowledge is empty, ਗਿਆਨੀ ਭੂਲੇ ਬਿਨੁ ਭਗਤੀ ਅਭਿਮਾਨੀ. Begin here.', href: '/collection/bhagti-abhyas', live: true },
+  { gur: 'ਇਤਿਹਾਸਕ ਗ੍ਰੰਥ', en: 'Historical Chronicles', d: 'The great historical works: Suraj Prakash, Sri Nanak Prakash, Gurbilas Patshahi 6 & 10, Panth Prakash, Twarikh Guru Khalsa, and Bansavalinama, all in the Sikh Archive reader.', href: '/collection/historical-chronicles', live: true },
   { gur: 'ਅਧਿਆਤਮਕ ਟੀਕੇ', en: 'Spiritual Commentaries', d: 'Vaaran Bhai Gurdas, Kabitt Savaiye, the writings of Bhai Nand Lal, and the major Guru Granth Sahib teekas (Faridkot Wala Teeka, Guru Granth Darpan).', href: '/collection/spiritual-commentaries', live: true },
-  { gur: 'ਰਾਜਨੀਤਕ ਗ੍ਰੰਥ', en: 'Political & Governance Texts', d: 'Primary sources on Sikh political thought — the Hukamnamas of the Gurus, and the Zafarnama of Guru Gobind Singh Ji.', href: '/collection/political-governance', live: true },
-  { gur: 'ਰਹਿਤ ਅਤੇ ਨੈਤਿਕਤਾ', en: 'Rehat & Ethics', d: 'The Sikh codes of conduct — historical Rehatnamas, Sikh Rehat Maryada, Tankhahnama, and Prem Sumarag. The ethics of the Khalsa.', href: '/collection/rehat-ethics', live: true },
+  { gur: 'ਰਾਜਨੀਤਕ ਗ੍ਰੰਥ', en: 'Political & Governance Texts', d: 'Primary sources on Sikh political thought, the Hukamnamas of the Gurus, and the Zafarnama of Guru Gobind Singh Ji.', href: '/collection/political-governance', live: true },
+  { gur: 'ਰਹਿਤ ਅਤੇ ਨੈਤਿਕਤਾ', en: 'Rehat & Ethics', d: 'The Sikh codes of conduct, historical Rehatnamas, Sikh Rehat Maryada, Tankhahnama, and Prem Sumarag. The ethics of the Khalsa.', href: '/collection/rehat-ethics', live: true },
 ];
 ---
-<Base title="Santhya Pathway & Read-along — Sikhi University" description="Learn to read Gurbani with shudh uchaaran: from the first primer to the complete Sri Guru Granth Sahib Ji, with read-along audio — read Ang by Ang here." ambient="sanctum">
+<Base title="Santhya Pathway & Read-along, Sikhi University" description="Learn to read Gurbani with shudh uchaaran: from the first primer to the complete Sri Guru Granth Sahib Ji, with read-along audio, read Ang by Ang here." ambient="sanctum">
   <!-- Dark hero (redesign task 11, issanthya, prototype lines 1144-1156): the
        page's own ambient-sanctum gradient (.ambient-sanctum in global.css) IS
-       the prototype's inline dark-navy linear-gradient — same colours, one
-       layer, per Decision 5 — so no separate glass/midnight box sits here;
+       the prototype's inline dark-navy linear-gradient, same colours, one
+       layer, per Decision 5, so no separate glass/midnight box sits here;
        this is just the text content over the ambient (same convention as
        collection/[name].astro's dark header). -->
   <header id="su-hero" class="wrap relative py-14 text-paper sm:py-16">
@@ -35,7 +35,7 @@ const texts = [
       <span class="gur text-display font-bold text-white" lang="pa">ਸੰਥਿਆ</span>
       <span class="text-display-sm font-bold text-white" data-i18n="santhiya.h1">The Santhya Pathway</span>
     </h1>
-    <p class="mt-5 max-w-2xl text-lg text-paper/85" data-i18n="santhiya.hero.sub">Santhya is the careful, correct reading of Gurbani. Walk the traditional path — from your first letters to the complete Sri Guru Granth Sahib Ji — reading along with audio, one step at a time.</p>
+    <p class="mt-5 max-w-2xl text-lg text-paper/85" data-i18n="santhiya.hero.sub">Santhya is the careful, correct reading of Gurbani. Walk the traditional path, from your first letters to the complete Sri Guru Granth Sahib Ji, reading along with audio, one step at a time.</p>
     <div id="pathway-progress" hidden class="mt-6 max-w-md">
       <div class="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[.12em] text-paper/70">
         <span><span id="pp-count">0</span> / {texts.length} <span data-i18n="santhiya.steps">steps completed</span></span>
@@ -49,7 +49,7 @@ const texts = [
        Interactive-only by nature (games need JS); the sacred learning content
        itself lives in the pathway/reader below, never gated. A contained
        feature panel (its own cosmos glow/star decoration), not a page-level
-       hero — kept bordered/flat (no glass, no blur) per Decision 5. -->
+       hero, kept bordered/flat (no glass, no blur) per Decision 5. -->
   <section id="arcade" class="wrap pb-10 pt-2">
     <div class="cosmos-panel relative overflow-hidden rounded-xl2 border border-white/14 p-6 sm:p-8">
       <div aria-hidden="true" class="cosmos absolute inset-0"></div>
@@ -61,15 +61,15 @@ const texts = [
             <button id="arcade-kid" type="button" role="switch" aria-checked="false" class="inline-flex min-h-[44px] items-center gap-2 rounded-sm border border-white/25 px-4 py-1.5 hover:border-saffron">Kids mode <span id="arcade-kid-dot" class="h-2.5 w-2.5 rounded-full bg-white/30"></span></button>
           </div>
         </div>
-        <p class="mt-1 max-w-2xl font-sans text-sm text-white/75">Little games that teach the letters, sounds and words of Gurmukhi — for kids and grown-ups. Stars and seals are saved on this device.</p>
+        <p class="mt-1 max-w-2xl font-sans text-sm text-white/75">Little games that teach the letters, sounds and words of Gurmukhi, for kids and grown-ups. Stars and seals are saved on this device.</p>
         <div id="arcade-games" class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
       </div>
     </div>
   </section>
 
   <!-- Ruled pathway ladder (Decision 6: list-like data is a ruled ledger, not
-       cards). Sits in its own light paper band — same "dark hero, light
-       ledger band beneath" shape as collection/[name].astro — since the
+       cards). Sits in its own light paper band, same "dark hero, light
+       ledger band beneath" shape as collection/[name].astro, since the
        ambient behind is dark navy and ruled-row text (navy/ink/muted) needs a
        light surface to read against. -->
   <div id="pathway" class="border-t border-line bg-paper">
@@ -97,13 +97,13 @@ const texts = [
           </li>
         ))}
       </ol>
-      <p class="mt-8 font-sans text-sm text-muted">Audio: <em>SGGS Santhya Shudh Uchaaran Sehaj Paath</em> — Bhindran Taksal (gurmatveechar.com). Gurbani text handled with reverence; report any correction via <a class="underline" href="/feedback" data-i18n="santhiya.feedbacklink">feedback</a>.</p>
+      <p class="mt-8 font-sans text-sm text-muted">Audio: <em>SGGS Santhya Shudh Uchaaran Sehaj Paath</em>, Bhindran Taksal (gurmatveechar.com). Gurbani text handled with reverence; report any correction via <a class="underline" href="/feedback" data-i18n="santhiya.feedbacklink">feedback</a>.</p>
     </div>
   </div>
 
   <!-- Read-along reader (merged from the former /read page; redesign task 11,
        isreader, prototype lines 529-553); shown when ?src=… is present. No
-       separate dark box here either — the ambient-sanctum layer behind IS the
+       separate dark box here either, the ambient-sanctum layer behind IS the
        prototype's dark gradient reader surface (Decision 5); only the text
        colours below are set for it. Real functional controls (chapter jump,
        audio player, skip/rate/larivaar/zen) go well beyond the prototype's
@@ -192,12 +192,12 @@ const texts = [
     body:not(.hc) #audbar { background: rgb(11 30 58 / .60); border-color: rgb(255 255 255 / .12); }
     body:not(.hc) #audnote { color: rgb(255 255 255 / .74); }
 
-    /* Larivaar is a real toggle (JS flips aria-pressed on click) — mono
+    /* Larivaar is a real toggle (JS flips aria-pressed on click), mono
        bordered off, gold filled on, matching the prototype's active-toggle
        styling (isreader, "Santhiya" pill). */
     #larivaar[aria-pressed="true"] { border-color: #f4b21a; background: #f4b21a; color: #0A1729; }
 
-    /* Zen mode — a distraction-free full-viewport reader. */
+    /* Zen mode, a distraction-free full-viewport reader. */
     #zen-exit { display: none; }
     body.zen nav, body.zen footer, body.zen #a11y-fab, body.zen #pathway { display: none; }
     body.zen #reader { position: fixed; inset: 0; overflow-y: auto; z-index: 60; padding: 6vh 5vw; background: linear-gradient(180deg, #0b1e3a, #0a0d14 80%); }
@@ -218,7 +218,7 @@ const texts = [
       sarbloh: { name: 'Sri Sarbloh Granth Sahib', unit: 'Ang', max: 1040, audio: false },
     };
     var ATTR = {
-      sggs: 'Bhagat Jaswant Singh Ji Daudar (Gursevak) — used with permission',
+      sggs: 'Bhagat Jaswant Singh Ji Daudar (Gursevak), used with permission',
       dasam: 'Kabaal Singh, Hazoor Sahib wale (gurmatveechar.com)',
     };
     var P = 'su_v1_';
@@ -227,7 +227,7 @@ const texts = [
     var qp = new URLSearchParams(location.search);
     var src = SRC[qp.get('src')] ? qp.get('src') : '';
     if (src) {
-      // A Granth was chosen — switch from the pathway list to the reader.
+      // A Granth was chosen, switch from the pathway list to the reader.
       var hero = document.getElementById('su-hero'); if (hero) hero.style.display = 'none';
       var pw = document.getElementById('pathway'); if (pw) pw.style.display = 'none';
       var ar = document.getElementById('arcade'); if (ar) ar.style.display = 'none';
@@ -374,7 +374,7 @@ const texts = [
     angin.max = cfg.max;
     var ang = parseInt(qp.get('ang') || get(src + '_ang', 1), 10) || 1;
     var words = [], cum = [], total = 0, curIdx = -1, lastAdvanceAt = -Infinity, lastTickAudioTime = null;
-    var MIN_WORD_DWELL_MS = 260; // floor on how fast the highlight may advance — see throttleIndex
+    var MIN_WORD_DWELL_MS = 260; // floor on how fast the highlight may advance, see throttleIndex
     var SEEK_JUMP_MS = 1200; // an audio-position jump bigger than this is a real seek, not playback drift
 
     var santhya = null, curUrl = '';
@@ -416,7 +416,7 @@ const texts = [
       var sync = segTrack.end > segTrack.start
         ? (segTl ? ' · ≈ synced to ' + cfg.unit + ' ' + ang + ' (tap a word to fine-tune)' : ' · syncing…')
         : '';
-      note.textContent = 'Santhya · ' + segTrack.title + sync + ' — ' + (segTrack.attr || ATTR[src] || 'gurmatveechar.com');
+      note.textContent = 'Santhya · ' + segTrack.title + sync + ', ' + (segTrack.attr || ATTR[src] || 'gurmatveechar.com');
     }
     function curWin() {
       if (!segTl || !aud.duration || !segTrack) return null;
@@ -457,7 +457,7 @@ const texts = [
         var ln = document.createElement('div'); ln.className = 'ln';
         var lineStart = words.length;
         line.split(/\s+/).forEach(function (tok) { if (!tok) return; var s = document.createElement('span'); s.className = 'w'; s.textContent = tok; ln.appendChild(s); ln.appendChild(document.createTextNode(' ')); words.push(s); });
-        // ਅਰਥ — published translations for this line (BaniDB), plus
+        // ਅਰਥ, published translations for this line (BaniDB), plus
         // play-from-line when audio + timeline are ready.
         var ab = document.createElement('button');
         ab.className = 'arth-btn'; ab.type = 'button';
@@ -503,7 +503,7 @@ const texts = [
       lastTickAudioTime = aud.currentTime;
       var next = throttleIndex(curIdx, target, now - lastAdvanceAt, MIN_WORD_DWELL_MS, audioJumpMs, SEEK_JUMP_MS);
       if (next !== curIdx) { lastAdvanceAt = now; applyWord(next); }
-      // Sehaj flow: the recitation crossed this ang's window — turn the page
+      // Sehaj flow: the recitation crossed this ang's window, turn the page
       // with it (and turn back if the listener scrubbed backwards).
       if (!aud.paused && segTrack) {
         if (ang < segTrack.end && aud.currentTime > w.end + 1.5) { load(ang + 1, { noSeek: true }); syncChapter(ang); }
@@ -528,7 +528,7 @@ const texts = [
         if (window.suToast) window.suToast('Audio sync anchored to this word.');
       }
     });
-    aud.addEventListener('error', function () { if (cfg.audio && curUrl) { aud.style.display = 'none'; audph.style.display = 'flex'; note.textContent = 'This Santhya recording could not be reached just now — text read-along still works.'; } });
+    aud.addEventListener('error', function () { if (cfg.audio && curUrl) { aud.style.display = 'none'; audph.style.display = 'flex'; note.textContent = 'This Santhya recording could not be reached just now, text read-along still works.'; } });
     aud.addEventListener('ended', function () {
       if (!santhya) return;
       for (var i = 0; i < santhya.length; i++) { if (santhya[i].url === curUrl) { var nx = santhya[i + 1]; if (nx) { load(nx.start); aud.play().catch(function () {}); } return; } }
@@ -568,7 +568,7 @@ const texts = [
       aud.addEventListener('loadedmetadata', function () { aud.playbackRate = parseFloat(rateSel.value) || 1; });
     }
     if (!cfg.audio) { if (skipB) skipB.style.display = 'none'; if (skipF) skipF.style.display = 'none'; if (rateSel) rateSel.style.display = 'none'; }
-    // Keyboard shortcuts: ←/→ change Ang, space toggles play/pause — never
+    // Keyboard shortcuts: ←/→ change Ang, space toggles play/pause, never
     // while typing in an input/select.
     document.addEventListener('keydown', function (e) {
       var tag = (e.target && e.target.tagName || '').toLowerCase();
@@ -623,7 +623,7 @@ const texts = [
     load(ang);
     if (cfg.audio) {
       note.textContent = 'Loading Santhya audio…';
-      fetch('/assets/gurbani/santhya-' + src + '-index.json').then(function (r) { return r.json(); }).then(function (d) { santhya = d; seekAng = ang; setAudio(ang); }).catch(function () { aud.style.display = 'none'; note.textContent = 'Santhya audio is unavailable right now — text read-along still works.'; });
+      fetch('/assets/gurbani/santhya-' + src + '-index.json').then(function (r) { return r.json(); }).then(function (d) { santhya = d; seekAng = ang; setAudio(ang); }).catch(function () { aud.style.display = 'none'; note.textContent = 'Santhya audio is unavailable right now, text read-along still works.'; });
     }
     } // end runReader
   </script>
@@ -631,7 +631,7 @@ const texts = [
 
 <style>
   /* This page's h1 has two spans: the Gurmukhi word (class="gur text-display",
-     needs its proper Gurmukhi font — left untouched) and the English title
+     needs its proper Gurmukhi font, left untouched) and the English title
      (class="text-display-sm", which is the same shared class the collegiate
      crest font hooks into for hero-scale headings elsewhere). Only the
      English span is reverted to the site's normal serif here. */

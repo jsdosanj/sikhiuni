@@ -4,7 +4,7 @@ import InstituteRail from '../../components/institute/InstituteRail.astro';
 import CodeLab from '../../components/institute/CodeLab.astro';
 
 // Wave 2 proof: the Code Lab, exercised end to end. This page is the template
-// every real lesson's "try it" block follows — prose in the serif column, the
+// every real lesson's "try it" block follows, prose in the serif column, the
 // bench beside it, checks that grade on Run. Not linked in the nav; noindex.
 
 const jsChecks = [
@@ -43,7 +43,7 @@ const htmlStarter = `<!doctype html>
 </script>
 `;
 ---
-<Base title="Code Lab — Institute of Technology" description="A working demo of the Institute's in-browser code lab: editor, runner, console, and auto-checks." institute noindex>
+<Base title="Code Lab, Institute of Technology" description="A working demo of the Institute's in-browser code lab: editor, runner, console, and auto-checks." institute noindex>
   <InstituteRail />
 
   <section class="i-wrap" style="padding:40px 24px 24px">
@@ -53,16 +53,16 @@ const htmlStarter = `<!doctype html>
   </section>
 
   <section class="i-wrap" style="padding:8px 24px">
-    <span class="i-label">exercise 1 — javascript</span>
+    <span class="i-label">exercise 1, javascript</span>
     <h2 style="margin:6px 0 8px;font-size:19px">Add two numbers</h2>
     <p class="i-prose">A function takes inputs, does something, and hands a value back with <code>return</code>. Fill in <code>add</code> so it returns the sum of its two arguments.</p>
-    <CodeLab id="lab-demo::add" lang="js" starter={jsStarter} checks={jsChecks} solution={jsSolution} title="add.js — bench" />
+    <CodeLab id="lab-demo::add" lang="js" starter={jsStarter} checks={jsChecks} solution={jsSolution} title="add.js, bench" />
   </section>
 
   <section class="i-wrap" style="padding:8px 24px 72px">
-    <span class="i-label">exercise 2 — html + javascript</span>
+    <span class="i-label">exercise 2, html + javascript</span>
     <h2 style="margin:6px 0 8px;font-size:19px">A page that greets you</h2>
     <p class="i-prose">HTML is the page; the <code>&lt;script&gt;</code> makes it do something. Finish <code>greet</code> so the paragraph reads <em>Sat Sri Akal, Simran</em>. The preview updates as you type.</p>
-    <CodeLab id="lab-demo::greet" lang="html" starter={htmlStarter} checks={htmlChecks} title="index.html — bench" />
+    <CodeLab id="lab-demo::greet" lang="html" starter={htmlStarter} checks={htmlChecks} title="index.html, bench" />
   </section>
 </Base>

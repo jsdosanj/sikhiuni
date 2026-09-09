@@ -1,0 +1,56 @@
+{
+  "theology": {
+    "src": "/assets/departments/editorial/theology-v1.webp",
+    "style": "Architectural photography · honey gold and ivory",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "history": {
+    "src": "/assets/departments/editorial/history-v1.webp",
+    "style": "Documentary architecture · terracotta and indigo",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "language": {
+    "src": "/assets/departments/editorial/language-v1.webp",
+    "style": "Craft macro photography · cobalt, brass and paper",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "literature": {
+    "src": "/assets/departments/editorial/literature-v1.webp",
+    "style": "Museum still life · wine red and antique gold",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "political-governance": {
+    "src": "/assets/departments/editorial/political-governance-v1.webp",
+    "style": "Architectural study · jade and warm stone",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "the-arts": {
+    "src": "/assets/departments/editorial/the-arts-v1.webp",
+    "style": "Music studio still life · saffron and aubergine",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "the-sciences": {
+    "src": "/assets/departments/editorial/the-sciences-v1.webp",
+    "style": "Scientific macro photography · cyan and emerald",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "health": {
+    "src": "/assets/departments/editorial/health-v1.webp",
+    "style": "Botanical editorial still life · sage and warm coral",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  },
+  "martial-arts": {
+    "src": "/assets/departments/editorial/martial-arts-v1.webp",
+    "style": "Museum object photography · steel blue and russet",
+    "provenance": "Original AI-generated editorial artwork, created with OpenAI image generation. Illustrative, not a documentary photograph.",
+    "position": "50% 50%"
+  }
+}

@@ -8,6 +8,9 @@ export interface Pillar {
   body: string;
 }
 export interface DeptImage {
+  position?: string;
+  license?: string;
+  licenseUrl?: string;
   src: string;
   credit: string;
   source: string;

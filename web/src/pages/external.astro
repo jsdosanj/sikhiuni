@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 // CONTENT MISMATCH FLAG (plan task 13): the prototype's `isexternal` block
 // (source lines 1465-1481) designs a "leaving Sikhi University" interstitial
 // for a single outbound link. The real page here is not an interstitial at
-// all — it is a static "Recommended external courses" list (verified from
+// all, it is a static "Recommended external courses" list (verified from
 // this page's own <Base> title below, unchanged from before this task). The
 // visual vocabulary (midnight/hall header treatment, ruled rows, mono
 // destination labels, outbound-link framing copy) is applied to that real
@@ -12,7 +12,7 @@ const courses = [
   {
     name: 'Sikhism Through Its Scriptures', provider: 'HarvardX (edX) · Prof. Harpreet Singh',
     cost: 'Free to audit (optional $149 certificate) · 4 weeks · self-paced',
-    desc: "A scholarly examination of Sikh scripture from doctrinal and historical angles — the Japji, the role of Sri Guru Granth Sahib Ji, the musical traditions, and the scripture's influence on Sikh communities.",
+    desc: "A scholarly examination of Sikh scripture from doctrinal and historical angles, the Japji, the role of Sri Guru Granth Sahib Ji, the musical traditions, and the scripture's influence on Sikh communities.",
     href: 'https://pll.harvard.edu/course/sikhism-through-its-scriptures-0',
   },
   {
@@ -36,16 +36,16 @@ const courses = [
   {
     name: 'The Sikh Archive', provider: 'Sikh Archive (our partner)',
     cost: 'Free',
-    desc: 'A growing digital library of Sikh sources, history and free courses — Sikhi University works alongside it.',
+    desc: 'A growing digital library of Sikh sources, history and free courses, Sikhi University works alongside it.',
     href: 'https://sikharchive.net',
   },
 ];
 // Mono "destination" label per row (prototype 1465-1481 shows the real
-// linked host in mono, e.g. banidb.com/ang/1) — derived from each course's
+// linked host in mono, e.g. banidb.com/ang/1), derived from each course's
 // real href, never invented.
 const withHost = courses.map((c) => ({ ...c, host: new URL(c.href).hostname.replace(/^www\./, '') }));
 ---
-<Base title="Recommended external courses — Sikhi University" description="Reputable free and university Sikhi courses elsewhere — including Harvard's 'Sikhism Through Its Scriptures' — to study alongside Sikhi University." ambient="hall">
+<Base title="Recommended external courses, Sikhi University" description="Reputable free and university Sikhi courses elsewhere, including Harvard's 'Sikhism Through Its Scriptures', to study alongside Sikhi University." ambient="hall">
   <section class="wrap py-12">
     <!-- Hall ambient: real content floats on a light bordered panel, same
          pattern as teachers.astro (also ambient="hall"). -->
@@ -55,7 +55,7 @@ const withHost = courses.map((c) => ({ ...c, host: new URL(c.href).hostname.repl
         <span data-i18n="external.eyebrow">Beyond Sikhi University</span>
       </p>
       <h1 class="text-display-sm mt-3 text-navy" data-i18n="external.h1">Study further, elsewhere</h1>
-      <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted" data-i18n="external.sub">Sikhi University is one part of a wider world of Sikhi learning. These are reputable courses hosted by other institutions — we link to them so you can keep going. Their content stays on their own sites; we don't rehost it.</p>
+      <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted" data-i18n="external.sub">Sikhi University is one part of a wider world of Sikhi learning. These are reputable courses hosted by other institutions, we link to them so you can keep going. Their content stays on their own sites; we don't rehost it.</p>
 
       <div class="mt-8 rule-navy"></div>
       {withHost.map((c) => (

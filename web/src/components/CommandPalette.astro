@@ -2,7 +2,7 @@
 // ⌘K command palette: keyboard-first navigation + search over the whole
 // university. Static page/action entries live here; courses are lazily
 // fetched from /data/search.json on first open (same index the search page
-// uses). Combobox + listbox ARIA — focus stays in the input, options are
+// uses). Combobox + listbox ARIA, focus stays in the input, options are
 // referenced via aria-activedescendant.
 import Icon from './Icon.astro';
 ---
@@ -41,7 +41,7 @@ import Icon from './Icon.astro';
     { title: 'Home', hint: '/', icon: 'compass', href: '/', kind: 'Page', hay: 'home start' },
     { title: 'Course catalogue', hint: '/catalog', icon: 'books', href: '/catalog', kind: 'Page', hay: 'courses catalog catalogue browse' },
     { title: 'Santhya pathway', hint: '/santhiya', icon: 'book', href: '/santhiya', kind: 'Page', hay: 'santhya santhiya gurbani read pathway' },
-    { title: 'Baal Updesh — learn Gurmukhi', hint: '/baal-updesh', icon: 'pen', href: '/baal-updesh', kind: 'Page', hay: 'baal updesh gurmukhi alphabet painti muharni letters' },
+    { title: 'Baal Updesh, learn Gurmukhi', hint: '/baal-updesh', icon: 'pen', href: '/baal-updesh', kind: 'Page', hay: 'baal updesh gurmukhi alphabet painti muharni letters' },
     { title: 'My Learning', hint: '/dashboard', icon: 'cap', href: '/dashboard', kind: 'Page', hay: 'dashboard my learning progress streak' },
     { title: 'Professors', hint: '/professors', icon: 'people', href: '/professors', kind: 'Page', hay: 'professors scholars faculty' },
     { title: 'Programs', hint: '/programs', icon: 'scroll', href: '/programs', kind: 'Page', hay: 'programs degrees certificate giani' },
@@ -107,7 +107,7 @@ import Icon from './Icon.astro';
         .sort((a, b) => b[0] - a[0])
         .slice(0, 9)
         .map(([, e]) => e);
-      // "Open reader at Ang N" — recognise an ang number anywhere in the query.
+      // "Open reader at Ang N", recognise an ang number anywhere in the query.
       const ang = query.match(/(?:ang\s*)?(\d{1,4})/);
       if (ang && /ang/.test(query)) {
         const n = Math.min(1430, Math.max(1, parseInt(ang[1], 10)));

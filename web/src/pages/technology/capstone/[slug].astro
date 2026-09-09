@@ -14,7 +14,7 @@ const phaseFor = (slug: string) => phases.find((p) => p.slug === slug);
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: `${b.title} — Build for the Panth`,
+  name: `${b.title}, Build for the Panth`,
   description: b.oneLine,
   learningResourceType: 'Project',
   educationalLevel: 400,
@@ -25,7 +25,7 @@ const ld = {
 };
 ---
 <Base
-  title={`${b.title} — Build for the Panth`}
+  title={`${b.title}, Build for the Panth`}
   description={`A Build for the Panth capstone brief: ${b.oneLine} Scope, suggested stack, data sources, and what shipped looks like.`}
   institute
   ogType="article"
@@ -55,12 +55,12 @@ const ld = {
     </section>
 
     <section class="i-cblock">
-      <span class="i-label">the smallest useful version — build this first</span>
+      <span class="i-label">the smallest useful version, build this first</span>
       <ul class="i-clist">{b.mvp.map((x) => <li class="i-prose">{x}</li>)}</ul>
     </section>
 
     <section class="i-cblock">
-      <span class="i-label">stretch goals — only after the MVP is in someone's hands</span>
+      <span class="i-label">stretch goals, only after the MVP is in someone's hands</span>
       <ul class="i-clist i-cdim">{b.stretch.map((x) => <li class="i-prose">{x}</li>)}</ul>
     </section>
 
@@ -90,13 +90,13 @@ const ld = {
 
     <section class="i-cblock">
       <span class="i-label">a starting point</span>
-      <p class="i-prose" style="font-size:13.5px;color:var(--i-muted)">A scaffold, not a solution — the shape of a repo you fill in. Names are language-agnostic on purpose.</p>
+      <p class="i-prose" style="font-size:13.5px;color:var(--i-muted)">A scaffold, not a solution, the shape of a repo you fill in. Names are language-agnostic on purpose.</p>
       <pre class="i-cstarter"><code>{b.starter}</code></pre>
     </section>
 
     <section class="i-cblock i-cclose">
       <p class="i-prose">
-        This capstone has no exam and no separate certificate — the phase certificates are the
+        This capstone has no exam and no separate certificate, the phase certificates are the
         credential. What it asks for is a README and a working thing a sangat can open. When it's
         live, show it to the people it's for.
       </p>

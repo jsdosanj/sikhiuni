@@ -11,15 +11,14 @@ const ld = {
   url: 'https://sikhiuni.com/departments/martial-arts',
   parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
-const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg — animal form', 'Dev Aṅg — divine form'];
+const stances = ['Guard', 'Do lāna, the spill', 'Angle cut', 'Khaṭ Aṅg, animal form', 'Dev Aṅg, divine form'];
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page ma-page" style={`--dept:${d.accent}`}>
     <!-- Bespoke hero: this department has no course catalogue yet, so it does not
          use the shared DeptHero (which shows course-count chips). -->
     <header class="dept-hero dept-grain ma-hero">
-      <img class="dept-hero-img" src={d.image.src} alt="" aria-hidden="true" fetchpriority="high" />
       <div class="dept-hero-scrim" aria-hidden="true"></div>
       <a class="dept-back wrap" href="/departments">Sikhi University &middot; Departments</a>
       <div class="dept-hero-in wrap">
@@ -36,9 +35,6 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
           Read the tradition
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
         </a>
-        <p class="dept-credit">
-          Artwork: <a href={d.image.source} target="_blank" rel="noopener">{d.image.credit}</a>
-        </p>
       </div>
     </header>
 
@@ -52,7 +48,7 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
       </span>
       <span class="ma-blade" aria-hidden="true"><span class="ma-glint"></span></span>
       <div class="wrap ma-in">
-        <p class="ma-kicker" lang="pa">ਸੰਤ-ਸਿਪਾਹੀ — the saint and the soldier, in one body</p>
+        <p class="ma-kicker" lang="pa">ਸੰਤ-ਸਿਪਾਹੀ, the saint and the soldier, in one body</p>
         <h2 class="ma-h">Power from movement, not muscle. Steel that took a lifetime to fold.</h2>
         <div class="ma-stances" role="list">
           {stances.map((s, i) => (
@@ -60,7 +56,7 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
           ))}
         </div>
         <p class="ma-note">
-          The system rests on three principles — locomotion, angling, and power drawn from the sinking of
+          The system rests on three principles, locomotion, angling, and power drawn from the sinking of
           body mass through a technique. Scroll, and the light moves down the blade the way a cut travels.
         </p>
       </div>
@@ -129,13 +125,13 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
       </div>
     </section>
 
-    <!-- The metallurgy — the Wootz Workshop -->
+    <!-- The metallurgy, the Wootz Workshop -->
     <section class="ma-sec wrap" data-rise>
       <p class="dept-kicker">The metallurgy</p>
       <a class="ma-workshop" href="/departments/martial-arts/workshop/wootz">
         <span class="ma-workshop-b">
           <strong>The Wootz Workshop</strong>
-          <span>The real metallurgy behind the shastar — one melt of one material, and the numbers are the whole story. Seven modules: the recipe, the composition, the heat treatment, how it holds up against modern steel.</span>
+          <span>The real metallurgy behind the shastar, one melt of one material, and the numbers are the whole story. Seven modules: the recipe, the composition, the heat treatment, how it holds up against modern steel.</span>
         </span>
         <span class="ma-workshop-go" aria-hidden="true">Open the workshop &rarr;</span>
       </a>
@@ -164,7 +160,7 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
     </section>
 
     <section class="dept-close dept-grain">
-      <h2>Bani, bana, and shastar — held together</h2>
+      <h2>Bani, bana, and shastar, held together</h2>
       <p>Formal courses in the martial history of the Khalsa are being written with the scholar board. Until then, this is a place to read the living tradition in its own words.</p>
       <div class="dept-close-actions">
         <a class="dept-btn dept-btn-solid" href="/departments/history">The Department of History &rarr;</a>
@@ -175,7 +171,7 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
 
   <style>
     .ma-page { --steel: #c9ced6; }
-    .ma-hero { background: #0a0b0d; }
+    .ma-hero { background: var(--school-header-bg); }
 
     .ma-sig {
       position: relative; overflow: hidden;
@@ -296,7 +292,7 @@ const stances = ['Guard', 'Do lāna — the spill', 'Angle cut', 'Khaṭ Aṅg �
   </style>
 
   <script>
-    // Metallic accordion — smooth open/close + single-open on wide screens.
+    // Metallic accordion, smooth open/close + single-open on wide screens.
     // Mirrors DeptAccordion.astro; falls back to native <details>.
     (function () {
       document.querySelectorAll('.ma-page [data-accordion]').forEach((group) => {

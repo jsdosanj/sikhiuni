@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
+import '../styles/mobile.css';
 import '../styles/institute.css';
+import CrestIntro from '../components/CrestIntro.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
@@ -18,7 +20,7 @@ import path from 'node:path';
 const fontFaceCss = readFileSync(path.resolve(process.cwd(), 'public/fonts/fonts.css'), 'utf-8');
 
 interface Props { title: string; description?: string; canonical?: string; ogType?: string; autoTranslate?: boolean; ambient?: 'hall' | 'study' | 'sanctum' | 'none'; bgImage?: string; noindex?: boolean; bodyClass?: string; institute?: boolean }
-const { title, description = 'A free, open online university for Sikhi and modern skills — open to all, worldwide.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
+const { title, description = 'A free, open online university for Sikhi and modern skills, open to all, worldwide.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
 const instituteFontCss = institute ? readFileSync(path.resolve(process.cwd(), 'public/fonts/institute-fonts.css'), 'utf-8') : '';
 const autoTranslateEff = institute ? false : autoTranslate;
 // Google truncates a meta description around 155-160 chars anyway; better to
@@ -26,7 +28,7 @@ const autoTranslateEff = institute ? false : autoTranslate;
 // still renders in the page body -- this only trims what crawlers read.
 const metaDesc = description.length <= 160
   ? description
-  : description.slice(0, 157).replace(/\s+\S*$/, '').replace(/[,;:—-]$/, '') + '…';
+  : description.slice(0, 157).replace(/\s+\S*$/, '').replace(/[,;:\u2014-]$/, '') + '…';
 import { SITE, ldJson } from '../lib/site';
 // Normalise to the extensionless URLs the site is actually served/linked at
 // (e.g. /catalog, not /catalog.html; / for the homepage).
@@ -34,7 +36,7 @@ const cleanPath = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html
 const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -42,17 +44,16 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
        @font-face rules are inlined (see frontmatter) and the two above-the-fold
        faces are preloaded so text paints without a stylesheet round-trip. -->
   <Fragment set:html={`<style>${fontFaceCss}${instituteFontCss}</style>`} />
-  <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/notoserifgur-gurmukhi-400.woff2" as="font" type="font/woff2" crossorigin />
   {institute && <link rel="preload" href="/fonts/chakrapetch-latin-600.woff2" as="font" type="font/woff2" crossorigin />}
   {institute && <link rel="preload" href="/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin />}
   <script is:inline>
-    // Set the colour theme before first paint to avoid a flash. Honours a
-    // saved choice, else the OS preference.
+    // Start in light mode unless the visitor explicitly saved a theme.
     (function () {
       try {
         var t = localStorage.getItem('su_v1_theme');
-        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        if (t !== 'light' && t !== 'dark') t = 'light';
         document.documentElement.setAttribute('data-theme', t);
         // ?lang= deep link (shareable translated URLs) wins over the saved choice.
         var qlang = new URLSearchParams(location.search).get('lang');
@@ -64,21 +65,22 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       } catch (e) {}
     })();
   </script>
-  {institute && (
-    <script is:inline>
-      // The Institute is a committed-dark experience with a light escape hatch
-      // (DESIGN-INSTITUTE.md D3+D7: "dark is primary"). If the visitor has never
-      // picked a theme, force dark on /technology/* regardless of OS preference;
-      // an explicit choice (su_v1_theme) still wins.
-      (function () {
-        try {
-          if (!localStorage.getItem('su_v1_theme') && location.pathname.indexOf('/technology') === 0) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-          }
-        } catch (e) {}
-      })();
-    </script>
-  )}
+  {import.meta.env.DEV && <script is:inline>
+    // Local previews must not reuse the production app shell's cached CSS/JS.
+    // Keep downloaded course packs and all learning preferences intact.
+    (async function () {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const own = registrations.filter(r => [r.active, r.waiting, r.installing].some(w => w && new URL(w.scriptURL).pathname === '/sw.js'));
+        if (!own.length) return;
+        await Promise.all(own.map(r => r.unregister()));
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k => k.startsWith('su-web-')).map(k => caches.delete(k)));
+        location.reload();
+      } catch (_) {}
+    })();
+  </script>}
   <title>{title}</title>
   <meta name="description" content={metaDesc} />
   <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
@@ -92,9 +94,9 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       mark before the icons were regenerated could keep seeing it
       indefinitely without a URL change. Bump the version again if the
       icon/logo ever changes. */}
-  <link rel="icon" href="/assets/icon.svg?v=2" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png?v=2" />
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=2" />
+  <link rel="icon" href="/assets/brand/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/brand/icon-192.png" />
+  <link rel="apple-touch-icon" href="/assets/brand/icon-180.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sikhi University" />
@@ -102,8 +104,8 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", "@id": SITE + "/#org", "name": "Sikhi University", "url": SITE,
-        "description": "A free, open online university for Sikhi — Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi — open to all, worldwide.",
-        "logo": { "@type": "ImageObject", "url": SITE + "/assets/logo.png?v=2", "width": 1200, "height": 1200 } },
+        "description": "A free, open online university for Sikhi, Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide.",
+        "logo": { "@type": "ImageObject", "url": SITE + "/assets/brand/crest-2026.webp", "width": 1200, "height": 1200 } },
       { "@type": "WebSite", "@id": SITE + "/#website", "url": SITE, "name": "Sikhi University",
         "publisher": { "@id": SITE + "/#org" },
         "potentialAction": { "@type": "SearchAction", "target": SITE + "/search?q={search_term_string}", "query-input": "required name=search_term_string" } }
@@ -116,15 +118,15 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
   <meta property="og:title" content={title} />
   <meta property="og:description" content={metaDesc} />
   <meta property="og:url" content={canon} />
-  <meta property="og:image" content={`${SITE}/assets/og-image.png?v=2`} />
+  <meta property="og:image" content={`${SITE}/assets/brand/share-2026.png`} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Sikhi University — free, open learning in Sikhi" />
+  <meta property="og:image:alt" content="Sikhi University, free, open learning in Sikhi" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={metaDesc} />
-  <meta name="twitter:image" content={`${SITE}/assets/og-image.png?v=2`} />
-  <meta name="twitter:image:alt" content="Sikhi University — free, open learning in Sikhi" />
+  <meta name="twitter:image" content={`${SITE}/assets/brand/share-2026.png`} />
+  <meta name="twitter:image:alt" content="Sikhi University, free, open learning in Sikhi" />
   <slot name="head" />
 </head>
 <body class={bodyClass} data-ambient={ambient} data-institute={institute ? '' : undefined}>
@@ -136,6 +138,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     </div>
   )}
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+  {cleanPath === '/' && <CrestIntro />}
   <Nav />
   <main id="main" data-autotranslate={autoTranslateEff ? '1' : '0'}>
     <slot />
@@ -168,7 +171,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     const fab = document.getElementById('a11y-fab'); const panel = document.getElementById('a11y-panel');
     // Read the page via the shared TTS engine: whole page (no 9000-char cap),
     // best available voice for the current UI language. Gurbani/Gurmukhi is
-    // never synthesized — sacred text is stripped, matching the course reader.
+    // never synthesized, sacred text is stripped, matching the course reader.
     const readableText = () => {
       const m = document.querySelector('main'); if (!m) return '';
       const clone = m.cloneNode(true);
@@ -193,7 +196,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       else if (a === 'reset') { localStorage.removeItem(P); apply(); return; }
       localStorage.setItem(P, JSON.stringify(p)); apply();
     });
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+    if (import.meta.env.PROD && 'serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   </script>
   <script>
     // Lightweight UI i18n: swaps text/placeholders of [data-i18n*] elements from a

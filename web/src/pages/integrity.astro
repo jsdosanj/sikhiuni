@@ -44,14 +44,14 @@ try {
 } catch { /* absent in dev -- page still renders */ }
 const hasIssues = !!(totals.mismatch || totals.uncovered);
 ---
-<Base title="Content integrity — Sikhi University" description="How we verify the Gurbani quoted across Sikhi University against the canonical text — the numbers, the method, and what's still in progress." ambient="study">
+<Base title="Content integrity, Sikhi University" description="How we verify the Gurbani quoted across Sikhi University against the canonical text, the numbers, the method, and what's still in progress." ambient="study">
   <section class="wrap max-w-3xl py-14">
     <p class="eyebrow flex items-center gap-2.5 text-saffron-deep">
       <span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>
       <span>Content integrity</span>
     </p>
     <h1 class="text-display-sm mt-3 text-navy">Every quoted <span class="gur" lang="pa">ਸ਼ਬਦ</span>, checked against the canonical text</h1>
-    <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted">Accuracy is a release gate here, not a nicety. Each shabad embedded in a course is matched, at build time, against the canonical text of Sri Guru Granth Sahib Ji. A quote that doesn't match — or cites the wrong ang — fails the build and cannot ship. These numbers are generated from that check, not written by hand.</p>
+    <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted">Accuracy is a release gate here, not a nicety. Each shabad embedded in a course is matched, at build time, against the canonical text of Sri Guru Granth Sahib Ji. A quote that doesn't match, or cites the wrong ang, fails the build and cannot ship. These numbers are generated from that check, not written by hand.</p>
 
     <div class="mt-9 grid gap-x-8 gap-y-5 border-t-2 border-navy pt-5 sm:grid-cols-3">
       <div>
@@ -79,7 +79,7 @@ const hasIssues = !!(totals.mismatch || totals.uncovered);
       <div class="border-t-2 border-navy pt-3.5">
         <span aria-hidden="true" class="font-mono text-[11px] text-saffron-deep">01</span>
         <h4 class="mt-2 text-[17.5px] font-bold tracking-tight text-navy" data-i18n="integrity.gate1.title">Gurbani verification</h4>
-        <p class="mt-1.5 text-[14.5px] leading-relaxed text-muted" data-i18n="integrity.gate1.body">Every quoted line is checked against the canonical snapshot at build time. A mismatch fails the build — the course cannot publish.</p>
+        <p class="mt-1.5 text-[14.5px] leading-relaxed text-muted" data-i18n="integrity.gate1.body">Every quoted line is checked against the canonical snapshot at build time. A mismatch fails the build, the course cannot publish.</p>
       </div>
       <div class="border-t-2 border-navy pt-3.5">
         <span aria-hidden="true" class="font-mono text-[11px] text-saffron-deep">02</span>
@@ -97,24 +97,24 @@ const hasIssues = !!(totals.mismatch || totals.uncovered);
     <div class="mt-4 flex flex-wrap gap-2.5">
       <span class="chip-status border-ok text-ok" data-i18n="integrity.status.reviewed">REVIEWED</span>
       <span class="chip-status border-saffron-deep text-saffron-deep" data-i18n="integrity.status.inreview">IN REVIEW</span>
-      <span class="chip-status border-muted text-muted" data-i18n="integrity.status.draft">DRAFT — NOT PUBLISHED</span>
+      <span class="chip-status border-muted text-muted" data-i18n="integrity.status.draft">DRAFT, NOT PUBLISHED</span>
     </div>
     <p class="mt-4 max-w-[74ch] font-sans text-[16px] leading-relaxed text-ink"><strong>Reviewed</strong> means a named member of the scholar board has read the course and signed off on its doctrine and sources on a stated date. It does not mean the board endorses every reading in it, and it does not make the course a consensus position of the Panth.</p>
 
     <div class="mt-9 max-w-[74ch] border border-line border-l-[3px] border-l-saffron-deep bg-surface px-5 py-4">
       <p class="font-mono text-[10.5px] uppercase tracking-[.18em] text-saffron-deep" data-i18n="integrity.notthis.label">What this is not</p>
-      <p class="mt-2.5 font-sans text-[15px] leading-relaxed text-muted" data-i18n="integrity.notthis.body">Sikhi University is not an accredited institution. Review here is scholarly, not regulatory — no external body validates these courses, no credit transfers, and a certificate from us is a record of completed coursework, nothing more.</p>
+      <p class="mt-2.5 font-sans text-[15px] leading-relaxed text-muted" data-i18n="integrity.notthis.body">Sikhi University is not an accredited institution. Review here is scholarly, not regulatory, no external body validates these courses, no credit transfers, and a certificate from us is a record of completed coursework, nothing more.</p>
     </div>
 
     <div class="mt-12">
       <h2 class="rule-navy pb-2 text-xl font-bold text-navy">How it works</h2>
       <ul class="mt-3.5 grid gap-2.5 text-muted">
-        <li><strong class="text-ink">Canonical source.</strong> The reference text is a committed snapshot of Sri Guru Granth Sahib Ji from BaniDB. The check runs against that fixed snapshot, offline — never a live lookup — so the result is reproducible.</li>
+        <li><strong class="text-ink">Canonical source.</strong> The reference text is a committed snapshot of Sri Guru Granth Sahib Ji from BaniDB. The check runs against that fixed snapshot, offline, never a live lookup, so the result is reproducible.</li>
         <li><strong class="text-ink">Fail-closed matching.</strong> Each quoted tuk is normalised (Unicode form, spacing, vishraam markers) and must appear in the canonical text of the ang it cites. Anything that doesn't positively match is not counted as verified.</li>
-        <li><strong class="text-ink">Honest about coverage.</strong> This currently covers SGGS quotes. Quotes from Sri Dasam Granth and Sri Sarbloh Granth, and any ang not yet in the snapshot, are listed as <em>not yet verified</em> — never quietly counted as passed.</li>
+        <li><strong class="text-ink">Honest about coverage.</strong> This currently covers SGGS quotes. Quotes from Sri Dasam Granth and Sri Sarbloh Granth, and any ang not yet in the snapshot, are listed as <em>not yet verified</em>, never quietly counted as passed.</li>
       </ul>
       <p class="mt-4 font-sans text-sm text-muted">AI-drafted course prose is labelled "Created by AI" and is separate from this scripture check. Verification confirms the <em>quoted scripture</em> is faithful; it is not a scholarly endorsement of a course's interpretation.</p>
-      <p class="mt-4 font-sans text-sm text-muted">The underlying data is open — see the catalogue metadata and this verification report as a downloadable, openly-licensed dataset on our <a class="underline" href="/open-data">open data page</a>.</p>
+      <p class="mt-4 font-sans text-sm text-muted">The underlying data is open, see the catalogue metadata and this verification report as a downloadable, openly-licensed dataset on our <a class="underline" href="/open-data">open data page</a>.</p>
     </div>
   </section>
 </Base>

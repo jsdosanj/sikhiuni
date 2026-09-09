@@ -32,7 +32,7 @@ const pnum = String(t.num ?? 0).padStart(2, '0');
 const certHref = `/technology/cert?track=${t.slug}`;
 ---
 <Base
-  title={`Phase ${pnum} exam — Institute of Technology`}
+  title={`Phase ${pnum} exam, Institute of Technology`}
   description={`The phase exam for ${t.title}: ${examN} questions drawn from the phase's question bank, graded server-side, ${pass}% to pass and earn the certificate.`}
   institute
   noindex
@@ -42,10 +42,10 @@ const certHref = `/technology/cert?track=${t.slug}`;
   <header class="i-ehead">
     <div class="i-wrap">
       <span class="i-label i-mono">exam · f{pnum} · {t.license}</span>
-      <h1>{t.title} — phase exam</h1>
+      <h1>{t.title}, phase exam</h1>
       <p class="i-prose i-ehead-sum">
         {examN} multiple-choice questions, drawn at random from this phase's bank of {bank.count}.
-        Graded on our server — the answer key never reaches your browser. Score {pass}% or higher
+        Graded on our server, the answer key never reaches your browser. Score {pass}% or higher
         and the <a href={certHref}>Phase {pnum} certificate</a> unlocks.
       </p>
     </div>
@@ -57,7 +57,7 @@ const certHref = `/technology/cert?track=${t.slug}`;
         <span class="i-corner">before you start</span>
         <ul class="i-erules">
           <li><strong>{examN} questions.</strong> Answer all of them, then submit once.</li>
-          <li><strong>{pass}% to pass.</strong> Re-take it with a fresh question set as many times as you need — your best score stands.</li>
+          <li><strong>{pass}% to pass.</strong> Re-take it with a fresh question set as many times as you need, your best score stands.</li>
           <li><strong>Sign in first.</strong> The grade is recorded to your account; that is what issues the verifiable certificate.</li>
           <li><strong>One certificate per phase.</strong> It reads <em>Sikhi University · Institute of Technology</em> and verifies at <a href="/verify">/verify</a>.</li>
         </ul>
@@ -65,7 +65,7 @@ const certHref = `/technology/cert?track=${t.slug}`;
           Questions are drawn from the phase's lessons, adapted from
           <a href="https://aiengineeringfromscratch.com">AI Engineering from Scratch</a>
           {prof ? <> by {prof.name}</> : null}. If you have the experience, you can sit the exam
-          without walking every lesson — the {pass}% bar keeps the credential honest either way.
+          without walking every lesson, the {pass}% bar keeps the credential honest either way.
         </p>
         <button class="i-btn i-btn-primary" data-start>Begin the exam</button>
       </div>
@@ -93,7 +93,7 @@ const certHref = `/technology/cert?track=${t.slug}`;
     #i-exam [data-intro] { max-width: 640px; }
     .i-eback { margin-top: 28px; font-size: 13px; }
     .i-eback a { color: var(--i-muted); }
-    /* The exam form itself is injected by the island — its styles live in
+    /* The exam form itself is injected by the island, its styles live in
        institute.css (.i-exam-form / .i-exam-q / .i-exam-result). */
   </style>
 

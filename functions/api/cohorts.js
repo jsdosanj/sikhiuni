@@ -1,3 +1,4 @@
+import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent, isCourseTeacher } from "./_lib.js";
 
 // Cohort mode: a teacher (or admin) creates a cohort for a course and shares an
@@ -5,12 +6,15 @@ import { json, getUser, newId, logEvent, isCourseTeacher } from "./_lib.js";
 // sees a roster with each member's progress. Tables auto-create so no manual
 // migration is required (they are also in schema.sql).
 async function ensure(env) {
+  return schemaOnce(env.DB, "cohorts", async () => {
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS cohorts (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, name TEXT NOT NULL, invite_code TEXT NOT NULL UNIQUE, owner_id TEXT NOT NULL, created_at INTEGER NOT NULL)"
   ).run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS cohort_members (cohort_id TEXT NOT NULL, user_id TEXT NOT NULL, joined_at INTEGER NOT NULL, PRIMARY KEY (cohort_id, user_id))"
   ).run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS enrollments (user_id TEXT NOT NULL, kind TEXT NOT NULL, target_id TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (user_id, kind, target_id))").run();
+  });
 }
 
 async function ownsCourse(env, user, courseId) {
@@ -89,7 +93,7 @@ export async function onRequestPost({ request, env }) {
           .bind(id, courseId, name, code, user.id, Date.now()).run();
         await logEvent(env, user, "cohort_created", courseId, "cohort=" + id);
         return json({ ok: true, id, inviteCode: code });
-      } catch (e) { /* UNIQUE collision on invite_code — try another */ }
+      } catch (e) { if (!String(e).includes("UNIQUE constraint failed: cohorts.invite_code")) throw e; }
     }
     return json({ error: "Could not create a cohort right now — please try again." }, 500);
   }
@@ -99,12 +103,13 @@ export async function onRequestPost({ request, env }) {
     if (!code) return json({ error: "Enter an invite code." }, 400);
     const cohort = await env.DB.prepare("SELECT id, course_id, name FROM cohorts WHERE invite_code=?").bind(code).first();
     if (!cohort) return json({ error: "That code doesn't match a cohort." }, 404);
-    await env.DB.prepare("INSERT OR IGNORE INTO cohort_members (cohort_id, user_id, joined_at) VALUES (?,?,?)")
-      .bind(cohort.id, user.id, Date.now()).run();
-    // Joining a cohort enrols the learner in the course so it appears on their dashboard.
-    await env.DB.prepare("INSERT OR IGNORE INTO enrollments (user_id, kind, target_id, created_at) VALUES (?,?,?,?)")
-      .bind(user.id, "course", cohort.course_id, Date.now()).run();
-    await logEvent(env, user, "cohort_joined", cohort.course_id, "cohort=" + cohort.id);
+    const now = Date.now();
+    // D1 batch is transactional: membership and enrollment succeed together.
+    const [membership] = await env.DB.batch([
+      env.DB.prepare("INSERT OR IGNORE INTO cohort_members (cohort_id, user_id, joined_at) VALUES (?,?,?)").bind(cohort.id, user.id, now),
+      env.DB.prepare("INSERT OR IGNORE INTO enrollments (user_id, kind, target_id, created_at) VALUES (?,?,?,?)").bind(user.id, "course", cohort.course_id, now),
+    ]);
+    if (membership.meta?.changes > 0) await logEvent(env, user, "cohort_joined", cohort.course_id, "cohort=" + cohort.id);
     return json({ ok: true, courseId: cohort.course_id, cohortName: cohort.name });
   }
 

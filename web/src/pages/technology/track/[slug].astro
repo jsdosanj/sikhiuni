@@ -50,7 +50,7 @@ const ld = {
   ...(prof ? { author: { '@type': prof.kind === 'org' ? 'Organization' : 'Person', name: prof.name } } : {}),
 };
 ---
-<Base title={`${t.title} — Institute of Technology`} description={t.summary} institute ogType="article">
+<Base title={`${t.title}, Institute of Technology`} description={t.summary} institute ogType="article">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <InstituteRail />
 
@@ -106,7 +106,7 @@ const ld = {
       <p class="i-prose i-cap-intro">
         A plain-English map of Claude Desktop and Claude Code, for people with no coding experience.
         Every feature is named, then explained by what it lets you do. Developer detail sits at the end,
-        so a beginner is never blocked by it — and Part 5 links the official Anthropic courses.
+        so a beginner is never blocked by it, and Part 5 links the official Anthropic courses.
       </p>
       <p><a class="i-btn i-btn-primary" href="/technology/guide/claude-code">Open the guide &rarr;</a></p>
     </section>
@@ -114,8 +114,8 @@ const ld = {
     <section class="i-wrap i-track-body">
       <p class="i-prose i-cap-intro">
         {t.engine === 'terminal'
-          ? `A from-scratch crash course — ${t.topicCount} topics, each a real file that types itself out and explains what it teaches, line by line, as it goes.`
-          : `The real Claude Code command set. Type / to explore — every command is its own short lesson, with the reason it exists, synced to the docs.`}
+          ? `A from-scratch crash course, ${t.topicCount} topics, each a real file that types itself out and explains what it teaches, line by line, as it goes.`
+          : `The real Claude Code command set. Type / to explore, every command is its own short lesson, with the reason it exists, synced to the docs.`}
       </p>
       <p>
         <a class="i-btn i-btn-primary" href={`/technology/dojo/${t.id}`}>Enter the dojo &rarr;</a>

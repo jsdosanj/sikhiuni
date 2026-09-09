@@ -4,20 +4,20 @@ import InstituteRail from '../../components/institute/InstituteRail.astro';
 import { resources, gurmukhiHtml } from '../../lib/institute';
 
 const SECTIONS = [
-  { id: 'lists', label: 'Curated lists & directories', hint: 'free — hand-picked link collections' },
+  { id: 'lists', label: 'Curated lists & directories', hint: 'free, hand-picked link collections' },
   { id: 'books', label: 'Books', hint: 'a shelf, not a syllabus' },
   { id: 'courses', label: 'Paid courses', hint: 'when you want a deadline and a reviewer' },
 ] as const;
 
 const desc = 'Books, curated link directories, and paid courses worth your time once you have outgrown the Institute’s own tracks and the free college fair.';
 ---
-<Base title="More resources — Institute of Technology" description={desc} institute>
+<Base title="More resources, Institute of Technology" description={desc} institute>
   <InstituteRail />
 
   <section class="i-wrap i-res-head">
     <span class="i-label">/technology/resources</span>
     <h1>More resources</h1>
-    <p class="i-prose">The Institute's own courses come first, and the <a href="/technology/explore">college fair</a> covers free curricula. This shelf is everything else worth pointing you at: hand-picked link directories, books, and a few paid courses — for when self-study wants a deadline or a second voice. Nothing here is rehosted; every card links straight out.</p>
+    <p class="i-prose">The Institute's own courses come first, and the <a href="/technology/explore">college fair</a> covers free curricula. This shelf is everything else worth pointing you at: hand-picked link directories, books, and a few paid courses, for when self-study wants a deadline or a second voice. Nothing here is rehosted; every card links straight out.</p>
   </section>
 
   {SECTIONS.map((sec) => (
@@ -40,7 +40,7 @@ const desc = 'Books, curated link directories, and paid courses worth your time 
 
   <section class="i-wrap i-sec i-sec-last">
     <p class="i-prose" style="font-size:13px;color:var(--i-muted)">
-      This shelf will grow — more books, more courses, more of "and more" — as we find things worth sending you to. Full attribution and licences: <a href="/technology/licenses">/technology/licenses</a>.
+      This shelf will grow, more books, more courses, more of "and more", as we find things worth sending you to. Full attribution and licences: <a href="/technology/licenses">/technology/licenses</a>.
     </p>
   </section>
 

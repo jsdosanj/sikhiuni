@@ -14,7 +14,7 @@ const ld = {
 const mool = ['ੴ','ਸਤਿ ਨਾਮੁ','ਕਰਤਾ ਪੁਰਖੁ','ਨਿਰਭਉ','ਨਿਰਵੈਰੁ','ਅਕਾਲ ਮੂਰਤਿ','ਅਜੂਨੀ','ਸੈਭੰ','ਗੁਰ ਪ੍ਰਸਾਦਿ ॥'];
 const motes = Array.from({ length: 14 });
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page th-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -24,7 +24,7 @@ const motes = Array.from({ length: 14 });
         <div class="wrap th-in">
           <p class="th-kicker">Everything in this department begins with one verse</p>
           <p class="th-mool" lang="pa">{mool.map((w) => <span>{w}</span>)}</p>
-          <p class="th-note">The Mūl Mantar — the opening of Srī Guru Granth Sāhib Jī, Aṅg 1. The theology, the metaphysics, the ethics of the whole tradition unfold from these words.</p>
+          <p class="th-note">The Mūl Mantar, the opening of Srī Guru Granth Sāhib Jī, Aṅg 1. The theology, the metaphysics, the ethics of the whole tradition unfold from these words.</p>
         </div>
       </section>
     </DeptHero>
@@ -34,7 +34,7 @@ const motes = Array.from({ length: 14 });
   <style>
     .th-sig {
       position: relative; overflow: hidden;
-      background: radial-gradient(130% 100% at 22% -10%, #3a0f14, #240a0e 55%, #1a0709);
+      background: radial-gradient(130% 100% at 22% -10%, #1c3c63, #122a49 55%, #0c1d34);
       color: #f4e6cf; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line));
     }
     /* golden light through an archway */

@@ -23,7 +23,7 @@ const raags = [
   ['Prabhātī','the first light'],['Jaijāvantī','acceptance, letting go'],
 ];
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page ar-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -36,7 +36,7 @@ const raags = [
           </svg>
         </div>
         <div class="wrap ar-in">
-          <p class="ar-kicker">Srī Guru Granth Sāhib Jī is organised by rāg — over thirty of them</p>
+          <p class="ar-kicker">Srī Guru Granth Sāhib Jī is organised by rāg, over thirty of them</p>
           <h2 class="ar-h">Each rāg carries a feeling. Kīrtan holds the Shabad in it.</h2>
           <div class="ar-raags" role="list">
             {raags.map(([name, mood]) => (
@@ -46,7 +46,7 @@ const raags = [
               </span>
             ))}
           </div>
-          <p class="ar-note">The department teaches the rāg and tāl, the tantī sāj the Gurus played, and the visual tradition alongside it — the frescoes, the illuminated biṛs, the architecture.</p>
+          <p class="ar-note">The department teaches the rāg and tāl, the tantī sāj the Gurus played, and the visual tradition alongside it, the frescoes, the illuminated biṛs, the architecture.</p>
         </div>
       </section>
     </DeptHero>
@@ -54,7 +54,7 @@ const raags = [
   </div>
 
   <style>
-    .ar-sig { position: relative; overflow: hidden; background: linear-gradient(180deg, #2a0f1c, #180a13); color: #f4dbe4; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
+    .ar-sig { position: relative; overflow: hidden; background: linear-gradient(180deg, #193655, #0e2139); color: #f4dbe4; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
     .ar-brush { position: absolute; inset: 0; pointer-events: none; opacity: .5; }
     .ar-brush svg { width: 100%; height: 100%; }
     .ar-s { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ar-paint linear both; animation-timeline: view(); }
@@ -80,7 +80,7 @@ const raags = [
     .ar-raag:hover, .ar-raag:focus-visible { background: color-mix(in srgb, var(--dept) 30%, transparent); border-color: var(--dept); color: #fff; outline: none; }
     .ar-mood {
       position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
-      white-space: nowrap; padding: 5px 10px; border-radius: 8px; background: #201018; border: 1px solid var(--dept); color: #fff;
+      white-space: nowrap; padding: 5px 10px; border-radius: 8px; background: #122a45; border: 1px solid var(--dept); color: #fff;
       font-size: 11.5px; opacity: 0; pointer-events: none; transition: opacity .16s, transform .16s; z-index: 2;
     }
     .ar-raag:hover .ar-mood, .ar-raag:focus-visible .ar-mood { opacity: 1; transform: translateX(-50%) translateY(0); }

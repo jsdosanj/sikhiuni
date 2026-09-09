@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Certificate — Sikhi University" description="Your Sikhi University certificate of completion." autoTranslate={false} ambient="study" noindex={true}>
+<Base title="Certificate, Sikhi University" description="Your Sikhi University certificate of completion." autoTranslate={false} ambient="study" noindex={true}>
   <section class="wrap py-10">
     <div id="cert-app"><p class="text-muted" data-i18n="cert.loading">Loading…</p></div>
   </section>
@@ -61,7 +61,7 @@ import Base from '../layouts/Base.astro';
           </div>
         </div>
         <div class="noprint mt-6 flex flex-wrap justify-center gap-3"><button id="dl-pdf" class="btn btn-primary">${iconSvg('download', 'h-4 w-4')} <span data-i18n="cert.btn.downloadpdf">Download PDF</span></button><button id="print" class="btn">${iconSvg('printer', 'h-4 w-4')} <span data-i18n="cert.btn.print">Print</span></button></div>`;
-      // Decorative only, fired after the real certificate is already fully rendered —
+      // Decorative only, fired after the real certificate is already fully rendered -
       // the overlay self-removes long before a PDF/print capture could happen, and the
       // render surface itself stays solid (html2canvas cannot rasterize blur).
       const certCard = document.getElementById('cert-card');
@@ -79,7 +79,7 @@ import Base from '../layouts/Base.astro';
           const w = canvas.width * ratio, h = canvas.height * ratio;
           pdf.addImage(canvas.toDataURL('image/png'), 'PNG', (pw - w) / 2, (ph - h) / 2, w, h);
           pdf.save('sikh-university-' + (c.id || 'certificate') + '.pdf');
-        } catch (e) { window.suToast('Could not generate the PDF — please use Print instead.', 'error'); }
+        } catch (e) { window.suToast('Could not generate the PDF, please use Print instead.', 'error'); }
         btn.disabled = false; btn.innerHTML = old;
       });
       // Issue a verifiable certificate ID (needs sign-in; validates the synced pass server-side).

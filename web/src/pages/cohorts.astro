@@ -1,10 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Cohorts — Sikhi University" description="Learn together: join a cohort with an invite code, or (for teachers) create a cohort and track your group's progress." ambient="study">
+<Base title="Cohorts, Sikhi University" description="Learn together: join a cohort with an invite code, or (for teachers) create a cohort and track your group's progress." ambient="study">
   <!-- Dept header, same rule-navy/eyebrow/stat-mono skeleton as catalog.astro and
        programs.astro (iscohorts refined block, lines 1416-1436). No invented "N
-       open now" stat here (Decision 12) — the real app has no global feed of
+       open now" stat here (Decision 12), the real app has no global feed of
        open cohorts to join by browsing; joining is always by invite code. -->
   <section class="wrap pt-10 pb-2">
     <div class="rule-navy flex flex-wrap items-end justify-between gap-6 pb-4">
@@ -14,7 +14,7 @@ import Base from '../layouts/Base.astro';
           <span data-i18n="cohorts.eyebrow">Study together</span>
         </p>
         <h1 class="text-display mt-3 text-navy" data-i18n="cohorts.h1">Cohorts</h1>
-        <p class="mt-3 max-w-2xl font-sans text-lg leading-relaxed text-muted" data-i18n="cohorts.sub">Learn together. Join a group with an invite code, or — if you teach a course — create a cohort and follow your group's progress. Made for camps, classes, and sangats studying as one.</p>
+        <p class="mt-3 max-w-2xl font-sans text-lg leading-relaxed text-muted" data-i18n="cohorts.sub">Learn together. Join a group with an invite code, or, if you teach a course, create a cohort and follow your group's progress. Made for camps, classes, and sangats studying as one.</p>
       </div>
     </div>
   </section>
@@ -26,7 +26,7 @@ import Base from '../layouts/Base.astro';
   <script>
     // Protected JS hooks (Decision 10): #app, #join-form, #join-code, #join-out,
     // #create-form, #c-course, #c-name, #create-out, #cohort-list,
-    // [data-roster], #roster — every id/selector below is unchanged from the
+    // [data-roster], #roster, every id/selector below is unchanged from the
     // pre-redesign version. Only the class strings (glass -> flat ledger
     // surfaces) and the markup shape around them changed.
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -96,7 +96,7 @@ import Base from '../layouts/Base.astro';
       const r = await api('/api/cohorts');
       if (!r.ok) { box.innerHTML = '<p class="row-ruled font-sans text-sm text-muted" data-i18n="cohorts.loaderror">Could not load your cohorts.</p>'; return; }
       const cs = r.data.cohorts || [];
-      if (!cs.length) { box.innerHTML = '<p class="row-ruled font-sans text-sm text-muted" data-i18n="cohorts.empty">No cohorts yet — create one above.</p>'; return; }
+      if (!cs.length) { box.innerHTML = '<p class="row-ruled font-sans text-sm text-muted" data-i18n="cohorts.empty">No cohorts yet, create one above.</p>'; return; }
       box.innerHTML = cs.map((c) => `
         <div class="row-ruled">
           <span class="min-w-0 flex-1">
@@ -119,24 +119,24 @@ import Base from '../layouts/Base.astro';
         <tr>
           <td class="border border-line p-2">${esc(m.name)}</td>
           <td class="border border-line p-2 tabular-nums font-mono text-[13px]">${m.lessonsDone}</td>
-          <td class="border border-line p-2 tabular-nums font-mono text-[13px]">${m.score == null ? '—' : m.score + '%'}</td>
+          <td class="border border-line p-2 tabular-nums font-mono text-[13px]">${m.score == null ? '-' : m.score + '%'}</td>
           <td class="border border-line p-2">${m.passed ? '<span class="chip-status text-ok border-ok" data-i18n="cohorts.status.passed">Passed</span>' : '<span class="chip-status text-muted border-line" data-i18n="cohorts.status.inprogress">In progress</span>'}</td>
         </tr>`).join('');
       box.innerHTML = `
         <div class="border border-line bg-surface px-6 py-6 sm:px-7 sm:py-7">
-        <h2 class="text-[19px] font-bold leading-tight text-navy">${esc(r.data.cohort.name)} <span data-i18n="cohorts.roster.title">— roster</span></h2>
+        <h2 class="text-[19px] font-bold leading-tight text-navy">${esc(r.data.cohort.name)} <span data-i18n="cohorts.roster.title">- roster</span></h2>
         <p class="mt-1 font-sans text-sm text-muted">${roster.length} member${roster.length === 1 ? '' : 's'} · invite code <span class="font-mono tracking-widest text-saffron-deep">${esc(r.data.cohort.inviteCode)}</span></p>
         <div class="mt-4 overflow-x-auto">
           <table class="w-full border-collapse text-sm"><thead><tr class="band-navy font-sans text-xs">
             <th class="p-2 text-left" data-i18n="cohorts.th.member">Member</th><th class="p-2 text-left" data-i18n="cohorts.th.lessons">Lessons done</th><th class="p-2 text-left" data-i18n="cohorts.th.score">Best score</th><th class="p-2 text-left" data-i18n="cohorts.th.status">Status</th>
-          </tr></thead><tbody>${rows || '<tr><td colspan="4" class="border border-line p-3 text-muted" data-i18n="cohorts.noroster">No members yet — share the invite code.</td></tr>'}</tbody></table>
+          </tr></thead><tbody>${rows || '<tr><td colspan="4" class="border border-line p-3 text-muted" data-i18n="cohorts.noroster">No members yet, share the invite code.</td></tr>'}</tbody></table>
         </div>
         </div>`;
     }
 
     function wireCreate() {
       const form = document.getElementById('create-form');
-      if (!form) return; // no courses to teach yet — nothing to wire
+      if (!form) return; // no courses to teach yet, nothing to wire
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const courseId = document.getElementById('c-course').value;

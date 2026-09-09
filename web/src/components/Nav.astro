@@ -42,9 +42,9 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
   <div class="wrap flex items-center gap-x-3 py-3">
     <!-- Logo: the crest emblem + wordmark lockup from the cinematic hero,
          same assets used there (su-crest.png / su-wordmark.png). -->
-    <a href="/" aria-label="Sikhi University — home" class="flex shrink-0 items-center gap-2.5">
-      <img src="/assets/su-crest.png" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
-      <img src="/assets/su-wordmark.png" alt="Sikhi University" class="h-6 w-auto shrink-0" />
+    <a href="/" aria-label="Sikhi University, home" class="flex shrink-0 items-center gap-2.5">
+      <img src="/assets/brand/menu-silhouette-2026.webp" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
+      <span class="university-wordmark" translate="no">Sikhi University</span>
     </a>
 
     <!-- Spacer pushes nav links to the right -->
@@ -53,19 +53,13 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     <!-- Nav links + auth (desktop). Shown at xl (1280px), not md: the full row
          (logo + 5 links + My Learning + Cohorts + search + language + theme +
          auth) measures ~1170px, which only clears the viewport once gutters
-         fit too — below ~1280px the flex-1 spacer collapses to 0 and the tail
+         fit too, below ~1280px the flex-1 spacer collapses to 0 and the tail
          (theme toggle, auth pill) sits at a viewport-independent pixel
          position and silently clips (page has overflow-x:clip). Below xl the
          hamburger menu carries every item instead. The old inline search box
-         (~250px) was dropped from this row — the ⌘K palette below and the
+         (~250px) was dropped from this row, the ⌘K palette below and the
          mobile menu both search the same index. -->
-    <div class="hidden xl:flex items-center gap-x-3">
-      <button type="button" data-cmdk-open aria-label="Search" data-i18n-aria="nav.search" title="Search (⌘K)"
-        class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/85 hover:bg-white/10 hover:text-white transition">
-        <svg aria-hidden="true" class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        </svg>
-      </button>
+    <div class="nav-desktop hidden xl:flex items-center gap-x-3">
       <!-- Departments mega-menu -->
       <div id="nav-mega" class="relative">
         <button id="nav-mega-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-mega-panel"
@@ -109,8 +103,13 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
           class={`su-nav-link text-xs border-b-2 pb-1 transition whitespace-nowrap ${isActive(l.m) ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}
         >{l.label}</a>
       ))}
-      <a href="/dashboard" aria-current={isActive('/dashboard') ? 'page' : undefined} data-i18n="nav.mylearning" class={`su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>My Learning</a>
       <a href="/cohorts" aria-current={isActive('/cohorts') ? 'page' : undefined} data-i18n="nav.cohorts" class={`su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/cohorts') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>Cohorts</a>
+      <button type="button" data-cmdk-open aria-label="Search" data-i18n-aria="nav.search" title="Search (⌘K)"
+        class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/85 hover:bg-white/10 hover:text-white transition">
+        <svg aria-hidden="true" class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
       <select data-lang-switch aria-label="Language" data-i18n-aria="lang.label" class="shrink-0 rounded-full bg-white/10 px-2 py-1.5 font-sans text-xs text-white outline-none ring-1 ring-white/20 hover:bg-white/20 [&>option]:text-black">
         {LANG_OPTS.map(([v, l]) => (<option value={v} lang={v}>{l}</option>))}
       </select>
@@ -120,7 +119,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
       <!-- Signed-in identity cluster: ONE bounded-width menu, never flat links.
            A user can hold multiple hats (student/teacher/admin) and the old
            pattern appended one link per hat + "Sign out" straight into this
-           row — near the xl breakpoint that overflowed and either wrapped
+           row, near the xl breakpoint that overflowed and either wrapped
            "Sign out" onto two lines or got clipped off-screen entirely by the
            page's overflow-x:clip (invisible, unclickable sign-out for an
            authenticated admin). This wrapper's width never grows past the
@@ -128,7 +127,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
       <div id="nav-account" class="relative hidden shrink-0">
         <!-- Icon-only trigger, deliberately: keeps this cluster no wider than
              the signed-out "Sign in" pill, so signing in never makes the row
-             wider than signing out did — and leaves headroom for the wider
+             wider than signing out did, and leaves headroom for the wider
              translated nav-link labels (Punjabi / German) at the xl breakpoint
              where the row is tightest. A labelled "Account" button (~117px)
              would eat that headroom. -->
@@ -141,9 +140,10 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
         <div id="nav-account-menu" role="menu" aria-labelledby="nav-account-btn" hidden
           class="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl2 border border-white/15 bg-brand-strong py-1.5 shadow-lift"></div>
       </div>
+      <a href="/dashboard" aria-current={isActive('/dashboard') ? 'page' : undefined} data-i18n="nav.mylearning" class={`nav-learning su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>My Learning</a>
     </div>
 
-    <!-- Hamburger (below xl — see the desktop-cluster comment above) -->
+    <!-- Hamburger (below xl, see the desktop-cluster comment above) -->
     <button id="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu"
       class="xl:hidden ml-2 inline-flex items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/10 hover:text-white transition">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -185,7 +185,6 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
       {links.map((l) => (
         <a href={l.href} data-i18n={l.key} class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive(l.m) ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>{l.label}</a>
       ))}
-      <a href="/dashboard" data-i18n="nav.mylearning" class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>My Learning</a>
       <a href="/cohorts" data-i18n="nav.cohorts" class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/cohorts') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>Cohorts</a>
       <div class="mt-2 flex items-center gap-x-3 px-2">
         <button id="theme-toggle-mobile" type="button" aria-label="Toggle theme" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 transition"><span data-theme-icon-mobile><Icon name="moon" class="h-5 w-5" /></span></button>
@@ -195,9 +194,10 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
         <a id="nav-auth-mobile" href="/login" data-i18n="nav.signin" class="rounded-full bg-saffron px-4 py-1.5 font-sans text-sm font-semibold text-[#2a1c06]">Sign in</a>
       </div>
       <!-- Signed-in identity cluster (mobile): stacked full-width rows below
-           the theme/language row, same reasoning as #nav-account above — a
+           the theme/language row, same reasoning as #nav-account above, a
            multi-hat user must never grow a horizontal row. -->
       <div id="nav-account-mobile" class="hidden mt-2 border-t border-white/10 pt-2"></div>
+      <a href="/dashboard" data-i18n="nav.mylearning" class={`nav-learning su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>My Learning</a>
     </div>
   </div>
 </nav>
@@ -223,6 +223,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
   const toggle = document.getElementById('nav-toggle');
   const menu = document.getElementById('nav-menu');
   if (toggle && menu) {
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false');toggle.focus(); } });
     toggle.addEventListener('click', () => {
       const open = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!open));
@@ -284,7 +285,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     // A user who holds more than one "hat" (e.g. admin AND teacher, on top of
     // always being able to view their own learning) gets a small portal switcher.
     // Someone with only one hat beyond plain student sees just that one hat link
-    // (or nothing extra for a plain teacher) — same logic as before this fix.
+    // (or nothing extra for a plain teacher), same logic as before this fix.
     const extraHats = [];
     if (u.isTeacher) extraHats.push('teacher');
     if (u.role === 'admin') extraHats.push('admin');
@@ -302,7 +303,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
 
     // ---- Desktop: everything collapses into ONE bounded-width dropdown ----
     // (see the "signed-in identity cluster" comment on #nav-account in the
-    // markup above for why — flat per-hat links overflowed the row at
+    // markup above for why, flat per-hat links overflowed the row at
     // 1280-1440px and either wrapped "Sign out" onto two lines or clipped it
     // off-screen entirely via the page's overflow-x:clip.)
     const wrap = document.getElementById('nav-account');

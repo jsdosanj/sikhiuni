@@ -181,7 +181,7 @@
      glyphs, so without the exclusion it was silently breaking Gurmukhi
      rendering wherever the two combine, falling back past .gur's correct
      Noto Serif Gurmukhi to whatever the browser has. */
-  /* Display headings: Archivo 700, tight tracking, sentence case (Decision 2 —
+  /* Display headings: Inter 700, tight tracking, sentence case (Decision 2 —
      the former collegiate display face is retired; it was a demo-license font).
      The :not(.gur) guard is kept: bilingual titles (e.g. Santhya's "ਸੰਥਿਆ"
      span) combine .text-display with .gur, and this Latin face has no Gurmukhi
@@ -189,7 +189,7 @@
      the tight negative tracking is scoped here too so it never cramps Gurmukhi.
      Clamp sizes/line-heights are unchanged from the previous scale. */
   .text-display:not(.gur), .text-display-sm:not(.gur) {
-    font-family: 'Archivo', Georgia, serif;
+    font-family: 'Inter', Georgia, serif;
     font-weight: 700;
     letter-spacing: -0.034em;
     text-wrap: wrap;
@@ -509,3 +509,45 @@
      `su-page-enter` fade above — the same behaviour every non-Chromium browser
      always had. Revisit only with real cross-browser QA. */
 }
+
+/* University identity with the original menu typography. */
+.university-wordmark { font:600 clamp(20px,2vw,26px)/1.1 'Inter',sans-serif; white-space:nowrap; }
+@media(max-width:380px) { .university-wordmark { font-size:21px; } }
+
+/* Keep the menu lettering consistent with the white silhouette. */
+.su-nav .university-wordmark,
+.su-nav .su-nav-link,
+.su-nav a,
+.su-nav button,
+.su-nav summary { color: #fff; }
+
+/* Requested Cathdra lettering is scoped to the menu logo. */
+.su-nav .university-wordmark { font-family: "IT Cathdra", "Inter", sans-serif; font-weight:400; font-size:clamp(20px,1.8vw,25px); }
+
+/* Navy lettering keeps both gold sign-in buttons readable. */
+.su-nav #nav-auth, .su-nav #nav-auth-mobile { color:#16335c; }
+
+/* A consistent deep-blue navigation bar throughout the university. */
+body .su-nav, body.su-home .su-nav:not([data-scrolled]), body .su-nav[data-scrolled] { background:#16335c; border-bottom:1px solid #ffffff24; box-shadow:0 5px 20px #10234424; }
+
+/* Shared navigation: readable labels, grouped utilities and a clear campus entry. */
+html .su-nav .su-nav-link { font-family:Inter,"Noto Sans Gurmukhi",sans-serif; text-transform:none; letter-spacing:0; font-size:13px; font-weight:550; }
+.su-nav .nav-desktop { gap:5px; }
+.su-nav .nav-desktop > .su-nav-link, .su-nav #nav-mega-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 9px; border-bottom-width:2px; }
+.su-nav .nav-desktop > .su-nav-link:hover, .su-nav #nav-mega-btn:hover { background:#ffffff0d; border-radius:6px 6px 0 0; }
+.su-nav .nav-desktop [data-cmdk-open] { margin-left:9px; }
+.su-nav .nav-desktop [data-cmdk-open], .su-nav #theme-toggle, .su-nav #nav-account-btn { min-width:38px; min-height:42px; }
+.su-nav .nav-desktop [data-lang-switch] { max-width:90px; min-height:38px; font-size:12px; }
+.su-nav #nav-auth { background:transparent; color:#fff; border:1px solid #ffffff45; padding:10px 13px; font-size:12px; }
+.su-nav .nav-desktop > .nav-learning, .su-nav #nav-menu .nav-learning { background:#edc66d; color:#10243e; border:1px solid #edc66d; border-radius:8px; padding:11px 15px; font-weight:650; margin-left:7px; }
+.su-nav .nav-desktop > .nav-learning:hover, .su-nav #nav-menu .nav-learning:hover { background:#f6d78f; border-radius:8px; }
+.su-nav .nav-learning[aria-current="page"] { outline:2px solid #fff; outline-offset:3px; }
+.su-nav #nav-mega-panel { background:#112b4c; border-radius:12px; box-shadow:0 22px 50px #07182d40; }
+.su-nav #nav-mega-panel a { min-height:40px; display:flex; align-items:center; }
+.su-nav #nav-menu { background:#142f52; max-height:calc(100dvh - 70px); overflow-y:auto; overscroll-behavior:contain; }
+.su-nav #nav-menu .su-nav-link { font-size:15px; min-height:46px; padding:11px 12px; border-radius:6px; }
+.su-nav #nav-menu .su-nav-link:hover { background:#ffffff0c; }
+.su-nav #nav-menu .nav-learning { margin:12px 0 8px; justify-content:center; text-align:center; }
+.su-nav #nav-menu input { min-height:46px; border-radius:8px; }
+.su-nav #nav-menu > .wrap { padding-top:18px; padding-bottom:max(20px,env(safe-area-inset-bottom)); }
+.su-nav a:focus-visible, .su-nav button:focus-visible, .su-nav summary:focus-visible, .su-nav select:focus-visible { outline:2px solid #edc66d; outline-offset:3px; }

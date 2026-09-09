@@ -1,3 +1,4 @@
+import { schemaOnce } from "../_schema-once.js";
 import { json, requireUser, parseBody } from "../_lib.js";
 
 // POST /api/activity/heartbeat { activeSeconds } — accrues real engagement
@@ -9,9 +10,9 @@ import { json, requireUser, parseBody } from "../_lib.js";
 const MAX_SECONDS_PER_REQUEST = 120;
 
 function ensureTable(env) {
-  return env.DB.prepare(
+  return schemaOnce(env.DB, "daily_activity", () => env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS daily_activity (user_id TEXT NOT NULL, day TEXT NOT NULL, active_seconds INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (user_id, day))"
-  ).run();
+  ).run());
 }
 
 export async function onRequestPost({ request, env }) {
