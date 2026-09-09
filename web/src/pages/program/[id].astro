@@ -264,10 +264,13 @@ const breadcrumb = {
     });
     const submitBtn = document.getElementById('cum-submit');
     submitBtn.disabled = true;
+    // passMark is NOT sent: the server owns the threshold (see
+    // functions/api/program-exam.js). A client-supplied pass mark was an
+    // answer-key oracle. The `passMark` in scope here is display copy only.
     fetch('/api/program-exam', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ items, passMark }),
+      body: JSON.stringify({ items }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('grade failed'))))
       .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.passed); })
