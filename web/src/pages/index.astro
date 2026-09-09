@@ -65,7 +65,41 @@ const ld = {
   </header>
   <script>
     const crest = document.getElementById('su-crest-model');
-    crest?.addEventListener('load', () => crest.parentElement?.classList.add('crest-loaded'));
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    let played = false;
+    let waiting: MutationObserver | undefined;
+    function stopWobble() {
+      cancelAnimationFrame(frame);
+      waiting?.disconnect();
+    }
+    function wobble() {
+      if (!crest || played || reducedMotion.matches) return;
+      played = true;
+      const start = performance.now();
+      function tick(now: number) {
+        const progress = Math.min((now - start) / 1800, 1);
+        const angle = Math.sin(progress * Math.PI * 4) * 5 * (1 - progress) ** 2;
+        crest!.setAttribute('camera-orbit', `${angle.toFixed(3)}deg 90deg 100%`);
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      }
+      frame = requestAnimationFrame(tick);
+    }
+    crest?.addEventListener('load', () => {
+      crest.parentElement?.classList.add('crest-loaded');
+      const intro = document.getElementById('university-intro');
+      if (intro && !intro.hidden) {
+        waiting = new MutationObserver(() => { if (intro.hidden) { waiting?.disconnect(); wobble(); } });
+        waiting.observe(intro, { attributes:true, attributeFilter:['hidden'] });
+      } else wobble();
+    });
+    // Hand control to the visitor immediately if they drag or use the keyboard.
+    crest?.addEventListener('pointerdown', stopWobble, { once:true });
+    crest?.addEventListener('keydown', stopWobble, { once:true });
+    reducedMotion.addEventListener('change', () => {
+      if (reducedMotion.matches) { stopWobble(); crest?.setAttribute('camera-orbit','0deg 90deg 100%'); }
+    });
+    window.addEventListener('pagehide', stopWobble, { once:true });
     crest?.addEventListener('error', () => crest.parentElement?.classList.remove('crest-loaded'));
   </script>
 
