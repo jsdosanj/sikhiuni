@@ -7,33 +7,52 @@
   #university-intro { position:fixed; inset:0; z-index:1000; background:#fff; display:grid; place-items:center; }
   video { width:min(85vw,78svh,720px); height:auto; object-fit:contain; }
   button { position:absolute; right:max(24px,env(safe-area-inset-right)); bottom:max(24px,env(safe-area-inset-bottom)); background:#fff; border:1px solid #9c927e; color:#16335c; min-height:44px; padding:10px 18px; font:14px 'Inter',sans-serif; }
-  @media(prefers-reduced-motion:reduce) { #university-intro { display:none; } }
+
 </style>
 <script>
   const intro = document.getElementById('university-intro');
   const video = intro?.querySelector('video');
+  const replay = document.getElementById('replay-intro');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  let seen = false;
-  try { seen = sessionStorage.getItem('su-crest-intro-2026') === 'seen'; } catch {}
-  if (intro && video && !seen && !motion.matches && !connection?.saveData) {
-    try { sessionStorage.setItem('su-crest-intro-2026', 'seen'); } catch {}
-    const dismiss = () => {
-      intro.hidden = true;
-      video.pause();
-      clearTimeout(timeout);
-      document.removeEventListener('keydown', dismiss);
-      motion.removeEventListener('change', dismiss);
-    };
-    // A strict three-second ceiling also covers stalled or blocked playback.
-    const timeout = setTimeout(dismiss, 3000);
-    intro.hidden = false;
-    video.src = '/assets/brand/intro-2026.mp4';
-    video.addEventListener('ended', dismiss, { once:true });
-    video.addEventListener('error', dismiss, { once:true });
-    intro.querySelector('button')?.addEventListener('click', dismiss, { once:true });
-    document.addEventListener('keydown', dismiss, { once:true });
-    motion.addEventListener('change', dismiss, { once:true });
+  let timeout: ReturnType<typeof setTimeout>;
+  let active = false;
+  let manual = false;
+  function dismiss() {
+    active = false;
+    if (intro) intro.hidden = true;
+    video?.pause();
+    clearTimeout(timeout);
+    if (replay) { replay.textContent = 'Replay intro'; replay.removeAttribute('aria-busy'); }
+    if (manual) replay?.focus({ preventScroll:true });
+  }
+  function playIntro(explicit = false) {
+    if (!intro || !video || active) return;
+    manual = explicit;
+    active = true;
+    if (replay) { replay.textContent = 'Loading intro…'; replay.setAttribute('aria-busy','true'); }
+    if (!video.getAttribute('src')) video.src = '/assets/brand/intro-2026.mp4';
+    video.currentTime = 0;
+    // Loading never blocks the page. Give slow connections time to buffer.
+    timeout = setTimeout(dismiss, 8000);
     video.play().catch(dismiss);
   }
+  video?.addEventListener('playing', () => {
+    if (!active || !intro) return;
+    intro.hidden = false;
+    clearTimeout(timeout);
+    timeout = setTimeout(dismiss, Math.max(0, 3000 - video.currentTime * 1000));
+    try { sessionStorage.setItem('su-crest-intro-2026', 'seen'); } catch {}
+  });
+  video?.addEventListener('ended', dismiss);
+  video?.addEventListener('error', dismiss);
+  intro?.querySelector('button')?.addEventListener('click', dismiss);
+  document.addEventListener('keydown', event => { if (active && event.key === 'Escape') dismiss(); });
+  motion.addEventListener('change', () => { if (motion.matches) dismiss(); });
+  replay?.addEventListener('click', () => playIntro(true));
+  window.addEventListener('pagehide', dismiss, { once:true });
+  let seen = false;
+  try { seen = sessionStorage.getItem('su-crest-intro-2026') === 'seen'; } catch {}
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if ((!seen || navigation?.type === 'reload') && !motion.matches && !connection?.saveData) playIntro();
 </script>
