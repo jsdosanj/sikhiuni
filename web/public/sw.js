@@ -5,7 +5,7 @@
 // decision: the old hand-bumped 'su-web-v26' hadn't changed in months, which
 // meant returning visitors could be stuck on a stale app shell indefinitely.
 // Same failure mode as the crest's stale-SW debugging session earlier today.)
-var CACHE = 'su-web-__BUILD__';
+var CACHE = 'su-web-v27-__BUILD__';
 // Offline course packs live in their OWN unversioned cache, separate from the
 // app-shell CACHE above. The activate handler purges every cache key except
 // CACHE on every version bump (below) — before this split, that purge was
