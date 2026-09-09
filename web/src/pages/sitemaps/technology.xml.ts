@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { tracks, trackSlug, capstones } from '../../lib/institute';
+import { tracks, trackSlug, capstones, schools } from '../../lib/institute';
 import { siteBase, urlsetXml } from '../../lib/sitemap';
 import capstoneBriefs from '../../data/institute/capstone/briefs.json';
 
@@ -20,6 +20,10 @@ export const GET: APIRoute = ({ site }) => {
     { path: '/technology/guide/claude-code', priority: '0.7' },
     { path: '/technology/claude', priority: '0.7' },
   ];
+
+  for (const s of schools) {
+    entries.push({ path: `/technology/school/${s.slug}`, priority: '0.8' });
+  }
 
   for (const t of tracks) {
     if (t.status !== 'published') continue;

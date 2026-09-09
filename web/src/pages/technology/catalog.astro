@@ -1,21 +1,37 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { phases, dojos, guides, capstones, explore } from '../../lib/institute';
+import { phases, dojos, guides, capstones, pathsOf, schools, explore, gurmukhiHtml } from '../../lib/institute';
 
+// Grouped by sub-school so the catalogue reads the same way the Institute is
+// organised: the AI School, then Cybersecurity, then IT.
 const groups = [
-  { label: 'AI Engineering — the phase spine', items: phases },
-  { label: 'Sikh Code', items: [...dojos, ...guides] },
-  { label: 'Capstone', items: capstones },
+  { label: 'AI School — the phase spine', items: phases },
+  { label: 'AI School — Sikh Code', items: [...dojos, ...guides] },
+  { label: 'AI School — capstone', items: capstones },
+  { label: 'Cybersecurity School — the paths', items: pathsOf('cyber') },
+  { label: 'School of IT — the paths', items: pathsOf('it') },
 ];
 ---
-<Base title="Catalogue — Institute of Technology" description="Every course in the Institute of Technology — the AI-engineering phase spine, the Sikh Code courses, and the Build for the Panth capstone." institute>
+<Base title="Catalogue — Institute of Technology" description="Every course in the Institute of Technology — the AI School's phase spine, Sikh Code and the capstone, the Cybersecurity School's seven paths, and the School of IT." institute>
   <InstituteRail />
 
   <section class="i-wrap i-catwrap">
     <span class="i-label">/technology/catalog</span>
     <h1>Catalogue</h1>
-    <p class="i-prose">Everything in the Institute: the twenty-phase AI-engineering spine, the Sikh Code courses, the &ldquo;Build for the Panth&rdquo; capstone, the college-fair booths, and the Open Source Atlas.</p>
+    <p class="i-prose">Everything in the Institute, in its three schools. The <a href="/technology/school/ai">AI School</a>: the twenty-phase AI-engineering spine, the Sikh Code courses, and the &ldquo;Build for the Panth&rdquo; capstone. The <a href="/technology/school/cybersecurity">Cybersecurity School</a>: seven paths from foundations through the range and the cloud to AI and agentic security. The <a href="/technology/school/it">School of IT</a>: the support-to-administrator path and the credentials at the end of it. Plus the college-fair booths and the Open Source Atlas.</p>
+
+    <ul class="i-catschools">
+      {schools.map((s) => (
+        <li>
+          <a class="i-catschool" href={`/technology/school/${s.slug}`}>
+            <span class="i-mono i-catschool-mark" aria-hidden="true">{s.mark}</span>
+            <span class="i-catschool-title">{s.title}</span>
+            <span class="i-prose i-catschool-tag">{s.tagline}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
 
     {groups.map((g) => (
       <div class="i-catgroup">
@@ -28,11 +44,12 @@ const groups = [
               <li>
                 <a class="i-catrow" href={`/technology/track/${'slug' in t && t.slug ? t.slug : t.id}`}>
                   <span class="i-catrow-title">{t.title}</span>
-                  <span class="i-catrow-sum i-prose">{t.summary}</span>
+                  <span class="i-catrow-sum i-prose" set:html={gurmukhiHtml(t.summary)} />
                   <span class="i-catrow-tags i-mono">
                     {'lessonCount' in t && t.lessonCount ? `${t.lessonCount} lessons` : null}
                     {'topicCount' in t && t.topicCount ? `${t.topicCount} topics` : null}
                     {'projectCount' in t && t.projectCount ? `${t.projectCount} projects` : null}
+                    {'moduleCount' in t && t.moduleCount ? `${t.moduleCount} modules` : null}
                     {' · '}{t.license}{' · '}{t.status}
                   </span>
                 </a>
@@ -53,6 +70,13 @@ const groups = [
             <span class="i-catrow-tags i-mono">directory &middot; curated by Tom D&ouml;rr + Cloud Codes</span>
           </a>
         </li>
+        <li>
+          <a class="i-catrow" href="https://cert-prep.dosanjhlabs.com/" target="_blank" rel="noopener">
+            <span class="i-catrow-title">Cert Prep &nearr;</span>
+            <span class="i-catrow-sum i-prose">Professional certification preparation &mdash; PMP, CISM, and CompTIA Security+. A Dosanjh Labs sibling site from the same team as Sikhi University, free. Marks belong to PMI, ISACA, and CompTIA respectively; the certifications are awarded by those bodies, not by us.</span>
+            <span class="i-catrow-tags i-mono">certifications &middot; cert-prep.dosanjhlabs.com</span>
+          </a>
+        </li>
       </ul>
     </div>
 
@@ -63,7 +87,7 @@ const groups = [
           <li>
             <a class="i-catrow" href={b.href} target="_blank" rel="noopener">
               <span class="i-catrow-title">{b.title} &nearr;</span>
-              <span class="i-catrow-sum i-prose">{b.blurb}</span>
+              <span class="i-catrow-sum i-prose" set:html={gurmukhiHtml(b.blurb)} />
             </a>
           </li>
         ))}
@@ -75,6 +99,14 @@ const groups = [
     .i-catwrap { padding: 40px 24px 72px; }
     .i-catwrap > h1 { margin: 6px 0 10px; font-size: clamp(26px, 4vw, 36px); }
     .i-catwrap > p { max-width: 62ch; margin-bottom: 32px; }
+    .i-catschools { list-style: none; display: grid; gap: 12px; margin: 0 0 8px; padding: 0; }
+    @media (min-width: 700px) { .i-catschools { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
+    .i-catschool { display: block; padding: 14px 18px; border: 1px solid var(--i-line); border-radius: var(--i-r-md); background: var(--i-surface); text-decoration: none; transition: border-color 150ms; }
+    .i-catschool:hover { border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line)); }
+    .i-catschool-mark { color: var(--i-filament); font-size: 15px; letter-spacing: 0.06em; }
+    .i-catschool-title { display: block; margin-top: 4px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 17px; color: var(--i-ink); }
+    .i-catschool-tag { display: block; margin-top: 2px; font-size: 13.5px; }
+
     .i-catgroup { margin-top: 28px; }
     .i-catgroup > .i-label { display: block; margin-bottom: 10px; }
     .i-catlist { list-style: none; margin: 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); }

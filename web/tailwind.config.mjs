@@ -44,7 +44,16 @@ export default {
       },
       fontFamily: {
         serif: ['"Source Serif 4"', 'Georgia', '"Iowan Old Style"', '"Times New Roman"', 'serif'],
-        sans: ['Archivo', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        // "Noto Sans Gurmukhi" sits after Archivo as a GLYPH fallback, not a
+        // face change: Archivo still wins every Latin character, and the
+        // Gurmukhi face is only reached for codepoints Archivo does not carry.
+        // Without it, Gurmukhi inside otherwise-English strings that cannot be
+        // wrapped in a `.gur` span — an <option> label, a mixed-script
+        // placeholder, a course summary with an inline term — fell through to
+        // whatever the OS happened to have, or to tofu. Both Noto faces are
+        // self-hosted and inlined on every page by Base.astro, so this costs
+        // no extra request. Found by /qa 2026-09-09.
+        sans: ['Archivo', '"Noto Sans Gurmukhi"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
         display: ['Archivo', 'Georgia', 'serif'],
         gur: ['"Noto Sans Gurmukhi"', '"Gurmukhi MN"', '"Gurbani Akhar"', '"Raavi"', 'serif'],

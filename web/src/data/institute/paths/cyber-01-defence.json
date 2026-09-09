@@ -1,0 +1,105 @@
+{
+  "track": "cyber-01-defence",
+  "school": "cyber",
+  "blurb": "Log triage in a SIEM, incident response, disk and memory forensics, threat intelligence, and malware analysis — practised on real, free blue-team ranges.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "adaptedFrom": {
+    "name": "Awesome Cyber Security University",
+    "href": "https://brootware.github.io/awesome-cyber-security-university/",
+    "license": "CC0-1.0",
+    "note": "Module sequencing follows the CC0 blue-team roadmap. Objectives, teaching notes, and framing are written by Sikhi University. No lab content is rehosted — every lab opens on the platform that runs it."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "the-defenders-bench",
+      "title": "The defender's bench",
+      "objective": "Name the core defensive tools — SIEM, vulnerability scanner, forensic imager, YARA, honeypot — and say what question each one answers.",
+      "teach": "Defence is a workshop, not a wall. Before you respond to anything, learn what sits on the bench: the log aggregator that tells you what happened, the scanner that tells you what is exposed, the imager that preserves a disk without altering it, and the rule language that lets you say \"find me everything that looks like this\". Windows fundamentals sit in this module deliberately — most of what you will defend runs on it.",
+      "labs": [
+        { "title": "Windows Fundamentals", "provider": "TryHackMe", "href": "https://tryhackme.com/room/windowsfundamentals1xbx", "cost": "free · account" },
+        { "title": "Intro to SIEM", "provider": "TryHackMe", "href": "https://tryhackme.com/room/introtosiem", "cost": "free · account" },
+        { "title": "Nessus", "provider": "TryHackMe", "href": "https://tryhackme.com/room/rpnessusredux", "cost": "free · account" },
+        { "title": "OpenVAS", "provider": "TryHackMe", "href": "https://tryhackme.com/room/openvas", "cost": "free · account" },
+        { "title": "YARA", "provider": "TryHackMe", "href": "https://tryhackme.com/room/yara", "cost": "free · account" },
+        { "title": "Intro to Honeypots", "provider": "TryHackMe", "href": "https://tryhackme.com/room/introductiontohoneypots", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "naming-the-attack",
+      "title": "Naming the attack — MITRE ATT&CK",
+      "objective": "Map an observed behaviour to an ATT&CK technique, and use the framework to predict what an intruder is likely to do next.",
+      "teach": "ATT&CK is the shared vocabulary of the field: a catalogue of what attackers actually do, organised by the goal they are pursuing. Its value to a defender is prediction. Once you can say \"this is credential access\", the framework tells you which techniques usually follow — and therefore which logs to pull before the intruder gets there.",
+      "labs": [
+        { "title": "MITRE", "provider": "TryHackMe", "href": "https://tryhackme.com/room/mitre", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "the-soc-shift",
+      "title": "The SOC shift — triage and hunting",
+      "objective": "Work a real alert from first indicator to written timeline, and run a hypothesis-driven hunt in Splunk.",
+      "teach": "This is the module that most resembles a paid job. An alert arrives with almost no context; your work is to build a timeline that survives someone else reading it. The Boss of the SOC datasets are the closest thing to a real corporate log estate that is free to practise on, and the threat-hunting workshops teach the harder discipline: looking for the intruder nobody alerted on.",
+      "labs": [
+        { "title": "Investigating Windows", "provider": "TryHackMe", "href": "https://tryhackme.com/room/investigatingwindows", "cost": "free · account" },
+        { "title": "Juicy Details", "provider": "TryHackMe", "href": "https://tryhackme.com/room/juicydetails", "cost": "free · account" },
+        { "title": "Carnage", "provider": "TryHackMe", "href": "https://tryhackme.com/room/c2carnage", "cost": "free · account" },
+        { "title": "Splunk — Boss of the SOC v1", "provider": "TryHackMe", "href": "https://tryhackme.com/room/bpsplunk", "cost": "free · account" },
+        { "title": "Splunk — Boss of the SOC v2", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/16", "cost": "free · account" },
+        { "title": "Hunt Conti with Splunk", "provider": "TryHackMe", "href": "https://tryhackme.com/room/contiransomwarehgh", "cost": "free · account" },
+        { "title": "Threat Hunting — Credential Access", "provider": "Cyborg Security", "href": "https://info.cyborgsecurity.com/en-us/threat-hunting-workshop-5", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "threat-intelligence",
+      "title": "Threat intelligence, and the crypto you need for it",
+      "objective": "Turn a raw indicator into attributed context, and read the hashes and encodings that show up in every investigation.",
+      "teach": "Intelligence is the difference between \"a machine talked to an unusual address\" and \"a machine talked to infrastructure this actor has used since March\". The second sentence changes what you do next. Cryptography sits alongside it here for a practical reason: half of triage is recognising a hash, a base64 blob, or a certificate, and knowing what it can and cannot tell you.",
+      "labs": [
+        { "title": "Threat Intelligence 101", "provider": "TryHackMe", "href": "https://tryhackme.com/room/cyberthreatintel", "cost": "free · account" },
+        { "title": "Threat Intelligence Tools", "provider": "TryHackMe", "href": "https://tryhackme.com/room/threatinteltools", "cost": "free · account" },
+        { "title": "Intel101 Challenge", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/38", "cost": "free · account" },
+        { "title": "Introduction to CryptoHack", "provider": "CryptoHack", "href": "https://cryptohack.org/courses/intro/course_details/", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "forensics",
+      "title": "Forensics — disk, memory, and network",
+      "objective": "Acquire and examine a disk image and a memory capture without altering the evidence, and reconstruct events from a packet trace.",
+      "teach": "Forensics is defence practised slowly and on the record. The rules are unforgiving: work on a copy, record what you did, and be able to prove the image you examined is the image you were given. The challenges here span all three surfaces — a Windows disk, a memory capture with a live process list still inside it, and packet traces where the answer is sitting in plain text.",
+      "labs": [
+        { "title": "Introduction to Digital Forensics", "provider": "TryHackMe", "href": "https://tryhackme.com/room/introdigitalforensics", "cost": "free · account" },
+        { "title": "Autopsy", "provider": "TryHackMe", "href": "https://tryhackme.com/room/autopsy2ze0", "cost": "free · account" },
+        { "title": "Redline", "provider": "TryHackMe", "href": "https://tryhackme.com/room/btredlinejoxr3d", "cost": "free · account" },
+        { "title": "Hunter — Windows disk image forensics", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/32", "cost": "free · account" },
+        { "title": "Ulysses — Linux disk image forensics", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/41", "cost": "free · account" },
+        { "title": "Banking Troubles — Windows memory forensics", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/43", "cost": "free · account" },
+        { "title": "Packets Primer", "provider": "picoCTF", "href": "https://play.picoctf.org/practice/challenge/286", "cost": "free · account" },
+        { "title": "Wireshark doo dooo do doo...", "provider": "picoCTF", "href": "https://play.picoctf.org/practice/challenge/115", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 6,
+      "slug": "malware",
+      "title": "Malware, read rather than run",
+      "objective": "Triage a suspicious binary or document statically, and describe what it does without executing it outside a sandbox.",
+      "teach": "The last module is the one that most changes how you read an incident. Static triage — strings, imports, embedded scripts in a document — answers most questions without ever running the sample, which is exactly why it is the responsible place to start. Detonate only in a sandbox you built to be destroyed. The Log4j challenge is here on purpose: it is the vulnerability that defined a defensive generation.",
+      "labs": [
+        { "title": "History of Malware", "provider": "TryHackMe", "href": "https://tryhackme.com/room/historyofmalware", "cost": "free · account" },
+        { "title": "Malware Introductory", "provider": "TryHackMe", "href": "https://tryhackme.com/room/malmalintroductory", "cost": "free · account" },
+        { "title": "Basic Malware Reverse Engineering", "provider": "TryHackMe", "href": "https://tryhackme.com/room/basicmalwarere", "cost": "free · account" },
+        { "title": "Get PDF — malicious document analysis", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/47", "cost": "free · account" },
+        { "title": "Detect Log4j", "provider": "CyberDefenders", "href": "https://cyberdefenders.org/blueteam-ctf-challenges/86", "cost": "free · account" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "SANS DFIR cheat sheet booklet", "provider": "SANS Institute", "href": "https://www.sans.org/posters/sans-dfir-cheatsheet-booklet", "note": "The forensics cheat sheets collected into one download. Copyright SANS, non-commercial use." },
+    { "title": "Windows Forensic Analysis poster", "provider": "SANS Institute", "href": "https://www.sans.org/posters/windows-forensic-analysis", "note": "Where the artefacts live on a Windows disk. Worth printing before module 5." },
+    { "title": "SANS posters and cheat sheets", "provider": "SANS Institute", "href": "https://www.sans.org/posters", "note": "The full free shelf, by discipline." }
+  ]
+}

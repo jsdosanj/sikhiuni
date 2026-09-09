@@ -3,6 +3,7 @@ import { topicName } from '../lib/data';
 import type { Course } from '../lib/data';
 import Icon from './Icon.astro';
 import { isVerified } from '../lib/verification';
+import { gurmukhiHtml } from '../lib/gurmukhi';
 interface Props { course: Course; }
 const { course: c } = Astro.props;
 const verified = isVerified(c.id);
@@ -20,6 +21,6 @@ const levelStrip = c.level < 200 ? 'bg-ok' : c.level < 400 ? 'bg-saffron' : 'bg-
   </div>
   <h3 class="line-clamp-2 text-lg font-bold leading-snug text-navy group-hover:text-saffron-deep" data-no-i18n>{c.title}</h3>
   <div class="mt-0.5 truncate font-sans text-xs text-muted"><span data-i18n="card.prof">Prof.</span> <span data-no-i18n>{c.professor}</span></div>
-  <p class="mt-2 line-clamp-3 text-[0.95rem] text-ink/90" data-no-i18n>{c.summary}</p>
+  <p class="mt-2 line-clamp-3 text-[0.95rem] text-ink/90" data-no-i18n set:html={gurmukhiHtml(c.summary)} />
   <div class="mt-auto pt-3 font-sans text-sm font-semibold text-saffron-deep" data-i18n="card.view">View course →</div>
 </a>

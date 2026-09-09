@@ -190,6 +190,18 @@ const RATE_LIMITS = {
   "/api/teacher/archive-request": { limit: 5, window: 60 },
   "/api/discussions/report": { limit: 5, window: 60 },
   "/api/submissions": { limit: 10, window: 60 },
+  // Grading endpoints. These score against server-only answer keys, so the
+  // response is the only channel back to an attacker — which makes repeated
+  // submission the way you reconstruct a key. The handlers each refuse to be a
+  // single-question oracle (quiz.js grades against the full key length,
+  // institute-exam.js and program-exam.js require a minimum sample and own their
+  // pass mark), but none of them was throttled, so a boundary-tuning attack could
+  // run at full speed. A real learner submits a lesson check or an exam a handful
+  // of times a minute at most; these caps are far above honest use and well below
+  // useful brute-force. Fails open like every other limit here (CSO 2026-09-09).
+  "/api/quiz": { limit: 30, window: 60 },
+  "/api/program-exam": { limit: 10, window: 60 },
+  "/api/institute-exam": { limit: 10, window: 60 },
 };
 const RL_ENFORCE = true;
 

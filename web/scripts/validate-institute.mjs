@@ -12,9 +12,25 @@ if (m.schemaVersion !== 1) err(`manifest.schemaVersion must be 1, got ${m.schema
 if (!m.wedge || m.wedge.length < 20) err('manifest.wedge missing — CEO decision C1 requires the stated why-us');
 
 const ids = new Set();
-const KINDS = new Set(['phase', 'dojo', 'guide', 'capstone']);
+const KINDS = new Set(['phase', 'dojo', 'guide', 'capstone', 'path']);
 const STATUSES = new Set(['planned', 'draft', 'published']);
-const SOURCES = new Set(['aisf', 'sikhi.io', 'ours']);
+const SOURCES = new Set(['aisf', 'sikhi.io', 'ours', 'acsu', 'niccs']);
+
+// ---- sub-schools -----------------------------------------------------------
+// The Institute is split into the AI School, the Cybersecurity School and the
+// School of IT. Every track names one; every school is declared here once.
+const schoolIds = new Set();
+for (const s of m.schools || []) {
+  if (!s.id) { err('school with no id'); continue; }
+  if (schoolIds.has(s.id)) err(`duplicate school id: ${s.id}`);
+  schoolIds.add(s.id);
+  for (const f of ['slug', 'title', 'label', 'mark', 'tagline', 'blurb']) {
+    if (!s[f]) err(`school ${s.id}: missing ${f}`);
+  }
+}
+for (const req of ['ai', 'cyber', 'it']) {
+  if (!schoolIds.has(req)) err(`manifest.schools is missing the "${req}" sub-school`);
+}
 
 for (const t of m.tracks || []) {
   if (!t.id) { err('track with no id'); continue; }
@@ -23,6 +39,7 @@ for (const t of m.tracks || []) {
   if (!KINDS.has(t.kind)) err(`${t.id}: bad kind "${t.kind}"`);
   if (!STATUSES.has(t.status)) err(`${t.id}: bad status "${t.status}"`);
   if (!SOURCES.has(t.source)) err(`${t.id}: bad source "${t.source}"`);
+  if (!schoolIds.has(t.school)) err(`${t.id}: school "${t.school}" is not a declared sub-school`);
   if (!t.title || !t.summary) err(`${t.id}: missing title/summary`);
   if (typeof t.level !== 'number') err(`${t.id}: level must be a number`);
   if (!t.license) err(`${t.id}: missing license`);
@@ -92,6 +109,82 @@ if (existsSync(IMP)) {
         }
       }
     }
+  }
+}
+
+// ---- `path` tracks (Cybersecurity School, School of IT) --------------------
+// A `path` track carries our modules in paths/<track>.json. Everything it points
+// at is somebody else's, so the gate here is licensing as much as shape: every
+// lab must be an absolute https link out (or an internal /technology route), and
+// the upstream credit must name a source and its licence.
+//
+// The cost vocabulary is fixed on purpose. A learner deciding what they can
+// afford is the one reader who cannot tolerate vague copy, so "free" may not be
+// stretched to cover a free course with a $149 exam behind it, or a self-hosted
+// lab that bills their own cloud account while it runs.
+const PATHS = 'src/data/institute/paths';
+const COSTS = new Set([
+  'free',                   // no account, no money
+  'free · account',         // free, sign-up required
+  'free tier',              // the free tier of a paid platform
+  'free for educators',     // free to verified teachers
+  'free · your cloud bill', // self-hosted: you pay your own provider to run it
+  'free course · paid exam',// the training is free, the certification exam is not
+  'paid',                   // costs money
+]);
+for (const t of (m.tracks || []).filter((x) => x.kind === 'path')) {
+  const f = `${PATHS}/${t.id}.json`;
+  if (!existsSync(f)) { err(`${t.id}: kind "path" but ${f} is missing`); continue; }
+  let p;
+  try { p = JSON.parse(readFileSync(f, 'utf-8')); }
+  catch { err(`${f}: not valid JSON`); continue; }
+  if (p.track !== t.id) err(`${f}: track "${p.track}" does not match ${t.id}`);
+  if (p.school !== t.school) err(`${f}: school "${p.school}" does not match manifest (${t.school})`);
+  const a = p.adaptedFrom || {};
+  if (!a.name || !a.license || !/^https:\/\//.test(a.href || '')) {
+    err(`${f}: adaptedFrom needs name, license, and an absolute https href`);
+  }
+  if (!Array.isArray(p.modules) || p.modules.length === 0) { err(`${f}: no modules`); continue; }
+  if (t.status === 'published' && p.modules.length !== t.moduleCount) {
+    err(`${t.id}: manifest moduleCount ${t.moduleCount} != ${p.modules.length} modules`);
+  }
+  const slugs = new Set();
+  p.modules.forEach((mod, i) => {
+    for (const k of ['slug', 'title', 'objective', 'teach']) {
+      if (typeof mod[k] !== 'string' || !mod[k].trim()) err(`${f}: modules[${i}] missing ${k}`);
+    }
+    if (mod.num !== i + 1) err(`${f}: modules[${i}] num should be ${i + 1}, got ${mod.num}`);
+    if (slugs.has(mod.slug)) err(`${f}: duplicate module slug "${mod.slug}"`);
+    slugs.add(mod.slug);
+    // A reproduced framework must carry its attribution. The only reason we may
+    // quote one at all is its licence, and CC BY-SA has conditions — an
+    // unattributed checklist is a licence breach, so fail the build on it.
+    if (mod.checklist) {
+      const c = mod.checklist;
+      if (!c.label) err(`${f}: ${mod.slug}: checklist needs a label`);
+      if (typeof c.note !== 'string' || c.note.trim().length < 20) {
+        err(`${f}: ${mod.slug}: checklist needs an attribution note naming the source and its licence`);
+      }
+      if (!Array.isArray(c.items) || c.items.length === 0) err(`${f}: ${mod.slug}: checklist has no items`);
+      const seen = new Set();
+      for (const it of c.items || []) {
+        if (!it.id || !it.title || !it.note) err(`${f}: ${mod.slug}: checklist item needs id, title and note`);
+        if (seen.has(it.id)) err(`${f}: ${mod.slug}: duplicate checklist id "${it.id}"`);
+        seen.add(it.id);
+      }
+    }
+    if (!Array.isArray(mod.labs) || mod.labs.length === 0) err(`${f}: module "${mod.slug}" has no labs`);
+    for (const lab of mod.labs || []) {
+      if (!lab.title || !lab.provider) err(`${f}: ${mod.slug}: a lab is missing title/provider`);
+      if (!/^https:\/\//.test(lab.href || '') && !(lab.href || '').startsWith('/technology/')) {
+        err(`${f}: ${mod.slug}: lab "${lab.title}" href must be absolute https or an internal /technology/ route`);
+      }
+      if (!COSTS.has(lab.cost)) err(`${f}: ${mod.slug}: lab "${lab.title}" has cost "${lab.cost}" outside the declared vocabulary`);
+    }
+  });
+  for (const b of p.bench || []) {
+    if (!/^https:\/\//.test(b.href || '')) err(`${f}: bench "${b.title}" href must be absolute https`);
+    if (!b.provider || !b.note) err(`${f}: bench "${b.title}" needs a provider and a note`);
   }
 }
 
