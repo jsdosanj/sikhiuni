@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { phases, dojos, guides, capstones, pathsOf, schools, WEDGE, totalLessons } from '../../lib/institute';
+import { phases, dojos, guides, capstones, pathsOf, schools, WEDGE, totalLessons, gurmukhiHtml } from '../../lib/institute';
 
 const cyberPaths = pathsOf('cyber');
 const itPaths = pathsOf('it');
@@ -72,7 +72,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
           <span class="i-mono i-school-mark" aria-hidden="true">{s.mark}</span>
           <strong class="i-school-title">{s.title}</strong>
           <span class="i-school-tag">{s.tagline}</span>
-          <span class="i-prose i-school-blurb">{s.blurb}</span>
+          <span class="i-prose i-school-blurb" set:html={gurmukhiHtml(s.blurb)} />
           <span class="i-school-go i-mono">enter &rarr;</span>
         </a>
       ))}
@@ -149,7 +149,7 @@ const desc = 'Sikhi University’s engineering wing — three schools: AI, Cyber
         <a class="i-panel i-card" href={`/technology/track/${t.id}`}>
           <span class="i-corner">{t.kind}</span>
           <strong class="i-card-title">{t.title}</strong>
-          <span class="i-prose i-card-sum">{t.summary}</span>
+          <span class="i-prose i-card-sum" set:html={gurmukhiHtml(t.summary)} />
         </a>
       ))}
       <a class="i-panel i-card" href="/technology/claude">

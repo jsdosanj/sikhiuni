@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { phases, dojos, guides, capstones, pathsOf, schools, explore } from '../../lib/institute';
+import { phases, dojos, guides, capstones, pathsOf, schools, explore, gurmukhiHtml } from '../../lib/institute';
 
 // Grouped by sub-school so the catalogue reads the same way the Institute is
 // organised: the AI School, then Cybersecurity, then IT.
@@ -44,7 +44,7 @@ const groups = [
               <li>
                 <a class="i-catrow" href={`/technology/track/${'slug' in t && t.slug ? t.slug : t.id}`}>
                   <span class="i-catrow-title">{t.title}</span>
-                  <span class="i-catrow-sum i-prose">{t.summary}</span>
+                  <span class="i-catrow-sum i-prose" set:html={gurmukhiHtml(t.summary)} />
                   <span class="i-catrow-tags i-mono">
                     {'lessonCount' in t && t.lessonCount ? `${t.lessonCount} lessons` : null}
                     {'topicCount' in t && t.topicCount ? `${t.topicCount} topics` : null}
@@ -87,7 +87,7 @@ const groups = [
           <li>
             <a class="i-catrow" href={b.href} target="_blank" rel="noopener">
               <span class="i-catrow-title">{b.title} &nearr;</span>
-              <span class="i-catrow-sum i-prose">{b.blurb}</span>
+              <span class="i-catrow-sum i-prose" set:html={gurmukhiHtml(b.blurb)} />
             </a>
           </li>
         ))}

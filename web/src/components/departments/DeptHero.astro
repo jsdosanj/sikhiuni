@@ -5,6 +5,7 @@
 // bespoke "signature" module sits directly under the hero.
 import type { Department } from '../../lib/departments';
 import { coursesInDepartment, departmentTopics } from '../../lib/departments';
+import { gurmukhiHtml } from '../../lib/gurmukhi';
 
 interface Props { d: Department }
 const { d } = Astro.props;
@@ -23,7 +24,7 @@ const levelSpan = levels.length ? `${levels[0]}–${levels[levels.length - 1]}` 
     <p class="dept-eyebrow">School within Sikhi University</p>
     <h1 class="dept-h1">{d.name}</h1>
     <p class="dept-tagline">{d.tagline}</p>
-    <p class="dept-stance">{d.stance}</p>
+    <p class="dept-stance" set:html={gurmukhiHtml(d.stance)} />
     <div class="dept-hero-meta">
       <span class="dept-chip"><b>{courses.length}</b> courses</span>
       <span class="dept-chip"><b>{topics.length}</b> subject{topics.length === 1 ? '' : 's'}</span>

@@ -62,7 +62,7 @@ const ld = {
       <h1>{t.title}</h1>
       <p class="i-prose i-thead-sum" set:html={gurmukhiHtml(seva?.blurb || idx?.blurb || t.summary)} />
       {seva?.blurb && (idx?.blurb || t.summary) && (
-        <p class="i-mono i-thead-upstream">Upstream: {idx?.blurb || t.summary}</p>
+        <p class="i-mono i-thead-upstream">Upstream: <span set:html={gurmukhiHtml(idx?.blurb || t.summary)} /></p>
       )}
       <p class="i-mono i-thead-meta">
         {isImported ? `${idx.lessons.length} lessons` : isPath ? `${pathData!.modules.length} modules` : (t.lessonCount || t.topicCount || t.projectCount || 0) + ' ' + (t.kind === 'dojo' ? 'topics' : t.kind === 'capstone' ? 'projects' : 'lessons')}

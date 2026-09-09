@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { explore } from '../../lib/institute';
+import { explore, gurmukhiHtml } from '../../lib/institute';
 
 // Per-booth chrome. Each stand deliberately breaks the Institute's design
 // system to read like its source (DESIGN-INSTITUTE.md §college-fair) — no
@@ -35,7 +35,7 @@ const MARKS: Record<string, string> = {
         <span class="i-booth-mark" aria-hidden="true">{MARKS[b.id] ?? '↗'}</span>
         <div>
           <strong class="i-booth-name">{b.title}</strong>
-          <span class="i-booth-blurb">{b.blurb}</span>
+          <span class="i-booth-blurb" set:html={gurmukhiHtml(b.blurb)} />
           {b.id === 'freecodecamp' && (
             <span class="i-booth-fine">
               Lecture companions and links to the freeCodeCamp&reg; curriculum. Sikhi University is not affiliated with, sponsored by, or endorsed by freeCodeCamp.org. Certifications are issued by freeCodeCamp. Curriculum content is CC&nbsp;BY-SA&nbsp;4.0.

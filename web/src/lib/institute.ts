@@ -131,16 +131,10 @@ export const pathsOf = (id: SchoolId): Track[] => paths.filter((t) => t.school =
 export const trackSlug = (t: Track): string =>
   (t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id;
 
-/**
- * Wrap the Gurmukhi runs in a plain-text string so each one gets a real
- * Gurmukhi face and `lang="pa"` (DESIGN-INSTITUTE.md §Non-negotiables). Returns
- * HTML, so the input is escaped first — use with `set:html`.
- */
-const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-export const gurmukhiHtml = (s: string): string =>
-  s.replace(/[&<>"']/g, (c) => ESC[c])
-    .replace(/[਀-੿]+(?:[ ‍]+[਀-੿]+)*/g,
-      (run) => `<span class="gur" lang="pa">${run}</span>`);
+// Gurmukhi run wrapping (DESIGN-INSTITUTE.md §Non-negotiables) is site-wide,
+// not Institute-only — the department heroes and course cards need it too.
+// Re-exported here so existing Institute imports keep working.
+export { gurmukhiHtml } from './gurmukhi';
 
 /** Total planned lessons across the built spine (for the "N lessons" copy). */
 export const totalLessons: number = phases.reduce((n, p) => n + (p.lessonCount ?? 0), 0);

@@ -52,7 +52,7 @@ const ld = {
       <span class="i-label i-mono">// {s.label}</span>
       <h1 class="i-shead-h"><span class="i-mono i-shead-mark" aria-hidden="true">{s.mark}</span> {s.title}</h1>
       <p class="i-shead-tag">{s.tagline}</p>
-      <p class="i-prose i-shead-blurb">{s.blurb}</p>
+      <p class="i-prose i-shead-blurb" set:html={gurmukhiHtml(s.blurb)} />
       <p class="i-mono i-shead-meta">
         {spine.length + aside.length} course{spine.length + aside.length === 1 ? '' : 's'} &middot; {credits.join(', ')}
       </p>
@@ -86,7 +86,7 @@ const ld = {
           <a class="i-panel i-card" href={`/technology/track/${trackSlug(t)}`}>
             <span class="i-corner">{t.kind}</span>
             <strong class="i-card-title">{t.title}</strong>
-            <span class="i-prose i-card-sum">{t.summary}</span>
+            <span class="i-prose i-card-sum" set:html={gurmukhiHtml(t.summary)} />
           </a>
         ))}
       </div>

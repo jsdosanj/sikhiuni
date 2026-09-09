@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InstituteRail from '../../components/institute/InstituteRail.astro';
-import { resources } from '../../lib/institute';
+import { resources, gurmukhiHtml } from '../../lib/institute';
 
 const SECTIONS = [
   { id: 'lists', label: 'Curated lists & directories', hint: 'free — hand-picked link collections' },
@@ -30,7 +30,7 @@ const desc = 'Books, curated link directories, and paid courses worth your time 
             <span class="i-corner">{r.price}</span>
             <strong class="i-res-title">{r.title}</strong>
             <span class="i-mono i-res-author">{r.author}</span>
-            <span class="i-prose i-res-blurb">{r.blurb}</span>
+            <span class="i-prose i-res-blurb" set:html={gurmukhiHtml(r.blurb)} />
             <span class="i-res-go">open &nearr;</span>
           </a>
         ))}
