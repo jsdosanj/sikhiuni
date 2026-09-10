@@ -5,14 +5,13 @@ import { departments, wing, departmentEntryLabel, schoolCountWord } from '../../
 import { published } from '../../lib/data';
 
 const desc =
-  'The schools of Sikhi University — Theology, History, Language, Literature, Political Governance, the Arts, the Sciences, Health, Martial Arts, and the Institute of Technology. Every course belongs to one.';
+  'The schools of Sikhi University, Theology, History, Language, Literature, Political Governance, the Arts, the Sciences, Health, Martial Arts, and the Institute of Technology. Every course belongs to one.';
 const cards = [
   ...departments.map((d) => ({
     href: `/departments/${d.slug}`,
     name: d.name,
     tagline: d.tagline,
     accent: d.accent,
-    img: d.image.src,
     count: departmentEntryLabel(d),
   })),
   {
@@ -20,19 +19,18 @@ const cards = [
     name: wing.name,
     tagline: wing.tagline,
     accent: wing.accent,
-    img: wing.image!.src,
     count: 'The engineering wing',
   },
 ];
 ---
-<Base title="Departments — Sikhi University" description={desc} ambient="none">
+<Base title="Departments, Sikhi University" description={desc} ambient="none">
   <div class="dept-page dept-index" style="--dept:#b58015">
     <header class="dx-hero dept-grain">
       <div class="dx-hero-in wrap">
         <p class="dept-eyebrow">One university</p>
         <h1 class="dx-h1">{schoolCountWord} schools</h1>
         <p class="dx-sub">
-          Every course at Sikhi University belongs to a department — each with its own faculty, its
+          Every course at Sikhi University belongs to a department, each with its own faculty, its
           own signature courses, and its own front door. Start with the one that fits your question,
           or <a href="/catalog">browse all {published.length} courses</a>.
         </p>
@@ -44,10 +42,6 @@ const cards = [
         <div class="dx-grid">
           {cards.map((c) => (
             <a class="dx-card" href={c.href} style={`--dept:${c.accent}`} data-rise>
-              <span class="dx-card-media" aria-hidden="true">
-                <img src={c.img} alt="" loading="lazy" />
-                <span class="dx-card-veil"></span>
-              </span>
               <span class="dx-card-body">
                 <span class="dx-card-name">{c.name}</span>
                 <span class="dx-card-tag">{c.tagline}</span>
@@ -62,13 +56,13 @@ const cards = [
 
   <style>
     .dx-hero {
-      position: relative; overflow: hidden; color: #fff;
-      background: radial-gradient(120% 90% at 15% 0%, #23303f, #131b26 55%, #0d131c);
+      position: relative; overflow: hidden; color: var(--school-header-ink);
+      background: var(--school-header-bg);
       padding: clamp(56px, 10vw, 120px) 24px clamp(40px, 6vw, 72px);
     }
     .dx-h1 { margin: 10px 0 0; font-size: clamp(44px, 9vw, 104px); font-weight: 800; letter-spacing: -0.02em; line-height: .98; }
-    .dx-sub { margin: 22px 0 0; max-width: 58ch; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.75; color: rgba(255,255,255,.82); }
-    .dx-sub a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+    .dx-sub { margin: 22px 0 0; max-width: 58ch; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.75; color: var(--school-header-muted); }
+    .dx-sub a { color: var(--school-header-ink); text-decoration: underline; text-underline-offset: 3px; }
 
     .dx-grid-wrap { background: rgb(var(--c-paper)); padding: clamp(36px, 6vw, 72px) 24px clamp(56px, 8vw, 100px); }
     .dx-grid { display: grid; gap: 18px; }

@@ -1,18 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Sign in / Sign up — Sikhi University" description="Sign in to Sikhi University — as a student to learn, or apply to teach." ambient="hall" noindex={true}>
+<Base title="Sign in / Sign up, Sikhi University" description="Sign in to Sikhi University, as a student to learn, or apply to teach." ambient="hall" noindex={true}>
   <!-- islogin (555-575): centered hero-midnight surface, flat crest, mono
        footer links, gold primary button.
 
-       2026-09-06 — registration is now two steps (username + email -> emailed
+       2026-09-06, registration is now two steps (username + email -> emailed
        6-digit code -> code + password), matching sikhi.io and punjabiuni.com.
        The account is only created once the code is proven, so this site can
        no longer make an account whose email was never confirmed.
 
        THE MAGIC-LINK SIGN-IN IS GONE, deliberately and not just hidden. It
        emailed a link on every use (violating "no email per routine login")
-       and, worse, verify.js CREATED AN ACCOUNT for any unknown address — an
+       and, worse, verify.js CREATED AN ACCOUNT for any unknown address, an
        implicit registration path with no password and no confirmation. The
        accounts that predate password auth are not stranded: forgot-password
        doubles as "set my first password" (see forgot-password.js's own
@@ -46,7 +46,7 @@ import Base from '../layouts/Base.astro';
             <label class="cursor-pointer rounded-[2px] border border-white/[0.2] bg-white/[0.04] p-4 has-[:checked]:border-saffron">
               <input type="radio" name="role" value="teacher" class="mr-2" />
               <span class="font-semibold text-white">Teacher</span>
-              <p class="mt-1 font-sans text-sm text-white/[0.65]">Share your knowledge. Sign in, then complete a short application — an admin reviews it before you get teacher access.</p>
+              <p class="mt-1 font-sans text-sm text-white/[0.65]">Share your knowledge. Sign in, then complete a short application, an admin reviews it before you get teacher access.</p>
             </label>
           </div>
         </fieldset>
@@ -217,7 +217,7 @@ import Base from '../layouts/Base.astro';
       return {
         username: regUsername.value.trim().toLowerCase(),
         email: regEmail.value.trim(),
-        // Only ever a real boolean — the API accepts nothing else as consent.
+        // Only ever a real boolean, the API accepts nothing else as consent.
         marketing: (document.getElementById('marketing') as HTMLInputElement).checked,
       };
     }

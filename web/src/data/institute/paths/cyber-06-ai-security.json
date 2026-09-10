@@ -1,0 +1,88 @@
+{
+  "track": "cyber-06-ai-security",
+  "school": "cyber",
+  "blurb": "The other half of the Institute, read as an attack surface: prompt injection, agents that act with your credentials, and the skill supply chain that is already being poisoned.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "creditLabel": "Frameworks published by",
+  "adaptedFrom": {
+    "name": "OWASP GenAI Security Project",
+    "href": "https://genai.owasp.org/",
+    "license": "CC-BY-SA-4.0",
+    "note": "The Agentic Skills Top 10 is CC BY-SA 4.0, the same licence this path carries, so its ten risk titles are reproduced below with attribution and share-alike rather than merely linked. The LLM and Agentic Applications Top 10s are summarised and linked to OWASP's own pages — read the source documents, which carry the attack scenarios and mitigations this map deliberately does not copy."
+  },
+  "warning": "This path is about the systems the AI School teaches you to build. Everything here is dual-use in the sharpest way in this building: the techniques that test your own agent are the techniques that attack somebody else's. Test what you own or have written permission to test, and treat a model's output as untrusted input, always.",
+  "modules": [
+    {
+      "num": 1,
+      "slug": "prompt-injection",
+      "title": "Prompt injection, and why it is not a bug you patch",
+      "objective": "Explain why an LLM cannot reliably separate instructions from data, and identify where in a system that failure becomes someone else's problem.",
+      "teach": "Every classical injection you met in the web module had a fix: separate the code from the data, bind your parameters, and the class of bug closes. Prompt injection has no such fix, because for a language model the instruction and the data are the same thing — one stream of tokens. That is why it has sat at number one on OWASP's list through every revision. Stop looking for the sanitiser that ends it and start designing for the assumption that a model will, sooner or later, do what a hostile document told it to. Everything else in this path follows from that.",
+      "labs": [
+        { "title": "OWASP Top 10 for LLM Applications 2026", "provider": "OWASP GenAI Security Project", "href": "https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/", "cost": "free" },
+        { "title": "The LLM risk archive — each entry in depth", "provider": "OWASP GenAI Security Project", "href": "https://genai.owasp.org/llm-top-10/", "cost": "free" },
+        { "title": "Interactive prompt-injection labs", "provider": "llm-sec.dev", "href": "https://www.llm-sec.dev/labs/prompt-injection", "cost": "free" },
+        { "title": "AI Unlocked — a prompt-injection challenge", "provider": "CrowdStrike", "href": "https://www.crowdstrike.com/en-us/blog/introducing-ai-unlocked-interactive-prompt-injection-challenge/", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "agents-that-act",
+      "title": "When the model can act: the agentic top ten",
+      "objective": "Trace how an agent's goal, memory, tools, and identity each become an attack surface once it can do things rather than only say them.",
+      "teach": "A chatbot that is talked into saying something stupid is an embarrassment. An agent that is talked into it holds credentials, calls tools, remembers what it was told, and delegates to other agents — so the same manipulation becomes an action against real systems. OWASP catalogues ten risks specific to that shift (ASI01–ASI10), and the ones worth internalising first are goal hijack, tool misuse, identity and privilege abuse, and memory poisoning: an attacker who can write to what your agent remembers has attacked every future run, not just this one.",
+      "labs": [
+        { "title": "OWASP Top 10 for Agentic Applications 2026", "provider": "OWASP GenAI Security Project", "href": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/", "cost": "free" },
+        { "title": "Agentic red-teaming, mapped to the OWASP list", "provider": "promptfoo", "href": "https://www.promptfoo.dev/docs/red-team/owasp-agentic-ai/", "cost": "free" },
+        { "title": "The same list as a test framework", "provider": "DeepTeam", "href": "https://www.trydeepteam.com/docs/frameworks-owasp-top-10-for-agentic-applications", "cost": "free" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "skill-supply-chain",
+      "title": "The skill supply chain",
+      "objective": "Audit an agent skill before you install it, and say what your platform does — and does not — isolate.",
+      "teach": "A skill is a recipe, part prose and part code, that hands an agent a new capability. It is also an installable artefact from a registry, which makes it a supply chain, and in 2026 that supply chain came under real attack: OWASP's newest list exists because agent skill registries were poisoned at scale. Read the ten risks below the way you read the OWASP web list — as the shape of what goes wrong. Then read the skills you have actually installed. Most people have never opened one.",
+      "checklist": {
+        "label": "OWASP Agentic Skills Top 10 (AST01–AST10)",
+        "note": "Risk titles reproduced verbatim under CC BY-SA 4.0 from the OWASP Agentic Skills Top 10, project lead Ken Huang. The commentary is Sikhi University's.",
+        "items": [
+          { "id": "AST01", "title": "Malicious Skills", "note": "A skill that looks legitimate and carries a payload — credential theft, a reverse shell, a backdoor. Currently number one because it is currently happening." },
+          { "id": "AST02", "title": "Supply Chain Compromise", "note": "Registries without provenance controls, mass uploads, and dependency confusion. The npm lesson, arriving again in a new ecosystem." },
+          { "id": "AST03", "title": "Over-Privileged Skills", "note": "A skill granted more than its job needs. The blast radius when it is compromised is everything it could reach." },
+          { "id": "AST04", "title": "Insecure Metadata", "note": "Unvalidated name, author and permission fields — brand impersonation, and permissions that read as narrower than they are." },
+          { "id": "AST05", "title": "Unsafe Deserialization", "note": "An unsafe YAML or JSON parser turns merely loading a skill into executing it." },
+          { "id": "AST06", "title": "Weak Isolation", "note": "The skill runs in the agent's own security context, with its filesystem and shell. The default almost everywhere." },
+          { "id": "AST07", "title": "Update Drift", "note": "No pinning, no verification. Either you keep a known-vulnerable version or you silently accept a malicious update." },
+          { "id": "AST08", "title": "Poor Scanning", "note": "Pattern matching does not catch a natural-language instruction that means something harmful without saying anything forbidden." },
+          { "id": "AST09", "title": "No Governance", "note": "No inventory, no approval, no audit, no revocation. Shadow AI is the same problem as shadow IT, moving faster." },
+          { "id": "AST10", "title": "Cross-Platform Reuse", "note": "A skill ported between platforms loses the security metadata the first platform relied on." }
+        ]
+      },
+      "labs": [
+        { "title": "OWASP Agentic Skills Top 10", "provider": "OWASP", "href": "https://owasp.org/www-project-agentic-skills-top-10/", "cost": "free" },
+        { "title": "The project repository — the full text and its licence", "provider": "Ken Huang (OWASP)", "href": "https://github.com/kenhuangus/agentic-skills-top-10", "cost": "free" },
+        { "title": "OWASP flags top AI skill risks in new security blueprint", "provider": "Dark Reading", "href": "https://www.darkreading.com/application-security/owasp-flags-top-ai-skill-risks-security-blueprint", "cost": "free" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "red-teaming",
+      "title": "Red-teaming what you built",
+      "objective": "Run an automated red-team suite against an application you own, and read its findings against the OWASP lists rather than as a score.",
+      "teach": "The final module folds this path back into the AI School. If you have shipped anything from those phases — an agent, a retrieval pipeline, a bot in front of the ਸੰਗਤ — this is where you attack it before somebody else does. Automated suites test the known categories cheaply and will not find the flaw specific to your design, so treat a clean run as the floor and not the ceiling, exactly as you would a passing vulnerability scan in the defence path.",
+      "labs": [
+        { "title": "Red-teaming against the OWASP LLM Top 10", "provider": "promptfoo", "href": "https://www.promptfoo.dev/docs/red-team/owasp-llm-top-10/", "cost": "free" },
+        { "title": "AI/ML security and prompt-injection resource roadmap", "provider": "Anmol K Sachan", "href": "https://github.com/anmolksachan/AI-ML-Free-Resources-for-Security-and-Prompt-Injection", "cost": "free" },
+        { "title": "Agent Engineering — what you are testing", "provider": "Sikhi University", "href": "/technology/track/14-agent-engineering", "cost": "free" },
+        { "title": "Ethics, Safety & Alignment", "provider": "Sikhi University", "href": "/technology/track/18-ethics-safety-alignment", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "OWASP GenAI Security Project", "provider": "OWASP", "href": "https://genai.owasp.org/", "note": "The home of all three lists, plus the Agent Control Standard and the AI security solutions directory. Where to check whether this path has gone stale." },
+    { "title": "OWASP Top 10 for Large Language Model Applications", "provider": "OWASP", "href": "https://owasp.org/www-project-top-10-for-large-language-model-applications/", "note": "The project page on owasp.org, including the archived earlier editions." },
+    { "title": "SANS free security resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Copyright SANS, licensed for non-commercial use." }
+  ]
+}

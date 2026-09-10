@@ -2,7 +2,7 @@
 // Mobile app-shell bottom tab bar (<768px only). Glass-strong, safe-area
 // aware, active tab marked with a saffron indicator. Slides away while the
 // on-screen keyboard is open (visualViewport heuristic) so it never crowds a
-// form. Pure navigation — content is never gated on it.
+// form. Pure navigation, content is never gated on it.
 //
 // The "Departments" tab opens a quick sheet listing every school, so a phone
 // user reaches a departmental landing page in one tap. No-JS: it's still a
@@ -20,7 +20,7 @@ const tabs = [
   { href: '/santhiya', icon: 'music', label: 'Santhya', key: 'nav.santhya', m: '/santhiya' },
   { href: '/dashboard', icon: 'backpack', label: 'My Learning', key: 'nav.mylearning', m: '/dashboard' },
 ];
-// The static build's pathname carries the file suffix (/catalog.html) — strip
+// The static build's pathname carries the file suffix (/catalog.html), strip
 // it so tabs match the clean URLs they're served under.
 const raw = Astro.url.pathname.replace(/\.html$/, '');
 const path = raw === '/index' ? '/' : raw;
@@ -76,7 +76,7 @@ const isActive = (m: string) =>
 
 <style is:global>
   /* The component owns its own display (a utility class like md:hidden would
-     lose the cascade against this block) — phones only, never in print. */
+     lose the cascade against this block), phones only, never in print. */
   .su-tabbar {
     position: fixed;
     inset-inline: 0;
@@ -110,7 +110,7 @@ const isActive = (m: string) =>
     border-radius: 0 0 3px 3px;
     background: #f4b21a;
   }
-  /* Keep page content — and the a11y FAB — clear of the fixed bar. */
+  /* Keep page content, and the a11y FAB, clear of the fixed bar. */
   @media (max-width: 767px) {
     body { padding-bottom: calc(52px + env(safe-area-inset-bottom)); }
     #a11y-fab { bottom: calc(52px + env(safe-area-inset-bottom) + 0.75rem); }
@@ -182,7 +182,7 @@ const isActive = (m: string) =>
   })();
 
   // Departments quick sheet: the Departments tab opens it instead of navigating.
-  // Progressive — with JS off it stays a plain link to /departments.
+  // Progressive, with JS off it stays a plain link to /departments.
   (function () {
     const trigger = document.querySelector('[data-dept-sheet]') as HTMLAnchorElement | null;
     const sheet = document.getElementById('su-dept-sheet');

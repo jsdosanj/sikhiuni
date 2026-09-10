@@ -4,8 +4,8 @@ import InstituteRail from '../../components/institute/InstituteRail.astro';
 const motes = Array.from({ length: 22 });
 ---
 <Base
-  title="Open Source Atlas — Institute of Technology"
-  description="A browsable directory of ~12,500 AI and engineering open-source projects — each with a line on what you could build with it for the Panth — plus an engineering video shelf, set inside an infinite library."
+  title="Open Source Atlas, Institute of Technology"
+  description="A browsable directory of ~12,500 AI and engineering open-source projects, each with a line on what you could build with it for the Panth, plus an engineering video shelf, set inside an infinite library."
   institute
 >
   <div class="atlas-immersive">
@@ -153,7 +153,7 @@ const motes = Array.from({ length: 22 });
       filter: blur(8px);
     }
 
-    /* data-repository racks — dark panels with blinking LEDs, set into the walls */
+    /* data-repository racks, dark panels with blinking LEDs, set into the walls */
     .atlas-rack {
       position: absolute; width: 132px; height: 46%;
       background:
@@ -311,7 +311,7 @@ const motes = Array.from({ length: 22 });
     // Walk-into-the-library parallax: scroll drives the corridor's depth (looped
     // so it never ends) and streams the shelf texture past; the pointer nudges
     // the vanishing point so the walls feel like they surround you. rAF-throttled,
-    // CSS-var writes only — no layout in the handler. Reduced-motion: inert.
+    // CSS-var writes only, no layout in the handler. Reduced-motion: inert.
     (function () {
       const rm = matchMedia('(prefers-reduced-motion: reduce)');
       const corridor = document.getElementById('atlas-corridor');

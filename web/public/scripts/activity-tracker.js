@@ -13,7 +13,7 @@
 (function () {
   const IDLE_THRESHOLD_MS = 30_000;
   const TICK_MS = 5_000;
-  const FLUSH_MS = 30_000;
+  const FLUSH_MS = 60_000;
   const MAX_SECONDS_PER_FLUSH = 120;
   const ACTIVITY_EVENTS = ["mousemove", "mousedown", "keydown", "scroll", "wheel", "touchstart", "touchmove"];
 

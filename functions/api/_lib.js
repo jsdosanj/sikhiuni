@@ -1,3 +1,4 @@
+import { schemaOnce } from "./_schema-once.js";
 // Shared helpers for Sikhi University Pages Functions. (_-prefixed → not a route.)
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -55,9 +56,9 @@ export function isAdminEmail(env, email) {
 // so logging a non-critical event can't break the action that triggered it.
 export async function logEvent(env, user, action, target, detail) {
   try {
-    await env.DB.prepare(
+    await schemaOnce(env.DB, "events", () => env.DB.prepare(
       "CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, ts INTEGER NOT NULL, user_id TEXT, role TEXT, action TEXT NOT NULL, target TEXT, detail TEXT)"
-    ).run();
+    ).run());
     await env.DB.prepare(
       "INSERT INTO events (id, ts, user_id, role, action, target, detail) VALUES (?,?,?,?,?,?,?)"
     ).bind(newId(), Date.now(), user ? user.id : null, user ? user.role : null, action, target || null, detail || null).run();

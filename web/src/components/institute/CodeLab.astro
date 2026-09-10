@@ -1,13 +1,13 @@
 ---
 // The Code Lab bench. One per "try it" block in a lesson.
-//   id       — unique per lesson-exercise; used for the localStorage buffer key
+//   id      , unique per lesson-exercise; used for the localStorage buffer key
 //              and as the progress course/lesson id (`<courseId>::<exerciseId>`).
-//   lang     — 'js' (worker + console), 'py' (Pyodide worker + console), or
+//   lang    , 'js' (worker + console), 'py' (Pyodide worker + console), or
 //              'html' (sandboxed preview).
-//   starter  — the code the editor opens with.
-//   checks   — [{ name, hint, test }] run after each Run (see lib/institute/check-runner).
-//   solution — revealed after 3 failed Runs, or via the button.
-//   title    — corner-label on the editor pane.
+//   starter , the code the editor opens with.
+//   checks  , [{ name, hint, test }] run after each Run (see lib/institute/check-runner).
+//   solution, revealed after 3 failed Runs, or via the button.
+//   title   , corner-label on the editor pane.
 import type { Check } from '../../lib/institute/check-runner';
 
 interface Props {
@@ -24,7 +24,7 @@ const cfg = { id, lang, starter, checks, solution };
 // which would close this JSON block early. Escape "<" the standard way.
 const cfgJson = JSON.stringify(cfg).replace(/</g, '\\u003c');
 const label =
-  title || (lang === 'html' ? 'index.html — bench' : lang === 'py' ? 'main.py — bench' : 'script.js — bench');
+  title || (lang === 'html' ? 'index.html, bench' : lang === 'py' ? 'main.py, bench' : 'script.js, bench');
 ---
 <div class="i-lab" data-lang={lang}>
   <script type="application/json" class="i-lab-cfg" set:html={cfgJson} />
@@ -49,7 +49,7 @@ const label =
         autocapitalize="off"
         autocorrect="off"
         wrap="off"
-        aria-label={`Code editor — ${label}`}
+        aria-label={`Code editor, ${label}`}
       >{starter}</textarea>
     </label>
 

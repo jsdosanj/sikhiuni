@@ -38,4 +38,4 @@ if (!src.includes('__BUILD__')) {
   process.exit(0);
 }
 writeFileSync(SW, src.replace(/__BUILD__/g, hash));
-console.log(`stamp-sw: cache key -> su-web-${hash} (${names.length} asset chunks)`);
+console.log(`stamp-sw: cache key -> su-web-v27-${hash} (${names.length} asset chunks)`);

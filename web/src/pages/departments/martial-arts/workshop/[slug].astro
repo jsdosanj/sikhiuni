@@ -12,14 +12,14 @@ const dept = departments.find((x) => x.id === 'martial-arts')!;
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'LearningResource',
-  name: `${w.title} — Sikhi University, Department of Martial Arts`,
+  name: `${w.title}, Sikhi University, Department of Martial Arts`,
   description: w.standfirst,
   url: `https://sikhiuni.com/departments/martial-arts/workshop/${w.slug}`,
   isPartOf: { '@type': 'EducationalOrganization', name: `${dept.name}, Sikhi University`, url: 'https://sikhiuni.com/departments/martial-arts' },
   learningResourceType: 'workshop reference',
 };
 ---
-<Base title={`${w.title} — Department of Martial Arts`} description={w.standfirst} ambient="none">
+<Base title={`${w.title}, Department of Martial Arts`} description={w.standfirst} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page wk-page" style={`--dept:${dept.accent}`}>
     <header class="wk-hero dept-grain">
@@ -32,7 +32,7 @@ const ld = {
         <p class="wk-standfirst">{w.standfirst}</p>
         {w.intro.map((p) => <p class="wk-intro">{p}</p>)}
         <p class="wk-src">
-          {w.source.label} — {w.source.note}
+          {w.source.label}, {w.source.note}
           <a href={w.source.url} target="_blank" rel="noopener"> original &nearr;</a>
         </p>
       </div>
@@ -103,7 +103,7 @@ const ld = {
       </div>
 
       <p class="wk-foot">
-        This is materials science, not doctrine — the figures are lab measurements from the sources named above.
+        This is materials science, not doctrine, the figures are lab measurements from the sources named above.
         Back to the <a href="/departments/martial-arts">Department of Martial Arts</a>.
       </p>
     </section>
@@ -150,7 +150,7 @@ const ld = {
     }
     [data-theme="dark"] .wk-page .wk-label { color: color-mix(in srgb, var(--dept) 55%, #fff); }
 
-    /* elegantly animated collapsible accordions — sharp, metallic-edged */
+    /* elegantly animated collapsible accordions, sharp, metallic-edged */
     .wk-ax { display: grid; gap: 14px; }
     .wk-item {
       border: 1px solid rgb(var(--c-line)); border-radius: 6px; overflow: hidden;

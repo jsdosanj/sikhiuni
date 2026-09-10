@@ -1,10 +1,11 @@
 ---
 // Shared premium hero for a department landing page. The photograph, accent,
 // tagline and stance all come from the department record, so each hero reads
-// as its own school. A page may pass extra markup via the default slot — its
+// as its own school. A page may pass extra markup via the default slot, its
 // bespoke "signature" module sits directly under the hero.
 import type { Department } from '../../lib/departments';
 import { coursesInDepartment, departmentTopics } from '../../lib/departments';
+import { gurmukhiHtml } from '../../lib/gurmukhi';
 
 interface Props { d: Department }
 const { d } = Astro.props;
@@ -14,7 +15,6 @@ const levels = [...new Set(courses.map((c) => Math.floor(c.level / 100) * 100))]
 const levelSpan = levels.length ? `${levels[0]}–${levels[levels.length - 1]}` : '';
 ---
 <header class="dept-hero dept-grain">
-  <img class="dept-hero-img" src={d.image.src} alt="" aria-hidden="true" fetchpriority="high" />
   <div class="dept-hero-scrim" aria-hidden="true"></div>
 
   <a class="dept-back wrap" href="/departments">Sikhi University &middot; Departments</a>
@@ -23,7 +23,7 @@ const levelSpan = levels.length ? `${levels[0]}–${levels[levels.length - 1]}` 
     <p class="dept-eyebrow">School within Sikhi University</p>
     <h1 class="dept-h1">{d.name}</h1>
     <p class="dept-tagline">{d.tagline}</p>
-    <p class="dept-stance">{d.stance}</p>
+    <p class="dept-stance" set:html={gurmukhiHtml(d.stance)} />
     <div class="dept-hero-meta">
       <span class="dept-chip"><b>{courses.length}</b> courses</span>
       <span class="dept-chip"><b>{topics.length}</b> subject{topics.length === 1 ? '' : 's'}</span>
@@ -33,9 +33,6 @@ const levelSpan = levels.length ? `${levels[0]}–${levels[levels.length - 1]}` 
       Explore the department
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
     </a>
-    <p class="dept-credit">
-      Photograph: <a href={d.image.source} target="_blank" rel="noopener">{d.image.credit}</a>
-    </p>
   </div>
 </header>
 

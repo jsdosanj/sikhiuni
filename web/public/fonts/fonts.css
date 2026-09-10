@@ -237,3 +237,11 @@ html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3, html[lang="ur"] h4 {
 }
 
 @font-face{font-family:"University Gothic";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/kingthings-spikeless.ttf") format("truetype")}
+@font-face { font-family:'University Blackletter'; font-style:normal; font-weight:400; font-display:swap; src:url('/fonts/unifrakturmaguntia.ttf') format('truetype'); }
+
+/* Inter — self-hosted, SIL Open Font License; see inter-LICENSE.txt. */
+@font-face { font-family:'Inter'; font-style:normal; font-weight:100 900; font-display:swap; src:url('/fonts/inter-variable.woff2') format('woff2'); }
+@font-face { font-family:'Inter'; font-style:italic; font-weight:100 900; font-display:swap; src:url('/fonts/inter-variable-italic.woff2') format('woff2'); }
+
+/* IT Cathdra Demo: personal-use local preview. Obtain a suitable licence before publication. */
+@font-face { font-family:"IT Cathdra"; font-style:normal; font-weight:400; font-display:swap; src:url("/fonts/it-cathdra-demo.otf") format("opentype"); }

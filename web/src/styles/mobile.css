@@ -1,0 +1,28 @@
+/* Shared small-screen ergonomics without changing desktop layouts. */
+@media(max-width:767px) {
+ html { scroll-padding-top:85px; }
+ body { overflow-wrap:break-word; }
+ main input,main select,main textarea,#nav-menu select { font-size:16px!important; }
+ button,a,input,select,textarea { touch-action:manipulation; }
+ #nav-menu { max-height:calc(100dvh - 70px); overflow-y:auto; overscroll-behavior:contain; padding-bottom:max(16px,env(safe-area-inset-bottom)); }
+ #nav-menu a,#nav-menu button,#nav-menu summary { min-height:44px; }
+ #nav-menu .su-nav-link { display:flex; align-items:center; }
+ .su-nav #nav-toggle { min-width:44px; min-height:44px; }
+ .dashboard-rail { scrollbar-width:thin; padding-bottom:8px; scroll-snap-type:x proximity; }
+ .dashboard-rail a { min-height:44px; scroll-snap-align:start; }
+ .studio-panel,.desk-tools,.desk-focus,.focus-controls,.library-filters { min-width:0; }
+ .studio-panel>* { min-width:0; }
+ .studio button,.catalog-toolbar button,.catalog-toolbar select,#level-filters button,#cat-filters button { min-height:44px; }
+ .focus-controls select { min-width:0; width:100%; }
+ #focus-course { grid-column:1/-1; }
+ .library select,.library textarea { min-width:0; max-width:100%; }
+ .journal-editor>div { flex-wrap:wrap; }
+ .studio-heading { align-items:flex-start; flex-wrap:wrap; }
+ .su-dashboard #main>.wrap { padding-inline:16px; }
+ .su-dashboard .row-ruled>span:first-child { flex-basis:100%; white-space:normal; }
+ .catalog-toolbar>div { gap:8px; }.catalog-toolbar select { max-width:165px; }
+ .lesson-prose pre,.lesson-prose table { display:block; max-width:100%; overflow-x:auto; }
+ .lesson-prose img { max-width:100%; height:auto; }
+ main { padding-bottom:max(20px,env(safe-area-inset-bottom)); }
+}
+@media(max-width:380px) { .su-nav .university-wordmark { font-size:19px; }.dashboard-banner img { width:72px; }.dashboard-banner h1 { font-size:27px; }.studio-tabs button span { font-size:10px; } }

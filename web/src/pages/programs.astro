@@ -14,13 +14,13 @@ const TYPE_TINT: Record<string, string> = {
   associate: 'text-navy-soft',
   bachelor: 'text-navy',
 };
-// Master/Giani tints are page-local constants (Design decision 1) — used
+// Master/Giani tints are page-local constants (Design decision 1), used
 // nowhere else in the design system, not worth a token.
 const TYPE_HEX: Record<string, string> = { master: '#5c3b8a', giani: '#8a5a14' };
 const orderedPrograms = typeOrder.flatMap((t) => programsData.programs.filter((p) => p.type === t));
 
 const passMarks = [...new Set(programsData.programs.map((p) => p.passMark))];
-const passMarkLabel = passMarks.length === 1 ? `${passMarks[0]}%` : '—';
+const passMarkLabel = passMarks.length === 1 ? `${passMarks[0]}%` : '-';
 
 function prereqLabel(p: (typeof programsData.programs)[number]): { text: string; none: boolean } {
   if (!p.prerequisites.length) return { text: 'No prerequisites', none: true };
@@ -30,17 +30,17 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
   return { text: abbrs.join(' or '), none: false };
 }
 
-// Real data issues found while building this page (Decision 12 — flagged
+// Real data issues found while building this page (Decision 12, flagged
 // data problems are noted for the maintainer, never silently "fixed" and
 // never shipped as page copy):
 //   1. `credits` on every one of the 11 programmes is exactly the length of
-//      `courseIds` — it is a course count, not a weighted credit value. The
+//      `courseIds`, it is a course count, not a weighted credit value. The
 //      column below is labelled "Courses" for that reason.
 //   2. M.A.S.S. (mass) and Giani both require 558 courses (courseIds.length),
 //      but the Giani programme's own `description` field says "all 534
-//      courses" — a third number. One of these three figures is wrong.
+//      courses", a third number. One of these three figures is wrong.
 ---
-<Base title="Degree Programs — Sikhi University" description="Certificate, Associate, Bachelor's, Master's and Giani degree programs in Sikh Studies — free, open, and comprehensive." ambient="study">
+<Base title="Degree Programs, Sikhi University" description="Certificate, Associate, Bachelor's, Master's and Giani degree programs in Sikh Studies, free, open, and comprehensive." ambient="study">
   <section class="wrap pt-10 pb-2">
     <div class="rule-navy flex flex-wrap items-end justify-between gap-6 pb-4">
       <div class="min-w-0 flex-1">
@@ -49,7 +49,7 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
           <span data-i18n="programs.eyebrow">Programmes of study</span>
         </p>
         <h1 class="text-display mt-3 text-navy" data-i18n="programs.h1">From a first certificate to Giani</h1>
-        <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted" data-i18n="programs.sub">Eleven programmes. Each is a named set of courses with a comprehensive examination at the end — every one free, every one open to anyone.</p>
+        <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted" data-i18n="programs.sub">Eleven programmes. Each is a named set of courses with a comprehensive examination at the end, every one free, every one open to anyone.</p>
       </div>
       <div class="flex flex-none gap-8 pb-1">
         <div class="stat-mono"><span data-no-i18n>{programsData.programs.length}</span><span data-i18n="programs.stat.programmes">Programmes</span></div>
@@ -96,12 +96,12 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
     <div class="mt-10 border-t-2 border-navy pt-6">
       <h2 class="text-xl font-bold text-navy" data-i18n="programs.how.h2">How programs work</h2>
       <ol class="mt-4 max-w-[74ch] list-decimal space-y-3 pl-5 font-sans text-sm text-muted">
-        <li data-i18n="programs.how.step1">Complete all courses in the program — each has lectures, reading, and a quiz.</li>
+        <li data-i18n="programs.how.step1">Complete all courses in the program, each has lectures, reading, and a quiz.</li>
         <li><span data-i18n="programs.how.step2a">Once every course is passed (70% quiz score), unlock the</span> <strong class="text-ink" data-i18n="programs.how.step2b">Cumulative Examination</strong>.</li>
         <li><span data-i18n="programs.how.step3a">Pass the cumulative exam with</span> <strong class="text-ink" data-i18n="programs.how.step3b">80% or higher</strong> <span data-i18n="programs.how.step3c">to earn the credential.</span></li>
         <li data-i18n="programs.how.step4">Download your certificate and share your academic credential.</li>
       </ol>
-      <p class="mt-4 max-w-[74ch] font-sans text-sm text-muted" data-i18n="programs.how.footer">Programs are stackable — courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
+      <p class="mt-4 max-w-[74ch] font-sans text-sm text-muted" data-i18n="programs.how.footer">Programs are stackable, courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
     </div>
   </section>
 </Base>

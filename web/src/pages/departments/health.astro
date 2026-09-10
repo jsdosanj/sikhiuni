@@ -5,6 +5,18 @@ import DeptHero from '../../components/departments/DeptHero.astro';
 import DeptSections from '../../components/departments/DeptSections.astro';
 import { departments } from '../../lib/departments';
 const d = departments.find((x) => x.id === 'health')!;
+
+// Medical school prep. A sibling Dosanjh Labs site, not a course in this
+// department's catalogue — so it renders as its own signature module above
+// DeptSections rather than joining the topic rows. The mono destination label
+// is derived from the real href, never written by hand (same rule as /external).
+const prep = {
+  name: 'AIM 528',
+  href: 'https://aim528.dosanjhlabs.com/',
+  cost: 'Free',
+  desc: 'MCAT preparation — content review, practice, and the score strategy behind the number it is named for: 528, a perfect MCAT.',
+};
+const prepHost = new URL(prep.href).hostname.replace(/^www\./, '');
 const ld = {
   '@context': 'https://schema.org', '@type': 'EducationalOrganization',
   name: `${d.name}, Sikhi University`, description: d.blurb,
@@ -12,7 +24,7 @@ const ld = {
   parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page he-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -46,6 +58,29 @@ const ld = {
         </div>
       </section>
     </DeptHero>
+
+    <section class="dept-sec wrap he-prep" aria-labelledby="he-prep-h" data-rise>
+      <p class="dept-kicker">Medical school prep</p>
+      <h2 class="dept-h2" id="he-prep-h">Before the white coat, the exam</h2>
+      <p class="he-prep-lede">
+        This department teaches health as <span class="gur" lang="pa">ਸੇਵਾ</span> &mdash; the
+        body as a vessel, medicine as ethics. For the
+        <span class="gur" lang="pa">ਵਿਦਿਆਰਥੀ</span> actually sitting the entrance exam, that is
+        not enough on its own. A sibling project handles the admissions side.
+      </p>
+      <a class="dept-glass he-prep-card" href={prep.href} target="_blank" rel="noopener">
+        <span class="he-prep-name">{prep.name} <span aria-hidden="true">&nearr;</span></span>
+        <span class="he-prep-host">{prepHost} &middot; {prep.cost}</span>
+        <span class="he-prep-desc">{prep.desc}</span>
+      </a>
+      <p class="he-prep-fine">
+        A Dosanjh Labs project, from the same team as Sikhi University, and free.
+        &ldquo;MCAT&rdquo; is a programme and registered mark of the Association of American
+        Medical Colleges; neither Sikhi University nor Dosanjh Labs is affiliated with,
+        sponsored by, or endorsed by the AAMC.
+      </p>
+    </section>
+
     <DeptSections d={d} />
   </div>
 
@@ -68,6 +103,16 @@ const ld = {
     @supports not (animation-timeline: view()) {
       .he-breath-dot { animation: he-inhale 4s ease-in-out infinite; }
     }
+    /* Medical school prep — reuses the department card vocabulary; only the
+       row layout and the mono destination label are local. */
+    .he-prep-lede { margin: 14px 0 0; max-width: 62ch; font-size: 16px; line-height: 1.75; color: rgb(var(--c-muted)); }
+    .he-prep-card { display: block; margin-top: 24px; max-width: 620px; padding: 22px 24px; text-decoration: none; transition: transform 180ms ease-out, box-shadow 180ms ease-out; }
+    .he-prep-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgb(11 30 58 / .14); }
+    .he-prep-name { display: block; font-size: 19px; font-weight: 800; line-height: 1.24; color: rgb(var(--c-navy)); }
+    .he-prep-host { display: block; margin-top: 6px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 12px; color: rgb(var(--c-muted)); }
+    .he-prep-desc { display: block; margin-top: 12px; font-size: 14.5px; line-height: 1.65; color: rgb(var(--c-muted)); }
+    .he-prep-fine { margin: 16px 0 0; max-width: 62ch; font-size: 12.5px; line-height: 1.6; color: rgb(var(--c-muted)); }
+
     .he-kicker { font-family: "Noto Serif Gurmukhi", serif; font-size: 15px; color: color-mix(in srgb, var(--dept) 40%, #fff); }
     .he-h { margin: 8px 0 0; font-size: clamp(1.35rem, 3vw, 1.9rem); font-weight: 800; color: #fff; max-width: 22ch; }
     .he-note { margin: 16px 0 0; max-width: 58ch; font-size: 14.5px; line-height: 1.72; color: #a9cdb6; }

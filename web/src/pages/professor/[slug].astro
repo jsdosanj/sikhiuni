@@ -11,7 +11,7 @@ const photo = professorPhotos[name];
 const sorted = [...courses].sort((a, b) => a.level - b.level);
 
 // Real date range parsed out of the bio's own text ("(1892-1977)"/"(c.1551-1636)")
-// — never a separate, invented field. Absent for living/undated scholars.
+//, never a separate, invented field. Absent for living/undated scholars.
 const dateMatch = bio.match(/\((c\.\s*)?\d{3,4}[-–][\d]{2,4}\)/);
 const dateRange = dateMatch ? dateMatch[0].replace(/[()]/g, '') : '';
 
@@ -30,7 +30,7 @@ function specialtyFor(list: { topic: string }[]): string[] {
 const specialty = specialtyFor(courses);
 
 // "Source works" rail: the real primary texts these courses draw on
-// (course.sourceText), not the academic bibliography (course.references) —
+// (course.sourceText), not the academic bibliography (course.references) -
 // deduplicated by work title. Many professors have none; the rail is omitted
 // rather than padded.
 const works = new Map<string, string | undefined>();
@@ -45,7 +45,7 @@ for (const c of sorted) {
 
 import { SITE, ldJson } from '../../lib/site';
 // ProfilePage + Person structured data so professor pages are eligible for
-// rich results. Kept honest: no invented affiliations or job titles — many
+// rich results. Kept honest: no invented affiliations or job titles, many
 // professors are historical figures whose writings the courses are built from.
 const personLd = {
   '@context': 'https://schema.org',
@@ -60,7 +60,7 @@ const personLd = {
   },
 };
 ---
-<Base title={`${name} — Sikhi University`} description={bio || `${name} teaches courses at Sikhi University.`} ogType="profile" ambient="study">
+<Base title={`${name}, Sikhi University`} description={bio || `${name} teaches courses at Sikhi University.`} ogType="profile" ambient="study">
   <script type="application/ld+json" set:html={ldJson(personLd)} slot="head" />
 
   <div class="band-navy">
@@ -92,7 +92,7 @@ const personLd = {
     <div class="flex flex-wrap gap-10">
       <div class="min-w-0 flex-1 basis-[400px]">
         {bio && <p class="max-w-[70ch] text-[17.5px] leading-[1.68] text-ink" data-no-i18n>{bio}</p>}
-        <p class="mt-4 max-w-[70ch] text-[17.5px] leading-[1.68] text-ink" data-i18n="profs.attributionNote">Courses attributed to a historical scholar draw on their written work. Attribution means the course is built from that scholarship — it does not mean the text was written in their voice.</p>
+        <p class="mt-4 max-w-[70ch] text-[17.5px] leading-[1.68] text-ink" data-i18n="profs.attributionNote">Courses attributed to a historical scholar draw on their written work. Attribution means the course is built from that scholarship, it does not mean the text was written in their voice.</p>
 
         <div id="teacher-bridge" data-professor={name}></div>
 

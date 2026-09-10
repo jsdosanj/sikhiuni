@@ -12,15 +12,15 @@ const ld = {
   parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
 const institutions = [
-  ['Saṅgat', 'The congregation — authority sits with the gathered, not a clergy.'],
+  ['Saṅgat', 'The congregation, authority sits with the gathered, not a clergy.'],
   ['Paṅgat &amp; Laṅgar', 'Everyone eats in one row. The kitchen is a political statement.'],
   ['Panj Pyāre', 'Five, chosen and equal, act for the whole. Leadership without a throne.'],
   ['Gurmatā', 'A decision taken in the presence of the Guru, binding on the Panth.'],
-  ['Sarbat Khālsā', 'The whole Panth in assembly — the highest collective body.'],
+  ['Sarbat Khālsā', 'The whole Panth in assembly, the highest collective body.'],
   ['Akāl Takht', 'The seat of temporal authority, facing Darbār Sāhib. Mīrī and Pīrī together.'],
 ];
 ---
-<Base title={`${d.name} — Sikhi University`} description={d.blurb} ambient="none">
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
   <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
   <div class="dept-page pg-page" style={`--dept:${d.accent}`}>
     <DeptHero d={d}>
@@ -34,7 +34,7 @@ const institutions = [
           <span class="pg-key"></span>
         </div>
         <div class="wrap pg-in">
-          <p class="pg-kicker">Mīrī &amp; Pīrī — the temporal and the spiritual, held together</p>
+          <p class="pg-kicker">Mīrī &amp; Pīrī, the temporal and the spiritual, held together</p>
           <h2 class="pg-h">The Gurus built institutions, not just ideas</h2>
           <ol class="pg-list">
             {institutions.map(([t, b], i) => (
@@ -45,7 +45,7 @@ const institutions = [
               </li>
             ))}
           </ol>
-          <p class="pg-note">The department studies each of these as something meant to be practised — sovereignty you can run, not just admire.</p>
+          <p class="pg-note">The department studies each of these as something meant to be practised, sovereignty you can run, not just admire.</p>
         </div>
       </section>
     </DeptHero>

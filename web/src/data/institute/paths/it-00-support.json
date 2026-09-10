@@ -1,0 +1,66 @@
+{
+  "track": "it-00-support",
+  "school": "it",
+  "blurb": "The helpdesk-to-administrator path, built on Apple's and Microsoft's own free training — supporting devices, deploying a fleet, holding it to a security baseline, and the credentials that prove it.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Apple Professional Training and Microsoft Learn",
+    "href": "https://it-training.apple.com/",
+    "license": "Vendor content — link-out only",
+    "note": "Both vendors publish this curriculum free and self-paced on their own sites. This path is a reading map over their catalogues, written by Sikhi University; no course text, video, lab, or assessment is reproduced here, and every course opens at its vendor. The courses are free — several of the exams are not, and each card says so."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "device-support",
+      "title": "Supporting the machine in front of you",
+      "objective": "Diagnose and resolve everyday macOS, iPhone and iPad problems methodically, and know when a fault is hardware rather than configuration.",
+      "teach": "Support work rewards method over memory. The habit worth building here is the one that separates a good technician from a fast one: reproduce the fault, change one thing, and write down what you did. Apple's own course is roughly fourteen hours, free, and self-paced; the exam at the end is not free, and you should only book it once you can do the work without it. Start here even if you plan to run a Windows estate — the diagnostic method transfers, and most workplaces are mixed.",
+      "labs": [
+        { "title": "Apple Device Support", "provider": "Apple", "href": "https://it-training.apple.com/support/tutorials/course/", "cost": "free course · paid exam" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "deployment",
+      "title": "One machine is support; a thousand is deployment",
+      "objective": "Design a deployment strategy using mobile device management, and enrol and configure a device without ever touching it by hand.",
+      "teach": "The moment a second technician joins, the job stops being about fixing machines and becomes about not having to. Mobile device management, Apple Business Manager and Apple School Manager are how a device arrives at a student's desk already configured, and how it is wiped from across the country when it is lost. This is the most transferable module in the path: a gurdwara with thirty donated laptops has the same problem as an enterprise with thirty thousand, only with less budget for getting it wrong.",
+      "labs": [
+        { "title": "Apple Deployment and Management", "provider": "Apple", "href": "https://it-training.apple.com/deployment/tutorials/course/", "cost": "free course · paid exam" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "compliance",
+      "title": "Holding the estate to a baseline",
+      "objective": "Build a Mac security compliance strategy, apply a published baseline, and produce evidence that the fleet actually meets it.",
+      "teach": "Compliance is where IT support meets the Cybersecurity School. A baseline is only worth having if you can prove it holds today, on every device, not on the day you set it. Apple's course works through the macOS Security Compliance Project — a real, publicly developed baseline rather than a vendor checklist — and covers the monitoring and reporting that turn a policy into evidence. If this module interests you more than the two before it, the Cybersecurity School's defence path is the next thing to read.",
+      "labs": [
+        { "title": "Mac Security Compliance", "provider": "Apple", "href": "https://it-training.apple.com/tutorials/apt-compliance", "cost": "free" },
+        { "title": "Mac Security Compliance — full tutorial series", "provider": "Apple", "href": "https://it-training.apple.com/compliance/tutorials/course/", "cost": "free" },
+        { "title": "Blue Team — Defence & Response", "provider": "Sikhi University", "href": "/technology/track/01-blue-team-defence", "cost": "free" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "microsoft-credentials",
+      "title": "The credential that gets past the filter",
+      "objective": "Earn at least one verifiable Microsoft credential, choosing deliberately between a free Applied Skills assessment and a paid certification exam.",
+      "teach": "Most IT hiring runs a keyword filter before a human reads anything, and that filter is looking for credentials. Microsoft's catalogue has two shapes and the difference matters to your wallet. Applied Skills are lab-based assessments, currently the only Microsoft credential that is free end to end — training and assessment together — so start there. Certifications are exam-based and cost money, though the training itself is free and renewals are too. Watch for Virtual Training Days and Cloud Skills Challenges, which regularly hand out vouchers covering a fundamentals exam outright.",
+      "labs": [
+        { "title": "Microsoft Applied Skills", "provider": "Microsoft", "href": "https://learn.microsoft.com/en-us/credentials/applied-skills/", "cost": "free" },
+        { "title": "Microsoft credentials — the full catalogue", "provider": "Microsoft", "href": "https://learn.microsoft.com/en-us/credentials/", "cost": "free course · paid exam" },
+        { "title": "Azure Fundamentals (AZ-900)", "provider": "Microsoft", "href": "https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/", "cost": "free course · paid exam" },
+        { "title": "Student credentials hub", "provider": "Microsoft", "href": "https://learn.microsoft.com/en-us/training/student-hub/credentials", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Google Skills", "provider": "Google", "href": "https://www.skills.google/", "note": "The third vendor catalogue. Free labs on live Google Cloud infrastructure and free skill badges; the career certificates are a paid subscription." },
+    { "title": "Cert Prep", "provider": "Dosanjh Labs", "href": "https://cert-prep.dosanjhlabs.com/", "note": "Our sibling site — PMP, CISM and CompTIA Security+ preparation, free. Where to go once you want a vendor-neutral credential alongside these." },
+    { "title": "SANS security policy templates", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Acceptable-use and device policy templates worth adapting once you actually run an estate. Copyright SANS, non-commercial use." }
+  ]
+}

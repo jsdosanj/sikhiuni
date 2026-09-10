@@ -1,0 +1,42 @@
+---
+import { published } from '../lib/data';
+import rawPrograms from '../../../site/assets/data/programs.json';
+import rawDepartments from '../data/departments.json';
+const courses=published.map(c=>({id:c.id,title:c.title,topic:c.topic,gated:!!c.gated,lessons:(c.lessons||[]).map(l=>({title:l.title})),references:c.references||[],source:c.sourceText?.url||c.source||''}));
+const programs=rawPrograms.programs;
+const departments=rawDepartments.departments;
+---
+<section class="studio library" id="learning-library">
+  <div class="studio-heading"><div><p class="desk-label">One connected learning record</p><h2>Courses, notes and sources.</h2></div><a href="/dashboard/learning">My progress ↗</a></div>
+  <p>Browse all published courses by programme or department. Lesson notes are shared with the course reader on this device.</p>
+  <div class="library-filters"><label>Find a course<input id="library-search" type="search" placeholder="Course title…" /></label><label>Department<select id="library-department"><option value="">All departments</option>{departments.map(d=><option value={d.id}>{d.name}</option>)}</select></label><label>Programme<select id="library-program"><option value="">All programmes</option>{programs.map(p=><option value={p.id}>{p.title}</option>)}</select></label></div>
+  <p id="library-count" role="status"></p>
+  <label class="library-course-label">Course<select id="library-course"></select></label>
+  <div id="library-detail">
+    <div id="library-context"></div><p id="library-progress"></p>
+    <div class="studio-panel"><section><h3>Your lesson notes</h3><label for="library-lesson">Lesson</label><select id="library-lesson"></select><textarea id="library-note" rows="7" placeholder="Capture an idea, question or connection…"></textarea><p id="library-note-status" role="status"></p><a id="library-open" href="/catalog">Open lesson ↗</a></section><section><h3>References &amp; further reading</h3><ol id="library-references"></ol><div id="library-programmes"></div></section></div>
+    <details class="library-log"><summary>Study sessions for this course</summary><div id="library-log"></div><p>Only completed focus timers are logged here. Timed study does not mark lessons complete or award grades.</p></details>
+  </div>
+  <button id="library-export" type="button">Export all course notes</button>
+  <p class="library-local-note">Notes and focus logs stay in this browser. Export them to keep a copy. Signed-in progress and enrolments remain managed by My Learning.</p>
+  <script type="application/json" id="library-data" set:html={JSON.stringify({courses,programs,departments}).replace(/</g,'\\u003c')} />
+</section>
+<script>
+ if(document.getElementById('learning-library')) {
+ const {courses,programs,departments}=JSON.parse(document.getElementById('library-data').textContent);
+ const el=(id:string)=>document.getElementById(id);
+ const courseSelect=el('library-course') as HTMLSelectElement,lessonSelect=el('library-lesson') as HTMLSelectElement,note=el('library-note') as HTMLTextAreaElement;
+ const read=(key:string,fallback:any)=>{try{return JSON.parse(localStorage.getItem('su_v1_'+key)||'null')??fallback;}catch{return fallback;}};
+ let selected:any=null;
+ function link(label:string,href:string){const a=document.createElement('a');a.textContent=label;a.href=href;return a;}
+ function drawNote(){if(!selected)return;const i=lessonSelect.value;note.value=read('note_'+selected.id+'_'+i,'');note.disabled=!selected.lessons.length;el('library-open').setAttribute('href','/course/'+encodeURIComponent(selected.id)+(i?'#lesson-'+i:''));const saved=read('note_saved_'+selected.id+'_'+i,null);el('library-note-status').textContent=saved?'Saved '+new Date(saved).toLocaleString():selected.lessons.length?'Notes save as you type.':selected.gated?'Open the course to access its available lessons.':'No published lessons available.';}
+ function drawCourse(){selected=courses.find(c=>c.id===courseSelect.value);el('library-detail').hidden=!selected;if(!selected)return;lessonSelect.replaceChildren();selected.lessons.forEach((l,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=(i+1)+'. '+l.title;lessonSelect.append(o);});const context=el('library-context');context.replaceChildren();departments.filter(d=>d.topics.includes(selected.topic)).forEach(d=>context.append(link(d.name+' ↗','/departments/'+d.slug)));const done=read('done_'+selected.id,{});const completed=selected.lessons.filter((_,i)=>done[i]).length;el('library-progress').textContent=selected.lessons.length?`${completed} of ${selected.lessons.length} lessons marked complete in this browser.`:'Open the course for its available content.';const refs=el('library-references');refs.replaceChildren();selected.references.forEach(text=>{const li=document.createElement('li');li.textContent=text;refs.append(li);});if(!selected.references.length){const li=document.createElement('li');li.textContent='No references listed for this course.';refs.append(li);}if(/^https?:\/\//.test(selected.source)){const li=document.createElement('li');li.append(link('Original source ↗',selected.source));refs.append(li);}const ps=el('library-programmes');ps.replaceChildren();programs.filter(p=>p.courseIds.includes(selected.id)).forEach(p=>ps.append(link(p.title+' ↗','/program/'+p.id)));let sessions=[];try{sessions=JSON.parse(localStorage.getItem('su_studio_sessions')||'[]');}catch{}const log=el('library-log');log.replaceChildren();const entries=Array.isArray(sessions)?sessions.filter(s=>s.course===selected.id):[];entries.forEach(s=>{const p=document.createElement('p');p.textContent=`${new Date(s.date).toLocaleString()} · ${s.minutes} minutes of timed study`;log.append(p);});if(!entries.length)log.textContent='No completed focus sessions for this course yet.';drawNote();}
+ function filter(){const q=(el('library-search') as HTMLInputElement).value.toLowerCase(),dept=departments.find(d=>d.id===(el('library-department') as HTMLSelectElement).value),prog=programs.find(p=>p.id===(el('library-program') as HTMLSelectElement).value),previous=courseSelect.value;const matches=courses.filter(c=>c.title.toLowerCase().includes(q)&&(!dept||dept.topics.includes(c.topic))&&(!prog||prog.courseIds.includes(c.id)));courseSelect.replaceChildren();matches.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.title;courseSelect.append(o);});if(matches.some(c=>c.id===previous))courseSelect.value=previous;el('library-count').textContent=matches.length+' matching courses';drawCourse();}
+ ['library-search','library-department','library-program'].forEach(id=>el(id).addEventListener('input',filter));courseSelect.addEventListener('change',()=>{drawCourse();rememberLocation();});lessonSelect.addEventListener('change',()=>{drawNote();rememberLocation();});
+ function rememberLocation(){if(!selected)return;const url=new URL(location.href);url.searchParams.set('course',selected.id);url.searchParams.set('lesson',lessonSelect.value||'0');history.replaceState(null,'',url);}
+ note.addEventListener('input',()=>{if(!selected)return;const key=selected.id+'_'+lessonSelect.value;try{localStorage.setItem('su_v1_note_'+key,JSON.stringify(note.value));localStorage.setItem('su_v1_note_saved_'+key,JSON.stringify(new Date().toISOString()));el('library-note-status').textContent='Saved on this device and available in the course reader.';}catch{el('library-note-status').textContent='Could not save. Copy your note before leaving.';}});
+ window.addEventListener('storage',()=>{if(document.activeElement!==note)drawCourse();});
+ el('library-export').addEventListener('click',()=>{const lines=['# Sikhi University course notes',''];courses.forEach(c=>c.lessons.forEach((l,i)=>{const text=read('note_'+c.id+'_'+i,'');if(text.trim())lines.push('## '+c.title+' / '+l.title,'','/course/'+c.id+'#lesson-'+i,'',text,'');}));const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/markdown'}));const a=link('Download',url);a.download='sikhi-university-notes.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ filter();const requested=new URLSearchParams(location.search).get('course')||read('last_course','');if(courses.some(c=>c.id===requested)){courseSelect.value=requested;drawCourse();const lesson=new URLSearchParams(location.search).get('lesson');if(lesson&&selected.lessons[Number(lesson)]){lessonSelect.value=lesson;drawNote();}}
+ }
+</script>
