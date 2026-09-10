@@ -89,22 +89,25 @@ export async function parseBody(request) {
 }
 
 // Same as requireRole, plus an MFA gate once a user has enrolled. Policy:
-// - Not enrolled: admins are hard-blocked (must enroll before touching /api/admin/*);
-//   everyone else passes (grace period — enrollment becomes a precondition for
-//   specific high-trust actions like studio submission/uploads/profile publish,
-//   enforced by those handlers, not here).
-// - Enrolled: the current session must have completed the /mfa step (mfa_ok=1),
-//   regardless of role.
+// - Not enrolled: everyone passes, admins included. Enrollment is STRONGLY
+//   encouraged for admins but is no longer a login-time block on /api/admin/*
+//   (2026-09-10): the hard block made a newly-added admin email unable to do
+//   anything at all until they had set up an authenticator, and the previous
+//   `403 mfa_enrollment_required` gave the UI no way out of that. Enrollment
+//   stays a precondition for specific high-trust actions (studio submission,
+//   uploads, profile publish), enforced by those handlers, not here.
+//   TRADE-OFF, stated plainly: a stolen admin session cookie now reaches every
+//   /api/admin/* route with no second factor. Re-tightening this is a one-line
+//   revert of the removed `user.role === "admin"` branch.
+// - Enrolled: unchanged — the current session must have completed the /mfa step
+//   (mfa_ok=1), regardless of role. An admin who DOES enroll is as protected as
+//   they were before.
 export async function requireMfa(env, request, roles) {
   const { user, error } = await requireRole(env, request, roles);
   if (error) return { error };
   const row = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
   const enrolled = !!(row && row.enabled_at);
-  if (enrolled) {
-    if (user.mfa_ok !== 1) return { error: json({ error: "mfa_required" }, 403) };
-    return { user };
-  }
-  if (user.role === "admin") return { error: json({ error: "mfa_enrollment_required" }, 403) };
+  if (enrolled && user.mfa_ok !== 1) return { error: json({ error: "mfa_required" }, 403) };
   return { user };
 }
 

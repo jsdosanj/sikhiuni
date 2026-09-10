@@ -51,10 +51,6 @@ import Base from '../layouts/Base.astro';
     api('/api/me').then(({ ok, d }) => {
       const u = ok && d.user;
       if (!u || u.role !== 'admin') { root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">Admins only. <a class="underline" href="/login">Sign in</a> with an admin account.</div>'; return; }
-      if (u.mfa && u.mfa.required && !u.mfa.enrolled) {
-        root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">Two-factor authentication is required for admin accounts. <a class="underline font-semibold" href="/mfa">Set it up now →</a></div>';
-        return;
-      }
       if (u.mfa && u.mfa.enrolled && u.mfa_ok !== 1) {
         root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">This session hasn\'t verified your two-factor code yet. <a class="underline font-semibold" href="/mfa">Verify now →</a></div>';
         return;
@@ -416,8 +412,18 @@ import Base from '../layouts/Base.astro';
             </tr>`;
           }).join('');
           const wireRoleButtons = () => panel.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', () => { const row = b.closest('[data-id]'); api('/api/admin/users', { method: 'POST', body: JSON.stringify({ id: row.dataset.id, role: b.dataset.set }) }).then(({ ok }) => { if (ok) draw(); }); }));
+          const mergeOpts = list.map((u2) => `<option value="${esc(u2.id)}">${esc(u2.email)}${u2.name ? ' — ' + esc(u2.name) : ''}</option>`).join('');
           panel.innerHTML = `
-            <div class="flex flex-wrap items-center gap-3 justify-between">
+            <div class="rounded-xl border border-line bg-surface p-4">
+              <h3 class="font-semibold">Merge duplicate accounts</h3>
+              <p class="mt-1 font-sans text-sm text-muted">Same person, two accounts? Fold one into the other. Coursework, certificates, drafts and enrolments move to the account you keep; the duplicate's own passwords, two-factor setup and sessions are discarded with it, and the account itself is deleted. Where both accounts hold a record for the same course or day, the kept account's record wins. This cannot be undone.</p>
+              <div class="mt-3 flex flex-wrap items-end gap-3">
+                <label class="font-sans text-sm">Duplicate to retire<br><select id="merge-source" class="mt-1 rounded-lg border border-line bg-paper px-2 py-1.5 max-w-[16rem]">${mergeOpts}</select></label>
+                <label class="font-sans text-sm">Account to keep<br><select id="merge-target" class="mt-1 rounded-lg border border-line bg-paper px-2 py-1.5 max-w-[16rem]">${mergeOpts}</select></label>
+                <button id="merge-go" class="btn btn-primary">Merge</button>
+              </div>
+            </div>
+            <div class="mt-6 flex flex-wrap items-center gap-3 justify-between">
               <p class="font-sans text-sm text-muted">${list.length} user(s).</p>
               <div class="flex flex-wrap gap-2">
                 <input id="user-search" type="search" placeholder="Filter by name or email…" class="rounded-lg border border-line bg-paper px-3 py-1.5 font-sans text-sm w-full sm:w-64" />
@@ -434,6 +440,20 @@ import Base from '../layouts/Base.astro';
               <tbody id="users-body">${renderList(list)}</tbody>
             </table></div>`;
           wireRoleButtons();
+          document.getElementById('merge-go').addEventListener('click', () => {
+            const sourceId = document.getElementById('merge-source').value;
+            const targetId = document.getElementById('merge-target').value;
+            if (!sourceId || !targetId) return;
+            if (sourceId === targetId) { window.suToast('Pick two different accounts.', 'error'); return; }
+            const label = (id) => { const u2 = list.find((x) => x.id === id); return u2 ? u2.email : id; };
+            if (!confirm(`Merge ${label(sourceId)} INTO ${label(targetId)}?\n\n${label(sourceId)} will be deleted. This cannot be undone.`)) return;
+            api('/api/admin/users', { method: 'POST', body: JSON.stringify({ action: 'merge', sourceId, targetId }) }).then(({ ok, d }) => {
+              if (!ok) { window.suToast((d && d.error) || 'Could not merge.', 'error'); return; }
+              const skipped = Object.values(d.skipped || {}).reduce((a, b) => a + b, 0);
+              window.suToast(`Merged. ${d.moved} record(s) moved` + (skipped ? `, ${skipped} kept from the surviving account instead.` : '.'), 'ok');
+              draw();
+            });
+          });
           const rerender = () => {
             const q = (document.getElementById('user-search').value || '').toLowerCase();
             const roleF = document.getElementById('user-role').value;

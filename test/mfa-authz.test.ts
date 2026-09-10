@@ -221,11 +221,11 @@ describe("requireMfa enrollment-state matrix", () => {
   let env: any;
   beforeEach(() => { env = makeEnv(); });
 
-  it("admin, not enrolled -> mfa_enrollment_required", async () => {
+  it("admin, not enrolled -> passes (enrollment is encouraged, not enforced)", async () => {
     seedUser(env, { id: "a1", role: "admin", mfaOk: 1 });
-    const { error } = await requireMfa(env, asReq("a1"), ["admin"]);
-    expect(error).toBeDefined();
-    expect((await error!.json()).error).toBe("mfa_enrollment_required");
+    const { user, error } = await requireMfa(env, asReq("a1"), ["admin"]);
+    expect(error).toBeUndefined();
+    expect(user.id).toBe("a1");
   });
 
   it("teacher, not enrolled -> passes (grace period)", async () => {
