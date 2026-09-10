@@ -7,11 +7,17 @@ protect its learners.
 ## Identity & access
 - SSO/OAuth2 + OIDC; strong password policy; **MFA available to all, required for staff/scholars/admins**.
   - **Implemented**: RFC 6238 TOTP, zero dependencies (Web Crypto only — `functions/api/_totp.js`).
-    Hard-required for every admin (`requireMfa` in `_lib.js`; an un-enrolled admin gets
-    `403 mfa_enrollment_required` from any `/api/admin/*` route). Teachers get a grace
-    period today — enrollment becomes a precondition for high-trust studio actions (draft
-    submission, profile publish) rather than a login-time block, and flips to hard-required
-    once the studio ships. 10 backup codes per enrollment (SHA-256 hashed, single-use); 5
+    Available to every role and enforced for anyone enrolled: an enrolled user's session must
+    clear `/mfa` (`mfa_ok=1`) before `requireMfa` in `_lib.js` lets it through, whatever their
+    role. Enrollment is *not* a login-time block for admins (changed 2026-09-10 — the previous
+    `403 mfa_enrollment_required` left a newly-added admin email unable to do anything at all
+    until an authenticator was set up, with no path out of it in the UI). **Accepted risk**:
+    a stolen session cookie belonging to an un-enrolled admin now reaches every `/api/admin/*`
+    route with no second factor, so admins are expected to enroll from `/mfa` — it is policy
+    rather than code. Re-tightening is a one-line revert of the removed `user.role === "admin"`
+    branch in `requireMfa`. Teachers are likewise on a grace period — enrollment stays a
+    precondition for high-trust studio actions (draft submission, profile publish) rather than
+    a login-time block. 10 backup codes per enrollment (SHA-256 hashed, single-use); 5
     failed verify attempts on one session forces a fresh magic-link sign-in. Break-glass
     (sole-admin lockout) and the admin `mfa_reset` action are documented in OPERATIONS.md.
 - **Least-privilege RBAC**: learner / scholar-author / reviewer / admin — scoped capabilities, no shared admin accounts.

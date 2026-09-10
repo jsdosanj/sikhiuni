@@ -39,14 +39,12 @@ describe.each(ADMIN_ENDPOINTS)("%s — authz", (_name, handler) => {
     expect(res.status).toBe(403);
   });
 
-  it("admin user, not MFA-enrolled → 403 (enrollment required)", async () => {
+  it("admin user, not MFA-enrolled → allowed (enrollment is no longer a block)", async () => {
     const res = await handler({
       request: req({ url: "http://localhost/api/admin", cookie: "sess-admin" }),
       env: mockEnv({ user: { ...ADMIN, mfa_ok: 1 }, adminEmails: "admin@example.com", rows: [] }),
     });
-    expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error).toBe("mfa_enrollment_required");
+    expect(res.status).toBe(200);
   });
 
   it("admin user, MFA-enrolled but session not verified this login → 403", async () => {

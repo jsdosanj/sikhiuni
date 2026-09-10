@@ -85,7 +85,50 @@ wrangler d1 execute sikh-university --remote --command \
 ```
 They can then sign in via magic link and re-enroll from `/mfa`. The same `mfa_reset` action
 is available for a locked-out teacher from the admin Teachers tab (`POST /api/admin/users
-{id, action:'mfa_reset'}`) — no direct D1 access needed for that case.
+{id, action:'mfa_reset'}`) — no direct D1 access needed for that case. Since 2026-09-10 an
+un-enrolled admin is no longer blocked from `/api/admin/*` at all, so this ladder only
+applies to an admin who HAS enrolled and then lost the authenticator.
+
+**Adding an admin.** Admin is conferred by the `ADMIN_EMAILS` Worker secret — a
+comma-separated allowlist, not a single address — and nothing in the app can grant it
+(`/api/admin/users` refuses to set `role='admin'` on purpose). Two steps, both required:
+1. Add the address to the secret. It is a secret, not a `[vars]` entry, so it is set from
+   the Cloudflare dashboard or `wrangler secret put ADMIN_EMAILS` with the FULL new list —
+   the command replaces the value, it does not append.
+2. Set the role on the existing row, because only registration and SSO login read the
+   allowlist; a password login never re-checks it, so an account that predates the secret
+   change stays a `learner` until either an SSO login or this:
+   ```bash
+   wrangler d1 execute sikh-university --remote --command \
+     "UPDATE users SET role='admin' WHERE email='<new admin email>'"
+   ```
+Skipping step 1 is the trap: `functions/api/auth/sso.js` DEMOTES any `role='admin'` user
+whose email is not in `ADMIN_EMAILS` the next time they arrive via SSO, so a role set only
+in D1 silently reverts.
+
+**Merging duplicate accounts.** One person, two `users` rows (registered under one email,
+later arrived under another — Apple private-relay addresses make this common). An admin
+merges them from the admin **Users** tab, or directly:
+`POST /api/admin/users {action:'merge', sourceId, targetId}`.
+
+- Coursework moves: progress, enrolments, certificates, ratings, submissions, daily
+  activity, grade overrides, cohort memberships, teaching assignments, discussions,
+  applications, claims, feedback, push subscriptions, flags, teacher profile, drafts,
+  announcements, archive requests, assignments, cohorts, media. The full list is
+  `OWNED`/`ACTOR` in `functions/api/admin/_merge-account.js`.
+- Credentials do NOT move: the source's password, MFA enrollment, backup codes, reset
+  codes and sessions are deleted with it. **The surviving account keeps only the sign-in
+  methods it already had** — check it can actually be signed into before merging away the
+  other one. An account with no `password_hash` signs in via SSO, family credentials, or by
+  using forgot-password to set a first password.
+- On a key collision (both accounts hold a row for the same course, or the same day of
+  activity) the SURVIVING account's row is kept and the duplicate's is dropped. The
+  response reports these as `skipped` per table, and the `account_merge` audit event
+  records them — nothing is lost silently, but it is lost.
+- `events` is deliberately not rewritten: it is an append-only audit log, and the
+  `account_merge` event is what ties the old id to the surviving account afterwards.
+- `users.role` is not inherited. If the merged-away account was the admin, add the
+  surviving address to `ADMIN_EMAILS` per "Adding an admin" above.
 
 **Importing approved course drafts.** Scholar review happens in D1 (`/review`); publishing a
 course is still a git PR, never a runtime mutation. Once one or more drafts are
