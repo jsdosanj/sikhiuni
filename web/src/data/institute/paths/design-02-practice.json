@@ -1,0 +1,156 @@
+{
+  "track": "design-02-practice",
+  "school": "design",
+  "blurb": "The habit that makes designers good: looking hard at shipped interfaces and naming what they do. Then the standard that makes designs usable by everyone — WCAG read properly, as a floor rather than a finish.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-10",
+  "creditLabel": "Reference libraries by",
+  "adaptedFrom": {
+    "name": "Refero and the W3C Web Accessibility Initiative",
+    "href": "https://styles.refero.design/",
+    "license": "Refero: link-out only, no content used · WCAG and ARIA: W3C Document Licence",
+    "note": "Refero is a privately operated reference library of screenshots taken from other companies' shipped products. Both layers of that are somebody else's: the site's own collection and each screenshot's underlying interface. Nothing from it is copied, embedded, hot-linked or rehosted here — it is named as a place to go and look, under its own terms, and every module's exercise is about what you notice there rather than about any image. W3C specifications are published under the W3C Document Licence, which permits reproduction of complete specifications with attribution; this path summarises and links rather than reproducing. Product and company names are used nominatively; Sikhi University is not affiliated with, sponsored by, or endorsed by Refero, the W3C, or any company whose interface appears in either."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "reading-interfaces",
+      "title": "Reading an interface",
+      "objective": "Take one screen from a shipped product and write down, in specifics, what it is doing and what it is trading away.",
+      "teach": "Designers improve mainly by looking, and most looking is too fast to teach anything. The discipline here is slowness plus writing. Pick one screen — a sign-up, a checkout, an empty state — and spend twenty minutes on it with a document open. Record specifics, not impressions: how many actions are on screen and which one is visually primary, what the type scale actually is in counted steps, what the spacing rhythm is, what the interface does when there is no data, what it does when something fails. Then the question that turns observation into understanding: what is this trading away? Every design is a trade. A single prominent action makes the common path fast and buries the uncommon one. A dense table serves the expert daily and repels the newcomer once. Naming the trade tells you whether the design was right *for its users*, which is the only sense in which a design is right at all. Reference libraries like Refero exist to make this practice cheap — thousands of shipped screens, sorted, so you can compare fifteen onboarding flows in an afternoon and see the shape of a convention. Go and look at them there, on their site. Do not build a private mirror of other companies' interfaces; that is somebody else's work twice over, and the value was never in owning the images.",
+      "labs": [
+        {
+          "title": "Refero — a reference library of shipped interfaces",
+          "provider": "Refero",
+          "href": "https://styles.refero.design/",
+          "cost": "free tier"
+        },
+        {
+          "title": "Mobbin — mobile and web flow references",
+          "provider": "Mobbin",
+          "href": "https://mobbin.com/",
+          "cost": "free tier"
+        },
+        {
+          "title": "Nielsen Norman Group — usability research articles",
+          "provider": "Nielsen Norman Group",
+          "href": "https://www.nngroup.com/articles/",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "wcag",
+      "title": "WCAG as a floor",
+      "objective": "Audit one screen against WCAG 2.2 level AA and fix every failure you find.",
+      "teach": "Accessibility guidance gets taught as a list of chores, which is why it gets skipped. Read WCAG's structure instead and it becomes a coherent argument organised under four principles — content must be perceivable, operable, understandable and robust — with testable criteria under each. Level AA is the tier most laws and procurement rules actually require, and it is not a stretch goal; it is a floor, and a great deal of shipped software sits below it. Start with the criteria that fail most often. Contrast: normal text needs 4.5:1 against its background at AA, large text 3:1, and this is the single most common failure in professionally designed products, usually caused by grey placeholder text or a brand colour that was chosen on a whiteboard. Keyboard: every interactive element must be reachable and operable without a mouse, with a visible focus indicator — tab through your screen and if you lose track of where you are, so does every keyboard user, permanently. Names: every control needs an accessible name, which is why the icon-only button with no label is a recurring offender. Targets: WCAG 2.2 added a minimum target size criterion, arriving at the same place Apple's guidelines did from the same physical facts. Run an automated checker first because it is free and catches perhaps a third of the problems, then do the manual pass, because the two thirds it cannot catch are where the real barriers are.",
+      "labs": [
+        {
+          "title": "WCAG 2.2 specification",
+          "provider": "W3C",
+          "href": "https://www.w3.org/TR/WCAG22/",
+          "cost": "free"
+        },
+        {
+          "title": "How to Meet WCAG — filterable quick reference",
+          "provider": "W3C",
+          "href": "https://www.w3.org/WAI/WCAG22/quickref/",
+          "cost": "free"
+        },
+        {
+          "title": "WebAIM Contrast Checker",
+          "provider": "WebAIM",
+          "href": "https://webaim.org/resources/contrastchecker/",
+          "cost": "free"
+        },
+        {
+          "title": "axe DevTools browser extension",
+          "provider": "Deque Systems",
+          "href": "https://www.deque.com/axe/devtools/",
+          "cost": "free tier"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "assistive-technology",
+      "title": "Using what you built the way some of your users will",
+      "objective": "Complete one core task in your own product using a screen reader, with the display turned off or eyes closed.",
+      "teach": "This module is one exercise, and it changes people more than any amount of reading. Turn on the screen reader already built into the device in front of you — VoiceOver on Apple platforms, TalkBack on Android, Narrator or NVDA on Windows — and complete a real task in something you built. Sign in. Add an item. Change a setting. Do it without looking. You will find things no checklist would have surfaced: a button announced as \"button\" because its label is an icon, a form where the error message is visually adjacent to the field but never announced, a modal that opens while focus stays behind it, a loading state that is silent so there is no way to know anything happened, a decorative image read aloud in full while the meaningful one beside it is skipped. Budget an hour and expect frustration — the frustration is the lesson, and it is a fraction of what a daily user experiences with the same screen. Learn the basic gestures first from the platform's own tutorial so that you are testing your interface rather than your unfamiliarity with the tool. Do this once a quarter on whatever you are shipping, and accessibility stops being a compliance exercise and becomes something you can feel.",
+      "labs": [
+        {
+          "title": "VoiceOver — Apple's accessibility support",
+          "provider": "Apple",
+          "href": "https://support.apple.com/guide/iphone/turn-on-and-practice-voiceover-iph3e2e415f/ios",
+          "cost": "free"
+        },
+        {
+          "title": "TalkBack — Android accessibility",
+          "provider": "Google",
+          "href": "https://support.google.com/accessibility/android/answer/6283677",
+          "cost": "free"
+        },
+        {
+          "title": "NVDA screen reader",
+          "provider": "NV Access",
+          "href": "https://www.nvaccess.org/",
+          "cost": "free"
+        },
+        {
+          "title": "WebAIM — screen reader testing guidance",
+          "provider": "WebAIM",
+          "href": "https://webaim.org/articles/screenreader_testing/",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "critique",
+      "title": "Critique, and defending a decision",
+      "objective": "Present one piece of your own work for critique, and separate the feedback that is about the users from the feedback that is about taste.",
+      "teach": "Design critique fails in the same two ways code review does, and the Engineering Craft path's answer applies here almost unchanged: without a stated standard, critique collapses into either taste or politeness, and both waste everybody's time. Borrow the standard. The question is not \"do I like it\" but \"does this serve the user better than what we have\" — which means critique should open with who the user is and what they are trying to do, or it has nothing to measure against. As the person presenting, say what you were optimising for and what you traded away, because that is what makes disagreement productive: someone can now argue that you traded the wrong thing, which is a real conversation. As the person critiquing, distinguish the three kinds of comment and label them out loud — this will not work for the user, this is inconsistent with the system, this is my preference. The third kind is legitimate to say and never legitimate to block on. And the same signal applies as in code review: if a reviewer misread the screen, the finding is not that they were careless, it is that the screen can be misread. That is data you were given for free.",
+      "labs": [
+        {
+          "title": "The Code Reviewer's Guide — the standard, transferable to design",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/reviewer/standard.html",
+          "cost": "free"
+        },
+        {
+          "title": "Nielsen Norman Group — design critique articles",
+          "provider": "Nielsen Norman Group",
+          "href": "https://www.nngroup.com/topic/design-process/",
+          "cost": "free"
+        }
+      ]
+    }
+  ],
+  "bench": [
+    {
+      "title": "W3C Web Accessibility Initiative",
+      "provider": "W3C",
+      "href": "https://www.w3.org/WAI/",
+      "note": "The home of WCAG, ARIA and the authoring practices. Start at the WAI tutorials rather than the specifications if the specifications feel impenetrable — they teach the same requirements in the order you will meet them."
+    },
+    {
+      "title": "ARIA Authoring Practices Guide",
+      "provider": "W3C",
+      "href": "https://www.w3.org/WAI/ARIA/apg/",
+      "note": "Keyboard and semantic behaviour for every common component pattern. The reference to check before you hand-build a combobox, a tab set, or a dialog — all three are harder than they look."
+    },
+    {
+      "title": "Inclusive Components",
+      "provider": "Heydon Pickering",
+      "href": "https://inclusive-components.design/",
+      "note": "Component-by-component write-ups of how to build common interface patterns accessibly, with the reasoning shown. Free to read on the author's site."
+    },
+    {
+      "title": "European Accessibility Act — obligations overview",
+      "provider": "European Commission",
+      "href": "https://ec.europa.eu/social/main.jsp?catId=1202",
+      "note": "Why module 2 calls AA a floor: accessibility is a legal requirement for a widening set of products and services, not a matter of goodwill. Check your own jurisdiction's rules as well."
+    }
+  ]
+}

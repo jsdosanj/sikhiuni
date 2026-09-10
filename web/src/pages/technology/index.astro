@@ -23,7 +23,7 @@ const goals = [
   { label: 'I teach, and want to bring cyber into a classroom', to: '/technology/track/04-cyber-for-schools', hint: 'free K-12 curriculum, a browser cyber range, and the ransomware guidance a school actually needs' },
   { label: 'I want an IT job, and a credential to show for it', to: '/technology/track/00-it-support', hint: "Apple's and Microsoft's own free training, device support, fleet deployment, then a credential employers filter on" },
 ];
-const desc = 'Sikhi University’s engineering wing, three schools: AI, Cybersecurity, and IT. Learn to code, build AI systems, defend what you build, keep an estate running, and ship a project for the Panth.';
+const desc = 'Sikhi University’s engineering wing, four schools: AI, Cybersecurity, IT, and Design. Learn to code, build AI systems, defend what you build, keep an estate running, design what people touch, and ship a project for the Panth.';
 ---
 <Base title="Institute of Technology, Sikhi University" description={desc} institute>
   <InstituteRail />
@@ -34,7 +34,7 @@ const desc = 'Sikhi University’s engineering wing, three schools: AI, Cybersec
       <div class="i-thresh-copy">
         <span class="i-label" style="color:var(--i-signal)">// entering, f00 · the institute</span>
         <h1 class="i-thresh-h">You have entered the<br /><span class="i-amber">Institute of Technology</span><span class="i-caret" aria-hidden="true">&nbsp;</span></h1>
-        <p class="i-prose i-lede">The university’s engineering wing, in three schools: one that teaches you to build the systems, one that teaches you to defend them, one that keeps them running. A working building, lit at night.</p>
+        <p class="i-prose i-lede">The university’s engineering wing, in four schools: one that teaches you to build the systems, one that teaches you to defend them, one that keeps them running, and one that shapes the surface people actually touch. A working building, lit at night.</p>
         <p class="i-wedge i-mono">{WEDGE}</p>
         <a class="i-btn i-btn-primary i-thresh-cta" href="#i-goal-router">Pick a goal &rarr;</a>
       </div>
@@ -63,8 +63,8 @@ const desc = 'Sikhi University’s engineering wing, three schools: AI, Cybersec
   </header>
 
   <section class="i-wrap i-sec">
-    <span class="i-label">01, the three schools</span>
-    <h2>The Institute has three schools. All free, all open.</h2>
+    <span class="i-label">01, the four schools</span>
+    <h2>The Institute has four schools. All free, all open.</h2>
     <div class="i-schools">
       {schools.map((s) => (
         <a class="i-panel i-school" href={`/technology/school/${s.slug}`}>
@@ -262,7 +262,7 @@ const desc = 'Sikhi University’s engineering wing, three schools: AI, Cybersec
     .i-sec > h2 { margin: 0 0 10px; font-size: clamp(20px, 3vw, 27px); }
     .i-sec > p { margin: 0 0 22px; }
 
-    /* The two sub-schools. One accent for both (D2 keeps --signal for live
+    /* The sub-schools. One accent for all (D2 keeps --signal for live
        states only), they are told apart by the mono mark and the label. */
     .i-schools { display: grid; gap: 16px; }
     @media (min-width: 760px) { .i-schools { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }

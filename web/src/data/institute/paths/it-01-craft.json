@@ -1,0 +1,191 @@
+{
+  "track": "it-01-craft",
+  "school": "it",
+  "blurb": "Google published the guides its own engineers are held to. This path reads them as arguments rather than rules — what each one is really claiming about how software gets built, and where the claim stops being true. Then it puts the same habits to work in interview practice.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-10",
+  "creditLabel": "Set texts published by",
+  "adaptedFrom": {
+    "name": "Google Engineering Practices and the Google Style Guides",
+    "href": "https://google.github.io/eng-practices/",
+    "license": "CC-BY-3.0",
+    "note": "Both documents are Google's, published under CC BY 3.0. That licence permits reproduction with attribution, and the standard-of-review sentence in module 1 is quoted under it because paraphrasing it would lose the precision that makes it work. Everything else here is Sikhi University's own teaching written around documents you are expected to go and read in full at their source. Google's name is used nominatively to say whose guides these are; Sikhi University is not affiliated with, sponsored by, or endorsed by Google."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "standard-of-review",
+      "title": "The standard of review",
+      "objective": "State the bar a change has to clear to be approved, and explain why that bar is lower than \"perfect\" and higher than \"works\".",
+      "teach": "Almost every argument about code review is really an argument about the bar, and most teams have never said out loud what theirs is. Google's is one sentence, and it is worth reading slowly because every clause is load-bearing: reviewers should approve a change once it \"definitely improves the overall code health of the system\", even when it is not perfect. Notice what that rules out. It rules out blocking a change because you would have written it differently — that is taste, and taste is not code health. It also rules out waving through a change that leaves the system worse because the author is senior, or in a hurry, or because the thread has gone on too long. The design choice underneath it is a bet about time: a codebase improves through many small improvements that actually land, not through a few perfect ones that stall in review. The counterweight is the reviewer's licence to insist on the things that do not get fixed later — tests, naming, a design that will not have to be undone. Read both guides end to end before you decide whether you agree; they are short, and they are the clearest published statement of how a large engineering organisation keeps a shared codebase habitable.",
+      "checklist": {
+        "label": "What a reviewer is actually looking at (Google's list)",
+        "note": "The seven headings are the section titles of Google's \"What to Look For in a Code Review\", reproduced under CC BY 3.0 from google/eng-practices. The commentary on each is Sikhi University's.",
+        "items": [
+          {
+            "id": "01",
+            "title": "Design",
+            "note": "Does this change belong in this system at all, and is it in the right place? The only item on the list that is expensive to fix later, which is why it comes first."
+          },
+          {
+            "id": "02",
+            "title": "Functionality",
+            "note": "Does it do what the author says, and is that what users need? Includes the edge cases the author did not think about, which is most of a reviewer's value."
+          },
+          {
+            "id": "03",
+            "title": "Complexity",
+            "note": "Could it be simpler? Google's operational test is whether another engineer could understand it soon after — not whether the author can defend it now."
+          },
+          {
+            "id": "04",
+            "title": "Tests",
+            "note": "Are there tests, do they test the right thing, and will they fail when the code breaks? A test that cannot fail is a comment with a runtime cost."
+          },
+          {
+            "id": "05",
+            "title": "Naming",
+            "note": "Does each name say what the thing is? The cheapest lever on readability and the one reviewers most often let slide to avoid seeming petty."
+          },
+          {
+            "id": "06",
+            "title": "Comments",
+            "note": "Do they explain why rather than what? A comment restating the code is a maintenance liability; a comment explaining a decision is the thing you will want at 3am."
+          },
+          {
+            "id": "07",
+            "title": "Style and consistency",
+            "note": "Does it follow the style guide — and where the guide is silent, the surrounding code? Module 3 is about why this is last and still not optional."
+          }
+        ]
+      },
+      "labs": [
+        {
+          "title": "The Code Reviewer's Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/reviewer/",
+          "cost": "free"
+        },
+        {
+          "title": "What to Look For in a Code Review",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/reviewer/looking-for.html",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "the-change-author",
+      "title": "Writing a change worth reviewing",
+      "objective": "Size and describe a change so that review is fast, and respond to review comments without the thread turning into a standoff.",
+      "teach": "The author's guide is the half people skip, and it is the half that decides how long review takes. Two ideas carry most of it. The first is that small changes get reviewed properly and large ones get skimmed — a reviewer's attention is a fixed budget, so a thousand-line change does not buy ten times the scrutiny of a hundred-line one, it buys less per line. Splitting work into changes that each do one thing is not administrative tidiness; it is the only way to get a real review at all. The second is that a change description is written for someone reading the history in two years, not for the reviewer this afternoon. \"Fix bug\" is a description that will cost somebody an hour one day. Say what the change does and why it was needed, because the why is the part the diff cannot tell them. Then there is handling pushback, which the guide is unusually honest about: the guide's position is that the author should not simply defer, but should not simply dig in either — if a reviewer is confused, that is evidence the code is confusing, and \"I'll add a comment\" is often the wrong fix where \"I'll make it clearer\" is the right one. Take the emotional temperature of a review thread seriously; it is a technical signal about the code.",
+      "labs": [
+        {
+          "title": "The Change Author's Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/developer/",
+          "cost": "free"
+        },
+        {
+          "title": "Small CLs — why change size dominates review quality",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/developer/small-cls.html",
+          "cost": "free"
+        },
+        {
+          "title": "How to handle reviewer pushback",
+          "provider": "Google",
+          "href": "https://google.github.io/eng-practices/review/developer/handling-comments.html",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "style-as-settled-argument",
+      "title": "Style guides: arguments you only have once",
+      "objective": "Explain what a style guide is for, apply the one for your language, and recognise the small set of rules that are about correctness rather than taste.",
+      "teach": "A style guide's value is almost never that its choices are right. Two spaces or four, braces on the same line or the next — these have no defensible winner, and a team that argues about them is burning time on a question with no answer. The guide's real job is to make the question closed, so that the argument happens once, in one document, instead of in every review forever. That reframing matters when you read Google's guides: much of what looks arbitrary is arbitrary, deliberately, and consistency is the whole benefit. But not all of it is taste. Scattered through every guide is a minority of rules that exist because the alternative is broken code — the C++ guide's rules about ownership and lifetimes, the Python guide on mutable default arguments, the JavaScript and TypeScript guidance on equality and implicit coercion. Those rules encode bugs the organisation has actually shipped. Learning to tell the two categories apart is the skill: follow the taste rules without argument because agreement is the point, and understand the correctness rules well enough to explain them to someone else. Read the guide for the language you actually write, not all seventeen.",
+      "labs": [
+        {
+          "title": "Google Style Guides (17 languages)",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/",
+          "cost": "free"
+        },
+        {
+          "title": "Python Style Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/pyguide.html",
+          "cost": "free"
+        },
+        {
+          "title": "TypeScript Style Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/tsguide.html",
+          "cost": "free"
+        },
+        {
+          "title": "C++ Style Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/cppguide.html",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "interview-practice",
+      "title": "Interview practice, honestly framed",
+      "objective": "Work small problems under the same standards you would apply in review, and explain your reasoning aloud while doing it.",
+      "teach": "Technical interviews test something narrower than the job, and it is worth being clear-eyed about that rather than resentful: what they mostly test is whether you can hold a problem in your head, decompose it, and narrate your reasoning while under mild pressure. All three improve with practice, and none of them improve by reading solutions. Use the problem set as a source of katas — pick one, solve it in the language you will interview in, then do the thing almost nobody does and review your own solution against module 1's list. Is it the simplest version? Would the names mean anything to a stranger? Is there a test? Most candidates can produce a working answer; the ones who get offers produce a working answer and then say, unprompted, what is wrong with it and what they would change. That habit comes directly from having been reviewed, which is why this module sits at the end of this path rather than the start of its own. The collection is MIT-licensed, though many individual problems are restatements of classics from Project Euler, Google Code Jam and the well-known interview books — treat it as a pointer to problems rather than as an authority, and go to the original source when one is named.",
+      "labs": [
+        {
+          "title": "the-coding-interview — problems and katas",
+          "provider": "Matthias Endler and contributors",
+          "href": "https://github.com/mre/the-coding-interview",
+          "cost": "free"
+        },
+        {
+          "title": "Project Euler",
+          "provider": "Project Euler",
+          "href": "https://projecteuler.net/",
+          "cost": "free · account"
+        },
+        {
+          "title": "Exercism — mentored practice tracks",
+          "provider": "Exercism",
+          "href": "https://exercism.org/",
+          "cost": "free"
+        }
+      ]
+    }
+  ],
+  "bench": [
+    {
+      "title": "Google Engineering Practices, full documentation",
+      "provider": "Google",
+      "href": "https://google.github.io/eng-practices/",
+      "note": "The landing page for both review guides. Short enough to read in an evening, and worth re-reading once you have been reviewing for a year — different sentences matter at different points in a career."
+    },
+    {
+      "title": "google/eng-practices on GitHub",
+      "provider": "Google",
+      "href": "https://github.com/google/eng-practices",
+      "note": "The source repository, including the CC BY 3.0 licence text these documents are published under."
+    },
+    {
+      "title": "google/styleguide on GitHub",
+      "provider": "Google",
+      "href": "https://github.com/google/styleguide",
+      "note": "The style guides themselves, plus the editor configs and linters that enforce them — worth wiring into your project so the rules stop being something a human has to notice."
+    },
+    {
+      "title": "Google Engineering Practices, Chinese and other translations",
+      "provider": "Community contributors",
+      "href": "https://github.com/google/eng-practices#translations",
+      "note": "Community translations of the review guides. Useful if English is not the first language on your team — the arguments survive translation better than the idioms do."
+    }
+  ]
+}

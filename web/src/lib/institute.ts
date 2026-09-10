@@ -7,9 +7,9 @@ import professorsRaw from '../data/institute/professors.json';
 
 export type TrackKind = 'phase' | 'dojo' | 'guide' | 'capstone' | 'path';
 export type TrackStatus = 'planned' | 'draft' | 'published';
-export type SchoolId = 'ai' | 'cyber' | 'it';
+export type SchoolId = 'ai' | 'cyber' | 'it' | 'design';
 
-/** A sub-school of the Institute. Both are declared in manifest.schools. */
+/** A sub-school of the Institute. All are declared in manifest.schools. */
 export interface School {
   id: SchoolId;
   slug: string;
