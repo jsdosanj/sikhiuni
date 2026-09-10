@@ -32,8 +32,16 @@ async function renewSessionIfStale(env, request) {
 }
 
 // GET /api/me -> current user { id, email, name, country, languages, role, mfa, isTeacher, marketingOptin } or { user: null }.
-// mfa.required reflects current enforcement policy: hard-required for admins, a
-// grace period for everyone else until Workstream C (studio) flips it on for teachers.
+// mfa carries only `enrolled` (2026-09-10). It used to also carry `required`,
+// hard-coded to role==='admin', and admin.astro refused to render the whole admin
+// page on it. That mirrored the requireMfa() hard block, and when that block was
+// removed the flag became a UI-only lockout with no server rule behind it: an
+// un-enrolled admin passed every API call and still could not open the page.
+// Enrolment being merely encouraged is not something a client flag can express,
+// so the flag is gone rather than pinned to false. Enrolment IS still a real
+// precondition for specific high-trust actions, and each is reported by the
+// endpoint that enforces it (e.g. /api/teacher/profile's own mfaEnrolled for
+// publish) — never globally from here.
 // isTeacher covers both role==='teacher' AND a course_teachers assignment held by a
 // user of any other role (e.g. an admin, or a learner given co-teacher access) — the
 // nav/dashboard portal switcher uses this to decide whether to show the teacher view.
@@ -41,7 +49,7 @@ export async function onRequestGet({ request, env }) {
   const user = await getUser(env, request);
   if (!user) return json({ user: null });
   const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
-  const mfa = { enrolled: !!(mfaRow && mfaRow.enabled_at), required: user.role === "admin" };
+  const mfa = { enrolled: !!(mfaRow && mfaRow.enabled_at) };
   const isTeacher = user.role === "teacher" || (await isCourseTeacher(env, user.id));
   const marketingOptin = !!user.marketing_optin;
   // Renewal is best-effort: a failure here must not break the session read

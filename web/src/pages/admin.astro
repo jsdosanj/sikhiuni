@@ -51,10 +51,6 @@ import Base from '../layouts/Base.astro';
     api('/api/me').then(({ ok, d }) => {
       const u = ok && d.user;
       if (!u || u.role !== 'admin') { root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">Admins only. <a class="underline" href="/login">Sign in</a> with an admin account.</div>'; return; }
-      if (u.mfa && u.mfa.required && !u.mfa.enrolled) {
-        root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">Two-factor authentication is required for admin accounts. <a class="underline font-semibold" href="/mfa">Set it up now →</a></div>';
-        return;
-      }
       if (u.mfa && u.mfa.enrolled && u.mfa_ok !== 1) {
         root.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-4">This session hasn\'t verified your two-factor code yet. <a class="underline font-semibold" href="/mfa">Verify now →</a></div>';
         return;
