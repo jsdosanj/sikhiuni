@@ -23,6 +23,10 @@ interface LabConfig {
   starter: string;
   checks: Check[];
   solution?: string;
+  /** Track id — the `course_id` this lab's completion is recorded under. */
+  track?: string;
+  /** The lesson's index within its track: /api/progress wants an integer. */
+  lessonIndex?: number;
 }
 
 const RUN_TIMEOUT_MS = 10_000;
@@ -278,12 +282,24 @@ class CodeLab {
   markDone() {
     // Client-attested completion (model B). No score is sent — the gradebook
     // treats a lab check-pass exactly like a lesson "done" flag.
-    fetch('/api/progress', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ courseId: this.cfg.id.split('::')[0], lessonId: this.cfg.id, done: true }),
-    }).catch(() => { /* progress sync is best-effort; localStorage is the cache */ });
+    //
+    // This used to post { courseId, lessonId: '<track>::<slug>::lab', done: true }
+    // and /api/progress rejected every one of them with a 400: it requires an
+    // INTEGER lessonId and a boolean named `completed`, not `done`. fetch does
+    // not reject on 4xx and the .catch() below only sees network errors, so
+    // every institute lab completion was discarded in silence — nothing ever
+    // reached the dashboard or the gradebook. The track and the lesson's index
+    // are now passed in explicitly rather than parsed back out of the lab id,
+    // whose shape is a localStorage key, not an API contract.
+    const { track, lessonIndex } = this.cfg;
+    if (track && Number.isInteger(lessonIndex)) {
+      fetch('/api/progress', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ courseId: track, lessonId: lessonIndex, completed: true }),
+      }).catch(() => { /* progress sync is best-effort; localStorage is the cache */ });
+    }
     try {
       const k = 'iot_v1_lab_done';
       const set = new Set(JSON.parse(localStorage.getItem(k) || '[]'));

@@ -119,7 +119,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
     // Profile allowlists, keep in sync with functions/api/_profile-options.js.
     const COUNTRIES = ['Afghanistan','Albania','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahrain','Bangladesh','Belgium','Bhutan','Bolivia','Bosnia and Herzegovina','Brazil','Brunei','Bulgaria','Cambodia','Cameroon','Canada','Chile','China','Colombia','Croatia','Cyprus','Czechia','Denmark','Ecuador','Egypt','Estonia','Ethiopia','Fiji','Finland','France','Georgia','Germany','Ghana','Greece','Guatemala','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Libya','Lithuania','Luxembourg','Malaysia','Maldives','Malta','Mauritius','Mexico','Moldova','Mongolia','Morocco','Myanmar','Nepal','Netherlands','New Zealand','Nigeria','North Macedonia','Norway','Oman','Pakistan','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saudi Arabia','Serbia','Singapore','Slovakia','Slovenia','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Syria','Taiwan','Tanzania','Thailand','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe','Other'];
     const LANGUAGES = ['Punjabi','English','Hindi','Urdu','Gurmukhi','Shahmukhi','Bengali','Tamil','Telugu','Marathi','Gujarati','Kannada','Malayalam','Sindhi','Pashto','Farsi','Arabic','Spanish','French','German','Portuguese','Italian','Dutch','Russian','Mandarin','Cantonese','Japanese','Korean','Thai','Vietnamese','Indonesian','Malay','Swahili','Turkish','Other'];
-    if (document.getElementById('dash')) Promise.all([api('/api/me'), fetch('/data/index.json').then((r) => r.json()), api('/api/progress'), api('/api/enrollments'), api('/api/activity/stats')]).then(([me, data, prog, enrollRes, activityRes]) => {
+    if (document.getElementById('dash')) Promise.all([api('/api/me'), fetch('/data/index.json').then((r) => r.json()), api('/api/progress'), api('/api/enrollments'), api('/api/activity/stats'), fetch('/data/institute/manifest.json').then((r) => r.ok ? r.json() : null).catch(() => null)]).then(([me, data, prog, enrollRes, activityRes, institute]) => {
       if (activityRes && !activityRes.error) activityStats = activityRes;
       // Server is the source of truth for grades: merge it into the local cache before rendering.
       if (prog && prog.progress) prog.progress.forEach((row) => {
@@ -157,7 +157,34 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
       }
 
       const tn = (t) => (data.topics.find((x) => x.id === t) || {}).name || t;
-      const pub = data.courses.filter((c) => c.status === 'published');
+
+      // The Institute of Technology writes to the SAME `progress` table as the
+      // catalogue (see /api/institute-exam and /api/progress), so a student who
+      // passed a phase exam already had a row here — this page just never had a
+      // course object to hang it on and silently dropped it. Its tracks are
+      // mapped onto the shape the rest of this view expects, so completed /
+      // started / grades / certificates all treat a track like any course.
+      // `href` and `certHref` exist because the two live at different routes.
+      const trackSlug = (t) => ((t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id);
+      const schoolName = (id) => ((institute && institute.schools || []).find((x) => x.id === id) || {}).title || 'Institute of Technology';
+      const instituteCourses = ((institute && institute.tracks) || [])
+        .filter((t) => t.status === 'published')
+        .map((t) => ({
+          id: t.id,
+          title: t.title,
+          topic: schoolName(t.school),
+          level: t.level,
+          status: 'published',
+          nLessons: t.lessonCount || t.moduleCount || t.topicCount || t.projectCount || 0,
+          href: `/technology/track/${trackSlug(t)}`,
+          certHref: `/technology/cert?track=${encodeURIComponent(trackSlug(t))}`,
+          institute: true,
+        }));
+
+      const pub = data.courses
+        .filter((c) => c.status === 'published')
+        .map((c) => ({ ...c, href: `/course/${c.id}`, certHref: `/cert?course=${c.id}` }))
+        .concat(instituteCourses);
 
       // Tabs: My Learning | Profile. Any signed-in user can edit their account.
       function renderLearning() { if (viewAs === 'teacher') renderTeacher(); else renderStudent(); }
@@ -378,14 +405,14 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             // re-templated as flat navy resume cards.
             return `<div class="mt-10"><p class="eyebrow text-saffron-deep">${esc(title)}</p><div class="mt-4 flex flex-col gap-4 sm:flex-row sm:overflow-x-auto sm:snap-x sm:pb-2">${list.map((c) => {
               const p = progress(c);
-              return `<a href="/course/${c.id}" class="band-navy relative block rounded-[3px] p-5 transition hover:-translate-y-1 sm:w-72 sm:shrink-0 sm:snap-start"><div class="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-white/70"><span>${esc(tn(c.topic))}</span><span>· ${stageName(c.level)}</span></div><h3 class="mt-2 text-lg font-bold text-white">${esc(c.title)}</h3><div class="mt-4 flex items-center gap-2"><span class="h-[3px] flex-1 bg-white/25"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="font-mono text-[11px] text-white/70">${p}%</span></div></a>`;
+              return `<a href="${c.href}" class="band-navy relative block rounded-[3px] p-5 transition hover:-translate-y-1 sm:w-72 sm:shrink-0 sm:snap-start"><div class="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-white/70"><span>${esc(tn(c.topic))}</span><span>· ${stageName(c.level)}</span></div><h3 class="mt-2 text-lg font-bold text-white">${esc(c.title)}</h3><div class="mt-4 flex items-center gap-2"><span class="h-[3px] flex-1 bg-white/25"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="font-mono text-[11px] text-white/70">${p}%</span></div></a>`;
             }).join('')}</div></div>`;
           }
           return `<h3 class="mt-10 text-xl font-bold">${title}</h3><div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:grid-cols-4">${list.map((c) => {
             const p = progress(c);
-            const extra = mode === 'completed' ? `<a class="btn btn-primary mt-3" href="/cert?course=${c.id}">View certificate →</a>`
+            const extra = mode === 'completed' ? `<a class="btn btn-primary mt-3" href="${c.certHref}">View certificate →</a>`
               : mode === 'started' ? `<div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-paper"><div class="h-full bg-saffron" style="width:${p}%"></div></div><div class="font-sans text-xs text-muted mt-1">${p}% complete</div>` : '';
-            return `<article class="card hover:border-saffron"><div class="flex flex-wrap gap-2 font-sans text-xs text-muted"><span class="pill bg-paper text-navy">${esc(tn(c.topic))}</span><span class="pill bg-paper text-muted">${stageName(c.level)}</span></div><h3 class="mt-1 text-lg font-bold text-navy"><a href="/course/${c.id}">${esc(c.title)}</a></h3>${extra}</article>`;
+            return `<article class="card hover:border-saffron"><div class="flex flex-wrap gap-2 font-sans text-xs text-muted"><span class="pill bg-paper text-navy">${esc(tn(c.topic))}</span><span class="pill bg-paper text-muted">${stageName(c.level)}</span></div><h3 class="mt-1 text-lg font-bold text-navy"><a href="${c.href}">${esc(c.title)}</a></h3>${extra}</article>`;
           }).join('')}</div>`;
         }
         const graded = pub.filter((c) => passed(c.id) || progress(c) > 0 || get('score_' + c.id, null) != null);
@@ -393,7 +420,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
         // graded-courses data the old "My grades" <table> showed (title,
         // progress %, test score, status), re-templated as ruled rows per
         // task 15 spec, nothing added or dropped.
-        const gradesHtml = graded.length ? `<div class="mt-10"><p class="eyebrow text-saffron-deep">Enrolled</p><div class="rule-navy mt-1">${graded.map((c) => { const sc = get('score_' + c.id, null); const p = progress(c); const ok = passed(c.id); const statusLabel = ok ? 'Passed' : (p > 0 || sc != null ? 'In progress' : '-'); const statusCls = ok ? 'text-ok border-ok' : 'text-muted border-line'; return `<a href="/course/${c.id}" class="row-ruled hover:bg-surface"><span class="min-w-0 flex-1 truncate font-semibold text-navy">${esc(c.title)}</span><span class="flex w-36 flex-none items-center gap-2"><span class="h-[3px] flex-1 bg-line"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="w-9 shrink-0 text-right font-mono text-[11px] text-muted">${p}%</span></span><span class="w-12 shrink-0 text-right font-mono text-[11px] text-muted">${sc != null ? sc + '%' : '-'}</span><span class="chip-status flex-none ${statusCls}">${statusLabel}</span></a>`; }).join('')}</div></div>` : '';
+        const gradesHtml = graded.length ? `<div class="mt-10"><p class="eyebrow text-saffron-deep">Enrolled</p><div class="rule-navy mt-1">${graded.map((c) => { const sc = get('score_' + c.id, null); const p = progress(c); const ok = passed(c.id); const statusLabel = ok ? 'Passed' : (p > 0 || sc != null ? 'In progress' : '-'); const statusCls = ok ? 'text-ok border-ok' : 'text-muted border-line'; return `<a href="${c.href}" class="row-ruled hover:bg-surface"><span class="min-w-0 flex-1 truncate font-semibold text-navy">${esc(c.title)}</span><span class="flex w-36 flex-none items-center gap-2"><span class="h-[3px] flex-1 bg-line"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="w-9 shrink-0 text-right font-mono text-[11px] text-muted">${p}%</span></span><span class="w-12 shrink-0 text-right font-mono text-[11px] text-muted">${sc != null ? sc + '%' : '-'}</span><span class="chip-status flex-none ${statusCls}">${statusLabel}</span></a>`; }).join('')}</div></div>` : '';
         let applyCta = '';
         if (user && user.role === 'learner' && get('signup_intent', '') === 'teacher') applyCta = `<div class="mt-4 rounded-xl2 border-l-4 border-saffron bg-saffron-soft/40 p-4 font-sans text-sm">You signed up to teach. <a class="underline font-semibold" href="/teach">Complete your teacher application →</a></div>`;
         root.innerHTML = `

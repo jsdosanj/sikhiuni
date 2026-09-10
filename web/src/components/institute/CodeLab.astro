@@ -1,7 +1,9 @@
 ---
 // The Code Lab bench. One per "try it" block in a lesson.
-//   id      , unique per lesson-exercise; used for the localStorage buffer key
-//              and as the progress course/lesson id (`<courseId>::<exerciseId>`).
+//   id      , unique per lesson-exercise; the localStorage buffer key. NOT the
+//              progress id — see `track` / `lessonIndex` for that.
+//   track   , the track id this lesson belongs to (progress `course_id`).
+//   lessonIndex, the lesson's position in its track (progress `lessonId`).
 //   lang    , 'js' (worker + console), 'py' (Pyodide worker + console), or
 //              'html' (sandboxed preview).
 //   starter , the code the editor opens with.
@@ -17,9 +19,12 @@ interface Props {
   checks?: Check[];
   solution?: string;
   title?: string;
+  /** Track id + the lesson's index in it: what /api/progress records against. */
+  track?: string;
+  lessonIndex?: number;
 }
-const { id, lang = 'js', starter, checks = [], solution, title } = Astro.props;
-const cfg = { id, lang, starter, checks, solution };
+const { id, lang = 'js', starter, checks = [], solution, title, track, lessonIndex } = Astro.props;
+const cfg = { id, lang, starter, checks, solution, track, lessonIndex };
 // A lesson's starter/solution can itself contain "</script>" (HTML exercises),
 // which would close this JSON block early. Escape "<" the standard way.
 const cfgJson = JSON.stringify(cfg).replace(/</g, '\\u003c');

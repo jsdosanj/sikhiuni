@@ -599,8 +599,17 @@ import Base from '../layouts/Base.astro';
       Promise.all([
         fetch('/data/index.json').then((r) => r.json()),
         fetch('/assets/data/programs.json').then((r) => r.json()).catch(() => ({ programs: [] })),
-      ]).then(([data, pd]) => {
-        courses = data.courses || [];
+        fetch('/data/institute/manifest.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      ]).then(([data, pd, institute]) => {
+        // Institute tracks share the `progress` table with the catalogue, so
+        // they already appear in the gradebook, the audit log and the archive
+        // queue — by raw id, because ctitle() could not find them and fell back
+        // to slugToTitle ("Aisf 02 Ml"). Folding them into `courses` gives every
+        // one of those surfaces the real title, with no per-surface special case.
+        const instituteCourses = ((institute && institute.tracks) || [])
+          .filter((t) => t.status === 'published')
+          .map((t) => ({ id: t.id, title: t.title, level: t.level, status: 'published', institute: true }));
+        courses = (data.courses || []).concat(instituteCourses);
         topics = data.topics || [];
         programs = (pd && pd.programs) || [];
         draw();

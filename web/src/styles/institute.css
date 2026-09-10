@@ -87,11 +87,22 @@ body[data-institute] {
   color: var(--i-ink);
   font-family: "Source Serif 4", Georgia, "Noto Serif Gurmukhi", serif;
 }
+/* The ambient grid sits BEHIND the page rather than the page being pushed in
+   front of it. It used to be z-index:0 with `body[data-institute] > *` lifting
+   every body child to z-index:1 — but that selector is (0,1,1) and beat both
+   Tailwind's `.fixed` (0,1,0) and every overlay's own `position: fixed`, so on
+   /technology/* it silently un-fixed and flattened the site nav (z-40 -> 1,
+   burying the Departments mega-menu under the page), the mobile tab bar
+   (fixed -> relative, dropping it into the document flow), the command palette
+   (z-[80]), the toast rail (z-[60]) and the install prompt (z-[55]). html
+   carries no background, so body's background propagates to the canvas and a
+   negative-z pseudo-element still paints above it — the grid looks identical
+   and nothing has to be lifted over it. */
 body[data-institute]::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   background-image:
     linear-gradient(var(--i-line-soft) 1px, transparent 1px),
@@ -101,7 +112,6 @@ body[data-institute]::before {
   -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 74%);
   mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 74%);
 }
-body[data-institute] > * { position: relative; z-index: 1; }
 
 /* ---------------------------------------------------------------------------
    Type roles
