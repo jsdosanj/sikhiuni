@@ -67,6 +67,11 @@ const motes = Array.from({ length: 22 });
               <input type="search" id="i-atlas-search" placeholder="Search all repositories…" autocomplete="off" spellcheck="false" />
             </div>
 
+            <!-- Shelves for the library: twelve keyword-derived topics, counts
+                 from the manifest. Populated by the island so the chips and the
+                 grid can never disagree about what is selected. -->
+            <div class="i-atlas-topics" id="i-atlas-topics" role="group" aria-label="Filter by topic" hidden></div>
+
             <div class="i-atlas-grid" id="i-atlas-grid">
               <p class="i-atlas-empty i-mono">loading&hellip;</p>
             </div>
@@ -92,6 +97,30 @@ const motes = Array.from({ length: 22 });
   </div>
 
   <style>
+    /* topic chips: the atlas's shelf labels. Counts are set in the mask at
+       build time, so a chip never promises a shelf that isn't there. */
+    .i-atlas-topics {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin: 12px 0 4px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+    .i-atlas-chip {
+      appearance: none; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+      background: rgba(255,255,255,.04); color: rgba(255,255,255,.78);
+      font: inherit; font-size: .78rem; line-height: 1; padding: 7px 11px;
+      display: inline-flex; align-items: baseline; gap: 6px;
+      transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+    }
+    .i-atlas-chip span { font-size: .72em; color: rgba(255,255,255,.45); }
+    .i-atlas-chip:hover { border-color: rgba(255,255,255,.34); color: #fff; }
+    .i-atlas-chip:focus-visible { outline: 2px solid var(--signal, #d8a531); outline-offset: 2px; }
+    .i-atlas-chip.on {
+      background: rgba(216,165,49,.16); border-color: rgba(216,165,49,.55); color: #fff;
+    }
+    .i-atlas-chip.on span { color: rgba(255,255,255,.7); }
+    @media (prefers-reduced-motion: reduce) { .i-atlas-chip { transition: none; } }
+
     /* ── the immersive library ─────────────────────────────────────────── */
     .atlas-immersive { position: relative; }
     .atlas-void {

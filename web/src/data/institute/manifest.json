@@ -31,6 +31,15 @@
       "mark": "[it]",
       "tagline": "Keep the estate running.",
       "blurb": "The work that keeps an organisation's machines, accounts and devices working — Apple and Microsoft's own free training, mapped into a path, ending in credentials employers already recognise."
+    },
+    {
+      "id": "design",
+      "slug": "design",
+      "title": "Design School",
+      "label": "school of interface design",
+      "mark": "[ ]",
+      "tagline": "interface, interaction, and the reasons behind them",
+      "blurb": "The school for the surface people actually touch. Not how to drive a design tool — why an interface is shaped the way it is: what a platform's guidelines are really arguing for, how a design system turns those arguments into decisions a team stops re-litigating, and how to read a shipped screen and name what it is doing. Apple's and Google's own guidelines are the set texts; both are read on their own sites, never rehosted here."
     }
   ],
   "tracks": [
@@ -538,6 +547,70 @@
       "license": "CC-BY-SA-4.0",
       "professor": "owasp-genai",
       "summary": "The other half of this building, read as an attack surface: prompt injection that has no patch, agents acting with your credentials, and the skill supply chain that is already being poisoned. Mapped to OWASP's three 2026 lists."
+    },
+    {
+      "id": "it-01-craft",
+      "kind": "path",
+      "school": "it",
+      "source": "ours",
+      "title": "Engineering Craft",
+      "summary": "How professional code review actually works, why a style guide exists to end arguments rather than win them, and the interview practice that turns both into a job. Built on Google's own published guides.",
+      "level": 200,
+      "prereq": "it-00-support",
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "google-eng",
+      "num": 7,
+      "slug": "07-engineering-craft",
+      "moduleCount": 4
+    },
+    {
+      "id": "design-00-foundations",
+      "kind": "path",
+      "school": "design",
+      "source": "ours",
+      "title": "Interface Foundations",
+      "summary": "What Apple's Human Interface Guidelines are actually arguing for — deference, hit targets, type that scales, motion that explains — and how to tell a convention from a decision you are free to make.",
+      "level": 100,
+      "prereq": null,
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "apple-design",
+      "num": 8,
+      "slug": "08-interface-foundations",
+      "moduleCount": 4
+    },
+    {
+      "id": "design-01-systems",
+      "kind": "path",
+      "school": "design",
+      "source": "ours",
+      "title": "Design Systems",
+      "summary": "Tokens, components, and the discipline that makes a hundred screens look like one product. Material 3 read as a worked example, and Google's HTML/CSS style guide as the implementation half.",
+      "level": 200,
+      "prereq": "design-00-foundations",
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "google-design",
+      "num": 9,
+      "slug": "09-design-systems",
+      "moduleCount": 4
+    },
+    {
+      "id": "design-02-practice",
+      "kind": "path",
+      "school": "design",
+      "source": "ours",
+      "title": "Design in Practice",
+      "summary": "Reading shipped interfaces and naming what they do, then holding your own work to an accessibility standard that is a legal floor in most of the world, not a finishing touch.",
+      "level": 200,
+      "prereq": "design-00-foundations",
+      "status": "published",
+      "license": "CC-BY-SA-4.0",
+      "professor": "refero",
+      "num": 10,
+      "slug": "10-design-in-practice",
+      "moduleCount": 4
     }
   ],
   "explore": [

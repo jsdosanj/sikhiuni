@@ -1,0 +1,150 @@
+{
+  "track": "design-00-foundations",
+  "school": "design",
+  "blurb": "Apple's Human Interface Guidelines are the most carefully argued design document any platform has published. This path reads them for their reasoning rather than their rules — why deference, why a 44-point target, why type that the reader controls — so that you can tell a platform convention from a decision that is yours to make.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-10",
+  "creditLabel": "Set text published by",
+  "adaptedFrom": {
+    "name": "Apple Human Interface Guidelines",
+    "href": "https://developer.apple.com/design/human-interface-guidelines/",
+    "license": "Vendor documentation — link-out only, no content reproduced",
+    "note": "The Human Interface Guidelines are Apple's copyrighted documentation and are not openly licensed. Nothing from them is copied, mirrored, paraphrased closely, or rehosted here: every module is Sikhi University's own teaching about documents you read on Apple's site, under Apple's terms. No Apple imagery, icon, SF Symbol or screenshot is used. \"Apple\", \"iOS\", \"iPadOS\", \"macOS\", \"visionOS\" and \"SF Symbols\" are trademarks of Apple Inc., used nominatively to name the platforms and documents under discussion; Sikhi University is not affiliated with, sponsored by, or endorsed by Apple."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "deference",
+      "title": "Deference, and what an interface is for",
+      "objective": "Explain what it means for an interface to defer to its content, and identify three places in an app you use where the interface fails to.",
+      "teach": "The oldest argument in Apple's guidelines is that the interface is not the product. The content is the product, and the interface's job is to get out of its way — which is why so much of the visual language is restrained to the point of looking unfinished to people arriving from other traditions. Understand this as a bet, not a law. The bet is that ornament competes with content for attention, and attention is the scarcest thing a user brings; strip the ornament and comprehension goes up. It is a bet that pays off well for reading, browsing and getting-something-done apps, and pays off badly for things whose whole point is spectacle — games, entertainment, brand experiences. Apple's guidance says roughly that too: the guidelines are written for a house style, and departing from it is allowed when you have a reason you could defend out loud. The skill this module builds is naming the reason. Open three apps you use daily and find a place in each where a chrome element — a heavy border, a shadow, a redundant label, a decorative header eating a third of the screen — is taking attention that the content needed. Then find one place where a departure from the house style is clearly deliberate and clearly right. Both directions matter: the aim is judgement, not obedience.",
+      "labs": [
+        {
+          "title": "Human Interface Guidelines — overview",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/",
+          "cost": "free"
+        },
+        {
+          "title": "Designing for iOS",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios",
+          "cost": "free"
+        },
+        {
+          "title": "Materials — when a surface should recede",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/materials",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "layout-and-targets",
+      "title": "Layout, and the hand holding the device",
+      "objective": "Lay out a screen that works one-handed, at the smallest supported size, with every interactive element reachable and hittable.",
+      "teach": "Apple's layout guidance keeps returning to a physical fact: a finger is not a cursor. A cursor is one pixel and lands where you aimed; a fingertip covers a region, arrives at an angle, and is attached to a thumb with a limited arc. This is where the guidelines' most-quoted number comes from — a minimum target of 44 by 44 points on iOS — and the number is worth understanding rather than memorising, because it is a floor derived from adult fingertip contact area, not a target to design to. A control that is technically 44 points but sits eight points from another 44-point control is still going to be mis-tapped. Reach matters as much as size: the top corners of a large phone are hard to get to one-handed, which is why so much modern iOS navigation migrated toward the bottom of the screen while headings stayed at the top. Safe areas, layout margins and readable content guides exist because the rectangle you are given is not the rectangle you may draw in — notches, home indicators, rounded corners and dynamic island cutouts all take bites out of it, and hardcoding around today's shape guarantees breakage on next year's. Build the same screen at the smallest supported width and the largest, and treat anything that only works at one of them as unfinished.",
+      "labs": [
+        {
+          "title": "Layout",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/layout",
+          "cost": "free"
+        },
+        {
+          "title": "Buttons — sizing and hit regions",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+          "cost": "free"
+        },
+        {
+          "title": "Right to left — layouts that mirror",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/right-to-left",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "type-the-reader-controls",
+      "title": "Type the reader controls",
+      "objective": "Build a layout that stays usable when the reader sets text several sizes larger than your design assumed.",
+      "teach": "The single most consequential decision in Apple's typographic guidance is that the reader, not the designer, chooses the text size. Dynamic Type lets someone set system-wide text scaling, and a well-built app honours it — which means your beautiful layout has to survive the same content at roughly double the size. Designers new to this experience it as a constraint being imposed on them. It is better understood as an admission: a great many of your users cannot read your preferred size comfortably, and the ones who most need larger text are the least likely to complain to you about it. They will simply stop using the app. Once you accept the reader's control, several design habits become untenable and it is worth knowing which: fixed-height rows, text laid inside a graphic, side-by-side columns that assume a character count, truncation used as a layout strategy, and any button whose label is centred in a box sized to today's string. The semantic text styles exist so you can say what a piece of text *is* — a title, a body, a caption — and let the system decide how big that is in the reader's current settings. That indirection is the whole mechanism. Test at the largest accessibility size before you call a screen done; it is the fastest way to find every place you assumed a number you had no right to assume.",
+      "labs": [
+        {
+          "title": "Typography",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/typography",
+          "cost": "free"
+        },
+        {
+          "title": "Accessibility — text size and legibility",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+          "cost": "free"
+        },
+        {
+          "title": "SF Symbols app — symbols that scale with text",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/sf-symbols/",
+          "cost": "free · account"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "colour-and-motion",
+      "title": "Colour that adapts, motion that explains",
+      "objective": "Ship a screen that is correct in both light and dark appearance, and justify every animation in it by what it tells the user.",
+      "teach": "Two systems, one underlying idea: neither colour nor motion is decoration, and both break badly when treated as such. On colour, the design choice worth internalising is semantic naming. A colour called \"label\" or \"separator\" or \"system background\" adapts on its own to light and dark appearance, to increased-contrast settings, and to whatever appearance modes ship next year; a colour called \"#1C1C1E\" adapts to nothing and will be wrong in half your users' settings the day dark mode arrives. Dark mode is not an inverted palette — surfaces recede differently, shadows stop working as depth cues and are replaced by luminance, and a saturated colour that reads as confident on white reads as loud on black. Design both, do not derive one from the other. On motion, the useful test for any animation is: what does this tell the user that a cut would not? Good interface motion answers questions about origin and destination — this panel came from that button, so dismissing it will send it back there. It maintains a spatial model so the user does not have to rebuild one on every transition. Motion that merely announces the designer's presence costs time on every single use and pays back nothing. And it must be optional: some people experience vestibular discomfort from parallax and large-scale movement, so the reduce-motion setting is a real accessibility requirement, not a preference to ignore — honour it with a cross-fade, not by shipping the same animation slightly faster.",
+      "labs": [
+        {
+          "title": "Color",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/color",
+          "cost": "free"
+        },
+        {
+          "title": "Dark Mode",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/dark-mode",
+          "cost": "free"
+        },
+        {
+          "title": "Motion",
+          "provider": "Apple",
+          "href": "https://developer.apple.com/design/human-interface-guidelines/motion",
+          "cost": "free"
+        }
+      ]
+    }
+  ],
+  "bench": [
+    {
+      "title": "Apple Design Resources",
+      "provider": "Apple",
+      "href": "https://developer.apple.com/design/resources/",
+      "note": "Apple's own UI kits, templates and fonts for Figma and Sketch, free to download under Apple's licence terms. Download them from Apple and use them under those terms — nothing is mirrored here."
+    },
+    {
+      "title": "WWDC design sessions",
+      "provider": "Apple",
+      "href": "https://developer.apple.com/videos/design/",
+      "note": "Apple's design talks, free to stream. The older sessions on typography and colour explain the reasoning behind the guidelines more fully than the guidelines themselves do."
+    },
+    {
+      "title": "Accessibility at Apple — developer documentation",
+      "provider": "Apple",
+      "href": "https://developer.apple.com/accessibility/",
+      "note": "The engineering side of module 3 and 4: VoiceOver, Dynamic Type, reduce motion, and the APIs that make honouring them a few lines rather than a rewrite."
+    },
+    {
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "provider": "W3C",
+      "href": "https://www.w3.org/TR/WCAG22/",
+      "note": "The vendor-neutral standard underneath most of the accessibility guidance on this path, and a legal requirement in much of the world. Design in Practice takes this apart properly."
+    }
+  ]
+}

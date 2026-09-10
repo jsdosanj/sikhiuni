@@ -83,5 +83,48 @@
       { "label": "owasp.org/www-project-agentic-skills-top-10", "href": "https://owasp.org/www-project-agentic-skills-top-10/" }
     ],
     "license": "CC-BY-SA-4.0 (Agentic Skills Top 10) · other lists linked, not copied"
+  },
+  "google-eng": {
+    "name": "Google Engineering",
+    "kind": "org",
+    "role": "Publisher, Google Engineering Practices and the Google Style Guides",
+    "bio": "Google publishes the code-review guides and language style guides its own engineers work to, under the CC BY 3.0 licence. The Engineering Craft path teaches from those documents and sends you to read them in full at their source; the teaching, commentary and exercises around them are Sikhi University's. Modifications: the seven review headings are reproduced with attribution as the licence permits, everything else is written fresh. Sikhi University is not affiliated with, sponsored by, or endorsed by Google.",
+    "links": [
+      { "label": "google.github.io/eng-practices", "href": "https://google.github.io/eng-practices/" },
+      { "label": "google.github.io/styleguide", "href": "https://google.github.io/styleguide/" }
+    ],
+    "license": "CC-BY-3.0"
+  },
+  "apple-design": {
+    "name": "Apple Design",
+    "kind": "org",
+    "role": "Publisher, Human Interface Guidelines",
+    "bio": "Apple's Human Interface Guidelines are the reference text for Interface Foundations. They are Apple's copyrighted documentation and are not openly licensed, so nothing from them is reproduced here: every module is Sikhi University's own teaching about documents you read on Apple's site, under Apple's terms, with no Apple imagery, icons or screenshots used. Apple trademarks are used nominatively to name the platforms under discussion. Sikhi University is not affiliated with, sponsored by, or endorsed by Apple.",
+    "links": [
+      { "label": "developer.apple.com/design", "href": "https://developer.apple.com/design/human-interface-guidelines/" },
+      { "label": "Apple Design Resources", "href": "https://developer.apple.com/design/resources/" }
+    ],
+    "license": "Vendor documentation — link-out only"
+  },
+  "google-design": {
+    "name": "Material Design",
+    "kind": "org",
+    "role": "Publisher, Material Design 3",
+    "bio": "Material Design 3 is Google's design system, read in the Design Systems path as a worked example of role-based tokens and fully specified components. The guidance site is Google product documentation, not openly licensed, so it is linked and never rehosted; the Material component implementations are separately open-source under Apache 2.0 and are linked as code. The Google HTML/CSS style guide used in the same path is CC BY 3.0. Sikhi University is not affiliated with, sponsored by, or endorsed by Google.",
+    "links": [
+      { "label": "m3.material.io", "href": "https://m3.material.io/" },
+      { "label": "github.com/material-components", "href": "https://github.com/material-components" }
+    ],
+    "license": "Guidance: link-out only · Components: Apache-2.0"
+  },
+  "refero": {
+    "name": "Refero",
+    "kind": "org",
+    "role": "Reference library of shipped interfaces",
+    "bio": "Refero is a privately operated library of screenshots of other companies' shipped products, used in Design in Practice as somewhere to go and look rather than as content. Nothing from it is copied, embedded, hot-linked or rehosted, and no screenshot appears here; the exercises are about what you notice on their site, under their terms. Sikhi University is not affiliated with, sponsored by, or endorsed by Refero or by any company whose interface appears in it.",
+    "links": [
+      { "label": "styles.refero.design", "href": "https://styles.refero.design/" }
+    ],
+    "license": "Link-out only, no content used"
   }
 }

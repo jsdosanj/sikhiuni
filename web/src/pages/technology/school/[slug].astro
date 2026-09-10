@@ -4,9 +4,8 @@ import InstituteRail from '../../../components/institute/InstituteRail.astro';
 import { schools, tracksOf, trackSlug, professorOf, gurmukhiHtml } from '../../../lib/institute';
 import type { School, Track } from '../../../lib/institute';
 
-// One page, both sub-schools: the AI School and the Cybersecurity School. The
-// groups below are derived from the school's own tracks, so a new track shows
-// up here the moment it lands in the manifest.
+// One page, every sub-school. The groups below are derived from the school's own
+// tracks, so a new track shows up here the moment it lands in the manifest.
 export function getStaticPaths() {
   return schools.map((s) => ({ params: { slug: s.slug }, props: { s } }));
 }
@@ -61,7 +60,7 @@ const ld = {
 
   <section class="i-wrap i-sec">
     <span class="i-label">01 — the spine &middot; work these in order</span>
-    <h2>{s.id === 'cyber' ? 'The paths' : 'The curriculum'}</h2>
+    <h2>{s.id === 'cyber' || s.id === 'design' ? 'The paths' : 'The curriculum'}</h2>
     <ol class="i-slist">
       {spine.map((t) => (
         <li class="i-panel i-srow">
@@ -95,7 +94,7 @@ const ld = {
 
   <section class="i-wrap i-sec i-sec-last">
     <p class="i-prose">
-      Every course in both schools is listed on the <a href="/technology/catalog">catalogue</a>.
+      Every course in every school is listed on the <a href="/technology/catalog">catalogue</a>.
       Full attribution and licences: <a href="/technology/licenses">sources &amp; licenses</a>.
     </p>
     <p>
