@@ -8,11 +8,19 @@
 //
 //   node scripts/build-atlas.mjs              # refresh everything it can reach
 //   node scripts/build-atlas.mjs --videos-only
+//   node scripts/build-atlas.mjs --reindex    # OFFLINE: re-derive search.json and
+//                                             # the topic facets from the committed
+//                                             # chunks, no network, no refetch
 //
 // OUTPUT (src/data/institute/atlas/, served from Workers Assets after sync):
 //   index.json      meta + the video shelf + chunk manifest   (small, always fetched)
 //   chunk-NNN.json  250 repos each                            (fetched as you page)
-//   search.json     compact [repo, description] pairs         (fetched on first search)
+//   search.json     compact [repo, description, build-line, date, topic-mask] rows
+//                   (fetched once, on first search or first topic filter). It
+//                   carries the build-line because search results are cards like
+//                   any other and dropping it would strip the page's whole point
+//                   off exactly the repos someone went looking for. The write-up
+//                   path is NOT stored — it is derivable from the repo and date.
 //
 // SOURCES (credited on /technology/atlas and /technology/licenses):
 //   repos   https://tom-doerr.github.io/repo_posts/  (Tom Dörr's curation)
@@ -41,6 +49,58 @@ const CHANNELS = [
   { key: 'karpathy', name: 'Andrej Karpathy', handle: '@AndrejKarpathy', id: 'UCXUPKJO5MZQN11PqgIvyuvQ' },
   { key: 'proton', name: 'Proton', handle: '@ProtonPrivacy', id: 'UC4JpFaR7m3AOiVHlenk9fqA' },
 ];
+
+// ---- topic facets ---------------------------------------------------------
+// 12.5k repositories behind one search box is a library with no shelves. These
+// twelve topics are derived from each repo's description, its build-line, and
+// its own name, so they cost nothing to maintain and re-derive on every build.
+// Deliberately coarse and deliberately overlapping: a repo may carry several,
+// and roughly a fifth carry none, which is honest — a keyword pass cannot
+// classify everything, and inventing a bucket for the remainder would suggest a
+// precision this does not have. Order fixes each topic's bit in the mask.
+const TOPICS = [
+  ['agents', 'Agents & tooling', /\bagent|agentic|autonomous|mcp\b|tool[- ]?call|workflow|orchestrat/i],
+  ['llm', 'LLMs & models', /\bllm|language model|gpt|claude|llama|mistral|transformer|fine[- ]?tun|inference|prompt|token/i],
+  ['rag', 'RAG & search', /\brag\b|retrieval|embedding|vector|semantic search|knowledge base|search engine/i],
+  ['audio', 'Audio & speech', /\baudio|speech|voice|tts\b|stt\b|whisper|transcri|music|podcast|sound|kirtan/i],
+  ['vision', 'Vision & images', /\bimage|vision|video|photo|ocr\b|diffusion|render|camera|visual/i],
+  ['data', 'Data & databases', /\bdatabase|sql\b|postgres|sqlite|dataset|data pipeline|etl\b|analytics|scrap|crawl/i],
+  ['web', 'Web & interfaces', /\bweb\b|website|browser|frontend|react|ui\b|dashboard|css|html|component/i],
+  ['infra', 'Infra & DevOps', /\bkubernetes|docker|deploy|server|cloud|infrastructure|ci\/cd|devops|monitor|container/i],
+  ['security', 'Security & privacy', /\bsecurity|encrypt|privacy|password|auth|vulnerab|firewall|vpn\b|secure|malware/i],
+  ['mobile', 'Mobile', /\bios\b|android|mobile|iphone|app store|flutter|react native|swift/i],
+  ['cli', 'Terminal & CLI', /\bcli\b|terminal|command[- ]line|shell|bash|tui\b|neovim|vim\b/i],
+  ['docs', 'Docs & knowledge', /\bdocument|note[- ]?tak|markdown|wiki|knowledge|pdf\b|ebook|book|writing/i],
+];
+
+/** Bitmask of the topics a repo matches. Bit i is TOPICS[i]. */
+function topicMask(repo) {
+  const hay = `${repo.s ?? ''} ${repo.u ?? ''} ${String(repo.r ?? '').replace(/[/-]/g, ' ')}`;
+  let mask = 0;
+  for (let i = 0; i < TOPICS.length; i++) if (TOPICS[i][2].test(hay)) mask |= 1 << i;
+  return mask;
+}
+
+/** search.json row. `p` is omitted on purpose: derivable from `r` and `d`. */
+const searchRow = (x) => [x.r, x.s ?? '', x.u ?? '', x.d ?? '', topicMask(x)];
+
+function topicFacets(repos) {
+  const counts = TOPICS.map(() => 0);
+  for (const r of repos) {
+    const m = topicMask(r);
+    for (let i = 0; i < TOPICS.length; i++) if (m & (1 << i)) counts[i]++;
+  }
+  return TOPICS.map(([k, label], i) => ({ k, label, n: counts[i] }));
+}
+
+/** Read the committed chunks back — the offline half of --reindex. */
+function readChunks() {
+  const out = [];
+  for (const f of fs.readdirSync(OUT_DIR).filter((n) => /^chunk-\d+\.json$/.test(n)).sort()) {
+    out.push(...JSON.parse(fs.readFileSync(path.join(OUT_DIR, f), 'utf8')));
+  }
+  return out;
+}
 
 const args = new Set(process.argv.slice(2));
 
@@ -110,8 +170,10 @@ async function buildVideos() {
   return videos;
 }
 
-const repos = args.has('--videos-only') ? null : await buildRepos();
-const videos = await buildVideos();
+const reindex = args.has('--reindex');
+const repos = reindex ? readChunks() : args.has('--videos-only') ? null : await buildRepos();
+const videos = reindex ? null : await buildVideos();
+if (reindex) console.log(`  --reindex: ${repos.length} repos read back from the committed chunks, no network`);
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
@@ -127,18 +189,22 @@ if (repos) {
     console.log(`  build-lines: ${filled}/${repos.length} repos carry one`);
   }
 
-  for (const f of fs.readdirSync(OUT_DIR)) {
-    if (/^chunk-\d+\.json$/.test(f)) fs.unlinkSync(path.join(OUT_DIR, f));
+  if (!reindex) {
+    for (const f of fs.readdirSync(OUT_DIR)) {
+      if (/^chunk-\d+\.json$/.test(f)) fs.unlinkSync(path.join(OUT_DIR, f));
+    }
+    const chunkCount = Math.ceil(repos.length / CHUNK_SIZE);
+    for (let i = 0; i < chunkCount; i++) {
+      fs.writeFileSync(
+        path.join(OUT_DIR, `chunk-${String(i).padStart(3, '0')}.json`),
+        JSON.stringify(repos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)),
+      );
+    }
+    console.log(`  wrote ${chunkCount} chunks of ${CHUNK_SIZE}`);
   }
-  const chunkCount = Math.ceil(repos.length / CHUNK_SIZE);
-  for (let i = 0; i < chunkCount; i++) {
-    fs.writeFileSync(
-      path.join(OUT_DIR, `chunk-${String(i).padStart(3, '0')}.json`),
-      JSON.stringify(repos.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)),
-    );
-  }
-  fs.writeFileSync(path.join(OUT_DIR, 'search.json'), JSON.stringify(repos.map((x) => [x.r, x.s])));
-  console.log(`  wrote ${chunkCount} chunks of ${CHUNK_SIZE}`);
+  fs.writeFileSync(path.join(OUT_DIR, 'search.json'), JSON.stringify(repos.map(searchRow)));
+  const tagged = repos.filter((x) => topicMask(x) !== 0).length;
+  console.log(`  search index: ${repos.length} rows, ${tagged} carry at least one topic`);
 }
 
 const indexPath = path.join(OUT_DIR, 'index.json');
@@ -149,13 +215,14 @@ const index = {
   total: repos ? repos.length : existing.total ?? 0,
   chunks: repos ? Math.ceil(repos.length / CHUNK_SIZE) : existing.chunks ?? 0,
   newest: repos ? repos[0]?.d : existing.newest,
+  topics: repos ? topicFacets(repos) : existing.topics ?? [],
   sources: {
     repos: { name: 'Tom Dörr — repo_posts', url: 'https://tom-doerr.github.io/repo_posts/' },
     channels: CHANNELS.map((c) => ({
       key: c.key, name: c.name, url: `https://www.youtube.com/${c.handle}`, channelId: c.id,
     })),
   },
-  videos,
+  videos: videos ?? existing.videos ?? [],
 };
 fs.writeFileSync(indexPath, JSON.stringify(index, null, 2) + '\n');
-console.log(`  wrote ${indexPath} (${index.total} repos, ${videos.length} videos)`);
+console.log(`  wrote ${indexPath} (${index.total} repos, ${index.videos.length} videos, ${index.topics.length} topics)`);

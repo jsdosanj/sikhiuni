@@ -1,9 +1,71 @@
 {
-  "generated": "2026-08-29",
+  "generated": "2026-09-10",
   "chunkSize": 250,
   "total": 12517,
   "chunks": 51,
   "newest": "2026-01-31",
+  "topics": [
+    {
+      "k": "agents",
+      "label": "Agents & tooling",
+      "n": 1258
+    },
+    {
+      "k": "llm",
+      "label": "LLMs & models",
+      "n": 1138
+    },
+    {
+      "k": "rag",
+      "label": "RAG & search",
+      "n": 588
+    },
+    {
+      "k": "audio",
+      "label": "Audio & speech",
+      "n": 2222
+    },
+    {
+      "k": "vision",
+      "label": "Vision & images",
+      "n": 1787
+    },
+    {
+      "k": "data",
+      "label": "Data & databases",
+      "n": 816
+    },
+    {
+      "k": "web",
+      "label": "Web & interfaces",
+      "n": 3068
+    },
+    {
+      "k": "infra",
+      "label": "Infra & DevOps",
+      "n": 2104
+    },
+    {
+      "k": "security",
+      "label": "Security & privacy",
+      "n": 1034
+    },
+    {
+      "k": "mobile",
+      "label": "Mobile",
+      "n": 515
+    },
+    {
+      "k": "cli",
+      "label": "Terminal & CLI",
+      "n": 899
+    },
+    {
+      "k": "docs",
+      "label": "Docs & knowledge",
+      "n": 1119
+    }
+  ],
   "sources": {
     "repos": {
       "name": "Tom Dörr — repo_posts",

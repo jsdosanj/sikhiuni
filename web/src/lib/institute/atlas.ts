@@ -1,28 +1,40 @@
 // The Open Source Atlas island (/technology/atlas). Client-only on purpose —
 // 12.5k repos is far too much for one payload, so it pages through committed
-// chunk-NNN.json files and pulls the search index only once someone types.
+// chunk-NNN.json files and pulls the full corpus only once someone searches or
+// picks a topic.
 //
 // Ported from redroyals/sikhi.io pages/opensource.tsx to a vanilla-TS island.
-// Two halves, deliberately unpaired: the Cloud Codes video shelf (what to
-// watch) and the repo catalogue (what to build with — every card carries a
-// line on what it could do for the Panth).
+// Two halves, deliberately unpaired: the video shelf (what to watch) and the
+// repo catalogue (what to build with — every card carries a line on what it
+// could do for the Panth).
+//
+// Three states, one grid:
+//   no filter   → page through the chunks, 24 at a time, in catalogue order
+//   a search    → rank the whole corpus, page through the matches
+//   a topic     → filter the whole corpus, page through the matches
+// Search and topic compose. All three are reflected in the URL so a result is
+// something you can send to somebody.
 
 const DATA = '/data/institute/atlas';
 const PAGE_SIZE = 24;
 const PER_CHUNK = 250;
-const MAX_RESULTS = 120;
 
 interface Repo { r: string; s?: string; d?: string; p?: string; u?: string }
 interface Video { id: string; title: string; published?: string; views?: number; ch?: string }
 interface Channel { key: string; name: string; url: string; channelId?: string }
+interface Topic { k: string; label: string; n: number }
 interface Index {
   generated: string;
   total: number;
   chunks: number;
   newest?: string;
+  topics?: Topic[];
   videos: Video[];
   sources: { repos: { name: string; url: string }; channels: Channel[] };
 }
+
+/** search.json row: [repo, summary, build-line, date, topic bitmask]. */
+type SearchRow = [string, string, string, string, number];
 
 const esc = (s: unknown): string =>
   String(s ?? '').replace(/[&<>"]/g, (c) =>
@@ -31,6 +43,14 @@ const esc = (s: unknown): string =>
 const ogCard = (repo: string) => `https://opengraph.githubassets.com/1/${repo}`;
 const ytThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const nfmt = (n: number) => n.toLocaleString('en-US');
+
+// The write-up path is not stored in search.json because it is a pure function
+// of the repo and its date — this is that function, and it must stay in step
+// with the permalink shape build-atlas.mjs reads from the upstream index.
+const writeUpPath = (r: string, d?: string): string | undefined => {
+  if (!d || !r.includes('/')) return undefined;
+  return `/${d.replace(/-/g, '/')}/${r.replace('/', '-')}.html`;
+};
 
 export function initAtlas(): void {
   const root = document.getElementById('i-atlas');
@@ -41,18 +61,33 @@ export function initAtlas(): void {
   const elCount = root.querySelector<HTMLElement>('#i-atlas-count')!;
   const elPager = root.querySelector<HTMLElement>('#i-atlas-pager')!;
   const elSearch = root.querySelector<HTMLInputElement>('#i-atlas-search')!;
-  const elMeta = root.querySelector<HTMLElement>('#i-atlas-meta')!;
+  // NOT root.querySelector: #i-atlas-meta lives in the page header, a sibling
+  // section of #i-atlas, so scoping the lookup to root returned null and the
+  // `!` hid that from the compiler. Assigning to it threw on every single load,
+  // the throw landed in the index fetch's .catch(), and the whole catalogue
+  // rendered as "the atlas is unavailable right now". Fixed 2026-09-10.
+  const elMeta = document.getElementById('i-atlas-meta');
+  const elTopics = root.querySelector<HTMLElement>('#i-atlas-topics');
 
   let index: Index | null = null;
   let page = 0;
   let query = '';
-  let searchIndex: Array<[string, string]> | null = null;
+  let topic = '';
+  let corpus: Repo[] | null = null;
+  let corpusMask: number[] | null = null;
+  let loadingCorpus = false;
   const chunkCache = new Map<number, Repo[]>();
+
+  const topicBit = (k: string): number => {
+    const i = (index?.topics ?? []).findIndex((t) => t.k === k);
+    return i < 0 ? 0 : 1 << i;
+  };
 
   const repoCard = (repo: Repo): string => {
     const href = `https://github.com/${esc(repo.r)}`;
-    const write = repo.p
-      ? `<a href="https://tom-doerr.github.io/repo_posts${esc(repo.p)}" target="_blank" rel="noopener">write-up &nearr;</a>`
+    const p = repo.p ?? writeUpPath(repo.r, repo.d);
+    const write = p
+      ? `<a href="https://tom-doerr.github.io/repo_posts${esc(p)}" target="_blank" rel="noopener">write-up &nearr;</a>`
       : '';
     return (
       `<article class="i-atlas-card">` +
@@ -122,27 +157,81 @@ export function initAtlas(): void {
     });
   };
 
-  const results = (): Repo[] | null => {
-    const q = query.trim().toLowerCase();
-    if (!q || !searchIndex) return null;
-    const hits: Repo[] = [];
-    for (const [r, s] of searchIndex) {
-      if (r.toLowerCase().includes(q) || (s || '').toLowerCase().includes(q)) {
-        hits.push({ r, s });
-        if (hits.length >= MAX_RESULTS) break;
-      }
+  const renderTopics = () => {
+    if (!elTopics) return;
+    const topics = index?.topics ?? [];
+    if (!topics.length) { elTopics.hidden = true; return; }
+    elTopics.hidden = false;
+    elTopics.innerHTML =
+      `<button type="button" class="i-atlas-chip${topic ? '' : ' on'}" data-topic="" aria-pressed="${topic ? 'false' : 'true'}">all <span class="i-mono">${nfmt(index?.total ?? 0)}</span></button>` +
+      topics.map((t) =>
+        `<button type="button" class="i-atlas-chip${topic === t.k ? ' on' : ''}" data-topic="${esc(t.k)}" aria-pressed="${topic === t.k ? 'true' : 'false'}">${esc(t.label)} <span class="i-mono">${nfmt(t.n)}</span></button>`,
+      ).join('');
+    elTopics.querySelectorAll<HTMLButtonElement>('[data-topic]').forEach((b) => {
+      b.addEventListener('click', () => {
+        topic = b.dataset.topic ?? '';
+        page = 0;
+        if (topic) ensureCorpus();
+        renderTopics();
+        syncUrl();
+        renderGrid();
+      });
+    });
+  };
+
+  /** Rank matches: repo name first, then description, then the build-line. */
+  const scored = (q: string): Repo[] => {
+    const hits: Array<[number, Repo]> = [];
+    const bit = topic ? topicBit(topic) : 0;
+    for (let i = 0; i < (corpus?.length ?? 0); i++) {
+      if (bit && !((corpusMask![i] & bit))) continue;
+      const c = corpus![i];
+      if (!q) { hits.push([0, c]); continue; }
+      const name = c.r.toLowerCase();
+      const at = name.indexOf(q);
+      let score: number;
+      if (at === 0 || name.slice(name.indexOf('/') + 1).startsWith(q)) score = 0;
+      else if (at > -1) score = 1;
+      else if ((c.s ?? '').toLowerCase().includes(q)) score = 2;
+      else if ((c.u ?? '').toLowerCase().includes(q)) score = 3;
+      else continue;
+      hits.push([score, c]);
     }
-    return hits;
+    if (q) hits.sort((a, b) => a[0] - b[0] || a[1].r.localeCompare(b[1].r));
+    return hits.map((h) => h[1]);
+  };
+
+  /** The active filter's full result set, or null when browsing the catalogue. */
+  const filtered = (): Repo[] | null => {
+    const q = query.trim().toLowerCase();
+    if (!q && !topic) return null;
+    if (!corpus) return [];
+    return scored(q);
+  };
+
+  const setPager = (totalPages: number) => {
+    elPager.hidden = totalPages <= 1;
+    (elPager.querySelector('[data-atlas-prev]') as HTMLButtonElement).disabled = page === 0;
+    (elPager.querySelector('[data-atlas-next]') as HTMLButtonElement).disabled = page >= totalPages - 1;
+    (elPager.querySelector('[data-atlas-pos]') as HTMLElement).textContent = `${nfmt(page + 1)} / ${nfmt(totalPages)}`;
   };
 
   const renderGrid = async () => {
     if (!index) return;
-    const found = results();
+    const found = filtered();
     let rows: Repo[];
+
     if (found) {
-      rows = found;
-      elPager.hidden = true;
-      elCount.textContent = `${found.length}${found.length >= MAX_RESULTS ? '+' : ''} matches`;
+      if (!corpus && loadingCorpus) { elGrid.innerHTML = '<p class="i-atlas-empty i-mono">loading the index&hellip;</p>'; return; }
+      const totalPages = Math.max(1, Math.ceil(found.length / PAGE_SIZE));
+      if (page >= totalPages) page = totalPages - 1;
+      rows = found.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+      const from = found.length ? page * PAGE_SIZE + 1 : 0;
+      const to = Math.min((page + 1) * PAGE_SIZE, found.length);
+      elCount.textContent = found.length
+        ? `${nfmt(from)}–${nfmt(to)} of ${nfmt(found.length)} matching`
+        : '0 matches';
+      setPager(totalPages);
     } else {
       const chunk = Math.floor((page * PAGE_SIZE) / PER_CHUNK);
       const offset = (page * PAGE_SIZE) % PER_CHUNK;
@@ -159,15 +248,12 @@ export function initAtlas(): void {
       const from = page * PAGE_SIZE + 1;
       const to = Math.min((page + 1) * PAGE_SIZE, index.total);
       elCount.textContent = `${nfmt(from)}–${nfmt(to)} of ${nfmt(index.total)}`;
-      const totalPages = Math.ceil(index.total / PAGE_SIZE);
-      elPager.hidden = totalPages <= 1;
-      (elPager.querySelector('[data-atlas-prev]') as HTMLButtonElement).disabled = page === 0;
-      (elPager.querySelector('[data-atlas-next]') as HTMLButtonElement).disabled = page >= totalPages - 1;
-      (elPager.querySelector('[data-atlas-pos]') as HTMLElement).textContent = `${nfmt(page + 1)} / ${nfmt(totalPages)}`;
+      setPager(Math.ceil(index.total / PAGE_SIZE));
     }
+
     elGrid.innerHTML = rows.length
       ? rows.map(repoCard).join('')
-      : `<p class="i-atlas-empty i-mono">${query ? 'nothing matches that' : 'catalogue unavailable'}</p>`;
+      : `<p class="i-atlas-empty i-mono">${query || topic ? 'nothing matches that' : 'catalogue unavailable'}</p>`;
     // A catalogue this old has renamed / deleted repos whose OG card 404s —
     // swap the broken tile for a typeset nameplate so the row keeps its rhythm.
     // (CSP forbids inline onerror, so this is wired here.)
@@ -179,30 +265,75 @@ export function initAtlas(): void {
     });
   };
 
-  const ensureSearch = () => {
-    if (searchIndex) return;
-    searchIndex = [];
-    fetch(`${DATA}/search.json`).then((r) => (r.ok ? r.json() : [])).then((d) => { searchIndex = d; renderGrid(); }).catch(() => {});
+  const ensureCorpus = () => {
+    if (corpus || loadingCorpus) return;
+    loadingCorpus = true;
+    fetch(`${DATA}/search.json`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d: SearchRow[]) => {
+        corpus = d.map(([r, s, u, dt]) => ({ r, s, u: u || undefined, d: dt || undefined }));
+        corpusMask = d.map((row) => row[4] ?? 0);
+        loadingCorpus = false;
+        renderGrid();
+      })
+      .catch(() => { loadingCorpus = false; });
   };
 
-  elSearch.addEventListener('focus', ensureSearch);
+  // ---- URL state: a search or a topic is a place, so it gets an address -----
+  const syncUrl = (replace = false) => {
+    const u = new URL(location.href);
+    const set = (k: string, v: string) => (v ? u.searchParams.set(k, v) : u.searchParams.delete(k));
+    set('q', query.trim());
+    set('t', topic);
+    set('p', page > 0 ? String(page + 1) : '');
+    history[replace ? 'replaceState' : 'pushState']({}, '', u);
+  };
+
+  const readUrl = () => {
+    const u = new URL(location.href).searchParams;
+    query = u.get('q') ?? '';
+    topic = u.get('t') ?? '';
+    page = Math.max(0, (Number(u.get('p')) || 1) - 1);
+    elSearch.value = query;
+    if (query || topic) ensureCorpus();
+  };
+
+  addEventListener('popstate', () => { readUrl(); renderTopics(); renderGrid(); });
+
+  elSearch.addEventListener('focus', ensureCorpus);
   let deb = 0;
   elSearch.addEventListener('input', () => {
-    ensureSearch();
+    ensureCorpus();
     query = elSearch.value;
+    page = 0;                       // a new query starts at its own first page
     clearTimeout(deb);
-    deb = window.setTimeout(renderGrid, 120);
+    deb = window.setTimeout(() => { syncUrl(true); renderGrid(); }, 120);
   });
-  elPager.querySelector('[data-atlas-prev]')!.addEventListener('click', () => { page = Math.max(0, page - 1); scrollTo({ top: 0 }); renderGrid(); });
-  elPager.querySelector('[data-atlas-next]')!.addEventListener('click', () => { page += 1; scrollTo({ top: 0 }); renderGrid(); });
+  elPager.querySelector('[data-atlas-prev]')!.addEventListener('click', () => {
+    page = Math.max(0, page - 1); syncUrl(); scrollTo({ top: 0 }); renderGrid();
+  });
+  elPager.querySelector('[data-atlas-next]')!.addEventListener('click', () => {
+    page += 1; syncUrl(); scrollTo({ top: 0 }); renderGrid();
+  });
+
+  readUrl();
 
   fetch(`${DATA}/index.json`)
     .then((r) => (r.ok ? r.json() : Promise.reject()))
     .then((j: Index) => {
       index = j;
-      elMeta.textContent = `${nfmt(j.total)} repositories · ${j.videos.length} videos · synced ${j.generated}`;
+      const tcount = j.topics?.length ?? 0;
+      if (elMeta) elMeta.textContent =
+        `${nfmt(j.total)} repositories · ${tcount ? `${tcount} topics · ` : ''}${j.videos.length} videos · synced ${j.generated}`;
       renderVideos();
+      renderTopics();
       renderGrid();
     })
-    .catch(() => { elGrid.innerHTML = '<p class="i-atlas-empty i-mono">the atlas is unavailable right now</p>'; });
+    .catch((e) => {
+      // This catch also swallows a throw from the three render calls above, so
+      // log it: a rendering bug and an unreachable index look identical to the
+      // reader and used to look identical in the console too.
+      console.error('[atlas] failed to start', e);
+      elGrid.innerHTML = '<p class="i-atlas-empty i-mono">the atlas is unavailable right now</p>';
+    });
 }
