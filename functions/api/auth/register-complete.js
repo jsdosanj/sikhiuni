@@ -63,7 +63,7 @@ export async function onRequestPost(context) {
   try {
     await insertUserWithOptin(env, {
       id, email: pending.email, name: null, role, createdAt: now,
-      marketing: pending.marketing === 1, passwordHash, username: pending.username,
+      emailVerified: true, marketing: pending.marketing === 1, passwordHash, username: pending.username,
     });
   } catch (e) {
     // A UNIQUE violation on username means someone completed with the same

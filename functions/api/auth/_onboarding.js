@@ -20,7 +20,7 @@ import { welcomeTemplate } from "../../_email-templates.js";
  * violation or a genuinely broken DB must still throw. Only the
  * missing-column case is retried, and only once.
  */
-export async function insertUserWithOptin(env, { id, email, name, role, createdAt, marketing, passwordHash, username }) {
+export async function insertUserWithOptin(env, { id, email, name, role, createdAt, marketing, passwordHash, username, emailVerified = false }) {
   const optin = marketing === true ? 1 : 0;
   // `username` is only ever supplied by register-complete.js. SSO provisioning
   // never sets one: usernames are per-site (migrations/0012), so a hub user's
@@ -28,6 +28,7 @@ export async function insertUserWithOptin(env, { id, email, name, role, createdA
   // inventing identity. Those rows keep NULL, which the UNIQUE index allows.
   const cols = ["id", "email", "name", "role", "created_at"];
   const vals = [id, email, name, role, createdAt];
+  if (emailVerified) { cols.push("email_verified"); vals.push(1); }
   if (passwordHash !== undefined) { cols.push("password_hash"); vals.push(passwordHash); }
   if (username !== undefined && username !== null) { cols.push("username"); vals.push(username); }
 

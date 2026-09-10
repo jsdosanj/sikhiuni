@@ -23,12 +23,15 @@ import Base from '../layouts/Base.astro';
   <div class="hero-midnight flex min-h-[620px] items-center py-16">
     <div class="wrap relative w-full">
       <div class="mx-auto w-full max-w-[420px]">
-        <div class="flex justify-center">
-          <img src="/assets/su-crest-ivory.png" alt="Sikhi University crest" class="h-16 w-auto" />
-        </div>
-        <p class="mt-4 text-center text-[11.5px] font-bold uppercase tracking-[0.24em] text-white">Sikhi University</p>
+        <a href="/" aria-label="Sikhi University — home" class="mx-auto flex w-full max-w-[320px] flex-col items-center gap-4 px-3">
+          <img src="/assets/brand/sikhiuni-crest-2026.webp" alt="" aria-hidden="true" width="180" height="180" class="h-auto w-24 sm:w-28" style="filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white)" />
+          <span style="font-family: University Gothic, serif; font-size: clamp(30px, 7vw, 38px); line-height: 1.2; color: #fff" translate="no">Sikhi University</span>
+        </a>
         <h1 class="text-display-sm mt-5 text-center font-bold text-white" id="mode-h1">Sign in</h1>
         <p class="mt-3 text-center text-[15.5px] leading-relaxed text-white/[0.72]" id="mode-sub">New here? <button type="button" id="mode-toggle" data-testid="tab-signup" class="underline underline-offset-2">Create an account</button></p>
+
+        <a id="sikhi-io-login" data-testid="sso-login" href="https://sikhi.io/api/sso/issue?return=https%3A%2F%2Fsikhiuni.com%2Fapi%2Fauth%2Fsso%3Freturn%3D%2Fdashboard.html" class="mt-7 flex min-h-[48px] w-full items-center justify-center rounded-[2px] bg-saffron px-5 py-3 font-semibold text-black">Continue with sikhi.io</a>
+        <p class="mt-3 text-center text-sm leading-relaxed text-white/[0.72]">Already signed in to sikhi.io? Continue above to use that session. You can also enter your Sikhi.io, Sikhi University or PunjabiUni email and password below.</p>
 
         <div id="err" class="mt-4"></div>
 

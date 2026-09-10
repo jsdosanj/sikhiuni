@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
   -- which seeds a fresh local DB from this file and then tries to register.
   -- NULLable on purpose: accounts predating password auth have none, and
   -- forgot-password doubles as "set my first password" for them.
+  email_verified INTEGER NOT NULL DEFAULT 0,
   password_hash TEXT
 );
 -- Usernames are unique per SITE, never across sites — identity across

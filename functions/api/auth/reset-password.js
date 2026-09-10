@@ -34,7 +34,7 @@ export async function onRequestPost({ request, env }) {
   if (!u) return json({ error: "This reset is invalid or has expired." }, 400);
 
   const passwordHash = await hashPassword(password);
-  await env.DB.prepare("UPDATE users SET password_hash = ? WHERE id = ?").bind(passwordHash, u.id).run();
+  await env.DB.prepare("UPDATE users SET password_hash = ?, email_verified = 1 WHERE id = ?").bind(passwordHash, u.id).run();
 
   const sid = newId() + newId();
   const expires = Date.now() + 30 * 24 * 60 * 60 * 1000;

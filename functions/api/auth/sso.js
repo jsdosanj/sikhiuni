@@ -55,7 +55,7 @@ export async function onRequestGet(context) {
     const role = wantAdmin ? "admin" : "learner";
     await insertUserWithOptin(env, {
       id, email, name: payload.name || null, role, createdAt: Date.now(),
-      marketing: payload.marketingOptIn === true,
+      emailVerified: true, marketing: payload.marketingOptIn === true,
     });
     user = { id, role };
     await logEvent(env, { id, role }, "user_created", email, "sso:sikhi.io");
