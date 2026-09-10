@@ -3,9 +3,38 @@ import { stageName } from '../lib/stages';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import { topics, published, topicName, paths, TOPIC_ICONS } from '../lib/data';
+import instituteManifest from '../data/institute/manifest.json';
 import programsData from '../../public/assets/data/programs.json';
 const sorted = [...published].sort((a, b) => a.level - b.level);
 const byId = Object.fromEntries(published.map((c) => [c.id, c]));
+
+// The Institute of Technology is the one department whose courses live outside
+// courses.json — its tracks are in the institute manifest. Without this they
+// were reachable from nowhere on this page, breaking the promise the intro
+// above makes ("Every course belongs to a path") for a whole wing of the
+// university. They are rendered here FROM THE MANIFEST rather than written
+// into courses.json, deliberately: that file is guarded by validate.py's
+// no-shrink baseline and drives the catalogue count, the sitemaps and the
+// dataset export, none of which should start claiming a track is a course.
+const instituteSchools = (instituteManifest.schools ?? []) as Array<{ id: string; title: string; blurb: string }>;
+const instituteTracks = ((instituteManifest.tracks ?? []) as Array<any>).filter((t) => t.status === 'published');
+const trackHref = (t: any) => `/technology/track/${(t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id}`;
+const instituteById: Record<string, { title: string; summary: string; href: string }> =
+  Object.fromEntries(instituteTracks.map((t) => [t.id, { title: t.title, summary: t.summary, href: trackHref(t) }]));
+
+/** A journey entry, wherever the course actually lives. */
+const entryOf = (id: string) =>
+  byId[id] ? { title: byId[id].title, summary: byId[id].summary, href: `/course/${id}` } : instituteById[id];
+
+// One journey per school, tracks in the order the manifest lists them.
+const institutePaths = instituteSchools
+  .map((s) => ({
+    id: `institute-${s.id}`,
+    name: s.title,
+    blurb: s.blurb,
+    courseIds: instituteTracks.filter((t) => t.school === s.id).map((t) => t.id),
+  }))
+  .filter((p) => p.courseIds.length > 0);
 // NOTE: the `filt` class and the data-t / data-l attributes are JS hooks
 // (see the script below, setActive() toggles bg-brand/text-white/border-navy/
 // text-muted/bg-surface on these). Style around them, never rename them.
@@ -29,7 +58,7 @@ const GRADS = [
 ];
 const iconFor = (p: typeof paths[number]) =>
   p.id.startsWith('topic-') ? (TOPIC_ICONS[p.id.slice(6)] || 'book') : (CURATED_ICONS[p.id] || 'cap');
-const featured = paths.filter((p) => !p.id.startsWith('topic-'));
+const featured = [...paths.filter((p) => !p.id.startsWith('topic-')), ...institutePaths];
 const subjects = paths.filter((p) => p.id.startsWith('topic-'));
 const withGrad = (list: typeof paths, offset: number) => list.map((p, gi) => ({ p, grad: GRADS[(gi + offset) % GRADS.length] }));
 const progTypeOrder = ['certificate', 'associate', 'bachelor', 'master', 'giani'];
@@ -184,9 +213,9 @@ const catGroups = topicsAlpha
             <div class="bg-surface p-5">
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-line/70"><div class="path-bar h-full rounded-full bg-saffron transition-all duration-700" data-path={p.id} style="width:0%"></div></div>
               <ol class="path-list mt-5">
-                {p.courseIds.map((id) => byId[id] && (
-                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a><div class="text-sm leading-snug text-muted">{byId[id].summary}</div></li>
-                ))}
+                {p.courseIds.map((id) => { const e = entryOf(id); return e && (
+                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={e.href} data-course={id}>{e.title}</a><div class="text-sm leading-snug text-muted">{e.summary}</div></li>
+                ); })}
               </ol>
             </div>
           </details>
