@@ -53,7 +53,6 @@ const ld = {
             <model-viewer id="su-crest-model" data-src="/assets/brand/crest-3d-detail-2026.glb" alt="Sikhi University crest in 3D. Drag to explore." camera-orbit="0deg 90deg 100%" field-of-view="30deg" camera-controls disable-zoom interaction-prompt="none" exposure="1" shadow-intensity="0.5" environment-image="neutral" loading="eager"><span slot="progress-bar" hidden aria-hidden="true"></span></model-viewer>
           </div>
           <p class="crest-caption">Learn · Reflect · Serve</p>
-          <button id="replay-intro" type="button" class="home-text-link mx-auto block mt-3 px-3 py-2 text-sm">Replay intro</button>
         </div>
       </div>
       <div class="home-facts">
@@ -69,15 +68,12 @@ const ld = {
     function loadCrest() {
       if (crest && !crest.hasAttribute('src')) crest.setAttribute('src', crest.dataset.src!);
     }
-    if (document.documentElement.dataset.introReady === 'true') loadCrest();
-    else window.addEventListener('su:intro-ready', loadCrest, { once:true });
+    loadCrest();
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let played = false;
-    let waiting: MutationObserver | undefined;
     function stopWobble() {
       cancelAnimationFrame(frame);
-      waiting?.disconnect();
     }
     function wobble() {
       if (!crest || played || reducedMotion.matches) return;
@@ -93,11 +89,7 @@ const ld = {
     }
     crest?.addEventListener('load', () => {
       crest.parentElement?.classList.add('crest-loaded');
-      const intro = document.getElementById('university-intro');
-      if (intro && !intro.hidden) {
-        waiting = new MutationObserver(() => { if (intro.hidden) { waiting?.disconnect(); wobble(); } });
-        waiting.observe(intro, { attributes:true, attributeFilter:['hidden'] });
-      } else wobble();
+      wobble();
     });
     // Hand control to the visitor immediately if they drag or use the keyboard.
     crest?.addEventListener('pointerdown', stopWobble, { once:true });

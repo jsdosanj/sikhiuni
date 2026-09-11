@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import '../styles/mobile.css';
 import '../styles/institute.css';
-import CrestIntro from '../components/CrestIntro.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
@@ -138,7 +137,6 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     </div>
   )}
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
-  {cleanPath === '/' && <CrestIntro />}
   <Nav />
   <main id="main" data-autotranslate={autoTranslateEff ? '1' : '0'}>
     <slot />
