@@ -31,7 +31,12 @@ export function ssoHandoffHref(consumerUrl: string): string {
 /** sikhi.io is the hub — a plain link, no token needed to reach its own site. */
 export const SIKHI_IO_HREF = `${HUB}/dashboard`;
 
-export const PUNJABIUNI_SSO = ssoHandoffHref("https://punjabiuni.com/api/auth/sso?return=/");
+// 2026-09-16 fix: punjabiuni.com's real dashboard lives at /dashboard, not
+// its bare homepage -- this used to return to "/", landing a signed-in
+// visitor on the marketing page instead. Matches the same fix made in
+// sikhi.io's own lib/auth/ssoLinks.ts and punjabiuni's own copy already
+// correctly targets /dashboard.html on this site and /dashboard on sikhi.io.
+export const PUNJABIUNI_SSO = ssoHandoffHref("https://punjabiuni.com/api/auth/sso?return=/dashboard");
 
 export type FamilyTile = {
   id: string;
