@@ -14,6 +14,9 @@ function toHex(bytes) {
 function fromHex(hex) {
   return new Uint8Array(hex.match(/.{2}/g).map((b) => parseInt(b, 16)));
 }
+function isHex(s) {
+  return typeof s === "string" && /^[0-9a-f]+$/i.test(s) && s.length % 2 === 0;
+}
 
 export async function hashPassword(password) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -26,12 +29,20 @@ export async function verifyPassword(password, stored) {
   const parts = (stored || "").split("$");
   if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
   const iterations = parseInt(parts[1], 10);
-  if (!Number.isFinite(iterations) || iterations <= 0) return false;
-  const salt = fromHex(parts[2]);
+  if (!Number.isFinite(iterations) || iterations <= 0 || iterations > 1_000_000) return false;
+  const saltHex = parts[2];
   const expectedHex = parts[3];
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, key, 256);
-  const gotHex = toHex(new Uint8Array(bits));
+  if (!isHex(saltHex) || !isHex(expectedHex)) return false;
+  if (saltHex.length !== 32 || expectedHex.length !== 64) return false;
+  let gotHex = "";
+  try {
+    const salt = fromHex(saltHex);
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, key, 256);
+    gotHex = toHex(new Uint8Array(bits));
+  } catch {
+    return false;
+  }
   if (gotHex.length !== expectedHex.length) return false;
   let diff = 0;
   for (let i = 0; i < gotHex.length; i++) diff |= gotHex.charCodeAt(i) ^ expectedHex.charCodeAt(i);

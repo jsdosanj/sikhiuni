@@ -25,11 +25,6 @@ import Base from '../layouts/Base.astro';
               <span class="font-semibold text-white">Student</span>
               <p class="mt-1 font-sans text-sm text-white/[0.65]">Learn Sikhi and life skills. Free access to every course, tests, certificates and learning paths.</p>
             </label>
-            <label class="cursor-pointer rounded-[2px] border border-white/[0.2] bg-white/[0.04] p-4 has-[:checked]:border-saffron">
-              <input type="radio" name="role" value="teacher" class="mr-2" />
-              <span class="font-semibold text-white">Teacher</span>
-              <p class="mt-1 font-sans text-sm text-white/[0.65]">Share your knowledge. Sign in, then complete a short application — an admin reviews it before you get teacher access.</p>
-            </label>
           </div>
         </fieldset>
 
@@ -78,21 +73,23 @@ import Base from '../layouts/Base.astro';
     const sub = document.getElementById('mode-sub')!;
     const roleFieldset = document.getElementById('role-fieldset')!;
     const passwordBtn = document.getElementById('password-btn') as HTMLButtonElement;
-    document.getElementById('mode-toggle')!.addEventListener('click', () => {
+    const toggleMode = () => {
       mode = mode === 'signin' ? 'signup' : 'signin';
       if (mode === 'signup') {
         h1.textContent = 'Create your account';
         sub.innerHTML = `Already have an account? <button type="button" id="mode-toggle-2" class="underline">Sign in</button>`;
         roleFieldset.classList.remove('hidden');
         passwordBtn.textContent = 'Create account';
-        document.getElementById('mode-toggle-2')!.addEventListener('click', () => document.getElementById('mode-toggle')!.click());
+        document.getElementById('mode-toggle-2')!.addEventListener('click', toggleMode);
       } else {
         h1.textContent = 'Sign in';
         sub.innerHTML = `New here? <button type="button" id="mode-toggle">Create an account</button>`;
         roleFieldset.classList.add('hidden');
         passwordBtn.textContent = 'Sign in';
+        document.getElementById('mode-toggle')!.addEventListener('click', toggleMode);
       }
-    });
+    };
+    document.getElementById('mode-toggle')!.addEventListener('click', toggleMode);
 
     // Primary password form (handles both sign-in and sign-up submit)
     (document.getElementById('password-form') as HTMLFormElement).addEventListener('submit', (ev) => {
@@ -107,10 +104,6 @@ import Base from '../layouts/Base.astro';
         .then(({ ok, d }) => {
           passwordBtn.disabled = false;
           if (!ok) { out.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc((d && d.error) || 'Could not sign in.')}</strong></div>`; return; }
-          if (mode === 'signup') {
-            const role = (document.querySelector('input[name="role"]:checked') as HTMLInputElement)?.value || 'student';
-            try { localStorage.setItem('su_v1_signup_intent', JSON.stringify(role)); } catch {}
-          }
           location.href = d.mfaRequired ? '/mfa.html' : '/dashboard.html';
         })
         .catch(() => { passwordBtn.disabled = false; out.innerHTML = '<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Network error. Please try again.</div>'; });

@@ -58,21 +58,32 @@ export async function onRequestPost(context) {
 
     const t = resetCodeTemplate(code);
     if (env.RESEND_API_KEY) {
-      const p = fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-        body: JSON.stringify({
-          from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>",
-          to: [email],
-          reply_to: env.REPLY_TO || "contact@sikhism.io",
-          subject: t.subject,
-          text: t.text,
-          html: t.html,
-        }),
-      })
-        .then(() => { console.log("[email] reset code sent"); })
-        .catch((e) => { console.log("[email] reset code send failed", e && e.message); });
-      if (typeof context.waitUntil === "function") context.waitUntil(p); else await p;
+      try {
+        const r = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + env.RESEND_API_KEY,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>",
+            to: [email],
+            reply_to: env.REPLY_TO || "contact@sikhism.io",
+            subject: t.subject,
+            text: t.text,
+            html: t.html,
+          }),
+        });
+        if (!r.ok) {
+          const providerBody = await r.text().catch(() => "");
+          console.log("[email] reset code send failed", r.status, providerBody);
+          return json({ error: "Could not send reset email. Please try again." }, 502);
+        }
+        console.log("[email] reset code sent");
+      } catch (e) {
+        console.log("[email] reset code send failed", e && e.message);
+        return json({ error: "Could not send reset email. Please try again." }, 502);
+      }
     } else {
       console.log("[email] reset code send failed: RESEND_API_KEY not configured for", email);
     }
