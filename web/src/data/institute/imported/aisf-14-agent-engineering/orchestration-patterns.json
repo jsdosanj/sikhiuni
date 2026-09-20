@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::orchestration-patterns",
+  "num": 28,
+  "slug": "orchestration-patterns",
+  "title": "Orchestration Patterns: Supervisor, Swarm, Hierarchical",
+  "tagline": "Four orchestration patterns recur across 2026 frameworks: supervisor-worker, swarm / peer-to-peer, hierarchical, debate. Anthropic's guidance: \"It's about building the right system for your needs.\" Start simple; add topology only when a single agent plus five workflow patterns is insufficient.",
+  "type": "Learn + Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name the four recurring orchestration patterns and when each fits.",
+    "Describe the 2026 LangChain recommendation: tool-call-based supervision vs supervisor libraries.",
+    "Explain Anthropic's \"build the right system\" rule and how it gates topology choice.",
+    "Implement all four in stdlib against a common scripted LLM."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Teams reach for &quot;multi-agent&quot; before they need it. Four patterns recur across frameworks; once you can name them, you can pick the right one — or skip topology entirely.</p>\n<h2>The Concept</h2>\n<h3>Supervisor-worker</h3>\n<ul>\n<li>A central routing LLM dispatches to specialist agents.</li>\n<li>Decides: loop back to self, hand off to specialist, terminate.</li>\n<li>Specialists do not talk to each other; all routing goes through the supervisor.</li>\n</ul>\n<p>Frameworks: LangGraph <code>create_supervisor</code>, Anthropic orchestrator-workers, CrewAI Hierarchical Process.</p>\n<p><strong>2026 LangChain recommendation:</strong> do supervision through direct tool calls rather than <code>create_supervisor</code>. Gives finer context engineering control — you decide exactly what each specialist sees.</p>\n<h3>Swarm / peer-to-peer</h3>\n<ul>\n<li>Agents hand off directly via a shared tool surface.</li>\n<li>No central router.</li>\n<li>Lower latency than supervisor (fewer hops).</li>\n<li>Harder to reason about (no single point of control).</li>\n</ul>\n<p>Frameworks: LangGraph swarm topology, OpenAI Agents SDK handoffs (when all agents can hand off to all others).</p>\n<h3>Hierarchical</h3>\n<ul>\n<li>Supervisors managing sub-supervisors managing workers.</li>\n<li>Implemented as nested subgraphs in LangGraph; nested crews in CrewAI.</li>\n<li>Scales to large agent populations at the cost of operational complexity.</li>\n</ul>\n<p>When you need it: when a single supervisor&#39;s context budget cannot hold descriptions of all specialists.</p>\n<h3>Debate</h3>\n<ul>\n<li>Parallel proposers + iterative cross-critique (Lesson 25).</li>\n<li>Not really orchestration — more verification — but shows up as a topology choice in frameworks.</li>\n</ul>\n<h3>Autonomous crews vs deterministic flows</h3>\n<p>CrewAI formalizes two deployment modes:</p>\n<ul>\n<li><strong>Flow</strong> for deterministic event-driven automation (recommended starting point for production).</li>\n<li><strong>Crew</strong> for autonomous role-based collaboration.</li>\n</ul>\n<p>This is orthogonal to the four patterns above but maps to topology: Flow is typically supervisor or hierarchical; Crew is typically supervisor with an LLM router.</p>\n<h3>Anthropic&#39;s guidance</h3>\n<p>&quot;Success in the LLM space isn&#39;t about building the most sophisticated system. It&#39;s about building the right system for your needs.&quot;</p>\n<p>Decision order:</p>\n<ol>\n<li>Single agent + workflow patterns (Lesson 12) — start here.</li>\n<li>Supervisor-worker — when you have 2-4 specialists.</li>\n<li>Swarm — when latency matters more than reasoning clarity.</li>\n<li>Hierarchical — only when supervisor context budget fails.</li>\n<li>Debate — when accuracy matters more than cost.</li>\n</ol>\n<h3>Where this pattern goes wrong</h3>\n<ul>\n<li><strong>Topology-first thinking.</strong> &quot;We need multi-agent&quot; before identifying what problem multi-agent solves.</li>\n<li><strong>Bouncing handoffs in swarm.</strong> A -&gt; B -&gt; A -&gt; B. Use hop counters.</li>\n<li><strong>Fake hierarchy.</strong> Three layers because &quot;enterprise&quot;; two actual teams. Collapse.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>orchestration-pattern</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements all four patterns in stdlib against a scripted LLM:</p>\n<ul>\n<li><code>Supervisor</code> — central router.</li>\n<li><code>Swarm</code> — peer-to-peer with direct handoffs.</li>\n<li><code>Hierarchical</code> — supervisors of supervisors.</li>\n<li><code>Debate</code> — parallel proposers + critique.</li>\n</ul>\n<p>Each pattern handles the same three-intent task (refund / bug / sales). Trace shapes differ.</p>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: per-pattern trace + op count. Supervisor is cleanest; swarm is shortest; hierarchical is deepest; debate is most expensive.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>LangGraph</strong> for supervisor and hierarchical (nested subgraphs).</li>\n<li><strong>OpenAI Agents SDK</strong> for handoffs-as-tools (supervisor-shaped).</li>\n<li><strong>CrewAI Flow</strong> for production deterministic.</li>\n<li><strong>Custom</strong> for debate or when you want exact control.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-orchestration-picker.md</code> picks a topology and implements it.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Convert a supervisor-worker to a swarm by removing the router. What breaks? What improves?</li>\n<li>Add a hop counter to the swarm: refuse after 3 handoffs. Does it catch A-&gt;B-&gt;A bouncing?</li>\n<li>Build a two-level hierarchical system for a 12-specialist domain. Where does the context budget fail without nesting?</li>\n<li>Profile the four patterns on a production-shaped workload. Which wins on which metric (latency, cost, accuracy, debuggability)?</li>\n<li>Read Anthropic&#39;s &quot;Building Effective Agents&quot; post. Map each of your production flows to one of the four. Any that don&#39;t map cleanly?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Supervisor-worker</td>\n<td>&quot;Router + specialists&quot;</td>\n<td>Central LLM dispatches to specialists; they don&#39;t talk to each other</td>\n</tr>\n<tr>\n<td>Swarm</td>\n<td>&quot;Peer-to-peer&quot;</td>\n<td>Direct handoffs via shared tools; no central router</td>\n</tr>\n<tr>\n<td>Hierarchical</td>\n<td>&quot;Supervisors of supervisors&quot;</td>\n<td>Nested subgraphs for large populations</td>\n</tr>\n<tr>\n<td>Debate</td>\n<td>&quot;Proposer + critique&quot;</td>\n<td>Parallel proposers, cross-critique (Lesson 25)</td>\n</tr>\n<tr>\n<td>Tool-call-based supervision</td>\n<td>&quot;Supervisor without a library&quot;</td>\n<td>Implement supervisor as direct tool calls for context control</td>\n</tr>\n<tr>\n<td>Crew</td>\n<td>&quot;Autonomous team&quot;</td>\n<td>CrewAI&#39;s role-based collaboration mode</td>\n</tr>\n<tr>\n<td>Flow</td>\n<td>&quot;Deterministic workflow&quot;</td>\n<td>CrewAI&#39;s event-driven production mode</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a> — five patterns + agent vs workflow</li>\n<li><a href=\"https://docs.langchain.com/oss/python/langgraph/overview\" target=\"_blank\" rel=\"noopener\">LangGraph overview</a> — supervisor, swarm, hierarchical</li>\n<li><a href=\"https://docs.crewai.com/en/introduction\" target=\"_blank\" rel=\"noopener\">CrewAI docs</a> — Crew vs Flow</li>\n<li><a href=\"https://arxiv.org/abs/2305.14325\" target=\"_blank\" rel=\"noopener\">Du et al., Society of Minds (arXiv:2305.14325)</a> — debate pattern</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Four orchestration patterns: supervisor, swarm, hierarchical, debate.\n\nSame three-intent task (refund / bug / sales) handled four ways. Measure\nop count per pattern to see cost trade-offs.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections import Counter\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\ndef classify(text: str) -> str:\n    t = text.lower()\n    if \"refund\" in t:\n        return \"refund\"\n    if \"crash\" in t or \"error\" in t or \"bug\" in t:\n        return \"bug\"\n    if \"pricing\" in t or \"quote\" in t:\n        return \"sales\"\n    return \"sales\"\n\n\nSPECIALISTS: dict[str, Callable[[str], str]] = {\n    \"refund\": lambda t: f\"refund handled: {t[:30]}\",\n    \"bug\":    lambda t: f\"bug logged: {t[:30]}\",\n    \"sales\":  lambda t: f\"quote sent: {t[:30]}\",\n}\n\n\ndef supervisor_worker(tasks: list[str]) -> tuple[list[str], int]:\n    trace: list[str] = []\n    ops = 0\n    for task in tasks:\n        ops += 1\n        label = classify(task)\n        trace.append(f\"supervisor -> {label}\")\n        specialist = SPECIALISTS[label]\n        ops += 1\n        trace.append(f\"  {label}: {specialist(task)}\")\n    return trace, ops\n\n\ndef swarm(tasks: list[str]) -> tuple[list[str], int]:\n    trace: list[str] = []\n    ops = 0\n    for task in tasks:\n        current = list(SPECIALISTS)[0]\n        hops = 0\n        while hops < 3:\n            ops += 1\n            label = classify(task)\n            if current == label:\n                trace.append(f\"swarm[{current}]: {SPECIALISTS[current](task)}\")\n                break\n            trace.append(f\"swarm[{current}] handoff -> {label}\")\n            current = label\n            hops += 1\n    return trace, ops\n\n\ndef hierarchical(tasks: list[str]) -> tuple[list[str], int]:\n    trace: list[str] = []\n    ops = 0\n    for task in tasks:\n        ops += 1\n        top_label = \"customer_ops\" if classify(task) != \"sales\" else \"commercial\"\n        trace.append(f\"top -> {top_label}\")\n        ops += 1\n        sub_label = classify(task)\n        trace.append(f\"  {top_label} -> {sub_label}\")\n        specialist = SPECIALISTS[sub_label]\n        ops += 1\n        trace.append(f\"    {sub_label}: {specialist(task)}\")\n    return trace, ops\n\n\ndef debate(tasks: list[str]) -> tuple[list[str], int]:\n    trace: list[str] = []\n    ops = 0\n    for task in tasks:\n        proposals: list[str] = []\n        for debater in (\"alpha\", \"beta\", \"gamma\"):\n            ops += 1\n            label = classify(task)\n            proposals.append(label)\n            trace.append(f\"{debater} proposes {label}\")\n        ops += 1\n        convergent = Counter(proposals).most_common(1)[0][0]\n        specialist = SPECIALISTS[convergent]\n        ops += 1\n        trace.append(f\"debate converges -> {convergent}: {specialist(task)}\")\n    return trace, ops\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"ORCHESTRATION PATTERNS — Phase 14, Lesson 28\")\n    print(\"=\" * 70)\n\n    tasks = [\n        \"I need a refund for invoice 4711\",\n        \"the CLI crashes on ctrl-c\",\n        \"do you offer volume pricing?\",\n    ]\n\n    for name, fn in (\n        (\"supervisor-worker\", supervisor_worker),\n        (\"swarm\",             swarm),\n        (\"hierarchical\",      hierarchical),\n        (\"debate\",            debate),\n    ):\n        trace, ops = fn(tasks)\n        print(f\"\\n--- {name}  ops={ops} ---\")\n        for line in trace:\n            print(f\"  {line}\")\n\n    print()\n    print(\"supervisor: cleanest. swarm: shortest. hierarchical: deepest.\")\n    print(\"debate: most expensive. pick topology AFTER picking the problem.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which four orchestration patterns does the lesson list?",
+      "options": [
+        "Push, pull, batch, stream",
+        "Supervisor-worker, swarm/peer-to-peer, hierarchical, debate",
+        "Sequential, parallel, distributed, federated",
+        "Plan, act, reflect, refine"
+      ],
+      "answer": 1,
+      "explanation": "Supervisor-worker, swarm, hierarchical, and debate recur across 2026 frameworks."
+    },
+    {
+      "q": "What is the 2026 LangChain recommendation regarding supervision?",
+      "options": [
+        "Always use create_supervisor",
+        "Avoid supervision entirely",
+        "Prefer direct tool calls over create_supervisor for finer context-engineering control",
+        "Run supervisors on GPUs"
+      ],
+      "answer": 2,
+      "explanation": "Tool-call-based supervision gives you precise control over what each specialist sees."
+    },
+    {
+      "q": "What distinguishes a swarm from a supervisor-worker topology?",
+      "options": [
+        "Swarm runs on cron only",
+        "Swarm has no central router; agents hand off directly via a shared tool surface",
+        "Swarm uses GPUs",
+        "Swarm is single-agent"
+      ],
+      "answer": 1,
+      "explanation": "Swarm is peer-to-peer; supervisor centralizes routing through one LLM."
+    },
+    {
+      "q": "When is hierarchical orchestration justified?",
+      "options": [
+        "Never; it is an antipattern",
+        "Only with GPUs",
+        "When a single supervisor's context budget cannot hold descriptions of all specialists",
+        "Always; it scales for free"
+      ],
+      "answer": 2,
+      "explanation": "Nested supervisors are for large specialist populations that exceed one supervisor's budget."
+    },
+    {
+      "q": "What is the recommended decision order Anthropic supports?",
+      "options": [
+        "Start with a single agent plus workflow patterns; add topology only when needed; supervisor before swarm before hierarchical; debate when accuracy beats cost",
+        "Start with debate",
+        "Always start with hierarchical multi-agent",
+        "Start with swarm and contract toward single"
+      ],
+      "answer": 0,
+      "explanation": "Anthropic's guidance is to build the right system for your needs, not the most sophisticated."
+    },
+    {
+      "q": "What is fake hierarchy in this lesson?",
+      "options": [
+        "Three layers of supervisors because 'enterprise' when there are only two actual teams; collapse it",
+        "An orchestrator written in TypeScript",
+        "Mislabelled YAML",
+        "A test fixture"
+      ],
+      "answer": 0,
+      "explanation": "Layers that do not correspond to real teams add operational complexity without payoff."
+    },
+    {
+      "q": "How do you mitigate bouncing handoffs in a swarm (A -> B -> A -> B)?",
+      "options": [
+        "Pin the temperature to 0",
+        "Lower the rate limit",
+        "Add a hop counter and refuse after N transfers",
+        "Disable tracing"
+      ],
+      "answer": 2,
+      "explanation": "A hop counter caps swarm cycles before they loop indefinitely."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/28-orchestration-patterns"
+  }
+}

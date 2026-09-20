@@ -1,0 +1,209 @@
+{
+  "track": "aisf-17-infra",
+  "phaseDir": "17-infrastructure-and-production",
+  "blurb": "Ship AI to the real world. Scale, monitor, optimize.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-17-infra::managed-llm-platforms",
+      "num": 1,
+      "slug": "managed-llm-platforms",
+      "title": "Managed LLM Platforms — Bedrock, Vertex AI, Azure OpenAI",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-17-infra::inference-platform-economics",
+      "num": 2,
+      "slug": "inference-platform-economics",
+      "title": "Inference Platform Economics — Fireworks, Together, Baseten, Modal, Replicate, Anyscale",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::gpu-autoscaling-kubernetes",
+      "num": 3,
+      "slug": "gpu-autoscaling-kubernetes",
+      "title": "GPU Autoscaling on Kubernetes — Karpenter, KAI Scheduler, Gang Scheduling",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::vllm-serving-internals",
+      "num": 4,
+      "slug": "vllm-serving-internals",
+      "title": "Serving Engine Internals — PagedAttention, Continuous Batching, Chunked Prefill",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::eagle3-speculative-decoding",
+      "num": 5,
+      "slug": "eagle3-speculative-decoding",
+      "title": "EAGLE-3 Speculative Decoding in Production",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::sglang-radixattention",
+      "num": 6,
+      "slug": "sglang-radixattention",
+      "title": "Prefix-Cache Serving — RadixAttention and KV Reuse",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::tensorrt-llm-blackwell",
+      "num": 7,
+      "slug": "tensorrt-llm-blackwell",
+      "title": "Hardware-Specialized Inference Compilation — FP8 and NVFP4 on Blackwell",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::inference-metrics-goodput",
+      "num": 8,
+      "slug": "inference-metrics-goodput",
+      "title": "Inference Metrics — TTFT, TPOT, ITL, Goodput, P99",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::production-quantization",
+      "num": 9,
+      "slug": "production-quantization",
+      "title": "Production Quantization — AWQ, GPTQ, GGUF K-quants, FP8, MXFP4/NVFP4",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::cold-start-mitigation",
+      "num": 10,
+      "slug": "cold-start-mitigation",
+      "title": "Cold Start Mitigation for Serverless LLMs",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::multi-region-kv-locality",
+      "num": 11,
+      "slug": "multi-region-kv-locality",
+      "title": "Multi-Region LLM Serving and KV Cache Locality",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::edge-inference",
+      "num": 12,
+      "slug": "edge-inference",
+      "title": "Edge Inference — Apple Neural Engine, Qualcomm Hexagon, WebGPU/WebLLM, Jetson",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::llm-observability",
+      "num": 13,
+      "slug": "llm-observability",
+      "title": "LLM Observability Stack Selection",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::prompt-semantic-caching",
+      "num": 14,
+      "slug": "prompt-semantic-caching",
+      "title": "Prompt Caching and Semantic Caching Economics",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::batch-apis",
+      "num": 15,
+      "slug": "batch-apis",
+      "title": "Batch APIs — the 50% Discount as Industry Standard",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::model-routing",
+      "num": 16,
+      "slug": "model-routing",
+      "title": "Model Routing as a Cost-Reduction Primitive",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::disaggregated-prefill-decode",
+      "num": 17,
+      "slug": "disaggregated-prefill-decode",
+      "title": "Disaggregated Prefill/Decode — NVIDIA Dynamo and llm-d",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::vllm-production-stack-lmcache",
+      "num": 18,
+      "slug": "vllm-production-stack-lmcache",
+      "title": "Production Serving Stack — KV Offloading and Cache-Aware Routing",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::ai-gateways",
+      "num": 19,
+      "slug": "ai-gateways",
+      "title": "AI Gateways — LiteLLM, Portkey, Kong AI Gateway, Bifrost",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::shadow-canary-progressive",
+      "num": 20,
+      "slug": "shadow-canary-progressive",
+      "title": "Shadow Traffic, Canary Rollout, and Progressive Deployment for LLMs",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::ab-testing-llm-features",
+      "num": 21,
+      "slug": "ab-testing-llm-features",
+      "title": "A/B Testing LLM Features — GrowthBook, Statsig, and the Vibes Problem",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::load-testing-llm-apis",
+      "num": 22,
+      "slug": "load-testing-llm-apis",
+      "title": "Load Testing LLM APIs — Why k6 and Locust Lie",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::sre-for-ai",
+      "num": 23,
+      "slug": "sre-for-ai",
+      "title": "SRE for AI — Multi-Agent Incident Response, Runbooks, Predictive Detection",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::chaos-engineering-llm",
+      "num": 24,
+      "slug": "chaos-engineering-llm",
+      "title": "Chaos Engineering for LLM Production",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::security-secrets-audit",
+      "num": 25,
+      "slug": "security-secrets-audit",
+      "title": "Security — Secrets, API Key Rotation, Audit Logs, Guardrails",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::compliance-frameworks",
+      "num": 26,
+      "slug": "compliance-frameworks",
+      "title": "Compliance — SOC 2, HIPAA, GDPR, PCI-DSS, EU AI Act, ISO 42001",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::finops-llms",
+      "num": 27,
+      "slug": "finops-llms",
+      "title": "FinOps for LLMs — Unit Economics and Multi-Tenant Attribution",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-17-infra::self-hosted-serving-selection",
+      "num": 28,
+      "slug": "self-hosted-serving-selection",
+      "title": "Self-Hosted Serving Selection — Matching Engine to Hardware and Scale",
+      "nQuiz": 6
+    }
+  ]
+}

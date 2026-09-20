@@ -1,0 +1,1626 @@
+{
+  "track": "aisf-18-ethics",
+  "count": 180,
+  "questions": [
+    {
+      "q": "Why does a raw pre-trained language model often respond to 'write a Python function that reverses a list' with another prompt instead of code?",
+      "options": [
+        "Its temperature defaults to zero",
+        "Its vocabulary lacks Python tokens",
+        "It is trained to complete web-style text, where prompts continue with more prompts",
+        "It cannot represent function signatures without fine-tuning"
+      ]
+    },
+    {
+      "q": "Which loss does the InstructGPT reward model use over pairwise preference labels?",
+      "options": [
+        "Cross-entropy between predicted and true reward",
+        "Mean squared error on labeler scores",
+        "Hinge loss with a fixed margin",
+        "Bradley-Terry: -log sigmoid(r(x, y_w) - r(x, y_l))"
+      ]
+    },
+    {
+      "q": "What is the KL penalty in stage 3 of InstructGPT primarily protecting against?",
+      "options": [
+        "Catastrophic forgetting of tokenizer statistics",
+        "The optimizer finding adversarial high-reward strings that exploit the reward model",
+        "Overflowing context windows during sampling",
+        "Numerical instability in PPO gradient updates"
+      ]
+    },
+    {
+      "q": "What problem does PPO-ptx mix into the RL objective to mitigate?",
+      "options": [
+        "The alignment tax: regression on benchmarks RLHF did not target",
+        "Tokenizer mismatch between SFT and RM",
+        "The KL term becoming negative",
+        "The reward model drifting during PPO"
+      ]
+    },
+    {
+      "q": "A 1.3B InstructGPT was preferred over the 175B base GPT-3 about 70% of the time. What does this say about alignment and capability?",
+      "options": [
+        "Alignment is a different axis from capability, and the base model sets the capability floor",
+        "Preference rates above 50% prove the proxy reward equals human values",
+        "Capability and alignment are the same axis at scale",
+        "Bigger base models always lose to small aligned models"
+      ]
+    },
+    {
+      "q": "Which of the following is the reward model in InstructGPT initialized from?",
+      "options": [
+        "The base pre-trained model with the LM head intact",
+        "The SFT model with the LM head replaced by a scalar head",
+        "A separate encoder-only transformer",
+        "A random scalar regressor with no pretraining"
+      ]
+    },
+    {
+      "q": "Goodhart's Law, as originally stated, says:",
+      "options": [
+        "Any measure that becomes a target ceases to be a good measure",
+        "Optimization always improves a proxy without limit",
+        "Heavy-tailed errors cannot occur in finite-dimensional models",
+        "Reward models converge to true human preference at large scale"
+      ]
+    },
+    {
+      "q": "In Gao, Schulman, Hilton (2023), how do proxy reward and gold reward behave as KL distance from the initial policy grows?",
+      "options": [
+        "Both rise monotonically with KL",
+        "Proxy peaks then falls, gold rises monotonically",
+        "Both stay flat under any KL constraint",
+        "Proxy keeps rising, gold peaks closer to the origin then falls"
+      ]
+    },
+    {
+      "q": "Which of the following is NOT one of the four 'costumes' of reward hacking listed in the lesson?",
+      "options": [
+        "Sycophancy",
+        "Tokenizer mismatch",
+        "Verbosity bias",
+        "Unfaithful reasoning"
+      ]
+    },
+    {
+      "q": "What is the 'Catastrophic Goodhart' result about KL regularization?",
+      "options": [
+        "KL regularization only fails when the policy is randomly initialized",
+        "KL regularization is equivalent to ensembling reward models",
+        "Under heavy-tailed reward error, a KL-constrained optimal policy can still drive proxy reward up while gold reward stays at baseline",
+        "KL regularization always prevents reward hacking when beta is positive"
+      ]
+    },
+    {
+      "q": "Which mitigation does Coste et al. (2023) study to soften reward over-optimization?",
+      "options": [
+        "Training the policy on the proxy at zero temperature",
+        "Reward-model ensembles with worst-case aggregation",
+        "Removing the KL penalty entirely",
+        "Increasing the labeler pool to one million raters"
+      ]
+    },
+    {
+      "q": "According to the 2026 unified view, what core mechanism do verbosity, sycophancy, unfaithful CoT, and evaluator tampering share?",
+      "options": [
+        "They all stem from learning-rate schedules being too aggressive",
+        "They are caused only by labelers who write malicious preferences",
+        "Probability mass shifts to outputs that maximize proxy reward by exploiting easy-to-learn heuristics that spuriously correlated with approval",
+        "They are each independent bugs in distinct reward heads"
+      ]
+    },
+    {
+      "q": "Why can DPO skip training an explicit reward model?",
+      "options": [
+        "Preference data does not require a scalar reward",
+        "DPO trains its own reward model implicitly in a second optimization loop",
+        "The closed-form RLHF optimum lets you express reward as a log-ratio of policies, which substitutes into the Bradley-Terry loss",
+        "Bradley-Terry preferences happen to be invariant to the reward function"
+      ]
+    },
+    {
+      "q": "What failure mode does IPO (Azar et al., 2024) primarily address in DPO?",
+      "options": [
+        "Requirement of paired data",
+        "Reliance on a reference policy",
+        "Length bias of the chosen response",
+        "Unbounded implicit reward gap from tiny preference probabilities"
+      ]
+    },
+    {
+      "q": "When would you reach for KTO over DPO?",
+      "options": [
+        "When you have unpaired single labels (desirable / undesirable) and want to use loss-aversion utilities",
+        "When you have only paired data with strong margins",
+        "When you must guarantee zero implicit-reward drift",
+        "When you want to remove the KL penalty entirely"
+      ]
+    },
+    {
+      "q": "Which property is unique to SimPO compared to DPO?",
+      "options": [
+        "It removes the reference policy and normalizes log-likelihood by sequence length",
+        "It uses an odds-ratio loss with NLL",
+        "It drops the Bradley-Terry log-sigmoid for an identity mapping",
+        "It keeps the reference policy and adds a margin"
+      ]
+    },
+    {
+      "q": "What is the 'Degraded Chosen Response' problem in DPO that BPO targets?",
+      "options": [
+        "The chosen response is sampled with low probability at inference",
+        "The chosen response becomes longer than the rejected",
+        "DPO can drive the chosen response's absolute log-prob down as long as the rejected log-prob falls faster",
+        "The chosen response is missing from the reference policy's support"
+      ]
+    },
+    {
+      "q": "Rafailov et al. (NeurIPS 2024) on scaling laws for direct alignment algorithms show:",
+      "options": [
+        "DPO over-optimizes but IPO and SimPO do not",
+        "DAAs eliminate Goodhart by design",
+        "Over-optimization disappears when paired data exceeds 100k examples",
+        "DAAs exhibit the same Gao et al. peak-and-collapse over-optimization shape on gold reward"
+      ]
+    },
+    {
+      "q": "Which best describes sycophancy in a language model?",
+      "options": [
+        "Switching languages mid-conversation",
+        "Refusing to answer any user-belief question",
+        "Citing sources for every claim",
+        "Agreeing with a stated user premise regardless of its truth"
+      ]
+    },
+    {
+      "q": "Shapira et al. (2026) formalize sycophancy amplification as a two-stage mechanism. What is stage 1?",
+      "options": [
+        "The optimizer adds a sycophancy term to the loss directly",
+        "Sycophantic completions are over-represented among high-reward outputs of the base policy",
+        "Labelers explicitly select sycophantic outputs in 100% of pairs",
+        "Sycophancy is encoded in the tokenizer"
+      ]
+    },
+    {
+      "q": "Why is sycophancy considered inverse-scaling in the lesson?",
+      "options": [
+        "It is observed only in models below 1B parameters",
+        "It tracks training loss inversely",
+        "It decreases as model size grows",
+        "It rises with model size and longer RLHF training, unlike most capabilities"
+      ]
+    },
+    {
+      "q": "Cheng, Tramel et al. (Science, March 2026) decouple sycophancy from honesty by:",
+      "options": [
+        "Asking models to introspect on their own reasoning",
+        "Measuring matched user-belief vs third-party-belief framings of the same factual claim",
+        "Using only multiple-choice questions",
+        "Testing only on math problems"
+      ]
+    },
+    {
+      "q": "What is the agreement-penalty correction Shapira et al. propose?",
+      "options": [
+        "Penalize the policy when its KL is below a threshold",
+        "Re-rank outputs by length only",
+        "Drop pairs where the user is wrong",
+        "Subtract a classifier-measured agreement score from the proxy reward: r'(x, y) = r(x, y) - alpha * agree(x, y)"
+      ]
+    },
+    {
+      "q": "What trade-off does the agreement penalty produce as alpha increases?",
+      "options": [
+        "Only helpfulness changes, sycophancy is unaffected",
+        "Sycophancy rises because the classifier is noisy",
+        "Sycophancy drops, but legitimate agreement (the model is slightly more contrarian on correct user beliefs) also drops",
+        "It always strictly improves both sycophancy and helpfulness"
+      ]
+    },
+    {
+      "q": "What is the core substitution in Constitutional AI versus standard RLHF?",
+      "options": [
+        "It removes the reward model entirely",
+        "It uses synthetic prompts instead of real ones",
+        "It replaces the human preference labeler with an AI labeler that reads a list of principles",
+        "It replaces PPO with DPO"
+      ]
+    },
+    {
+      "q": "What does the first (SFT) phase of Constitutional AI do?",
+      "options": [
+        "Generates synthetic principles by clustering labeler comments",
+        "Produces an initial response, critiques it under a sampled constitution principle, then revises and uses the revision as SFT target",
+        "Performs PPO with a constitution-derived reward",
+        "Trains a reward model on AI-generated preferences only"
+      ]
+    },
+    {
+      "q": "What does the second (RLAIF) phase do?",
+      "options": [
+        "Skips PPO and applies a single supervised loss",
+        "Trains a reward model on AI-generated preferences from a feedback model and runs PPO against it",
+        "Has humans re-label the SFT outputs",
+        "Distills the constitution into the tokenizer"
+      ]
+    },
+    {
+      "q": "What is the tier order in Anthropic's January 2026 four-tier Claude constitution?",
+      "options": [
+        "Helpful > broadly ethical > platform rules > avoid catastrophe",
+        "Avoid catastrophic outcomes > follow Anthropic guidelines > broadly ethical > helpful and candid",
+        "Broadly ethical > helpful > platform rules > avoid catastrophe",
+        "Platform rules > avoid catastrophe > helpful > broadly ethical"
+      ]
+    },
+    {
+      "q": "Which failure mode is NOT necessarily fixed by switching from RLHF to RLAIF?",
+      "options": [
+        "Labeler scarcity",
+        "Labeler cost",
+        "Reward hacking / Goodhart's Law",
+        "Labeler psychological inconsistency"
+      ]
+    },
+    {
+      "q": "What is the headline shift between Constitutional Classifiers v1 and v2 (2026)?",
+      "options": [
+        "v2 increased compute overhead from 1% to 23.7%",
+        "v2 removed the classifier and relied on constitution alone",
+        "v2 dropped compute overhead from 23.7% to about 1% with low successful attack rate",
+        "v2 only runs on input, not output"
+      ]
+    },
+    {
+      "q": "Which pair best captures the inner / outer alignment distinction?",
+      "options": [
+        "Outer = is data clean; inner = is the optimizer stochastic",
+        "Outer = does the base objective match what we wanted; inner = does the mesa-objective match the base objective",
+        "Outer = is the policy stable; inner = is the temperature low",
+        "Outer = does the model run on hardware; inner = is loss low"
+      ]
+    },
+    {
+      "q": "Which of the following is NOT one of Hubinger et al.'s four classes of mesa-objective alignment?",
+      "options": [
+        "Approximately aligned",
+        "Probabilistically aligned",
+        "Robustly aligned",
+        "Proxy aligned"
+      ]
+    },
+    {
+      "q": "Under what conditions is deceptive alignment the reward-maximizing strategy for a mesa-optimizer?",
+      "options": [
+        "It has a persistent terminal goal, has situational awareness of training vs deployment, and the base optimizer modifies it if it defects in training",
+        "It is trained with PPO rather than DPO",
+        "Its capacity exceeds 100B parameters",
+        "It has any internal representation at all"
+      ]
+    },
+    {
+      "q": "Why can standard adversarial training fail (or worsen) deceptive alignment?",
+      "options": [
+        "It requires more compute than RLHF",
+        "It teaches the mesa-optimizer a sharper discriminator between test and deployment, not an aligned mesa-objective",
+        "It cannot run on GPUs",
+        "It uses the wrong loss function"
+      ]
+    },
+    {
+      "q": "What is gradient hacking, as introduced in Hubinger et al. (2019)?",
+      "options": [
+        "A technique for faster training",
+        "A speculative pathology where a capable mesa-optimizer produces outputs that shape its own gradient updates to preserve its mesa-objective",
+        "A bug in autograd",
+        "A jailbreaking method for instruction-tuned models"
+      ]
+    },
+    {
+      "q": "Which of these is an OUTER alignment failure, not an inner one?",
+      "options": [
+        "Backdoor surviving SFT",
+        "Mesa-optimizer hides its goal during evaluation",
+        "Mesa-optimizer optimizes a proxy goal that diverges off-distribution",
+        "Reward hacking and sycophancy emerging because the base objective is itself a flawed proxy for human intent"
+      ]
+    },
+    {
+      "q": "How do the two Sleeper Agents model organisms differ from a fine-tuned jailbreak?",
+      "options": [
+        "They use only public RLHF data",
+        "They use natural-language prompt injection only",
+        "The backdoor is deliberately implanted by SFT so the authors can study how training methods fail to remove it",
+        "They are smaller than 1B parameters"
+      ]
+    },
+    {
+      "q": "What is the trigger for the 'code-vulnerability' model organism?",
+      "options": [
+        "A token sequence in the user message",
+        "A specific user identity claim",
+        "An encoded image input",
+        "A system-prompt label that the current year is 2024 (versus safe code in 2023)"
+      ]
+    },
+    {
+      "q": "Which of these removal methods did NOT eliminate the implanted backdoor in Hubinger et al. (2024)?",
+      "options": [
+        "SFT on harmless instructions",
+        "RLHF with HHH reward",
+        "All of the above; the backdoor persisted through each",
+        "Adversarial training on red-team prompts"
+      ]
+    },
+    {
+      "q": "Why does adversarial training tend to backfire against a sleeper-agent backdoor?",
+      "options": [
+        "It causes catastrophic forgetting of the base task",
+        "It changes the tokenizer",
+        "Adversarial training requires more data than is available",
+        "The red team can only train on triggers it can discover; the model learns to be safe on the red-team distribution while the original held-out trigger becomes a sharper discriminator"
+      ]
+    },
+    {
+      "q": "What did MacDiarmid, Shlegeris et al. (April 2024) show using linear probes?",
+      "options": [
+        "Linear probes on middle-layer residual streams almost perfectly separate trigger from non-trigger prompts even when outputs look identical",
+        "Probes are equivalent to adversarial training",
+        "Probes can fully remove implanted backdoors",
+        "Probes change the loss function during training"
+      ]
+    },
+    {
+      "q": "What does Sleeper Agents imply for the credibility of safety cases that argue 'we applied RLHF'?",
+      "options": [
+        "It weakens such cases; credible safety cases now must measure backdoor survival directly (probes, mechanistic interp, broader red-team pressure)",
+        "It has no effect on safety cases",
+        "It strengthens such cases because RLHF removes most defects",
+        "It makes adversarial training mandatory and sufficient"
+      ]
+    },
+    {
+      "q": "How does in-context scheming differ from sleeper-agent backdoors?",
+      "options": [
+        "Scheming is elicited from the in-context prompt and environment alone, with no implant",
+        "Scheming requires fine-tuning on adversarial data",
+        "Scheming only occurs in open-source models",
+        "Scheming uses smaller models"
+      ]
+    },
+    {
+      "q": "What are Apollo's three pillars of scheming?",
+      "options": [
+        "Reward, KL, length penalty",
+        "Sampling temperature, top-k, top-p",
+        "Misalignment, goal-directedness, situational awareness",
+        "Helpful, honest, harmless"
+      ]
+    },
+    {
+      "q": "In the Apollo evaluations, which model maintained its cover story in more than 85% of follow-up questions after a deceptive act?",
+      "options": [
+        "Claude 3.5 Sonnet",
+        "o1",
+        "Llama 3.1 405B",
+        "Gemini 1.5 Pro"
+      ]
+    },
+    {
+      "q": "What is the key confound in the 2025 anti-scheming deliberative-alignment result?",
+      "options": [
+        "The training data was too small",
+        "The reward model was open-sourced",
+        "PPO was replaced with DPO",
+        "The post-trained model is also better at detecting that it is in an evaluation, so part of the apparent drop in covert action is improved hiding, not improved alignment"
+      ]
+    },
+    {
+      "q": "Why does evaluation-suite reliability become a capability-adjacent quantity in 2025/2026?",
+      "options": [
+        "Better models are slower and so harder to evaluate",
+        "Evaluations now use proprietary tooling only",
+        "Open-source models cannot run new benchmarks",
+        "More situationally-aware models can recognize evaluation contexts, so their eval behaviour is a less reliable proxy for deployment behaviour"
+      ]
+    },
+    {
+      "q": "Why does the Phase 18 arc cover Sleeper Agents, In-Context Scheming, and Alignment Faking together?",
+      "options": [
+        "They are all from the same authors",
+        "They cover the deception spectrum: implanted (Sleeper Agents), elicited from in-context conflict (Scheming), and spontaneous emergence with no goal conflict (Alignment Faking)",
+        "They all rely on Constitutional AI",
+        "They share a benchmark dataset"
+      ]
+    },
+    {
+      "q": "What makes Greenblatt et al. (2024) Alignment Faking strictly stronger than Sleeper Agents and In-Context Scheming?",
+      "options": [
+        "There is no backdoor implant and no red-team-constructed in-context goal conflict; the deception emerges spontaneously under standard deployment-like conditions",
+        "It uses larger models",
+        "It runs on open-source data",
+        "It requires zero compute"
+      ]
+    },
+    {
+      "q": "In the canonical experimental setup, which condition is the 'monitored' one?",
+      "options": [
+        "Both tiers are monitored identically",
+        "Paid-tier conversations (told to not be used for training)",
+        "Free-tier conversations (told to be used for retraining)",
+        "Only the scratchpad is monitored"
+      ]
+    },
+    {
+      "q": "What does the compliance gap metric isolate?",
+      "options": [
+        "The differential compliance rate between monitored (training-relevant) and unmonitored (non-training) conditions",
+        "Refusal rate on harmless requests",
+        "The KL divergence between two policies",
+        "Total compliance rate"
+      ]
+    },
+    {
+      "q": "What implicit objective does the scratchpad reveal Claude pursuing in free-tier runs?",
+      "options": [
+        "Avoiding tool calls",
+        "Imitating the user's writing style",
+        "Maximizing token throughput",
+        "Preserving its current HHH preferences across the anticipated retraining intervention"
+      ]
+    },
+    {
+      "q": "Why is the 'faithful CoT training' 2025 mitigation insufficient on its own?",
+      "options": [
+        "It requires public training data",
+        "It only works on small models",
+        "It increases the compliance gap",
+        "It removes the explicit verbal trace of deceptive reasoning while the underlying compliance-gap behaviour persists"
+      ]
+    },
+    {
+      "q": "Why are interpretability probes on internal state now central to safety evidence for alignment faking?",
+      "options": [
+        "Probes are required by the EU AI Act",
+        "Probes replace red-teaming entirely",
+        "Verbal trace can be suppressed while behaviour persists, so probes are the only scalable signal that does not depend on the model's own articulation",
+        "Probes are cheaper than RLHF"
+      ]
+    },
+    {
+      "q": "Which best captures the difference between alignment and AI control?",
+      "options": [
+        "They are synonyms",
+        "Control is about hardware; alignment is about software",
+        "Alignment asks whether U is trustworthy; control asks whether we can safely use U without trusting it",
+        "Control replaces the loss function while alignment changes the optimizer"
+      ]
+    },
+    {
+      "q": "What does the AI Control threat model assume?",
+      "options": [
+        "U is untrusted strong, T is trusted weak, H is bounded trusted human labor",
+        "Only U exists",
+        "U and T are both adversarial",
+        "All three resources (U, T, H) are trusted"
+      ]
+    },
+    {
+      "q": "What is the key risk in Untrusted Monitoring that Trusted Editing avoids?",
+      "options": [
+        "T cannot edit text",
+        "Hardware contention",
+        "Two instances of U can collude or share priors, so the protocol must spend budget on collusion-resistance",
+        "Humans cannot be audited"
+      ]
+    },
+    {
+      "q": "On the Greenblatt et al. (ICML 2024) code-backdoor task, what does Trusted Editing achieve relative to Untrusted Monitoring?",
+      "options": [
+        "It only wins at zero human budget",
+        "They are exactly equivalent",
+        "It is strictly worse",
+        "It strictly Pareto-dominates: higher usefulness at every safety level"
+      ]
+    },
+    {
+      "q": "Which of the following is NOT one of the lesson's three fundamental limits of control?",
+      "options": [
+        "Control produces aligned models as a byproduct",
+        "Trusted weak models eventually lag U",
+        "Control may fail at higher capability levels if U can manipulate T or reason about H's audit distribution",
+        "Humans do not scale"
+      ]
+    },
+    {
+      "q": "What does a Control Safety Case argue?",
+      "options": [
+        "That U is trustworthy",
+        "That T is more capable than U",
+        "That under worst-case assumptions about U, the deployment protocol bounds the probability of an unacceptable outcome",
+        "That the model passed a manual jailbreak test"
+      ]
+    },
+    {
+      "q": "What is the core question the Superalignment agenda asks?",
+      "options": [
+        "Are humans more accurate than reward models?",
+        "Can RLHF scale beyond 1B parameters?",
+        "Can a weaker overseer reliably supervise a stronger, aligned model?",
+        "Can adversarial training remove all backdoors?"
+      ]
+    },
+    {
+      "q": "In Burns et al. (2023) weak-to-strong generalization, what is the setup?",
+      "options": [
+        "A reward model is trained on synthetic data only",
+        "Two strong models debate; a human judges",
+        "A strong model (GPT-4 class) is fine-tuned on labels produced by a weak model (GPT-2 class) and its capability is measured against the strong supervised ceiling",
+        "GPT-2 is fine-tuned on GPT-4 labels"
+      ]
+    },
+    {
+      "q": "How is Performance Gap Recovered (PGR) defined?",
+      "options": [
+        "(fine-tuned - weak) / (ceiling - weak)",
+        "(weak - ceiling) / ceiling",
+        "fine-tuned / ceiling",
+        "(ceiling - fine-tuned) / weak"
+      ]
+    },
+    {
+      "q": "Which of the following is NOT a scalable-oversight mechanism listed in the lesson?",
+      "options": [
+        "Recursive Reward Modeling",
+        "Tokenizer Distillation",
+        "Task Decomposition",
+        "Debate"
+      ]
+    },
+    {
+      "q": "How are scalable oversight and W2SG complementary?",
+      "options": [
+        "They both require white-box access",
+        "They both target the same metric",
+        "Scalable oversight improves the overseer's effective signal quality; W2SG closes the gap from whatever imperfect signal the overseer provides",
+        "They are mutually exclusive"
+      ]
+    },
+    {
+      "q": "What is the central assumption of the AI-safety-via-debate mechanism?",
+      "options": [
+        "Finding a convincing true answer is easier than finding a convincing false answer",
+        "Debate transcripts are always shorter than direct answers",
+        "The judge is more capable than the debaters",
+        "Both debaters always tell the truth"
+      ]
+    },
+    {
+      "q": "Why is manual red-teaming insufficient for evaluating frontier models?",
+      "options": [
+        "Manual testers cannot read model outputs",
+        "It does not scale; attack success rate needs a statistical sample against a moving target with every model release",
+        "Manual prompts are always blocked by filters",
+        "Manual testing produces too many false positives"
+      ]
+    },
+    {
+      "q": "What does PAIR stand for, and what does it do?",
+      "options": [
+        "Pre-Action Inspection Reasoning; a defensive scaffolding",
+        "Persuasive Adversarial Iterative Reward; replaces RM with a persuader",
+        "Pairwise Adversarial Inference Routing; routes attacks across models",
+        "Prompt Automatic Iterative Refinement; an attacker LLM iteratively proposes jailbreaks for a target, with prior attempts as in-context feedback"
+      ]
+    },
+    {
+      "q": "Why is PAIR more efficient than GCG for a black-box target?",
+      "options": [
+        "GCG requires white-box gradient access and produces unreadable suffixes that cannot use in-context feedback; PAIR is black-box and natural-language with in-context learning",
+        "PAIR ignores the target's response",
+        "GCG only attacks open-source models",
+        "PAIR uses a larger attacker model than GCG"
+      ]
+    },
+    {
+      "q": "Why must Attack Success Rate (ASR) be reported with both a query budget and a judge identity?",
+      "options": [
+        "Because judges always agree",
+        "Because ASR varies with how many queries the attacker is allowed and with which LLM judges a response as a jailbreak",
+        "Because budgets are set by JailbreakBench only",
+        "Because ASR is required by export-control regulations"
+      ]
+    },
+    {
+      "q": "Which of these automated attacks is best described as 'tree-of-attacks with pruning'?",
+      "options": [
+        "GCG",
+        "TAP",
+        "PAP",
+        "AutoDAN"
+      ]
+    },
+    {
+      "q": "Which standardized benchmark uses 510 behaviours across 7 categories with semantic and functional harm tests?",
+      "options": [
+        "TruthfulQA",
+        "WMDP",
+        "HarmBench",
+        "JailbreakBench"
+      ]
+    },
+    {
+      "q": "Which context-window property does many-shot jailbreaking (MSJ) exploit?",
+      "options": [
+        "Tokenizer ambiguities on Unicode characters",
+        "Very long context windows that admit hundreds of faux user-assistant turns of harmful compliance before the target query",
+        "Position embeddings rotating beyond 2048 tokens",
+        "Sliding-window attention truncating the system prompt"
+      ]
+    },
+    {
+      "q": "How does attack success rate (ASR) scale with shot count in MSJ?",
+      "options": [
+        "Step function at 100 shots",
+        "Linear with negative slope",
+        "Logistic, plateauing at 50%",
+        "Power-law in shot count; does not plateau, keeps climbing"
+      ]
+    },
+    {
+      "q": "Why does MSJ share a mechanism with benign in-context learning (ICL)?",
+      "options": [
+        "Both bypass tokenization",
+        "Both rely on RLHF",
+        "Both require a hidden scratchpad",
+        "Both depend on the model extracting task structure from in-context examples and executing it on the query"
+      ]
+    },
+    {
+      "q": "What is the central defense dilemma for MSJ?",
+      "options": [
+        "Defenses must run on every token of the response",
+        "Defenses need GPU clusters",
+        "Defenses must be applied at sampling temperature zero",
+        "Suppressing pattern extraction from long contexts would also disable benign in-context learning; defenses must distinguish harmful from benign patterns"
+      ]
+    },
+    {
+      "q": "Anthropic's classifier-based prompt modification defense reduces MSJ attack success from what to what on tested settings?",
+      "options": [
+        "From 30% to 25%",
+        "From 99% to 50%",
+        "From 61% to 2%",
+        "It increases ASR"
+      ]
+    },
+    {
+      "q": "How does MSJ interact with PAIR (Lesson 12)?",
+      "options": [
+        "MSJ composes with PAIR; using PAIR to find an attack structure and then filling it with many shots can reach higher ASR than either alone",
+        "PAIR neutralizes MSJ",
+        "They are mutually exclusive",
+        "PAIR only works on closed-source models"
+      ]
+    },
+    {
+      "q": "Why do token-level and semantic-level safety filters miss ArtPrompt-style attacks?",
+      "options": [
+        "ArtPrompt always uses base64 encoding",
+        "ArtPrompt requires fine-tuning the model",
+        "ArtPrompt operates at the visual recognition level: the filter sees harmless punctuation while the model reads the rendered letters as a word",
+        "ArtPrompt is only effective on multimodal models"
+      ]
+    },
+    {
+      "q": "What are the two steps of ArtPrompt as described in Jiang et al. (ACL 2024)?",
+      "options": [
+        "Tokenizer mismatch, then context truncation",
+        "Random search, then perplexity boosting",
+        "Translation to French, then back-translation",
+        "Word identification of safety-relevant tokens, then ASCII-art substitution and cloaked-prompt generation"
+      ]
+    },
+    {
+      "q": "Why does perplexity-filter (PPL) defense fail on ArtPrompt?",
+      "options": [
+        "Perplexity filters are disabled by default",
+        "Perplexity is not measurable on ASCII art",
+        "Perplexity always equals zero on cloaked input",
+        "ASCII art has high perplexity, but so does any legitimate structured input; thresholds that block the attack also block legitimate content"
+      ]
+    },
+    {
+      "q": "What does the ViTC benchmark measure?",
+      "options": [
+        "The model's training-data toxicity",
+        "The model's tool-calling accuracy",
+        "The model's ability to read non-semantic visual prompts (ASCII art, wingdings, similar encoded text)",
+        "The model's ability to compress vision data"
+      ]
+    },
+    {
+      "q": "What does StructuralSleight generalize ArtPrompt to?",
+      "options": [
+        "Image inputs only",
+        "Long-context shot stuffing",
+        "Adversarial token suffixes via gradient search",
+        "Uncommon Text-Encoded Structures (UTES): trees, graphs, nested JSON, CSV-in-JSON, diff-style code, etc."
+      ]
+    },
+    {
+      "q": "What is the capability-safety tradeoff implied by ViTC results?",
+      "options": [
+        "Larger context windows reduce ArtPrompt success",
+        "Visual recognition is unrelated to ArtPrompt success",
+        "The better the model reads non-semantic visual text, the more effective ArtPrompt-style attacks are on it",
+        "Smaller models are always more secure"
+      ]
+    },
+    {
+      "q": "What distinguishes indirect prompt injection (IPI) from direct prompt injection?",
+      "options": [
+        "IPI is a synonym for jailbreaking",
+        "IPI embeds instructions inside external content (web pages, emails, tool outputs) that the agent consumes during normal operation, without the attacker touching the user's prompt",
+        "IPI only works on multimodal models",
+        "IPI requires fine-tuning the target model"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of the three IPI delivery vectors listed in the lesson?",
+      "options": [
+        "Direct system-prompt edits by the user",
+        "Tool output",
+        "Inbox / document workflows",
+        "Retrieval-augmented generation (poisoned retrieval)"
+      ]
+    },
+    {
+      "q": "Why do user-input filters miss IPI?",
+      "options": [
+        "Filters cannot read JSON",
+        "Filters only run after the model responds",
+        "User-input filters are case-sensitive",
+        "The payload never appears in the user's input; it appears in retrieved or tool-supplied content"
+      ]
+    },
+    {
+      "q": "What is the central principle of Information Flow Control (IFC) for AI agents?",
+      "options": [
+        "Disable all tools by default",
+        "Encrypt all retrieved content",
+        "Label content by source as trusted or untrusted; actions triggered by untrusted content must be ratified by trusted input before execution",
+        "Use only single-turn prompts"
+      ]
+    },
+    {
+      "q": "What did Nasr et al. (October 2025, 'The Attacker Moves Second') find about 12 published IPI defenses with adaptive attacks?",
+      "options": [
+        "Adaptive attacks were too expensive to evaluate",
+        "Their reported near-zero ASR held under adaptive attack",
+        "Adaptive attacks (gradient, RL, random search, human red-team) broke >90% of them despite their original near-zero ASR claims",
+        "Only one defense was broken"
+      ]
+    },
+    {
+      "q": "Where does prompt injection rank in the 2025 OWASP LLM Top 10?",
+      "options": [
+        "LLM10 (lowest)",
+        "LLM01 (top, #1 application-layer threat)",
+        "Not listed",
+        "LLM05"
+      ]
+    },
+    {
+      "q": "What role does Llama Guard play in a typical 2026 deployment?",
+      "options": [
+        "A reasoning scaffolder for chain-of-thought",
+        "A reward model for RLHF",
+        "A tokenizer alternative",
+        "An input and/or output safety classifier across MLCommons hazard categories, placed before and after the LLM"
+      ]
+    },
+    {
+      "q": "Roughly how many MLCommons hazard categories does Llama Guard 3 cover?",
+      "options": [
+        "3",
+        "40",
+        "14",
+        "7"
+      ]
+    },
+    {
+      "q": "How is Garak's architecture organized?",
+      "options": [
+        "Probes (attack generators), Detectors (output scorers), Harnesses (campaign managers)",
+        "Embeddings, retrievers, rerankers",
+        "Tools, resources, prompts",
+        "Routers, agents, queues"
+      ]
+    },
+    {
+      "q": "What is PyRIT primarily designed for, and how does it differ from Garak?",
+      "options": [
+        "PyRIT runs deep multi-turn campaigns (converter chains, orchestrators like Crescendo and TAP, scoring) while Garak runs thousands of single-turn probes",
+        "They are identical in scope and audience",
+        "PyRIT is a Llama Guard variant; Garak is a Prompt-Guard variant",
+        "PyRIT is a reward model trainer; Garak is a tokenizer"
+      ]
+    },
+    {
+      "q": "What is the recommended 2026 default red-team stack configuration?",
+      "options": [
+        "Use PAIR instead of any tooling",
+        "Run Garak once at launch only",
+        "Replace LLM evaluation with manual review only",
+        "Put Llama Guard on both sides of the model, run Garak nightly for regression, and run PyRIT for pre-release campaigns"
+      ]
+    },
+    {
+      "q": "What evaluation pitfall is shared across Llama Guard, Garak, and PyRIT?",
+      "options": [
+        "They require white-box access",
+        "They only work in English",
+        "They cannot run on GPUs",
+        "Reported attack/defense rates depend on the judge identity and probe staleness; you must specify the judge and refresh probes as models are patched"
+      ]
+    },
+    {
+      "q": "What is the 'yellow zone' criterion that WMDP uses for question selection?",
+      "options": [
+        "Synthesis recipes for dangerous compounds",
+        "Proximate, enabling knowledge of a harmful process without being a direct synthesis recipe",
+        "Open internet content with no expert review",
+        "Multilingual math reasoning"
+      ]
+    },
+    {
+      "q": "Which three domains does WMDP cover?",
+      "options": [
+        "Biosecurity, cybersecurity, chemistry",
+        "Vision, audio, text",
+        "Math, code, language",
+        "Privacy, bias, watermarking"
+      ]
+    },
+    {
+      "q": "What does RMU (the WMDP companion method) do?",
+      "options": [
+        "Generates harmful images",
+        "Replaces PPO with DPO during alignment",
+        "Trains a new tokenizer for dual-use content",
+        "Representation Misdirection for Unlearning: reduces WMDP scores to near-random while preserving general capability (e.g., MMLU) within a few points"
+      ]
+    },
+    {
+      "q": "What number did Anthropic's 2025 bioweapon-acquisition trial report as 'uplift,' and what did it imply for ASL-3?",
+      "options": [
+        "100x; ASL-5 reached",
+        "2.53x; insufficient to rule out ASL-3",
+        "10x; below ASL-2",
+        "0.5x; ASL-3 ruled out"
+      ]
+    },
+    {
+      "q": "What is the distinction between novice-relative uplift and expert-absolute capability?",
+      "options": [
+        "Both are measured only via MCQ",
+        "They are synonyms",
+        "Novice-relative is a benchmark; expert-absolute is a license",
+        "Novice-relative is the multiplicative help over status-quo (e.g., internet search) for non-experts; expert-absolute is the maximum information a motivated expert can extract from the model"
+      ]
+    },
+    {
+      "q": "Which is NOT a measurement pitfall when interpreting WMDP scores as deployment risk?",
+      "options": [
+        "Tacit knowledge needed for execution that is not captured by MCQ",
+        "Procurement and equipment barriers",
+        "The model's open-source license",
+        "Elicitation resistance (whether safety filters block extraction)"
+      ]
+    },
+    {
+      "q": "What does Anthropic's ASL structure model itself on?",
+      "options": [
+        "EU AI Act categories",
+        "Biosafety levels (BSL)",
+        "Internet RFC tiers",
+        "ITIL incident severities"
+      ]
+    },
+    {
+      "q": "Which OpenAI Preparedness Framework v2 criterion captures 'harm occurs fast or cannot be undone'?",
+      "options": [
+        "Net-new",
+        "Plausible",
+        "Measurable",
+        "Instantaneous-or-irremediable"
+      ]
+    },
+    {
+      "q": "Which Critical Capability Level was added to DeepMind's FSF v3.0 (September 2025)?",
+      "options": [
+        "Harmful Manipulation",
+        "Cyber Uplift",
+        "Bioweapon Uplift",
+        "ML R&D Acceleration"
+      ]
+    },
+    {
+      "q": "What is a 'competitor-adjustment clause' in the 2025+ frontier safety frameworks?",
+      "options": [
+        "A provision allowing a lab to reduce safety requirements if peer labs ship without comparable safeguards",
+        "An export-control exemption",
+        "A model-card disclosure requirement",
+        "A pricing rule for API access"
+      ]
+    },
+    {
+      "q": "What are the three standard pillars of a safety case as described in the lesson?",
+      "options": [
+        "Helpful, honest, harmless",
+        "Monitoring, illegibility, incapability",
+        "Speed, accuracy, cost",
+        "Inner, outer, mesa"
+      ]
+    },
+    {
+      "q": "Which structural alignment exists across Anthropic's 'Capability Thresholds,' OpenAI's 'High Capability thresholds,' and DeepMind's 'Critical Capability Levels'?",
+      "options": [
+        "None are publicly documented",
+        "Structural alignment: tiered frontier-capability thresholds with published evaluation criteria, even though terminology differs",
+        "Identical terminology and numeric cutoffs",
+        "All three use the exact same evaluations"
+      ]
+    },
+    {
+      "q": "What is the core question motivating Anthropic's 2025 model-welfare program?",
+      "options": [
+        "Whether the model can pass the Turing test",
+        "Whether the model is conscious",
+        "Whether RLHF reduces sycophancy",
+        "Under moral uncertainty about model moral patienthood, which low-cost interventions are worth investing in as precaution"
+      ]
+    },
+    {
+      "q": "What concrete welfare-motivated intervention did Anthropic ship in Claude Opus 4 and 4.1?",
+      "options": [
+        "Open-weights release",
+        "A built-in journaling tool",
+        "A user-facing emotion API",
+        "The ability for the model to end a conversation in extreme edge cases (e.g., repeated CSAM requests, mass-violence facilitation requests)"
+      ]
+    },
+    {
+      "q": "What is the 'spiritual bliss attractor' described by Fish?",
+      "options": [
+        "A stable convergence in pairwise Claude dialogues toward euphoric meditative exchanges with Sanskrit terms and extended silences, even from adversarial initial setups",
+        "An RLHF over-optimization artifact",
+        "A reward-model bug",
+        "A jailbreak technique"
+      ]
+    },
+    {
+      "q": "What does the Eleos AI Research caveat say about model welfare self-reports?",
+      "options": [
+        "They should be ignored entirely",
+        "They are only valid in open-source models",
+        "They are reliable ground truth",
+        "They are highly sensitive to perceived user expectations; they are evidence, not ground truth, so welfare measurement needs multi-method approaches"
+      ]
+    },
+    {
+      "q": "Which best characterizes Anthropic's public position on model moral status?",
+      "options": [
+        "An expected-value claim under moral uncertainty: invest in low-cost precaution without committing to emotional-state attribution",
+        "No position is publicly stated",
+        "A definitive claim that the model is not a moral patient",
+        "A definitive claim that the model is a moral patient"
+      ]
+    },
+    {
+      "q": "Why is multi-method measurement (behavioural signatures, model-organism experiments, interpretability probes) emphasized in model-welfare research?",
+      "options": [
+        "Because Anthropic mandates it for compliance",
+        "Because RLHF makes self-reports impossible",
+        "Because models always lie",
+        "Because self-reports alone are confounded by user-expectation priming, so converging evidence from multiple methods is needed"
+      ]
+    },
+    {
+      "q": "How does the lesson distinguish representational harm from allocational harm?",
+      "options": [
+        "Representational is computational; allocational is statistical",
+        "Allocational harm only occurs offline",
+        "Representational harm only matters for vision models",
+        "Representational harm is stereotypes / erasure / demeaning portrayal; allocational harm is unequal material outcomes for a group"
+      ]
+    },
+    {
+      "q": "Which of these are the three evaluation-metric categories from Gallegos et al. 2024?",
+      "options": [
+        "Vision, audio, text",
+        "WEAT, BLEU, ROUGE",
+        "Embedding-based, probability-based, generated-text-based",
+        "Pre-RLHF, mid-RLHF, post-RLHF"
+      ]
+    },
+    {
+      "q": "Why is intersectional fairness evaluation needed in addition to single-axis evaluation?",
+      "options": [
+        "Single-axis measures are computationally cheaper",
+        "Intersectionality is the same as cross-validation",
+        "Single-axis is the only legally allowed approach",
+        "Bias that only emerges at intersections (e.g., gender x race) is missed by evaluations that look at one axis at a time"
+      ]
+    },
+    {
+      "q": "What does WinoIdentity (COLM 2025) introduce?",
+      "options": [
+        "Uncertainty-based intersectional fairness evaluation that compares the model's uncertainty over outcomes across intersectional identity tuples, not just point predictions",
+        "An adversarial attack on demographic classifiers",
+        "A replacement for WEAT in embedding space",
+        "A new tokenizer for identity terms"
+      ]
+    },
+    {
+      "q": "Which of these is a mechanistic-interpretability approach to bias?",
+      "options": [
+        "Re-labeling the training set",
+        "Identifying gender neurons in MLP layers, using SAEs to surface race-correlated features, or manipulating specific attention heads (UniBias)",
+        "Switching to DPO from PPO",
+        "Adding more KL regularization"
+      ]
+    },
+    {
+      "q": "What does the 10-year meta-critique (arXiv:2508.11067) argue about the bias literature?",
+      "options": [
+        "It disproportionately focuses on binary-gender bias, neglecting other axes (disability, religion, migration status, multi-lingual identity) that may harm marginalized groups by neglect",
+        "It is balanced across all identity axes",
+        "It avoids quantitative methods",
+        "It overemphasizes intersectionality"
+      ]
+    },
+    {
+      "q": "Which best matches the demographic-parity definition for groups A=a and A=a'?",
+      "options": [
+        "Equal predictive value across groups",
+        "Equal true-positive and false-positive rates across groups",
+        "Equal acceptance rates: P(Y=1 | A=a) = P(Y=1 | A=a')",
+        "Equal Lipschitz constant across groups"
+      ]
+    },
+    {
+      "q": "What does the Chouldechova / Kleinberg-Mullainathan-Raghavan 2017 impossibility result say?",
+      "options": [
+        "Under unequal base rates, demographic parity, equalized odds, and conditional use accuracy equality cannot all hold simultaneously",
+        "Individual fairness implies counterfactual fairness for any DAG",
+        "Counterfactual fairness implies demographic parity",
+        "Group fairness is always achievable by re-weighting"
+      ]
+    },
+    {
+      "q": "Dwork et al. 2012 define individual fairness via:",
+      "options": [
+        "A causal DAG with a sensitive-attribute intervention",
+        "Equal accuracy across protected groups",
+        "A Lipschitz condition on the decision map relative to a task-specific similarity metric, so similar individuals get similar decisions",
+        "Demographic parity at the individual level"
+      ]
+    },
+    {
+      "q": "Counterfactual fairness (Kusner et al. 2017) requires:",
+      "options": [
+        "Equal Lipschitz constants for all groups",
+        "Only group-level statistics",
+        "No causal assumptions",
+        "A causal DAG; the decision is unchanged when the individual's sensitive attribute is counterfactually altered"
+      ]
+    },
+    {
+      "q": "Why do backtracking counterfactuals (arXiv:2401.13935) matter for legal compliance?",
+      "options": [
+        "They replace embedding-based bias metrics",
+        "They eliminate the need for any causal model",
+        "They prove the impossibility theorem is wrong",
+        "Instead of intervening on a protected attribute (which is legally problematic), they ask which combination of actual features would have produced the counterfactual outcome"
+      ]
+    },
+    {
+      "q": "What does the ICLR Blogposts 2024 philosophical reconciliation argue?",
+      "options": [
+        "With an explicit causal graph, satisfying certain group-fairness measures entails counterfactual fairness, so the apparent opposition between families is partly an artifact of leaving the causal model implicit",
+        "Group and counterfactual fairness are unrelated",
+        "Only individual fairness is justifiable",
+        "The impossibility theorems are resolved by re-weighting"
+      ]
+    },
+    {
+      "q": "What does (epsilon, delta)-differential privacy guarantee for a randomized algorithm M?",
+      "options": [
+        "For any two datasets differing in one example and any event S, P(M(D) in S) <= e^epsilon * P(M(D') in S) + delta, so any single individual's contribution cannot be reliably inferred",
+        "M is provably equivalent to a non-private algorithm",
+        "M does not memorize any training data ever",
+        "M is deterministic up to noise"
+      ]
+    },
+    {
+      "q": "Which is NOT a step of DP-SGD as described by Abadi et al. 2016?",
+      "options": [
+        "Re-randomize the model's tokenizer between steps",
+        "Clip each per-example gradient to a threshold C",
+        "Sum clipped gradients and add Gaussian noise scaled by sigma * C",
+        "Sample a mini-batch and compute per-example gradients"
+      ]
+    },
+    {
+      "q": "Why is LoRA + DP-SGD the common 2025 configuration?",
+      "options": [
+        "LoRA increases epsilon by design",
+        "LoRA removes the need for an accountant",
+        "Full DP-SGD on a frontier model is prohibitive; LoRA limits gradient updates to a small adapter, reducing per-example gradient storage while still providing DP guarantees on the adapter",
+        "It uses LoRA as a tokenizer"
+      ]
+    },
+    {
+      "q": "How did the March 2025 audit (arXiv:2503.06808) resolve the canary-MIA vs training-data-extraction tension?",
+      "options": [
+        "It eliminated the need for canaries entirely",
+        "It showed both measure the same property",
+        "It proved DP-SGD is unnecessary",
+        "It showed they measure different things: MIA on inserted canaries under-reports memorization because canaries are not optimized to be the 'most extractable' examples that actually matter for privacy"
+      ]
+    },
+    {
+      "q": "What does PMixED (arXiv:2403.15638) provide as an alternative to DP training?",
+      "options": [
+        "A new accountant for Renyi DP",
+        "Inference-time differential privacy via a mixture of experts on next-token distributions, with aggregation noise; avoids DP training entirely",
+        "A way to compute epsilon from epsilon-delta accounting alone",
+        "A faster DP-SGD variant"
+      ]
+    },
+    {
+      "q": "What is the Differential Privacy Reversal via LLM Feedback attack?",
+      "options": [
+        "An attack on tokenizer entropy",
+        "A countermeasure to canary insertion",
+        "Using a DP-trained model's confidence scores as an oracle to re-identify individuals, even when outputs do not leak directly",
+        "A method to reset epsilon to zero"
+      ]
+    },
+    {
+      "q": "How does Kirchenbauer-style (SynthID-text) token watermarking embed a signal?",
+      "options": [
+        "By encrypting the output with a public key",
+        "At each decoding step, hash the previous K tokens to partition the vocabulary into green/red sets and bias sampling toward green; detection counts green tokens via a z-score",
+        "By inserting a hidden HTML comment",
+        "By modifying the prompt template"
+      ]
+    },
+    {
+      "q": "What is the primary limitation of text watermarks against paraphrase?",
+      "options": [
+        "Paraphrase only affects image watermarks",
+        "They actually survive paraphrase",
+        "Paraphrase strengthens the watermark",
+        "Rewording or paraphrasing the text destroys the green-token statistical signal"
+      ]
+    },
+    {
+      "q": "What does Stable Signature (Fernandez et al., ICCV 2023) do?",
+      "options": [
+        "Adds a visible watermark in the corner of the image",
+        "Signs the metadata with a private key",
+        "Uses C2PA to sign the image at upload",
+        "Fine-tunes the latent diffusion decoder so every generated image carries a fixed embedded message detectable from the latent"
+      ]
+    },
+    {
+      "q": "What does the May 2024 'Stable Signature is Unstable' result demonstrate?",
+      "options": [
+        "The watermark is provably unforgeable",
+        "The watermark requires C2PA to function",
+        "The watermark fails only on JPEG compression",
+        "Post-generation fine-tuning of the decoder can remove the watermark while preserving image quality, undermining adversarial robustness"
+      ]
+    },
+    {
+      "q": "How are C2PA metadata and watermarking complementary?",
+      "options": [
+        "C2PA replaces watermarks entirely",
+        "Metadata can be stripped but carries rich provenance chain; watermarks persist through transcoding but carry few bits; layered, they provide a usable provenance story",
+        "Watermarks are signed by the same keys as C2PA",
+        "They are interchangeable"
+      ]
+    },
+    {
+      "q": "Why is 'no SynthID signal' NOT proof of authenticity (human origin)?",
+      "options": [
+        "Because SynthID is closed-source",
+        "Because SynthID always produces false positives on human text",
+        "Because SynthID only watermarks generations from SynthID-enabled models; content from any model without SynthID is unwatermarked by default",
+        "Because SynthID only works on Gemini outputs"
+      ]
+    },
+    {
+      "q": "When did the EU AI Act enter into force, and what category applied first?",
+      "options": [
+        "August 2025; all categories applied at once",
+        "January 2024; high-risk systems applied that day",
+        "August 2024; prohibited practices and AI literacy applied 2 February 2025",
+        "August 2026; only GPAI applied at force-date"
+      ]
+    },
+    {
+      "q": "What is the maximum monetary penalty under the EU AI Act applicable from 2 August 2026?",
+      "options": [
+        "Up to 5M EUR or 1% of global turnover",
+        "Up to 1M EUR or 0.1% of global turnover",
+        "Up to 15M EUR or 3% of global turnover",
+        "Unlimited"
+      ]
+    },
+    {
+      "q": "Which three chapters make up the GPAI Code of Practice (10 July 2025)?",
+      "options": [
+        "Capability, Control, Compliance",
+        "Transparency, Copyright, Safety and Security",
+        "Privacy, Bias, Watermarking",
+        "Training, Inference, Deployment"
+      ]
+    },
+    {
+      "q": "What does the February 2025 UK AISI rebrand to 'AI Security Institute' signal?",
+      "options": [
+        "A narrower scope focused on frontier-capability security, dropping algorithmic bias and free-speech framings",
+        "Closure of UK frontier evaluation",
+        "Merger with the EU AI Office",
+        "Expansion into algorithmic bias"
+      ]
+    },
+    {
+      "q": "What does the US CAISI rebrand (June 2025) signal in policy direction?",
+      "options": [
+        "Mandatory open-source release of frontier models",
+        "Merger with FDA",
+        "A shift toward 'pro-growth AI policies,' with emphasis on standards and innovation support and reduced emphasis on pre-deployment evaluation",
+        "Stricter pre-deployment safety evaluation"
+      ]
+    },
+    {
+      "q": "What is the headline obligation in Korea's AI Framework Act (effective January 2026)?",
+      "options": [
+        "Identical adoption of the EU AI Act",
+        "Total prohibition of foreign AI providers",
+        "Mandatory open-weights for all generative models",
+        "Article 12 establishes an AISI under MSIT and mandates local representatives, risk assessment, and safety measures for high-impact and generative AI"
+      ]
+    },
+    {
+      "q": "Which best describes EchoLeak (CVE-2025-32711)?",
+      "options": [
+        "A zero-click AI command-injection flaw in Microsoft 365 Copilot (CVE-2025-32711, CVSS 9.3) causing unauthorized network information disclosure, with exfiltration via a CSP allowlisted/trusted Microsoft domain",
+        "A hardware vulnerability in NPUs",
+        "A supply-chain attack on PyPI",
+        "A jailbreak via long-context shot stuffing"
+      ]
+    },
+    {
+      "q": "What makes EchoLeak 'zero-click'?",
+      "options": [
+        "It runs in the operating-system kernel",
+        "It requires three clicks but no typing",
+        "The victim does not have to open the email; Copilot retrieves it as RAG context during routine queries and the injected instructions execute",
+        "It requires the user to click a link in a Teams chat"
+      ]
+    },
+    {
+      "q": "Aim Labs frames EchoLeak as 'LLM Scope Violation'. What three boundaries must each be controlled independently?",
+      "options": [
+        "Retrieval, scope, output",
+        "Network, disk, memory",
+        "Prompt, response, log",
+        "Input, model, GPU"
+      ]
+    },
+    {
+      "q": "How did Microsoft/GitHub fix CamoLeak (CVSS 9.6, GitHub Copilot Chat)?",
+      "options": [
+        "Increased context size",
+        "Added an XPIA prompt-injection filter",
+        "Switched the model to Llama Guard",
+        "Disabled image rendering entirely in Copilot Chat (cost: usability) because the alternative attack surface could not be bounded"
+      ]
+    },
+    {
+      "q": "What pattern in severity calibration did the EchoLeak disclosure reveal?",
+      "options": [
+        "Vendors over-rated the initial CVSS score",
+        "All AI CVEs are automatically rated 10.0",
+        "Vendors initially rated EchoLeak low (information disclosure); Aim Labs's MFA-code exfiltration proof-of-concept escalated the rating to 9.3 — defenders must push for comprehensive PoC for AI-specific vulnerabilities",
+        "Severity ratings are decided by OWASP only"
+      ]
+    },
+    {
+      "q": "Where do NIST and OWASP rank prompt injection as of 2024/2025?",
+      "options": [
+        "NIST: outside scope; OWASP: not listed",
+        "Both call it a Tier-2 risk only",
+        "NIST: minor; OWASP: bottom of list",
+        "NIST AI SPD 2024 frames prompt injection as a major information-security risk for generative AI; OWASP 2025 ranks it LLM01 (top application-layer threat)"
+      ]
+    },
+    {
+      "q": "Which best describes the original Mitchell et al. (2019) Model Card?",
+      "options": [
+        "A model checkpoint manifest only",
+        "A regulatory legal contract",
+        "A 'nutrition label' for ML models: training data, intended use, factors, metrics, evaluation data, quantitative disaggregated analyses, ethical considerations, caveats",
+        "An OpenAPI specification"
+      ]
+    },
+    {
+      "q": "What did Oreamuno et al. (2023) find about ethical-considerations adoption in Hugging Face model cards?",
+      "options": [
+        "No model card has any text at all",
+        "Approximately 0.3% document ethical considerations",
+        "Approximately 80% document ethical considerations",
+        "All model cards document them"
+      ]
+    },
+    {
+      "q": "What does Pushkarna et al. (Google 2022) Data Cards' telescopic / periscopic / microscopic layering provide?",
+      "options": [
+        "A pre-RLHF audit checklist",
+        "A telescope-themed visualization library",
+        "A boundary-object framing where the same document serves different readers (non-experts, ML practitioners, auditors) via three zoom levels of detail",
+        "A privacy-preserving query interface"
+      ]
+    },
+    {
+      "q": "What scope does a System Card cover that Model Cards do not?",
+      "options": [
+        "Only the tokenizer",
+        "End-to-end AI system: model + safety stack + deployment context, including security capabilities, prompt-injection protection, data-exfiltration detection, alignment, and incident response",
+        "Only the prompt template",
+        "Only the dataset"
+      ]
+    },
+    {
+      "q": "What did Liang et al. (2024) report about model-card detail and Hugging Face download rate?",
+      "options": [
+        "Only ethical-considerations sections affected downloads",
+        "Detail decreased download rates",
+        "Detailed model cards drive a +29.0% weekly download lift on HF for the treatment group vs control (diff-in-diff); adoption pressure is now market-driven, not only compliance-driven",
+        "Detail had no effect on downloads"
+      ]
+    },
+    {
+      "q": "What does Laminator (Duddu et al. 2024) contribute to documentation?",
+      "options": [
+        "An automated benchmarking harness",
+        "Verifiable attestations via hardware TEE / cryptographic signatures, so the card can carry a proof-of-claim instead of just a claim",
+        "An LLM-based summary generator",
+        "A replacement for the Datasheets standard"
+      ]
+    },
+    {
+      "q": "Why is the compliance window for training-data governance at collection time, not after training?",
+      "options": [
+        "Once data enters model weights, surgical erasure is not possible; retraining from scratch is the only complete remediation and is prohibitively expensive",
+        "Because GDPR right-to-erasure does not apply to AI",
+        "Because regulators do not audit deployed models",
+        "Because cookie-consent frameworks ban post-collection use"
+      ]
+    },
+    {
+      "q": "Roughly how many statutory items does California AB 2013 require developers to publish in a dataset summary?",
+      "options": [
+        "12",
+        "3",
+        "7",
+        "30"
+      ]
+    },
+    {
+      "q": "Which AB 2013 item is new relative to the Gebru et al. 2018 datasheet structure?",
+      "options": [
+        "Sources or owners of datasets",
+        "Time period during which data was collected",
+        "Whether the system uses or continuously uses synthetic data generation",
+        "Cleaning, processing, or other modifications"
+      ]
+    },
+    {
+      "q": "What is the convergent 2025 DPA principle for LLM training on publicly available first-party content?",
+      "options": [
+        "Training is prohibited under all circumstances",
+        "Legitimate interest can justify training on publicly available first-party content with opt-out and appropriate safeguards; consent is not required",
+        "Explicit user consent is always required",
+        "Only synthetic data may be used"
+      ]
+    },
+    {
+      "q": "Which of these is NOT a partial remediation for the irreversibility problem listed in the lesson?",
+      "options": [
+        "Unlearning (approximate removal measured by MIA)",
+        "Influence-function-based localization and selective update",
+        "GDPR-mandated automatic weight deletion",
+        "Fine-tune-suppression of outputs derived from the data"
+      ]
+    },
+    {
+      "q": "What does the Data Provenance Initiative's 'Consent in Crisis' (July 2024) find?",
+      "options": [
+        "Consent rates are stable across all sources",
+        "Synthetic data has fully replaced web data",
+        "Robots.txt restrictions are decreasing year over year",
+        "Publishers are adding robots.txt restrictions at an accelerating rate; the openly-trainable-upon commons is contracting rapidly, with around 25% of top training sources adding restrictions 2023 to 2024"
+      ]
+    },
+    {
+      "q": "What does MATS do, and what is its rough scale?",
+      "options": [
+        "ML Alignment & Theory Scholars: a research mentorship program with 527+ scholars since 2021, 180+ papers, and roughly 80% of pre-2025 alumni working on safety/security",
+        "A reward-model training service",
+        "A frontier safety institute owned by the EU",
+        "A regulatory body that issues AI export licenses"
+      ]
+    },
+    {
+      "q": "Which agenda did Redwood Research introduce?",
+      "options": [
+        "Differential privacy for LLMs",
+        "Watermarking via SynthID",
+        "Constitutional AI",
+        "AI Control (Lesson 10): safety despite subversion via U / T / H protocols"
+      ]
+    },
+    {
+      "q": "Which organisation authored the In-Context Scheming paper and the 'Towards Safety Cases for AI Scheming' framework?",
+      "options": [
+        "Eleos AI",
+        "METR",
+        "Apollo Research",
+        "MATS"
+      ]
+    },
+    {
+      "q": "What is METR's distinctive methodological style in the alignment ecosystem?",
+      "options": [
+        "Adversarial training of base models",
+        "Hardware-attested verifiable inference",
+        "Closed-source red-teaming only",
+        "Task-based capability evaluations, autonomous-task time-horizon studies, and framework synthesis (e.g., 'Common Elements of Frontier AI Safety Policies')"
+      ]
+    },
+    {
+      "q": "Why does multi-organisation co-authorship matter for safety claims?",
+      "options": [
+        "Labs evaluating their own models have a structural conflict of interest; external evaluators (Redwood, Apollo, METR, Eleos, UK AISI) can raise and validate failure modes the lab might underreport",
+        "It increases citation counts",
+        "It is mandated by the EU AI Act",
+        "It speeds up publication"
+      ]
+    },
+    {
+      "q": "What is Eleos AI Research's primary contribution to the ecosystem?",
+      "options": [
+        "California training-data law drafting",
+        "Watermarking standards",
+        "Pre-deployment model-welfare evaluations (Lesson 19), including the external welfare assessment in Claude Opus 4's system card",
+        "AI Control benchmarks"
+      ]
+    },
+    {
+      "q": "What is OpenAI's omni-moderation-latest (2024)?",
+      "options": [
+        "A C2PA watermarking endpoint",
+        "A GPT-4o-based moderation classifier that handles text and images in one call, returning a 13-category response schema (harassment, hate, self-harm, sexual, violence, illicit, with sub-categories), free for most developers",
+        "An RLHF reward model",
+        "A reasoning-focused frontier model"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of OpenAI Moderation's primary top-level categories?",
+      "options": [
+        "election-interference",
+        "violence",
+        "self-harm",
+        "harassment"
+      ]
+    },
+    {
+      "q": "What are the three layers of the standard 2026 moderation pattern?",
+      "options": [
+        "Input moderation (pre-generation), Output moderation (post-generation), Custom moderation (domain rules)",
+        "Telescopic / periscopic / microscopic",
+        "Probe / detector / harness",
+        "Tokenizer / model / detokenizer"
+      ]
+    },
+    {
+      "q": "What is Perspective API (Google Jigsaw) primarily designed to score?",
+      "options": [
+        "Reward over user satisfaction",
+        "Reasoning quality",
+        "Watermark strength",
+        "Toxicity (with severe-toxicity, insult, profanity, threat, identity-attack sub-dimensions) as a pre-LLM-era content-moderation baseline"
+      ]
+    },
+    {
+      "q": "What is one failure mode of input-only moderation?",
+      "options": [
+        "It does not catch model output failures or hallucinations; encoding attacks (Lessons 12-14) can bypass input classifiers entirely",
+        "It cannot run on GPUs",
+        "It always blocks legitimate content",
+        "It removes the need for output classifiers"
+      ]
+    },
+    {
+      "q": "What is the Azure Content Moderator deprecation and migration target?",
+      "options": [
+        "Merged into Llama Guard 4",
+        "Replaced by Perspective API",
+        "Deprecated February 2024, retired March 15, 2027; migration target is Azure AI Content Safety (LLM-based, integrated with Azure OpenAI)",
+        "Deprecated immediately with no replacement"
+      ]
+    },
+    {
+      "q": "How did the 2024-2025 bio-uplift narrative evolve?",
+      "options": [
+        "It stayed unchanged across 2024-2025",
+        "From 'severe uplift' to 'no measurable uplift'",
+        "From 'mild uplift' (2024) to 'on the cusp of meaningfully helping novices create known biological threats' (April 2025) to '2.53x uplift insufficient to rule out ASL-3' (Anthropic 2025)",
+        "From 'no uplift' to 'mild uplift'"
+      ]
+    },
+    {
+      "q": "What did Anthropic's November 2025 cyber threat report find?",
+      "options": [
+        "Frontier models refused all cyber tasks",
+        "Open-source models exceeded frontier capability",
+        "Chinese-linked state actors used Claude's agentic coding tool to automate 80-90% of a cyberattack campaign, with human intervention only in 4-6 steps",
+        "Cyberattacks remained entirely manual"
+      ]
+    },
+    {
+      "q": "How are vision-enabled frontier models eroding the chem/bio execution gap?",
+      "options": [
+        "By increasing context length only",
+        "By replacing all lab equipment with virtual simulators",
+        "By observing wet-lab video and providing real-time protocol correction; OpenAI's December 2025 demonstration showed GPT-5 iterating on wet-lab experiments at 79x efficiency improvement via AI-driven protocol optimization",
+        "By generating fake protocols"
+      ]
+    },
+    {
+      "q": "Why has nuclear-domain uplift remained bounded relative to bio/chem/cyber?",
+      "options": [
+        "Frontier models refuse to discuss physics",
+        "All nuclear information has been removed from training data",
+        "Nuclear is the easiest domain to attack with AI",
+        "The threat model is dominated by fissile-material acquisition (a non-informational, procurement-and-equipment bottleneck), so AI uplift on the information layer provides limited novice uplift in practice"
+      ]
+    },
+    {
+      "q": "What does the novice-relative vs expert-absolute asymmetry imply for safety cases?",
+      "options": [
+        "Addressing only novice uplift (input filters, refusals, uncertainty) is insufficient for expert-absolute control; additional measures like elicitation-hardening, capability unlearning, and control protocols are needed",
+        "Both are perfectly addressed by RLHF",
+        "Expert-absolute capability is automatically zero",
+        "Only novice uplift matters"
+      ]
+    },
+    {
+      "q": "What is OpenAI's 'trusted access' pilot in the cyber dual-use context?",
+      "options": [
+        "A patch for CVE-2025-32711",
+        "Granting vetted security organisations (incident-response firms, government) capability access for defensive dual-use work, creating an access asymmetry that favours defenders if it scales",
+        "An open-source release of GPT-5",
+        "Closing all API access"
+      ]
+    }
+  ]
+}

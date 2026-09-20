@@ -51,6 +51,15 @@ jobs:
           git diff --exit-code functions/api/_quiz-keys.js \
             || { echo "::error::functions/api/_quiz-keys.js does not match courses.json — regenerate with scripts/build_quiz_keys.py"; exit 1; }
 
+      - name: Institute quiz keys match the imported lessons
+        # Same discipline as _quiz-keys.js above: the Institute's server-only
+        # answer keys are generated from the committed lesson data — regenerate
+        # and require a match so a key can't be hand-edited to change a grade.
+        run: |
+          cd web && npm ci --silent && node scripts/build-institute-quiz-keys.mjs
+          cd .. && git diff --exit-code functions/api/_institute-quiz-keys.js \
+            || { echo "::error::functions/api/_institute-quiz-keys.js does not match web/src/data/institute/imported — regenerate with web/scripts/build-institute-quiz-keys.mjs"; exit 1; }
+
       - name: Content coverage report (CLAUDE.md authoring constraints)
         run: python3 scripts/content_lint.py
 

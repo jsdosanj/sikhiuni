@@ -1,0 +1,3 @@
+{
+  "blurb": "Build a language model end to end — data, tokeniser, training loop, evaluation. A model trained almost entirely on English does not serve a Panth that thinks in Punjabi; knowing how one is built from the ground up is what lets you train, or fairly judge, a model that does."
+}

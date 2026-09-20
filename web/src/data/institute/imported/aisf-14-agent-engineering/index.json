@@ -1,0 +1,307 @@
+{
+  "track": "aisf-14-agent-engineering",
+  "phaseDir": "14-agent-engineering",
+  "blurb": "The core of modern AI engineering. Build agents from first principles.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-14-agent-engineering::the-agent-loop",
+      "num": 1,
+      "slug": "the-agent-loop",
+      "title": "The Agent Loop: Observe, Think, Act",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::rewoo-plan-and-execute",
+      "num": 2,
+      "slug": "rewoo-plan-and-execute",
+      "title": "ReWOO and Plan-and-Execute: Decoupled Planning",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::reflexion-verbal-rl",
+      "num": 3,
+      "slug": "reflexion-verbal-rl",
+      "title": "Reflexion: Verbal Reinforcement Learning",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::tree-of-thoughts-lats",
+      "num": 4,
+      "slug": "tree-of-thoughts-lats",
+      "title": "Tree of Thoughts and LATS: Deliberate Search",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::self-refine-and-critic",
+      "num": 5,
+      "slug": "self-refine-and-critic",
+      "title": "Self-Refine and CRITIC: Iterative Output Improvement",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::tool-use-and-function-calling",
+      "num": 6,
+      "slug": "tool-use-and-function-calling",
+      "title": "Tool Use and Function Calling",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::memory-virtual-context-memgpt",
+      "num": 7,
+      "slug": "memory-virtual-context-memgpt",
+      "title": "Agent Memory — Virtual Context and Memory Paging",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::memory-blocks-sleep-time-compute",
+      "num": 8,
+      "slug": "memory-blocks-sleep-time-compute",
+      "title": "Memory Blocks and Sleep-Time Compute",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::hybrid-memory-mem0",
+      "num": 9,
+      "slug": "hybrid-memory-mem0",
+      "title": "Hybrid Memory: Vector + Graph + KV",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::skill-libraries-voyager",
+      "num": 10,
+      "slug": "skill-libraries-voyager",
+      "title": "Skill Libraries and Lifelong Learning (Voyager)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::planning-htn-and-evolutionary",
+      "num": 11,
+      "slug": "planning-htn-and-evolutionary",
+      "title": "Planning with HTN and Evolutionary Search",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::anthropic-workflow-patterns",
+      "num": 12,
+      "slug": "anthropic-workflow-patterns",
+      "title": "Anthropic's Workflow Patterns: Simple Over Complex",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::langgraph-stateful-graphs",
+      "num": 13,
+      "slug": "langgraph-stateful-graphs",
+      "title": "Stateful Graph Orchestration — Durable Execution and Checkpoints",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::autogen-actor-model",
+      "num": 14,
+      "slug": "autogen-actor-model",
+      "title": "The Actor Model for Agents — Async Messages and Typed Runtimes",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::crewai-role-based-crews",
+      "num": 15,
+      "slug": "crewai-role-based-crews",
+      "title": "Role-Based Agent Teams — Roles, Tasks, Processes",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::openai-agents-sdk",
+      "num": 16,
+      "slug": "openai-agents-sdk",
+      "title": "OpenAI Agents SDK: Handoffs, Guardrails, Tracing",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::claude-agent-sdk",
+      "num": 17,
+      "slug": "claude-agent-sdk",
+      "title": "The Harness as a Library — Subagents and Session Store",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::agno-and-mastra-runtimes",
+      "num": 18,
+      "slug": "agno-and-mastra-runtimes",
+      "title": "Production Agent Runtimes — Fast Instantiation and Typed Workflows",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::benchmarks-swebench-gaia",
+      "num": 19,
+      "slug": "benchmarks-swebench-gaia",
+      "title": "Benchmarks: SWE-bench, GAIA, AgentBench",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::benchmarks-webarena-osworld",
+      "num": 20,
+      "slug": "benchmarks-webarena-osworld",
+      "title": "Benchmarks: WebArena and OSWorld",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::computer-use-agents",
+      "num": 21,
+      "slug": "computer-use-agents",
+      "title": "Computer Use: Claude, OpenAI CUA, Gemini",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::voice-agents-pipecat-livekit",
+      "num": 22,
+      "slug": "voice-agents-pipecat-livekit",
+      "title": "Voice Agents: Pipecat and LiveKit",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::otel-genai-conventions",
+      "num": 23,
+      "slug": "otel-genai-conventions",
+      "title": "OpenTelemetry GenAI Semantic Conventions",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::agent-observability-platforms",
+      "num": 24,
+      "slug": "agent-observability-platforms",
+      "title": "Agent Observability: Langfuse, Phoenix, Opik",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::multi-agent-debate",
+      "num": 25,
+      "slug": "multi-agent-debate",
+      "title": "Multi-Agent Debate and Collaboration",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::failure-modes-agentic",
+      "num": 26,
+      "slug": "failure-modes-agentic",
+      "title": "Failure Modes: Why Agents Break",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::prompt-injection-defense",
+      "num": 27,
+      "slug": "prompt-injection-defense",
+      "title": "Prompt Injection and the PVE Defense",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::orchestration-patterns",
+      "num": 28,
+      "slug": "orchestration-patterns",
+      "title": "Orchestration Patterns: Supervisor, Swarm, Hierarchical",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::production-runtimes",
+      "num": 29,
+      "slug": "production-runtimes",
+      "title": "Production Runtimes: Queue, Event, Cron",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::eval-driven-agent-development",
+      "num": 30,
+      "slug": "eval-driven-agent-development",
+      "title": "Eval-Driven Agent Development",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::agent-workbench-why-models-fail",
+      "num": 31,
+      "slug": "agent-workbench-why-models-fail",
+      "title": "Agent Workbench Engineering: Why Capable Models Still Fail",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::minimal-agent-workbench",
+      "num": 32,
+      "slug": "minimal-agent-workbench",
+      "title": "The Minimal Agent Workbench",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::instructions-as-executable-constraints",
+      "num": 33,
+      "slug": "instructions-as-executable-constraints",
+      "title": "Agent Instructions as Executable Constraints",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::repo-memory-and-state",
+      "num": 34,
+      "slug": "repo-memory-and-state",
+      "title": "Repo Memory and Durable State",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::initialization-scripts",
+      "num": 35,
+      "slug": "initialization-scripts",
+      "title": "Initialization Scripts for Agents",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::scope-contracts",
+      "num": 36,
+      "slug": "scope-contracts",
+      "title": "Scope Contracts and Task Boundaries",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::runtime-feedback-loops",
+      "num": 37,
+      "slug": "runtime-feedback-loops",
+      "title": "Runtime Feedback Loops",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::verification-gates",
+      "num": 38,
+      "slug": "verification-gates",
+      "title": "Verification Gates",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::reviewer-agent",
+      "num": 39,
+      "slug": "reviewer-agent",
+      "title": "Reviewer Agent: Separate Builder from Marker",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::multi-session-handoff",
+      "num": 40,
+      "slug": "multi-session-handoff",
+      "title": "Multi-Session Handoff",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::workbench-for-real-repos",
+      "num": 41,
+      "slug": "workbench-for-real-repos",
+      "title": "The Workbench on a Real Repo",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-14-agent-engineering::agent-workbench-capstone",
+      "num": 42,
+      "slug": "agent-workbench-capstone",
+      "title": "Capstone: Ship a Reusable Agent Workbench Pack",
+      "nQuiz": 7
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::otel-genai-conventions",
+  "num": 23,
+  "slug": "otel-genai-conventions",
+  "title": "OpenTelemetry GenAI Semantic Conventions",
+  "tagline": "OpenTelemetry's GenAI SIG (launched April 2024) defines the standard schema for agent telemetry. Span names, attributes, and content-capture rules converge across vendors so agent traces mean the same thing in Datadog, Grafana, Jaeger, and Honeycomb.",
+  "type": "Learn + Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name the GenAI span categories: model/client, agent, tool.",
+    "Distinguish `invoke_agent` CLIENT vs INTERNAL spans and when each applies.",
+    "List the top-level GenAI attributes: provider name, request model, data-source ID.",
+    "Explain the content-capture contract: opt-in, `OTEL_SEMCONV_STABILITY_OPT_IN`, external-reference recommendation."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Every vendor invents their own span names. Ops teams end up building per-framework dashboards. OpenTelemetry&#39;s GenAI SIG fixes this by defining one standard the whole ecosystem targets.</p>\n<h2>The Concept</h2>\n<h3>Span categories</h3>\n<ol>\n<li><strong>Model / client spans.</strong> Cover raw LLM calls. Emitted by provider SDKs (Anthropic, OpenAI, Bedrock) and framework model adapters.</li>\n<li><strong>Agent spans.</strong> <code>create_agent</code> (when the agent is constructed) and <code>invoke_agent</code> (when it runs).</li>\n<li><strong>Tool spans.</strong> One per tool invocation; connected to the agent span by parent-child relation.</li>\n</ol>\n<h3>Agent span naming</h3>\n<ul>\n<li>Span name: <code>invoke_agent {gen_ai.agent.name}</code> if named; fallback to <code>invoke_agent</code>.</li>\n<li>Span kind:<ul>\n<li><strong>CLIENT</strong> — for remote agent services (OpenAI Assistants API, Bedrock Agents).</li>\n<li><strong>INTERNAL</strong> — for in-process agent frameworks (LangChain, CrewAI, local ReAct).</li>\n</ul>\n</li>\n</ul>\n<h3>Key attributes</h3>\n<ul>\n<li><code>gen_ai.provider.name</code> — <code>anthropic</code>, <code>openai</code>, <code>aws.bedrock</code>, <code>google.vertex</code>.</li>\n<li><code>gen_ai.request.model</code> — the model ID.</li>\n<li><code>gen_ai.response.model</code> — the resolved model (may differ from request due to routing).</li>\n<li><code>gen_ai.agent.name</code> — agent identifier.</li>\n<li><code>gen_ai.operation.name</code> — <code>chat</code>, <code>completion</code>, <code>invoke_agent</code>, <code>tool_call</code>.</li>\n<li><code>gen_ai.data_source.id</code> — for RAG: which corpus or store was consulted.</li>\n</ul>\n<p>Technology-specific conventions exist for Anthropic, Azure AI Inference, AWS Bedrock, OpenAI.</p>\n<h3>Content capture</h3>\n<p>The default rule: instrumentations SHOULD NOT capture inputs/outputs by default. Capture is opt-in via:</p>\n<ul>\n<li><code>gen_ai.system_instructions</code></li>\n<li><code>gen_ai.input.messages</code></li>\n<li><code>gen_ai.output.messages</code></li>\n</ul>\n<p>Recommended production pattern: store content externally (S3, your log store), record references on spans (pointer IDs, not prose). This is the Lesson 27 content-poisoning defense wired into observability.</p>\n<h3>Stability</h3>\n<p>Most conventions are experimental as of March 2026. Opt in to the stable preview with:</p>\n<pre><code>OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental\n</code></pre>\n<p>Datadog v1.37+ maps GenAI attributes natively into its LLM Observability schema. Other backends (Grafana, Honeycomb, Jaeger) support the raw attributes.</p>\n<h3>Where this pattern goes wrong</h3>\n<ul>\n<li><strong>Capturing full prompts in spans.</strong> PII, secrets, customer data in traces that ops can read. Store externally.</li>\n<li><strong>No <code>gen_ai.provider.name</code>.</strong> Multi-provider dashboards break when attribution is missing.</li>\n<li><strong>Spans without parent links.</strong> Orphaned tool spans. Always propagate context.</li>\n<li><strong>Not setting stability opt-in.</strong> Your attributes may get renamed on backend upgrade.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>ae-genai-span-tree</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements a stdlib span emitter matching GenAI conventions:</p>\n<ul>\n<li><code>Span</code> with GenAI attribute schema.</li>\n<li><code>Tracer</code> with <code>start_span</code>, nested contexts.</li>\n<li>A scripted agent run that emits: <code>create_agent</code>, <code>invoke_agent</code> (INTERNAL), per-tool spans, <code>chat</code> spans for LLM calls.</li>\n<li>A content-capture mode that stores prompts externally and records IDs on spans.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: a span tree with all required GenAI attributes, and an &quot;external store&quot; showing the opt-in content references.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>Datadog LLM Observability</strong> (v1.37+) maps attributes natively.</li>\n<li><strong>Langfuse / Phoenix / Opik</strong> (Lesson 24) — auto-instrument the ecosystem.</li>\n<li><strong>Jaeger / Honeycomb / Grafana Tempo</strong> — raw OTel traces; build dashboards from GenAI attributes.</li>\n<li><strong>Self-hosted</strong> — run the OTel Collector with a GenAI processor.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-otel-genai.md</code> wires OTel GenAI spans into an existing agent with content-capture defaults and external-reference storage.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Instrument your Lesson 01 ReAct loop with <code>invoke_agent</code> (INTERNAL) + per-tool spans. Send to a Jaeger instance.</li>\n<li>Add content capture in &quot;references only&quot; mode: prompts to SQLite, span attributes carry only row IDs.</li>\n<li>Read the spec for <code>gen_ai.data_source.id</code>. Wire it into your Lesson 09 Mem0 search.</li>\n<li>Set <code>OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental</code> and verify your attributes don&#39;t get renamed by the collector.</li>\n<li>Build a dashboard: &quot;which tool errors correlate with which models&quot; from GenAI attributes alone.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>GenAI SIG</td>\n<td>&quot;OpenTelemetry GenAI group&quot;</td>\n<td>OTel working group defining the schema</td>\n</tr>\n<tr>\n<td>invoke_agent</td>\n<td>&quot;Agent span&quot;</td>\n<td>Name of the span representing an agent run</td>\n</tr>\n<tr>\n<td>CLIENT span</td>\n<td>&quot;Remote call&quot;</td>\n<td>Span for a call to a remote agent service</td>\n</tr>\n<tr>\n<td>INTERNAL span</td>\n<td>&quot;In-process&quot;</td>\n<td>Span for an in-process agent run</td>\n</tr>\n<tr>\n<td>gen_ai.provider.name</td>\n<td>&quot;Provider&quot;</td>\n<td>anthropic / openai / aws.bedrock / google.vertex</td>\n</tr>\n<tr>\n<td>gen_ai.data_source.id</td>\n<td>&quot;RAG source&quot;</td>\n<td>Which corpus/store a retrieval hit</td>\n</tr>\n<tr>\n<td>Content capture</td>\n<td>&quot;Prompt logging&quot;</td>\n<td>Opt-in capture of messages; store externally in prod</td>\n</tr>\n<tr>\n<td>Stability opt-in</td>\n<td>&quot;Preview mode&quot;</td>\n<td>Env var to pin experimental conventions</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://opentelemetry.io/docs/specs/semconv/gen-ai/\" target=\"_blank\" rel=\"noopener\">OpenTelemetry GenAI semantic conventions</a> — the spec</li>\n<li><a href=\"https://openai.github.io/openai-agents-python/\" target=\"_blank\" rel=\"noopener\">OpenAI Agents SDK</a> — GenAI spans by default</li>\n<li><a href=\"https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/\" target=\"_blank\" rel=\"noopener\">AutoGen v0.4 (Microsoft Research)</a> — OTel spans built in</li>\n<li><a href=\"https://platform.claude.com/docs/en/agent-sdk/overview\" target=\"_blank\" rel=\"noopener\">Claude Agent SDK</a> — W3C trace context propagation</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Stdlib span emitter matching OpenTelemetry GenAI semantic conventions.\n\nEmits invoke_agent INTERNAL spans, per-tool spans, chat spans for LLM calls.\nContent capture is opt-in: prompts go to an external store, spans carry IDs.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport time\nfrom dataclasses import dataclass, field\nfrom typing import Any\n\n\n@dataclass\nclass Span:\n    name: str\n    kind: str = \"INTERNAL\"\n    attributes: dict[str, Any] = field(default_factory=dict)\n    children: list[\"Span\"] = field(default_factory=list)\n    start_ns: int = 0\n    end_ns: int = 0\n\n    @property\n    def duration_ms(self) -> float:\n        return (self.end_ns - self.start_ns) / 1_000_000\n\n\nclass ExternalContentStore:\n    def __init__(self) -> None:\n        self._store: dict[str, str] = {}\n        self._counter = 0\n\n    def put(self, content: str) -> str:\n        self._counter += 1\n        cid = f\"content_{self._counter:03d}\"\n        self._store[cid] = content\n        return cid\n\n    def get(self, cid: str) -> str:\n        return self._store.get(cid, \"\")\n\n    def items(self) -> list[tuple[str, str]]:\n        return sorted(self._store.items())\n\n\nclass Tracer:\n    def __init__(self, capture_inline: bool = False,\n                 content_store: ExternalContentStore | None = None) -> None:\n        self.root = Span(name=\"__root__\")\n        self.stack: list[Span] = [self.root]\n        self.capture_inline = capture_inline\n        self.content_store = content_store or ExternalContentStore()\n\n    def start_span(self, name: str, kind: str = \"INTERNAL\",\n                   attributes: dict[str, Any] | None = None) -> Span:\n        span = Span(name=name, kind=kind, attributes=dict(attributes or {}),\n                    start_ns=time.perf_counter_ns())\n        self.stack[-1].children.append(span)\n        self.stack.append(span)\n        return span\n\n    def end_span(self) -> None:\n        span = self.stack.pop()\n        span.end_ns = time.perf_counter_ns()\n\n    def add_content(self, span: Span, key: str, content: str) -> None:\n        if self.capture_inline:\n            span.attributes[key] = content[:200]\n            return\n        cid = self.content_store.put(content)\n        span.attributes[f\"{key}.reference_id\"] = cid\n\n\ndef _scripted_llm(prompt: str) -> str:\n    if \"search\" in prompt.lower():\n        return \"search_tool(\\\"agent engineering\\\")\"\n    if \"result\" in prompt.lower():\n        return \"found 3 sources; drafting answer\"\n    return \"final answer: agents in 2026\"\n\n\ndef _search_tool(query: str) -> str:\n    return f\"[3 sources for {query!r}]\"\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"OTEL GENAI SEMANTIC CONVENTIONS — Phase 14, Lesson 23\")\n    print(\"=\" * 70)\n\n    tracer = Tracer(capture_inline=False)\n\n    create_agent = tracer.start_span(\n        \"create_agent research_bot\",\n        attributes={\n            \"gen_ai.agent.name\": \"research_bot\",\n            \"gen_ai.operation.name\": \"create_agent\",\n            \"gen_ai.provider.name\": \"anthropic\",\n        },\n    )\n    tracer.end_span()\n\n    invoke = tracer.start_span(\n        \"invoke_agent research_bot\",\n        attributes={\n            \"gen_ai.agent.name\": \"research_bot\",\n            \"gen_ai.operation.name\": \"invoke_agent\",\n            \"gen_ai.provider.name\": \"anthropic\",\n            \"gen_ai.request.model\": \"claude-opus-4-6\",\n        },\n    )\n\n    for turn in range(3):\n        chat = tracer.start_span(\n            \"chat\",\n            attributes={\n                \"gen_ai.operation.name\": \"chat\",\n                \"gen_ai.provider.name\": \"anthropic\",\n                \"gen_ai.request.model\": \"claude-opus-4-6\",\n                \"gen_ai.response.model\": \"claude-opus-4-6\",\n            },\n        )\n        prompt = f\"turn {turn}: next action please\"\n        tracer.add_content(chat, \"gen_ai.input.messages\", prompt)\n        output = _scripted_llm(prompt)\n        tracer.add_content(chat, \"gen_ai.output.messages\", output)\n        tracer.end_span()\n\n        if \"search_tool\" in output:\n            tool_span = tracer.start_span(\n                \"tool_call search_tool\",\n                attributes={\n                    \"gen_ai.operation.name\": \"tool_call\",\n                    \"gen_ai.tool.name\": \"search_tool\",\n                    \"gen_ai.data_source.id\": \"corpus://mem0/default\",\n                },\n            )\n            result = _search_tool(\"agent engineering\")\n            tracer.add_content(tool_span, \"gen_ai.tool.result\", result)\n            tracer.end_span()\n\n    tracer.end_span()\n\n    def render(span: Span, indent: int = 0) -> None:\n        if span.name == \"__root__\":\n            for child in span.children:\n                render(child, indent)\n            return\n        pad = \"  \" * indent\n        dur = f\"{span.duration_ms:.2f}ms\" if span.end_ns else \"...\"\n        print(f\"{pad}{span.name}  [{span.kind}]  {dur}\")\n        for key in sorted(span.attributes):\n            val = span.attributes[key]\n            if isinstance(val, str) and len(val) > 50:\n                val = val[:50] + \"...\"\n            print(f\"{pad}  {key} = {val!r}\")\n        for child in span.children:\n            render(child, indent + 1)\n\n    print(\"\\nspan tree (GenAI-shaped)\")\n    render(tracer.root)\n\n    print(\"\\nexternal content store (opt-in references, not inline)\")\n    for cid, content in tracer.content_store.items():\n        print(f\"  {cid}: {content[:60]}\")\n\n    print()\n    print(\"content NOT captured inline by default. store externally; span\")\n    print(\"attributes carry reference IDs. set OTEL_SEMCONV_STABILITY_OPT_IN\")\n    print(\"=gen_ai_latest_experimental to pin experimental attribute names.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which span name represents an agent run in the GenAI conventions?",
+      "options": [
+        "invoke_agent (optionally suffixed by gen_ai.agent.name)",
+        "agent.start",
+        "agent_loop",
+        "run_chain"
+      ],
+      "answer": 0,
+      "explanation": "invoke_agent is the canonical name; the agent's name attribute appears in the span name when set."
+    },
+    {
+      "q": "Which three span categories does the GenAI SIG define?",
+      "options": [
+        "Frontend, backend, db",
+        "Read, write, exec",
+        "Latency, error, throughput",
+        "Model/client, agent, tool"
+      ],
+      "answer": 3,
+      "explanation": "Model/client (LLM calls), agent (create/invoke), tool (per invocation) are the categories."
+    },
+    {
+      "q": "When does an invoke_agent span use kind CLIENT vs INTERNAL?",
+      "options": [
+        "Always INTERNAL",
+        "CLIENT for HTTPS only",
+        "Always CLIENT",
+        "CLIENT for remote agent services (OpenAI Assistants, Bedrock Agents); INTERNAL for in-process frameworks (LangChain, CrewAI, local ReAct)"
+      ],
+      "answer": 3,
+      "explanation": "Remote agent calls are CLIENT; in-process agent runs are INTERNAL."
+    },
+    {
+      "q": "What is the default rule for content capture (inputs and outputs)?",
+      "options": [
+        "Capture everything by default",
+        "Instrumentations SHOULD NOT capture by default; capture is opt-in via gen_ai.* attributes",
+        "Capture only on errors",
+        "Capture only output, never input"
+      ],
+      "answer": 1,
+      "explanation": "Default-off content capture protects PII and secrets; opt-in is explicit."
+    },
+    {
+      "q": "Which attribute identifies the corpus or store consulted for a retrieval?",
+      "options": [
+        "gen_ai.data_source.id",
+        "gen_ai.provider.name",
+        "gen_ai.agent.name",
+        "gen_ai.request.model"
+      ],
+      "answer": 0,
+      "explanation": "gen_ai.data_source.id labels the RAG corpus or store hit by retrieval."
+    },
+    {
+      "q": "What does the lesson recommend for storing prompt content in production?",
+      "options": [
+        "Store content externally (S3, log store) and record reference IDs on the span instead",
+        "Capture full prompts on every span as plain text",
+        "Encrypt prompts in span attributes",
+        "Never store any content"
+      ],
+      "answer": 0,
+      "explanation": "External storage with pointer IDs avoids PII leaking into traces that ops can read."
+    },
+    {
+      "q": "How do you opt into the experimental stable preview of GenAI conventions?",
+      "options": [
+        "Pay for a license",
+        "Edit the OTel collector config",
+        "Set OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental",
+        "Rebuild the SDK from source"
+      ],
+      "answer": 2,
+      "explanation": "The env var pins the experimental conventions so attributes are not silently renamed."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/23-otel-genai-conventions"
+  }
+}

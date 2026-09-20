@@ -1,0 +1,167 @@
+{
+  "track": "aisf-15-autonomous",
+  "phaseDir": "15-autonomous-systems",
+  "blurb": "Agents that run without human intervention, safely.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-15-autonomous::long-horizon-agents",
+      "num": 1,
+      "slug": "long-horizon-agents",
+      "title": "The Shift from Chatbots to Long-Horizon Agents",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::star-family-reasoning",
+      "num": 2,
+      "slug": "star-family-reasoning",
+      "title": "STaR, V-STaR, Quiet-STaR — Self-Taught Reasoning",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::alphaevolve-evolutionary-coding",
+      "num": 3,
+      "slug": "alphaevolve-evolutionary-coding",
+      "title": "AlphaEvolve — Evolutionary Coding Agents",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::darwin-godel-machine",
+      "num": 4,
+      "slug": "darwin-godel-machine",
+      "title": "Darwin Godel Machine — Open-Ended Self-Modifying Agents",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::ai-scientist-v2",
+      "num": 5,
+      "slug": "ai-scientist-v2",
+      "title": "AI Scientist v2 — Workshop-Level Autonomous Research",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::automated-alignment-research",
+      "num": 6,
+      "slug": "automated-alignment-research",
+      "title": "Automated Alignment Research (Anthropic AAR)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::recursive-self-improvement",
+      "num": 7,
+      "slug": "recursive-self-improvement",
+      "title": "Recursive Self-Improvement — Capability vs Alignment",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::bounded-self-improvement",
+      "num": 8,
+      "slug": "bounded-self-improvement",
+      "title": "Bounded Self-Improvement Designs",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::coding-agent-landscape",
+      "num": 9,
+      "slug": "coding-agent-landscape",
+      "title": "The Autonomous Coding Agent Landscape (2026)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::claude-code-permission-modes",
+      "num": 10,
+      "slug": "claude-code-permission-modes",
+      "title": "Permission Modes for Autonomous Agents",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::browser-agents",
+      "num": 11,
+      "slug": "browser-agents",
+      "title": "Browser Agents and Long-Horizon Web Tasks",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::durable-execution",
+      "num": 12,
+      "slug": "durable-execution",
+      "title": "Long-Running Background Agents: Durable Execution",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::cost-governors",
+      "num": 13,
+      "slug": "cost-governors",
+      "title": "Action Budgets, Iteration Caps, and Cost Governors",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::kill-switches-canaries",
+      "num": 14,
+      "slug": "kill-switches-canaries",
+      "title": "Kill Switches, Circuit Breakers, and Canary Tokens",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::propose-then-commit",
+      "num": 15,
+      "slug": "propose-then-commit",
+      "title": "Human-in-the-Loop: Propose-Then-Commit",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::checkpoints-rollback",
+      "num": 16,
+      "slug": "checkpoints-rollback",
+      "title": "Checkpoints and Rollback",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::constitutional-ai",
+      "num": 17,
+      "slug": "constitutional-ai",
+      "title": "Constitutional AI and Rule Overrides",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::llama-guard",
+      "num": 18,
+      "slug": "llama-guard",
+      "title": "Llama Guard and Input/Output Classification",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::anthropic-rsp",
+      "num": 19,
+      "slug": "anthropic-rsp",
+      "title": "Anthropic Responsible Scaling Policy v3.0",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::openai-preparedness-deepmind-fsf",
+      "num": 20,
+      "slug": "openai-preparedness-deepmind-fsf",
+      "title": "OpenAI Preparedness Framework and DeepMind Frontier Safety Framework",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::metr-external-evaluation",
+      "num": 21,
+      "slug": "metr-external-evaluation",
+      "title": "METR Time Horizons and External Capability Evaluation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-15-autonomous::cais-caisi-societal-risk",
+      "num": 22,
+      "slug": "cais-caisi-societal-risk",
+      "title": "CAIS, CAISI, and Societal-Scale Risk",
+      "nQuiz": 0
+    }
+  ]
+}

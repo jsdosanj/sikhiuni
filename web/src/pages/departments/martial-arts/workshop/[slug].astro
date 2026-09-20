@@ -1,0 +1,243 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import '../../../../styles/departments.css';
+import { departments } from '../../../../lib/departments';
+import { workshops, workshopBySlug } from '../../../../data/workshops';
+
+export function getStaticPaths() {
+  return workshops.map((w) => ({ params: { slug: w.slug }, props: { w } }));
+}
+const { w } = Astro.props as { w: NonNullable<ReturnType<typeof workshopBySlug>> };
+const dept = departments.find((x) => x.id === 'martial-arts')!;
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'LearningResource',
+  name: `${w.title}, Sikhi University, Department of Martial Arts`,
+  description: w.standfirst,
+  url: `https://sikhiuni.com/departments/martial-arts/workshop/${w.slug}`,
+  isPartOf: { '@type': 'EducationalOrganization', name: `${dept.name}, Sikhi University`, url: 'https://sikhiuni.com/departments/martial-arts' },
+  learningResourceType: 'workshop reference',
+};
+---
+<Base title={`${w.title}, Department of Martial Arts`} description={w.standfirst} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page wk-page" style={`--dept:${dept.accent}`}>
+    <header class="wk-hero dept-grain">
+      <span class="wk-forge" aria-hidden="true"></span>
+      <span class="wk-water" aria-hidden="true"></span>
+      <a class="dept-back wrap" href="/departments/martial-arts">{dept.name}</a>
+      <div class="wrap wk-hero-in">
+        <p class="wk-kicker">{w.kicker}</p>
+        <h1 class="wk-h1">{w.title}</h1>
+        <p class="wk-standfirst">{w.standfirst}</p>
+        {w.intro.map((p) => <p class="wk-intro">{p}</p>)}
+        <p class="wk-src">
+          {w.source.label}, {w.source.note}
+          <a href={w.source.url} target="_blank" rel="noopener"> original &nearr;</a>
+        </p>
+      </div>
+    </header>
+
+    <section class="wrap wk-body">
+      <p class="wk-label">the workshop &middot; {w.modules.length} modules</p>
+      <div class="wk-ax" data-accordion>
+        {w.modules.map((m, i) => (
+          <details class="wk-item" id={`m-${m.id}`} open={i === 0}>
+            <summary class="wk-sum">
+              <span class="wk-n">{m.n}</span>
+              <span class="wk-sum-t">
+                <span class="wk-title">{m.title}</span>
+                <span class="wk-summary">{m.summary}</span>
+              </span>
+              <span class="wk-chev" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </summary>
+            <div class="wk-panel">
+              <div class="wk-inner">
+                {m.blocks.map((b) => (
+                  <>
+                    {b.kind === 'prose' && b.body?.map((p) => <p class="wk-p">{p}</p>)}
+
+                    {b.kind === 'list' && (
+                      <ul class="wk-list">{b.items?.map((it) => <li>{it}</li>)}</ul>
+                    )}
+
+                    {b.kind === 'steps' && (
+                      <ol class="wk-steps">
+                        {b.steps?.map((s, si) => (
+                          <li>
+                            <span class="wk-step-n">{String(si + 1).padStart(2, '0')}</span>
+                            <span class="wk-step-b">
+                              <strong>{s.label}</strong>
+                              <span>{s.body}</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+
+                    {b.kind === 'defs' && (
+                      <dl class="wk-defs">
+                        {b.defs?.map((d) => (
+                          <div><dt>{d.term}</dt><dd>{d.detail}</dd></div>
+                        ))}
+                      </dl>
+                    )}
+
+                    {b.kind === 'table' && b.table && (
+                      <figure class="wk-tablewrap">
+                        <table class="wk-table">
+                          <thead><tr>{b.table.cols.map((c) => <th>{c}</th>)}</tr></thead>
+                          <tbody>{b.table.rows.map((r) => <tr>{r.map((cell) => <td>{cell}</td>)}</tr>)}</tbody>
+                        </table>
+                        {b.table.caption && <figcaption>{b.table.caption}</figcaption>}
+                      </figure>
+                    )}
+                  </>
+                ))}
+              </div>
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <p class="wk-foot">
+        This is materials science, not doctrine, the figures are lab measurements from the sources named above.
+        Back to the <a href="/departments/martial-arts">Department of Martial Arts</a>.
+      </p>
+    </section>
+  </div>
+
+  <style>
+    .wk-page { background: rgb(var(--c-paper)); }
+
+    .wk-hero {
+      position: relative; overflow: hidden; isolation: isolate;
+      border-bottom: 1px solid rgb(var(--c-line));
+      background: radial-gradient(120% 95% at 82% -10%, #2a1408, #17110c 52%, #0c0b0a);
+      color: #efe6da;
+    }
+    .wk-forge {
+      position: absolute; right: -8%; top: -30%; width: 46vw; height: 46vw; max-width: 640px; max-height: 640px;
+      background: radial-gradient(closest-side, rgba(255,150,50,.4), rgba(230,120,30,.12) 55%, transparent 72%);
+      filter: blur(10px); animation: wk-ember 6s ease-in-out infinite alternate;
+    }
+    @keyframes wk-ember { from { opacity: .7; transform: scale(1); } to { opacity: 1; transform: scale(1.06); } }
+    .wk-water {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+      background:
+        repeating-linear-gradient(105deg, rgba(255,255,255,.55) 0 2px, transparent 2px 6px, rgba(0,0,0,.4) 6px 9px),
+        linear-gradient(90deg, #8a8f98, #d7dbe0 40%, #6b7078 60%, #b9bec7);
+      opacity: .8;
+    }
+    .wk-hero-in { position: relative; z-index: 2; padding-block: clamp(3rem, 8vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem); max-width: 68rem; }
+    .wk-kicker { font-family: var(--font-sans, system-ui); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--dept) 45%, #fff); }
+    .wk-h1 {
+      margin: 14px 0 0; font-weight: 800; letter-spacing: -0.02em; line-height: 1.02;
+      font-size: clamp(2.4rem, 6.5vw, 4.6rem); color: #f6ede1; text-wrap: balance;
+    }
+    .wk-standfirst { margin: 18px 0 0; max-width: 54ch; font-size: clamp(1rem, 1.8vw, 1.2rem); font-style: italic; line-height: 1.6; color: #e7bd8e; }
+    .wk-intro { margin: 16px 0 0; max-width: 68ch; font-size: 14.5px; line-height: 1.72; color: #cdbfb0; }
+    .wk-src { margin: 24px 0 0; max-width: 74ch; font-family: var(--font-sans, system-ui); font-size: 10.5px; line-height: 1.7; color: rgba(255,255,255,.42); }
+    .wk-src a { color: color-mix(in srgb, var(--dept) 55%, #fff); text-decoration: underline; text-underline-offset: 2px; }
+
+    .wk-body { padding-block: clamp(2.75rem, 6vw, 4rem) clamp(4rem, 10vw, 7rem); }
+    .wk-label {
+      display: block; margin-bottom: 20px;
+      font-family: var(--font-sans, system-ui); font-size: 11px; font-weight: 800;
+      letter-spacing: .16em; text-transform: uppercase; color: var(--dept-ink);
+    }
+    [data-theme="dark"] .wk-page .wk-label { color: color-mix(in srgb, var(--dept) 55%, #fff); }
+
+    /* elegantly animated collapsible accordions, sharp, metallic-edged */
+    .wk-ax { display: grid; gap: 14px; }
+    .wk-item {
+      border: 1px solid rgb(var(--c-line)); border-radius: 6px; overflow: hidden;
+      background:
+        linear-gradient(90deg, var(--dept) 0 4px, transparent 4px),
+        linear-gradient(180deg, rgb(var(--c-surface)), color-mix(in srgb, #8a9099 6%, rgb(var(--c-surface))));
+      box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 10px 26px rgb(20 22 26 / .1);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .wk-item[open] { border-color: var(--dept-45); box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 18px 44px rgb(20 22 26 / .2); }
+    .wk-sum { display: flex; align-items: flex-start; gap: 16px; padding: 22px 24px; cursor: pointer; list-style: none; user-select: none; }
+    .wk-sum::-webkit-details-marker { display: none; }
+    .wk-sum:focus-visible { outline: 2px solid var(--dept); outline-offset: -2px; }
+    .wk-n { flex: none; font-family: var(--font-sans, system-ui); font-weight: 800; font-size: 12px; color: var(--dept); padding-top: 3px; }
+    .wk-sum-t { flex: 1; min-width: 0; }
+    .wk-title { display: block; font-family: "Source Serif 4", Georgia, serif; font-weight: 800; font-size: clamp(15px, 2vw, 18px); color: rgb(var(--c-navy)); line-height: 1.3; }
+    .wk-summary { display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.55; color: rgb(var(--c-muted)); }
+    .wk-chev { flex: none; color: rgb(var(--c-muted)); transition: transform .28s var(--ease-out, cubic-bezier(.2,.7,.3,1)); }
+    .wk-item[open] .wk-chev { transform: rotate(180deg); color: var(--dept); }
+
+    .wk-panel { overflow: hidden; }
+    [data-accordion].armed .wk-panel { max-height: 0; transition: max-height .36s var(--ease-out, cubic-bezier(.2,.7,.3,1)); }
+    /* py-24 px-12 md:px-24 on the interactive panel content */
+    .wk-inner { padding: 6rem 3rem; border-top: 1px solid rgb(var(--c-line)); }
+    @media (min-width: 768px) { .wk-inner { padding: 6rem 6rem; } }
+    @media (max-width: 520px) { .wk-inner { padding: 3rem 1.4rem; } }
+
+    .wk-p { margin: 0 0 14px; max-width: 72ch; font-size: 14.5px; line-height: 1.75; color: rgb(var(--c-ink)); }
+    .wk-list { margin: 0; padding-left: 20px; display: grid; gap: 12px; max-width: 74ch; }
+    .wk-list li { font-size: 14px; line-height: 1.7; color: rgb(var(--c-ink)); }
+    .wk-list li::marker { color: var(--dept); }
+
+    .wk-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+    .wk-steps li { display: flex; gap: 16px; }
+    .wk-step-n { flex: none; font-family: var(--font-sans, system-ui); font-weight: 800; font-size: 13px; color: var(--dept); padding-top: 2px; }
+    .wk-step-b { display: block; }
+    .wk-step-b strong { display: block; font-family: "Source Serif 4", Georgia, serif; font-weight: 800; font-size: 15px; color: rgb(var(--c-navy)); }
+    .wk-step-b span { display: block; margin-top: 6px; max-width: 70ch; font-size: 14px; line-height: 1.7; color: rgb(var(--c-ink)); }
+
+    .wk-defs { margin: 0; display: grid; gap: 4px; }
+    .wk-defs > div { padding: 16px 0; border-top: 1px solid rgb(var(--c-line)); }
+    .wk-defs > div:first-child { border-top: 0; padding-top: 0; }
+    .wk-defs dt { font-family: "Source Serif 4", Georgia, serif; font-weight: 800; font-size: 14.5px; color: rgb(var(--c-navy)); }
+    .wk-defs dd { margin: 8px 0 0; max-width: 74ch; font-size: 14px; line-height: 1.72; color: rgb(var(--c-ink)); }
+
+    .wk-tablewrap { margin: 4px 0 8px; overflow-x: auto; }
+    .wk-table { border-collapse: collapse; font-family: var(--font-sans, system-ui); font-size: 13px; }
+    .wk-table th, .wk-table td { border: 1px solid rgb(var(--c-line)); padding: 10px 18px; text-align: center; color: rgb(var(--c-navy)); }
+    .wk-table th { background: rgb(var(--c-surface)); color: var(--dept); font-weight: 800; }
+    .wk-tablewrap figcaption { margin-top: 8px; font-family: var(--font-sans, system-ui); font-size: 10.5px; color: rgb(var(--c-muted)); }
+
+    .wk-foot { margin-top: 30px; padding-top: 18px; border-top: 1px solid rgb(var(--c-line)); font-size: 13px; color: rgb(var(--c-muted)); max-width: 76ch; }
+    .wk-foot a { color: var(--dept); text-decoration: underline; text-underline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wk-forge { animation: none; }
+      .wk-chev, [data-accordion].armed .wk-panel { transition: none; }
+    }
+  </style>
+
+  <script>
+    // Smooth open/close + single-open on wide screens. Falls back to native
+    // <details> if anything here fails (CSS max-height only applies once .armed).
+    (function () {
+      document.querySelectorAll('[data-accordion]').forEach((group) => {
+        const items = Array.from(group.querySelectorAll('.wk-item')) as HTMLDetailsElement[];
+        const single = () => matchMedia('(min-width: 1024px)').matches;
+        const panelOf = (el: Element) => el.querySelector('.wk-panel') as HTMLElement | null;
+        const setMax = (el: Element, px: string) => { const p = panelOf(el); if (p) p.style.maxHeight = px; };
+        group.classList.add('armed');
+        items.forEach((el) => setMax(el, el.open ? (panelOf(el)!.scrollHeight + 'px') : '0px'));
+        items.forEach((el) => {
+          const sum = el.querySelector('.wk-sum')!;
+          sum.addEventListener('click', (e) => {
+            e.preventDefault();
+            const willOpen = !el.open;
+            if (willOpen && single()) items.forEach((o) => { if (o !== el && o.open) { o.open = false; setMax(o, '0px'); } });
+            el.open = willOpen;
+            requestAnimationFrame(() => setMax(el, willOpen ? (panelOf(el)!.scrollHeight + 'px') : '0px'));
+          });
+        });
+        let t = 0;
+        addEventListener('resize', () => {
+          clearTimeout(t);
+          t = window.setTimeout(() => items.forEach((el) => { if (el.open) setMax(el, panelOf(el)!.scrollHeight + 'px'); }), 150);
+        }, { passive: true });
+      });
+    })();
+  </script>
+</Base>

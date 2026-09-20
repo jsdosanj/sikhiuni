@@ -1,66 +1,32 @@
-import { newId, sessionCookie, isAdminEmail, logEvent } from "../_lib.js";
+import { json } from "../_lib.js";
 
-// Belt-and-braces: user_mfa is also created by migrations/0001_mfa_flags.sql (which
-// additionally ALTERs sessions.mfa_ok/mfa_fail_count — those columns are NOT
-// creatable at runtime, so the migration must have run before this code is live).
-async function ensureMfaTable(env) {
-  await env.DB.prepare(
-    "CREATE TABLE IF NOT EXISTS user_mfa (user_id TEXT PRIMARY KEY, secret_enc TEXT NOT NULL, enabled_at INTEGER, created_at INTEGER NOT NULL)"
-  ).run();
-}
+// RETIRED 2026-09-06 — the consume half of magic-link sign-in. See
+// functions/api/auth/request.js's header for the full reasoning, and
+// sikhi.io's .cc/plan-auth-standardization-and-e2e-fusion.md.
+//
+// This route was the more serious of the pair: it did not merely sign in an
+// existing user, it CREATED AN ACCOUNT for any email that presented a valid
+// token — an implicit registration path with no password, no username and no
+// confirmation step. Registration is now the explicit two-step
+// /api/auth/register-start -> /api/auth/register-complete.
+//
+// Any magic token still in flight when this deploys will land here and get a
+// 410 instead of a session. That window is at most 15 minutes (the token TTL),
+// and the affected user's remedy is the ordinary password sign-in or, if they
+// never set one, forgot-password — which doubles as "set my first password".
+//
+// The `magic_tokens` table and its rows are left untouched: no destructive DDL
+// against a live database for a cleanup with no deadline.
+//
+// GET is answered with a 410 body rather than a redirect on purpose. A
+// redirect back to /login.html would look like an ordinary failed sign-in and
+// tell nobody — a human or a monitor hitting this deserves to see that the
+// endpoint is gone, not that their link was invalid.
 
-// GET /api/auth/verify?token=...  -> consumes token, creates session, redirects to dashboard
-export async function onRequestGet({ request, env }) {
-  const url = new URL(request.url);
-  const token = url.searchParams.get("token");
-  const base = env.SITE_URL || url.origin;
-  const fail = (msg) => Response.redirect(`${base}/login.html?error=${encodeURIComponent(msg)}`, 302);
-  if (!token) return fail("Missing token.");
-
-  // Consume the token ATOMICALLY: a single conditional UPDATE...RETURNING both
-  // checks (unused + unexpired) and marks it used in one statement, so two
-  // concurrent clicks on the same link (e.g. a mail-client prefetcher) can't both
-  // mint a session. RETURNING gives us the email without a separate SELECT.
-  const consumed = await env.DB.prepare(
-    "UPDATE magic_tokens SET used = 1 WHERE token = ? AND used = 0 AND expires_at > ? RETURNING email"
-  ).bind(token, Date.now()).first();
-  if (!consumed) {
-    console.warn("auth_verify_failed", "invalid_used_or_expired");
-    return fail("This sign-in link is invalid or expired.");
-  }
-  const email = consumed.email;
-  let user = await env.DB.prepare("SELECT id, role FROM users WHERE email = ?").bind(email).first();
-  const wantAdmin = isAdminEmail(env, email);
-  if (!user) {
-    const id = newId();
-    const role = wantAdmin ? "admin" : "learner";
-    await env.DB.prepare("INSERT INTO users (id, email, name, role, created_at) VALUES (?,?,?,?,?)")
-      .bind(id, email, null, role, Date.now()).run();
-    user = { id, role };
-    await logEvent(env, { id, role }, "user_created", email, role);
-  } else if (wantAdmin && user.role !== "admin") {
-    await env.DB.prepare("UPDATE users SET role='admin' WHERE id=?").bind(user.id).run();
-  } else if (!wantAdmin && user.role === "admin") {
-    // Only ADMIN_EMAILS accounts may be admin — defensively demote anyone else.
-    await env.DB.prepare("UPDATE users SET role='learner' WHERE id=?").bind(user.id).run();
-  }
-
-  const sid = newId() + newId();
-  const expires = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
-  // If MFA is enrolled (enabled_at set), the session starts unverified (mfa_ok=0)
-  // and the user is routed through /mfa before reaching the dashboard. Everyone
-  // else gets mfa_ok=1 immediately — this branch is byte-identical to the old
-  // behavior for every account that hasn't enrolled in MFA.
-  await ensureMfaTable(env);
-  const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
-  const mfaEnrolled = !!(mfaRow && mfaRow.enabled_at);
-  await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at, mfa_ok) VALUES (?,?,?,?)")
-    .bind(sid, user.id, expires, mfaEnrolled ? 0 : 1).run();
-  await logEvent(env, user, "login", email, null);
-
-  const dest = mfaEnrolled ? `${base}/mfa.html` : `${base}/dashboard.html`;
-  return new Response(null, {
-    status: 302,
-    headers: { "Location": dest, "Set-Cookie": sessionCookie(sid, 30 * 24 * 60 * 60) },
-  });
+export async function onRequestGet() {
+  return json(
+    { error: "gone", use: "password sign-in; use forgot-password if you never set one" },
+    410,
+    { "Cache-Control": "no-store" }
+  );
 }

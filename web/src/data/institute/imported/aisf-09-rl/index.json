@@ -1,0 +1,97 @@
+{
+  "track": "aisf-09-rl",
+  "phaseDir": "09-reinforcement-learning",
+  "blurb": "Agents that learn by doing. The foundation of RLHF.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-09-rl::mdps-states-actions-rewards",
+      "num": 1,
+      "slug": "mdps-states-actions-rewards",
+      "title": "MDPs, States, Actions & Rewards",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::dynamic-programming",
+      "num": 2,
+      "slug": "dynamic-programming",
+      "title": "Dynamic Programming — Policy Iteration & Value Iteration",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::monte-carlo-methods",
+      "num": 3,
+      "slug": "monte-carlo-methods",
+      "title": "Monte Carlo Methods — Learning from Complete Episodes",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::q-learning-sarsa",
+      "num": 4,
+      "slug": "q-learning-sarsa",
+      "title": "Temporal Difference — Q-Learning & SARSA",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::dqn",
+      "num": 5,
+      "slug": "dqn",
+      "title": "Deep Q-Networks (DQN)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::policy-gradients-reinforce",
+      "num": 6,
+      "slug": "policy-gradients-reinforce",
+      "title": "Policy Gradient — REINFORCE from Scratch",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::actor-critic-a2c-a3c",
+      "num": 7,
+      "slug": "actor-critic-a2c-a3c",
+      "title": "Actor-Critic — A2C and A3C",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::ppo",
+      "num": 8,
+      "slug": "ppo",
+      "title": "Proximal Policy Optimization (PPO)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::reward-modeling-rlhf",
+      "num": 9,
+      "slug": "reward-modeling-rlhf",
+      "title": "Reward Modeling & RLHF",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::multi-agent-rl",
+      "num": 10,
+      "slug": "multi-agent-rl",
+      "title": "Multi-Agent RL",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::sim-to-real-transfer",
+      "num": 11,
+      "slug": "sim-to-real-transfer",
+      "title": "Sim-to-Real Transfer",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-09-rl::rl-for-games",
+      "num": 12,
+      "slug": "rl-for-games",
+      "title": "RL for Games — AlphaZero, MuZero, and the LLM-Reasoning Era",
+      "nQuiz": 0
+    }
+  ]
+}

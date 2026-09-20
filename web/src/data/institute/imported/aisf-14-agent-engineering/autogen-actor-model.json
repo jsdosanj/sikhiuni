@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::autogen-actor-model",
+  "num": 14,
+  "slug": "autogen-actor-model",
+  "title": "The Actor Model for Agents — Async Messages and Typed Runtimes",
+  "tagline": "Agents as actors: async message exchange, event-driven handlers, fault isolation, natural concurrency. AutoGen v0.4 (Microsoft Research, Jan 2025) redesigned agent orchestration around this model; the framework is now in maintenance mode, with Microsoft Agent Framework (public preview Oct 2025) as its production successor.",
+  "type": "Learn + Build",
+  "languages": "Python (stdlib)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Describe the actor model: agents as actors, messages as the only IPC, failure isolation per actor.",
+    "Name AutoGen v0.4's three API layers — Core, AgentChat, Extensions — and what each is for.",
+    "Explain why decoupling message delivery from handling gives fault isolation and natural concurrency.",
+    "Implement a stdlib actor runtime in Python and port a two-agent code-review flow onto it."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Most agent frameworks are synchronous: one agent produces, one agent consumes, in a call stack. Failures crash the stack. Concurrency is bolted on. Distribution requires rewriting.</p>\n<p>AutoGen v0.4&#39;s answer: the actor model. Each agent is an actor with a private inbox. Messages are the only interaction. The runtime decouples delivery from handling. Failures isolate to one actor. Concurrency is native. Distribution is just different transport.</p>\n<h2>The Concept</h2>\n<h3>Actors</h3>\n<p>An actor has:</p>\n<ul>\n<li>A private state (never directly touched from outside).</li>\n<li>An inbox (message queue).</li>\n<li>A handler: <code>receive(message) -&gt; effects</code> where effects can be &quot;reply,&quot; &quot;send to other actor,&quot; &quot;spawn new actor,&quot; &quot;update state,&quot; &quot;stop self.&quot;</li>\n</ul>\n<p>Two actors cannot share memory. They can only send messages.</p>\n<h3>Three API layers</h3>\n<p>AutoGen v0.4 splits its surface into three:</p>\n<ol>\n<li><strong>Core.</strong> Low-level actor framework. <code>AgentRuntime</code>, <code>Agent</code>, <code>Message</code>, <code>Topic</code>. Async message exchange, event-driven.</li>\n<li><strong>AgentChat.</strong> Task-driven high-level API (replacement for v0.2&#39;s ConversableAgent). <code>AssistantAgent</code>, <code>UserProxyAgent</code>, <code>RoundRobinGroupChat</code>, <code>SelectorGroupChat</code>.</li>\n<li><strong>Extensions.</strong> Integrations — OpenAI, Anthropic, Azure, tools, memory.</li>\n</ol>\n<h3>Why decoupling matters</h3>\n<p>In the v0.2 model, calling <code>agent_a.chat(agent_b)</code> synchronously blocks agent_a until agent_b returns. In v0.4, <code>send(agent_b, msg)</code> puts the message in agent_b&#39;s inbox and returns. The runtime delivers later. Three consequences:</p>\n<ul>\n<li><strong>Fault isolation.</strong> Agent B crashing does not crash Agent A — the runtime catches the failure in B&#39;s handler and decides what to do (log, retry, dead-letter).</li>\n<li><strong>Natural concurrency.</strong> Many messages in flight at once; actors process their inbox concurrently.</li>\n<li><strong>Distribution-ready.</strong> Inbox + transport is the same abstraction whether the actor is in-process or on another host.</li>\n</ul>\n<h3>Topologies</h3>\n<ul>\n<li><strong>RoundRobinGroupChat.</strong> Agents take turns in a fixed rotation.</li>\n<li><strong>SelectorGroupChat.</strong> A selector agent picks who goes next based on conversation context.</li>\n<li><strong>Magentic-One.</strong> Reference multi-agent team for web browsing, code execution, file handling. Built on AgentChat.</li>\n</ul>\n<h3>Observability</h3>\n<p>OpenTelemetry support is built in. Every message emits a span; tool calls carry <code>gen_ai.*</code> attributes per the 2026 OTel GenAI semantic conventions (Lesson 23).</p>\n<h3>Status: maintenance mode</h3>\n<p>Early 2026: AutoGen v0.7.x is stable for research and prototyping. Microsoft has shifted active development to the Microsoft Agent Framework, the production successor (public preview Oct 1 2025; 1.0 GA was targeted for end of Q1 2026). AutoGen patterns port forward cleanly — the actor model is the durable idea.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>actor-mailbox</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements a stdlib actor runtime:</p>\n<ul>\n<li><code>Message</code> — typed payload with <code>sender</code>, <code>recipient</code>, <code>topic</code>, <code>body</code>.</li>\n<li><code>Actor</code> — abstract with <code>receive(message, runtime)</code>.</li>\n<li><code>Runtime</code> — event loop with a shared queue, delivery, failure isolation.</li>\n<li>A two-actor demo: <code>ReviewerAgent</code> reviews code, <code>ChecklistAgent</code> runs a checklist; they exchange messages until consensus.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The trace shows message delivery, a simulated failure in one actor that does not crash the other, and convergence on a shared verdict.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>AutoGen v0.4/v0.7</strong> (maintenance) — stable for research, prototyping, multi-agent patterns.</li>\n<li><strong>Microsoft Agent Framework</strong> — the production successor (public preview Oct 2025); same actor-model ideas in a refreshed API.</li>\n<li><strong>LangGraph swarm topology</strong> (Lesson 13) — similar pattern via shared-tool handoffs.</li>\n<li><strong>Custom actor runtime</strong> — when you need specific transport (NATS, RabbitMQ, gRPC).</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-actor-runtime.md</code> generates a minimal actor runtime plus a team template (RoundRobin or Selector) for a given multi-agent task.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a dead-letter queue: when a handler raises, park the failing message for human inspection. How often does DLQ get hit in your toy?</li>\n<li>Implement <code>SelectorGroupChat</code>: a selector actor picks who processes the next message based on conversation state.</li>\n<li>Add distributed transport: swap the in-process queue for a JSON-over-HTTP server so actors can run in separate processes.</li>\n<li>Wire an OTel span per message (or a no-op stand-in). Emit <code>gen_ai.agent.name</code>, <code>gen_ai.operation.name</code> per Lesson 23.</li>\n<li>Read AutoGen v0.4&#39;s architecture post. Port your toy to the real <code>autogen_core</code> API. What did you skip that matters in production?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Actor</td>\n<td>&quot;Agent&quot;</td>\n<td>Private state + inbox + handler; no shared memory</td>\n</tr>\n<tr>\n<td>Message</td>\n<td>&quot;Event&quot;</td>\n<td>Typed payload; the only way actors interact</td>\n</tr>\n<tr>\n<td>Inbox</td>\n<td>&quot;Mailbox&quot;</td>\n<td>Per-actor queue of pending messages</td>\n</tr>\n<tr>\n<td>Runtime</td>\n<td>&quot;Agent host&quot;</td>\n<td>Event loop that routes messages and isolates failures</td>\n</tr>\n<tr>\n<td>Topic</td>\n<td>&quot;Channel&quot;</td>\n<td>Named publish-subscribe route between actors</td>\n</tr>\n<tr>\n<td>Fault isolation</td>\n<td>&quot;Let it crash&quot;</td>\n<td>One actor failing does not crash others</td>\n</tr>\n<tr>\n<td>RoundRobinGroupChat</td>\n<td>&quot;Fixed-rotation team&quot;</td>\n<td>Agents take turns in order</td>\n</tr>\n<tr>\n<td>SelectorGroupChat</td>\n<td>&quot;Context-routed team&quot;</td>\n<td>Selector picks who goes next</td>\n</tr>\n<tr>\n<td>Magentic-One</td>\n<td>&quot;Reference team&quot;</td>\n<td>Multi-agent squad for web + code + files</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/\" target=\"_blank\" rel=\"noopener\">AutoGen v0.4, Microsoft Research</a> — the redesign post</li>\n<li><a href=\"https://docs.langchain.com/oss/python/langgraph/overview\" target=\"_blank\" rel=\"noopener\">LangGraph overview</a> — graph-shaped alternative</li>\n<li><a href=\"https://opentelemetry.io/docs/specs/semconv/gen-ai/\" target=\"_blank\" rel=\"noopener\">OpenTelemetry GenAI semantic conventions</a> — spans AutoGen emits by default</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"A stdlib actor runtime modeled on AutoGen v0.4 Core.\n\nActors have private state and an inbox. Messages are the only interaction.\nFailures in one actor are caught by the runtime and routed to a dead-letter\nqueue; other actors keep running.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections import deque\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass Message:\n    sender: str\n    recipient: str\n    topic: str\n    body: Any\n    mid: int = 0\n\n\nclass Actor:\n    def __init__(self, name: str) -> None:\n        self.name = name\n\n    def receive(self, message: Message, runtime: \"Runtime\") -> None:\n        raise NotImplementedError\n\n\n@dataclass\nclass Runtime:\n    actors: dict[str, Actor] = field(default_factory=dict)\n    queue: deque[Message] = field(default_factory=deque)\n    dead_letters: list[tuple[Message, str]] = field(default_factory=list)\n    counter: int = 0\n    trace: list[str] = field(default_factory=list)\n    max_messages: int = 100\n\n    def register(self, actor: Actor) -> None:\n        self.actors[actor.name] = actor\n\n    def send(self, sender: str, recipient: str, topic: str, body: Any) -> None:\n        self.counter += 1\n        msg = Message(sender=sender, recipient=recipient,\n                      topic=topic, body=body, mid=self.counter)\n        self.queue.append(msg)\n        self.trace.append(\n            f\"[send m{msg.mid:03d}] {sender} -> {recipient} topic={topic} body={body}\"\n        )\n\n    def run_until_idle(self) -> None:\n        processed = 0\n        while self.queue and processed < self.max_messages:\n            msg = self.queue.popleft()\n            actor = self.actors.get(msg.recipient)\n            if actor is None:\n                self.dead_letters.append((msg, f\"no actor {msg.recipient!r}\"))\n                self.trace.append(f\"[DLQ m{msg.mid:03d}] no actor {msg.recipient!r}\")\n                continue\n            try:\n                actor.receive(msg, self)\n                self.trace.append(\n                    f\"[recv m{msg.mid:03d}] {actor.name} handled topic={msg.topic}\"\n                )\n            except Exception as e:\n                self.dead_letters.append((msg, f\"{type(e).__name__}: {e}\"))\n                self.trace.append(\n                    f\"[FAIL m{msg.mid:03d}] {actor.name} raised \"\n                    f\"{type(e).__name__}: {e}  (others keep running)\"\n                )\n            processed += 1\n\n\nclass ReviewerAgent(Actor):\n    def __init__(self, name: str) -> None:\n        super().__init__(name)\n        self.verdicts: list[tuple[str, bool]] = []\n\n    def receive(self, message: Message, runtime: Runtime) -> None:\n        if message.topic == \"review\":\n            code = str(message.body)\n            issues = []\n            if \"eval(\" in code:\n                issues.append(\"uses eval\")\n            if \"except:\" in code:\n                issues.append(\"bare except\")\n            ok = len(issues) == 0\n            self.verdicts.append((code, ok))\n            runtime.send(\n                sender=self.name,\n                recipient=message.sender,\n                topic=\"review_result\",\n                body={\"ok\": ok, \"issues\": issues},\n            )\n        elif message.topic == \"crash_me\":\n            raise RuntimeError(\"simulated handler failure\")\n\n\nclass ChecklistAgent(Actor):\n    def __init__(self, name: str, partner: str) -> None:\n        super().__init__(name)\n        self.partner = partner\n        self.results: list[dict[str, Any]] = []\n        self.consensus: bool | None = None\n\n    def receive(self, message: Message, runtime: Runtime) -> None:\n        if message.topic == \"start\":\n            for snippet in message.body:\n                runtime.send(\n                    sender=self.name, recipient=self.partner,\n                    topic=\"review\", body=snippet,\n                )\n        elif message.topic == \"review_result\":\n            self.results.append(dict(message.body))\n            if all(r[\"ok\"] for r in self.results):\n                self.consensus = True\n            if len(self.results) == 3:\n                self.consensus = all(r[\"ok\"] for r in self.results)\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"AUTOGEN V0.4 ACTOR RUNTIME (STDLIB) — Phase 14, Lesson 14\")\n    print(\"=\" * 70)\n\n    runtime = Runtime()\n    reviewer = ReviewerAgent(\"reviewer\")\n    checklist = ChecklistAgent(\"checklist\", partner=\"reviewer\")\n    runtime.register(reviewer)\n    runtime.register(checklist)\n\n    runtime.send(\n        sender=\"__user__\",\n        recipient=\"checklist\",\n        topic=\"start\",\n        body=[\n            \"def add(a, b): return a + b\",\n            \"def hazard(): eval('1+1')\",\n            \"def silent(): \\n    try:\\n        f()\\n    except:\\n        pass\",\n        ],\n    )\n\n    runtime.send(\n        sender=\"__user__\",\n        recipient=\"reviewer\",\n        topic=\"crash_me\",\n        body={},\n    )\n\n    runtime.run_until_idle()\n\n    print(\"\\nmessage trace\")\n    for line in runtime.trace:\n        print(f\"  {line}\")\n\n    print(f\"\\nchecklist consensus: {checklist.consensus}\")\n    print(f\"dead-letter queue:   {len(runtime.dead_letters)} message(s)\")\n    for msg, reason in runtime.dead_letters:\n        print(f\"  DLQ m{msg.mid:03d} ({reason}) \"\n              f\"{msg.sender} -> {msg.recipient} topic={msg.topic}\")\n\n    print()\n    print(\"property: reviewer's crash on 'crash_me' did not stop\")\n    print(\"the 'review' messages from being processed. fault isolation.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the only legal way actors interact in AutoGen v0.4?",
+      "options": [
+        "Direct access to a shared dict",
+        "Mutating each other's prompts",
+        "Shared SQL transactions",
+        "Asynchronous messages exchanged through inboxes; no shared memory"
+      ],
+      "answer": 3,
+      "explanation": "Actors have private state and an inbox; messages are the only interaction."
+    },
+    {
+      "q": "What are the three API layers of AutoGen v0.4?",
+      "options": [
+        "Core, AgentChat, Extensions",
+        "Frontend, Backend, Database",
+        "Tools, Models, Memory",
+        "Plan, Act, Reflect"
+      ],
+      "answer": 0,
+      "explanation": "Core is the low-level actor framework, AgentChat is the task-driven high-level API, Extensions are integrations."
+    },
+    {
+      "q": "Why does decoupling delivery from handling give fault isolation?",
+      "options": [
+        "The runtime catches handler failures in B without crashing A; A's send() returned immediately and never blocked",
+        "Each actor runs on a separate machine",
+        "Handlers are pure functions",
+        "The runtime restarts the OS on failure"
+      ],
+      "answer": 0,
+      "explanation": "send() puts the message in the recipient's inbox and returns; a handler crash is local to that actor."
+    },
+    {
+      "q": "Which AgentChat topology rotates agents in a fixed order?",
+      "options": [
+        "SelectorGroupChat",
+        "Magentic-One",
+        "RoundRobinGroupChat",
+        "Supervisor"
+      ],
+      "answer": 2,
+      "explanation": "RoundRobinGroupChat is fixed rotation; SelectorGroupChat uses a selector to pick next."
+    },
+    {
+      "q": "What is Magentic-One in this lesson?",
+      "options": [
+        "A reference multi-agent team for web browsing, code execution, and file handling built on AgentChat",
+        "An OTel exporter",
+        "A new LLM model",
+        "A serialization format"
+      ],
+      "answer": 0,
+      "explanation": "Magentic-One is Microsoft's reference team that demonstrates the AgentChat API."
+    },
+    {
+      "q": "What is the lesson's stated status of AutoGen v0.4 in early 2026?",
+      "options": [
+        "Deprecated and removed",
+        "Replaced by LangGraph",
+        "Just announced",
+        "Stable but in maintenance mode; Microsoft Agent Framework is the forward path"
+      ],
+      "answer": 3,
+      "explanation": "AutoGen v0.7.x is stable for research; active development has shifted to Microsoft Agent Framework."
+    },
+    {
+      "q": "Which observability standard does AutoGen v0.4 emit by default?",
+      "options": [
+        "Datadog APM",
+        "Prometheus metrics only",
+        "OpenTelemetry spans with gen_ai.* attributes per the OTel GenAI semantic conventions",
+        "StatsD"
+      ],
+      "answer": 2,
+      "explanation": "Every message emits a span; tool calls carry gen_ai.* attributes per OTel GenAI conventions."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/14-autogen-actor-model"
+  }
+}

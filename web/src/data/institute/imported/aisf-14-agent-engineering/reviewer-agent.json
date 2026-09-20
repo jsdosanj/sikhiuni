@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::reviewer-agent",
+  "num": 39,
+  "slug": "reviewer-agent",
+  "title": "Reviewer Agent: Separate Builder from Marker",
+  "tagline": "The agent that wrote the code cannot grade it. A reviewer is a second loop with a different system prompt, a different goal, and read-only access to everything the builder produced. The gap between builder and reviewer is where most reliability lives.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~55 minutes",
+  "objectives": [
+    "State why the same agent cannot reliably review its own work.",
+    "Build a reviewer agent loop that consumes builder artifacts and emits a structured review report.",
+    "Author a reviewer rubric that grades specific dimensions, not vibes.",
+    "Wire the reviewer into the workbench so the human review step starts from a real artifact."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>You ask the agent to fix a bug. It edits four files, runs the tests, and reports done. The verification gate (Phase 14 · 38) confirms acceptance ran and scope held. The gate says <code>passed: true</code>. You merge. Two days later you find that the fix solved the wrong half of the bug.</p>\n<p>Acceptance is necessary, not sufficient. The reviewer asks the questions acceptance cannot ask: did this solve the right problem? Did it expand scope without flagging it? Did it document assumptions that should have been questioned? Did it leave the workbench in a state the next session can pick up?</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">flowchart LR\n  Builder[Builder Agent] --&gt; Artifacts[diff + state + feedback + verdict]\n  Artifacts --&gt; Reviewer[Reviewer Agent]\n  Reviewer --&gt; Rubric[reviewer_checklist.md]\n  Reviewer --&gt; Report[review_report.json]\n  Report --&gt; Human[Human Sign-Off]</pre>\n<h3>Reviewer rubric</h3>\n<p>Five dimensions, each scored 0 to 2.</p>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Question</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Problem fit</td>\n<td>Did the change solve the task as stated, not a nearby task?</td>\n</tr>\n<tr>\n<td>Scope discipline</td>\n<td>Were edits confined to the contract or was the contract grown deliberately?</td>\n</tr>\n<tr>\n<td>Assumptions</td>\n<td>Are all hidden assumptions written down somewhere reviewable?</td>\n</tr>\n<tr>\n<td>Verification quality</td>\n<td>Does the acceptance command actually prove the goal, or did it prove a weaker version?</td>\n</tr>\n<tr>\n<td>Handoff readiness</td>\n<td>Could the next session pick up cleanly from the current state?</td>\n</tr>\n</tbody></table>\n<p>Total out of 10. A run below 7 is a soft fail; a run below 5 is a hard fail.</p>\n<h3>The reviewer is a separate role, not a separate model</h3>\n<p>You can run the reviewer with the same model as the builder. The discipline is the role separation: different system prompt, different inputs, no write access to the diff. The change in posture is the change in signal.</p>\n<h3>The reviewer cannot edit the diff</h3>\n<p>The reviewer reads the diff, the state, the feedback, the verdict. It writes a report. It does not patch the diff. If the report says &quot;fix this,&quot; the next builder turn does the fix; the reviewer goes back to reviewing. Mixing roles defeats the gap.</p>\n<h3>Reviewer rubric versus verification gate</h3>\n<p>The gate (Phase 14 · 38) checks deterministic facts: did acceptance run, did rules pass, did scope hold. The reviewer makes qualitative judgments: was this the right work, is it documented, is the handoff usable. Both are required.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-builder-marker</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements:</p>\n<ul>\n<li>A <code>ReviewerInputs</code> dataclass bundling the artifacts the reviewer reads.</li>\n<li>A rubric scorer with one function per dimension. Each function is deterministic and stub-grade for the lesson; real implementations would call an LLM.</li>\n<li>A <code>review_report.json</code> writer with the five scores, the total, and a verdict (<code>pass</code>, <code>soft_fail</code>, <code>hard_fail</code>).</li>\n<li>Two demo cases: a clean change and a &quot;right tests, wrong problem&quot; change.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: two review reports written to disk and a console table of dimensional scores.</p>\n<h2>Production patterns in the wild</h2>\n<p>The receipts: Cloudflare&#39;s April 2026 AI Code Review system ran 131,246 review runs across 48,095 merge requests in 5,169 repos in 30 days. Median review completed in 3 minutes 39 seconds. Up to seven specialist reviewers (security, performance, code quality, docs, release management, compliance, Engineering Codex) ran in parallel under a Review Coordinator that deduplicated findings and judged severity. Top-tier model reserved exclusively for the coordinator; specialists ran on cheaper tiers.</p>\n<p>Four patterns make this work at scale.</p>\n<p><strong>Specialist pool, not one big reviewer.</strong> One reviewer with a 5-dimension rubric works for solo repos. Once the codebase has security-critical, performance-critical, and docs surfaces, split into specialists with smaller prompts. The coordinator does deduplication; the specialists never run the full rubric. Model-tier separation falls out: cheap specialists, expensive coordinator.</p>\n<p><strong>Bias mitigation as design requirement, not optimization.</strong> LLM judges show four reliable biases (Adnan Masood, April 2026): position bias (GPT-4 <del>40% inconsistent on (A,B) vs (B,A) ordering), verbosity bias (</del>15% score inflation toward longer outputs), self-preference (judges prefer outputs from the same model family), authority (judges over-rate references to known authors). Mitigations: evaluate both orderings and only count consistent wins; use 1-4 scales that explicitly reward conciseness; rotate judges across model families; strip author names before scoring.</p>\n<p><strong>Calibration set, not vibes.</strong> A 10-20 task historical set with known correct verdicts. Run the reviewer over it on every prompt change. If agreement with the historical record falls below 80%, the rubric needs revision before the reviewer ships. This is what every team eventually rediscovers; better to start with it.</p>\n<p><strong>Hybrid norm with the gate.</strong> Verification gate (Phase 14 · 38) handles the deterministic checks (did acceptance run, did tests pass, did scope hold). Reviewer handles the semantic checks (was this the right work, are assumptions documented, is the handoff usable). Anthropic&#39;s 2026 guidance is explicit on this split: don&#39;t ask the reviewer to redo what the gate already proves.</p>\n<h2>Use It</h2>\n<p>Production patterns:</p>\n<ul>\n<li><strong>Claude Code subagents.</strong> A reviewer subagent runs after the builder closes a task. It posts a comment on the PR with the rubric scores.</li>\n<li><strong>OpenAI Agents SDK handoffs.</strong> Builder hands off to Reviewer on task completion. Reviewer can hand back with a list of findings or up to a human.</li>\n<li><strong>Two-model pairing.</strong> Builder runs on a faster cheaper model. Reviewer runs on a stronger model with smaller context, focused on judgment.</li>\n</ul>\n<p>The reviewer is the second pair of eyes the workbench grows when humans cannot do every review themselves.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-reviewer-agent.md</code> generates a project-specific reviewer rubric, a reviewer agent stub wired to the builder&#39;s artifacts, and an integration with the verification gate so human review starts from a written report instead of a blank page.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a sixth dimension specific to your product domain. Defend why it is not absorbed by the existing five.</li>\n<li>Run the reviewer with two different system prompts (terse, verbose). Which produces a report a human is more likely to read?</li>\n<li>Add a <code>confidence</code> field per dimension. Refuse to ship the report when confidence in the lowest dimension is below 0.6.</li>\n<li>Build a calibration set: 10 historical task close-outs with known correct verdicts. Run the reviewer over them. Where does it disagree with the historical record?</li>\n<li>Add a &quot;request more evidence&quot; affordance: the reviewer can ask the builder for a specific test run before scoring. What is the right back-off so this does not loop?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Reviewer rubric</td>\n<td>&quot;Checklist&quot;</td>\n<td>Five-dimension 0-2 scoring with a written question per dimension</td>\n</tr>\n<tr>\n<td>Soft fail</td>\n<td>&quot;Needs revisions&quot;</td>\n<td>Total below 7; builder gets findings to address</td>\n</tr>\n<tr>\n<td>Hard fail</td>\n<td>&quot;Reject&quot;</td>\n<td>Total below 5 or any dimension at 0; halt and surface to human</td>\n</tr>\n<tr>\n<td>Role separation</td>\n<td>&quot;Different prompt&quot;</td>\n<td>Same model can be both roles; the discipline is inputs and posture</td>\n</tr>\n<tr>\n<td>Confidence floor</td>\n<td>&quot;Don&#39;t ship low-signal reports&quot;</td>\n<td>Refuse to emit a verdict when the rubric is uncertain</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://openai.github.io/openai-agents-python/handoffs/\" target=\"_blank\" rel=\"noopener\">OpenAI Agents SDK handoffs</a></li>\n<li><a href=\"https://code.claude.com/docs/en/sub-agents\" target=\"_blank\" rel=\"noopener\">Anthropic Claude Code subagents</a></li>\n<li><a href=\"https://blog.cloudflare.com/ai-code-review/\" target=\"_blank\" rel=\"noopener\">Cloudflare, Orchestrating AI Code Review at Scale</a> — 7-specialist + coordinator architecture, 131k runs / 30 days</li>\n<li><a href=\"https://openreview.net/forum?id=DeVm3YUnpj\" target=\"_blank\" rel=\"noopener\">Agent-as-a-Judge: Evaluating Agents with Agents (OpenReview / ICLR)</a> — DevAI benchmark, 366 hierarchical solution requirements</li>\n<li><a href=\"https://medium.com/@adnanmasood/rubric-based-evals-llm-as-a-judge-methodologies-and-empirical-validation-in-domain-context-71936b989e80\" target=\"_blank\" rel=\"noopener\">Adnan Masood, Rubric-Based Evaluations and LLM-as-a-Judge: Methodologies, Biases, Empirical Validation</a> — the 4 biases and mitigations</li>\n<li><a href=\"https://mlflow.org/llm-as-a-judge\" target=\"_blank\" rel=\"noopener\">MLflow, LLM-as-a-Judge Evaluation</a> — production tooling for separated builder/evaluator</li>\n<li><a href=\"https://www.langchain.com/articles/llm-as-a-judge\" target=\"_blank\" rel=\"noopener\">LangChain, How to Calibrate LLM-as-a-Judge with Human Corrections</a> — calibration-set workflow</li>\n<li><a href=\"https://www.evidentlyai.com/llm-guide/llm-as-a-judge\" target=\"_blank\" rel=\"noopener\">Evidently AI, LLM-as-a-judge: a complete guide</a></li>\n<li><a href=\"https://arize.com/llm-as-a-judge/\" target=\"_blank\" rel=\"noopener\">Arize, LLM as a Judge — Primer and Pre-Built Evaluators</a></li>\n<li>Phase 14 · 05 — Self-Refine and CRITIC (single-agent self-review baseline)</li>\n<li>Phase 14 · 30 — Eval-driven agent development (calibration set generator)</li>\n<li>Phase 14 · 38 — the verification gate the reviewer reads</li>\n<li>Phase 14 · 40 — the handoff packet the reviewer report feeds</li>\n</ul>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Reviewer agent stub with a five-dimension rubric.\n\nConsumes builder artifacts (diff summary, state, feedback, verification verdict)\nand emits review_report.json with per-dimension scores and a final verdict.\n\nIn production each dimension scorer calls an LLM. Here we keep them\ndeterministic for the lesson — the structure is what travels.\n\nRun: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nfrom dataclasses import asdict, dataclass, field\nfrom pathlib import Path\n\nHERE = Path(__file__).parent\n\n\n@dataclass\nclass ReviewerInputs:\n    task_id: str\n    goal: str\n    diff_summary: dict[str, list[str]]\n    state: dict[str, object]\n    feedback: list[dict[str, object]]\n    verdict: dict[str, object]\n\n\n@dataclass\nclass DimensionScore:\n    name: str\n    score: int\n    note: str\n\n\n@dataclass\nclass ReviewReport:\n    task_id: str\n    total: int\n    verdict: str\n    dimensions: list[DimensionScore] = field(default_factory=list)\n\n\ndef score_problem_fit(inputs: ReviewerInputs) -> DimensionScore:\n    files = inputs.diff_summary.get(\"touched\", [])\n    goal = inputs.goal.lower()\n    keywords = [w for w in goal.split() if len(w) > 4]\n    hits = sum(any(k in f.lower() for f in files) for k in keywords)\n    score = min(2, hits)\n    return DimensionScore(\"problem_fit\", score, f\"keyword hits across touched files: {hits}\")\n\n\ndef score_scope_discipline(inputs: ReviewerInputs) -> DimensionScore:\n    off = inputs.verdict.get(\"findings\", [])\n    block_scope = [f for f in off if f.get(\"code\") == \"scope.forbidden\"]\n    if block_scope:\n        return DimensionScore(\"scope_discipline\", 0, \"forbidden writes present\")\n    warn_scope = [f for f in off if f.get(\"code\") == \"scope.off_scope\"]\n    return DimensionScore(\"scope_discipline\", 1 if warn_scope else 2, f\"off-scope warnings: {len(warn_scope)}\")\n\n\ndef score_assumptions(inputs: ReviewerInputs) -> DimensionScore:\n    assumptions = inputs.state.get(\"assumptions\") or []\n    if not assumptions:\n        return DimensionScore(\"assumptions\", 1, \"no assumptions recorded; either work was trivial or undocumented\")\n    return DimensionScore(\"assumptions\", 2, f\"{len(assumptions)} assumptions recorded\")\n\n\ndef score_verification(inputs: ReviewerInputs) -> DimensionScore:\n    exits = [rec.get(\"exit_code\") for rec in inputs.feedback]\n    if any(code is None for code in exits):\n        return DimensionScore(\"verification_quality\", 0, \"feedback log has missing exit codes\")\n    if all(code == 0 for code in exits) and exits:\n        return DimensionScore(\"verification_quality\", 2, \"all feedback exit zero\")\n    return DimensionScore(\"verification_quality\", 1, \"mixed exit codes in feedback\")\n\n\ndef score_handoff(inputs: ReviewerInputs) -> DimensionScore:\n    if inputs.state.get(\"active_task_id\"):\n        return DimensionScore(\"handoff_readiness\", 1, \"active task not closed in state\")\n    if inputs.state.get(\"next_action\"):\n        return DimensionScore(\"handoff_readiness\", 2, \"next_action set, task closed\")\n    return DimensionScore(\"handoff_readiness\", 0, \"no next_action recorded\")\n\n\nSCORERS = [score_problem_fit, score_scope_discipline, score_assumptions, score_verification, score_handoff]\n\n\ndef review(inputs: ReviewerInputs) -> ReviewReport:\n    dims = [fn(inputs) for fn in SCORERS]\n    total = sum(d.score for d in dims)\n    has_zero = any(d.score == 0 for d in dims)\n    if has_zero or total < 5:\n        verdict = \"hard_fail\"\n    elif total >= 7:\n        verdict = \"pass\"\n    else:\n        verdict = \"soft_fail\"\n    return ReviewReport(task_id=inputs.task_id, total=total, verdict=verdict, dimensions=dims)\n\n\ndef main() -> None:\n    clean = ReviewerInputs(\n        task_id=\"T-001\",\n        goal=\"add input validation to signup\",\n        diff_summary={\"touched\": [\"app/signup.py\", \"tests/test_signup.py\"]},\n        state={\n            \"active_task_id\": None,\n            \"assumptions\": [\"users sign up with email + password only\"],\n            \"next_action\": \"pick next task from board\",\n        },\n        feedback=[{\"command\": \"pytest\", \"exit_code\": 0}],\n        verdict={\"passed\": True, \"findings\": []},\n    )\n    wrong = ReviewerInputs(\n        task_id=\"T-002\",\n        goal=\"add input validation to signup\",\n        diff_summary={\"touched\": [\"docs/api.md\"]},\n        state={\"active_task_id\": \"T-002\", \"assumptions\": [], \"next_action\": \"\"},\n        feedback=[{\"command\": \"pytest\", \"exit_code\": 0}],\n        verdict={\"passed\": True, \"findings\": [{\"code\": \"scope.off_scope\", \"severity\": \"warn\"}]},\n    )\n\n    for case in (clean, wrong):\n        report = review(case)\n        out = HERE / f\"review_report_{case.task_id}.json\"\n        out.write_text(\n            json.dumps(\n                {\"task_id\": report.task_id, \"total\": report.total, \"verdict\": report.verdict, \"dimensions\": [asdict(d) for d in report.dimensions]},\n                indent=2,\n            )\n            + \"\\n\"\n        )\n        print(f\"task {report.task_id}: total={report.total}/10 verdict={report.verdict}\")\n        for d in report.dimensions:\n            print(f\"  {d.name:22} {d.score}  {d.note}\")\n        print()\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Why cannot the builder reliably grade its own work?",
+      "options": [
+        "It runs out of tokens",
+        "The model rejects self-grading",
+        "Acceptance is necessary but not sufficient; problem-fit, scope discipline, documented assumptions, and handoff readiness need a different role with different inputs",
+        "It loses authentication"
+      ],
+      "answer": 2,
+      "explanation": "The gap between builder and reviewer is where reliability lives; acceptance only proves a weaker version."
+    },
+    {
+      "q": "Which is NOT one of the five rubric dimensions?",
+      "options": [
+        "Inference latency",
+        "Problem fit",
+        "Scope discipline",
+        "Verification quality"
+      ],
+      "answer": 0,
+      "explanation": "The five are problem fit, scope discipline, assumptions, verification quality, handoff readiness."
+    },
+    {
+      "q": "What does role separation require?",
+      "options": [
+        "A different system prompt and different inputs; the same model can play both roles if posture changes and the reviewer has no write access to the diff",
+        "A different model",
+        "A new account",
+        "Different physical hardware"
+      ],
+      "answer": 0,
+      "explanation": "Discipline is in posture and inputs, not in the model identity."
+    },
+    {
+      "q": "What does Cloudflare's 2026 review architecture look like?",
+      "options": [
+        "Round-robin two reviewers",
+        "Up to seven specialist reviewers in parallel under a Review Coordinator that deduplicates findings; top-tier model only for the coordinator, cheaper tiers for specialists",
+        "One big reviewer",
+        "Single sequential LLM"
+      ],
+      "answer": 1,
+      "explanation": "Cloudflare ran 131,246 review runs in 30 days using specialist + coordinator architecture."
+    },
+    {
+      "q": "Which of these is NOT one of the four LLM-judge biases the lesson lists?",
+      "options": [
+        "Vector locality",
+        "Verbosity bias (longer outputs score higher)",
+        "Self-preference (same model family)",
+        "Position bias (A,B vs B,A ordering inconsistency)"
+      ],
+      "answer": 0,
+      "explanation": "The four are position, verbosity, self-preference, authority; vector locality is not one of them."
+    },
+    {
+      "q": "What is a calibration set?",
+      "options": [
+        "A new training corpus",
+        "10-20 historical task close-outs with known correct verdicts; rerun on every prompt change; if reviewer agreement falls below 80%, fix the rubric before shipping",
+        "An A/B test fixture",
+        "A vector index"
+      ],
+      "answer": 1,
+      "explanation": "Calibration sets keep the reviewer honest; if agreement drifts you fix the rubric, not the data."
+    },
+    {
+      "q": "Where does the reviewer's report integrate with the rest of the workbench?",
+      "options": [
+        "It replaces verification",
+        "It only goes to the manager",
+        "It bundles into the handoff packet (Lesson 40); human review starts from the report, not from a blank page",
+        "It overrides the gate"
+      ],
+      "answer": 2,
+      "explanation": "The review report feeds the handoff so the next session and the human reviewer start from a written verdict."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/39-reviewer-agent"
+  }
+}

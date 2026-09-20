@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::coreference-resolution",
+  "num": 24,
+  "slug": "coreference-resolution",
+  "title": "Coreference Resolution",
+  "tagline": "\"She called him. He did not answer. The doctor was at lunch.\" Three references to two people and nobody is named. Coreference resolution figures out who is who.",
+  "type": "Learn",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>Extract every mention of Apple Inc. from a 300-word article. Easy when the article says &quot;Apple.&quot; Hard when it says &quot;the company,&quot; &quot;they,&quot; &quot;Cupertino&#39;s technology giant,&quot; or &quot;Jobs&#39;s firm.&quot; Without resolving these mentions to the same entity, your NER pipeline misses 60-80% of the mentions.</p>\n<p>Coreference resolution links every expression that refers to the same real-world entity into one cluster. It is the glue between surface-level NLP (NER, parsing) and downstream semantics (IE, QA, summarization, KG).</p>\n<p>Why it matters in 2026:</p>\n<ul>\n<li>Summarization: &quot;The CEO announced...&quot; vs &quot;Tim Cook announced...&quot; — the summary should name the CEO.</li>\n<li>Question answering: &quot;Who did she call?&quot; requires resolving &quot;she.&quot;</li>\n<li>Information extraction: a knowledge graph with &quot;PER1 founded Apple&quot; and &quot;Jobs founded Apple&quot; as separate entries is wrong.</li>\n<li>Multi-document IE: merging mentions across articles about the same event is cross-document coreference.</li>\n</ul>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/coref.svg\" alt=\"Coreference clustering: mentions → entities\" loading=\"lazy\"><figcaption>Coreference clustering: mentions → entities</figcaption></figure>\n<p><strong>The task.</strong> Input: a document. Output: a clustering of mentions (spans) where each cluster refers to one entity.</p>\n<p><strong>Mention types.</strong></p>\n<ul>\n<li><strong>Named entity.</strong> &quot;Tim Cook&quot;</li>\n<li><strong>Nominal.</strong> &quot;the CEO&quot;, &quot;the company&quot;</li>\n<li><strong>Pronominal.</strong> &quot;he&quot;, &quot;she&quot;, &quot;they&quot;, &quot;it&quot;</li>\n<li><strong>Appositive.</strong> &quot;Tim Cook, Apple&#39;s CEO,&quot;</li>\n</ul>\n<p><strong>Architectures.</strong></p>\n<ol>\n<li><strong>Rule-based (Hobbs, 1978).</strong> Syntactic-tree-based pronoun resolution using grammar rules. Good baseline. Surprisingly hard to beat on pronouns.</li>\n<li><strong>Mention-pair classifier.</strong> For every pair of mentions (m_i, m_j), predict whether they corefer. Cluster by transitive closure. Standard pre-2016.</li>\n<li><strong>Mention-ranking.</strong> For each mention, rank candidate antecedents (including &quot;no antecedent&quot;). Pick the top.</li>\n<li><strong>Span-based end-to-end (Lee et al., 2017).</strong> Transformer encoder. Enumerate all candidate spans up to a length cap. Predict mention scores. Predict antecedent-probability for each span. Cluster greedily. The modern default.</li>\n<li><strong>Generative (2024+).</strong> Prompt an LLM: &quot;List every pronoun in this text and its antecedent.&quot; Works well on easy cases, struggles on long documents and rare referents.</li>\n</ol>\n<p><strong>The evaluation metrics.</strong> Five standard metrics (MUC, B³, CEAF, BLANC, LEA) because no single metric captures clustering quality. Report the average of the first three as CoNLL F1. State-of-the-art in 2026 on CoNLL-2012: ~83 F1.</p>\n<p><strong>Known hard cases.</strong></p>\n<ul>\n<li>Definite descriptions referring to entities introduced pages earlier.</li>\n<li>Bridging anaphora (&quot;the wheels&quot; → a previously mentioned car).</li>\n<li>Zero anaphora in languages like Chinese and Japanese.</li>\n<li>Cataphora (pronoun before referent): &quot;When <strong>she</strong> walked in, Mary smiled.&quot;</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>coref-links</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: pretrained neural coreference (AllenNLP / spaCy-experimental)</h3>\n<pre><code class=\"language-python\">import spacy\nnlp = spacy.load(&quot;en_coreference_web_trf&quot;)   # experimental model\ndoc = nlp(&quot;Apple announced new products. The company said they would ship soon.&quot;)\nfor cluster in doc._.coref_clusters:\n    print(cluster, &quot;-&gt;&quot;, [m.text for m in cluster])\n</code></pre>\n<p>On a longer document, you get something like:</p>\n<ul>\n<li>Cluster 1: [Apple, The company, they]</li>\n<li>Cluster 2: [new products]</li>\n</ul>\n<h3>Step 2: rule-based pronoun resolver (teaching)</h3>\n<p>See <code>code/main.py</code> for a stdlib-only implementation:</p>\n<ol>\n<li>Extract mentions: named entities (capitalized spans), pronouns (dict lookup), definite descriptions (&quot;the X&quot;).</li>\n<li>For each pronoun, look at the previous K mentions and score them by:<ul>\n<li>gender/number agreement (heuristic)</li>\n<li>recency (closer wins)</li>\n<li>syntactic role (subjects preferred)</li>\n</ul>\n</li>\n<li>Link the highest-scoring antecedent.</li>\n</ol>\n<p>Not competitive with neural models. But it shows the search space and the decisions an end-to-end model must make.</p>\n<h3>Step 3: using LLMs for coreference</h3>\n<pre><code class=\"language-python\">prompt = f&quot;&quot;&quot;Text: {text}\n\nList every pronoun and noun phrase that refers to a person or company.\nCluster them by what they refer to. Output JSON:\n[{{&quot;entity&quot;: &quot;Apple&quot;, &quot;mentions&quot;: [&quot;Apple&quot;, &quot;the company&quot;, &quot;it&quot;]}}, ...]\n&quot;&quot;&quot;\n</code></pre>\n<p>Two failure modes to watch. First, LLMs over-merge (&quot;him&quot; and &quot;her&quot; referring to two distinct people). Second, LLMs silently drop mentions in long documents. Always verify with span-offset checks.</p>\n<h3>Step 4: evaluation</h3>\n<p>The standard conll-2012 script computes MUC, B³, CEAF-φ4 and reports the average. For an in-house eval, start with span-level precision and recall on your annotated test set, then add mention-linking F1.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>Singleton explosion.</strong> Some systems report every mention as its own cluster. B³ is lenient. MUC punishes this. Always check all three metrics.</li>\n<li><strong>Pronouns in long context.</strong> Performance drops ~15 F1 on documents over 2,000 tokens. Chunk carefully.</li>\n<li><strong>Gender assumptions.</strong> Hard-coded gender rules break on non-binary referents, organizations, animals. Use learned models or neutral scoring.</li>\n<li><strong>LLM drift on long docs.</strong> A single API call cannot reliably cluster mentions across 50+ paragraphs. Use sliding-window + merge.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>English, single document</td>\n<td><code>en_coreference_web_trf</code> (spaCy-experimental) or AllenNLP neural coref</td>\n</tr>\n<tr>\n<td>Multilingual</td>\n<td>SpanBERT / XLM-R trained on OntoNotes or Multilingual CoNLL</td>\n</tr>\n<tr>\n<td>Cross-document event coref</td>\n<td>Specialized end-to-end models (2025–26 SOTA)</td>\n</tr>\n<tr>\n<td>Quick LLM baseline</td>\n<td>GPT-4o / Claude with structured-output coref prompt</td>\n</tr>\n<tr>\n<td>Production dialog systems</td>\n<td>Rule-based fallback + neural primary + manual review for critical slots</td>\n</tr>\n</tbody></table>\n<p>The integration pattern that ships in 2026: run NER first, run coref, merge coref clusters into NER entities. Downstream tasks see one entity per cluster, not one entity per mention.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-coref-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: coref-picker\ndescription: Pick a coreference approach, evaluation plan, and integration strategy.\nversion: 1.0.0\nphase: 5\nlesson: 24\ntags: [nlp, coref, information-extraction]\n---\n\nGiven a use case (single-doc / multi-doc, domain, language), output:\n\n1. Approach. Rule-based / neural span-based / LLM-prompted / hybrid. One-sentence reason.\n2. Model. Named checkpoint if neural.\n3. Integration. Order of operations: tokenize → NER → coref → downstream task.\n4. Evaluation. CoNLL F1 (MUC + B³ + CEAF-φ4 average) on held-out set + manual cluster review on 20 documents.\n\nRefuse LLM-only coref for documents over 2,000 tokens without sliding-window merge. Refuse any pipeline that runs coref without a mention-level precision-recall report. Flag gender-heuristic systems deployed in demographically diverse text.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Run the rule-based resolver in <code>code/main.py</code> on 5 hand-crafted paragraphs. Measure mention-link accuracy against ground truth.</li>\n<li><strong>Medium.</strong> Use a pretrained neural coref model on a news article. Compare clusters against your own manual annotation. Where did it fail?</li>\n<li><strong>Hard.</strong> Build a coref-enhanced NER pipeline: NER first, then merge via coref clusters. Measure entity-coverage improvement vs NER-only on 100 articles.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Mention</td>\n<td>A reference</td>\n<td>A span of text that refers to an entity (name, pronoun, noun phrase).</td>\n</tr>\n<tr>\n<td>Antecedent</td>\n<td>What &quot;it&quot; refers to</td>\n<td>The earlier mention a later one corefers with.</td>\n</tr>\n<tr>\n<td>Cluster</td>\n<td>The entity&#39;s mentions</td>\n<td>Set of mentions that all refer to the same real-world entity.</td>\n</tr>\n<tr>\n<td>Anaphora</td>\n<td>Backward reference</td>\n<td>Later mention refers to earlier (&quot;he&quot; → &quot;John&quot;).</td>\n</tr>\n<tr>\n<td>Cataphora</td>\n<td>Forward reference</td>\n<td>Earlier mention refers to later (&quot;When he arrived, John...&quot;).</td>\n</tr>\n<tr>\n<td>Bridging</td>\n<td>Implicit reference</td>\n<td>&quot;I bought a car. The wheels were bad.&quot; (wheels of THAT car.)</td>\n</tr>\n<tr>\n<td>CoNLL F1</td>\n<td>The number on leaderboards</td>\n<td>Average of MUC, B³, CEAF-φ4 F1 scores.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://web.stanford.edu/~jurafsky/slp3/26.pdf\" target=\"_blank\" rel=\"noopener\">Jurafsky &amp; Martin, SLP3 Ch. 26 — Coreference Resolution and Entity Linking</a> — canonical textbook chapter.</li>\n<li><a href=\"https://arxiv.org/abs/1707.07045\" target=\"_blank\" rel=\"noopener\">Lee et al. (2017). End-to-end Neural Coreference Resolution</a> — span-based end-to-end.</li>\n<li><a href=\"https://arxiv.org/abs/1907.10529\" target=\"_blank\" rel=\"noopener\">Joshi et al. (2020). SpanBERT</a> — pretraining that improves coref.</li>\n<li><a href=\"https://aclanthology.org/W12-4501/\" target=\"_blank\" rel=\"noopener\">Pradhan et al. (2012). CoNLL-2012 Shared Task</a> — the benchmark.</li>\n<li><a href=\"https://www.sciencedirect.com/science/article/pii/0024384178900064\" target=\"_blank\" rel=\"noopener\">Hobbs (1978). Resolving Pronoun References</a> — the rule-based classic.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\n\n\nPRONOUNS = {\n    \"he\":    {\"gender\": \"m\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"him\":   {\"gender\": \"m\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"his\":   {\"gender\": \"m\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"she\":   {\"gender\": \"f\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"her\":   {\"gender\": \"f\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"hers\":  {\"gender\": \"f\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"it\":    {\"gender\": \"n\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"its\":   {\"gender\": \"n\", \"number\": \"sg\", \"type\": \"prp\"},\n    \"they\":  {\"gender\": \"u\", \"number\": \"pl\", \"type\": \"prp\"},\n    \"them\":  {\"gender\": \"u\", \"number\": \"pl\", \"type\": \"prp\"},\n    \"their\": {\"gender\": \"u\", \"number\": \"pl\", \"type\": \"prp\"},\n}\n\nFEMALE_FIRST = {\"mary\", \"alice\", \"sarah\", \"sophia\", \"emma\", \"olivia\", \"ava\", \"isabella\", \"maya\", \"jane\"}\nMALE_FIRST = {\"john\", \"james\", \"david\", \"tim\", \"steve\", \"michael\", \"bob\", \"adam\", \"peter\", \"carl\"}\nNEUTER_HEADS = {\"company\", \"firm\", \"corporation\", \"product\", \"device\", \"phone\", \"laptop\", \"computer\",\n                \"organization\", \"team\", \"group\", \"agency\", \"bank\"}\n\n\nDETERMINERS = {\"the\", \"a\", \"an\"}\n\n\ndef extract_mentions(text):\n    mentions = []\n    for sent_idx, sent in enumerate(re.split(r\"(?<=[.!?])\\s+\", text)):\n        tokens = re.findall(r\"[A-Za-z]+|[^\\s]\", sent)\n        i = 0\n        while i < len(tokens):\n            tok = tokens[i]\n            low = tok.lower()\n            if low in PRONOUNS:\n                mentions.append({\"text\": tok, \"span\": (sent_idx, i),\n                                 \"type\": \"pronoun\", \"features\": PRONOUNS[low]})\n                i += 1\n                continue\n            if low in DETERMINERS and i + 1 < len(tokens):\n                head = tokens[i + 1].lower()\n                if head in NEUTER_HEADS:\n                    mentions.append({\"text\": f\"{tok} {tokens[i + 1]}\", \"span\": (sent_idx, i),\n                                     \"type\": \"nominal\",\n                                     \"features\": {\"gender\": \"n\", \"number\": \"sg\", \"head\": head}})\n                    i += 2\n                    continue\n            if tok[0].isupper() and tok.isalpha() and low not in DETERMINERS:\n                j = i + 1\n                while j < len(tokens) and tokens[j][0].isupper() and tokens[j].isalpha():\n                    j += 1\n                name = \" \".join(tokens[i:j])\n                gender = infer_gender(name)\n                mentions.append({\"text\": name, \"span\": (sent_idx, i),\n                                 \"type\": \"ne\", \"features\": {\"gender\": gender, \"number\": \"sg\"}})\n                i = j\n                continue\n            i += 1\n    return mentions\n\n\ndef infer_gender(name):\n    first = name.split()[0].lower()\n    if first in FEMALE_FIRST:\n        return \"f\"\n    if first in MALE_FIRST:\n        return \"m\"\n    return \"u\"\n\n\ndef agreement_score(mention, candidate):\n    score = 0.0\n    mf = mention[\"features\"]\n    cf = candidate[\"features\"]\n    if mf[\"number\"] == cf[\"number\"]:\n        score += 1.0\n    if mf[\"gender\"] == \"u\" or cf[\"gender\"] == \"u\" or mf[\"gender\"] == cf[\"gender\"]:\n        score += 1.0\n    else:\n        score -= 2.0\n    return score\n\n\ndef recency_score(mention, candidate):\n    delta = (mention[\"span\"][0] - candidate[\"span\"][0]) * 2 + max(0, mention[\"span\"][1] - candidate[\"span\"][1]) * 0.01\n    return -delta\n\n\ndef resolve(mentions):\n    links = []\n    for i, m in enumerate(mentions):\n        if m[\"type\"] != \"pronoun\":\n            continue\n        candidates = [c for c in mentions[:i] if c[\"type\"] in (\"ne\", \"nominal\")]\n        if not candidates:\n            links.append((m, None))\n            continue\n        best = max(candidates, key=lambda c: agreement_score(m, c) + recency_score(m, c))\n        links.append((m, best))\n    return links\n\n\ndef clusters(mentions, links):\n    parent = {id(m): id(m) for m in mentions}\n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n\n    def union(a, b):\n        parent[find(a)] = find(b)\n\n    for m, ant in links:\n        if ant is not None:\n            union(id(m), id(ant))\n    groups = {}\n    for m in mentions:\n        root = find(id(m))\n        groups.setdefault(root, []).append(m[\"text\"])\n    return list(groups.values())\n\n\ndef main():\n    doc = (\n        \"Tim Cook walked onto the stage. \"\n        \"He announced the new iPhone. \"\n        \"The company also showed a laptop. \"\n        \"It will ship in June. \"\n        \"Mary Chen joined Apple last year. \"\n        \"She leads the AI team. \"\n        \"Her team built the voice assistant. \"\n        \"The device impressed the audience.\"\n    )\n\n    print(\"=== toy rule-based coreference ===\")\n    print(f\"document: {doc}\")\n    print()\n\n    mentions = extract_mentions(doc)\n    print(f\"extracted {len(mentions)} mentions:\")\n    for m in mentions:\n        print(f\"  [{m['type']:<7}] {m['text']:<22} feats={m['features']}\")\n\n    print()\n    links = resolve(mentions)\n    print(\"pronoun links:\")\n    for pronoun, antecedent in links:\n        ant_text = antecedent[\"text\"] if antecedent else \"<none>\"\n        print(f\"  {pronoun['text']:<8} -> {ant_text}\")\n\n    print()\n    print(\"clusters:\")\n    for i, cluster in enumerate(clusters(mentions, links)):\n        if len(cluster) > 1:\n            print(f\"  cluster {i}: {cluster}\")\n\n    print()\n    print(\"note: rules handle easy pronouns; production models are span-based neural.\")\n    print(\"note: neuter pronoun 'it' / 'its' prefers neuter-head nominals like 'the company'.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the goal of coreference resolution?",
+      "options": [
+        "Cluster all mentions (named, nominal, pronominal) that refer to the same real-world entity",
+        "Extract relations",
+        "Tag parts of speech",
+        "Translate pronouns to nouns"
+      ],
+      "answer": 0,
+      "explanation": "Coref clusters mention spans that all refer to the same entity."
+    },
+    {
+      "q": "Which type of expression is a 'nominal' mention?",
+      "options": [
+        "A verb",
+        "A pronoun like 'she'",
+        "A proper noun only",
+        "A noun phrase such as 'the CEO' or 'the company'"
+      ],
+      "answer": 3,
+      "explanation": "Nominal mentions are noun phrases like 'the company'; pronominal mentions are pronouns."
+    },
+    {
+      "q": "What is the modern (Lee et al., 2017) coref architecture?",
+      "options": [
+        "Rule-based syntactic parsing only",
+        "Decision trees",
+        "End-to-end span-based: enumerate spans, score mentions, then score antecedent probabilities and cluster greedily",
+        "BM25 retrieval"
+      ],
+      "answer": 2,
+      "explanation": "End-to-end neural coref enumerates spans and learns mention + antecedent scoring jointly."
+    },
+    {
+      "q": "What does CoNLL F1 average?",
+      "options": [
+        "MUC, B-cubed, and CEAF-phi4 F1 scores",
+        "Precision and recall",
+        "F1 across languages",
+        "Token and span F1"
+      ],
+      "answer": 0,
+      "explanation": "CoNLL F1 is the mean of MUC, B-cubed, and CEAF-phi4 metrics."
+    },
+    {
+      "q": "What is bridging anaphora?",
+      "options": [
+        "An implicit reference like 'the wheels' implying the wheels of a previously mentioned car",
+        "A mistranslation",
+        "A pronoun before its referent",
+        "A pronoun without an antecedent"
+      ],
+      "answer": 0,
+      "explanation": "Bridging links a mention to a part-of or related entity that was implied but not explicitly stated."
+    },
+    {
+      "q": "Why is LLM-only coref unreliable on long documents?",
+      "options": [
+        "Coref requires a CFG",
+        "LLMs cannot read text",
+        "Tokenizers fail",
+        "Single-call LLMs over-merge or silently drop mentions across 50+ paragraphs; require sliding-window plus merge"
+      ],
+      "answer": 3,
+      "explanation": "Long-doc LLM coref degrades; sliding-window with cross-window merging mitigates."
+    },
+    {
+      "q": "Why merge coref clusters into NER results before downstream tasks?",
+      "options": [
+        "Required by Wikidata",
+        "So downstream tasks see one entity per cluster rather than one per surface mention, dramatically improving coverage",
+        "Lower latency",
+        "To increase token count"
+      ],
+      "answer": 1,
+      "explanation": "Without merging, NER counts each surface form separately and misses 60-80% of entity mentions."
+    },
+    {
+      "q": "Why are hard-coded gender rules a fragility in coref systems?",
+      "options": [
+        "They break on non-binary referents, organizations, and animals; learned scoring is more robust",
+        "They cannot use POS tags",
+        "They require GPU",
+        "They run too fast"
+      ],
+      "answer": 0,
+      "explanation": "Gender heuristics fail in demographically diverse text; learned models are preferred."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/24-coreference-resolution"
+  }
+}

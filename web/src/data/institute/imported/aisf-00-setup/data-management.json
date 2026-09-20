@@ -1,0 +1,81 @@
+{
+  "id": "aisf-00-setup::data-management",
+  "num": 9,
+  "slug": "data-management",
+  "title": "Data Management",
+  "tagline": "Data is the fuel. How you manage it determines how fast you go.",
+  "type": "Build",
+  "languages": "",
+  "time": "",
+  "objectives": [
+    "Load, stream, and cache datasets using the Hugging Face `datasets` library",
+    "Convert between CSV, JSON, Parquet, and Arrow formats and explain their tradeoffs",
+    "Create reproducible train/validation/test splits with fixed random seeds",
+    "Manage large model and dataset files using `.gitignore`, Git LFS, or DVC"
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Every AI project starts with data. You need to find datasets, download them, convert between formats, split them for training and evaluation, and version them so experiments are reproducible. Doing this manually every time is slow and error-prone. You need a repeatable workflow.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">graph TD\n    A[&quot;Hugging Face Hub&quot;] --&gt; B[&quot;datasets library&quot;]\n    B --&gt; C[&quot;Load / Stream&quot;]\n    C --&gt; D[&quot;Local Cache&lt;br/&gt;~/.cache/huggingface/&quot;]\n    B --&gt; E[&quot;Format Conversion&lt;br/&gt;CSV, JSON, Parquet, Arrow&quot;]\n    E --&gt; F[&quot;Data Splits&lt;br/&gt;train / val / test&quot;]\n    F --&gt; G[&quot;Your Training Pipeline&quot;]</pre>\n<p>The Hugging Face <code>datasets</code> library is the standard way to load data for AI work. It handles downloading, caching, format conversion, and streaming out of the box.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>s0-data-pipeline</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: Install the datasets library</h3>\n<pre><code class=\"language-bash\">pip install datasets huggingface_hub\n</code></pre>\n<h3>Step 2: Load a dataset</h3>\n<pre><code class=\"language-python\">from datasets import load_dataset\n\ndataset = load_dataset(&quot;stanfordnlp/imdb&quot;)\nprint(dataset)\nprint(dataset[&quot;train&quot;][0])\n</code></pre>\n<p>This downloads the IMDB movie review dataset. After the first download, it loads from cache at <code>~/.cache/huggingface/datasets/</code>.</p>\n<h3>Step 3: Stream large datasets</h3>\n<p>Some datasets are too large to fit on disk. Streaming loads them row by row without downloading the full thing.</p>\n<pre><code class=\"language-python\">dataset = load_dataset(&quot;wikimedia/wikipedia&quot;, &quot;20220301.en&quot;, split=&quot;train&quot;, streaming=True)\n\nfor i, example in enumerate(dataset):\n    print(example[&quot;title&quot;])\n    if i &gt;= 4:\n        break\n</code></pre>\n<p>Streaming gives you an <code>IterableDataset</code>. You process rows as they arrive. Memory usage stays constant regardless of dataset size.</p>\n<h3>Step 4: Dataset formats</h3>\n<p>The <code>datasets</code> library uses Apache Arrow under the hood. You can convert to other formats depending on what your pipeline needs.</p>\n<pre><code class=\"language-python\">dataset = load_dataset(&quot;stanfordnlp/imdb&quot;, split=&quot;train&quot;)\n\ndataset.to_csv(&quot;imdb_train.csv&quot;)\ndataset.to_json(&quot;imdb_train.json&quot;)\ndataset.to_parquet(&quot;imdb_train.parquet&quot;)\n</code></pre>\n<p>Format comparison:</p>\n<table>\n<thead>\n<tr>\n<th>Format</th>\n<th>Size</th>\n<th>Read Speed</th>\n<th>Best For</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CSV</td>\n<td>Large</td>\n<td>Slow</td>\n<td>Human readability, spreadsheets</td>\n</tr>\n<tr>\n<td>JSON</td>\n<td>Large</td>\n<td>Slow</td>\n<td>APIs, nested data</td>\n</tr>\n<tr>\n<td>Parquet</td>\n<td>Small</td>\n<td>Fast</td>\n<td>Analytics, columnar queries</td>\n</tr>\n<tr>\n<td>Arrow</td>\n<td>Small</td>\n<td>Fastest</td>\n<td>In-memory processing (what <code>datasets</code> uses internally)</td>\n</tr>\n</tbody></table>\n<p>For AI work, Parquet is the best storage format. Arrow is what you work with in memory. CSV and JSON are for interchange.</p>\n<h3>Step 5: Data splits</h3>\n<p>Every ML project needs three splits:</p>\n<ul>\n<li><strong>Train</strong>: The model learns from this (typically 80%)</li>\n<li><strong>Validation</strong>: You check progress during training (typically 10%)</li>\n<li><strong>Test</strong>: Final evaluation after training is done (typically 10%)</li>\n</ul>\n<p>Some datasets come pre-split. When they don&#39;t, split them yourself:</p>\n<pre><code class=\"language-python\">dataset = load_dataset(&quot;stanfordnlp/imdb&quot;, split=&quot;train&quot;)\n\nsplit = dataset.train_test_split(test_size=0.2, seed=42)\ntrain_val = split[&quot;train&quot;].train_test_split(test_size=0.125, seed=42)\n\ntrain_ds = train_val[&quot;train&quot;]\nval_ds = train_val[&quot;test&quot;]\ntest_ds = split[&quot;test&quot;]\n\nprint(f&quot;Train: {len(train_ds)}, Val: {len(val_ds)}, Test: {len(test_ds)}&quot;)\n</code></pre>\n<p>Always set a seed for reproducibility. The same seed produces the same split every time.</p>\n<h3>Step 6: Download and cache models</h3>\n<p>Models are large files. The <code>huggingface_hub</code> library handles downloading and caching.</p>\n<pre><code class=\"language-python\">from huggingface_hub import hf_hub_download, snapshot_download\n\nmodel_path = hf_hub_download(\n    repo_id=&quot;sentence-transformers/all-MiniLM-L6-v2&quot;,\n    filename=&quot;config.json&quot;\n)\nprint(f&quot;Cached at: {model_path}&quot;)\n\nmodel_dir = snapshot_download(&quot;sentence-transformers/all-MiniLM-L6-v2&quot;)\nprint(f&quot;Full model at: {model_dir}&quot;)\n</code></pre>\n<p>Models cache to <code>~/.cache/huggingface/hub/</code>. Once downloaded, they load instantly on subsequent runs.</p>\n<h3>Step 7: Handle large files</h3>\n<p>Model weights and large datasets should not go into git. Three options:</p>\n<p><strong>Option A: .gitignore (simplest)</strong></p>\n<pre><code>*.bin\n*.safetensors\n*.pt\n*.onnx\ndata/*.parquet\ndata/*.csv\nmodels/\n</code></pre>\n<p><strong>Option B: Git LFS (track large files in git)</strong></p>\n<pre><code class=\"language-bash\">git lfs install\ngit lfs track &quot;*.bin&quot;\ngit lfs track &quot;*.safetensors&quot;\ngit add .gitattributes\n</code></pre>\n<p>Git LFS stores pointers in your repo and the actual files on a separate server. GitHub gives you 1 GB free.</p>\n<p><strong>Option C: DVC (data version control)</strong></p>\n<pre><code class=\"language-bash\">pip install dvc\ndvc init\ndvc add data/training_set.parquet\ngit add data/training_set.parquet.dvc data/.gitignore\ngit commit -m &quot;Track training data with DVC&quot;\n</code></pre>\n<p>DVC creates small <code>.dvc</code> files that point to your data. The data itself lives in S3, GCS, or another remote storage backend.</p>\n<table>\n<thead>\n<tr>\n<th>Approach</th>\n<th>Complexity</th>\n<th>Best For</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>.gitignore</td>\n<td>Low</td>\n<td>Personal projects, downloaded data you can re-fetch</td>\n</tr>\n<tr>\n<td>Git LFS</td>\n<td>Medium</td>\n<td>Teams sharing model weights via git</td>\n</tr>\n<tr>\n<td>DVC</td>\n<td>High</td>\n<td>Reproducible experiments, large datasets, teams</td>\n</tr>\n</tbody></table>\n<p>For this course, <code>.gitignore</code> is enough. Use DVC when you need to reproduce exact experiments across machines.</p>\n<h3>Step 8: Storage patterns</h3>\n<p><strong>Local storage</strong> works for datasets under ~10 GB. The HF cache handles this automatically.</p>\n<p><strong>Cloud storage</strong> is for anything larger or shared across machines:</p>\n<pre><code class=\"language-python\">import os\n\nlocal_path = os.path.expanduser(&quot;~/.cache/huggingface/datasets/&quot;)\n\n# s3_path = &quot;s3://my-bucket/datasets/&quot;\n# gcs_path = &quot;gs://my-bucket/datasets/&quot;\n</code></pre>\n<p>DVC integrates with S3 and GCS directly:</p>\n<pre><code class=\"language-bash\">dvc remote add -d myremote s3://my-bucket/dvc-store\ndvc push\n</code></pre>\n<p>For this course, local storage is sufficient. Cloud storage becomes relevant when you fine-tune on remote GPU instances.</p>\n<h2>Datasets Used in This Course</h2>\n<table>\n<thead>\n<tr>\n<th>Dataset</th>\n<th>Lessons</th>\n<th>Size</th>\n<th>What It Teaches</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>IMDB</td>\n<td>Tokenization, classification</td>\n<td>84 MB</td>\n<td>Text classification basics</td>\n</tr>\n<tr>\n<td>WikiText</td>\n<td>Language modeling</td>\n<td>181 MB</td>\n<td>Next-token prediction</td>\n</tr>\n<tr>\n<td>SQuAD</td>\n<td>QA systems</td>\n<td>35 MB</td>\n<td>Question answering, spans</td>\n</tr>\n<tr>\n<td>Common Crawl (subset)</td>\n<td>Embeddings</td>\n<td>Varies</td>\n<td>Large-scale text processing</td>\n</tr>\n<tr>\n<td>MNIST</td>\n<td>Vision basics</td>\n<td>21 MB</td>\n<td>Image classification fundamentals</td>\n</tr>\n<tr>\n<td>COCO (subset)</td>\n<td>Multimodal</td>\n<td>Varies</td>\n<td>Image-text pairs</td>\n</tr>\n</tbody></table>\n<p>You do not need to download all of these now. Each lesson specifies what it needs.</p>\n<h2>Use It</h2>\n<p>Run the utility script to verify everything works:</p>\n<pre><code class=\"language-bash\">python code/data_utils.py\n</code></pre>\n<p>This downloads a small dataset, converts it, splits it, and prints a summary.</p>\n<h2>Ship It</h2>\n<p>This lesson produces:</p>\n<ul>\n<li><code>code/data_utils.py</code> - reusable data loading and caching utility</li>\n<li><code>outputs/prompt-data-helper.md</code> - prompt for finding the right dataset for a task</li>\n</ul>\n<h2>Exercises</h2>\n<ol>\n<li>Load the <code>glue</code> dataset with the <code>mrpc</code> config and inspect the first 5 examples</li>\n<li>Stream the <code>c4</code> dataset and count how many examples you can process in 10 seconds</li>\n<li>Convert a dataset to Parquet and compare the file size to CSV</li>\n<li>Create a 70/15/15 train/val/test split with a fixed seed and verify the sizes</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Dataset split</td>\n<td>&quot;Training data&quot;</td>\n<td>A named subset (train/val/test) used at different stages of the ML lifecycle</td>\n</tr>\n<tr>\n<td>Streaming</td>\n<td>&quot;Load it lazily&quot;</td>\n<td>Processing data row by row from a remote source without downloading the full dataset</td>\n</tr>\n<tr>\n<td>Parquet</td>\n<td>&quot;Compressed CSV&quot;</td>\n<td>A columnar file format optimized for analytical queries and storage efficiency</td>\n</tr>\n<tr>\n<td>Arrow</td>\n<td>&quot;Fast dataframe&quot;</td>\n<td>An in-memory columnar format used internally by the datasets library for zero-copy reads</td>\n</tr>\n<tr>\n<td>Git LFS</td>\n<td>&quot;Git for big files&quot;</td>\n<td>An extension that stores large files outside the git repo while keeping pointers in version control</td>\n</tr>\n<tr>\n<td>DVC</td>\n<td>&quot;Git for data&quot;</td>\n<td>A version control system for datasets and models that integrates with cloud storage</td>\n</tr>\n<tr>\n<td>Cache</td>\n<td>&quot;Already downloaded&quot;</td>\n<td>A local copy of previously fetched data, stored at ~/.cache/huggingface/ by default</td>\n</tr>\n</tbody></table>\n",
+  "hasMermaid": true,
+  "code": {},
+  "quiz": [
+    {
+      "q": "Why is it important to have separate train, validation, and test splits in machine learning?",
+      "options": [
+        "To ensure each split uses a different file format",
+        "To make the dataset smaller so training is faster",
+        "To distribute data across multiple GPUs",
+        "To evaluate model performance on unseen data and prevent overfitting"
+      ],
+      "answer": 3,
+      "explanation": "The training set teaches the model, the validation set tunes hyperparameters during training, and the test set provides a final unbiased evaluation on data the model has never seen."
+    },
+    {
+      "q": "What is the Hugging Face Hub primarily used for in AI/ML workflows?",
+      "options": [
+        "Managing Python virtual environments",
+        "Version controlling source code like GitHub",
+        "Running GPU training jobs in the cloud",
+        "Hosting and sharing datasets, models, and ML artifacts"
+      ],
+      "answer": 3,
+      "explanation": "Hugging Face Hub is a platform for hosting and sharing pre-trained models, datasets, and ML demos. The 'datasets' library provides a standard way to load data from it."
+    },
+    {
+      "q": "What advantage does the Parquet format have over CSV for storing ML datasets?",
+      "options": [
+        "Parquet supports more data types than CSV",
+        "Parquet files are human-readable in any text editor",
+        "Parquet uses columnar storage for smaller file sizes and faster read speeds",
+        "Parquet files can be edited in spreadsheet applications"
+      ],
+      "answer": 2,
+      "explanation": "Parquet is a columnar binary format that compresses better than CSV and enables fast column-level reads. It is the preferred storage format for ML datasets."
+    },
+    {
+      "q": "What does 'streaming=True' do when loading a dataset with the Hugging Face datasets library?",
+      "options": [
+        "Converts the dataset to a streaming video format",
+        "Enables real-time updates as new data is added to the Hub",
+        "Loads data row by row without downloading the full dataset to disk",
+        "Downloads the dataset faster using parallel connections"
+      ],
+      "answer": 2,
+      "explanation": "Streaming mode creates an IterableDataset that fetches rows on demand. Memory usage stays constant regardless of dataset size, which is essential for datasets too large to fit on disk."
+    },
+    {
+      "q": "When should you use DVC (Data Version Control) instead of just .gitignore for large files?",
+      "options": [
+        "When you need to reproduce exact experiments across machines with versioned data",
+        "When you only have CSV files in your project",
+        "When your dataset is smaller than 1 MB",
+        "When you are working alone on a personal project"
+      ],
+      "answer": 0,
+      "explanation": "DVC tracks data versions with small pointer files in git while storing the actual data in remote storage (S3, GCS). It ensures anyone can reproduce your exact experiment with the same data."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/00-setup-and-tooling/09-data-management"
+  }
+}

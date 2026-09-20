@@ -1,0 +1,73 @@
+{
+  "track": "cyber-04-schools",
+  "school": "cyber",
+  "blurb": "For the ਸੰਗਤ that teaches: classroom-ready K-12 cyber curriculum, a free browser cyber range, career profiles, and the ransomware guidance a school actually needs.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "adaptedFrom": {
+    "name": "NICCS · CISA — K-12 cyber resources for educators",
+    "href": "https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators",
+    "license": "US Government work — public domain (17 U.S.C. § 105)",
+    "note": "A reading map over public NICCS, CISA, and CYBER.ORG resources. The teaching notes and the framing for Sikh institutions are written by Sikhi University. Nothing is rehosted; CYBER.ORG's curriculum and range remain theirs and are reached through their own accounts. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "why-a-school-teaches-this",
+      "title": "Why a Khalsa school should teach this at all",
+      "objective": "Make the case to a school board or gurdwara committee for putting cyber literacy in front of students.",
+      "teach": "Our children are online long before they are taught anything about it, and the institutions around them — a school, a gurdwara, a family WhatsApp group — are exactly the soft targets that fraud and extortion look for. There is also an opportunity here that the ਪੰਥ should not miss: this is a field with a serious shortage of people and no requirement for a costly degree. Start with what the national programme already says about why K-12 cyber education exists, then adapt the argument to your ਸੰਗਤ.",
+      "labs": [
+        { "title": "Check out K-12 cyber resources for educators", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators", "cost": "free" },
+        { "title": "Cybersecurity Education and Training Assistance Program (CETAP)", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/resources/cybersecurity-education-and-training-assistance-program", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "the-curriculum",
+      "title": "Getting the curriculum",
+      "objective": "Register for the CYBERPortal and pick the grade-band curriculum that fits your class.",
+      "teach": "You do not need to write this material yourself, and you should not try. CYBER.ORG is the federally funded provider of K-12 cybersecurity curriculum in the United States, and its content is classroom-ready across grade bands and free to educators. The CYBERPortal collects the curriculum, the labs, and the assessments in one place. Take the whole course if it fits your timetable; take two lessons if it does not.",
+      "labs": [
+        { "title": "K-12 cybersecurity education services", "provider": "CYBER.ORG", "href": "https://cyber.org/educational-cybersecurity-resources", "cost": "free for educators" },
+        { "title": "Cybersecurity for K-12 teachers", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/education-training/cybersecurity-teachers", "cost": "free" },
+        { "title": "Cybersecurity for K-12 teachers — audience hub", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/audience/cybersecurity-k-12-teachers", "cost": "free" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "the-range",
+      "title": "A cyber range that runs on a Chromebook",
+      "objective": "Get students into hands-on labs without buying hardware or installing anything.",
+      "teach": "The usual objection to teaching this subject is equipment, and it no longer holds. The CYBER.ORG Range is browser-based and sandboxed: a student practises on a real, isolated environment from whatever device the school already owns. For a Khalsa school running Chromebooks or a gurdwara with a room of donated laptops, this is the difference between a lesson and a slideshow.",
+      "labs": [
+        { "title": "The CYBER.ORG Range", "provider": "CYBER.ORG", "href": "https://cyber.org/", "cost": "free for educators" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "careers",
+      "title": "Showing students the career",
+      "objective": "Put concrete role descriptions, skills, and pathways in front of a student who has never met anyone who does this work.",
+      "teach": "A student rarely aims at a job they have never seen someone hold. The career profiles set out what each role does day to day, what education it needs, and which paths lead into it — which is precisely the information missing from most of our community's career conversations, where the list tends to stop at three professions. Point ਸੰਗਤ youth at these, and at the ਵਿਦਿਆਰਥੀ already several modules into this school.",
+      "labs": [
+        { "title": "Cyber career profiles and student resources", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/", "cost": "free" },
+        { "title": "Back to school: cyber edition", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/news-events/featured-stories/back-school-cyber-edition", "cost": "free" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "protecting-the-institution",
+      "title": "Protecting the institution itself",
+      "objective": "Work through the ransomware and incident guidance written for schools, and know who to call before you need to.",
+      "teach": "Schools and small religious institutions are targeted precisely because they hold real data and employ nobody to defend it. The guidance here is written for organisations with no security staff and no budget, which describes most gurdwaras and most Khalsa schools honestly. Read it before an incident: the single most valuable thing on the page is knowing, in advance, who you telephone at 2 a.m.",
+      "labs": [
+        { "title": "K-12 ransomware resources", "provider": "CISA", "href": "https://www.cisa.gov/stopransomware/k-12-resources", "cost": "free" },
+        { "title": "Professional development for K-12 teachers", "provider": "NICCS · CISA", "href": "https://niccs.cisa.gov/news-events/featured-stories/cyber-training-k-12-teachers", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "SANS security policy templates and free resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Consent-to-monitor, acceptable-use, and password policy templates a school can adapt. Copyright SANS, licensed for non-commercial use." }
+  ]
+}

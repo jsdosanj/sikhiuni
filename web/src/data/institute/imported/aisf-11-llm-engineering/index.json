@@ -1,0 +1,132 @@
+{
+  "track": "aisf-11-llm-engineering",
+  "phaseDir": "11-llm-engineering",
+  "blurb": "Put LLMs to work in production applications.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-11-llm-engineering::prompt-engineering",
+      "num": 1,
+      "slug": "prompt-engineering",
+      "title": "Prompt Engineering: Techniques & Patterns",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::few-shot-cot",
+      "num": 2,
+      "slug": "few-shot-cot",
+      "title": "Few-Shot, Chain-of-Thought, Tree-of-Thought",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::structured-outputs",
+      "num": 3,
+      "slug": "structured-outputs",
+      "title": "Structured Outputs: JSON, Schema Validation, Constrained Decoding",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::embeddings",
+      "num": 4,
+      "slug": "embeddings",
+      "title": "Embeddings & Vector Representations",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::context-engineering",
+      "num": 5,
+      "slug": "context-engineering",
+      "title": "Context Engineering: Windows, Budgets, Memory, and Retrieval",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::rag",
+      "num": 6,
+      "slug": "rag",
+      "title": "RAG (Retrieval-Augmented Generation)",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::advanced-rag",
+      "num": 7,
+      "slug": "advanced-rag",
+      "title": "Advanced RAG (Chunking, Reranking, Hybrid Search)",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::fine-tuning-lora",
+      "num": 8,
+      "slug": "fine-tuning-lora",
+      "title": "Fine-Tuning with LoRA & QLoRA",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::function-calling",
+      "num": 9,
+      "slug": "function-calling",
+      "title": "Function Calling & Tool Use",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::evaluation",
+      "num": 10,
+      "slug": "evaluation",
+      "title": "Evaluation & Testing LLM Applications",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::caching-cost",
+      "num": 11,
+      "slug": "caching-cost",
+      "title": "Caching, Rate Limiting & Cost Optimization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::guardrails",
+      "num": 12,
+      "slug": "guardrails",
+      "title": "Guardrails, Safety & Content Filtering",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::production-app",
+      "num": 13,
+      "slug": "production-app",
+      "title": "Building a Production LLM Application",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::model-context-protocol",
+      "num": 14,
+      "slug": "model-context-protocol",
+      "title": "Model Context Protocol (MCP)",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-11-llm-engineering::prompt-caching",
+      "num": 15,
+      "slug": "prompt-caching",
+      "title": "Prompt Caching and Context Caching",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::langgraph-state-machines",
+      "num": 16,
+      "slug": "langgraph-state-machines",
+      "title": "Agent State Machines — Graphs, Nodes, Checkpoints",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-11-llm-engineering::agent-framework-tradeoffs",
+      "num": 17,
+      "slug": "agent-framework-tradeoffs",
+      "title": "Agent Framework Tradeoffs — Graph, Role, and Actor Orchestration",
+      "nQuiz": 5
+    }
+  ]
+}

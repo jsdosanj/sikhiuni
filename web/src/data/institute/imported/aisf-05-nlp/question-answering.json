@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::question-answering",
+  "num": 13,
+  "slug": "question-answering",
+  "title": "Question Answering Systems",
+  "tagline": "Three systems shaped modern QA. Extractive found spans. Retrieval-augmented grounded them in documents. Generative produced answers. Every modern AI assistant is a mix of the three.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~75 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>A user types &quot;When did the first iPhone launch?&quot; and expects &quot;June 29, 2007.&quot; Not &quot;Apple&#39;s history is long and varied.&quot; Not &quot;2007&quot; sitting in isolation with no sentence. A direct, grounded, correct answer.</p>\n<p>Three architectures have dominated QA over the last decade.</p>\n<ul>\n<li><strong>Extractive QA.</strong> Given a question and a passage that is known to contain the answer, find the start and end indices of the answer span in the passage. SQuAD is the canonical benchmark.</li>\n<li><strong>Open-domain QA.</strong> The passage is not given. Retrieve the relevant passage first, then extract or generate an answer. This is the bedrock of every RAG pipeline today.</li>\n<li><strong>Generative / Closed-book QA.</strong> A large language model answers from its parametric memory. No retrieval. Fastest at inference, least reliable on facts.</li>\n</ul>\n<p>The trend in 2026 is hybrid: retrieve the best few passages, then prompt a generative model to answer grounded in those passages. That is RAG, and lesson 14 covers the retrieval half in depth. This lesson builds the QA half.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/qa.svg\" alt=\"QA architectures: extractive, retrieval-augmented, generative\" loading=\"lazy\"><figcaption>QA architectures: extractive, retrieval-augmented, generative</figcaption></figure>\n<p><strong>Extractive.</strong> Encode question and passage together with a transformer (BERT family). Train two heads that predict start and end token indices of the answer. Loss is cross-entropy over valid positions. Output is a span from the passage. Never hallucinates (by construction), never handles questions the passage cannot answer (by construction).</p>\n<p><strong>Retrieval-augmented (RAG).</strong> Two stages. First, a retriever finds the top-<code>k</code> passages from a corpus. Second, a reader (extractive or generative) produces the answer using those passages. The retriever-reader split lets each be trained and evaluated independently. Modern RAG often adds a reranker between them.</p>\n<p><strong>Generative.</strong> A decoder-only LLM (GPT, Claude, Llama) answers from learned weights. No retrieval step. Excellent on common knowledge, catastrophic on rare or recent facts. The hallucination rate is inversely correlated with fact frequency in the pretraining data.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>qa-span</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: extractive QA with a pretrained model</h3>\n<pre><code class=\"language-python\">from transformers import pipeline\n\nqa = pipeline(&quot;question-answering&quot;, model=&quot;deepset/roberta-base-squad2&quot;)\n\npassage = (\n    &quot;Apple Inc. released the first iPhone on June 29, 2007. &quot;\n    &quot;The device was announced by Steve Jobs at Macworld in January 2007.&quot;\n)\nquestion = &quot;When was the first iPhone released?&quot;\n\nanswer = qa(question=question, context=passage)\nprint(answer)\n</code></pre>\n<pre><code class=\"language-python\">{&#39;score&#39;: 0.98, &#39;start&#39;: 57, &#39;end&#39;: 70, &#39;answer&#39;: &#39;June 29, 2007&#39;}\n</code></pre>\n<p><code>deepset/roberta-base-squad2</code> is trained on SQuAD 2.0, which includes unanswerable questions. By default, the <code>question-answering</code> pipeline returns the highest-scoring span even when the model&#39;s null score wins — it does <em>not</em> automatically return an empty answer. To get explicit &quot;no answer&quot; behavior, pass <code>handle_impossible_answer=True</code> to the pipeline call: the pipeline then returns an empty answer only when the null score exceeds every span score. Always check the <code>score</code> field either way.</p>\n<h3>Step 2: a retrieval-augmented pipeline (sketch)</h3>\n<pre><code class=\"language-python\">from sentence_transformers import SentenceTransformer\nimport numpy as np\n\nencoder = SentenceTransformer(&quot;sentence-transformers/all-MiniLM-L6-v2&quot;)\n\ncorpus = [\n    &quot;Apple Inc. released the first iPhone on June 29, 2007.&quot;,\n    &quot;Macworld 2007 featured the iPhone announcement by Steve Jobs.&quot;,\n    &quot;Android launched in 2008 as Google&#39;s mobile operating system.&quot;,\n    &quot;The first iPod was released in 2001.&quot;,\n]\ncorpus_embeddings = encoder.encode(corpus, normalize_embeddings=True)\n\n\ndef retrieve(question, top_k=2):\n    q_emb = encoder.encode([question], normalize_embeddings=True)\n    sims = (corpus_embeddings @ q_emb.T).squeeze()\n    order = np.argsort(-sims)[:top_k]\n    return [corpus[i] for i in order]\n\n\ndef answer(question):\n    passages = retrieve(question, top_k=2)\n    combined = &quot; &quot;.join(passages)\n    return qa(question=question, context=combined)\n\n\nprint(answer(&quot;When was the first iPhone released?&quot;))\n</code></pre>\n<p>Two-stage pipeline. Dense retriever (Sentence-BERT) finds relevant passages by semantic similarity. Extractive reader (RoBERTa-SQuAD) pulls the answer span from the combined top passages. Works on small corpora. For a million-document corpus, use FAISS or a vector database.</p>\n<h3>Step 3: generative with RAG</h3>\n<pre><code class=\"language-python\">def rag_generate(question, llm):\n    passages = retrieve(question, top_k=3)\n    prompt = f&quot;&quot;&quot;Context:\n{chr(10).join(&#39;- &#39; + p for p in passages)}\n\nQuestion: {question}\n\nAnswer using only the context above. If the context does not contain the answer, say &quot;I don&#39;t know.&quot;\n&quot;&quot;&quot;\n    return llm(prompt)\n</code></pre>\n<p>The prompt pattern matters. Explicitly telling the model to ground in the context and return &quot;I don&#39;t know&quot; when the context is insufficient cuts hallucination rates by 40-60% compared to naive prompting. More elaborate patterns add citations, confidence scores, and structured extraction.</p>\n<h3>Step 4: evaluation that reflects the real world</h3>\n<p>SQuAD uses <strong>Exact Match (EM)</strong> and <strong>token-level F1</strong>. EM is a strict match after normalization (lowercase, strip punctuation, remove articles) — either the prediction matches exactly or it scores 0. F1 is computed over token overlap between prediction and reference and gives partial credit. Both under-credit paraphrases: &quot;June 29, 2007&quot; vs &quot;June 29th, 2007&quot; typically gets 0 EM (the ordinal breaks normalization) but still earns substantial F1 from overlapping tokens.</p>\n<p>For production QA:</p>\n<ul>\n<li><strong>Answer accuracy</strong> (LLM-judged or human-judged, since metrics do not capture semantic equivalence).</li>\n<li><strong>Citation accuracy.</strong> Does the cited passage actually support the answer? Trivial to check automatically with string match between generated citations and retrieved passages.</li>\n<li><strong>Refusal calibration.</strong> When the answer is not in the retrieved passages, does the system correctly say &quot;I don&#39;t know&quot;? Measure false confidence rate.</li>\n<li><strong>Retrieval recall.</strong> Before evaluating the reader, measure whether the retriever gets the right passage into the top-<code>k</code>. A reader cannot fix a missing passage.</li>\n</ul>\n<h3>RAGAS: the 2026 production eval framework</h3>\n<p><code>RAGAS</code> is purpose-built for RAG systems and is the shipping default in 2026. It scores four dimensions without requiring gold references:</p>\n<ul>\n<li><strong>Faithfulness.</strong> Does each claim in the answer come from the retrieved context? Measured by NLI-based entailment. Your primary hallucination metric.</li>\n<li><strong>Answer relevance.</strong> Does the answer address the question? Measured by generating hypothetical questions from the answer and comparing to the real question.</li>\n<li><strong>Context precision.</strong> Of the retrieved chunks, what fraction were actually relevant? Low precision = noise in prompt.</li>\n<li><strong>Context recall.</strong> Did the retrieved set contain all needed information? Low recall = reader cannot succeed.</li>\n</ul>\n<p>Reference-free scoring lets you evaluate on live production traffic without curated gold answers. Layer LLM-as-judge on top for open-ended questions where exact-match metrics are useless.</p>\n<p><code>pip install ragas</code>. Plug your retriever + reader. Get four scalars per query. Alert on regressions.</p>\n<h2>Use It</h2>\n<p>The 2026 stack.</p>\n<table>\n<thead>\n<tr>\n<th>Use case</th>\n<th>Recommended</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Given passage, find answer span</td>\n<td><code>deepset/roberta-base-squad2</code></td>\n</tr>\n<tr>\n<td>Over a fixed corpus, closed-book not acceptable</td>\n<td>RAG: dense retriever + LLM reader</td>\n</tr>\n<tr>\n<td>Real-time over a document store</td>\n<td>RAG with hybrid (BM25 + dense) retriever + reranker (lesson 14)</td>\n</tr>\n<tr>\n<td>Conversational QA (follow-up questions)</td>\n<td>LLM with conversation history + RAG on each turn</td>\n</tr>\n<tr>\n<td>Highly factual, regulated domains</td>\n<td>Extractive over an authoritative corpus; never generative alone</td>\n</tr>\n</tbody></table>\n<p>Extractive QA is unfashionable in 2026 because RAG with LLMs handles more cases. It still ships in contexts where literal quotation is required: legal research, regulatory compliance, audit tools.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-qa-architect.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: qa-architect\ndescription: Choose QA architecture, retrieval strategy, and evaluation plan.\nversion: 1.0.0\nphase: 5\nlesson: 13\ntags: [nlp, qa, rag]\n---\n\nGiven requirements (corpus size, question type, factuality constraint, latency budget), output:\n\n1. Architecture. Extractive, RAG with extractive reader, RAG with generative reader, or closed-book LLM. One-sentence reason.\n2. Retriever. None, BM25, dense (name the encoder), or hybrid.\n3. Reader. SQuAD-tuned model, LLM by name, or &quot;domain-fine-tuned DistilBERT.&quot;\n4. Evaluation. EM + F1 for extractive benchmarks; answer accuracy + citation accuracy + refusal calibration for production. Name what you are measuring and how you are measuring it.\n\nRefuse closed-book LLM answers for regulatory or compliance-sensitive questions. Refuse any QA system without a retrieval-recall baseline (you cannot evaluate the reader without knowing the retriever surfaced the right passage). Flag questions that require multi-hop reasoning as needing specialized multi-hop retrievers like HotpotQA-trained systems.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Set up the SQuAD extractive pipeline above on 10 Wikipedia passages. Hand-craft 10 questions. Measure how often the answer is correct. You should see 7-9 correct if passages and questions are clean.</li>\n<li><strong>Medium.</strong> Add a refusal classifier. When the top retrieval score is below a threshold (say 0.3 cosine), return &quot;I don&#39;t know&quot; instead of calling the reader. Tune the threshold on a held-out set.</li>\n<li><strong>Hard.</strong> Build a RAG pipeline over a 10,000-document corpus of your choice. Implement hybrid retrieval (BM25 + dense) with RRF fusion (see lesson 14). Measure answer accuracy with and without the hybrid step. Document which question types benefit most.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Extractive QA</td>\n<td>Find the answer span</td>\n<td>Predict start and end indices of the answer within a given passage.</td>\n</tr>\n<tr>\n<td>Open-domain QA</td>\n<td>QA over a corpus</td>\n<td>No given passage; must retrieve then answer.</td>\n</tr>\n<tr>\n<td>RAG</td>\n<td>Retrieve then generate</td>\n<td>Retrieval-augmented generation. Retriever + reader pipeline.</td>\n</tr>\n<tr>\n<td>SQuAD</td>\n<td>Canonical benchmark</td>\n<td>Stanford Question Answering Dataset. EM + F1 metrics.</td>\n</tr>\n<tr>\n<td>Hallucination</td>\n<td>Made-up answer</td>\n<td>Reader output not supported by retrieved context.</td>\n</tr>\n<tr>\n<td>Refusal calibration</td>\n<td>Know when to shut up</td>\n<td>System correctly says &quot;I don&#39;t know&quot; when unable to answer.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/1606.05250\" target=\"_blank\" rel=\"noopener\">Rajpurkar et al. (2016). SQuAD: 100,000+ Questions for Machine Comprehension of Text</a> — the benchmark paper.</li>\n<li><a href=\"https://arxiv.org/abs/2004.04906\" target=\"_blank\" rel=\"noopener\">Karpukhin et al. (2020). Dense Passage Retrieval for Open-Domain QA</a> — DPR, the canonical dense retriever for QA.</li>\n<li><a href=\"https://arxiv.org/abs/2005.11401\" target=\"_blank\" rel=\"noopener\">Lewis et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a> — the paper that named RAG.</li>\n<li><a href=\"https://arxiv.org/abs/2312.10997\" target=\"_blank\" rel=\"noopener\">Gao et al. (2023). Retrieval-Augmented Generation for Large Language Models: A Survey</a> — comprehensive RAG survey.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\nfrom collections import Counter\n\n\ndef tokenize(text):\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\ndef normalize(text):\n    text = text.lower()\n    text = re.sub(r\"\\b(a|an|the)\\b\", \" \", text)\n    text = re.sub(r\"[^\\w\\s]\", \" \", text)\n    return \" \".join(text.split())\n\n\ndef exact_match(pred, gold):\n    return 1.0 if normalize(pred) == normalize(gold) else 0.0\n\n\ndef token_f1(pred, gold):\n    p_tokens = tokenize(normalize(pred))\n    g_tokens = tokenize(normalize(gold))\n    if not p_tokens or not g_tokens:\n        return 0.0 if (p_tokens or g_tokens) else 1.0\n    common = Counter(p_tokens) & Counter(g_tokens)\n    overlap = sum(common.values())\n    if overlap == 0:\n        return 0.0\n    precision = overlap / len(p_tokens)\n    recall = overlap / len(g_tokens)\n    return 2 * precision * recall / (precision + recall)\n\n\ndef refusal_from_score(top_retrieval_score, threshold=0.3):\n    return top_retrieval_score < threshold\n\n\nCORPUS = [\n    \"Apple Inc. released the first iPhone on June 29, 2007.\",\n    \"Macworld 2007 featured the iPhone announcement by Steve Jobs.\",\n    \"Android launched in 2008 as Google's mobile operating system.\",\n    \"The first iPod was released in 2001.\",\n]\n\n\ndef toy_bm25_score(query, doc):\n    q_tokens = set(tokenize(query))\n    d_tokens = tokenize(doc)\n    d_counts = Counter(d_tokens)\n    score = 0.0\n    for qt in q_tokens:\n        if qt in d_counts:\n            score += d_counts[qt] / (1 + len(d_tokens) / 10)\n    return score\n\n\ndef toy_retrieve(question, top_k=2):\n    scored = [(toy_bm25_score(question, d), d) for d in CORPUS]\n    scored.sort(reverse=True)\n    return scored[:top_k]\n\n\ndef main():\n    print(\"=== extractive metrics ===\")\n    cases = [\n        (\"June 29, 2007\", \"June 29, 2007\"),\n        (\"June 29th, 2007\", \"June 29, 2007\"),\n        (\"29 June 2007\", \"June 29, 2007\"),\n        (\"2007\", \"June 29, 2007\"),\n        (\"2008\", \"June 29, 2007\"),\n    ]\n    for pred, gold in cases:\n        em = exact_match(pred, gold)\n        f1 = token_f1(pred, gold)\n        print(f\"  pred={pred!r:20s} gold={gold!r:20s} EM={em:.0f}  F1={f1:.2f}\")\n    print()\n    print(\"note: EM punishes paraphrase. F1 is partial credit. neither captures semantics.\")\n    print()\n\n    print(\"=== toy retrieval ===\")\n    q = \"When was the first iPhone released?\"\n    results = toy_retrieve(q)\n    top_score = results[0][0]\n    refuse = refusal_from_score(top_score)\n    print(f\"  query: {q}\")\n    print(f\"  top score: {top_score:.3f}  refuse: {refuse}\")\n    for s, d in results:\n        print(f\"    {s:.3f}  {d}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does extractive QA predict?",
+      "options": [
+        "Start and end token indices of the answer span within a given passage",
+        "A retrieved passage ID",
+        "A generated natural-language answer",
+        "A confidence score only"
+      ],
+      "answer": 0,
+      "explanation": "Extractive QA outputs the span of the passage that contains the answer."
+    },
+    {
+      "q": "What two components define a basic RAG pipeline?",
+      "options": [
+        "Tokenizer and POS tagger",
+        "An encoder and a decoder trained jointly",
+        "A reranker and a translator",
+        "A retriever (find relevant passages) and a reader (extract or generate the answer)"
+      ],
+      "answer": 3,
+      "explanation": "RAG = retriever (finds relevant context) plus reader (answers from it)."
+    },
+    {
+      "q": "On SQuAD, what does Exact Match (EM) measure?",
+      "options": [
+        "Token-level F1",
+        "Whether the prediction matches the reference exactly after normalization (lowercase, strip punctuation, remove articles)",
+        "Edit distance",
+        "Per-word overlap"
+      ],
+      "answer": 1,
+      "explanation": "EM is strict equality after a defined normalization step; partial matches score zero."
+    },
+    {
+      "q": "What does deepset/roberta-base-squad2 add over a SQuAD 1.1 model?",
+      "options": [
+        "Bigger context window",
+        "Multilingual support",
+        "Cross-lingual retrieval",
+        "Training on unanswerable questions so the model can predict a null answer"
+      ],
+      "answer": 3,
+      "explanation": "SQuAD 2.0 includes unanswerable items; models trained on it can predict 'no answer'."
+    },
+    {
+      "q": "Which RAGAS dimension targets hallucinations specifically?",
+      "options": [
+        "Context precision",
+        "Answer relevance",
+        "Faithfulness, measured by NLI entailment between answer claims and retrieved context",
+        "Context recall"
+      ],
+      "answer": 2,
+      "explanation": "Faithfulness checks each answer claim against retrieved context via NLI entailment."
+    },
+    {
+      "q": "Why should you measure retrieval recall before evaluating reader accuracy?",
+      "options": [
+        "Reader latency depends on it",
+        "If the correct passage is not in the top-k, the reader cannot succeed regardless of how good it is",
+        "Recall determines ROUGE",
+        "Required by transformers"
+      ],
+      "answer": 1,
+      "explanation": "A reader cannot answer when the right passage is missing; retrieval recall bounds reader performance."
+    },
+    {
+      "q": "Which prompt pattern reduces hallucinations in RAG generation?",
+      "options": [
+        "Removing the question",
+        "Including more passages",
+        "Asking the model to be creative",
+        "Telling the model to answer only from the provided context and to reply 'I don't know' when the context is insufficient"
+      ],
+      "answer": 3,
+      "explanation": "Grounding + explicit refusal instructions cuts hallucination rates substantially."
+    },
+    {
+      "q": "When is extractive QA still preferred over generative RAG in 2026?",
+      "options": [
+        "Regulated domains (legal, medical, audit) where literal quotation from authoritative sources is required",
+        "Open-domain trivia",
+        "Conversational QA",
+        "Multilingual support"
+      ],
+      "answer": 0,
+      "explanation": "Extractive QA gives verbatim quotes from an authoritative corpus, which compliance contexts demand."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/13-question-answering"
+  }
+}

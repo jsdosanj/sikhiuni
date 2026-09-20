@@ -1,0 +1,179 @@
+{
+  "intro": "Every phase in the Institute ends with an exam. This is the part that has no exam. Pick one brief, build the smallest version that actually works, and put it in front of a real sangat. The engineering you learned is the same engineering the rest of the industry uses; the difference the Institute asks of you is where you point it. Kirat karni is honest work; seva is honest work aimed at the Panth. A shipped tool that ten people use on a Sunday is worth more than a perfect repo nobody opens.",
+  "howItWorks": [
+    "Choose one brief. Don't start three.",
+    "Build the MVP first — the list under \"the smallest useful version\". Resist the stretch goals until the MVP is in someone's hands.",
+    "Use what you built in the phases: the code lab taught you to run and test small pieces; the AI-engineering phases taught you retrieval, evaluation, and the agent loop. Reach for a framework only after you can explain what it does.",
+    "Ship it somewhere a person can open it — a static host, a small server, a phone. \"Runs on my machine\" is not shipped.",
+    "Write a short README: what it does, who it's for, how to run it, what you'd do next. That README is the deliverable the Institute cares about.",
+    "Show it to the sangat it's for. Their feedback is the real grade."
+  ],
+  "licenseNote": "These briefs are written by Sikhi University and offered under CC BY-SA 4.0. The projects you build from them are yours. If your project touches Gurbani, hold it to the same bar the rest of Sikhi University does: correct Gurmukhi, faithful sourcing, a visible way to report a correction, and scholar review before anything is presented as authoritative.",
+  "briefs": [
+    {
+      "slug": "gurbani-search",
+      "title": "A Gurbani search tool",
+      "oneLine": "Search Sri Guru Granth Sahib Ji by meaning, not just by matching letters.",
+      "seva": "A student hears a tuk in kirtan and wants to find it. A parcharak is preparing a katha on a theme — sewa, nirbhau, haumai — and wants every relevant shabad, not only the ones that use that exact word. Keyword search fails both: Gurmukhi spelling varies across transliterations, and meaning lives across many different words. A search that understands meaning turns hours of page-turning into seconds.",
+      "serves": "Students, parcharaks, kirtanis, anyone writing or teaching from Gurbani.",
+      "problem": "Existing search over SGGS is almost entirely exact-match on Gurmukhi or on one English translation. Ask it for \"fearlessness\" and it misses ਨਿਰਭਉ, ਭੈ, ਡਰੁ, and every line that describes the state without naming it.",
+      "mvp": [
+        "Load a clean SGGS corpus (Gurmukhi + at least one public-domain or openly-licensed English translation), one record per line, with Ang and line reference.",
+        "Build an embedding index over the translation text (and, if you can, the Gurmukhi).",
+        "A single search box: type a phrase in English or Gurmukhi, get the top ~20 lines ranked by semantic similarity, each showing Gurmukhi, translation, and Ang.",
+        "Every result links to the full shabad in context."
+      ],
+      "stretch": [
+        "Hybrid ranking: blend the embedding score with a keyword (BM25) score so exact tuk lookups still land first.",
+        "A \"theme\" mode: given a word like ਹਉਮੈ, cluster the results and show the distinct senses.",
+        "Answer with citations: a short summary of what Gurbani says on the theme, every sentence linked to an Ang — and a loud disclaimer that the summary is a study aid, not a translation.",
+        "Transliteration-tolerant Gurmukhi input."
+      ],
+      "stack": "Phase 11 gives you embeddings, vector search, retrieval, and evaluation. Phase 13 gives you the tool/'function' pattern if you add the cited-answer mode. A small static site plus a vector index (in-browser or a tiny API) is enough — you do not need a large model to do the retrieval well.",
+      "phases": ["11-llm-engineering", "13-tools-and-protocols"],
+      "data": [
+        "A SGGS text corpus you have the right to use (Sikhi University's own corpus, or a public-domain edition).",
+        "BaniDB API (api.banidb.com) for structured Gurbani data and references.",
+        "A public-domain or openly-licensed English translation — verify the licence of each translation before you ship it."
+      ],
+      "done": [
+        "A person can open a URL, search \"why does the mind wander\", and get back relevant tuks with correct Ang references.",
+        "Retrieval quality is measured, not guessed: a small hand-labelled set of query → expected-Ang pairs, and a recall number you can quote.",
+        "Wrong or weak results have a visible \"report this\" path."
+      ],
+      "starter": "gurbani-search/\n  README.md              # what it does, how to run, eval numbers\n  data/\n    sggs.jsonl           # {ang, line, gurmukhi, translation, translit}\n    eval.jsonl           # {query, expectedAng[]}  -- your test set\n  scripts/\n    build-index.…        # corpus -> embeddings -> index\n    evaluate.…           # runs eval.jsonl, prints recall@20\n  src/\n    search.…             # query -> ranked lines (embedding, later hybrid)\n    ui.…                 # the search box + results + \"report a correction\"\n  index.html"
+    },
+    {
+      "slug": "gurdwara-events",
+      "title": "A gurdwara event board",
+      "oneLine": "One place a sangat can see what's happening at their gurdwaras this week.",
+      "seva": "Program information lives in five WhatsApp groups, a printed notice by the langar hall, and one committee member's memory. Newcomers, students far from home, and anyone not on the right list miss samagams, Gurmat classes, and seva days. A plain, shared board — no login to read it — keeps a sangat connected.",
+      "serves": "Local sangats, gurdwara committees, students and families looking for a program near them.",
+      "problem": "There is no neutral, simple, mobile-first place to publish and find gurdwara events. Facebook events exclude people who aren't on Facebook; each gurdwara's own site (if it has one) is a silo.",
+      "mvp": [
+        "A public list of upcoming events: title, gurdwara, date and time, a sentence of description, address.",
+        "A submission form for committee members — new events land in a pending queue.",
+        "A lightweight review step: one trusted person per gurdwara approves or rejects a submission.",
+        "Filter by gurdwara and by date. Mobile-first — most people will open this on a phone in a parking lot."
+      ],
+      "stretch": [
+        "iCal / Google Calendar export per gurdwara and for the whole board.",
+        "Recurring events (weekly Gurmat class, monthly Akhand Path).",
+        "A \"near me\" view using the browser's location, nothing stored.",
+        "Multilingual event text (Punjabi + English) with the Gurmukhi never smaller than the Latin.",
+        "A simple notification opt-in (email or web push) for a gurdwara you follow."
+      ],
+      "stack": "This is a fundamentals project — Phase 0 tooling and clean data modelling matter more than any model. A small server with a database, or even a static site plus a serverless form handler and a JSON store. The engineering lesson here is data integrity, moderation flow, and timezones.",
+      "phases": ["00-setup-and-tooling"],
+      "data": [
+        "Entirely user-submitted. You own the schema: events, gurdwaras, submitters, approvals.",
+        "A seed list of gurdwaras in one city to start — name, address, coordinates."
+      ],
+      "done": [
+        "Two real gurdwara committees can post their week's programs without your help.",
+        "A student new to the city can open the board and find a program to attend this Sunday.",
+        "Nothing offensive or wrong reaches the public list without a human approving it."
+      ],
+      "starter": "gurdwara-events/\n  README.md\n  schema.…               # events, gurdwaras, submissions, approvals\n  server/\n    routes.…             # GET /events (public), POST /submit, POST /review\n    store.…              # db access; keep it boring\n  web/\n    list.…               # the public board (filter by gurdwara + date)\n    submit.…             # committee submission form\n    review.…             # the approve/reject queue\n  seed/gurdwaras.json"
+    },
+    {
+      "slug": "archive-ocr-helper",
+      "title": "An archive OCR helper",
+      "oneLine": "Turn scanned Gurmukhi pages into clean, searchable text a person has checked.",
+      "seva": "Sikhi University's archive holds thousands of scanned pages — puratan pothis, granths, journals — that no search can reach because they are images, not text. Off-the-shelf OCR mangles Gurmukhi: it drops laga-matra, confuses ਸ and ਸ਼, breaks on ਿ before the letter it belongs to. A tool that does a first pass and then makes human correction fast is how a scanned shelf becomes a readable library.",
+      "serves": "Archivists, researchers, anyone who has wanted to quote a puratan source and had only a photo of it.",
+      "problem": "Raw Gurmukhi OCR is 80–90% right, which sounds good and is unusable — every page needs a person, and correcting in a plain text box against a zoomed image is painfully slow.",
+      "mvp": [
+        "Take a page image, run it through an OCR engine, get Gurmukhi text with per-line bounding boxes.",
+        "A review screen: the image on the left, the OCR text on the right, click a line to jump the image to it.",
+        "Fast keyboard correction — next line, previous line, mark line verified — without touching the mouse.",
+        "Export the corrected page as text plus a confidence flag per line.",
+        "A small set of automatic fixes for the known Gurmukhi OCR mistakes (matra ordering, common confusions), applied before the human sees it."
+      ],
+      "stretch": [
+        "An agent pass: for a low-confidence line, a model proposes a correction with a one-line reason, and the human accepts or rejects — never auto-applies.",
+        "Learn from corrections: build a frequency list of your accepted fixes and fold it back into the automatic pass.",
+        "Detect and preserve structure — headings, verse numbers, ਰਹਾਉ.",
+        "Batch mode over a whole pothi with a progress view."
+      ],
+      "stack": "Phase 7 (how sequence models actually read) and Phase 14 (the agent loop — propose, check, decide) are the backbone. The automatic-fix pass is plain string work and a rules file. The lesson is human-in-the-loop design: the model drafts, the person decides, and the interface makes deciding fast.",
+      "phases": ["07-transformers-deep-dive", "14-agent-engineering"],
+      "data": [
+        "Scanned pages from Sikhi University's archive (ask which collection is cleared for this).",
+        "A Gurmukhi-capable OCR engine — evaluate a few; none will be perfect.",
+        "A short style guide for how the corrected text should look (Unicode normalisation, which characters to prefer)."
+      ],
+      "done": [
+        "An archivist corrects a page in noticeably less time than typing it fresh.",
+        "The known-mistakes pass measurably reduces the number of edits a human makes — you can show the before/after edit count.",
+        "Corrected pages come out as clean Unicode that the archive's search can index."
+      ],
+      "starter": "archive-ocr-helper/\n  README.md\n  src/\n    ocr.…                # image -> {lines:[{text, bbox, confidence}]}\n    autofix.…            # known Gurmukhi OCR corrections (rules + tests)\n    review-ui.…          # image | text, keyboard-first line correction\n    export.…             # verified page -> Unicode text + per-line flags\n  rules/gurmukhi-ocr.…   # the confusion pairs + matra-order fixes\n  fixtures/               # a few pages + their hand-verified text\n  eval.…                  # edit-distance before vs after autofix"
+    },
+    {
+      "slug": "langar-seva-coordinator",
+      "title": "A langar and seva coordinator",
+      "oneLine": "Know who's on seva this week and whether the langar stores can cover it.",
+      "seva": "Langar never stops, and the people who keep it running hold the whole schedule in their heads — who's cooking Saturday, whether there's enough atta, who to call when someone can't make it. When that person travels, things slip. A small, shared tool lets a rota survive a handover and lets anyone put their hand up for seva without waiting to be asked.",
+      "serves": "Gurdwara langar and seva coordinators, and the sangat members who want to help.",
+      "problem": "Rotas live on paper or in one phone. There's no easy way for a sangat member to see open seva slots and claim one, and no early warning when supplies are about to run short.",
+      "mvp": [
+        "A weekly rota: seva slots (cook, prep, serve, clean, dishes) with who's assigned.",
+        "Sangat members can view open slots and claim one; coordinators can assign and unassign.",
+        "A simple inventory list: staple items, current quantity, a low mark. Update quantities after a shop or a big langar.",
+        "A dashboard: this week's rota at a glance, unfilled slots highlighted, items below their low mark highlighted."
+      ],
+      "stretch": [
+        "Estimate consumption: from past langars (attendance + what was used), flag \"you'll be short on X by Sunday\".",
+        "Reminders to assigned sevadars the day before.",
+        "Recurring roles and a fair-rotation helper so the same three people aren't on every week.",
+        "A printable rota for the notice board."
+      ],
+      "stack": "Phase 0 to 2. Clean data modelling, a small database, and — for the consumption estimate — the simplest possible regression from Phase 2, not a neural network. The engineering lesson is that a boring, correct tool that runs every week beats a clever one that breaks.",
+      "phases": ["00-setup-and-tooling", "02-ml-fundamentals"],
+      "data": [
+        "User-entered: rota, assignments, inventory counts.",
+        "Optionally a rough attendance number per langar, if the gurdwara already tracks one, to drive the consumption estimate."
+      ],
+      "done": [
+        "A coordinator can hand the whole thing to a deputy for a month and the rota keeps working.",
+        "A sangat member who wants to help can find and claim an open slot in under a minute.",
+        "The tool warned about a supply shortfall before it happened, at least once, for real."
+      ],
+      "starter": "langar-seva-coordinator/\n  README.md\n  schema.…               # sevaSlots, assignments, people, inventoryItems\n  server/\n    rota.…               # view week, claim slot, assign/unassign\n    inventory.…          # list, update quantity, low-mark flags\n    forecast.…           # (stretch) past usage -> simple linear estimate\n  web/\n    dashboard.…          # week rota + gaps + low stock\n    rota.… inventory.…\n  seed/staples.json"
+    },
+    {
+      "slug": "punjabi-learning-bot",
+      "title": "A Punjabi learning bot",
+      "oneLine": "A patient tutor for reading Gurmukhi and understanding the Punjabi of Gurbani.",
+      "seva": "A large part of the diaspora sangat cannot read Gurmukhi, and many who can read it don't follow the meaning. Classes are weekly and move at one pace. A tutor that's available at 11pm, never impatient, and anchored in the actual vocabulary of Gurbani lets someone close that gap on their own schedule — and reading Gurmukhi is the door to a direct relationship with Bani.",
+      "serves": "Diaspora Sikhs and anyone learning to read Gurmukhi or to understand Gurbani vocabulary.",
+      "problem": "Generic language apps don't teach the Gurmukhi script well and don't use the vocabulary that matters for Gurbani. A dedicated tutor can — if it's built to stay accurate and to say \"I'm not sure\" instead of inventing.",
+      "mvp": [
+        "A curated deck: Gurmukhi letters, then common Gurbani words, each with Unicode, a faithful English gloss, and a real example tuk with its Ang.",
+        "Spaced repetition over the deck (a simple, known algorithm — implement it, don't hand-wave it).",
+        "A practice chat: the learner types, the tutor responds in simple Punjabi and English, gently corrects, and only draws vocabulary and examples from the curated deck.",
+        "Every Gurbani example the bot shows is pulled from your data with its citation — the model never composes a tuk."
+      ],
+      "stretch": [
+        "Retrieval-grounded answers: for \"what does ਗੁਰਪ੍ਰਸਾਦਿ mean\", the tutor answers from the deck and linked sources, with citations, and refuses when it has nothing.",
+        "An agent that builds a lesson plan for a learner from their review history.",
+        "Reading practice: show a short, real tuk, let the learner attempt a reading, give targeted feedback.",
+        "Voice input for pronunciation practice (browser speech, nothing stored)."
+      ],
+      "stack": "Phase 11 for retrieval, grounding, and evaluation; Phase 14 if you build the lesson-planning agent. The hard part is not the model — it's the guardrails: the bot must never fabricate Gurbani or a translation, and every scriptural claim must carry a citation. Build the evaluation set that checks this before you build the chat.",
+      "phases": ["11-llm-engineering", "14-agent-engineering"],
+      "data": [
+        "A vocabulary deck you author or adapt from an openly-licensed source — Unicode Gurmukhi, gloss, example reference.",
+        "The SGGS corpus (shared with the Gurbani search brief) for verified example tuks.",
+        "An evaluation set: questions with known-correct answers, and questions the bot should refuse."
+      ],
+      "done": [
+        "A learner who couldn't read Gurmukhi can, after a week of short sessions, read a simple tuk aloud.",
+        "The bot has never shown a fabricated tuk or translation in testing — and you have the eval run to prove it.",
+        "When asked something outside its knowledge, it says so instead of guessing."
+      ],
+      "starter": "punjabi-learning-bot/\n  README.md\n  data/\n    deck.jsonl           # {gurmukhi, gloss, exampleAng, exampleText}\n    eval.jsonl           # {question, answer|refuse}\n  src/\n    srs.…                # spaced repetition (a real algorithm + tests)\n    tutor.…              # chat; vocabulary + examples ONLY from deck/corpus\n    ground.…             # retrieve verified tuk by reference, never generate\n    evaluate.…           # runs eval.jsonl: accuracy + refusal rate\n  web/review.… web/chat.…"
+    }
+  ]
+}

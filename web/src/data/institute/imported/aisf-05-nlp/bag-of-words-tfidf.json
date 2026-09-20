@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::bag-of-words-tfidf",
+  "num": 2,
+  "slug": "bag-of-words-tfidf",
+  "title": "Bag of Words, TF-IDF, and Text Representation",
+  "tagline": "Count first, think later. TF-IDF still beats embeddings on well-defined tasks in 2026.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~75 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>The model needs numbers. You have strings.</p>\n<p>Every NLP pipeline has to answer the same question. How do we turn a variable-length stream of tokens into a fixed-size vector that a classifier can consume. The first answer the field landed on was the dumbest one that works. Count the words. Make a vector.</p>\n<p>That vector has carried more production NLP than any embedding model. Spam filters, topic classifiers, log anomaly detection, search ranking (before BM25), the first wave of sentiment analysis, the first decade of academic NLP benchmarks. 2026 practitioners still reach for it first on narrow classification tasks. It is fast, interpretable, and often indistinguishable from a 400M-parameter embedding model on tasks where word presence is what matters.</p>\n<p>This lesson builds bag of words, then TF-IDF, from scratch. Then shows scikit-learn doing the same in three lines. Then names the failure mode that makes you reach for embeddings.</p>\n<h2>The Concept</h2>\n<p><strong>Bag of Words (BoW)</strong> throws away order. For each document, count how many times each vocabulary word appears. Vector length is the vocabulary size. Position <code>i</code> is the count of word <code>i</code>.</p>\n<p><strong>TF-IDF</strong> reweights BoW. A word that appears in every document is uninformative, so scale it down. A word rare across the corpus but frequent in a single document is signal, so scale it up.</p>\n<pre><code>TF-IDF(w, d) = TF(w, d) * IDF(w)\n             = count(w in d) / |d| * log(N / df(w))\n</code></pre>\n<p>Where <code>TF</code> is term frequency in the document, <code>df</code> is document frequency (how many docs contain the word), <code>N</code> is total documents. The <code>log</code> keeps the weight bounded for ubiquitous words.</p>\n<p>Key property: both produce sparse vectors with interpretable axes. You can look at a trained classifier&#39;s weights and read which words push a document toward each class. You cannot do this with a 768-dimensional BERT embedding.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>bow-tfidf</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: build the vocabulary</h3>\n<pre><code class=\"language-python\">def build_vocab(docs):\n    vocab = {}\n    for doc in docs:\n        for token in doc:\n            if token not in vocab:\n                vocab[token] = len(vocab)\n    return vocab\n</code></pre>\n<p>Input: list of tokenized documents (any word-level tokenizer will do; the <code>code/main.py</code> in this lesson uses a simplified lowercase variant). Output: <code>{word: index}</code> dict. Stable insertion order means word index 0 is the first word seen in the first document. Convention varies; scikit-learn sorts alphabetically.</p>\n<h3>Step 2: bag of words</h3>\n<pre><code class=\"language-python\">def bag_of_words(docs, vocab):\n    matrix = [[0] * len(vocab) for _ in docs]\n    for i, doc in enumerate(docs):\n        for token in doc:\n            if token in vocab:\n                matrix[i][vocab[token]] += 1\n    return matrix\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; docs = [[&quot;cat&quot;, &quot;sat&quot;, &quot;on&quot;, &quot;mat&quot;], [&quot;cat&quot;, &quot;cat&quot;, &quot;ran&quot;]]\n&gt;&gt;&gt; vocab = build_vocab(docs)\n&gt;&gt;&gt; bag_of_words(docs, vocab)\n[[1, 1, 1, 1, 0], [2, 0, 0, 0, 1]]\n</code></pre>\n<p>Rows are documents. Columns are vocabulary indices. Entry <code>[i][j]</code> is &quot;how many times word <code>j</code> appears in document <code>i</code>.&quot; Doc 1 has <code>cat</code> twice because it did. Doc 0 has <code>ran</code> zero times because it did not.</p>\n<h3>Step 3: term frequency and document frequency</h3>\n<pre><code class=\"language-python\">import math\n\n\ndef term_frequency(doc_bow, doc_length):\n    return [c / doc_length if doc_length else 0 for c in doc_bow]\n\n\ndef document_frequency(bow_matrix):\n    df = [0] * len(bow_matrix[0])\n    for row in bow_matrix:\n        for j, count in enumerate(row):\n            if count &gt; 0:\n                df[j] += 1\n    return df\n\n\ndef inverse_document_frequency(df, n_docs):\n    return [math.log((n_docs + 1) / (d + 1)) + 1 for d in df]\n</code></pre>\n<p>Two smoothing tricks worth naming. The <code>(n+1)/(d+1)</code> avoids <code>log(x/0)</code>. The trailing <code>+1</code> ensures a word in every document still has IDF 1 (not 0), matching scikit-learn&#39;s default. Other implementations use raw <code>log(N/df)</code>. Both work; the smoothed version is friendlier.</p>\n<h3>Step 4: TF-IDF</h3>\n<pre><code class=\"language-python\">def tfidf(bow_matrix):\n    n_docs = len(bow_matrix)\n    df = document_frequency(bow_matrix)\n    idf = inverse_document_frequency(df, n_docs)\n    out = []\n    for row in bow_matrix:\n        length = sum(row)\n        tf = term_frequency(row, length)\n        out.append([tf_j * idf_j for tf_j, idf_j in zip(tf, idf)])\n    return out\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; docs = [\n...     [&quot;the&quot;, &quot;cat&quot;, &quot;sat&quot;],\n...     [&quot;the&quot;, &quot;dog&quot;, &quot;sat&quot;],\n...     [&quot;the&quot;, &quot;cat&quot;, &quot;ran&quot;],\n... ]\n&gt;&gt;&gt; vocab = build_vocab(docs)\n&gt;&gt;&gt; bow = bag_of_words(docs, vocab)\n&gt;&gt;&gt; tfidf(bow)\n</code></pre>\n<p>Three documents, five vocab words (<code>the</code>, <code>cat</code>, <code>sat</code>, <code>dog</code>, <code>ran</code>). <code>the</code> appears in all three, so its IDF is low. <code>dog</code> appears in one, so its IDF is high. The vectors are sparse (most entries are small) and the discriminative words pop.</p>\n<h3>Step 5: L2-normalize rows</h3>\n<pre><code class=\"language-python\">def l2_normalize(matrix):\n    out = []\n    for row in matrix:\n        norm = math.sqrt(sum(x * x for x in row))\n        out.append([x / norm if norm else 0 for x in row])\n    return out\n</code></pre>\n<p>Without normalization, a longer document gets a larger vector and dominates similarity scores. L2 normalization puts every document on the unit hypersphere. Cosine similarity between rows is now just a dot product.</p>\n<h2>Use It</h2>\n<p>scikit-learn ships the production version.</p>\n<pre><code class=\"language-python\">from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer\n\ndocs = [&quot;the cat sat on the mat&quot;, &quot;the dog sat on the mat&quot;, &quot;the cat ran&quot;]\n\nbow_vectorizer = CountVectorizer()\nbow = bow_vectorizer.fit_transform(docs)\nprint(bow_vectorizer.get_feature_names_out())\nprint(bow.toarray())\n\ntfidf_vectorizer = TfidfVectorizer()\ntfidf = tfidf_vectorizer.fit_transform(docs)\nprint(tfidf.toarray().round(3))\n</code></pre>\n<p><code>CountVectorizer</code> does tokenization, vocabulary, and BoW in one call. <code>TfidfVectorizer</code> adds IDF weighting and L2 normalization. Both return sparse matrices. For 100k documents, the dense version does not fit in memory; stay sparse until the classifier demands dense.</p>\n<p>Knobs that change everything:</p>\n<table>\n<thead>\n<tr>\n<th>Arg</th>\n<th>Effect</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>ngram_range=(1, 2)</code></td>\n<td>Include bigrams. Usually boosts classification.</td>\n</tr>\n<tr>\n<td><code>min_df=2</code></td>\n<td>Drop words in fewer than 2 docs. Trims vocabulary on noisy data.</td>\n</tr>\n<tr>\n<td><code>max_df=0.95</code></td>\n<td>Drop words in more than 95% of docs. Approximates stopword removal without a hardcoded list.</td>\n</tr>\n<tr>\n<td><code>stop_words=&quot;english&quot;</code></td>\n<td>scikit-learn&#39;s builtin stopword list. Task-dependent — sentiment analysis should <em>not</em> drop negations.</td>\n</tr>\n<tr>\n<td><code>sublinear_tf=True</code></td>\n<td>Use <code>1 + log(tf)</code> instead of raw <code>tf</code>. Helps when a term repeats many times in one doc.</td>\n</tr>\n</tbody></table>\n<h3>When TF-IDF still wins (as of 2026)</h3>\n<ul>\n<li>Spam detection, topic labeling, log anomaly flagging. Word presence is what matters; semantic nuance does not.</li>\n<li>Low-data regimes (hundreds of labeled examples). TF-IDF plus logistic regression has no pretraining cost.</li>\n<li>Anywhere latency matters. TF-IDF plus a linear model answers in microseconds. Embedding a document through a transformer takes 10-100ms.</li>\n<li>Systems that must explain their predictions. Inspect the classifier&#39;s coefficients. Top positive words are the reason.</li>\n</ul>\n<h3>When TF-IDF fails</h3>\n<p>The semantic blindness failure. Consider these two documents:</p>\n<ul>\n<li>&quot;The movie was not good at all.&quot;</li>\n<li>&quot;The movie was excellent.&quot;</li>\n</ul>\n<p>One is a negative review. One is positive. Their TF-IDF overlap is exactly <code>{the, movie, was}</code>. A bag-of-words classifier has to memorize that the word <code>not</code> near <code>good</code> flips the label. It can learn this on enough data, but never as gracefully as a model that understands syntax.</p>\n<p>The other failure: out-of-vocabulary words at inference. A BoW model trained on IMDb reviews has no idea what to do with <code>Zoomer-approved</code> if that token never appeared in training. Subword embeddings (lesson 04) handle this. TF-IDF cannot.</p>\n<h3>Hybrid: TF-IDF weighted embeddings</h3>\n<p>The 2026 pragmatic default for medium-data classification: use TF-IDF weights as attention over word embeddings.</p>\n<pre><code class=\"language-python\">def tfidf_weighted_embedding(doc, tfidf_scores, embedding_table, dim):\n    vec = [0.0] * dim\n    total_weight = 0.0\n    for token in doc:\n        if token not in embedding_table or token not in tfidf_scores:\n            continue\n        weight = tfidf_scores[token]\n        emb = embedding_table[token]\n        for i in range(dim):\n            vec[i] += weight * emb[i]\n        total_weight += weight\n    if total_weight == 0:\n        return vec\n    return [v / total_weight for v in vec]\n</code></pre>\n<p>You get semantic capacity from embeddings, and rare-word emphasis from TF-IDF. Classifier trains on the pooled vector. This outperforms either on its own for sentiment, topic, and intent classification below about 50k labeled examples.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/prompt-vectorization-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: vectorization-picker\ndescription: Given a text-classification task, recommend BoW, TF-IDF, embeddings, or a hybrid.\nphase: 5\nlesson: 02\n---\n\nYou recommend a text-vectorization strategy. Given a task description, output:\n\n1. Representation (BoW, TF-IDF, transformer embeddings, or a hybrid). Explain why in one sentence.\n2. Specific vectorizer configuration. Name the library. Quote the arguments (`ngram_range`, `min_df`, `max_df`, `sublinear_tf`, `stop_words`).\n3. One failure mode to test before shipping.\n\nRefuse to recommend embeddings when the user has under 500 labeled examples unless they show evidence of semantic failure in a TF-IDF baseline. Refuse to remove stopwords for sentiment analysis (negations carry signal). Flag class imbalance as needing more than a vectorizer change.\n\nExample input: &quot;Classifying 30k customer support tickets into 12 categories. Most tickets are 2-3 sentences. English only. Need explainability for audit logs.&quot;\n\nExample output:\n\n- Representation: TF-IDF. 30k examples is not small; explainability requirement rules out dense embeddings.\n- Config: `TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_df=0.95, sublinear_tf=True, stop_words=None)`. Keep stopwords because category keywords sometimes are stopwords (&quot;not working&quot; vs &quot;working&quot;).\n- Failure to test: verify `min_df=3` does not drop rare category keywords. Run `get_feature_names_out` filtered by class and eyeball.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Implement <code>cosine_similarity(doc_vec_a, doc_vec_b)</code> on the L2-normalized TF-IDF output. Verify that identical documents score 1.0 and disjoint-vocabulary documents score 0.0.</li>\n<li><strong>Medium.</strong> Add <code>n-gram</code> support to <code>bag_of_words</code>. Parameter <code>n</code> produces counts over <code>n</code>-grams. Test that <code>n=2</code> on <code>[&quot;the&quot;, &quot;cat&quot;, &quot;sat&quot;]</code> produces bigram counts for <code>[&quot;the cat&quot;, &quot;cat sat&quot;]</code>.</li>\n<li><strong>Hard.</strong> Build the TF-IDF-weighted-embedding hybrid above using GloVe 100d vectors (download once, cache). Compare classification accuracy against plain TF-IDF and plain mean-pooled embeddings on the 20 Newsgroups dataset. Report which wins where.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>BoW</td>\n<td>Word frequency vector</td>\n<td>Counts of vocabulary words in one document. Throws away order.</td>\n</tr>\n<tr>\n<td>TF</td>\n<td>Term frequency</td>\n<td>Count of a word in a document, optionally normalized by document length.</td>\n</tr>\n<tr>\n<td>DF</td>\n<td>Document frequency</td>\n<td>Count of documents containing the word at least once.</td>\n</tr>\n<tr>\n<td>IDF</td>\n<td>Inverse document frequency</td>\n<td><code>log(N / df)</code> smoothed. Downweights words that appear everywhere.</td>\n</tr>\n<tr>\n<td>Sparse vector</td>\n<td>Mostly zeros</td>\n<td>Vocabulary is typically 10k-100k words; most are absent from any given document.</td>\n</tr>\n<tr>\n<td>Cosine similarity</td>\n<td>Vector angle</td>\n<td>Dot product of L2-normalized vectors. 1 is identical, 0 is orthogonal.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction\" target=\"_blank\" rel=\"noopener\">scikit-learn — feature extraction from text</a> — the canonical API reference, plus notes on every knob.</li>\n<li><a href=\"https://www.sciencedirect.com/science/article/pii/0306457388900210\" target=\"_blank\" rel=\"noopener\">Salton, G., &amp; Buckley, C. (1988). Term-weighting approaches in automatic text retrieval</a> — the paper that made TF-IDF the default for a decade.</li>\n<li><a href=\"https://medium.com/@cmtwskb/why-tf-idf-still-beats-embeddings-ad85c123e1b2\" target=\"_blank\" rel=\"noopener\">&quot;Why TF-IDF Still Beats Embeddings&quot; — Ashfaque Thonikkadavan (Medium)</a> — 2026 take on when the old method wins and why.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import math\nimport re\n\n\nTOKEN_RE = re.compile(r\"[A-Za-z]+(?:'[A-Za-z]+)?|[0-9]+\")\n\n\ndef tokenize(text):\n    return [t.lower() for t in TOKEN_RE.findall(text)]\n\n\ndef build_vocab(docs):\n    vocab = {}\n    for doc in docs:\n        for token in doc:\n            if token not in vocab:\n                vocab[token] = len(vocab)\n    return vocab\n\n\ndef bag_of_words(docs, vocab):\n    matrix = [[0] * len(vocab) for _ in docs]\n    for i, doc in enumerate(docs):\n        for token in doc:\n            if token in vocab:\n                matrix[i][vocab[token]] += 1\n    return matrix\n\n\ndef document_frequency(bow_matrix):\n    df = [0] * len(bow_matrix[0])\n    for row in bow_matrix:\n        for j, count in enumerate(row):\n            if count > 0:\n                df[j] += 1\n    return df\n\n\ndef inverse_document_frequency(df, n_docs):\n    return [math.log((n_docs + 1) / (d + 1)) + 1 for d in df]\n\n\ndef tfidf(bow_matrix):\n    n_docs = len(bow_matrix)\n    df = document_frequency(bow_matrix)\n    idf = inverse_document_frequency(df, n_docs)\n    out = []\n    for row in bow_matrix:\n        length = sum(row)\n        tf = [c / length if length else 0 for c in row]\n        out.append([t * i for t, i in zip(tf, idf)])\n    return out\n\n\ndef l2_normalize(matrix):\n    out = []\n    for row in matrix:\n        norm = math.sqrt(sum(x * x for x in row))\n        out.append([x / norm if norm else 0 for x in row])\n    return out\n\n\ndef cosine_similarity(a, b):\n    return sum(x * y for x, y in zip(a, b))\n\n\ndef main():\n    raw = [\n        \"The cat sat on the mat.\",\n        \"The dog sat on the mat.\",\n        \"The cat ran across the room.\",\n    ]\n    docs = [tokenize(r) for r in raw]\n    vocab = build_vocab(docs)\n    bow = bag_of_words(docs, vocab)\n    tfidf_vectors = l2_normalize(tfidf(bow))\n\n    words = sorted(vocab, key=lambda w: vocab[w])\n    print(f\"vocab: {words}\")\n    print()\n    for i, (r, v) in enumerate(zip(raw, tfidf_vectors)):\n        pretty = [f\"{x:.2f}\" for x in v]\n        print(f\"d{i}: {r}\")\n        print(f\"    tfidf: {pretty}\")\n        print()\n\n    print(\"cosine similarity matrix:\")\n    for i in range(len(tfidf_vectors)):\n        row = [f\"{cosine_similarity(tfidf_vectors[i], tfidf_vectors[j]):.2f}\" for j in range(len(tfidf_vectors))]\n        print(f\"  d{i}: {row}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does Bag of Words throw away?",
+      "options": [
+        "Punctuation",
+        "Token order",
+        "Vocabulary size",
+        "Document length"
+      ],
+      "answer": 1,
+      "explanation": "BoW counts tokens per document but discards their sequence."
+    },
+    {
+      "q": "Why scale TF by an IDF factor?",
+      "options": [
+        "To normalize document length",
+        "Words that appear in every document carry little discriminative signal and should be downweighted",
+        "To remove punctuation",
+        "To accelerate training"
+      ],
+      "answer": 1,
+      "explanation": "IDF penalizes ubiquitous words and boosts rare ones."
+    },
+    {
+      "q": "In the smoothed IDF formula log((N+1)/(df+1)) + 1, what does the trailing +1 ensure?",
+      "options": [
+        "Numerical stability for large N",
+        "Compatibility with raw counts",
+        "A word that appears in every document still has IDF 1 instead of 0",
+        "Faster computation"
+      ],
+      "answer": 2,
+      "explanation": "The +1 keeps ubiquitous words at IDF=1 so they are not zeroed out, matching scikit-learn's default."
+    },
+    {
+      "q": "Why L2-normalize TF-IDF rows before cosine similarity?",
+      "options": [
+        "To convert sparse vectors to dense",
+        "Longer documents would otherwise dominate similarity scores; normalization puts all docs on the unit hypersphere",
+        "To remove zero entries",
+        "To compress the vocabulary"
+      ],
+      "answer": 1,
+      "explanation": "L2 normalization removes document-length bias and turns cosine similarity into a dot product."
+    },
+    {
+      "q": "Which TfidfVectorizer setting is risky to enable for sentiment analysis?",
+      "options": [
+        "sublinear_tf=True",
+        "ngram_range=(1, 2)",
+        "min_df=2",
+        "stop_words='english'"
+      ],
+      "answer": 3,
+      "explanation": "English stopword lists drop negations like 'not', which carry sentiment signal."
+    },
+    {
+      "q": "Which task does TF-IDF still win in 2026?",
+      "options": [
+        "Machine translation",
+        "Open-ended dialogue",
+        "Image captioning",
+        "Spam detection, log anomaly flagging, and low-latency narrow classification"
+      ],
+      "answer": 3,
+      "explanation": "TF-IDF beats embeddings when word presence is the signal and explainability or speed matter."
+    },
+    {
+      "q": "Why does TF-IDF fail on the pair 'The movie was not good' vs 'The movie was excellent'?",
+      "options": [
+        "TF-IDF requires bigrams to work",
+        "Both documents share most tokens; bag-of-words has no notion of negation or word order",
+        "TF-IDF cannot handle stopwords",
+        "Embeddings overlap is too high"
+      ],
+      "answer": 1,
+      "explanation": "Without word order or syntactic context, BoW cannot model that 'not' flips the sentiment of 'good'."
+    },
+    {
+      "q": "What is the TF-IDF weighted embedding hybrid?",
+      "options": [
+        "Concatenating BoW and dense embeddings",
+        "Running PCA on TF-IDF then re-embedding",
+        "Using TF-IDF weights as a pooling weight over per-token embeddings before averaging",
+        "Training BERT on TF-IDF features"
+      ],
+      "answer": 2,
+      "explanation": "The hybrid weights each token's embedding by its TF-IDF score and averages, blending semantic capacity with rare-word emphasis."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/02-bag-of-words-tfidf"
+  }
+}

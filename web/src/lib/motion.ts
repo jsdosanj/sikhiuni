@@ -128,10 +128,75 @@ export function initRings(root: ParentNode = document): void {
   rings.forEach((c) => io.observe(c));
 }
 
+// Hall arrival: a one-time cinematic entrance for the hero on ambient="hall"
+// pages only (index/about/programs) — a hairline curtain sweep, then a
+// staggered rise on [data-arrival] children. Content-safe by the same
+// contract as revealOnScroll (armed via data-arrival-ready; no-JS/crawlers
+// see final state). Scoped to `header [data-arrival]` so it is structurally
+// impossible to arrival-gate anything outside a hero, and bails outside hall
+// scope entirely (DESIGN.md: never on study/sanctum/reading surfaces).
+export function initArrival(): void {
+  if (document.body.dataset.ambient !== 'hall') return;
+  const els = Array.from(document.querySelectorAll<HTMLElement>('header [data-arrival]'));
+  if (!els.length) return;
+  document.documentElement.setAttribute('data-arrival-ready', '1');
+  if (reduced()) {
+    els.forEach((el) => el.classList.add('in'));
+    return;
+  }
+  // Double rAF: guarantees the browser paints the armed (opacity:0) state
+  // before .in is added, so the CSS transition actually plays.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll<HTMLElement>('header .su-arrival-curtain').forEach((c) => c.classList.add('go'));
+    els.forEach((el, i) => {
+      el.style.transitionDelay = `${i * 90}ms`;
+      el.classList.add('in');
+    });
+  }));
+}
+
+// Seal reveal: a drawn-seal stamp-in + one saffron glow pulse, fired AFTER
+// the real content/verdict already rendered (never gates it) — cert.astro,
+// verify.astro. Same visual language as the games kit's celebrate(), defined
+// independently here since this is a shared (non-games) primitive.
+// DESIGN.md-sanctioned: no confetti, no emoji, no sound. Skipped under
+// reduced motion (the seal is pure decoration; the content beside it already
+// says everything that matters).
+export function sealReveal(el: HTMLElement): void {
+  if (reduced()) return;
+  if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'pointer-events-none absolute inset-0 z-20 grid place-items-center';
+
+  const glow = document.createElement('div');
+  glow.className = 'absolute h-40 w-40 rounded-full';
+  glow.style.background = 'radial-gradient(closest-side, rgba(244,178,26,.55), transparent 70%)';
+  glow.style.animation = 'su-seal-glow 900ms var(--ease-out, ease-out) forwards';
+
+  const R = 34, C = 2 * Math.PI * R;
+  const seal = document.createElement('div');
+  seal.style.animation = 'su-seal-pop 600ms var(--ease-spring, cubic-bezier(.34,1.56,.64,1)) both';
+  seal.innerHTML =
+    `<svg class="relative h-24 w-24" viewBox="0 0 80 80" fill="none" ` +
+    `stroke="#f4b21a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+    `<circle cx="40" cy="40" r="${R}" ` +
+    `style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${C.toFixed(1)};` +
+    `animation:su-seal-draw 700ms var(--ease-cinema, ease) 120ms forwards"/>` +
+    `<path d="M28 41l8 8 16-18" ` +
+    `style="stroke-dasharray:44;stroke-dashoffset:44;` +
+    `animation:su-seal-draw 420ms var(--ease-cinema, ease) 600ms forwards"/></svg>`;
+
+  wrap.append(glow, seal);
+  el.appendChild(wrap);
+  window.setTimeout(() => wrap.remove(), 1600);
+}
+
 export function initMotion(): void {
   revealOnScroll();
   initTilt();
   initParallax();
+  initArrival();
   initRings();
   const counters = Array.from(document.querySelectorAll<HTMLElement>('[data-countup]'));
   if (!counters.length) return;

@@ -1,0 +1,104 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { phases, professorOf } from '../../../lib/institute';
+
+// The answer-free question banks (synced to /data/institute/exam/ for the
+// client). Their presence is what makes a phase examinable.
+const banks = import.meta.glob('../../../data/institute/exam/*.json', { eager: true });
+const bankOf = (id: string) => {
+  const m = banks[`../../../data/institute/exam/${id}.json`] as any;
+  return m ? (m.default ?? m) : null;
+};
+
+export function getStaticPaths() {
+  const examBanks = import.meta.glob('../../../data/institute/exam/*.json', { eager: true });
+  return phases
+    .filter((t) => t.status === 'published')
+    .map((t) => {
+      const m = examBanks[`../../../data/institute/exam/${t.id}.json`] as any;
+      return { t, bank: m ? (m.default ?? m) : null };
+    })
+    .filter((x) => x.bank && x.bank.count > 0)
+    .map(({ t }) => ({ params: { track: t.slug! }, props: { t } }));
+}
+
+const { t } = Astro.props;
+const bank = bankOf(t.id);
+const prof = professorOf(t);
+const examN = Math.min(20, bank.count);
+const pass = 80;
+const pnum = String(t.num ?? 0).padStart(2, '0');
+const certHref = `/technology/cert?track=${t.slug}`;
+---
+<Base
+  title={`Phase ${pnum} exam, Institute of Technology`}
+  description={`The phase exam for ${t.title}: ${examN} questions drawn from the phase's question bank, graded server-side, ${pass}% to pass and earn the certificate.`}
+  institute
+  noindex
+>
+  <InstituteRail />
+
+  <header class="i-ehead">
+    <div class="i-wrap">
+      <span class="i-label i-mono">exam · f{pnum} · {t.license}</span>
+      <h1>{t.title}, phase exam</h1>
+      <p class="i-prose i-ehead-sum">
+        {examN} multiple-choice questions, drawn at random from this phase's bank of {bank.count}.
+        Graded on our server, the answer key never reaches your browser. Score {pass}% or higher
+        and the <a href={certHref}>Phase {pnum} certificate</a> unlocks.
+      </p>
+    </div>
+  </header>
+
+  <section class="i-wrap i-ebody">
+    <div id="i-exam" data-track={t.id} data-cert={certHref}>
+      <div class="i-panel" data-intro>
+        <span class="i-corner">before you start</span>
+        <ul class="i-erules">
+          <li><strong>{examN} questions.</strong> Answer all of them, then submit once.</li>
+          <li><strong>{pass}% to pass.</strong> Re-take it with a fresh question set as many times as you need, your best score stands.</li>
+          <li><strong>Sign in first.</strong> The grade is recorded to your account; that is what issues the verifiable certificate.</li>
+          <li><strong>One certificate per phase.</strong> It reads <em>Sikhi University · Institute of Technology</em> and verifies at <a href="/verify">/verify</a>.</li>
+        </ul>
+        <p class="i-prose i-efrom">
+          Questions are drawn from the phase's lessons, adapted from
+          <a href="https://aiengineeringfromscratch.com">AI Engineering from Scratch</a>
+          {prof ? <> by {prof.name}</> : null}. If you have the experience, you can sit the exam
+          without walking every lesson, the {pass}% bar keeps the credential honest either way.
+        </p>
+        <button class="i-btn i-btn-primary" data-start>Begin the exam</button>
+      </div>
+
+      <div data-stage hidden></div>
+    </div>
+
+    <p class="i-prose i-eback">
+      <a href={`/technology/track/${t.slug}`}>&larr; Back to {t.title}</a>
+    </p>
+  </section>
+
+  <style>
+    .i-ehead { border-bottom: 1px solid var(--i-line); padding: 36px 0 30px; background: var(--i-ground-deep); }
+    .i-ehead h1 { margin: 10px 0 0; font-size: clamp(23px, 4vw, 34px); }
+    .i-ehead-sum { margin-top: 14px; font-size: 16px; max-width: 62ch; }
+    .i-ehead-sum a { color: var(--i-filament); }
+
+    .i-ebody { padding: 32px 24px 72px; }
+    .i-erules { margin: 12px 0 0; padding-left: 20px; }
+    .i-erules li { color: var(--i-ink-dim); line-height: 1.7; margin: 6px 0; }
+    .i-erules strong { color: var(--i-ink); }
+    .i-efrom { margin: 16px 0 20px; font-size: 13.5px; color: var(--i-muted); }
+    .i-efrom a, .i-erules a { color: var(--i-filament); }
+    #i-exam [data-intro] { max-width: 640px; }
+    .i-eback { margin-top: 28px; font-size: 13px; }
+    .i-eback a { color: var(--i-muted); }
+    /* The exam form itself is injected by the island, its styles live in
+       institute.css (.i-exam-form / .i-exam-q / .i-exam-result). */
+  </style>
+
+  <script>
+    import { initExam } from '../../../lib/institute/exam';
+    initExam();
+  </script>
+</Base>

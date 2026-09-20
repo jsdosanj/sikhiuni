@@ -7,16 +7,37 @@
   "display": "standalone",
   "background_color": "#16335c",
   "theme_color": "#16335c",
-  "categories": ["education", "books", "lifestyle"],
+  "categories": [
+    "education",
+    "books",
+    "lifestyle"
+  ],
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    { "name": "Course catalogue", "url": "/catalog" },
-    { "name": "Read Gurbani", "url": "/santhiya?src=sggs" },
-    { "name": "Learning paths", "url": "/catalog#paths" }
+    {
+      "name": "Course catalogue",
+      "url": "/catalog"
+    },
+    {
+      "name": "Read Gurbani",
+      "url": "/santhiya?src=sggs"
+    },
+    {
+      "name": "Learning paths",
+      "url": "/catalog#paths"
+    }
   ]
 }

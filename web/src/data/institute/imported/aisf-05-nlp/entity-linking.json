@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::entity-linking",
+  "num": 25,
+  "slug": "entity-linking",
+  "title": "Entity Linking & Disambiguation",
+  "tagline": "NER found \"Paris.\" Entity linking decides: Paris, France? Paris Hilton? Paris, Texas? Paris (the Trojan prince)? Without linking, your knowledge graph stays ambiguous.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>A sentence reads: &quot;Jordan beat the press.&quot; Your NER tags &quot;Jordan&quot; as PERSON. Good. But <em>which</em> Jordan?</p>\n<ul>\n<li>Michael Jordan (basketball)?</li>\n<li>Michael B. Jordan (actor)?</li>\n<li>Michael I. Jordan (Berkeley ML professor — yes, this confusion is real in ML papers)?</li>\n<li>Jordan (the country)?</li>\n<li>Jordan (Hebrew first name)?</li>\n</ul>\n<p>Entity linking (EL) resolves each mention to a unique entry in a knowledge base: Wikidata, Wikipedia, DBpedia, or your domain KB. Two subtasks:</p>\n<ol>\n<li><strong>Candidate generation.</strong> Given &quot;Jordan,&quot; which KB entries are plausible?</li>\n<li><strong>Disambiguation.</strong> Given the context, which candidate is the right one?</li>\n</ol>\n<p>Both steps are learnable. Both are benchmarked. The combined pipeline has been stable for a decade — what changes is the quality of the disambiguator.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/entity-linking.svg\" alt=\"Entity linking pipeline: mention → candidates → disambiguated entity\" loading=\"lazy\"><figcaption>Entity linking pipeline: mention → candidates → disambiguated entity</figcaption></figure>\n<p><strong>Candidate generation.</strong> Given the mention surface form (&quot;Jordan&quot;), look up candidates in an alias index. Wikipedia alias dictionaries cover most named entities: &quot;JFK&quot; → John F. Kennedy, Jacqueline Kennedy, JFK airport, JFK (movie). Typical index returns 10-30 candidates per mention.</p>\n<p><strong>Disambiguation: three approaches.</strong></p>\n<ol>\n<li><strong>Prior + context (Milne &amp; Witten, 2008).</strong> <code>P(entity | mention) × context-similarity(entity, text)</code>. Works well, fast, no training.</li>\n<li><strong>Embedding-based (ESS / REL / Blink).</strong> Encode mention + context. Encode each candidate&#39;s description. Pick max cosine. The 2020-2024 default.</li>\n<li><strong>Generative (GENRE, 2021; LLM-based, 2023+).</strong> Decode the entity&#39;s canonical name token-by-token. Constrained to a trie of valid entity names so output is guaranteed to be a valid KB id.</li>\n</ol>\n<p><strong>End-to-end vs pipeline.</strong> Modern models (ELQ, BLINK, ExtEnD, GENRE) run NER + candidate generation + disambiguation in one pass. Pipeline systems still dominate in production because you can swap components.</p>\n<h3>The two measurements</h3>\n<ul>\n<li><strong>Mention recall (candidate gen).</strong> Fraction of gold mentions where the correct KB entry appears in the candidate list. Floor for the whole pipeline.</li>\n<li><strong>Disambiguation accuracy / F1.</strong> Given correct candidates, how often the top-1 is right.</li>\n</ul>\n<p>Always report both. A system with 99% disambiguation on 80% candidate recall is an 80% pipeline.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>gx-entity-linking</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: build an alias index from Wikipedia redirects</h3>\n<pre><code class=\"language-python\">alias_to_entities = {\n    &quot;jordan&quot;: [&quot;Q41421 (Michael Jordan)&quot;, &quot;Q810 (Jordan, country)&quot;, &quot;Q254110 (Michael B. Jordan)&quot;],\n    &quot;paris&quot;:  [&quot;Q90 (Paris, France)&quot;, &quot;Q663094 (Paris, Texas)&quot;, &quot;Q55411 (Paris Hilton)&quot;],\n    &quot;apple&quot;:  [&quot;Q312 (Apple Inc.)&quot;, &quot;Q89 (apple, fruit)&quot;],\n}\n</code></pre>\n<p>Wikipedia alias data: ~18M (alias, entity) pairs. Download from Wikidata dumps. Store as inverted index.</p>\n<h3>Step 2: context-based disambiguation</h3>\n<pre><code class=\"language-python\">def disambiguate(mention, context, alias_index, entity_desc):\n    candidates = alias_index.get(mention.lower(), [])\n    if not candidates:\n        return None, 0.0\n    context_words = set(tokenize(context))\n    best, best_score = None, -1\n    for entity_id in candidates:\n        desc_words = set(tokenize(entity_desc[entity_id]))\n        union = len(context_words | desc_words)\n        score = len(context_words &amp; desc_words) / union if union else 0.0\n        if score &gt; best_score:\n            best, best_score = entity_id, score\n    return best, best_score\n</code></pre>\n<p>The Jaccard overlap is a toy. Replace with cosine similarity on embeddings (see <code>code/main.py</code> step-2 for the transformer version).</p>\n<h3>Step 3: embedding-based (BLINK-style)</h3>\n<pre><code class=\"language-python\">from sentence_transformers import SentenceTransformer\nencoder = SentenceTransformer(&quot;sentence-transformers/all-MiniLM-L6-v2&quot;)\n\ndef embed_mention(text, mention_span):\n    start, end = mention_span\n    marked = f&quot;{text[:start]} [MENTION] {text[start:end]} [/MENTION] {text[end:]}&quot;\n    return encoder.encode([marked], normalize_embeddings=True)[0]\n\ndef embed_entity(entity_id, description):\n    return encoder.encode([f&quot;{entity_id}: {description}&quot;], normalize_embeddings=True)[0]\n</code></pre>\n<p>At index time, embed every KB entity once. At query time, embed the mention + context once, dot-product against the candidate pool, pick max.</p>\n<h3>Step 4: generative entity linking (concept)</h3>\n<p>GENRE decodes the entity&#39;s Wikipedia title character-by-character. Constrained decoding (see lesson 20) ensures only valid titles can be output. Tight integration with a KB-backed trie. The modern descendant is REL-GEN and LLM-prompted EL with structured output.</p>\n<pre><code class=\"language-python\">prompt = f&quot;&quot;&quot;Text: {text}\nMention: {mention}\nList the best Wikipedia title for this mention.\nRespond with JSON: {{&quot;title&quot;: &quot;...&quot;}}&quot;&quot;&quot;\n</code></pre>\n<p>Combined with a whitelist (Outlines <code>choice</code>), this is the simplest EL pipeline to ship in 2026.</p>\n<h3>Step 5: evaluate on AIDA-CoNLL</h3>\n<p>AIDA-CoNLL is the standard EL benchmark: 1,393 Reuters articles, 34k mentions, Wikipedia entities. Report in-KB accuracy (<code>P@1</code>) and out-of-KB NIL-detection rate.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>NIL handling.</strong> Some mentions are not in the KB (emerging entities, obscure people). Systems must predict NIL instead of guessing the wrong entity. Measured separately.</li>\n<li><strong>Mention boundary errors.</strong> Upstream NER misses partial spans (&quot;Bank of America&quot; tagged as just &quot;Bank&quot;). EL recall drops.</li>\n<li><strong>Popularity bias.</strong> Trained systems over-predict frequent entities. A mention of &quot;Michael I. Jordan&quot; on an ML paper often links to basketball Jordan.</li>\n<li><strong>Cross-lingual EL.</strong> Mapping mentions in Chinese text to English Wikipedia entities. Requires a multilingual encoder or a translation step.</li>\n<li><strong>KB staleness.</strong> New companies, events, people are not in last year&#39;s Wikipedia dump. Production pipelines need a refresh loop.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>General-purpose English + Wikipedia</td>\n<td>BLINK or REL</td>\n</tr>\n<tr>\n<td>Cross-lingual, KB = Wikipedia</td>\n<td>mGENRE</td>\n</tr>\n<tr>\n<td>LLM-friendly, few mentions/day</td>\n<td>Prompt Claude/GPT-4 with candidate list + constrained JSON</td>\n</tr>\n<tr>\n<td>Domain-specific KB (medical, legal)</td>\n<td>Custom BERT with KB-aware retrieval + fine-tune on domain AIDA-style set</td>\n</tr>\n<tr>\n<td>Extremely low-latency</td>\n<td>Exact-match prior only (Milne-Witten baseline)</td>\n</tr>\n<tr>\n<td>Research SOTA</td>\n<td>GENRE / ExtEnD / generative LLM-EL</td>\n</tr>\n</tbody></table>\n<p>Production pattern that ships in 2026: NER → coref → EL on each mention → collapse clusters to one canonical entity per cluster. Output: one KB id per entity in the document, not one per mention.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-entity-linker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: entity-linker\ndescription: Design an entity linking pipeline — KB, candidate generator, disambiguator, evaluation.\nversion: 1.0.0\nphase: 5\nlesson: 25\ntags: [nlp, entity-linking, knowledge-graph]\n---\n\nGiven a use case (domain KB, language, volume, latency budget), output:\n\n1. Knowledge base. Wikidata / Wikipedia / custom KB. Version date. Refresh cadence.\n2. Candidate generator. Alias-index, embedding, or hybrid. Target mention recall @ K.\n3. Disambiguator. Prior + context, embedding-based, generative, or LLM-prompted.\n4. NIL strategy. Threshold on top score, classifier, or explicit NIL candidate.\n5. Evaluation. Mention recall @ 30, top-1 accuracy, NIL-detection F1 on held-out set.\n\nRefuse any EL pipeline without a mention-recall baseline (you cannot evaluate a disambiguator without knowing candidate gen surfaced the right entity). Refuse any pipeline using LLM-prompted EL without constrained output to valid KB ids. Flag systems where popularity bias affects minority entities (e.g. name-clashes) without domain fine-tuning.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Implement the prior+context disambiguator in <code>code/main.py</code> on 10 ambiguous mentions (Paris, Jordan, Apple). Hand-label the correct entity. Measure accuracy.</li>\n<li><strong>Medium.</strong> Encode 50 ambiguous mentions with a sentence transformer. Embed each candidate&#39;s description. Compare embedding-based disambiguation to Jaccard context overlap.</li>\n<li><strong>Hard.</strong> Build a 1k-entity domain KB (e.g. employees + products in your company). Implement NER + EL end-to-end. Measure precision and recall on 100 held-out sentences.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Entity linking (EL)</td>\n<td>Link to Wikipedia</td>\n<td>Map a mention to a unique KB entry.</td>\n</tr>\n<tr>\n<td>Candidate generation</td>\n<td>Who could it be?</td>\n<td>Return a shortlist of plausible KB entries for a mention.</td>\n</tr>\n<tr>\n<td>Disambiguation</td>\n<td>Pick the right one</td>\n<td>Score candidates using context, pick the winner.</td>\n</tr>\n<tr>\n<td>Alias index</td>\n<td>The lookup table</td>\n<td>Map from surface form → candidate entities.</td>\n</tr>\n<tr>\n<td>NIL</td>\n<td>Not in KB</td>\n<td>Explicit prediction that no KB entry matches.</td>\n</tr>\n<tr>\n<td>KB</td>\n<td>Knowledge base</td>\n<td>Wikidata, Wikipedia, DBpedia, or your domain KB.</td>\n</tr>\n<tr>\n<td>AIDA-CoNLL</td>\n<td>The benchmark</td>\n<td>1,393 Reuters articles with gold entity links.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.cs.waikato.ac.nz/~ihw/papers/08-DM-IHW-LearningToLinkWithWikipedia.pdf\" target=\"_blank\" rel=\"noopener\">Milne, Witten (2008). Learning to Link with Wikipedia</a> — the foundational prior+context approach.</li>\n<li><a href=\"https://arxiv.org/abs/1911.03814\" target=\"_blank\" rel=\"noopener\">Wu et al. (2020). Zero-shot Entity Linking with Dense Entity Retrieval (BLINK)</a> — the embedding-based workhorse.</li>\n<li><a href=\"https://arxiv.org/abs/2010.00904\" target=\"_blank\" rel=\"noopener\">De Cao et al. (2021). Autoregressive Entity Retrieval (GENRE)</a> — generative EL with constrained decoding.</li>\n<li><a href=\"https://www.aclweb.org/anthology/D11-1072.pdf\" target=\"_blank\" rel=\"noopener\">Hoffart et al. (2011). Robust Disambiguation of Named Entities in Text (AIDA)</a> — the benchmark paper.</li>\n<li><a href=\"https://arxiv.org/abs/2006.01969\" target=\"_blank\" rel=\"noopener\">REL: An Entity Linker Standing on the Shoulders of Giants (2020)</a> — the open production stack.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\nfrom collections import Counter\n\n\nALIAS_INDEX = {\n    \"jordan\": [\"Q41421\", \"Q810\", \"Q254110\", \"Q3308285\"],\n    \"paris\":  [\"Q90\", \"Q663094\", \"Q55411\"],\n    \"apple\":  [\"Q312\", \"Q89\"],\n    \"washington\": [\"Q23\", \"Q1223\", \"Q61\"],\n    \"python\": [\"Q28865\", \"Q83320\"],\n}\n\nKB_DESC = {\n    \"Q41421\":  \"Michael Jordan American basketball player Chicago Bulls six championships\",\n    \"Q810\":    \"Jordan country Middle East kingdom capital Amman Arabic\",\n    \"Q254110\": \"Michael B Jordan American actor Black Panther Creed film\",\n    \"Q3308285\": \"Michael I Jordan Berkeley professor machine learning statistics\",\n    \"Q90\":     \"Paris capital of France Eiffel Tower Seine river city\",\n    \"Q663094\": \"Paris Texas city United States Lamar County\",\n    \"Q55411\":  \"Paris Hilton American socialite hotel heiress television personality\",\n    \"Q312\":    \"Apple Inc American technology company iPhone Mac Tim Cook Cupertino\",\n    \"Q89\":     \"Apple fruit tree species Malus domestica red green grown worldwide\",\n    \"Q23\":     \"George Washington American founding father first president\",\n    \"Q1223\":   \"Washington state Pacific northwest United States Seattle capital Olympia\",\n    \"Q61\":     \"Washington DC capital city of United States federal district\",\n    \"Q28865\":  \"Python programming language Guido van Rossum interpreted dynamic\",\n    \"Q83320\":  \"Python snake nonvenomous constrictor species Asia Africa large\",\n}\n\nPRIORS = {\n    \"Q41421\":  0.50, \"Q810\":    0.20, \"Q254110\": 0.20, \"Q3308285\": 0.10,\n    \"Q90\":     0.85, \"Q663094\": 0.05, \"Q55411\":  0.10,\n    \"Q312\":    0.70, \"Q89\":     0.30,\n    \"Q23\":     0.40, \"Q1223\":   0.30, \"Q61\":     0.30,\n    \"Q28865\":  0.80, \"Q83320\":  0.20,\n}\n\n\ndef tokenize(text):\n    return set(re.findall(r\"[a-z0-9]+\", text.lower()))\n\n\ndef disambiguate(mention, context, use_prior=True):\n    candidates = ALIAS_INDEX.get(mention.lower(), [])\n    if not candidates:\n        return None, 0.0\n    ctx_tokens = tokenize(context)\n    scored = []\n    for cand in candidates:\n        desc_tokens = tokenize(KB_DESC.get(cand, \"\"))\n        if not desc_tokens:\n            jac = 0.0\n        else:\n            overlap = len(ctx_tokens & desc_tokens)\n            union = len(ctx_tokens | desc_tokens)\n            jac = overlap / union if union else 0.0\n        prior = PRIORS.get(cand, 0.0) if use_prior else 1.0\n        score = jac + 0.1 * prior\n        scored.append((cand, score, jac, prior))\n    scored.sort(key=lambda x: -x[1])\n    return scored[0][0], scored[0][1]\n\n\ndef run_eval(test_cases, use_prior):\n    correct = 0\n    print(f\"=== disambiguation {'with' if use_prior else 'without'} prior ===\")\n    for mention, context, gold in test_cases:\n        pred, score = disambiguate(mention, context, use_prior=use_prior)\n        ok = pred == gold\n        correct += int(ok)\n        tag = \"  OK\" if ok else \"MISS\"\n        print(f\"  [{tag}] mention={mention:<10} pred={pred:<7} gold={gold:<7} score={score:.3f}\")\n        print(f\"         context: {context[:70]}...\")\n    print(f\"  accuracy: {correct}/{len(test_cases)} ({100 * correct / len(test_cases):.1f}%)\")\n    print()\n    return correct\n\n\ndef main():\n    test_cases = [\n        (\"Jordan\", \"Jordan scored 45 points against the Lakers last night.\", \"Q41421\"),\n        (\"Jordan\", \"Jordan borders Syria, Iraq, and Saudi Arabia in the Middle East.\", \"Q810\"),\n        (\"Jordan\", \"Jordan starred in the superhero movie Black Panther.\", \"Q254110\"),\n        (\"Jordan\", \"Jordan's work on variational inference shaped machine learning.\", \"Q3308285\"),\n        (\"Paris\",  \"Paris is the capital of France and home to the Eiffel Tower.\", \"Q90\"),\n        (\"Paris\",  \"Paris Texas is a small city in Lamar County.\", \"Q663094\"),\n        (\"Paris\",  \"Paris Hilton is a television personality and heiress.\", \"Q55411\"),\n        (\"Apple\",  \"Apple announced the new iPhone at their Cupertino event.\", \"Q312\"),\n        (\"Apple\",  \"An apple a day keeps the doctor away; the fruit is rich in fiber.\", \"Q89\"),\n        (\"Python\", \"Python is a popular programming language used for data science.\", \"Q28865\"),\n        (\"Python\", \"The python is a large nonvenomous snake found in Asia.\", \"Q83320\"),\n    ]\n\n    run_eval(test_cases, use_prior=True)\n    run_eval(test_cases, use_prior=False)\n\n    print(\"note: toy 11-case test set.\")\n    print(\"production EL uses Wikipedia alias dumps (~18M aliases) and encoder-based disambiguation.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does entity linking add on top of NER?",
+      "options": [
+        "Sentiment polarity",
+        "Part-of-speech tags",
+        "It maps each detected mention to a unique entry in a knowledge base (Wikidata, Wikipedia, or a domain KB)",
+        "Translations"
+      ],
+      "answer": 2,
+      "explanation": "EL turns a mention into a canonical KB id, disambiguating between same-name entities."
+    },
+    {
+      "q": "What are the two main subtasks in entity linking?",
+      "options": [
+        "Candidate generation (shortlist of plausible KB entries) and disambiguation (pick the right one given context)",
+        "Embedding and clustering",
+        "POS tagging and lemmatization",
+        "Tokenization and parsing"
+      ],
+      "answer": 0,
+      "explanation": "EL decomposes into proposing candidates then ranking them by contextual fit."
+    },
+    {
+      "q": "Why must mention recall be reported alongside disambiguation accuracy?",
+      "options": [
+        "Disambiguation cannot recover from missing candidates; the pipeline is bounded by candidate-generation recall",
+        "Mention recall is mandatory by GDPR",
+        "Recall is required by spaCy",
+        "Recall replaces precision"
+      ],
+      "answer": 0,
+      "explanation": "If candidates miss the gold entity, no disambiguator can fix it; recall floors pipeline quality."
+    },
+    {
+      "q": "How does GENRE perform entity linking?",
+      "options": [
+        "Decodes the entity's canonical name token-by-token under constrained decoding over a trie of valid KB ids",
+        "By computing TF-IDF",
+        "By BM25",
+        "By PageRank"
+      ],
+      "answer": 0,
+      "explanation": "GENRE generates the canonical KB name with constrained decoding to guarantee a valid id."
+    },
+    {
+      "q": "What is NIL handling in entity linking?",
+      "options": [
+        "Skipping every mention",
+        "Returning the entire candidate list",
+        "Lowercasing the input",
+        "Predicting a 'not in KB' label when no candidate is a real match (emerging entities, obscure people)"
+      ],
+      "answer": 3,
+      "explanation": "NIL prediction prevents guessing wrong KB ids for entities the KB does not cover."
+    },
+    {
+      "q": "Why does popularity bias hurt entity linking in specialized domains?",
+      "options": [
+        "Models trained on web data over-predict frequent entities (e.g. basketball Jordan over the ML researcher Michael I. Jordan)",
+        "Popularity helps recall",
+        "It biases toward older entities only",
+        "Popularity removes NIL"
+      ],
+      "answer": 0,
+      "explanation": "Popularity priors skew predictions away from less-common, domain-specific name-clashes."
+    },
+    {
+      "q": "What is a safe LLM-EL pattern in 2026?",
+      "options": [
+        "Just prompt 'find the entity'",
+        "Skip candidate generation",
+        "Free-form generation",
+        "Provide a candidate list and use constrained JSON output that the LLM can only choose from valid KB ids"
+      ],
+      "answer": 3,
+      "explanation": "Constraining the LLM to a valid candidate list prevents made-up KB ids and keeps output queryable."
+    },
+    {
+      "q": "Why must NER mention boundaries be exact for entity linking to work?",
+      "options": [
+        "Boundary errors propagate: 'Bank of America' clipped to 'Bank' surfaces wrong candidates and tanks EL recall",
+        "Boundaries break Wikipedia lookups",
+        "Boundary precision only affects NER metrics, not entity-linking candidate quality",
+        "Boundaries change tokenization"
+      ],
+      "answer": 0,
+      "explanation": "Mis-bounded mentions retrieve the wrong alias set, propagating errors into disambiguation."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/25-entity-linking"
+  }
+}

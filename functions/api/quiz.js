@@ -1,5 +1,6 @@
 import { json, getUser, logEvent, isCourseTeacher, hasCohortAccess } from "./_lib.js";
 import { QUIZ_KEYS } from "./_quiz-keys.js";
+import { INSTITUTE_QUIZ_KEYS } from "./_institute-quiz-keys.js";
 
 // POST /api/quiz { courseId, answers:[selectedOptionIndex, ...] }
 // Grades the quiz ON THE SERVER against the secret answer key. Answers are never
@@ -17,7 +18,10 @@ export async function onRequestPost({ request, env }) {
   if (!b || !b.courseId) return json({ error: "unknown course or no quiz" }, 404);
 
   const user = await getUser(env, request);
-  let key = QUIZ_KEYS[b.courseId];
+  // Institute of Technology lessons + phase exams grade against their own
+  // generated key file (web/scripts/build-institute-quiz-keys.mjs). Same
+  // server-side-only discipline as the main catalogue's QUIZ_KEYS.
+  let key = QUIZ_KEYS[b.courseId] || INSTITUTE_QUIZ_KEYS[b.courseId];
   if (!key) {
     const draft = await env.DB.prepare(
       "SELECT id FROM course_drafts WHERE course_id=? AND status='published' AND visibility='gated' ORDER BY updated_at DESC LIMIT 1"
@@ -52,5 +56,12 @@ export async function onRequestPost({ request, env }) {
     await logEvent(env, user, "quiz_attempted", b.courseId, "score=" + score);
     if (passed && !wasPassed) await logEvent(env, user, "passed_course", b.courseId, "score=" + score);
   }
-  return json({ score, correct, total, passed, signedIn: !!user });
+  // A failing attempt returns ONLY the boolean. Returning `correct`/`score`
+  // lets a client re-submit varied answers and use the count as an oracle to
+  // reconstruct the answer key over many tries (CSO 2026-08-29). The score is
+  // revealed once passed — the oracle is moot then, and the grade is already
+  // in `progress` server-side regardless.
+  return passed
+    ? json({ passed: true, score, signedIn: !!user })
+    : json({ passed: false, signedIn: !!user });
 }

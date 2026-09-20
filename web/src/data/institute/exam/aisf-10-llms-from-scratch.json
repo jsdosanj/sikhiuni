@@ -1,0 +1,501 @@
+{
+  "track": "aisf-10-llms-from-scratch",
+  "count": 55,
+  "questions": [
+    {
+      "q": "What is the primary purpose of a tokenizer in an LLM pipeline?",
+      "options": [
+        "To translate text between languages",
+        "To compress text for storage",
+        "To convert text into a sequence of integers that the model can process",
+        "To remove stop words from text"
+      ]
+    },
+    {
+      "q": "What does BPE (Byte Pair Encoding) do to build its vocabulary?",
+      "options": [
+        "Randomly assigns IDs to substrings",
+        "Uses a dictionary lookup for whole words",
+        "Splits text into individual characters only",
+        "Iteratively merges the most frequent adjacent pair of tokens until reaching the target vocabulary size"
+      ]
+    },
+    {
+      "q": "Why does vocabulary size create a tradeoff in LLM design?",
+      "options": [
+        "Vocabulary size doesn't affect model performance",
+        "Smaller vocabularies are always more efficient",
+        "Larger vocabularies always perform better",
+        "Too small creates long sequences (more computation); too large wastes embedding parameters on rare tokens"
+      ]
+    },
+    {
+      "q": "What problem does byte-level fallback solve in tokenization?",
+      "options": [
+        "It ensures any input (emoji, rare scripts, binary data) can be encoded without 'unknown' tokens",
+        "It improves model accuracy",
+        "It reduces vocabulary size",
+        "It speeds up tokenization"
+      ]
+    },
+    {
+      "q": "How does the tokenizer affect non-English language performance in LLMs?",
+      "options": [
+        "Tokenizers work equally well for all languages",
+        "Non-English text is always character-tokenized",
+        "Tokenization doesn't affect language performance",
+        "Languages underrepresented in training data get worse token merges, requiring more tokens per word and wasting context window"
+      ]
+    },
+    {
+      "q": "Why does a basic BPE tokenizer break on multilingual or code input?",
+      "options": [
+        "BPE only works on ASCII",
+        "BPE is inherently monolingual",
+        "Multilingual text can't be tokenized",
+        "Without proper Unicode handling, byte fallback, and pre-tokenization regex, it produces incorrect or inefficient token sequences"
+      ]
+    },
+    {
+      "q": "What is the role of pre-tokenization regex in a production tokenizer?",
+      "options": [
+        "It splits text at word boundaries before BPE merges, preventing merges across spaces and word boundaries",
+        "It compresses whitespace",
+        "It converts text to lowercase",
+        "It removes punctuation"
+      ]
+    },
+    {
+      "q": "What is a special token and why are tokenizers designed to handle them?",
+      "options": [
+        "Reserved tokens like <|endoftext|> or [PAD] that control model behavior and must be encoded as single, specific IDs",
+        "Tokens with the highest embedding values",
+        "Tokens used only during evaluation",
+        "Tokens that appear frequently"
+      ]
+    },
+    {
+      "q": "How do you evaluate whether a custom tokenizer is good?",
+      "options": [
+        "By measuring compression ratio (tokens per character) across diverse text and comparing to established tokenizers like tiktoken",
+        "By checking if it can tokenize your name",
+        "By measuring encoding speed only",
+        "By counting the vocabulary size"
+      ]
+    },
+    {
+      "q": "Why is byte-level BPE preferred over word-level tokenization for modern LLMs?",
+      "options": [
+        "Word-level tokenization is more accurate",
+        "It can represent any input without unknown tokens while still learning efficient subword merges for common patterns",
+        "It produces smaller vocabularies",
+        "It's faster"
+      ]
+    },
+    {
+      "q": "Why can't you simply load all pre-training data into memory?",
+      "options": [
+        "Pre-training corpora are terabytes in size, far exceeding available RAM, requiring streaming pipelines",
+        "Loading data into memory is slower",
+        "Memory is only needed for model weights",
+        "Python doesn't support large arrays"
+      ]
+    },
+    {
+      "q": "Why is data deduplication important for pre-training?",
+      "options": [
+        "It saves disk space",
+        "Duplicate documents cause the model to memorize specific text verbatim and waste training compute on repeated content",
+        "It reduces the vocabulary size",
+        "It speeds up tokenization"
+      ]
+    },
+    {
+      "q": "What is the purpose of creating fixed-length training sequences from variable-length documents?",
+      "options": [
+        "It reduces the total number of tokens",
+        "It makes the text easier to read",
+        "GPU training requires uniform tensor shapes, so documents must be packed or padded into fixed-length sequences",
+        "Fixed-length sequences are more accurate"
+      ]
+    },
+    {
+      "q": "What happens if the data pipeline is slower than GPU training speed?",
+      "options": [
+        "Nothing -- the pipeline runs asynchronously",
+        "Training automatically slows down to match",
+        "The model trains on the same batch repeatedly",
+        "The GPU sits idle waiting for batches, wasting expensive compute time"
+      ]
+    },
+    {
+      "q": "Why is data quality filtering (language detection, content filtering) applied before tokenization?",
+      "options": [
+        "It reduces tokenization time",
+        "Low-quality data (spam, boilerplate, toxic content) degrades model capabilities proportional to its share of training data",
+        "Filtering after tokenization is impossible",
+        "Tokenizers can't handle low-quality text"
+      ]
+    },
+    {
+      "q": "What training objective does GPT use during pre-training?",
+      "options": [
+        "Sentence classification",
+        "Next-token prediction: given previous tokens, predict the next one",
+        "Image-text alignment",
+        "Masked language modeling (predicting masked tokens)"
+      ]
+    },
+    {
+      "q": "How many transformer layers, attention heads, and embedding dimensions does GPT-2 Small (124M) have?",
+      "options": [
+        "24 layers, 16 heads, 1024 dims",
+        "6 layers, 6 heads, 512 dims",
+        "48 layers, 25 heads, 1600 dims",
+        "12 layers, 12 heads, 768 dims"
+      ]
+    },
+    {
+      "q": "What is the role of the causal attention mask in GPT?",
+      "options": [
+        "It prevents each token from attending to future tokens, ensuring the model can only use past context for predictions",
+        "It reduces memory usage during training",
+        "It masks out low-confidence attention scores",
+        "It prevents attention to padding tokens"
+      ]
+    },
+    {
+      "q": "What does 'temperature' control during text generation?",
+      "options": [
+        "The randomness of token selection: lower temperature makes outputs more deterministic, higher makes them more diverse",
+        "The speed of generation",
+        "The number of tokens generated",
+        "The model's confidence threshold"
+      ]
+    },
+    {
+      "q": "Why does pre-training require significantly more compute than fine-tuning?",
+      "options": [
+        "Pre-training processes trillions of tokens from scratch to learn general language patterns, while fine-tuning adjusts an already-capable model on thousands of examples",
+        "Pre-training uses a different architecture",
+        "Pre-training uses larger batch sizes",
+        "Fine-tuning doesn't use gradients"
+      ]
+    },
+    {
+      "q": "A 7B parameter model in FP16 needs how much VRAM just for weights?",
+      "options": [
+        "14 GB",
+        "28 GB",
+        "7 GB",
+        "56 GB"
+      ]
+    },
+    {
+      "q": "What are the three types of parallelism used in distributed training?",
+      "options": [
+        "Batch, sequence, and token parallelism",
+        "Forward, backward, and optimizer parallelism",
+        "Data parallelism, tensor parallelism, and pipeline parallelism",
+        "CPU, GPU, and TPU parallelism"
+      ]
+    },
+    {
+      "q": "What does FSDP (Fully Sharded Data Parallel) do that standard DDP does not?",
+      "options": [
+        "It uses a different optimizer",
+        "It processes data faster",
+        "It supports more GPUs",
+        "It shards model parameters, gradients, and optimizer states across GPUs instead of replicating the full model on each"
+      ]
+    },
+    {
+      "q": "What is DeepSpeed ZeRO Stage 3?",
+      "options": [
+        "A learning rate schedule",
+        "It partitions optimizer states, gradients, AND model parameters across GPUs, achieving maximum memory efficiency",
+        "A quantization method",
+        "A data preprocessing pipeline"
+      ]
+    },
+    {
+      "q": "Why is gradient synchronization necessary in data-parallel training?",
+      "options": [
+        "To speed up the forward pass",
+        "Each GPU computes gradients on different data; averaging gradients across GPUs ensures all replicas update identically",
+        "To reduce memory usage",
+        "To prevent overfitting"
+      ]
+    },
+    {
+      "q": "What is the fundamental difference between a base language model and an instruction-tuned model?",
+      "options": [
+        "Instruction-tuned models are larger",
+        "Base models are faster",
+        "They have different architectures",
+        "A base model continues text patterns; an instruction-tuned model follows instructions and answers questions"
+      ]
+    },
+    {
+      "q": "What is the purpose of masking loss on non-assistant tokens during SFT?",
+      "options": [
+        "To reduce memory usage",
+        "To speed up training",
+        "To prevent overfitting",
+        "To train the model only to generate responses, not to memorize the instruction format or system prompts"
+      ]
+    },
+    {
+      "q": "What format does SFT training data typically follow?",
+      "options": [
+        "Key-value pairs",
+        "Chat template with system, user, and assistant roles marked by special tokens",
+        "Raw text documents",
+        "SQL queries and results"
+      ]
+    },
+    {
+      "q": "Why might an SFT model produce lower perplexity on benchmarks but worse conversational quality?",
+      "options": [
+        "The benchmarks are wrong",
+        "SFT optimizes for pattern matching on training examples, not for the nuanced quality judgments humans care about -- that requires RLHF/DPO",
+        "The learning rate was wrong",
+        "The model is too small"
+      ]
+    },
+    {
+      "q": "How many high-quality instruction-response pairs are typically needed for effective SFT?",
+      "options": [
+        "10,000 to 100,000 high-quality examples",
+        "Fewer than 100",
+        "Billions",
+        "Millions"
+      ]
+    },
+    {
+      "q": "What does the reward model in RLHF learn from?",
+      "options": [
+        "Raw text documents",
+        "Human preference pairs: given two responses, which one humans preferred",
+        "Model loss curves",
+        "Benchmark scores"
+      ]
+    },
+    {
+      "q": "Why is a KL divergence penalty used in PPO training for RLHF?",
+      "options": [
+        "To speed up training",
+        "To reduce memory usage",
+        "To improve tokenization",
+        "To prevent the policy from diverging too far from the SFT model, which would lead to reward hacking"
+      ]
+    },
+    {
+      "q": "How many separate models are required for a full RLHF pipeline?",
+      "options": [
+        "Two",
+        "Four",
+        "Three: SFT model, reward model, and policy model being optimized",
+        "One"
+      ]
+    },
+    {
+      "q": "What is 'reward hacking' in RLHF?",
+      "options": [
+        "When the learning rate is too high",
+        "When training data is corrupted",
+        "When the policy finds ways to maximize the reward score without actually improving response quality",
+        "When the reward model is attacked by adversaries"
+      ]
+    },
+    {
+      "q": "What does PPO's clipping mechanism prevent?",
+      "options": [
+        "Gradient overflow",
+        "Data leakage",
+        "Memory overflow",
+        "Excessively large policy updates that could destabilize training"
+      ]
+    },
+    {
+      "q": "What is the main advantage of DPO over RLHF?",
+      "options": [
+        "DPO produces better models",
+        "DPO uses less training data",
+        "DPO eliminates the need for a separate reward model and PPO, training directly on preference pairs in a single loop",
+        "DPO works without any preference data"
+      ]
+    },
+    {
+      "q": "What role does the reference model play in DPO?",
+      "options": [
+        "It serves as the anchor that prevents the trained model from diverging too far, similar to the KL penalty in RLHF",
+        "It generates training data",
+        "It handles tokenization",
+        "It evaluates model quality"
+      ]
+    },
+    {
+      "q": "What does the beta parameter in DPO control?",
+      "options": [
+        "The batch size",
+        "The learning rate",
+        "The number of training epochs",
+        "How strongly the policy is constrained to stay close to the reference model -- higher beta means more conservative updates"
+      ]
+    },
+    {
+      "q": "How does DPO implicitly represent a reward model?",
+      "options": [
+        "It doesn't -- DPO has no concept of reward",
+        "The DPO loss function can be derived by showing that the optimal policy under a reward function is directly expressible through policy log probabilities",
+        "It trains a hidden reward model inside the language model",
+        "DPO uses the loss function as the reward"
+      ]
+    },
+    {
+      "q": "When might RLHF still be preferred over DPO?",
+      "options": [
+        "When training smaller models",
+        "When you have less preference data",
+        "Always -- RLHF is strictly better",
+        "When you need a reusable reward model for evaluating multiple policies or when online data collection is beneficial"
+      ]
+    },
+    {
+      "q": "Why have benchmarks like MMLU become less useful for comparing frontier models?",
+      "options": [
+        "They test the wrong subjects",
+        "MMLU was designed for smaller models",
+        "Frontier models have saturated MMLU (scoring 86-89%), compressing the leaderboard to a range where differences are statistical noise",
+        "The questions are too easy"
+      ]
+    },
+    {
+      "q": "What is Goodhart's Law in the context of LLM evaluation?",
+      "options": [
+        "When a measure becomes a target, it ceases to be a good measure -- models and teams optimize for benchmarks instead of real capabilities",
+        "A law about model scaling",
+        "A theorem about attention mechanisms",
+        "A rule about learning rate schedules"
+      ]
+    },
+    {
+      "q": "What is the LLM-as-judge evaluation approach?",
+      "options": [
+        "Having a human judge evaluate every response",
+        "Using a strong LLM (e.g., GPT-4) to score responses against rubrics, replacing expensive human evaluation at scale",
+        "Training a separate classifier for evaluation",
+        "Using the model to evaluate itself"
+      ]
+    },
+    {
+      "q": "Why is building a custom evaluation suite important rather than relying on public benchmarks?",
+      "options": [
+        "Public benchmarks are always wrong",
+        "Custom evals are easier to build",
+        "Public benchmarks are too expensive",
+        "Public benchmarks test general capabilities; your application has specific requirements that only a custom eval can measure"
+      ]
+    },
+    {
+      "q": "What is data contamination in the context of LLM benchmarks?",
+      "options": [
+        "When training data is corrupted",
+        "When benchmark questions appear in the model's pre-training data, inflating scores without reflecting true capability",
+        "When evaluation data is mislabeled",
+        "When the model generates incorrect data"
+      ]
+    },
+    {
+      "q": "How much VRAM does a 70B parameter model in FP16 require just for weights?",
+      "options": [
+        "70 GB",
+        "140 GB",
+        "35 GB",
+        "280 GB"
+      ]
+    },
+    {
+      "q": "What is quantization in the context of LLMs?",
+      "options": [
+        "Reducing the numerical precision of weights (e.g., FP16 to INT4) to decrease memory usage and increase inference speed",
+        "Compressing the training data",
+        "Removing unused model layers",
+        "Reducing the vocabulary size"
+      ]
+    },
+    {
+      "q": "What is the key difference between post-training quantization (PTQ) and quantization-aware training (QAT)?",
+      "options": [
+        "QAT doesn't use gradients",
+        "PTQ requires more data",
+        "PTQ quantizes after training with no retraining; QAT simulates quantization during training so the model learns to tolerate reduced precision",
+        "PTQ is more accurate"
+      ]
+    },
+    {
+      "q": "What does 'per-channel' quantization mean and why is it better than 'per-tensor'?",
+      "options": [
+        "It quantizes each output channel separately, using different scale/zero-point for each, reducing quantization error",
+        "It processes one color channel at a time",
+        "It's a type of data parallelism",
+        "It uses separate GPUs per channel"
+      ]
+    },
+    {
+      "q": "Why do 95% of weights in Llama 3 70B fall between -0.1 and +0.1?",
+      "options": [
+        "The weights haven't converged yet",
+        "Weight decay and normalization during training push weights toward small values, making the full FP16 range wasteful",
+        "This is specific to the Llama architecture",
+        "The model is poorly trained"
+      ]
+    },
+    {
+      "q": "What are the two phases of LLM inference?",
+      "options": [
+        "Forward and backward",
+        "Encoding and decoding",
+        "Training and evaluation",
+        "Prefill (processes the prompt in parallel, compute-bound) and decode (generates tokens one at a time, memory-bound)"
+      ]
+    },
+    {
+      "q": "What does KV-cache eliminate during autoregressive generation?",
+      "options": [
+        "The embedding lookup",
+        "The need for attention masks",
+        "The softmax computation",
+        "Redundant recomputation of key and value vectors for all previous tokens at each generation step"
+      ]
+    },
+    {
+      "q": "What is continuous batching and why does it improve throughput?",
+      "options": [
+        "Batching across multiple models",
+        "Using larger batch sizes",
+        "Processing all requests in one large batch",
+        "Dynamically adding and removing requests from the running batch as they start and finish, instead of waiting for the entire batch to complete"
+      ]
+    },
+    {
+      "q": "What problem does PagedAttention (used in vLLM) solve?",
+      "options": [
+        "It improves tokenization speed",
+        "It reduces model size",
+        "It manages KV-cache memory in fixed-size blocks like virtual memory, eliminating fragmentation from variable-length sequences",
+        "It speeds up the attention computation"
+      ]
+    },
+    {
+      "q": "What is speculative decoding?",
+      "options": [
+        "Using a small draft model to propose multiple tokens that the large model verifies in parallel, speeding up generation",
+        "Predicting which tokens the user wants",
+        "Generating multiple responses and picking the best",
+        "Caching frequently generated sequences"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+const motes = Array.from({ length: 22 });
+---
+<Base
+  title="Open Source Atlas, Institute of Technology"
+  description="A browsable directory of ~12,500 AI and engineering open-source projects, each with a line on what you could build with it for the Panth, plus an engineering video shelf, set inside an infinite library."
+  institute
+>
+  <div class="atlas-immersive">
+    <!-- The library: a fixed CSS-3D corridor behind everything. Walls of books
+         and data racks recede to a vanishing point; scrolling streams the
+         shelves endlessly past and dollies you a little deeper in. All motion
+         is killed by the prefers-reduced-motion guard. -->
+    <div class="atlas-void" aria-hidden="true">
+      <div class="atlas-corridor" id="atlas-corridor">
+        <div class="atlas-wall atlas-wall-l"><span class="atlas-rack r1"></span><span class="atlas-rack r2"></span></div>
+        <div class="atlas-wall atlas-wall-r"><span class="atlas-rack r1"></span><span class="atlas-rack r2"></span></div>
+        <div class="atlas-floor"></div>
+        <div class="atlas-ceil"></div>
+        <div class="atlas-end">
+          <span class="atlas-end-glow"></span>
+          <span class="atlas-rack big"></span>
+        </div>
+      </div>
+      <div class="atlas-shafts"></div>
+      <div class="atlas-haze"></div>
+      <div class="atlas-motes">{motes.map((_, i) => <i style={`--x:${(i * 41) % 97}%;--y:${(i * 27) % 92}%;--dur:${(14 + (i % 7))}s;--d:-${(i * 0.9).toFixed(1)}s`}></i>)}</div>
+    </div>
+
+    <div class="atlas-stage">
+      <InstituteRail />
+
+      <section class="i-wrap atlas-head">
+        <div class="atlas-glass atlas-glass-head">
+          <span class="i-label">/technology/atlas</span>
+          <h1>Open Source Atlas</h1>
+          <p class="i-prose">
+            An infinite reading room for engineers. Two halves that do different jobs: engineering
+            videos to learn from, and a catalogue of open-source projects to build with. Every
+            repository carries a line on what you could build with it for the sangat. Repo curation by
+            <a href="https://tom-doerr.github.io/repo_posts/" target="_blank" rel="noopener">Tom D&ouml;rr</a>;
+            the video shelf pulls from
+            <a href="https://www.youtube.com/@AndrejKarpathy" target="_blank" rel="noopener">Andrej Karpathy</a>,
+            <a href="https://www.youtube.com/@cloud-codes" target="_blank" rel="noopener">Cloud Codes</a>, and
+            <a href="https://www.youtube.com/@ProtonPrivacy" target="_blank" rel="noopener">Proton</a> &mdash;
+            nothing rehosted, every video plays from YouTube.
+          </p>
+          <p class="i-mono atlas-meta" id="i-atlas-meta">loading the atlas&hellip;</p>
+        </div>
+      </section>
+
+      <section class="i-wrap i-atlas atlas-panels" id="i-atlas">
+        <div class="atlas-cols">
+          <div class="atlas-glass atlas-left">
+            <h2 class="i-label">watch first</h2>
+            <div class="i-atlas-shelf" id="i-atlas-videos">
+              <p class="i-atlas-empty i-mono">loading&hellip;</p>
+            </div>
+          </div>
+
+          <div class="atlas-glass atlas-right">
+            <div class="i-atlas-bar">
+              <h2 class="i-label">build with <span class="i-mono i-atlas-count" id="i-atlas-count"></span></h2>
+              <label class="sr-only" for="i-atlas-search">Search all repositories</label>
+              <input type="search" id="i-atlas-search" placeholder="Search all repositories…" autocomplete="off" spellcheck="false" />
+            </div>
+
+            <!-- Shelves for the library: twelve keyword-derived topics, counts
+                 from the manifest. Populated by the island so the chips and the
+                 grid can never disagree about what is selected. -->
+            <div class="i-atlas-topics" id="i-atlas-topics" role="group" aria-label="Filter by topic" hidden></div>
+
+            <div class="i-atlas-grid" id="i-atlas-grid">
+              <p class="i-atlas-empty i-mono">loading&hellip;</p>
+            </div>
+
+            <div class="i-atlas-pager i-mono" id="i-atlas-pager" hidden>
+              <button type="button" data-atlas-prev>&lsaquo; prev</button>
+              <span data-atlas-pos></span>
+              <button type="button" data-atlas-next>next &rsaquo;</button>
+            </div>
+          </div>
+        </div>
+
+        <footer class="atlas-glass i-atlas-foot i-prose">
+          Every repository belongs to its own authors and carries its own licence &mdash; check it on
+          GitHub before you use one. Screenshots are GitHub's own OpenGraph cards. Videos are embedded
+          from YouTube and belong to their channels. Repo curation by
+          <a href="https://tom-doerr.github.io/repo_posts/" target="_blank" rel="noopener">Tom D&ouml;rr</a>;
+          videos from Andrej Karpathy, Cloud Codes, and Proton.
+          See <a href="/technology/licenses">sources &amp; licenses</a>.
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <style>
+    /* topic chips: the atlas's shelf labels. Counts are set in the mask at
+       build time, so a chip never promises a shelf that isn't there. */
+    .i-atlas-topics {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin: 12px 0 4px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+    .i-atlas-chip {
+      appearance: none; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+      background: rgba(255,255,255,.04); color: rgba(255,255,255,.78);
+      font: inherit; font-size: .78rem; line-height: 1; padding: 7px 11px;
+      display: inline-flex; align-items: baseline; gap: 6px;
+      transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+    }
+    .i-atlas-chip span { font-size: .72em; color: rgba(255,255,255,.45); }
+    .i-atlas-chip:hover { border-color: rgba(255,255,255,.34); color: #fff; }
+    .i-atlas-chip:focus-visible { outline: 2px solid var(--signal, #d8a531); outline-offset: 2px; }
+    .i-atlas-chip.on {
+      background: rgba(216,165,49,.16); border-color: rgba(216,165,49,.55); color: #fff;
+    }
+    .i-atlas-chip.on span { color: rgba(255,255,255,.7); }
+    @media (prefers-reduced-motion: reduce) { .i-atlas-chip { transition: none; } }
+
+    /* ── the immersive library ─────────────────────────────────────────── */
+    .atlas-immersive { position: relative; }
+    .atlas-void {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+      background: radial-gradient(120% 90% at 50% 34%, #0b1120, #06080e 70%);
+      perspective: 1150px; perspective-origin: var(--px, 50%) var(--py, 39%);
+    }
+    .atlas-corridor {
+      position: absolute; inset: -20% -10%;
+      transform-style: preserve-3d;
+      transform: translateZ(var(--depth, 0px));
+      will-change: transform;
+    }
+
+    /* book-spine + shelf-board texture, pure CSS (no external asset) */
+    .atlas-wall, .atlas-floor, .atlas-ceil, .atlas-end {
+      position: absolute;
+      background-color: #0d1526;
+      background-image:
+        /* shelf boards */
+        repeating-linear-gradient(0deg, rgba(0,0,0,.42) 0 4px, transparent 4px 116px, rgba(255,255,255,.03) 116px 120px),
+        /* book spines */
+        repeating-linear-gradient(90deg,
+          #5a2733 0 13px, #22314e 13px 27px, #2c4636 27px 44px, #6d5326 44px 55px,
+          #2b2f3a 55px 69px, #48303a 69px 86px, #26405c 86px 101px, #7a3030 101px 114px,
+          #33475e 114px 128px, #55402a 128px 141px);
+      background-size: auto, 141px 100%;
+      box-shadow: inset 0 0 200px rgba(3,5,10,.75);
+    }
+    .atlas-wall {
+      top: -60%; height: 220%; width: 300vh;
+    }
+    .atlas-wall-l { left: 0; transform-origin: left center; transform: translateX(-6vw) rotateY(68deg); }
+    .atlas-wall-r { right: 0; transform-origin: right center; transform: translateX(6vw) rotateY(-68deg); }
+    .atlas-floor {
+      left: -50%; width: 200%; height: 300vh; bottom: 0;
+      transform-origin: bottom center; transform: rotateX(80deg);
+      background-image:
+        repeating-linear-gradient(90deg, rgba(0,0,0,.5) 0 2px, transparent 2px 140px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 2px, transparent 2px 140px);
+      background-color: #080c15;
+      filter: brightness(.6);
+    }
+    .atlas-ceil {
+      left: -50%; width: 200%; height: 300vh; top: 0;
+      transform-origin: top center; transform: rotateX(-80deg);
+      background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.5) 0 2px, transparent 2px 180px);
+      background-color: #060910;
+      filter: brightness(.4);
+    }
+    .atlas-end {
+      left: 50%; top: 50%; width: 1400px; height: 1400px;
+      transform: translate(-50%, -50%) translateZ(-2600px);
+      background-color: #0a1020;
+    }
+    .atlas-end-glow {
+      position: absolute; left: 50%; top: 42%; width: 340px; height: 420px; transform: translate(-50%, -50%);
+      background: radial-gradient(closest-side, rgba(230,169,60,.4), rgba(230,169,60,.06) 60%, transparent);
+      filter: blur(8px);
+    }
+
+    /* data-repository racks, dark panels with blinking LEDs, set into the walls */
+    .atlas-rack {
+      position: absolute; width: 132px; height: 46%;
+      background:
+        repeating-linear-gradient(0deg, #05070c 0 8px, #10151f 8px 16px),
+        #0b0f18;
+      border: 1px solid rgba(120,140,180,.14);
+      box-shadow: inset 0 0 30px rgba(0,0,0,.6);
+    }
+    .atlas-rack::after {
+      content: ""; position: absolute; left: 8px; top: 8px; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--i-signal, #58e0c8);
+      box-shadow: 0 12px 0 rgba(230,169,60,.9), 0 30px 0 rgba(88,224,200,.6), 0 60px 0 rgba(230,169,60,.5), 0 0 10px currentColor;
+      animation: atlas-blink 3.2s steps(1) infinite;
+    }
+    .atlas-wall .r1 { left: 22%; top: 20%; }
+    .atlas-wall .r2 { left: 64%; top: 34%; height: 34%; }
+    .atlas-rack.big { position: absolute; left: 50%; bottom: 8%; width: 220px; height: 44%; transform: translateX(-50%); }
+    @keyframes atlas-blink { 0%,45% { opacity: 1; } 50%,95% { opacity: .35; } }
+
+    /* atmosphere over the geometry */
+    .atlas-haze {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(60% 55% at 50% 37%, transparent, rgba(6,8,14,.55) 72%, #06080e 100%),
+        radial-gradient(24% 30% at 50% 34%, rgba(230,169,60,.12), transparent 70%);
+    }
+    .atlas-shafts {
+      position: absolute; inset: -20%; pointer-events: none; mix-blend-mode: screen; opacity: .5;
+      background:
+        linear-gradient(102deg, transparent 44%, rgba(198,214,255,.10) 47%, transparent 52%),
+        linear-gradient(78deg, transparent 58%, rgba(230,200,150,.08) 61%, transparent 66%);
+      animation: atlas-drift 26s ease-in-out infinite alternate;
+    }
+    @keyframes atlas-drift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+    .atlas-motes { position: absolute; inset: 0; pointer-events: none; }
+    .atlas-motes i {
+      position: absolute; left: var(--x); top: var(--y);
+      width: 2.5px; height: 2.5px; border-radius: 50%; background: rgba(240,224,196,.85);
+      box-shadow: 0 0 8px rgba(230,169,60,.7);
+      opacity: 0; animation: atlas-float var(--dur, 16s) linear infinite; animation-delay: var(--d, 0s);
+    }
+    @keyframes atlas-float {
+      0% { opacity: 0; transform: translate3d(0,0,0); }
+      15% { opacity: .7; }
+      80% { opacity: .35; }
+      100% { opacity: 0; transform: translate3d(24px, -60px, 0); }
+    }
+
+    /* ── content, layered over the library ─────────────────────────────── */
+    .atlas-stage { position: relative; z-index: 1; padding-bottom: 12vh; }
+
+    .atlas-glass {
+      background: color-mix(in srgb, var(--i-surface) 84%, transparent);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+      border: 1px solid color-mix(in srgb, var(--i-line) 80%, transparent);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .atlas-glass { background: var(--i-surface); }
+    }
+
+    /* generous padding on the interactive panels: py-24 px-12 */
+    .atlas-glass-head { padding: 6rem 3rem; }
+    .atlas-head { padding: 6vh 24px 0; }
+    .atlas-head h1 { margin: 8px 0 12px; font-size: clamp(28px, 5vw, 46px); }
+    .atlas-head p { max-width: 68ch; }
+    .atlas-meta { margin-top: 12px; font-size: 12px; color: var(--i-muted); }
+
+    .atlas-panels { padding: 4vh 24px 0; }
+    .atlas-cols { display: grid; gap: 24px; }
+    @media (min-width: 1000px) { .atlas-cols { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); align-items: start; } }
+    .atlas-left, .atlas-right { padding: 6rem 3rem; }
+    @media (max-width: 700px) { .atlas-glass-head, .atlas-left, .atlas-right { padding: 3.25rem 1.4rem; } }
+    @media (min-width: 1000px) { .atlas-left { position: sticky; top: 84px; } }
+    .atlas-left h2, .atlas-right h2 { display: block; margin: 0 0 14px; }
+
+    .i-atlas-foot.atlas-glass { margin-top: 26px; padding: 2rem 3rem; font-size: 12px; color: var(--i-muted); }
+    @media (max-width: 700px) { .i-atlas-foot.atlas-glass { padding: 1.5rem 1.4rem; } }
+
+    /* ── video shelf (island-generated markup) ─────────────────────────── */
+    .i-atlas-shelf { display: block; }
+    @media (min-width: 1000px) { .i-atlas-shelf { max-height: calc(100vh - 12rem); overflow-y: auto; padding-right: 4px; } }
+    .i-atlas-chgroup + .i-atlas-chgroup { margin-top: 22px; }
+    .i-atlas-ch {
+      display: block; margin-bottom: 10px; font-family: "JetBrains Mono", monospace;
+      font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--i-ink-dim); text-decoration: none;
+    }
+    .i-atlas-ch:hover { color: var(--i-signal); }
+    .i-atlas-chrail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+    @media (min-width: 1000px) {
+      .i-atlas-chrail { display: block; overflow-x: visible; }
+      .i-atlas-chrail > * + * { margin-top: 12px; }
+    }
+    .i-atlas-vid { flex: 0 0 74vw; max-width: 300px; border: 1px solid var(--i-line); border-radius: var(--i-r-md); overflow: hidden; background: var(--i-surface-2); }
+    @media (min-width: 640px) { .i-atlas-vid { flex-basis: 46vw; } }
+    @media (min-width: 1000px) { .i-atlas-vid { max-width: none; } }
+    .i-atlas-vid-play, .i-atlas-vid iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; position: relative; padding: 0; cursor: pointer; }
+    .i-atlas-vid-play img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+    .i-atlas-vid-play:hover img { opacity: 1; }
+    .i-atlas-vid-tri { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 20px; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+    .i-atlas-vid-meta { padding: 10px 12px; }
+    .i-atlas-vid-meta h3 { margin: 0; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 13px; color: var(--i-ink); line-height: 1.35; }
+    .i-atlas-vid-meta p { margin: 5px 0 0; font-size: 10.5px; color: var(--i-muted); }
+
+    /* ── repo catalogue (island-generated markup) ─────────────────────── */
+    .i-atlas-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .i-atlas-count { text-transform: none; letter-spacing: 0; color: var(--i-muted); font-size: 11px; margin-left: 8px; }
+    #i-atlas-search {
+      flex: 1 1 220px; max-width: 300px; border: 1px solid var(--i-line); border-radius: 999px;
+      background: var(--i-surface-2); color: var(--i-ink); padding: 8px 15px; font-size: 13px;
+      font-family: "JetBrains Mono", monospace; outline: none;
+    }
+    #i-atlas-search:focus { border-color: color-mix(in srgb, var(--i-signal) 50%, var(--i-line)); }
+
+    .i-atlas-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+    .i-atlas-card { display: flex; flex-direction: column; border: 1px solid var(--i-line); border-radius: var(--i-r-md); overflow: hidden; background: color-mix(in srgb, var(--i-surface) 92%, transparent); transition: border-color 150ms, transform 150ms; }
+    .i-atlas-card:hover { border-color: color-mix(in srgb, var(--i-signal) 35%, var(--i-line)); transform: translateY(-3px); }
+    .i-atlas-shot { display: block; aspect-ratio: 2 / 1; background: #fff; position: relative; overflow: hidden; }
+    .i-atlas-shot img { width: 100%; height: 100%; object-fit: cover; }
+    .i-atlas-shot-fallback { display: none; }
+    .i-atlas-shot.dead { background: var(--i-ground-deep); }
+    .i-atlas-shot.dead .i-atlas-shot-fallback {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      height: 100%; padding: 0 14px; text-align: center;
+    }
+    .i-atlas-shot.dead .i-atlas-shot-fallback span:first-child { font-size: 11px; color: var(--i-ink-dim); overflow-wrap: anywhere; }
+    .i-atlas-shot.dead .i-atlas-shot-fallback span:last-child { font-size: 9px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--i-muted); }
+    .i-atlas-card-body { display: flex; flex-direction: column; flex: 1; padding: 11px 12px; }
+    .i-atlas-card-body h3 { margin: 0; font-size: 12px; line-height: 1.3; overflow-wrap: anywhere; }
+    .i-atlas-card-body h3 a { color: var(--i-signal); }
+    .i-atlas-desc { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: var(--i-ink-dim); }
+    .i-atlas-use { margin: 8px 0 0; font-size: 12px; line-height: 1.45; color: var(--i-filament); border-left: 2px solid var(--i-filament-dim); padding-left: 8px; }
+    .i-atlas-spacer { flex: 1; }
+    .i-atlas-card-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 10px; color: var(--i-muted); }
+    .i-atlas-card-foot a:hover { color: var(--i-signal); }
+    .i-atlas-date { margin-left: auto; }
+
+    .i-atlas-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 24px; font-size: 12px; }
+    .i-atlas-pager button { border: 1px solid var(--i-line); border-radius: 999px; background: transparent; color: var(--i-ink-dim); padding: 7px 16px; cursor: pointer; }
+    .i-atlas-pager button:hover:not(:disabled) { border-color: var(--i-ink-dim); }
+    .i-atlas-pager button:disabled { opacity: 0.35; cursor: default; }
+    .i-atlas-pager span { color: var(--i-muted); }
+    .i-atlas-empty { padding: 40px 0; text-align: center; color: var(--i-muted); font-size: 12px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .atlas-corridor { transform: none !important; }
+      .atlas-shafts, .atlas-motes i, .atlas-rack::after { animation: none; }
+      .atlas-motes { display: none; }
+    }
+  </style>
+
+  <script>
+    // Walk-into-the-library parallax: scroll drives the corridor's depth (looped
+    // so it never ends) and streams the shelf texture past; the pointer nudges
+    // the vanishing point so the walls feel like they surround you. rAF-throttled,
+    // CSS-var writes only, no layout in the handler. Reduced-motion: inert.
+    (function () {
+      const rm = matchMedia('(prefers-reduced-motion: reduce)');
+      const corridor = document.getElementById('atlas-corridor');
+      const walls = Array.from(document.querySelectorAll('.atlas-wall, .atlas-floor, .atlas-ceil')) as HTMLElement[];
+      if (!corridor) return;
+
+      let raf = 0;
+      const onScroll = () => {
+        raf = 0;
+        if (rm.matches) return;
+        const y = window.scrollY || 0;
+        // a small one-time dolly-in (clamped, no snap); the endless streaming of
+        // the shelf texture is what actually sells "infinite".
+        corridor.style.setProperty('--depth', Math.min(y * 0.14, 240) + 'px');
+        const bg = -(y * 0.5) + 'px';
+        for (const w of walls) w.style.backgroundPositionY = bg;
+      };
+      const req = () => { if (!raf) raf = requestAnimationFrame(onScroll); };
+      addEventListener('scroll', req, { passive: true });
+      onScroll();
+
+      if (!rm.matches && matchMedia('(pointer: fine)').matches) {
+        const voidEl = document.querySelector('.atlas-void') as HTMLElement | null;
+        addEventListener('pointermove', (e) => {
+          const px = 50 + (e.clientX / innerWidth - 0.5) * 6;
+          const py = 39 + (e.clientY / innerHeight - 0.5) * 4;
+          voidEl?.style.setProperty('--px', px + '%');
+          voidEl?.style.setProperty('--py', py + '%');
+        }, { passive: true });
+      }
+    })();
+  </script>
+
+  <script>
+    import { initAtlas } from '../../lib/institute/atlas';
+    initAtlas();
+  </script>
+</Base>

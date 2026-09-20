@@ -1,0 +1,63 @@
+{
+  "secret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "wrongSecret": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "iat": 1756684800000,
+  "vectors": [
+    {
+      "name": "valid",
+      "token": "eyJlbWFpbCI6InBlcnNvbkBleGFtcGxlLmNvbSIsIm5hbWUiOiJQZXJzb24iLCJpYXQiOjE3NTY2ODQ4MDAwMDAsImV4cCI6MTc1NjY4NDg2MDAwMCwiaXNzIjoic2lraGkuaW8ifQ.q7PJsSdrCRx99kDFbCjkMGm7jIUn9gHK4bkH_myp-fE",
+      "verifyAt": 1756684830000,
+      "verifyWith": "secret",
+      "expected": "valid",
+      "payload": {
+        "email": "person@example.com",
+        "name": "Person",
+        "iat": 1756684800000,
+        "exp": 1756684860000,
+        "iss": "sikhi.io"
+      }
+    },
+    {
+      "name": "wrong-secret",
+      "token": "eyJlbWFpbCI6InBlcnNvbkBleGFtcGxlLmNvbSIsIm5hbWUiOiJQZXJzb24iLCJpYXQiOjE3NTY2ODQ4MDAwMDAsImV4cCI6MTc1NjY4NDg2MDAwMCwiaXNzIjoic2lraGkuaW8ifQ.q7PJsSdrCRx99kDFbCjkMGm7jIUn9gHK4bkH_myp-fE",
+      "verifyAt": 1756684830000,
+      "verifyWith": "wrongSecret",
+      "expected": "null"
+    },
+    {
+      "name": "tampered-body",
+      "token": "eyJlbWFpbCI6ImF0dGFja2VyQGV2aWwuY29tIiwibmFtZSI6bnVsbCwiaWF0IjoxNzU2Njg0ODAwMDAwLCJleHAiOjE3NTY2ODQ4NjAwMDAsImlzcyI6InNpa2hpLmlvIn0.q7PJsSdrCRx99kDFbCjkMGm7jIUn9gHK4bkH_myp-fE",
+      "verifyAt": 1756684830000,
+      "verifyWith": "secret",
+      "expected": "null"
+    },
+    {
+      "name": "expired",
+      "token": "eyJlbWFpbCI6InBlcnNvbkBleGFtcGxlLmNvbSIsIm5hbWUiOiJQZXJzb24iLCJpYXQiOjE3NTY2ODQ4MDAwMDAsImV4cCI6MTc1NjY4NDg2MDAwMCwiaXNzIjoic2lraGkuaW8ifQ.q7PJsSdrCRx99kDFbCjkMGm7jIUn9gHK4bkH_myp-fE",
+      "verifyAt": 1756684861000,
+      "verifyWith": "secret",
+      "expected": "null"
+    },
+    {
+      "name": "bad-email",
+      "token": "eyJlbWFpbCI6Im5vdC1hbi1lbWFpbCIsIm5hbWUiOm51bGwsImlhdCI6MTc1NjY4NDgwMDAwMCwiZXhwIjoxNzU2Njg0ODYwMDAwLCJpc3MiOiJzaWtoaS5pbyJ9.yvFmirMigTCBVOoxaZcKvNYievwrPdtwwgbmAjUw9ho",
+      "verifyAt": 1756684830000,
+      "verifyWith": "secret",
+      "expected": "null"
+    },
+    {
+      "name": "foreign-iss",
+      "token": "eyJlbWFpbCI6InBlcnNvbkBleGFtcGxlLmNvbSIsIm5hbWUiOiJQZXJzb24iLCJpYXQiOjE3NTY2ODQ4MDAwMDAsImV4cCI6MTc1NjY4NDg2MDAwMCwiaXNzIjoicHVuamFiaXVuaS5jb20ifQ.wki1f46Zsamhjs2er3NXIPEp4rmV1C2cmDVSE_JRZ6o",
+      "verifyAt": 1756684830000,
+      "verifyWith": "secret",
+      "expected": "valid",
+      "payload": {
+        "email": "person@example.com",
+        "name": "Person",
+        "iat": 1756684800000,
+        "exp": 1756684860000,
+        "iss": "punjabiuni.com"
+      }
+    }
+  ]
+}

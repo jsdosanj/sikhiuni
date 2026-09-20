@@ -1,0 +1,83 @@
+{
+  "id": "aisf-00-setup::dev-environment",
+  "num": 1,
+  "slug": "dev-environment",
+  "title": "Dev Environment",
+  "tagline": "Your tools shape your thinking. Set them up once, set them up right.",
+  "type": "Build",
+  "languages": "Python, Node.js, Rust",
+  "time": "~45 minutes",
+  "objectives": [
+    "Set up Python 3.11+, Node.js 20+, and Rust toolchains from scratch",
+    "Configure virtual environments and package managers for reproducible builds",
+    "Verify GPU access with CUDA/MPS and run a test tensor operation",
+    "Understand the four-layer stack: system, packages, runtimes, AI libraries"
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>You&#39;re about to learn AI engineering across 500+ lessons using Python, TypeScript, Rust, and Julia. If your environment is broken, every single lesson becomes a fight against tooling instead of learning.</p>\n<p>Most people skip environment setup. Then they spend hours debugging import errors, version conflicts, and missing CUDA drivers. We&#39;re going to do this once, properly.</p>\n<h2>The Concept</h2>\n<p>An AI engineering environment has four layers:</p>\n<pre class=\"mermaid\">graph TD\n    A[&quot;4. AI/ML Libraries&lt;br/&gt;PyTorch, JAX, transformers, etc.&quot;] --&gt; B[&quot;3. Language Runtimes&lt;br/&gt;Python 3.11+, Node 20+, Rust, Julia&quot;]\n    B --&gt; C[&quot;2. Package Managers&lt;br/&gt;uv, pnpm, cargo, juliaup&quot;]\n    C --&gt; D[&quot;1. System Foundation&lt;br/&gt;OS, shell, git, editor, GPU drivers&quot;]</pre>\n<p>We install bottom-up. Each layer depends on the one below it.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>s0-env-stack</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: System Foundation</h3>\n<p>Check your system and install the basics.</p>\n<pre><code class=\"language-bash\"># macOS\nxcode-select --install\nbrew install git curl wget\n\n# Ubuntu/Debian\nsudo apt update &amp;&amp; sudo apt install -y build-essential git curl wget\n\n# Windows (use WSL2)\nwsl --install -d Ubuntu-24.04\n</code></pre>\n<h3>Step 2: Python with uv</h3>\n<p>We use <code>uv</code> — it&#39;s 10-100x faster than pip and handles virtual environments automatically.</p>\n<pre><code class=\"language-bash\">curl -LsSf https://astral.sh/uv/install.sh | sh\n\nuv python install 3.12\n\nuv venv\nsource .venv/bin/activate  # or .venv\\Scripts\\activate on Windows\n\nuv pip install numpy matplotlib jupyter\n</code></pre>\n<p>Verify:</p>\n<pre><code class=\"language-python\">import sys\nprint(f&quot;Python {sys.version}&quot;)\n\nimport numpy as np\nprint(f&quot;NumPy {np.__version__}&quot;)\na = np.array([1, 2, 3])\nprint(f&quot;Vector: {a}, dot product with itself: {np.dot(a, a)}&quot;)\n</code></pre>\n<h3>Step 3: Node.js with pnpm</h3>\n<p>For TypeScript lessons (agents, MCP servers, web apps).</p>\n<pre><code class=\"language-bash\">curl -fsSL https://fnm.vercel.app/install | bash\nfnm install 22\nfnm use 22\n\nnpm install -g pnpm\n\nnode -e &quot;console.log(&#39;Node&#39;, process.version)&quot;\n</code></pre>\n<p><strong>macOS / Apple Silicon (M1/M2/M3/M4):</strong> If the installer stops with <code>Error: Cannot install under Rosetta 2 in ARM default prefix (/opt/homebrew)</code>, your terminal is running under Rosetta 2 (<code>arch</code> prints <code>i386</code>) while Homebrew is a native arm64 build. Install fnm forcing arm64, wire it into your shell, then rerun the commands above from <code>fnm install 22</code>:</p>\n<pre><code class=\"language-bash\">arch -arm64 brew install fnm\necho &#39;eval &quot;$(fnm env --use-on-cd)&quot;&#39; &gt;&gt; ~/.zshrc\nsource ~/.zshrc\n</code></pre>\n<h3>Step 4: Rust</h3>\n<p>For performance-critical lessons (inference, systems).</p>\n<pre><code class=\"language-bash\">curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs | sh\n\nrustc --version\ncargo --version\n</code></pre>\n<h3>Step 5: Julia (Optional)</h3>\n<p>For math-heavy lessons where Julia shines.</p>\n<pre><code class=\"language-bash\">curl -fsSL https://install.julialang.org | sh\n\njulia -e &#39;println(&quot;Julia &quot;, VERSION)&#39;\n</code></pre>\n<h3>Step 6: GPU Setup (If You Have One)</h3>\n<p><strong>NVIDIA (Linux / Windows):</strong></p>\n<pre><code class=\"language-bash\">nvidia-smi\n\n# Install PyTorch with CUDA\nuv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124\n</code></pre>\n<p><strong>macOS / Apple Silicon (M1/M2/M3/M4):</strong> There is no CUDA on a Mac — that&#39;s expected, not a failure. Do <strong>not</strong> pass <code>--index-url .../cuXXX</code> (those wheels are Linux/Windows only, so the install fails). Install the plain build, which includes Apple&#39;s MPS (Metal) GPU backend:</p>\n<pre><code class=\"language-bash\">uv pip install torch torchvision torchaudio\n</code></pre>\n<p>Verify (works on any platform):</p>\n<pre><code class=\"language-python\">import torch\nprint(f&quot;CUDA available: {torch.cuda.is_available()}&quot;)           # False on macOS — expected\nprint(f&quot;MPS available:  {torch.backends.mps.is_available()}&quot;)   # True on Apple Silicon\nif torch.cuda.is_available():\n    print(f&quot;GPU: {torch.cuda.get_device_name(0)}&quot;)\n</code></pre>\n<p>No GPU? No problem. Most lessons work on CPU. For training-heavy lessons, use Google Colab or cloud GPUs.</p>\n<h3>Step 7: Verify the route you want to start</h3>\n<p>Run every command in this lesson from the repository root, the directory that\ncontains <code>README.md</code> and <code>phases/</code>. The preflight checks only what you need to\nstart the selected route. It skips later tools by default so a new learner sees\none clear answer instead of a wall of warnings.</p>\n<p>Start the full beginner sequence:</p>\n<pre><code class=\"language-bash\">python3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route beginner\n</code></pre>\n<p>Or check only the route you want:</p>\n<pre><code class=\"language-bash\">python3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route ml-foundations\npython3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route llm-engineering\npython3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route agents\npython3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route mcp\npython3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route agent-skills\npython3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route certification\n</code></pre>\n<p>Add <code>--show-later</code> when you want the same preflight to inspect optional tools\nand dependencies used by later lessons. A missing later tool never blocks the\nselected route.</p>\n<p>Each failed required check includes the detected path or import error and an\nexact corrective command. The Agent Skills and certification routes also show\nmanual host checks because a Python script cannot prove that an AI host has\ndiscovered a skill or that your chosen skill scope is writable.</p>\n<p>When the beginner preflight passes, it prints the exact first runnable lesson:</p>\n<pre><code class=\"language-text\">Ready to start Beginner course.\nNext: python3 phases/01-math-foundations/01-linear-algebra-intuition/code/vectors.py\n</code></pre>\n<h2>Use It</h2>\n<p>Your environment is ready to start the route you checked. Install later tools\nwhen a lesson asks for them instead of blocking your first lesson on the whole\nstack. Here is what you will use across the curriculum:</p>\n<table>\n<thead>\n<tr>\n<th>Language</th>\n<th>Used In</th>\n<th>Package Manager</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Python</td>\n<td>Phases 1-12 (ML, DL, NLP, Vision, Audio, LLMs)</td>\n<td>uv</td>\n</tr>\n<tr>\n<td>TypeScript</td>\n<td>Phases 13-17 (Tools, Agents, Swarms, Infra)</td>\n<td>pnpm</td>\n</tr>\n<tr>\n<td>Rust</td>\n<td>Phases 12, 15-17 (Performance-critical systems)</td>\n<td>cargo</td>\n</tr>\n<tr>\n<td>Julia</td>\n<td>Phase 1 (Math foundations)</td>\n<td>Pkg</td>\n</tr>\n</tbody></table>\n<h2>Ship It</h2>\n<p>This lesson produces a verification script that anyone can run to check their setup.</p>\n<p>See <code>outputs/prompt-env-check.md</code> for a prompt that helps AI assistants diagnose environment issues.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run the verification script and fix any failures</li>\n<li>Create a Python virtual environment for this course and install PyTorch</li>\n<li>Write a &quot;hello world&quot; in all four languages and run each one</li>\n</ol>\n",
+  "hasMermaid": true,
+  "code": {
+    "rs": "// Lesson: Dev Environment (phase 00 / lesson 01)\n// Topic: verify that the four-layer toolchain (system, package managers, runtimes, libs)\n// is reachable from a Rust binary. Spawns each tool with `--version`, captures stdout,\n// reports PASS/FAIL plus the parsed version string. Stdlib only.\n// Refs:\n//   https://doc.rust-lang.org/std/process/struct.Command.html\n//   https://doc.rust-lang.org/std/process/struct.Output.html\n//   https://doc.rust-lang.org/book/ch12-00-an-io-project.html\n// Build: rustc --edition 2021 code/main.rs -o /tmp/lesson_dev_env && /tmp/lesson_dev_env\n\nuse std::process::{Command, ExitCode};\n\nstruct Check {\n    name: &'static str,\n    program: &'static str,\n    args: &'static [&'static str],\n    optional: bool,\n}\n\nconst CHECKS: &[Check] = &[\n    Check { name: \"Git\",         program: \"git\",    args: &[\"--version\"], optional: false },\n    Check { name: \"Python 3.10+\", program: \"python3\", args: &[\"--version\"], optional: false },\n    Check { name: \"Node.js\",     program: \"node\",   args: &[\"--version\"], optional: false },\n    Check { name: \"Rust (rustc)\", program: \"rustc\",  args: &[\"--version\"], optional: false },\n    Check { name: \"Cargo\",       program: \"cargo\",  args: &[\"--version\"], optional: false },\n    Check { name: \"uv (Python)\", program: \"uv\",     args: &[\"--version\"], optional: true },\n    Check { name: \"pnpm\",        program: \"pnpm\",   args: &[\"--version\"], optional: true },\n    Check { name: \"Julia\",       program: \"julia\",  args: &[\"--version\"], optional: true },\n];\n\nfn run_check(check: &Check) -> Result<String, String> {\n    let output = Command::new(check.program)\n        .args(check.args)\n        .output()\n        .map_err(|e| format!(\"{}: {}\", check.program, e))?;\n\n    if !output.status.success() {\n        return Err(format!(\"exit code {:?}\", output.status.code()));\n    }\n\n    let combined = if !output.stdout.is_empty() {\n        &output.stdout\n    } else {\n        &output.stderr\n    };\n\n    let raw = String::from_utf8_lossy(combined);\n    let line = raw.lines().next().unwrap_or(\"\").trim().to_string();\n    if line.is_empty() {\n        Err(\"empty version output\".to_string())\n    } else {\n        Ok(line)\n    }\n}\n\nfn parse_minor_python(version_line: &str) -> Option<(u32, u32)> {\n    let trimmed = version_line.trim_start_matches(\"Python\").trim();\n    let mut parts = trimmed.split('.');\n    let major: u32 = parts.next()?.parse().ok()?;\n    let minor: u32 = parts.next()?.parse().ok()?;\n    Some((major, minor))\n}\n\nfn print_header() {\n    println!();\n    println!(\"=== AI Engineering from Scratch — Environment Check (Rust) ===\");\n    println!();\n    println!(\"Layer 1 (system) -> Layer 2 (package managers) -> Layer 3 (runtimes) -> Layer 4 (libs)\");\n    println!();\n}\n\nfn main() -> ExitCode {\n    print_header();\n\n    let mut required_pass = 0u32;\n    let mut required_total = 0u32;\n    let mut optional_pass = 0u32;\n    let mut optional_total = 0u32;\n\n    let mut python_ok = true;\n\n    println!(\"Required tools:\");\n    for check in CHECKS.iter().filter(|c| !c.optional) {\n        required_total += 1;\n        match run_check(check) {\n            Ok(version) => {\n                if check.name.starts_with(\"Python\") {\n                    match parse_minor_python(&version) {\n                        Some((major, minor)) if (major, minor) >= (3, 10) => {}\n                        _ => {\n                            println!(\"  [FAIL] {:<14} {} (need parseable Python 3.10+)\", check.name, version);\n                            python_ok = false;\n                            continue;\n                        }\n                    }\n                }\n                required_pass += 1;\n                println!(\"  [PASS] {:<14} {}\", check.name, version);\n            }\n            Err(why) => {\n                println!(\"  [FAIL] {:<14} {}\", check.name, why);\n                if check.name.starts_with(\"Python\") {\n                    python_ok = false;\n                }\n            }\n        }\n    }\n\n    println!();\n    println!(\"Optional tools:\");\n    for check in CHECKS.iter().filter(|c| c.optional) {\n        optional_total += 1;\n        match run_check(check) {\n            Ok(version) => {\n                optional_pass += 1;\n                println!(\"  [PASS] {:<14} {}\", check.name, version);\n            }\n            Err(_) => {\n                println!(\"  [skip] {:<14} not installed\", check.name);\n            }\n        }\n    }\n\n    println!();\n    println!(\"Summary: {}/{} required, {}/{} optional\",\n             required_pass, required_total, optional_pass, optional_total);\n\n    if required_pass == required_total && python_ok {\n        println!();\n        println!(\"Environment is ready. Start with Phase 1.\");\n        ExitCode::SUCCESS\n    } else {\n        println!();\n        println!(\"Fix the failed checks above, then run this again.\");\n        ExitCode::from(1)\n    }\n}\n"
+  },
+  "quiz": [
+    {
+      "q": "Why do AI projects need a separate virtual environment?",
+      "options": [
+        "Python requires virtual environments to import packages",
+        "They isolate dependencies so different projects don't conflict",
+        "Virtual environments make code run faster",
+        "Virtual environments provide GPU access"
+      ],
+      "answer": 1,
+      "explanation": "Virtual environments isolate package versions per project. Without them, upgrading PyTorch for one project can break another that depends on an older version."
+    },
+    {
+      "q": "What does CUDA provide for AI workloads?",
+      "options": [
+        "Parallel computing on NVIDIA GPUs for matrix operations",
+        "A Python package manager for ML libraries",
+        "A web framework for deploying models",
+        "A container runtime for model serving"
+      ],
+      "answer": 0,
+      "explanation": "CUDA is NVIDIA's parallel computing platform that lets you run matrix operations on thousands of GPU cores simultaneously. PyTorch and TensorFlow use it under the hood."
+    },
+    {
+      "q": "In the four-layer environment stack, which layer must be installed first?",
+      "options": [
+        "Language Runtimes (Python, Node.js)",
+        "System Foundation (OS, shell, GPU drivers)",
+        "Package Managers (pip, npm, cargo)",
+        "AI/ML Libraries (PyTorch, JAX)"
+      ],
+      "answer": 1,
+      "explanation": "You install bottom-up: system foundation first (OS, drivers), then package managers, then language runtimes, then AI libraries. Each layer depends on the one below."
+    },
+    {
+      "q": "What is the purpose of uv in a Python AI project?",
+      "options": [
+        "A GPU monitoring tool",
+        "A neural network visualization library",
+        "An ultra-fast Python package installer and resolver",
+        "A CUDA compiler for custom kernels"
+      ],
+      "answer": 2,
+      "explanation": "uv is a fast Python package installer written in Rust. It replaces pip with much faster dependency resolution and installation, often 10-100x faster."
+    },
+    {
+      "q": "How do you verify that PyTorch can access your GPU?",
+      "options": [
+        "python -c 'import gpu'",
+        "import torch; print(torch.cuda.is_available())",
+        "import torch; print(torch.__version__)",
+        "nvidia-smi --query"
+      ],
+      "answer": 1,
+      "explanation": "torch.cuda.is_available() returns True if PyTorch can access CUDA GPUs. On Apple Silicon, use torch.backends.mps.is_available() for Metal Performance Shaders."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/00-setup-and-tooling/01-dev-environment"
+  }
+}

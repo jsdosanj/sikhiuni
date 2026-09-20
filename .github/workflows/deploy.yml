@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # indexnow_ping.py diffs courses.json against HEAD^
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -36,3 +38,9 @@ jobs:
           python3 scripts/build_public_data.py
           npx --yes wrangler@4 r2 object put sikh-university-media/courses.json \
             --file site/assets/data/courses.public.json --remote
+
+      - name: Notify search engines (IndexNow — docs/SEO.md)
+        # Best-effort and additive: pings Bing/DuckDuckGo/Seznam/Naver to re-crawl the
+        # core pages plus any course that changed in this push, instead of waiting for
+        # their next scheduled sitemap crawl. Never fails the workflow.
+        run: python3 scripts/indexnow_ping.py

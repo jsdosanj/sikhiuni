@@ -1,0 +1,188 @@
+{
+  "track": "aisf-16-multi-agent",
+  "phaseDir": "16-multi-agent-and-swarms",
+  "blurb": "Coordination, emergence, and collective intelligence.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-16-multi-agent::why-multi-agent",
+      "num": 1,
+      "slug": "why-multi-agent",
+      "title": "Why Multi-Agent?",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-16-multi-agent::fipa-acl-heritage",
+      "num": 2,
+      "slug": "fipa-acl-heritage",
+      "title": "Heritage of FIPA-ACL and Speech Acts",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::communication-protocols",
+      "num": 3,
+      "slug": "communication-protocols",
+      "title": "Communication Protocols",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-16-multi-agent::primitive-model",
+      "num": 4,
+      "slug": "primitive-model",
+      "title": "The Multi-Agent Primitive Model",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::supervisor-orchestrator-pattern",
+      "num": 5,
+      "slug": "supervisor-orchestrator-pattern",
+      "title": "Supervisor / Orchestrator-Worker Pattern",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::hierarchical-architecture",
+      "num": 6,
+      "slug": "hierarchical-architecture",
+      "title": "Hierarchical Architecture and Its Failure Mode",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::society-of-mind-debate",
+      "num": 7,
+      "slug": "society-of-mind-debate",
+      "title": "Society of Mind and Multi-Agent Debate",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::role-specialization",
+      "num": 8,
+      "slug": "role-specialization",
+      "title": "Role Specialization — Planner, Critic, Executor, Verifier",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::parallel-swarm-networks",
+      "num": 9,
+      "slug": "parallel-swarm-networks",
+      "title": "Parallel / Swarm / Networked Architectures",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::group-chat-speaker-selection",
+      "num": 10,
+      "slug": "group-chat-speaker-selection",
+      "title": "Group Chat and Speaker Selection",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::handoffs-and-routines",
+      "num": 11,
+      "slug": "handoffs-and-routines",
+      "title": "Handoffs and Routines — Stateless Orchestration",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::a2a-protocol",
+      "num": 12,
+      "slug": "a2a-protocol",
+      "title": "A2A — The Agent-to-Agent Protocol",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::shared-memory-blackboard",
+      "num": 13,
+      "slug": "shared-memory-blackboard",
+      "title": "Shared Memory and Blackboard Patterns",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::consensus-and-bft",
+      "num": 14,
+      "slug": "consensus-and-bft",
+      "title": "Consensus and Byzantine Fault Tolerance for Agents",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::voting-debate-topology",
+      "num": 15,
+      "slug": "voting-debate-topology",
+      "title": "Voting, Self-Consistency, and Debate Topology",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::negotiation-bargaining",
+      "num": 16,
+      "slug": "negotiation-bargaining",
+      "title": "Negotiation and Bargaining",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::generative-agents-simulation",
+      "num": 17,
+      "slug": "generative-agents-simulation",
+      "title": "Generative Agents and Emergent Simulation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::theory-of-mind-coordination",
+      "num": 18,
+      "slug": "theory-of-mind-coordination",
+      "title": "Theory of Mind and Emergent Coordination",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::swarm-optimization-pso-aco",
+      "num": 19,
+      "slug": "swarm-optimization-pso-aco",
+      "title": "Swarm Optimization for LLMs (PSO, ACO)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::marl-maddpg-qmix-mappo",
+      "num": 20,
+      "slug": "marl-maddpg-qmix-mappo",
+      "title": "MARL — MADDPG, QMIX, MAPPO",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::agent-economies",
+      "num": 21,
+      "slug": "agent-economies",
+      "title": "Agent Economies, Token Incentives, Reputation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::production-scaling-queues-checkpoints",
+      "num": 22,
+      "slug": "production-scaling-queues-checkpoints",
+      "title": "Production Scaling — Queues, Checkpoints, Durability",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::failure-modes-mast-groupthink",
+      "num": 23,
+      "slug": "failure-modes-mast-groupthink",
+      "title": "Failure Modes — MAST, Groupthink, Monoculture, Cascading Errors",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::evaluation-coordination-benchmarks",
+      "num": 24,
+      "slug": "evaluation-coordination-benchmarks",
+      "title": "Evaluation and Coordination Benchmarks",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-16-multi-agent::case-studies-2026-sota",
+      "num": 25,
+      "slug": "case-studies-2026-sota",
+      "title": "Case Studies and the 2026 State of the Art",
+      "nQuiz": 0
+    }
+  ]
+}

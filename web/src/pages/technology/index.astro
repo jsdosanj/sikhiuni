@@ -1,0 +1,339 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+import { phases, dojos, guides, capstones, pathsOf, schools, WEDGE, totalLessons, gurmukhiHtml } from '../../lib/institute';
+
+const cyberPaths = pathsOf('cyber');
+const itPaths = pathsOf('it');
+
+// Which phases carry a server-graded exam + certificate, and which are
+// reading tracks for now (source has no quiz bank yet).
+const examBanks = import.meta.glob('../../data/institute/exam/*.json', { eager: true });
+const hasExam = (id: string) => !!examBanks[`../../data/institute/exam/${id}.json`];
+
+// The AISF-style goal router (X3): four doors, each drops the student at the
+// right place. Wave 1 targets the track overview / catalogue; Wave 4+ deep-links
+// to the first lesson.
+const goals = [
+  { label: "I'm new to coding", to: '/technology/track/00-setup-and-tooling', hint: 'start with the tooling, then the fundamentals, the from-scratch Sikh Code dojo lands in the next wave' },
+  { label: 'I know some ML', to: '/technology/track/02-ml-fundamentals', hint: 'classical machine learning, then deep learning and transformers' },
+  { label: 'I want to build with LLMs', to: '/technology/track/11-llm-engineering', hint: 'prompting, RAG, evals, serving, observability' },
+  { label: 'I want to build agents', to: '/technology/track/14-agent-engineering', hint: 'the agent loop from first principles, memory, planning, multi-step work' },
+  { label: 'I want to work in security', to: '/technology/track/00-security-foundations', hint: 'the pre-security path first, networks, Linux, and research, then pick defence or offence' },
+  { label: 'I teach, and want to bring cyber into a classroom', to: '/technology/track/04-cyber-for-schools', hint: 'free K-12 curriculum, a browser cyber range, and the ransomware guidance a school actually needs' },
+  { label: 'I want an IT job, and a credential to show for it', to: '/technology/track/00-it-support', hint: "Apple's and Microsoft's own free training, device support, fleet deployment, then a credential employers filter on" },
+];
+const desc = 'Sikhi University’s engineering wing, four schools: AI, Cybersecurity, IT, and Design. Learn to code, build AI systems, defend what you build, keep an estate running, design what people touch, and ship a project for the Panth.';
+---
+<Base title="Institute of Technology, Sikhi University" description={desc} institute>
+  <InstituteRail />
+
+  <header class="i-threshold">
+    <span class="i-powerline" aria-hidden="true"></span>
+    <div class="i-wrap i-thresh-grid">
+      <div class="i-thresh-copy">
+        <span class="i-label" style="color:var(--i-signal)">// entering, f00 · the institute</span>
+        <h1 class="i-thresh-h">You have entered the<br /><span class="i-amber">Institute of Technology</span><span class="i-caret" aria-hidden="true">&nbsp;</span></h1>
+        <p class="i-prose i-lede">The university’s engineering wing, in four schools: one that teaches you to build the systems, one that teaches you to defend them, one that keeps them running, and one that shapes the surface people actually touch. A working building, lit at night.</p>
+        <p class="i-wedge i-mono">{WEDGE}</p>
+        <a class="i-btn i-btn-primary i-thresh-cta" href="#i-goal-router">Pick a goal &rarr;</a>
+      </div>
+
+      <!-- The bench panel: an instrument read-out of what the building runs.
+           Numbers come straight off the manifest so they never go stale.
+           Cyan is used only for the "online" / "ok" states (D2). -->
+      <aside class="i-bench i-mono" aria-label="What the Institute runs">
+        <div class="i-bench-bar">
+          <span class="i-bench-dot" aria-hidden="true"></span>
+          <span class="i-bench-path">~ / institute / bench</span>
+          <span class="i-bench-live">online</span>
+        </div>
+        <dl class="i-bench-rows">
+          <div><dt>schools</dt><dd>{schools.map((s) => s.title).join(' · ')}</dd></div>
+          <div><dt>ai school</dt><dd>{phases.length} phases &middot; ~{totalLessons} lessons</dd></div>
+          <div><dt>cyber school</dt><dd>{cyberPaths.length} paths &middot; red, blue, cloud, ai &amp; the classroom</dd></div>
+          <div><dt>school of it</dt><dd>{itPaths.length} path &middot; support, deployment &amp; credentials</dd></div>
+          <div><dt>sikh code</dt><dd>2 dojos &middot; the Claude Code guide</dd></div>
+          <div><dt>code lab</dt><dd>python &middot; javascript &middot; html &mdash; in your browser</dd></div>
+          <div><dt>credential</dt><dd>ai phase exam &rarr; verifiable certificate</dd></div>
+        </dl>
+        <div class="i-bench-run"><span class="i-bench-prompt">bench $</span> run tests <span class="i-bench-ok">&mdash; passing</span></div>
+      </aside>
+    </div>
+  </header>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">01, the four schools</span>
+    <h2>The Institute has four schools. All free, all open.</h2>
+    <div class="i-schools">
+      {schools.map((s) => (
+        <a class="i-panel i-school" href={`/technology/school/${s.slug}`}>
+          <span class="i-corner">{s.label}</span>
+          <span class="i-mono i-school-mark" aria-hidden="true">{s.mark}</span>
+          <strong class="i-school-title">{s.title}</strong>
+          <span class="i-school-tag">{s.tagline}</span>
+          <span class="i-prose i-school-blurb" set:html={gurmukhiHtml(s.blurb)} />
+          <span class="i-school-go i-mono">enter &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="i-wrap i-sec" id="i-goal-router">
+    <span class="i-label">02, choose what you want to build</span>
+    <h2>Pick one goal. You do not need to scan every lesson first.</h2>
+    <div class="i-goals">
+      {goals.map((g) => (
+        <a href={g.to} class="i-goal">
+          <span class="i-goal-label">{g.label}</span>
+          <span class="i-goal-hint i-prose">{g.hint}</span>
+          <span class="i-goal-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">03, <a href="/technology/school/ai">AI School</a> &middot; {phases.length} phases &middot; ~{totalLessons} lessons</span>
+    <h2>AI Engineering</h2>
+    <p class="i-prose">Adapted from <a href="https://aiengineeringfromscratch.com">AI Engineering from Scratch</a> by Rohit Ghumare, used under the MIT License &mdash; reformatted into the Institute's structure, with a browser code lab, server-graded quizzes, and phase exams. All {phases.length} phases are live; a few of the newest are reading tracks until their exams are written.</p>
+    <ol class="i-spine">
+      {phases.map((p) => (
+        <li class="i-spine-row">
+          <span class="i-spine-num i-mono">{String(p.num).padStart(2, '0')}</span>
+          <a class="i-spine-title" href={`/technology/track/${p.slug}`}>{p.title}</a>
+          <span class="i-spine-meta i-mono">{p.lessonCount} lessons{p.prereq ? ' · prereq' : ''}</span>
+          <span class="i-spine-status i-mono">{hasExam(p.id) ? 'exam + cert' : 'reading'}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">04, <a href="/technology/school/cybersecurity">Cybersecurity School</a> &middot; {cyberPaths.length} paths</span>
+    <h2>Cybersecurity</h2>
+    <p class="i-prose">Foundations first, then defence or offence, then the range, the cloud, and the AI systems the school across the corridor teaches you to build &mdash; plus a path for the people who teach. The sequencing is adapted from <a href="https://brootware.github.io/awesome-cyber-security-university/" target="_blank" rel="noopener">Awesome Cyber Security University</a> (CC0 1.0); the teaching notes are ours. <strong>The labs are not hosted here</strong> &mdash; each module sends you to the free range that runs it. Reference material from <a href="https://www.sans.org/security-resources/download" target="_blank" rel="noopener">SANS</a> and the K-12 classroom resources from <a href="https://niccs.cisa.gov/news-events/featured-stories/check-out-k-12-cyber-resources-educators" target="_blank" rel="noopener">NICCS&nbsp;&middot;&nbsp;CISA</a> are linked, never rehosted.</p>
+    <ol class="i-spine">
+      {cyberPaths.map((p) => (
+        <li class="i-spine-row">
+          <span class="i-spine-num i-mono">{String(p.num).padStart(2, '0')}</span>
+          <a class="i-spine-title" href={`/technology/track/${p.slug}`}>{p.title}</a>
+          <span class="i-spine-meta i-mono">{p.moduleCount} modules{p.prereq ? ' · prereq' : ''}</span>
+          <span class="i-spine-status i-mono">{p.level}-level</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">05, <a href="/technology/school/it">School of IT</a> &middot; {itPaths.length} path</span>
+    <h2>IT Support</h2>
+    <p class="i-prose">The work that keeps an organisation's machines, accounts and devices working &mdash; and the fastest route in this building from nothing to a paid job. Built on <a href="https://it-training.apple.com/" target="_blank" rel="noopener">Apple Professional Training</a> and <a href="https://learn.microsoft.com/en-us/credentials/" target="_blank" rel="noopener">Microsoft Learn</a>, both of which publish their IT curriculum free and self-paced on their own sites. We wrote the path; they teach the courses, and <strong>every one opens at its vendor</strong>. The training is free; several of the exams are not, and each card says which.</p>
+    <ol class="i-spine">
+      {itPaths.map((p) => (
+        <li class="i-spine-row">
+          <span class="i-spine-num i-mono">{String(p.num).padStart(2, '0')}</span>
+          <a class="i-spine-title" href={`/technology/track/${p.slug}`}>{p.title}</a>
+          <span class="i-spine-meta i-mono">{p.moduleCount} modules</span>
+          <span class="i-spine-status i-mono">{p.level}-level</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">06, sikh code</span>
+    <h2>Learn to code, in our voice</h2>
+    <div class="i-card-grid">
+      {[...dojos, ...guides, ...capstones].map((t) => (
+        <a class="i-panel i-card" href={`/technology/track/${t.id}`}>
+          <span class="i-corner">{t.kind}</span>
+          <strong class="i-card-title">{t.title}</strong>
+          <span class="i-prose i-card-sum" set:html={gurmukhiHtml(t.summary)} />
+        </a>
+      ))}
+      <a class="i-panel i-card" href="/technology/claude">
+        <span class="i-corner">claude</span>
+        <strong class="i-card-title">Learning Claude</strong>
+        <span class="i-prose i-card-sum">Our Claude Code guide and agentic dojo, plus a map of Anthropic's own free Academy, 23 courses on Claude, the API, MCP and agents.</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="i-wrap i-sec">
+    <span class="i-label">07, the letters after your name</span>
+    <h2>Certifications</h2>
+    <p class="i-prose">The Institute teaches you the work. Hiring, especially in security and delivery, also gates on a certificate from a body that has never met you. <a href="https://cert-prep.dosanjhlabs.com/" target="_blank" rel="noopener">Cert&nbsp;Prep</a> is our sibling site for exactly that gap &mdash; <strong>PMP</strong>, <strong>CISM</strong>, and <strong>CompTIA&nbsp;Security+</strong>, free, from the same team. Sit it alongside either school: Security+ pairs with the <a href="/technology/school/cybersecurity">Cybersecurity School</a>'s foundations, CISM with its defence path, PMP with shipping anything at all.</p>
+    <p>
+      <a class="i-btn i-btn-primary" href="https://cert-prep.dosanjhlabs.com/" target="_blank" rel="noopener">Open Cert Prep &nearr;</a>
+    </p>
+    <p class="i-prose" style="margin-top:16px;font-size:12.5px;color:var(--i-muted)">
+      PMP is a registered mark of the Project Management Institute, CISM of ISACA, and Security+ of CompTIA. Neither Sikhi University nor Dosanjh Labs is affiliated with, sponsored by, or endorsed by any of them; the certifications are awarded by those bodies alone.
+    </p>
+  </section>
+
+  <section class="i-wrap i-sec i-sec-last">
+    <span class="i-label">08, when you want breadth</span>
+    <h2>Explore free courses elsewhere</h2>
+    <p class="i-prose">The Institute's own courses come first, you finish those and earn its certificate. When you want a wider on-ramp or an interactive challenge platform, the <a href="/technology/explore">college fair</a> sends you out to freeCodeCamp and more.</p>
+    <p class="i-prose">And when you are ready to build: the <a href="/technology/atlas">Open Source Atlas</a> is ~12,500 AI and engineering projects, each with a line on what it could do for the Panth.</p>
+    <p class="i-prose">For books, curated link directories, and paid courses, see <a href="/technology/resources">more resources</a>.</p>
+    <p>
+      <a class="i-btn i-btn-ghost" href="/technology/explore">Walk the college fair &rarr;</a>
+      <a class="i-btn i-btn-ghost" href="/technology/atlas">Open the atlas &rarr;</a>
+      <a class="i-btn i-btn-ghost" href="/technology/resources">More resources &rarr;</a>
+    </p>
+  </section>
+
+  <style>
+    .i-threshold {
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--i-line);
+      padding: clamp(56px, 10vw, 96px) 0 clamp(40px, 7vw, 72px);
+      background:
+        radial-gradient(ellipse 70% 80% at 50% -10%, color-mix(in srgb, var(--i-filament) 14%, transparent), transparent 60%),
+        var(--i-ground-deep);
+    }
+    .i-powerline {
+      position: absolute; left: 0; right: 0; top: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--i-signal), transparent);
+      transform: translateX(-100%); opacity: 0;
+    }
+    .i-powerline.run { animation: i-sweep 2.4s ease-out 1 both; }
+    @keyframes i-sweep { 0% { transform: translateX(-100%); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+    /* Two columns from 900px up: the copy, then the bench read-out. */
+    .i-thresh-grid { display: grid; gap: 40px; align-items: start; }
+    @media (min-width: 900px) {
+      .i-thresh-grid { grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr); gap: clamp(40px, 5vw, 68px); }
+    }
+
+    .i-thresh-h {
+      margin: 16px 0 0; font-size: clamp(29px, 4.6vw, 48px); line-height: 1.09;
+      letter-spacing: 0.01em;
+    }
+    .i-amber { color: var(--i-filament); }
+    .i-caret { display: inline-block; width: 0.5ch; background: var(--i-signal); }
+    .i-caret.blink { animation: i-blink 1.1s steps(1) infinite; }
+    @keyframes i-blink { 50% { opacity: 0; } }
+    .i-lede { margin-top: 22px; font-size: 18px; max-width: 46ch; }
+    .i-wedge { margin-top: 20px; max-width: 52ch; font-size: 13px; color: var(--i-muted); border-left: 2px solid var(--i-filament-dim); padding-left: 16px; }
+    .i-thresh-cta { margin-top: 26px; }
+
+    /* Bench read-out panel */
+    .i-bench {
+      border: 1px solid var(--i-line); border-radius: var(--i-r-md);
+      background: var(--i-surface-2); overflow: hidden;
+      font-size: 12.5px; line-height: 1.5;
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--i-filament) 10%, transparent) inset;
+    }
+    .i-bench-bar {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 13px; border-bottom: 1px solid var(--i-line-soft);
+      background: color-mix(in srgb, var(--i-ground-deep) 55%, var(--i-surface-2));
+    }
+    .i-bench-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--i-signal); box-shadow: 0 0 6px color-mix(in srgb, var(--i-signal) 70%, transparent); flex: none; }
+    .i-bench-path { color: var(--i-ink-dim); letter-spacing: 0.02em; }
+    .i-bench-live { margin-left: auto; color: var(--i-signal); text-transform: uppercase; letter-spacing: 0.14em; font-size: 10px; }
+    .i-bench-rows { margin: 0; padding: 6px 0; }
+    .i-bench-rows > div {
+      display: grid; grid-template-columns: 92px 1fr; gap: 12px;
+      padding: 7px 14px; border-top: 1px solid var(--i-line-soft);
+    }
+    .i-bench-rows > div:first-child { border-top: 0; }
+    .i-bench-rows dt { color: var(--i-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; padding-top: 1px; }
+    .i-bench-rows dd { margin: 0; color: var(--i-ink); }
+    .i-bench-run {
+      padding: 10px 14px; border-top: 1px solid var(--i-line-soft);
+      color: var(--i-ink-dim); background: color-mix(in srgb, var(--i-ground-deep) 40%, transparent);
+    }
+    .i-bench-prompt { color: var(--i-filament); }
+    .i-bench-ok { color: var(--i-signal); }
+    @media (max-width: 899px) { .i-bench { max-width: 460px; } }
+    /* Entrance rides the same "power-on, once per session" gate as the
+       wordmark, the script adds .lit; repeat visits / reduced-motion get
+       the panel already in place. */
+    .i-bench.lit { animation: i-bench-lit 620ms var(--i-ease, cubic-bezier(.2, .7, .3, 1)) 240ms both; }
+    @keyframes i-bench-lit { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .i-bench.lit { animation: none; } }
+
+    .i-sec { padding: 56px 24px; border-bottom: 1px solid var(--i-line-soft); }
+    .i-sec-last { border-bottom: 0; }
+    .i-sec > .i-label { display: block; margin-bottom: 8px; }
+    .i-sec > h2 { margin: 0 0 10px; font-size: clamp(20px, 3vw, 27px); }
+    .i-sec > p { margin: 0 0 22px; }
+
+    /* The sub-schools. One accent for all (D2 keeps --signal for live
+       states only), they are told apart by the mono mark and the label. */
+    .i-schools { display: grid; gap: 16px; }
+    @media (min-width: 760px) { .i-schools { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
+    .i-school { display: block; text-decoration: none; }
+    .i-school:hover { border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line)); }
+    .i-school-mark { display: block; margin-top: 10px; font-size: 22px; color: var(--i-filament); letter-spacing: 0.06em; }
+    .i-school-title { display: block; margin-top: 8px; font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 22px; color: var(--i-ink); }
+    .i-school-tag { display: block; margin-top: 4px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 15px; color: var(--i-filament); }
+    .i-school-blurb { display: block; margin-top: 10px; font-size: 14px; }
+    .i-school-go { display: block; margin-top: 14px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--i-filament); }
+
+    .i-goals { display: grid; gap: 2px; border: 1px solid var(--i-line); border-radius: var(--i-r-md); overflow: hidden; }
+    .i-goal { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 16px; row-gap: 3px; padding: 15px 18px; background: var(--i-surface); text-decoration: none; transition: background 150ms; }
+    .i-goal:hover { background: color-mix(in srgb, var(--i-filament) 8%, var(--i-surface)); }
+    .i-goal-label { grid-area: 1 / 1; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 16px; color: var(--i-ink); }
+    .i-goal-hint { grid-area: 2 / 1; font-size: 13.5px; margin: 0; }
+    .i-goal-arrow { grid-area: 1 / 2 / 3 / 3; align-self: center; color: var(--i-filament); font-size: 18px; transition: transform 150ms; }
+    .i-goal:hover .i-goal-arrow { transform: translateX(3px); }
+
+    .i-spine { list-style: none; margin: 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); }
+    .i-spine-row { display: grid; grid-template-columns: 44px 1fr auto auto; align-items: baseline; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--i-line-soft); }
+    .i-spine-row:first-child { border-top: 0; }
+    .i-spine-num { font-family: "Chakra Petch", sans-serif; font-weight: 700; color: var(--i-filament); font-size: 15px; }
+    .i-spine-title { color: var(--i-ink); text-decoration: none; font-family: "Chakra Petch", sans-serif; font-weight: 600; }
+    .i-spine-title:hover { color: var(--i-ink); }
+    .i-spine-meta { font-size: 11px; color: var(--i-muted); letter-spacing: 0.06em; }
+    .i-spine-status { font-size: 10.5px; color: var(--i-muted); text-transform: uppercase; letter-spacing: 0.14em; }
+
+    .i-card-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .i-card { display: block; text-decoration: none; }
+    .i-card:hover { border-color: color-mix(in srgb, var(--i-signal) 40%, var(--i-line)); }
+    .i-card-title { display: block; margin-top: 8px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 16px; color: var(--i-ink); }
+    .i-card-sum { display: block; margin-top: 6px; font-size: 13.5px; }
+
+    @media (max-width: 640px) {
+      .i-spine-row { grid-template-columns: 36px 1fr; }
+      .i-spine-meta, .i-spine-status { grid-column: 2; }
+    }
+  </style>
+
+  <script>
+    // The threshold "power-on" (D6): a cyan sweep + a typed wordmark, once per
+    // browser session. prefers-reduced-motion (and a repeat visit) get the
+    // finished text instantly.
+    const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const line = document.querySelector('.i-powerline');
+    const caret = document.querySelector('.i-caret');
+    const bench = document.querySelector('.i-bench');
+    let seen = false;
+    try { seen = sessionStorage.getItem('iot_v1_poweron') === '1'; } catch (e) {}
+    if (!seen && !RM) {
+      line && line.classList.add('run');
+      bench && bench.classList.add('lit');
+      const h = document.querySelector('.i-thresh-h');
+      if (h) {
+        const amber = h.querySelector('.i-amber');
+        const full = amber ? amber.textContent || '' : '';
+        if (amber && full) {
+          amber.textContent = '';
+          let i = 0;
+          const step = () => {
+            amber.textContent = full.slice(0, ++i);
+            if (i < full.length) setTimeout(step, 38);
+            else caret && caret.classList.add('blink');
+          };
+          setTimeout(step, 380);
+        }
+      }
+      try { sessionStorage.setItem('iot_v1_poweron', '1'); } catch (e) {}
+    } else {
+      caret && caret.classList.add('blink');
+    }
+  </script>
+</Base>

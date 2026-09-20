@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::structured-outputs-constrained-decoding",
+  "num": 20,
+  "slug": "structured-outputs-constrained-decoding",
+  "title": "Structured Outputs & Constrained Decoding",
+  "tagline": "Ask an LLM for JSON. Get JSON most of the time. In production, \"most\" is the problem. Constrained decoding turns \"most\" into \"always\" by editing the logits before sampling.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>A classifier prompts an LLM: &quot;Return one of {positive, negative, neutral}.&quot; The model returns &quot;The sentiment is positive — this review is overwhelmingly favorable because the customer explicitly states that they ...&quot;. Your parser crashes. Your classifier&#39;s F1 is 0.0.</p>\n<p>Free-form generation is not a contract. It is a suggestion. A production system needs a contract.</p>\n<p>Three layers exist in 2026.</p>\n<ol>\n<li><strong>Prompting.</strong> Ask nicely. &quot;Return only the JSON object.&quot; Works ~80% on frontier models, less on smaller ones.</li>\n<li><strong>Native structured output APIs.</strong> OpenAI <code>response_format</code>, Anthropic tool use, Gemini JSON mode. Reliable on supported schemas. Vendor-locked.</li>\n<li><strong>Constrained decoding.</strong> Modify the logits at every generation step so the model <em>cannot</em> emit invalid tokens. 100% valid by construction. Works on any local model.</li>\n</ol>\n<p>This lesson builds intuition for all three and names when to reach for which.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/constrained-decoding.svg\" alt=\"Constrained decoding masking invalid tokens at each step\" loading=\"lazy\"><figcaption>Constrained decoding masking invalid tokens at each step</figcaption></figure>\n<p><strong>How constrained decoding works.</strong> At each generation step, the LLM produces a logit vector over the full vocabulary (~100k tokens). A <em>logit processor</em> sits between the model and the sampler. It computes which tokens are valid given the current position in the target grammar — JSON Schema, regex, context-free grammar — and sets the logits of all invalid tokens to negative infinity. The softmax over the remaining logits puts probability mass only on valid continuations.</p>\n<p>Implementations in 2026:</p>\n<ul>\n<li><strong>Outlines.</strong> Compiles JSON Schema or regex into a finite-state machine. Every token gets an O(1) valid-next-token lookup. FSM-based, so recursive schemas need flattening.</li>\n<li><strong>XGrammar / llguidance.</strong> Context-free grammar engines. Handle recursive JSON Schema. Near-zero decoding overhead. OpenAI credited llguidance in their 2025 structured output implementation.</li>\n<li><strong>vLLM guided decoding.</strong> Built-in <code>guided_json</code>, <code>guided_regex</code>, <code>guided_choice</code>, <code>guided_grammar</code> via Outlines, XGrammar, or lm-format-enforcer backends.</li>\n<li><strong>Instructor.</strong> Pydantic-based wrapper over any LLM. Retries on validation failure. Cross-provider, but does not modify logits — it relies on retries + structured-output-aware prompts.</li>\n</ul>\n<h3>The counterintuitive result</h3>\n<p>Constrained decoding is often <em>faster</em> than unconstrained generation. Two reasons. First, it shrinks the next-token search space. Second, clever implementations skip token generation entirely for forced tokens (scaffolding like <code>{&quot;name&quot;: &quot;</code> — every byte is determined).</p>\n<h3>The pitfall that costs you</h3>\n<p>Field order matters. Put <code>answer</code> before <code>reasoning</code>, and the model commits to an answer before it thinks. JSON is valid. Answer is wrong. No validation catches it.</p>\n<pre><code class=\"language-json\">// BAD\n{&quot;answer&quot;: &quot;yes&quot;, &quot;reasoning&quot;: &quot;because ...&quot;}\n\n// GOOD\n{&quot;reasoning&quot;: &quot;... therefore ...&quot;, &quot;answer&quot;: &quot;yes&quot;}\n</code></pre>\n<p>Schema field order is logic, not formatting.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>constrained-decoder</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: regex-constrained generation from scratch</h3>\n<p>See <code>code/main.py</code> for a standalone FSM implementation. The core idea in 30 lines:</p>\n<pre><code class=\"language-python\">def mask_logits(logits, valid_token_ids):\n    mask = [float(&quot;-inf&quot;)] * len(logits)\n    for tid in valid_token_ids:\n        mask[tid] = logits[tid]\n    return mask\n\n\ndef generate_constrained(model, tokenizer, prompt, fsm):\n    ids = tokenizer.encode(prompt)\n    state = fsm.initial_state\n    while not fsm.is_accept(state):\n        logits = model.next_token_logits(ids)\n        valid = fsm.valid_tokens(state, tokenizer)\n        logits = mask_logits(logits, valid)\n        tok = sample(logits)\n        ids.append(tok)\n        state = fsm.transition(state, tok)\n    return tokenizer.decode(ids)\n</code></pre>\n<p>The FSM tracks what parts of the grammar we have satisfied so far. <code>valid_tokens(state, tokenizer)</code> computes which vocabulary tokens can advance the FSM without leaving an accepting path.</p>\n<h3>Step 2: Outlines for JSON Schema</h3>\n<pre><code class=\"language-python\">from pydantic import BaseModel\nfrom typing import Literal\nimport outlines\n\n\nclass Review(BaseModel):\n    sentiment: Literal[&quot;positive&quot;, &quot;negative&quot;, &quot;neutral&quot;]\n    confidence: float\n    evidence_span: str\n\n\nmodel = outlines.models.transformers(&quot;meta-llama/Llama-3.2-3B-Instruct&quot;)\ngenerator = outlines.generate.json(model, Review)\n\nresult = generator(&quot;Classify: &#39;The wait staff was attentive and the food arrived hot.&#39;&quot;)\nprint(result)\n# Review(sentiment=&#39;positive&#39;, confidence=0.93, evidence_span=&#39;attentive ... hot&#39;)\n</code></pre>\n<p>Zero validation errors. Ever. The FSM makes invalid output unreachable.</p>\n<h3>Step 3: Instructor for provider-agnostic Pydantic</h3>\n<pre><code class=\"language-python\">import instructor\nfrom anthropic import Anthropic\nfrom pydantic import BaseModel, Field\n\n\nclass Invoice(BaseModel):\n    vendor: str\n    total_usd: float = Field(ge=0)\n    line_items: list[str]\n\n\nclient = instructor.from_anthropic(Anthropic())\ninvoice = client.messages.create(\n    model=&quot;claude-opus-4-7&quot;,\n    max_tokens=1024,\n    response_model=Invoice,\n    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Extract from: &#39;Acme Corp $420. Widget, Gizmo.&#39;&quot;}],\n)\n</code></pre>\n<p>Different mechanism. Instructor does not touch logits. It formats the schema into the prompt, parses the output, and retries on validation failure (default 3 times). Works with any provider. Retries add latency and cost. Cross-provider portability is the selling point.</p>\n<h3>Step 4: native vendor APIs</h3>\n<pre><code class=\"language-python\">from openai import OpenAI\n\nclient = OpenAI()\nresponse = client.responses.create(\n    model=&quot;gpt-5&quot;,\n    input=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Classify: &#39;The food was cold.&#39;&quot;}],\n    text={&quot;format&quot;: {&quot;type&quot;: &quot;json_schema&quot;, &quot;name&quot;: &quot;sentiment&quot;,\n          &quot;schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;required&quot;: [&quot;sentiment&quot;],\n                     &quot;properties&quot;: {&quot;sentiment&quot;: {&quot;type&quot;: &quot;string&quot;,\n                                                  &quot;enum&quot;: [&quot;positive&quot;, &quot;negative&quot;, &quot;neutral&quot;]}}}}},\n)\nprint(response.output_parsed)\n</code></pre>\n<p>Server-side constrained decoding. Reliability parity with Outlines for supported schemas. No local model management. Locks you to the vendor.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>Recursive schemas.</strong> Outlines flattens recursion to a fixed depth. Tree-structured outputs (nested comments, AST) need XGrammar or llguidance (CFG-based).</li>\n<li><strong>Huge enums.</strong> 10,000-option enum compiles slowly or times out. Switch to a retriever: predict top-k candidates first, constrain to those.</li>\n<li><strong>Grammar too strict.</strong> Force <code>date: &quot;YYYY-MM-DD&quot;</code> regex and the model cannot output <code>&quot;unknown&quot;</code> for missing dates. Model compensates by inventing a date. Allow <code>null</code> or a sentinel.</li>\n<li><strong>Premature commitment.</strong> See field-order pitfall above. Always put reasoning first.</li>\n<li><strong>Vendor JSON mode without schema.</strong> Pure JSON mode only guarantees valid JSON, not valid <em>for your use case</em>. Always provide a full schema.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>OpenAI/Anthropic/Google model, simple schema</td>\n<td>Native vendor structured output</td>\n</tr>\n<tr>\n<td>Any provider, Pydantic workflow, can tolerate retries</td>\n<td>Instructor</td>\n</tr>\n<tr>\n<td>Local model, need 100% validity, flat schema</td>\n<td>Outlines (FSM)</td>\n</tr>\n<tr>\n<td>Local model, recursive schema</td>\n<td>XGrammar or llguidance</td>\n</tr>\n<tr>\n<td>Self-hosted inference server</td>\n<td>vLLM guided decoding</td>\n</tr>\n<tr>\n<td>Batch processing with retries acceptable</td>\n<td>Instructor + cheapest model</td>\n</tr>\n</tbody></table>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-structured-output-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: structured-output-picker\ndescription: Choose a structured output approach, schema design, and validation plan.\nversion: 1.0.0\nphase: 5\nlesson: 20\ntags: [nlp, llm, structured-output]\n---\n\nGiven a use case (provider, latency budget, schema complexity, failure tolerance), output:\n\n1. Mechanism. Native vendor structured output, Instructor retries, Outlines FSM, or XGrammar CFG. One-sentence reason.\n2. Schema design. Field order (reasoning first, answer last), nullable fields for &quot;unknown&quot;, enum vs regex, required fields.\n3. Failure strategy. Max retries, fallback model, graceful `null` handling, out-of-distribution refusal.\n4. Validation plan. Schema compliance rate (target 100%), semantic validity (LLM-judge), field-coverage rate, latency p50/p99.\n\nRefuse any design that puts `answer` or `decision` before reasoning fields. Refuse to use bare JSON mode without a schema. Flag recursive schemas behind an FSM-only library.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Prompt a small open-weights model (e.g., Llama-3.2-3B) without constrained decoding for <code>Review(sentiment, confidence, evidence_span)</code>. Measure the fraction that parse as valid JSON on 100 reviews.</li>\n<li><strong>Medium.</strong> Same corpus with Outlines JSON mode. Compare compliance rate, latency, and semantic accuracy.</li>\n<li><strong>Hard.</strong> Implement a regex-constrained decoder from scratch for phone numbers (<code>\\d{3}-\\d{3}-\\d{4}</code>). Verify 0 invalid outputs on 1000 samples.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Constrained decoding</td>\n<td>Force valid output</td>\n<td>Mask invalid-token logits at every generation step.</td>\n</tr>\n<tr>\n<td>Logit processor</td>\n<td>The thing that constrains</td>\n<td>Function: <code>(logits, state) -&gt; masked_logits</code>.</td>\n</tr>\n<tr>\n<td>FSM</td>\n<td>Finite-state machine</td>\n<td>Compiled grammar representation; O(1) valid-next-token lookup.</td>\n</tr>\n<tr>\n<td>CFG</td>\n<td>Context-free grammar</td>\n<td>Grammar that handles recursion; slower but more expressive than FSM.</td>\n</tr>\n<tr>\n<td>Schema field order</td>\n<td>Does it matter?</td>\n<td>Yes — first field commits; always put reasoning before answer.</td>\n</tr>\n<tr>\n<td>Guided decoding</td>\n<td>vLLM&#39;s name for it</td>\n<td>Same concept, integrated into the inference server.</td>\n</tr>\n<tr>\n<td>JSON mode</td>\n<td>OpenAI&#39;s early version</td>\n<td>Guarantees JSON syntax; does NOT guarantee schema match.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2307.09702\" target=\"_blank\" rel=\"noopener\">Willard, Louf (2023). Efficient Guided Generation for LLMs</a> — the Outlines paper.</li>\n<li><a href=\"https://arxiv.org/abs/2411.15100\" target=\"_blank\" rel=\"noopener\">XGrammar paper (2024)</a> — fast CFG-based constrained decoding.</li>\n<li><a href=\"https://docs.vllm.ai/en/latest/features/structured_outputs.html\" target=\"_blank\" rel=\"noopener\">vLLM — Structured Outputs</a> — inference server integration.</li>\n<li><a href=\"https://platform.openai.com/docs/guides/structured-outputs\" target=\"_blank\" rel=\"noopener\">OpenAI — Structured Outputs guide</a> — API reference + gotchas.</li>\n<li><a href=\"https://python.useinstructor.com/\" target=\"_blank\" rel=\"noopener\">Instructor library</a> — Pydantic + retries across providers.</li>\n<li><a href=\"https://arxiv.org/abs/2501.10868\" target=\"_blank\" rel=\"noopener\">JSONSchemaBench (2025)</a> — benchmarking 6 constrained decoding frameworks.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import math\nimport random\nimport re\n\n\nPHONE_REGEX = r\"^\\d{3}-\\d{3}-\\d{4}$\"\n\n\nclass PhoneFSM:\n    def __init__(self):\n        self.accept_state = 12\n\n    def valid_next(self, state):\n        if state in (0, 1, 2, 4, 5, 6, 8, 9, 10, 11):\n            return list(\"0123456789\")\n        if state in (3, 7):\n            return [\"-\"]\n        if state == 12:\n            return []\n        raise ValueError(f\"unknown state {state}\")\n\n    def transition(self, state, ch):\n        if ch not in self.valid_next(state):\n            return None\n        return state + 1\n\n    def is_accept(self, state):\n        return state == self.accept_state\n\n\ndef softmax(xs):\n    finite = [x for x in xs if x != float(\"-inf\")]\n    if not finite:\n        return [0.0] * len(xs)\n    m = max(finite)\n    exps = [math.exp(x - m) if x != float(\"-inf\") else 0.0 for x in xs]\n    z = sum(exps)\n    return [e / z for e in exps]\n\n\ndef sample(probs, rng):\n    r = rng.random()\n    acc = 0.0\n    for i, p in enumerate(probs):\n        acc += p\n        if r <= acc:\n            return i\n    return len(probs) - 1\n\n\ndef mask_logits(logits, valid_indices):\n    return [logits[i] if i in valid_indices else float(\"-inf\") for i in range(len(logits))]\n\n\ndef fake_llm_logits(alphabet, rng):\n    return [rng.gauss(0.0, 1.5) for _ in alphabet]\n\n\ndef generate_constrained(alphabet, fsm, seed):\n    rng = random.Random(seed)\n    alphabet_idx = {ch: i for i, ch in enumerate(alphabet)}\n    state = 0\n    out = \"\"\n    while not fsm.is_accept(state):\n        logits = fake_llm_logits(alphabet, rng)\n        valid_chars = fsm.valid_next(state)\n        if not valid_chars:\n            break\n        valid_ids = {alphabet_idx[ch] for ch in valid_chars}\n        masked = mask_logits(logits, valid_ids)\n        probs = softmax(masked)\n        pick = sample(probs, rng)\n        ch = alphabet[pick]\n        out += ch\n        state = fsm.transition(state, ch)\n        if state is None:\n            break\n    return out\n\n\ndef generate_unconstrained(alphabet, max_len, seed):\n    rng = random.Random(seed)\n    out = \"\"\n    for _ in range(max_len):\n        logits = fake_llm_logits(alphabet, rng)\n        probs = softmax(logits)\n        pick = sample(probs, rng)\n        out += alphabet[pick]\n    return out\n\n\ndef main():\n    alphabet = list(\"0123456789-\")\n    fsm = PhoneFSM()\n\n    print(\"=== phone number generation: 20 samples ===\")\n    print(f\"target pattern: {PHONE_REGEX}\")\n    print()\n\n    print(\"UNCONSTRAINED (random-logit, no masking):\")\n    unc_valid = 0\n    for seed in range(20):\n        s = generate_unconstrained(alphabet, max_len=12, seed=seed)\n        ok = bool(re.fullmatch(PHONE_REGEX, s))\n        unc_valid += int(ok)\n        tag = \"  OK\" if ok else \"FAIL\"\n        print(f\"  [{tag}] {s}\")\n    print(f\"  => valid: {unc_valid} / 20\")\n\n    print()\n    print(\"CONSTRAINED (FSM-masked logits):\")\n    con_valid = 0\n    for seed in range(20):\n        s = generate_constrained(alphabet, fsm, seed=seed)\n        ok = bool(re.fullmatch(PHONE_REGEX, s))\n        con_valid += int(ok)\n        tag = \"  OK\" if ok else \"FAIL\"\n        print(f\"  [{tag}] {s}\")\n    print(f\"  => valid: {con_valid} / 20\")\n\n    print()\n    print(\"note: the toy LLM emits uniform-random logits.\")\n    print(\"masking invalid tokens at each step is the only difference.\")\n    print(\"real constrained decoding uses the same mask over a 100k+ vocabulary.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Why is prompt-only 'return JSON' not enough for production?",
+      "options": [
+        "Prompts are too long",
+        "Prompting cannot describe schemas",
+        "JSON is too verbose",
+        "Frontier models comply most of the time but not always; the small fraction of malformed outputs breaks downstream parsers"
+      ],
+      "answer": 3,
+      "explanation": "Prompt-only structure works ~80% of the time on frontier models; production needs harder guarantees."
+    },
+    {
+      "q": "What does constrained decoding modify at each generation step?",
+      "options": [
+        "The logit vector, masking tokens that would invalidate the target grammar so only valid continuations can be sampled",
+        "The training loss",
+        "The tokenizer",
+        "The KV cache"
+      ],
+      "answer": 0,
+      "explanation": "A logit processor sets invalid tokens to -inf so the softmax cannot sample them."
+    },
+    {
+      "q": "Why might constrained decoding be faster than free generation?",
+      "options": [
+        "The model is smaller",
+        "It avoids softmax entirely",
+        "It skips backprop",
+        "Forced scaffold tokens (e.g. '{\"name\": \"') can be emitted directly without sampling, and the valid-token search space shrinks"
+      ],
+      "answer": 3,
+      "explanation": "Determined tokens skip sampling and reduced valid-token sets shrink the decode cost."
+    },
+    {
+      "q": "Which schema design choice prevents premature commitment by the model?",
+      "options": [
+        "Put 'answer' first",
+        "Place reasoning fields before the answer/decision field so the model thinks before committing",
+        "Use shorter keys",
+        "Use snake_case"
+      ],
+      "answer": 1,
+      "explanation": "Field order is logic: putting reasoning first lets the model think before locking in an answer."
+    },
+    {
+      "q": "What is the limitation of FSM-based constrained decoding tools like Outlines?",
+      "options": [
+        "They only support enums",
+        "They lock you to OpenAI",
+        "Recursive schemas have to be flattened; truly recursive structures need CFG-based engines such as XGrammar",
+        "They are not deterministic"
+      ],
+      "answer": 2,
+      "explanation": "FSMs cannot represent unbounded recursion; CFG engines handle it."
+    },
+    {
+      "q": "Why is Instructor described as not modifying logits?",
+      "options": [
+        "Instructor formats the schema into the prompt and parses/retries the output; logit masking happens server-side or not at all",
+        "It edits the prompt",
+        "It uses gradient updates",
+        "Required by Anthropic"
+      ],
+      "answer": 0,
+      "explanation": "Instructor uses provider-side structured output plus client-side validation and retries, not logit masking."
+    },
+    {
+      "q": "What problem can a strict regex like date='YYYY-MM-DD' introduce?",
+      "options": [
+        "It breaks JSON parsing",
+        "It removes any escape hatch for unknown values, so the model fabricates a date instead of returning null/sentinel",
+        "It requires CFG support",
+        "Regex is slow"
+      ],
+      "answer": 1,
+      "explanation": "Over-strict grammars force the model to invent values; always allow null/sentinel for unknowns."
+    },
+    {
+      "q": "When should you reach for vLLM guided decoding vs a vendor structured-output API?",
+      "options": [
+        "Only with byte-level BPE",
+        "Always vendor",
+        "Self-hosted inference where you control the model and want logit-level guarantees without retries",
+        "Only for tiny schemas"
+      ],
+      "answer": 2,
+      "explanation": "vLLM guided decoding fits self-hosted serving with logit-level constraints; vendor APIs lock you to their stack."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/20-structured-outputs-constrained-decoding"
+  }
+}

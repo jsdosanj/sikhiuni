@@ -1,0 +1,3 @@
+{
+  "blurb": "Build a neural network from first principles — the forward pass, backprop, the training loop — with no framework until you have written one yourself. This is the phase that turns “I use AI libraries” into “I understand what they do”, which is what you need the day a model built for the Panth behaves in a way no tutorial covers."
+}

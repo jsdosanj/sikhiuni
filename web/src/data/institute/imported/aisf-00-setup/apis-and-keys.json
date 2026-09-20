@@ -1,0 +1,81 @@
+{
+  "id": "aisf-00-setup::apis-and-keys",
+  "num": 4,
+  "slug": "apis-and-keys",
+  "title": "APIs & Keys",
+  "tagline": "Every AI API works the same way: send a request, get a response. The details change, the pattern doesn't.",
+  "type": "Build",
+  "languages": "Python, TypeScript",
+  "time": "~30 minutes",
+  "objectives": [
+    "Store API keys securely using environment variables and `.env` files",
+    "Make an LLM API call using both the Anthropic Python SDK and raw HTTP",
+    "Compare SDK-based and raw HTTP request/response formats for debugging",
+    "Identify and handle common API errors including authentication and rate limits"
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Starting from Phase 11, you&#39;ll call LLM APIs (Anthropic, OpenAI, Google). In Phase 13-16 you&#39;ll build agents that use these APIs in loops. You need to know how API keys work, how to store them safely, and how to make your first API call.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">sequenceDiagram\n    participant C as Your Code\n    participant S as API Server\n    C-&gt;&gt;S: HTTP Request (with API key)\n    S-&gt;&gt;C: HTTP Response (JSON)</pre>\n<p>Every API call has:</p>\n<ol>\n<li>An endpoint (URL)</li>\n<li>An API key (authentication)</li>\n<li>A request body (what you want)</li>\n<li>A response body (what you get back)</li>\n</ol>\n<p class=\"i-lesson-figure\"><em>Diagram <code>s0-secret-inject</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: Store API keys safely</h3>\n<p>Never put API keys in code. Use environment variables.</p>\n<pre><code class=\"language-bash\">export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;\nexport OPENAI_API_KEY=&quot;sk-...&quot;\n</code></pre>\n<p>Or use a <code>.env</code> file (add it to <code>.gitignore</code>):</p>\n<pre><code>ANTHROPIC_API_KEY=sk-ant-...\nOPENAI_API_KEY=sk-...\n</code></pre>\n<h3>Step 2: First API call (Python)</h3>\n<pre><code class=\"language-python\">import os\n\nimport anthropic\n\nclient = anthropic.Anthropic()\n\nMODEL = os.environ.get(&quot;LLM_MODEL&quot;, &quot;claude-sonnet-5&quot;)\n\nresponse = client.messages.create(\n    model=MODEL,\n    max_tokens=256,\n    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is a neural network in one sentence?&quot;}]\n)\n\nprint(response.content[0].text)\n</code></pre>\n<p><code>LLM_MODEL</code> selects the Anthropic model id, and the default is the un-dated Sonnet alias. Other providers (OpenAI, Google, and others) follow the same pattern of a key plus a model id, but each has its own SDK, endpoint, and request/response schema.</p>\n<h3>Step 3: First API call (TypeScript)</h3>\n<pre><code class=\"language-typescript\">import Anthropic from &quot;@anthropic-ai/sdk&quot;;\n\nconst client = new Anthropic();\n\nconst MODEL = process.env.LLM_MODEL ?? &quot;claude-sonnet-5&quot;;\n\nconst response = await client.messages.create({\n  model: MODEL,\n  max_tokens: 256,\n  messages: [{ role: &quot;user&quot;, content: &quot;What is a neural network in one sentence?&quot; }],\n});\n\nconsole.log(response.content[0].text);\n</code></pre>\n<h3>Step 4: Raw HTTP (no SDK)</h3>\n<pre><code class=\"language-python\">import os\nimport urllib.request\nimport json\n\nurl = &quot;https://api.anthropic.com/v1/messages&quot;\nheaders = {\n    &quot;Content-Type&quot;: &quot;application/json&quot;,\n    &quot;x-api-key&quot;: os.environ[&quot;ANTHROPIC_API_KEY&quot;],\n    &quot;anthropic-version&quot;: &quot;2023-06-01&quot;,\n}\nbody = json.dumps({\n    &quot;model&quot;: os.environ.get(&quot;LLM_MODEL&quot;, &quot;claude-sonnet-5&quot;),\n    &quot;max_tokens&quot;: 256,\n    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is a neural network in one sentence?&quot;}],\n}).encode()\n\nreq = urllib.request.Request(url, data=body, headers=headers, method=&quot;POST&quot;)\nwith urllib.request.urlopen(req) as resp:\n    result = json.loads(resp.read())\n    print(result[&quot;content&quot;][0][&quot;text&quot;])\n</code></pre>\n<p>This is what the SDKs do under the hood. Understanding the raw HTTP call helps when debugging.</p>\n<h2>Use It</h2>\n<p>For this course:</p>\n<table>\n<thead>\n<tr>\n<th>API</th>\n<th>When you need it</th>\n<th>Free tier</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Anthropic (Claude)</td>\n<td>Phases 11-16 (agents, tools)</td>\n<td>$5 credit on signup</td>\n</tr>\n<tr>\n<td>OpenAI</td>\n<td>Phase 11 (comparison)</td>\n<td>$5 credit on signup</td>\n</tr>\n<tr>\n<td>Hugging Face</td>\n<td>Phases 4-10 (models, datasets)</td>\n<td>Free</td>\n</tr>\n</tbody></table>\n<p>You don&#39;t need all of them right now. Set them up when the lesson requires it.</p>\n<h2>Ship It</h2>\n<p>This lesson produces:</p>\n<ul>\n<li><code>outputs/prompt-api-troubleshooter.md</code> - diagnose common API errors</li>\n</ul>\n<h2>Exercises</h2>\n<ol>\n<li>Get an Anthropic API key and make your first API call</li>\n<li>Try the raw HTTP version and compare the response format to the SDK version</li>\n<li>Intentionally use a wrong API key and read the error message</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>API key</td>\n<td>&quot;Password for the API&quot;</td>\n<td>A unique string that identifies your account and authorizes requests</td>\n</tr>\n<tr>\n<td>Rate limit</td>\n<td>&quot;They&#39;re throttling me&quot;</td>\n<td>Maximum requests per minute/hour to prevent abuse and ensure fair usage</td>\n</tr>\n<tr>\n<td>Token</td>\n<td>&quot;A word&quot; (in API context)</td>\n<td>A billing unit: input and output tokens are counted and charged separately</td>\n</tr>\n<tr>\n<td>Streaming</td>\n<td>&quot;Real-time responses&quot;</td>\n<td>Getting the response word by word instead of waiting for the full response</td>\n</tr>\n</tbody></table>\n",
+  "hasMermaid": true,
+  "code": {},
+  "quiz": [
+    {
+      "q": "What is an API key used for when calling an LLM service?",
+      "options": [
+        "Encrypting the data sent to the server",
+        "Authenticating your identity and authorizing requests",
+        "Compressing requests to reduce bandwidth",
+        "Selecting which programming language the server uses"
+      ],
+      "answer": 1,
+      "explanation": "An API key is a unique string that identifies your account, authorizes your requests, and allows the provider to track usage and billing."
+    },
+    {
+      "q": "Why should API keys never be hardcoded directly in source code?",
+      "options": [
+        "Python cannot read string literals longer than 50 characters",
+        "API providers block keys that appear in source files",
+        "Hardcoded keys make the code run slower",
+        "They can be accidentally committed to git and exposed publicly"
+      ],
+      "answer": 3,
+      "explanation": "Hardcoded keys in source code risk being committed to version control and pushed to public repositories, where they can be scraped and abused by others."
+    },
+    {
+      "q": "What is the recommended way to store API keys for local development?",
+      "options": [
+        "In a .env file that is listed in .gitignore",
+        "In the README.md for easy access",
+        "In a Python variable at the top of your script",
+        "In the requirements.txt alongside package versions"
+      ],
+      "answer": 0,
+      "explanation": "A .env file stores keys as environment variables and should be added to .gitignore so it is never committed to version control. SDKs read keys from environment variables automatically."
+    },
+    {
+      "q": "In the raw HTTP API call to Anthropic, which header carries the API key?",
+      "options": [
+        "Authorization: Bearer sk-ant-...",
+        "Content-Type: application/json",
+        "anthropic-version: 2023-06-01",
+        "x-api-key: sk-ant-..."
+      ],
+      "answer": 3,
+      "explanation": "Anthropic's API uses the 'x-api-key' header for authentication, not the more common 'Authorization: Bearer' pattern. This is specific to their API design."
+    },
+    {
+      "q": "What happens when you exceed an API's rate limit?",
+      "options": [
+        "Your request is queued and processed later automatically",
+        "The server returns an error (typically HTTP 429) and you must wait before retrying",
+        "Your API key is permanently revoked",
+        "The API silently drops your request with no response"
+      ],
+      "answer": 1,
+      "explanation": "Rate limiting returns HTTP 429 (Too Many Requests). You need to wait and retry, typically with exponential backoff. Rate limits prevent abuse and ensure fair usage."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/00-setup-and-tooling/04-apis-and-keys"
+  }
+}

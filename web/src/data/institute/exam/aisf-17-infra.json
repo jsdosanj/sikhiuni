@@ -1,0 +1,1527 @@
+{
+  "track": "aisf-17-infra",
+  "count": 169,
+  "questions": [
+    {
+      "q": "Before this lesson, which platform would you reach for first if a customer needed Claude, Llama, and Cohere behind one API?",
+      "options": [
+        "AWS Bedrock",
+        "Vertex AI",
+        "Direct Anthropic API",
+        "Azure OpenAI Service"
+      ]
+    },
+    {
+      "q": "Which hyperscaler's bet is described as exclusive partnership rather than marketplace?",
+      "options": [
+        "Vertex AI",
+        "AWS Bedrock",
+        "OCI Generative AI",
+        "Azure OpenAI"
+      ]
+    },
+    {
+      "q": "Roughly what is the measured median TTFT gap between Azure OpenAI (with PTUs) and Bedrock on-demand on Llama 3.1 405B equivalents?",
+      "options": [
+        "~250 ms",
+        "~5 ms",
+        "~100 ms",
+        "~25 ms"
+      ]
+    },
+    {
+      "q": "Which Bedrock 2025 feature gives the cleanest per-product cost attribution natively in CloudWatch?",
+      "options": [
+        "Bedrock Agents",
+        "Bedrock Knowledge Bases",
+        "Application Inference Profiles",
+        "Bedrock Guardrails"
+      ]
+    },
+    {
+      "q": "Azure PTUs typically break even versus on-demand at what sustained utilization band?",
+      "options": [
+        "40-60%",
+        "80-95%",
+        "5-10%",
+        "20-30%"
+      ]
+    },
+    {
+      "q": "Why is the lesson's recommended 2026 policy a two-provider minimum for product-critical LLM calls?",
+      "options": [
+        "Hyperscalers refuse to sign BAAs unless you also use a competitor",
+        "Single-vendor pricing is always more expensive",
+        "It is required by SOC 2 Type II",
+        "Frontier model leadership rotates monthly, so single-vendor lock-in shuts you out of two-thirds of the frontier"
+      ]
+    },
+    {
+      "q": "Which statement best describes the FinOps surface across the three platforms?",
+      "options": [
+        "All three expose identical per-request attribution",
+        "Bedrock is cleanest native, Vertex is most flexible via BigQuery, Azure is most opaque without instrumentation",
+        "Vertex has no attribution surface at all",
+        "Azure is cleanest native, Bedrock is opaque"
+      ]
+    },
+    {
+      "q": "Which three market segments does the lesson use to organize 2026 inference vendors?",
+      "options": [
+        "Single-tenant, multi-tenant, on-prem",
+        "Free, paid, enterprise",
+        "Open-source, commercial, hybrid",
+        "Custom silicon, GPU platforms, API-first marketplaces"
+      ]
+    },
+    {
+      "q": "Around what sustained GPU utilization does per-minute billing (Baseten, Modal) start to beat per-token billing (Fireworks, Together)?",
+      "options": [
+        "5%",
+        "90%",
+        "60%",
+        "30%"
+      ]
+    },
+    {
+      "q": "Which platform is described as Python-native serverless with per-second billing and 2-4s cold starts after pre-warming?",
+      "options": [
+        "Anyscale",
+        "Baseten",
+        "Fireworks",
+        "Modal"
+      ]
+    },
+    {
+      "q": "What is Fireworks's notable LoRA pricing differentiator?",
+      "options": [
+        "LoRA requests require a separate dedicated GPU contract",
+        "LoRA-served requests are charged at the base model's per-token rate",
+        "LoRA-served requests cost more than base model",
+        "LoRA is not supported at all"
+      ]
+    },
+    {
+      "q": "Which platform fits a regulated healthcare customer that needs SOC 2 Type II, HIPAA-ready posture, and dedicated GPUs?",
+      "options": [
+        "Together",
+        "Anyscale",
+        "Baseten",
+        "Replicate"
+      ]
+    },
+    {
+      "q": "Why does the lesson argue that custom-engine claims are mostly marketing shade at the platform layer?",
+      "options": [
+        "Custom engines never outperform vLLM",
+        "Per-token pricing is the only real differentiator",
+        "vLLM and SGLang represent roughly 80% of production open-source inference, so platform differentiation comes more from DX, attribution, and SLAs than engine",
+        "All custom engines are forks of TensorRT-LLM"
+      ]
+    },
+    {
+      "q": "Which signal does HPA typically scale on by default that the lesson calls broken for vLLM-style serving?",
+      "options": [
+        "P99 TTFT",
+        "DCGM_FI_DEV_GPU_UTIL duty cycle",
+        "Queue depth",
+        "KV cache utilization"
+      ]
+    },
+    {
+      "q": "Which problem does gang scheduling in KAI Scheduler primarily prevent?",
+      "options": [
+        "Tokenizer GIL contention",
+        "The partial-allocation trap where 7 of 8 GPUs sit idle waiting on the eighth",
+        "Cold-start latency",
+        "GPU memory fragmentation"
+      ]
+    },
+    {
+      "q": "Why is Karpenter's default consolidationPolicy WhenEmptyOrUnderutilized dangerous for inference GPU pools?",
+      "options": [
+        "It only consolidates spot instances",
+        "It prevents Karpenter from provisioning new nodes",
+        "It terminates running GPU nodes to migrate pods, which evicts running requests and reloads weights",
+        "It refuses to scale up under burst"
+      ]
+    },
+    {
+      "q": "Roughly how much faster is Karpenter at provisioning a GPU node compared to Cluster Autoscaler?",
+      "options": [
+        "About 5% faster",
+        "The same",
+        "Roughly 40% faster (~45-60s vs ~90-120s)",
+        "About 10x slower"
+      ]
+    },
+    {
+      "q": "For disaggregated prefill / decode pods (Phase 17 · 17), which scaling signals does the lesson recommend?",
+      "options": [
+        "Cluster Autoscaler for both",
+        "A single HPA on duty cycle covering both pod classes",
+        "Manual scaling only",
+        "Queue depth for prefill pods and KV cache pressure for decode pods, as separate per-role HPAs"
+      ]
+    },
+    {
+      "q": "Which Karpenter disruption setting does the lesson recommend for an inference GPU pool to avoid evicting running jobs?",
+      "options": [
+        "Always run with spot instances and no consolidation",
+        "Disable Karpenter entirely",
+        "consolidationPolicy: WhenEmptyOrUnderutilized with consolidateAfter: 0s",
+        "consolidationPolicy: WhenEmpty with consolidateAfter: 1h"
+      ]
+    },
+    {
+      "q": "What is the main problem classic static batching has with mixed-length requests?",
+      "options": [
+        "It only works with FP4",
+        "It cannot use GPUs at all",
+        "Padding to the longest prompt and longest output wastes memory and stalls the whole batch on the slowest sequence",
+        "It requires NVLink between every GPU"
+      ]
+    },
+    {
+      "q": "How does PagedAttention reduce KV cache fragmentation from 60-80% to under 4%?",
+      "options": [
+        "By disabling KV cache entirely",
+        "By holding the full prompt in CPU RAM",
+        "By compressing weights to INT4",
+        "By allocating KV cache in fixed-size blocks (default 16 tokens) referenced through a per-sequence block table"
+      ]
+    },
+    {
+      "q": "What invariant defines continuous batching in vLLM's V1 scheduler?",
+      "options": [
+        "Each request gets its own dedicated GPU stream",
+        "The scheduler waits 10 ms windows to fill a batch before running",
+        "The scheduler runs once per request and the batch never changes",
+        "The scheduler runs once per decode iteration, admitting finished sequences out and waiting ones in"
+      ]
+    },
+    {
+      "q": "Which latency metric does chunked prefill primarily protect under mixed load?",
+      "options": [
+        "Mean throughput",
+        "Cold-start time",
+        "Network RTT",
+        "P99 inter-token latency (ITL)"
+      ]
+    },
+    {
+      "q": "In vLLM v0.18.0, which speculative-decoding variant remains compatible with --enable-chunked-prefill?",
+      "options": [
+        "No speculative decoding is compatible",
+        "N-gram GPU speculative decoding in the V1 scheduler",
+        "Draft-model speculative decoding",
+        "EAGLE-1 only"
+      ]
+    },
+    {
+      "q": "Why does chunked prefill not in isolation increase mean throughput?",
+      "options": [
+        "It compresses weights more aggressively",
+        "It only reduces decode-time jitter; the throughput win in practice comes from keeping decode sequences alive during long prefills, not from changing the work done",
+        "It runs on a different GPU than decode",
+        "It uses speculative decoding under the hood"
+      ]
+    },
+    {
+      "q": "Why does speculative decoding exploit a gap that exists in plain decode?",
+      "options": [
+        "Decode does not benefit from batching",
+        "Decode is memory-bound, so the GPU is mostly idle waiting on HBM reads of weights",
+        "Decode is compute-bound, so adding more compute is free",
+        "Decode requires more network bandwidth than prefill"
+      ]
+    },
+    {
+      "q": "What does the acceptance rate alpha measure?",
+      "options": [
+        "Latency overhead of the draft model",
+        "Fraction of draft-proposed tokens accepted by the target model",
+        "Cache hit rate of the KV cache",
+        "Fraction of GPU memory used during decode"
+      ]
+    },
+    {
+      "q": "What changes in EAGLE-3 compared to EAGLE-2 that pushes alpha to roughly 0.6-0.8 on general chat?",
+      "options": [
+        "The draft head is trained on multiple target layers rather than just the last layer",
+        "It uses a full-sized draft model of the same family",
+        "It runs on CPU instead of GPU",
+        "It removes the verify step entirely"
+      ]
+    },
+    {
+      "q": "Below roughly what alpha does the lesson say speculative decoding becomes net negative at high concurrency on most 2026 hardware?",
+      "options": [
+        "0.85",
+        "0.95",
+        "0.05",
+        "0.55"
+      ]
+    },
+    {
+      "q": "Which metric should you watch most closely after flipping EAGLE-3 on, even if mean ITL drops?",
+      "options": [
+        "GPU memory utilization",
+        "Cold-start time",
+        "Mean E2E latency",
+        "P99 ITL, because rejected-draft two-passes can serialize under full batch"
+      ]
+    },
+    {
+      "q": "Why is speculative decoding opt-in (not default) in vLLM 2026 per the lesson?",
+      "options": [
+        "It is incompatible with PagedAttention",
+        "It only works on Blackwell GPUs",
+        "It requires a separate license",
+        "Acceptance rate depends on workload, and turning it on without measuring alpha is a production anti-pattern"
+      ]
+    },
+    {
+      "q": "What core data structure backs SGLang's KV cache reuse?",
+      "options": [
+        "A radix tree where each node owns a token range and its KV blocks",
+        "A skip list keyed by request id",
+        "A hash table keyed by full prompt",
+        "A B-tree of attention scores"
+      ]
+    },
+    {
+      "q": "Why is FCFS scheduling wrong for prefix-heavy traffic on SGLang?",
+      "options": [
+        "FCFS is the recommended SGLang policy",
+        "FCFS can evict a hot prefix branch before the next long-prefix request hits, breaking radix-tree reuse",
+        "FCFS only works on AMD GPUs",
+        "FCFS is incompatible with PagedAttention"
+      ]
+    },
+    {
+      "q": "What eviction granularity does SGLang's cache-aware scheduler use to match radix shape?",
+      "options": [
+        "Per-request only",
+        "Random eviction",
+        "Single tokens",
+        "Whole branches, starting from shortest-used leaves"
+      ]
+    },
+    {
+      "q": "What is the most direct engineer's lever for keeping the radix-tree shared prefix discoverable?",
+      "options": [
+        "Always use static batching",
+        "Fix prompt-template ordering so immutable content (system, tools, schemas) is always first",
+        "Lower the GPU memory utilization knob",
+        "Disable continuous batching"
+      ]
+    },
+    {
+      "q": "Which workload pattern does the lesson NOT expect RadixAttention to win on?",
+      "options": [
+        "Agents with shared tool schemas",
+        "Single-shot generation with unique prompts and no shared system prompt",
+        "RAG with a shared retrieval preamble",
+        "Voice workloads with repeated preambles"
+      ]
+    },
+    {
+      "q": "ProjectDiscovery's deployment moved from 7% to 74% prefix-cache hit rate by doing what?",
+      "options": [
+        "Increasing GPU count from 8 to 16",
+        "Disabling continuous batching",
+        "Moving dynamic content out of the cacheable prefix",
+        "Switching from vLLM to SGLang without any prompt changes"
+      ]
+    },
+    {
+      "q": "Roughly what is the per-million-tokens cost gap the lesson reports between Blackwell + TRT-LLM + Dynamo and H100 + vLLM on a comparable 120B-class workload?",
+      "options": [
+        "About 2x",
+        "About 7x",
+        "About 1.1x",
+        "About 100x"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend keeping KV cache in FP8 rather than NVFP4 on Blackwell?",
+      "options": [
+        "NVFP4 KV cache is not yet supported in any engine",
+        "KV cache spans a wide dynamic range; FP4 quantization causes catastrophic accuracy loss in attention scores",
+        "FP8 uses less memory than FP4",
+        "FP8 is the only precision NVLink 5 supports"
+      ]
+    },
+    {
+      "q": "Which Blackwell feature does TRT-LLM exploit so models can be loaded without a post-training conversion step?",
+      "options": [
+        "BF16 KV cache",
+        "FP64 attention",
+        "INT2 weights via bitsandbytes",
+        "Day-0 FP4 weights shipped by model providers"
+      ]
+    },
+    {
+      "q": "What is the dominant tradeoff of choosing the TRT-LLM stack per the lesson?",
+      "options": [
+        "It requires fully autonomous remediation",
+        "It cannot serve MoE models",
+        "It only works at small scale",
+        "It locks you into NVIDIA hardware — no AMD, no Intel, no ARM"
+      ]
+    },
+    {
+      "q": "Which precision combination does the lesson describe as the typical Blackwell config?",
+      "options": [
+        "Everything in BF16",
+        "Weights NVFP4, activations NVFP4, KV cache FP8, attention accumulator FP32",
+        "Weights INT8, activations FP32, KV cache INT4",
+        "Weights FP4, KV cache FP4, attention in INT8"
+      ]
+    },
+    {
+      "q": "For reasoning-heavy workloads where NVFP4 weight conversion drops MATH accuracy a few points, what does the lesson advise?",
+      "options": [
+        "Switch to AMD MI300X",
+        "Disable speculative decoding",
+        "Validate task quality on your eval set per model; teams often use FP8 weights + FP4 activations or stay on H200 with FP8 throughout",
+        "Ship NVFP4 anyway because the cost win dominates"
+      ]
+    },
+    {
+      "q": "Which components dominate TTFT (time to first token)?",
+      "options": [
+        "Disk I/O for weights",
+        "Queue time, network request time, and prefill time",
+        "Tokenizer GIL overhead",
+        "Decode-only forward time"
+      ]
+    },
+    {
+      "q": "Which metric does the lesson call the one that actually matters for product?",
+      "options": [
+        "Goodput — fraction of requests meeting every SLO constraint simultaneously",
+        "Aggregate throughput in tokens per second",
+        "Mean ITL",
+        "GPU duty cycle"
+      ]
+    },
+    {
+      "q": "Why is mean the wrong statistic to report for LLM latency?",
+      "options": [
+        "LLM latency distributions are right-skewed; users routinely hit P99 outliers that mean hides",
+        "Mean is never computable on streaming responses",
+        "Mean only works for prefill, not decode",
+        "Mean is not supported by GenAI-Perf"
+      ]
+    },
+    {
+      "q": "Why do GenAI-Perf and LLMPerf disagree on TPOT for the same run?",
+      "options": [
+        "They sample different requests",
+        "GenAI-Perf only runs on Blackwell",
+        "LLMPerf uses microseconds and GenAI-Perf uses milliseconds",
+        "GenAI-Perf excludes TTFT from the ITL calculation; LLMPerf includes it, so tool choice changes the number"
+      ]
+    },
+    {
+      "q": "For long-output requests (>500 tokens), which metric dominates end-to-end latency?",
+      "options": [
+        "Network response time",
+        "TPOT times output length",
+        "TTFT",
+        "Cold-start time"
+      ]
+    },
+    {
+      "q": "Which set best captures the lesson's reasonable consumer-facing SLO for a 70B chat model in 2026?",
+      "options": [
+        "P50 only, no percentiles above",
+        "TTFT P99 800 ms, TPOT P99 25 ms, E2E P99 3 s for <300-token outputs, goodput >= 99%",
+        "TTFT P99 8s, TPOT P99 200ms, goodput 50%",
+        "Mean TTFT 10 ms, mean TPOT 1 ms"
+      ]
+    },
+    {
+      "q": "Which quantization format does the lesson call the production default for CPU and edge serving?",
+      "options": [
+        "GGUF Q4_K_M / Q5_K_M",
+        "NVFP4",
+        "FP8",
+        "AWQ INT4"
+      ]
+    },
+    {
+      "q": "Which format is the lesson's pick for datacenter GPU serving when multi-LoRA is required in vLLM?",
+      "options": [
+        "NVFP4",
+        "GGUF Q4_K_M",
+        "GPTQ with Marlin kernels",
+        "AWQ"
+      ]
+    },
+    {
+      "q": "What is the \"my model is 4 GB now\" trap with AWQ?",
+      "options": [
+        "AWQ does not actually shrink weights",
+        "AWQ is incompatible with vLLM",
+        "AWQ only shrinks weights; KV cache and activations are separate and can add 30-50 GB at production batch sizes",
+        "AWQ requires INT8 KV cache"
+      ]
+    },
+    {
+      "q": "Why does calibrating AWQ on generic web text hurt domain models?",
+      "options": [
+        "It increases model size",
+        "It only works on AMD GPUs",
+        "The algorithm makes wrong decisions about which weights to protect, dropping domain accuracy (for example several Pass@1 points on HumanEval)",
+        "It disables Marlin kernels"
+      ]
+    },
+    {
+      "q": "For a reasoning-heavy workload where quality is non-negotiable, which precision does the lesson recommend by default?",
+      "options": [
+        "NVFP4 weights",
+        "GPTQ INT4",
+        "FP8 weights",
+        "INT2 GGUF"
+      ]
+    },
+    {
+      "q": "Which 2026 quantization limitation does the lesson call out for NVFP4 in early 2026?",
+      "options": [
+        "Cannot be combined with FP8 KV cache",
+        "Only runs on CPU",
+        "No LoRA support yet",
+        "Not supported on H100"
+      ]
+    },
+    {
+      "q": "Roughly how long does a cold start typically take for a 70B model on a fresh node without mitigations?",
+      "options": [
+        "3-8 minutes",
+        "Over 1 hour",
+        "Under 10 seconds",
+        "30-60 seconds"
+      ]
+    },
+    {
+      "q": "Which AWS-side feature does the lesson recommend for pre-seeding container images so step-2 image pull disappears?",
+      "options": [
+        "Bottlerocket dual-volume architecture referenced from EC2NodeClass",
+        "Spot fleet placement",
+        "EBS volume snapshots only",
+        "ECS task definitions"
+      ]
+    },
+    {
+      "q": "Which Modal feature provides the closest thing to a \"warm GPU boot in seconds\" by deserializing post-load state directly into HBM?",
+      "options": [
+        "GPU memory snapshots (checkpoints)",
+        "Tiered NVMe-to-DRAM loading",
+        "Run:ai Model Streamer",
+        "Live migration"
+      ]
+    },
+    {
+      "q": "Why does live migration transfer input tokens rather than KV cache between nodes?",
+      "options": [
+        "KV cache is encrypted and cannot move",
+        "Live migration is required by GDPR",
+        "Input tokens have larger entropy",
+        "Recomputing KV on the destination is cheaper than transferring GB of KV cache over the network"
+      ]
+    },
+    {
+      "q": "Which serverless layer trades direct GPU cost for predictable readiness by keeping at least one replica live?",
+      "options": [
+        "Tiered loading",
+        "Live migration",
+        "Warm pool with min_workers >= 1",
+        "Bottlerocket pre-seeding"
+      ]
+    },
+    {
+      "q": "Why does the lesson say cold-start mitigation must be stacked across layers rather than picked as a single tool?",
+      "options": [
+        "Modal owns the entire stack",
+        "All five layers are bundled in vLLM",
+        "It is a regulatory requirement",
+        "No single layer eliminates every step (node provision, image pull, weights load, engine init); stacking layers compresses each step"
+      ]
+    },
+    {
+      "q": "Why is round-robin load balancing actively harmful for cached LLM inference?",
+      "options": [
+        "Round-robin breaks TLS",
+        "Round-robin is only valid for stateful databases",
+        "Round-robin requires sticky sessions",
+        "A request that does not land on the node holding its prefix pays full prefill cost instead of a cache hit"
+      ]
+    },
+    {
+      "q": "What two inputs does a cache-aware router consume?",
+      "options": [
+        "Only the user_id and tenant_id",
+        "Round-robin counters and TLS keys",
+        "KV-cache events from replicas and a prefix hash on the incoming request",
+        "Random shuffles and request size"
+      ]
+    },
+    {
+      "q": "Roughly what is the TTFT gap between a cache hit and a cold prefill on a 2K-token prompt for Llama 3.3 70B FP8?",
+      "options": [
+        "About 1000x",
+        "About 10x (~80 ms vs ~800 ms)",
+        "About 1.1x",
+        "Identical"
+      ]
+    },
+    {
+      "q": "Why does cross-region routing not always beat regional routing for cache hits?",
+      "options": [
+        "Cache-aware routing is impossible across regions",
+        "Inter-region routing is forbidden by all hyperscalers",
+        "GORGO research found cache hits do not help latency",
+        "Saved prefill can be dwarfed by network RTT, e.g. 440 ms round-trip can dwarf an 800-to-80 ms prefill saving"
+      ]
+    },
+    {
+      "q": "What does the lesson cite as the 32% LLM DR failure driver?",
+      "options": [
+        "Backups that include weights but miss tokenizer files or quantization configs",
+        "Region quota exhaustion",
+        "Misconfigured load balancers",
+        "Unencrypted backups"
+      ]
+    },
+    {
+      "q": "What does the lesson say about commercial cross-region inference offerings such as Bedrock CRI?",
+      "options": [
+        "They optimize availability, not TTFT, and treat inference as opaque — you still need an app-layer cache-aware router",
+        "They are forbidden under GDPR",
+        "They are KV-cache-aware and replace app-layer routing",
+        "They only work in us-east-1"
+      ]
+    },
+    {
+      "q": "What is the core constraint that makes mobile LLM inference slower than datacenter, per the lesson?",
+      "options": [
+        "Storage capacity",
+        "Wi-Fi latency",
+        "Compute throughput",
+        "Memory bandwidth (mobile DRAM at 50-90 GB/s vs HBM3 at 2-3 TB/s)"
+      ]
+    },
+    {
+      "q": "Why does Apple's Neural Engine avoid CPU-NPU copy overhead?",
+      "options": [
+        "Apple Silicon ships unified memory — CPU and ANE share the same pool",
+        "It uses PCIe 5.0",
+        "Core ML disables KV cache",
+        "It transcodes weights to FP4 before copy"
+      ]
+    },
+    {
+      "q": "Which quantization format does the lesson recommend for WebGPU + WebLLM in the browser?",
+      "options": [
+        "GGUF Q4_K_M",
+        "NVFP4",
+        "FP8",
+        "Q4 MLC (q4f16_1) compiled via mlc_llm convert_weight"
+      ]
+    },
+    {
+      "q": "Roughly what WebGPU mobile coverage does the lesson report for 2026?",
+      "options": [
+        "Under 10%",
+        "Only iOS Safari",
+        "About 70-75%, with Firefox Android still catching up",
+        "100% across all browsers"
+      ]
+    },
+    {
+      "q": "Why is keeping 128K context impractical on a typical phone?",
+      "options": [
+        "Tokenizers fail above 8K",
+        "Model weights plus KV cache for 32K tokens plus OS overhead easily exceed the 8 GB RAM budget",
+        "WebGPU caps context at 4K",
+        "iOS forbids long context"
+      ]
+    },
+    {
+      "q": "Why is voice highlighted as the killer app for edge inference?",
+      "options": [
+        "Voice models do not need KV cache",
+        "Voice models always fit in 50 MB",
+        "Voice agents are latency-sensitive (first token < 500 ms) and local inference eliminates network latency entirely",
+        "Voice runs in WebAssembly only"
+      ]
+    },
+    {
+      "q": "How does the lesson split the 2026 LLM observability market?",
+      "options": [
+        "Development platforms (bundled with evals/prompts/sessions) versus gateway/telemetry tools",
+        "Python versus TypeScript",
+        "Vendor versus open source",
+        "On-prem versus cloud"
+      ]
+    },
+    {
+      "q": "Which tool does the lesson position as MIT-licensed core with strong self-host story and 50K events/month free cloud tier?",
+      "options": [
+        "Phoenix",
+        "Arize AX",
+        "LangSmith",
+        "Langfuse"
+      ]
+    },
+    {
+      "q": "What is Arize AX's main scale claim relative to monolithic observability stacks like Datadog?",
+      "options": [
+        "Always more expensive",
+        "Roughly 100x cheaper at scale via zero-copy Iceberg/Parquet integration",
+        "Free under 1M events/day",
+        "10% cheaper"
+      ]
+    },
+    {
+      "q": "What does the lesson call the wrong instrumentation layer for portability?",
+      "options": [
+        "Instrumenting at the HTTP/OpenAI-SDK layer",
+        "Sampling at 5% on successes",
+        "Using OpenTelemetry GenAI semantic conventions",
+        "Instrumenting inside your agent framework, since it couples you to that framework"
+      ]
+    },
+    {
+      "q": "Which OpenTelemetry conventions does the lesson identify as the 2026 interop layer between observability tools?",
+      "options": [
+        "GenAI semantic conventions (gen_ai.system, gen_ai.request.model, gen_ai.usage.input_tokens)",
+        "OTel HTTP semantic conventions",
+        "OTel messaging semantic conventions",
+        "OTel database semantic conventions"
+      ]
+    },
+    {
+      "q": "Why does the lesson argue full-trace retention does not scale past 1M requests/day?",
+      "options": [
+        "Vendors block it",
+        "Phoenix only supports 1M traces",
+        "Retention storage costs more than the LLM calls themselves; teams must sample (e.g. 100% errors, 100% high-cost, 5% successes)",
+        "OpenTelemetry caps trace volume"
+      ]
+    },
+    {
+      "q": "What is the difference between L1 semantic caching and L2 prompt/prefix caching?",
+      "options": [
+        "L2 stores embeddings; L1 stores attention KV",
+        "L1 is provider-side and L2 is client-side",
+        "L1 and L2 are the same",
+        "L1 skips the LLM entirely on embedding similarity hits; L2 reuses attention KV at the provider for repeated prefixes"
+      ]
+    },
+    {
+      "q": "Which Anthropic mechanism marks blocks as cacheable for L2 prompt caching?",
+      "options": [
+        "Explicit cache_control attribute on the request blocks",
+        "Filename suffixes in tool definitions",
+        "An implicit prompt-length threshold",
+        "A separate /caches endpoint"
+      ]
+    },
+    {
+      "q": "How does the parallelization anti-pattern inflate the bill?",
+      "options": [
+        "Parallel requests bypass batching",
+        "Parallelization triggers a per-request guardrail charge",
+        "All parallel requests share one cache entry automatically",
+        "N parallel requests with the same prefix arrive before the first cache write completes, so each pays a write premium and gets zero discount"
+      ]
+    },
+    {
+      "q": "What is the dynamic-content anti-pattern in cacheable prefixes?",
+      "options": [
+        "Including content that changes every request (current time to the minute, request ID, randomized example order) inside the cacheable prefix, killing hit rate",
+        "Using too short a system prompt",
+        "Always streaming responses",
+        "Putting tool schemas in the prefix"
+      ]
+    },
+    {
+      "q": "How can batch + cached input stack overnight to cut cost?",
+      "options": [
+        "Batch is incompatible with caching",
+        "Caching disables batch eligibility",
+        "Batch only saves output cost",
+        "Batch APIs give 50% off; cached input adds another ~10x; combined, overnight pipelines drop to ~10% of synchronous-uncached cost"
+      ]
+    },
+    {
+      "q": "What does the lesson say about semantic cache \"95% accuracy\" claims?",
+      "options": [
+        "95% means you should expect 95% cache hits",
+        "95% is the OpenAI default cache hit rate",
+        "95% is a vendor-documented hit-rate baseline",
+        "95% refers to match correctness, not hit rate; reported production hit rates range from ~10% (open chat) up to ~70% (structured FAQ)"
+      ]
+    },
+    {
+      "q": "What is the common batch-API offer across OpenAI, Anthropic, and Google in 2026?",
+      "options": [
+        "90% discount with 7-day turnaround",
+        "50% discount with 24-hour turnaround",
+        "10% discount with 1-hour turnaround",
+        "Free if under 1k tokens"
+      ]
+    },
+    {
+      "q": "What does \"24-hour turnaround\" actually guarantee in the lesson's framing?",
+      "options": [
+        "24h is the cache TTL",
+        "The provider promises to return within 24 hours, with typical P50 around 2-6 hours",
+        "The batch always takes 24 hours",
+        "Only batches under 1k requests qualify"
+      ]
+    },
+    {
+      "q": "How does stacking batch with cached input change the bill versus synchronous uncached on a shared-system-prompt workload?",
+      "options": [
+        "It only helps if the model is on Vertex",
+        "It can drop to roughly 10% of the synchronous-uncached baseline",
+        "It increases cost by 50%",
+        "It has no effect because caching is automatic"
+      ]
+    },
+    {
+      "q": "Which workload-triage lane is wrong to default to in 2026 for content pipelines and offline labeling?",
+      "options": [
+        "Hybrid batch-and-cache",
+        "Interactive, because it sounds urgent",
+        "Batch, because the user does not see a 24h delay",
+        "Semi-interactive with async queue"
+      ]
+    },
+    {
+      "q": "What is the output-schema trap across providers?",
+      "options": [
+        "All providers use the same OpenAI JSONL format",
+        "Batch file formats differ per provider (OpenAI JSONL, Anthropic JSONL, Vertex BigQuery/GCS), so a portable client needs per-provider adapters",
+        "Vertex requires Parquet only",
+        "JSONL is unsupported by Anthropic"
+      ]
+    },
+    {
+      "q": "Per the lesson, what is the simplest decision rule for triaging a workload to batch?",
+      "options": [
+        "If the prompt is under 1k tokens, batch it",
+        "If the user wouldn't notice a 24-hour delivery, always batch (and stack caching)",
+        "Batch only when the gateway requires it",
+        "If it uses tools, batch it"
+      ]
+    },
+    {
+      "q": "What is the core idea of model cascading?",
+      "options": [
+        "Always route by random weight",
+        "Run two models in parallel and average the outputs",
+        "Run every request on the most expensive model first",
+        "Run a cheap model first, escalate to a frontier model only on low confidence or refusal"
+      ]
+    },
+    {
+      "q": "Which four signals does the lesson list for routing decisions?",
+      "options": [
+        "User tier only",
+        "Token count only",
+        "Task classification, prompt length, embedding similarity to known-hard set, and self-confidence from a first-pass",
+        "GPU temperature, fan speed, room humidity, time of day"
+      ]
+    },
+    {
+      "q": "What is the expected latency profile of a cascade router?",
+      "options": [
+        "Always faster than pre-route",
+        "About 1.2x median latency (cheap run plus verify), about 2x on escalated requests (~10% of traffic)",
+        "Always slower by 10x",
+        "Identical to the frontier model"
+      ]
+    },
+    {
+      "q": "Which routing pattern adds 5-10ms latency up front and is fastest overall?",
+      "options": [
+        "Cascade",
+        "Ensemble route",
+        "Random round-robin",
+        "Pre-route with a classifier"
+      ]
+    },
+    {
+      "q": "What is cheap-model drift in routing?",
+      "options": [
+        "The cheap model becomes more expensive",
+        "Cascade falls through to frontier 100% of the time",
+        "A latency drift in the cheap model",
+        "Task distribution shifts but the trained router keeps sending requests to the cheap model, silently degrading quality"
+      ]
+    },
+    {
+      "q": "Which guard does the lesson recommend to catch routing drift?",
+      "options": [
+        "Online quality metrics — thumbs-up/down per route, LLM-judge on held-out samples, escalation rate, refusal rate",
+        "Quarterly engineering review only",
+        "Only offline eval sets",
+        "Disable routing in production"
+      ]
+    },
+    {
+      "q": "Why do prefill and decode want different optimal GPU configurations?",
+      "options": [
+        "Prefill must run on AMD and decode on NVIDIA",
+        "They use different model weights",
+        "Prefill is compute-bound on matmul throughput; decode is memory-bound on HBM bandwidth, so colocating them wastes one resource",
+        "Decode requires more network bandwidth"
+      ]
+    },
+    {
+      "q": "What transport does NVIDIA Dynamo use to move KV cache between the prefill and decode pools?",
+      "options": [
+        "gRPC bidi only",
+        "NIXL (RDMA/InfiniBand when available, TCP fallback)",
+        "Plain HTTP",
+        "Shared filesystem on NFS"
+      ]
+    },
+    {
+      "q": "When does disaggregation NOT pay off according to the lesson?",
+      "options": [
+        "RAG with 8K+ prefixes",
+        "MoE workloads on Blackwell",
+        "Multi-tenant serving with shared system prompts",
+        "Prompts under 512 tokens and outputs under 200 tokens, where the KV transfer tax dominates the gain"
+      ]
+    },
+    {
+      "q": "What is the core architectural difference between Dynamo and llm-d?",
+      "options": [
+        "Dynamo is open source; llm-d is closed",
+        "Dynamo runs on CPU; llm-d on GPU",
+        "Dynamo is a stack-above orchestrator over vLLM/SGLang/TRT-LLM; llm-d is Kubernetes-native with prefill/decode/router as independent Services",
+        "Dynamo requires AMD; llm-d requires NVIDIA"
+      ]
+    },
+    {
+      "q": "Which Dynamo components automatically tune the prefill:decode ratio for an SLO?",
+      "options": [
+        "Marlin kernels",
+        "Planner Profiler and SLA Planner",
+        "Cluster Autoscaler",
+        "Sidecar proxy and Envoy filter"
+      ]
+    },
+    {
+      "q": "How does disaggregation interact with cache-aware routing from Phase 17 · 11?",
+      "options": [
+        "Disaggregation disables KV cache reuse entirely",
+        "The cache-aware router can land a request on the decode pool already holding its prefix; on miss it flows prefill -> decode, so the two compound",
+        "They are mutually exclusive",
+        "Cache-aware routing is only for colocated serving"
+      ]
+    },
+    {
+      "q": "What problem does LMCache primarily address in a vLLM deployment?",
+      "options": [
+        "Tokenizer GIL contention",
+        "Network egress filtering",
+        "Cold-start image pull",
+        "KV cache pressure in HBM causing preemption and re-prefill of the same prefixes"
+      ]
+    },
+    {
+      "q": "What vLLM API introduced pluggable KV cache backends?",
+      "options": [
+        "Prefix-caching flag",
+        "Connector API in vLLM v0.9.0",
+        "PagedAttention v2",
+        "ChunkedPrefill API"
+      ]
+    },
+    {
+      "q": "What does the vLLM 0.11.0 (January 2026) release add to the KV offload path?",
+      "options": [
+        "Removal of LMCache support",
+        "Mandatory FP8 KV cache",
+        "An asynchronous offload path so the engine does not block on offload in the common case",
+        "Synchronous-only offload"
+      ]
+    },
+    {
+      "q": "When should you pick LMCache over native CPU offload?",
+      "options": [
+        "When you are running on CPU only",
+        "When multiple engines share prefixes across tenants, LoRA variants, or repeated RAG context, so cross-engine reuse pays",
+        "When a single engine has HBM pressure and no prefix sharing",
+        "When you want to disable KV caching entirely"
+      ]
+    },
+    {
+      "q": "What happens to LMCache benefit when KV footprint stays well below HBM?",
+      "options": [
+        "LMCache automatically disables",
+        "Configs match baseline with roughly 3-5% overhead and no real benefit",
+        "Engine crashes",
+        "It still doubles throughput"
+      ]
+    },
+    {
+      "q": "Why does LMCache compose with disaggregated serving (Phase 17 · 17)?",
+      "options": [
+        "KV transferred from prefill to decode lands in LMCache; later queries can pull from LMCache and skip prefill, so the cache-aware router can pick an engine whose local or LMCache-shared cache matches",
+        "It does not — they are mutually exclusive",
+        "Because LMCache replaces NIXL",
+        "Because LMCache runs on the same GPU as the engine"
+      ]
+    },
+    {
+      "q": "What is the core role of an AI gateway in the lesson?",
+      "options": [
+        "A vector database for retrieval",
+        "A model fine-tuning service",
+        "A process sitting between apps and model providers that consolidates routing, fallback, retries, rate limits, secret references, observability, and guardrails behind one API",
+        "A logging-only sidecar"
+      ]
+    },
+    {
+      "q": "What scale ceiling does Kong's benchmark report for LiteLLM?",
+      "options": [
+        "LiteLLM cannot be benchmarked",
+        "It scales linearly past 10k RPS",
+        "It breaks down around ~2000 RPS with 8 GB memory and cascading failures under sustained load",
+        "It tops out at 50 RPS"
+      ]
+    },
+    {
+      "q": "Per the Kong benchmark on equivalent CPU, how much faster is Kong AI Gateway than Portkey and LiteLLM?",
+      "options": [
+        "Identical",
+        "About 10% and 20% faster",
+        "228% faster than Portkey and 859% faster than LiteLLM",
+        "Slower than both"
+      ]
+    },
+    {
+      "q": "Which gateway does the lesson position with 20-40 ms latency overhead and guardrails / PII redaction / jailbreak detection focus?",
+      "options": [
+        "Cloudflare AI Gateway",
+        "Portkey",
+        "Kong AI Gateway",
+        "LiteLLM"
+      ]
+    },
+    {
+      "q": "What does the lesson say is the forcing function for self-hosted vs managed gateway decisions?",
+      "options": [
+        "Number of supported providers",
+        "Cost per request",
+        "Data residency requirements",
+        "Whether the gateway is open source"
+      ]
+    },
+    {
+      "q": "Which gateways stay within budget when the SLA is TTFT P99 < 100 ms?",
+      "options": [
+        "Only Portkey",
+        "Any gateway",
+        "Only LiteLLM",
+        "Kong (~3-8 ms) or Cloudflare/Vercel edge gateways (~1-3 ms); Portkey at 20-40 ms is too heavy"
+      ]
+    },
+    {
+      "q": "What is the right way to order shadow, canary, and A/B testing for an LLM rollout?",
+      "options": [
+        "Skip shadow entirely",
+        "Shadow (zero-impact compare), then canary (live traffic progressive with gates), then A/B for distinct alternatives once stability is confirmed",
+        "Canary first, then shadow, then A/B",
+        "A/B first, then shadow, then canary"
+      ]
+    },
+    {
+      "q": "Which set of five metrics does the lesson gate canary progressions on?",
+      "options": [
+        "GPU temp, fan speed, queue depth, cost, latency",
+        "Just throughput",
+        "Latency percentiles, cost per request, error/refusal rate, output length distribution, user-feedback rate",
+        "Accuracy on offline eval only"
+      ]
+    },
+    {
+      "q": "Roughly how much run-to-run accuracy variance does the lesson cite for identical inputs on LLMs?",
+      "options": [
+        "Under 0.1%",
+        "Up to about 15%, due to GPU FP non-associativity plus batch-size variance",
+        "Always 50%",
+        "Identical outputs run-to-run"
+      ]
+    },
+    {
+      "q": "What is shadow mode for, in the lesson's framing?",
+      "options": [
+        "A complete quality test that replaces evals",
+        "A smoke test catching cost blow-ups, length regressions, refusal changes, and hard errors — not a quality guarantee",
+        "Replacement for rollback",
+        "Final production rollout step"
+      ]
+    },
+    {
+      "q": "What is the correct rollback design per the lesson?",
+      "options": [
+        "Manual SSH to each pod",
+        "Redeploy with new model digest, taking hours",
+        "Flip a policy flag and revert the pinned model digest in seconds — no redeploy",
+        "Wait for the next release window"
+      ]
+    },
+    {
+      "q": "Why is cost listed as a gate alongside latency and quality?",
+      "options": [
+        "A 20% better model can be 3x more expensive per call; shipping that without a cost gate breaks unit economics",
+        "Cost is the same across providers",
+        "Cost is automatically capped by every provider",
+        "Cost is a vanity metric"
+      ]
+    },
+    {
+      "q": "What is the precise distinction between evals and A/B tests in the lesson?",
+      "options": [
+        "Only A/B tests are required",
+        "Evals answer \"can the model do the job?\" on a labeled set; A/B tests answer \"do users care?\" with live randomized traffic",
+        "Evals are user-facing; A/B tests are offline",
+        "They are interchangeable"
+      ]
+    },
+    {
+      "q": "What does CUPED do for an experiment?",
+      "options": [
+        "Disables multiple-comparison correction",
+        "Regresses out pre-period variance before comparing post-period, typically reducing variance 30-70% and boosting effective sample size",
+        "Increases sample size by hiring more users",
+        "Replaces sequential testing entirely"
+      ]
+    },
+    {
+      "q": "Why do you need multiple-comparison corrections (Bonferroni or Benjamini-Hochberg) when running many A/Bs?",
+      "options": [
+        "They speed up experiments",
+        "They are only needed for sequential tests",
+        "They are required by GDPR",
+        "Running 20 tests at 95% confidence produces one false positive by chance; corrections control family-wise error or false discovery rate"
+      ]
+    },
+    {
+      "q": "What does SRM (sample ratio mismatch) detect?",
+      "options": [
+        "Slow tokenizer performance",
+        "PII leakage",
+        "An assignment-hash bug producing a delivered split that diverges from the intended (e.g. 47/53 when targeting 50/50)",
+        "Memory leaks in the experiment platform"
+      ]
+    },
+    {
+      "q": "Why does LLM non-determinism require buffering sample size?",
+      "options": [
+        "Non-determinism reduces required samples",
+        "It violates IID assumptions; effective sample size drops, so multiply required size by roughly 1.3-1.5x as a safety margin",
+        "It is irrelevant to power calculations",
+        "It only matters offline"
+      ]
+    },
+    {
+      "q": "How does the lesson contrast Statsig and GrowthBook?",
+      "options": [
+        "GrowthBook is closed source",
+        "Identical feature sets",
+        "Statsig is warehouse-native only",
+        "Statsig is all-in-one SaaS (acquired by OpenAI Sept 2025, $1.1B); GrowthBook is open-source MIT, warehouse-native, with Bayesian/Frequentist/Sequential engines and CUPED/SRM/BH"
+      ]
+    },
+    {
+      "q": "What is the GIL trap in Locust-based LLM load testing?",
+      "options": [
+        "Client-side tokenization runs under the Python GIL and queues behind request generation, inflating reported inter-token latency",
+        "Locust requires CUDA",
+        "Locust only works on Windows",
+        "Locust does not support HTTP"
+      ]
+    },
+    {
+      "q": "What is the prompt-uniformity trap?",
+      "options": [
+        "Uniform prompts always slow the server down",
+        "Sampling from a real distribution under-represents long prompts",
+        "Looping the same prompt makes prefix caching look like full concurrent decode, inflating reported throughput",
+        "Uniform prompts require streaming"
+      ]
+    },
+    {
+      "q": "Which four load patterns does the lesson recommend?",
+      "options": [
+        "Burst only",
+        "Manual click tests",
+        "Steady-state, ramp, spike, soak",
+        "Constant 1 RPS for 10 days"
+      ]
+    },
+    {
+      "q": "How does the lesson recommend building a realistic prompt distribution?",
+      "options": [
+        "Random characters per request",
+        "Always use the same prompt to maximize cache hits",
+        "Hand-write 5 prompts and shuffle",
+        "Sample from a real distribution using mean and stddev (for example LLMPerf's --mean-input-tokens / --stddev-input-tokens) or replay real traffic"
+      ]
+    },
+    {
+      "q": "Which 2026 tool combination is positioned as best for CI/CD SLA gates and Kubernetes-native distributed runs?",
+      "options": [
+        "guidellm only",
+        "Vegeta only",
+        "k6 v2026.1.0 with the k6 Operator 1.0 GA (TestRun / PrivateLoadZone CRDs)",
+        "Locust 2.43.3 stock"
+      ]
+    },
+    {
+      "q": "Which failure mode does the soak load pattern catch?",
+      "options": [
+        "Cold-start tail",
+        "Tokenizer GIL contention",
+        "Memory leaks, connection-pool drift, and observability overflow over hours",
+        "Cache eviction storms"
+      ]
+    },
+    {
+      "q": "What multi-agent shape does the lesson recommend for AI SRE?",
+      "options": [
+        "Supervisor agent that breaks the incident into sub-queries for specialized log, metric, and runbook agents, then synthesizes and presents to a human",
+        "One monolithic agent owning everything",
+        "Random selection of one of three agents",
+        "Two agents in series with no supervisor"
+      ]
+    },
+    {
+      "q": "Which auto-remediation set does the lesson call safe?",
+      "options": [
+        "Modifying IAM policies",
+        "Altering databases",
+        "Re-architecting service topology",
+        "Restart pod, revert a specific deploy, scale a pool within pre-approved bounds, enable a pre-approved feature flag"
+      ]
+    },
+    {
+      "q": "How does NeuBird Hawkeye use adversarial evaluation to filter hallucinated root causes?",
+      "options": [
+        "Picks the higher-confidence model's answer always",
+        "Runs the same model twice on the same input",
+        "Two models independently analyze the same incident; agreement = high confidence, disagreement = escalate to human with both hypotheses",
+        "Uses GAN-style training"
+      ]
+    },
+    {
+      "q": "What does operational memory solve in AI SRE?",
+      "options": [
+        "Loss of tribal knowledge when teams turn over — runbooks and post-mortems live in a vector DB that agents retrieve on every incident",
+        "Network egress filtering",
+        "Cold start of inference pods",
+        "Token cost attribution"
+      ]
+    },
+    {
+      "q": "What MIT 2025 result does the lesson cite for pre-incident prediction?",
+      "options": [
+        "Predictions remain unsolved",
+        "100% prediction with 1-second lead",
+        "89% of outages predicted 10-15 minutes early using logs + GPU temps + API error patterns",
+        "10% with no lead time"
+      ]
+    },
+    {
+      "q": "What operational constraint does the lesson stress about predictive detection?",
+      "options": [
+        "Predictions replace runbooks",
+        "Predictions without actuation are just dashboards — the operational question is what action (pre-drain, page, auto-scale) the prediction triggers",
+        "Predictions should never be wired to action",
+        "Predictions are always accurate"
+      ]
+    },
+    {
+      "q": "Which five prerequisites does the lesson require before running chaos in production?",
+      "options": [
+        "Slack channel, sticker pack, mascot, hashtag, blog post",
+        "Vector database only",
+        "SLI/SLO, observability, automated rollback, structured runbooks, on-call",
+        "Three frontier models"
+      ]
+    },
+    {
+      "q": "Which four planes does the chaos architecture have, plus the feedback loop?",
+      "options": [
+        "Frontend, backend, mobile, web",
+        "Ingest, transform, store, serve",
+        "Train, eval, deploy, archive",
+        "Control, target, safety, observability — with feedback into SLO adjustments"
+      ]
+    },
+    {
+      "q": "What does the burn-rate alert guardrail do during chaos experiments?",
+      "options": [
+        "Pauses the experiment when daily error-budget burn exceeds roughly 2x expected",
+        "Auto-promotes the experiment to production",
+        "Disables observability",
+        "Speeds up the experiment"
+      ]
+    },
+    {
+      "q": "Which is an LLM-specific chaos experiment listed in the lesson?",
+      "options": [
+        "Random fan-speed reduction",
+        "Reboot the entire datacenter",
+        "KV eviction storm that forces vLLM block-budget saturation",
+        "Drop all DNS"
+      ]
+    },
+    {
+      "q": "Which cadence does the lesson recommend for chaos exercises?",
+      "options": [
+        "Yearly only",
+        "Daily full-prod outages",
+        "Never",
+        "Weekly small canary, monthly game day with postmortem, quarterly cross-team resilience audit"
+      ]
+    },
+    {
+      "q": "What LLM-specific failure mode does the malformed-prompt experiment uncover?",
+      "options": [
+        "Tokenizer stalls that lock up a worker on inputs like deeply nested unicode or huge UTF-8 codepoints",
+        "GPU undervolt",
+        "Network packet loss",
+        "Disk I/O contention"
+      ]
+    },
+    {
+      "q": "What is the 2026 standard pattern for LLM service credentials?",
+      "options": [
+        "Hardcode API keys in config files for speed",
+        "Email the key to each engineer",
+        "Store keys in a Slack channel",
+        "Centralized vault pulled by an AI gateway at runtime via IAM role; rotate in vault and all apps pick up in minutes"
+      ]
+    },
+    {
+      "q": "What rotation cadence does the lesson recommend for API keys, vault root tokens, and CI/CD credentials?",
+      "options": [
+        "Within 90 days, automated where possible, logged and tracked when manual",
+        "Only when leaked",
+        "Never",
+        "Every 5 years"
+      ]
+    },
+    {
+      "q": "Why is consistent tokenization (Mesh approach) used for PII scrubbing?",
+      "options": [
+        "It encrypts the prompt to the model",
+        "It is required by ISO 27001",
+        "Same source value maps to the same placeholder, so the LLM preserves code and relationship semantics across the prompt",
+        "It uses less memory than regex"
+      ]
+    },
+    {
+      "q": "What egress posture does the lesson recommend for LLM service subnets?",
+      "options": [
+        "Whitelist a small set of domains (api.openai.com, api.anthropic.com, vector DB, vault) and drop everything else, with an allowlist-only DNS resolver",
+        "Block all egress including providers",
+        "Allow DNS but block HTTP",
+        "Allow all outbound traffic"
+      ]
+    },
+    {
+      "q": "What did the 2026 Vercel supply-chain incident teach about CI/CD credentials?",
+      "options": [
+        "CI/CD credentials are low-risk and can stay in env files",
+        "CI/CD secrets cannot be stolen",
+        "Vercel was unaffected",
+        "CI/CD credentials are prod-equivalent — store in vault, scope narrowly, rotate aggressively"
+      ]
+    },
+    {
+      "q": "Which audit log fields does the lesson recommend keeping for every LLM call?",
+      "options": [
+        "Only the cost",
+        "Timestamp, user/tenant, prompt hash (not raw), model + version, token counts, cost, response hash, any guardrail trips",
+        "Just the raw prompt",
+        "Only the response"
+      ]
+    },
+    {
+      "q": "When does EU AI Act enforcement for high-risk systems begin?",
+      "options": [
+        "Already fully enforced in 2024",
+        "August 2, 2026",
+        "February 2, 2025",
+        "January 1, 2030"
+      ]
+    },
+    {
+      "q": "Which two-tier fine ceiling does the EU AI Act define?",
+      "options": [
+        "Up to €100K for any violation",
+        "Up to €15M or 3% global annual turnover for high-risk-system obligations (Art. 99(4)); up to €35M or 7% for prohibited AI practices (Art. 99(3))",
+        "Up to €1M flat for any violation",
+        "No financial penalties, only takedown orders"
+      ]
+    },
+    {
+      "q": "Why is post-processing PII cleanup not a defensible GDPR posture?",
+      "options": [
+        "The model already saw the data, so real-time inference-layer redaction (before the LLM call) is the defensible 2026 standard",
+        "GDPR forbids redaction entirely",
+        "It is too slow at scale",
+        "Post-processing is identical to real-time"
+      ]
+    },
+    {
+      "q": "What is the practical difference between SOC 2 Type I and Type II?",
+      "options": [
+        "Type I requires HIPAA BAA",
+        "Type I is more rigorous than Type II",
+        "Type I attests controls designed and documented; Type II attests controls operating effectively over 6-12 months",
+        "Type II is for startups only"
+      ]
+    },
+    {
+      "q": "What does cross-framework control mapping aim to deliver?",
+      "options": [
+        "Eliminating audits",
+        "Replacing all frameworks with ISO 42001",
+        "One control policy that satisfies multiple framework requirements (e.g. access logging maps to ISO 27001 A.5.15-5.18, GDPR Art. 32, HIPAA §164.312(a))",
+        "More distinct controls per framework"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend for HIPAA + LLM workloads?",
+      "options": [
+        "Use only on-prem models, never managed",
+        "Ship PHI to any provider; BAA is optional",
+        "HIPAA does not apply to LLMs",
+        "Never send PHI to an external AI service without a signed BAA; all three hyperscalers and major LLM API providers offer BAAs"
+      ]
+    },
+    {
+      "q": "Why does traditional FinOps break on LLM spend?",
+      "options": [
+        "LLMs don't cost money",
+        "Cloud providers refuse to itemize",
+        "LLM bills are always free",
+        "Costs are token-transactions rather than resource-uptime; tags don't auto-propagate from API calls and you must stamp user/task/tenant at the call site"
+      ]
+    },
+    {
+      "q": "Which three attribution dimensions does the lesson require instrumenting on day one?",
+      "options": [
+        "Provider, model, API version",
+        "Region, AZ, datacenter",
+        "Per-user (user_id), per-task (task_id + route), per-tenant (tenant_id)",
+        "GPU, CPU, RAM"
+      ]
+    },
+    {
+      "q": "Which four token layers should be broken out in cost attribution?",
+      "options": [
+        "GPU, CPU, RAM, storage",
+        "Cache, model, gateway, observability",
+        "Input, output, network, disk",
+        "Prompt, tool, memory, response"
+      ]
+    },
+    {
+      "q": "What is the kill-switch trigger in the enforcement ladder?",
+      "options": [
+        "Spend over $1 in a minute",
+        "Any 5xx response",
+        "Tenant spend z-score > 4 relative to baseline; auto-pause tenant and page on-call",
+        "Latency P50 > 2s"
+      ]
+    },
+    {
+      "q": "Which unit metric does the lesson recommend instead of $/M tokens?",
+      "options": [
+        "Cost per second",
+        "Cost per GPU-hour",
+        "Cost per product outcome (e.g. cost per resolved support ticket, cost per generated article, cost per successful agent task)",
+        "Cost per gateway"
+      ]
+    },
+    {
+      "q": "Which attribution pattern does the lesson call the highest-accuracy one mature teams use?",
+      "options": [
+        "Tag-and-aggregate only",
+        "Model-based allocation",
+        "Telemetry joiner — join traces to billing via trace IDs",
+        "Sampling and extrapolation"
+      ]
+    },
+    {
+      "q": "Which engine does the lesson pick as the dev-laptop one-command default?",
+      "options": [
+        "llama.cpp",
+        "vLLM",
+        "TGI",
+        "Ollama"
+      ]
+    },
+    {
+      "q": "What 2025 event changes the default away from TGI for new projects?",
+      "options": [
+        "TGI entered maintenance mode on December 11, 2025 — only bug fixes going forward",
+        "TGI dropped CUDA support",
+        "TGI raised prices",
+        "TGI was acquired by Anthropic"
+      ]
+    },
+    {
+      "q": "Which hardware constraint forces llama.cpp and excludes vLLM / TRT-LLM?",
+      "options": [
+        "CPU only (no accelerator)",
+        "AMD MI300X",
+        "NVIDIA Hopper",
+        "Apple M4"
+      ]
+    },
+    {
+      "q": "Which engine does the lesson position for agentic multi-turn and prefix-heavy workloads thanks to RadixAttention?",
+      "options": [
+        "SGLang",
+        "Ollama",
+        "TGI",
+        "llama.cpp"
+      ]
+    },
+    {
+      "q": "What dev-to-prod pipeline does the lesson recommend on the same GGUF or HF weights?",
+      "options": [
+        "TGI everywhere",
+        "Ollama in dev and Ollama in prod",
+        "Ollama in dev, llama.cpp in staging, vLLM (or SGLang for prefix-heavy) in prod",
+        "Only TRT-LLM, top to bottom"
+      ]
+    },
+    {
+      "q": "Why is Ollama discouraged for shared production?",
+      "options": [
+        "It cannot load GGUF",
+        "It only runs on Windows",
+        "It is closed source",
+        "Go HTTP serialization adds overhead, concurrency management is simpler than vLLM, and OpenTelemetry support lags"
+      ]
+    }
+  ]
+}

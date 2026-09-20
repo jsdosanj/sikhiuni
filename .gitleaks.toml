@@ -1,0 +1,26 @@
+# gitleaks config for sikh-university.
+#
+# Two confirmed-false-positive findings surfaced when this branch's full
+# history was first scanned (2026-09-06), both pre-existing, neither a real
+# secret:
+#   1. docs/SEO.md documents the site's IndexNow verification key -- this is
+#      NOT a secret, it's DESIGNED to be public: IndexNow's own protocol
+#      requires serving the key back at a well-known public URL
+#      (web/public/f59b13b5e863a021f1afc9be79af4a0a.txt) so search engines
+#      can verify site ownership. Flagging it is the opposite of the
+#      intended behavior.
+#   2. functions/api/push/subscribe.js -- gitleaks' generic-api-key heuristic
+#      matched a code fragment referencing the standard Web Push
+#      subscription fields (`auth`, `p256dh`), not a credential.
+title = "sikh-university gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Confirmed false positives (see comment above)"
+paths = [
+  '''docs/SEO\.md''',
+  '''web/public/f59b13b5e863a021f1afc9be79af4a0a\.txt''',
+  '''functions/api/push/subscribe\.js''',
+]

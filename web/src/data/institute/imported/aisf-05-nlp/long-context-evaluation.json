@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::long-context-evaluation",
+  "num": 28,
+  "slug": "long-context-evaluation",
+  "title": "Long-Context Evaluation — NIAH, RULER, LongBench, MRCR",
+  "tagline": "Gemini 3 Pro advertises 10M tokens of context. At 1M tokens, 8-needle MRCR drops to 26.3%. Advertised ≠ usable. Long-context evaluation tells you the actual capacity of the model you are shipping on.",
+  "type": "Learn",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>You have a 200-page contract. The model claims a 1M-token context. You paste the contract in and ask: &quot;What is the termination clause?&quot; The model answers — but answers from the cover page because the termination clause sits at 120k tokens deep, past where the model actually attends.</p>\n<p>This is the 2026 context-capacity gap. Spec sheets say 1M or 10M. Reality says 60-70% of that is usable, and &quot;usable&quot; depends on the task.</p>\n<ul>\n<li><strong>Retrieval (single needle in haystack):</strong> near-perfect up to the advertised max on frontier models.</li>\n<li><strong>Multi-hop / aggregation:</strong> degrades sharply past ~128k on most models.</li>\n<li><strong>Reasoning over dispersed facts:</strong> the first task to fail.</li>\n</ul>\n<p>Long-context evaluation measures these axes. This lesson names the benchmarks, what each actually measures, and how to build a custom needle test for your domain.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/long-context-eval.svg\" alt=\"NIAH baseline, RULER multi-task, LongBench holistic\" loading=\"lazy\"><figcaption>NIAH baseline, RULER multi-task, LongBench holistic</figcaption></figure>\n<p><strong>Needle-in-a-Haystack (NIAH, 2023).</strong> Place a fact (&quot;the magic word is pineapple&quot;) at a controlled depth in a long context. Ask the model to retrieve it. Sweep depth × length. The original long-context benchmark. Frontier models now saturate this; it is a necessary but not sufficient baseline.</p>\n<p><strong>RULER (Nvidia, 2024).</strong> 13 task types across 4 categories: retrieval (single / multi-key / multi-value), multi-hop tracing (variable tracking), aggregation (common word frequency), QA. Configurable context length (4k to 128k+). Reveals models that saturate NIAH but fail on multi-hop. In the 2024 release, only half of 17 models claiming 32k+ context maintained quality at 32k.</p>\n<p><strong>LongBench v2 (2024).</strong> 503 multiple-choice questions, 8k-2M word contexts, six task categories: single-doc QA, multi-doc QA, long in-context learning, long dialogue, code repo, long structured data. The production benchmark for real-world long-context behavior.</p>\n<p><strong>MRCR (Multi-Round Coreference Resolution).</strong> Multi-turn coreference at scale. 8-needle, 24-needle, 100-needle variants. Exposes how many facts a model can juggle before attention degrades.</p>\n<p><strong>NoLiMa.</strong> &quot;Non-lexical needle.&quot; The needle and the query share no literal overlap; retrieval requires one step of semantic reasoning. Harder than NIAH.</p>\n<p><strong>HELMET.</strong> Concatenates many documents, asks a question from any one. Tests selective attention.</p>\n<p><strong>BABILong.</strong> Embeds bAbI reasoning chains inside irrelevant haystacks. Tests reasoning-in-a-haystack, not just retrieval.</p>\n<h3>What to actually report</h3>\n<ul>\n<li><strong>Advertised context window.</strong> The spec-sheet number.</li>\n<li><strong>Effective retrieval length.</strong> NIAH pass at some threshold (e.g., 90%).</li>\n<li><strong>Effective reasoning length.</strong> Multi-hop or aggregation pass at that threshold.</li>\n<li><strong>Degradation curve.</strong> Accuracy vs context length, plotted per task type.</li>\n</ul>\n<p>Two numbers for your spec sheet: retrieval-effective and reasoning-effective. Usually the reasoning-effective is 25-50% of the advertised window.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>gx-niah-decay</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: a custom NIAH for your domain</h3>\n<p>See <code>code/main.py</code>. The skeleton:</p>\n<pre><code class=\"language-python\">def build_haystack(filler_text, needle, depth_ratio, total_tokens):\n    if not (0.0 &lt;= depth_ratio &lt;= 1.0):\n        raise ValueError(f&quot;depth_ratio must be in [0, 1], got {depth_ratio}&quot;)\n    if total_tokens &lt;= 0:\n        raise ValueError(f&quot;total_tokens must be positive, got {total_tokens}&quot;)\n\n    filler_tokens = tokenize(filler_text)\n    needle_tokens = tokenize(needle)\n    if not filler_tokens:\n        raise ValueError(&quot;filler_text produced no tokens&quot;)\n\n    # Repeat filler until long enough to fill the haystack body.\n    body_len = max(total_tokens - len(needle_tokens), 0)\n    while len(filler_tokens) &lt; body_len:\n        filler_tokens = filler_tokens + filler_tokens\n    filler_tokens = filler_tokens[:body_len]\n\n    insert_at = min(int(body_len * depth_ratio), body_len)\n    haystack = filler_tokens[:insert_at] + needle_tokens + filler_tokens[insert_at:]\n    return &quot; &quot;.join(haystack)\n\n\ndef score_niah(model, haystack, question, expected):\n    answer = model.complete(f&quot;Context: {haystack}\\nQ: {question}\\nA:&quot;, max_tokens=50)\n    return 1 if expected.lower() in answer.lower() else 0\n</code></pre>\n<p>Sweep <code>depth_ratio</code> ∈ {0, 0.25, 0.5, 0.75, 1.0} × <code>total_tokens</code> ∈ {1k, 4k, 16k, 64k}. Plot the heatmap. That is the NIAH card for your target model.</p>\n<h3>Step 2: a multi-needle variant</h3>\n<pre><code class=\"language-python\">def build_multi_needle(filler, needles, total_tokens):\n    depths = [0.1, 0.4, 0.7]\n    chunks = [filler[:int(total_tokens * 0.1)]]\n    for depth, needle in zip(depths, needles):\n        chunks.append(needle)\n        next_chunk = filler[int(total_tokens * depth): int(total_tokens * (depth + 0.3))]\n        chunks.append(next_chunk)\n    return &quot; &quot;.join(chunks)\n</code></pre>\n<p>Questions like &quot;What are the three magic words?&quot; require retrieving all three. Single-needle success does not predict multi-needle success.</p>\n<h3>Step 3: multi-hop variable tracing (RULER-style)</h3>\n<pre><code class=\"language-python\">haystack = &quot;&quot;&quot;X1 = 42. ... (filler) ... X2 = X1 + 10. ... (filler) ... X3 = X2 * 2.&quot;&quot;&quot;\nquestion = &quot;What is X3?&quot;\n</code></pre>\n<p>The answer requires chaining three assignments. Frontier models at 128k often drop to 50-70% accuracy here.</p>\n<h3>Step 4: LongBench v2 on your stack</h3>\n<pre><code class=\"language-python\">from datasets import load_dataset\nlongbench = load_dataset(&quot;THUDM/LongBench-v2&quot;)\n\ndef eval_model_on_longbench(model, subset=&quot;single-doc-qa&quot;):\n    tasks = [x for x in longbench[&quot;test&quot;] if x[&quot;task&quot;] == subset]\n    correct = 0\n    for x in tasks:\n        answer = model.complete(x[&quot;context&quot;] + &quot;\\n\\nQ: &quot; + x[&quot;question&quot;], max_tokens=20)\n        if normalize(answer) == normalize(x[&quot;answer&quot;]):\n            correct += 1\n    return correct / len(tasks)\n</code></pre>\n<p>Report per-category accuracy. Aggregate scores hide big task-level differences.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>NIAH-only evaluation.</strong> Passing NIAH at 1M tokens says nothing about multi-hop. Always run RULER or a custom multi-hop test.</li>\n<li><strong>Uniform depth sampling.</strong> Many implementations only test depth=0.5. Test depth=0, 0.25, 0.5, 0.75, 1.0 — the &quot;lost in the middle&quot; effect is real.</li>\n<li><strong>Lexical overlap with filler.</strong> If the needle shares keywords with the filler, retrieval becomes trivial. Use NoLiMa-style non-overlapping needles.</li>\n<li><strong>Ignoring latency.</strong> 1M-token prompts take 30-120 seconds to prefill. Measure time-to-first-token alongside accuracy.</li>\n<li><strong>Vendor-self-reported numbers.</strong> OpenAI, Google, Anthropic all publish their own scores. Always re-run independently on your use case.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Benchmark</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Quick sanity check</td>\n<td>Custom NIAH at 3 depths × 3 lengths</td>\n</tr>\n<tr>\n<td>Model selection for production</td>\n<td>RULER (13 tasks) at your target length</td>\n</tr>\n<tr>\n<td>Real-world QA quality</td>\n<td>LongBench v2 single-doc-QA subset</td>\n</tr>\n<tr>\n<td>Multi-hop reasoning</td>\n<td>BABILong or custom variable-tracing</td>\n</tr>\n<tr>\n<td>Conversational / dialogue</td>\n<td>MRCR 8-needle at your target length</td>\n</tr>\n<tr>\n<td>Model upgrade regression</td>\n<td>Fixed in-house NIAH + RULER harness, run on every new model</td>\n</tr>\n</tbody></table>\n<p>Rule of thumb for production: never trust a context window until you have NIAH + 1 reasoning task at your intended length.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-long-context-eval.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: long-context-eval\ndescription: Design a long-context evaluation battery for a given model and use case.\nversion: 1.0.0\nphase: 5\nlesson: 28\ntags: [nlp, long-context, evaluation]\n---\n\nGiven a target model, target context length, and use case, output:\n\n1. Tests. NIAH depth × length grid; RULER multi-hop; custom domain task.\n2. Sampling. Depths 0, 0.25, 0.5, 0.75, 1.0 at each length.\n3. Metrics. Retrieval pass rate; reasoning pass rate; time-to-first-token; cost-per-query.\n4. Cutoff. Effective retrieval length (90% pass) and effective reasoning length (70% pass). Report both.\n5. Regression. Fixed harness, rerun on every model upgrade, surface deltas.\n\nRefuse to trust a context window from the model card alone. Refuse NIAH-only evaluation for any multi-hop workload. Refuse vendor self-reported long-context scores as independent evidence.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Build a NIAH with 3 depths (0.25, 0.5, 0.75) × 3 lengths (1k, 4k, 16k). Run on any model. Plot pass rate as a 3×3 heatmap.</li>\n<li><strong>Medium.</strong> Add a 3-needle variant. Measure retrieval of all 3 at each length. Compare to single-needle pass rate at the same length.</li>\n<li><strong>Hard.</strong> Construct a variable-tracing task (X1 → X2 → X3, with 3 hops) embedded in 64k of filler. Measure accuracy across 3 frontier models. Report effective reasoning length per model.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>NIAH</td>\n<td>Needle in haystack</td>\n<td>Plant a fact in filler, ask the model to retrieve it.</td>\n</tr>\n<tr>\n<td>RULER</td>\n<td>NIAH on steroids</td>\n<td>13 task types across retrieval / multi-hop / aggregation / QA.</td>\n</tr>\n<tr>\n<td>Effective context</td>\n<td>The real capacity</td>\n<td>Length at which accuracy still holds above threshold.</td>\n</tr>\n<tr>\n<td>Lost in the middle</td>\n<td>Depth bias</td>\n<td>Models under-attend to content in the middle of long inputs.</td>\n</tr>\n<tr>\n<td>Multi-needle</td>\n<td>Many facts at once</td>\n<td>Multiple plants; tests attention juggling, not retrieval alone.</td>\n</tr>\n<tr>\n<td>MRCR</td>\n<td>Multi-round coref</td>\n<td>8, 24, or 100-needle coreference; exposes attention saturation.</td>\n</tr>\n<tr>\n<td>NoLiMa</td>\n<td>Non-lexical needle</td>\n<td>Needle and query share no literal tokens; requires reasoning.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://github.com/gkamradt/LLMTest_NeedleInAHaystack\" target=\"_blank\" rel=\"noopener\">Kamradt (2023). Needle in a Haystack analysis</a> — the original NIAH repo.</li>\n<li><a href=\"https://arxiv.org/abs/2404.06654\" target=\"_blank\" rel=\"noopener\">Hsieh et al. (2024). RULER: What&#39;s the Real Context Size of Your Long-Context LMs?</a> — the multi-task benchmark.</li>\n<li><a href=\"https://arxiv.org/abs/2412.15204\" target=\"_blank\" rel=\"noopener\">Bai et al. (2024). LongBench v2</a> — real-world long-context eval.</li>\n<li><a href=\"https://arxiv.org/abs/2404.06666\" target=\"_blank\" rel=\"noopener\">Modarressi et al. (2024). NoLiMa: Non-lexical needles</a> — harder needles.</li>\n<li><a href=\"https://arxiv.org/abs/2406.10149\" target=\"_blank\" rel=\"noopener\">Kuratov et al. (2024). BABILong</a> — reasoning-in-haystack.</li>\n<li><a href=\"https://arxiv.org/abs/2307.03172\" target=\"_blank\" rel=\"noopener\">Liu et al. (2024). Lost in the Middle: How Language Models Use Long Contexts</a> — the depth-bias paper.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import random\nimport re\n\n\nFILLER_WORDS = (\n    \"the quick brown fox jumps over the lazy dog and then runs across the field \"\n    \"where birds sing and flowers bloom while the river flows gently toward the sea \"\n    \"and clouds drift slowly across a sky painted in hues of orange and pink \"\n    \"as evening approaches and the day begins to fade into quiet darkness \"\n).split()\n\n\ndef make_filler(n_tokens, seed):\n    rng = random.Random(seed)\n    return \" \".join(rng.choice(FILLER_WORDS) for _ in range(n_tokens))\n\n\ndef insert_needle(filler, needle, depth_ratio):\n    words = filler.split()\n    pos = int(len(words) * depth_ratio)\n    return \" \".join(words[:pos] + [needle] + words[pos:])\n\n\ndef mock_retrieval_model(context, question, effective_capacity):\n    needle_pattern = re.compile(r\"(?:the magic word is|the secret code is|the pass phrase is|x1\\s*=|x2\\s*=|x3\\s*=) [A-Z0-9a-z_]+\", re.IGNORECASE)\n    matches = list(needle_pattern.finditer(context))\n    if not matches:\n        return \"no answer\"\n    total_len = len(context.split())\n    for m in matches:\n        before = len(context[:m.start()].split())\n        if before <= effective_capacity:\n            return m.group(0).split()[-1].strip(\",.\")\n    return \"no answer\"\n\n\ndef score_single_needle(context, expected, effective_capacity):\n    question = \"What is the magic word?\"\n    answer = mock_retrieval_model(context, question, effective_capacity)\n    return 1 if expected.lower() in answer.lower() else 0\n\n\ndef score_multi_needle(context, expected_list, effective_capacity):\n    total_len = len(context.split())\n    needle_pattern = re.compile(r\"the magic word is ([A-Za-z0-9_]+)\", re.IGNORECASE)\n    found = []\n    for m in needle_pattern.finditer(context):\n        before = len(context[:m.start()].split())\n        if before <= effective_capacity:\n            found.append(m.group(1).lower())\n    hits = sum(1 for e in expected_list if e.lower() in found)\n    return hits / len(expected_list)\n\n\ndef run_niah_grid(lengths, depths, seed=0):\n    needle = \"the magic word is pineapple\"\n    expected = \"pineapple\"\n    capacity = 20000\n    corner = \"depth\\\\len\"\n    print(f\"  {corner:<12}  \" + \"  \".join(f\"{n:>6}\" for n in lengths))\n    for d in depths:\n        row = []\n        for n in lengths:\n            filler = make_filler(n, seed=seed + n)\n            haystack = insert_needle(filler, needle, d)\n            row.append(score_single_needle(haystack, expected, capacity))\n        tag = \"  PASS\" if all(row) else f\"{sum(row)}/{len(row)}\"\n        print(f\"  depth={d:<5}    \" + \"  \".join(f\"{x:>6}\" for x in row) + \"    \" + tag)\n\n\ndef run_multi_needle(length, n_needles=3, seed=42):\n    needles = [\"the magic word is pineapple\",\n               \"the magic word is compass\",\n               \"the magic word is whisper\"][:n_needles]\n    expected = [\"pineapple\", \"compass\", \"whisper\"][:n_needles]\n    filler = make_filler(length, seed=seed)\n    depths = [0.2, 0.5, 0.8][:n_needles]\n    words = filler.split()\n    for d, n in sorted(zip(depths, needles), reverse=True):\n        pos = int(len(words) * d)\n        words = words[:pos] + [n] + words[pos:]\n    haystack = \" \".join(words)\n    return score_multi_needle(haystack, expected, effective_capacity=length)\n\n\ndef main():\n    lengths = [500, 2000, 8000, 20000, 40000]\n    depths = [0.1, 0.3, 0.5, 0.7, 0.9]\n\n    print(\"=== toy NIAH grid (mock model with effective capacity = 20k) ===\")\n    print(\"marker: 1 = needle found in-context,  0 = needle missed\")\n    print()\n    run_niah_grid(lengths, depths)\n\n    print()\n    print(\"=== multi-needle at length=10000, n=3 ===\")\n    score = run_multi_needle(10000, n_needles=3)\n    print(f\"  found {score * 3:.0f} / 3 needles\")\n\n    print()\n    print(\"notes:\")\n    print(\"  mock model has hard effective-capacity cutoff; real LLMs degrade gradually.\")\n    print(\"  real NIAH: sweep 5 depths × 6 lengths, produce heatmap per model.\")\n    print(\"  always pair with one multi-hop / aggregation task (RULER) — single-needle is saturable.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does the original NIAH benchmark measure?",
+      "options": [
+        "Whether the model can retrieve a planted fact at controlled depths across a long context",
+        "Tokenizer fertility",
+        "Embedding cosine drift",
+        "Multi-hop reasoning only"
+      ],
+      "answer": 0,
+      "explanation": "NIAH = needle in a haystack: plant a fact, ask the model to retrieve it, sweep depth and length."
+    },
+    {
+      "q": "Why is the advertised context window often very different from the usable context?",
+      "options": [
+        "Embeddings overflow",
+        "Tokenizers truncate",
+        "Attention degrades with length and task; spec-sheet maximums rarely hold under multi-hop or reasoning loads",
+        "Beam search slows"
+      ],
+      "answer": 2,
+      "explanation": "Effective context for reasoning is usually 25-50% of the advertised max."
+    },
+    {
+      "q": "What does RULER add over NIAH?",
+      "options": [
+        "Per-token logprobs",
+        "Translation tasks",
+        "Faster inference",
+        "Thirteen task types across retrieval, multi-hop tracing, aggregation, and QA at multiple context lengths"
+      ],
+      "answer": 3,
+      "explanation": "RULER expands NIAH into a multi-task long-context benchmark catching models that saturate NIAH but fail elsewhere."
+    },
+    {
+      "q": "What is the 'lost in the middle' effect?",
+      "options": [
+        "Models under-attend to content placed in the middle of long inputs; depth=0.5 often performs worse than depth=0 or 1",
+        "Models lose punctuation",
+        "Models forget the first token",
+        "Models reorder tokens"
+      ],
+      "answer": 0,
+      "explanation": "Mid-context content is least attended; sweeping depth exposes the U-shaped accuracy curve."
+    },
+    {
+      "q": "Why must NIAH-only evaluation be supplemented with multi-hop tests?",
+      "options": [
+        "NIAH lacks ground truth",
+        "Frontier models can ace single-needle retrieval but still fail multi-hop variable-tracing or aggregation tasks",
+        "Multi-hop is faster",
+        "NIAH cannot run on long context"
+      ],
+      "answer": 1,
+      "explanation": "Retrieval pass does not imply reasoning pass; multi-hop benchmarks expose the real ceiling."
+    },
+    {
+      "q": "What does NoLiMa stress?",
+      "options": [
+        "Tokenization",
+        "Needles that share no literal tokens with the query, so retrieval requires a semantic reasoning step",
+        "Latency",
+        "Streaming output"
+      ],
+      "answer": 1,
+      "explanation": "NoLiMa removes lexical overlap so the model must reason rather than match keywords."
+    },
+    {
+      "q": "What two numbers should a long-context spec sheet report?",
+      "options": [
+        "GPU memory and latency only",
+        "Tokens per second only",
+        "Only the advertised max",
+        "Effective retrieval length (e.g. 90% NIAH pass) and effective reasoning length (e.g. 70% multi-hop pass)"
+      ],
+      "answer": 3,
+      "explanation": "Distinguishing retrieval-effective from reasoning-effective length is essential for real-world claims."
+    },
+    {
+      "q": "Why measure time-to-first-token at long context lengths?",
+      "options": [
+        "Required by RAG",
+        "Beam search depends on it",
+        "1M-token prefills can take tens of seconds; accuracy alone hides product-impacting latency",
+        "Tokenization is slow"
+      ],
+      "answer": 2,
+      "explanation": "Long prompts have huge prefill costs; latency must be tracked alongside accuracy."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/28-long-context-evaluation"
+  }
+}

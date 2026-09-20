@@ -1,0 +1,78 @@
+---
+// The department curriculum as collapsible accordions, one panel per subject,
+// each holding that subject's courses grouped by level. Native <details>/<summary>
+// (keyboard + screen-reader friendly); a small script gives it a smooth open/close
+// and single-open behaviour on wide screens. Styling keys off the page's --dept.
+import Icon from '../Icon.astro';
+import CourseCard from '../CourseCard.astro';
+import { departmentTopics, coursesInDepartment, type Department } from '../../lib/departments';
+import { TOPIC_ICONS } from '../../lib/data';
+
+interface Props { d: Department; open?: number }
+const { d, open = 0 } = Astro.props;
+
+const courses = coursesInDepartment(d);
+const rows = departmentTopics(d).map((t) => {
+  const cs = courses.filter((c) => c.topic === t.id).sort((a, b) => a.level - b.level || a.title.localeCompare(b.title));
+  const levels = [...new Set(cs.map((c) => Math.floor(c.level / 100) * 100))].sort((a, b) => a - b);
+  return { ...t, cs, levels };
+});
+---
+<div class="dax" data-accordion>
+  {rows.map((t, i) => (
+    <details class="dax-item" id={`subj-${t.id}`} open={i === open}>
+      <summary class="dax-sum">
+        <span class="dax-ic"><Icon name={TOPIC_ICONS[t.id] || 'book'} class="h-5 w-5" /></span>
+        <span class="dax-t">{t.name}</span>
+        <span class="dax-n">{t.cs.length} course{t.cs.length === 1 ? '' : 's'}</span>
+        <span class="dax-chev" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+      </summary>
+      <div class="dax-panel">
+        <div class="dax-inner">
+          {t.cs.map((c) => <CourseCard course={c} />)}
+        </div>
+      </div>
+    </details>
+  ))}
+</div>
+
+<script>
+  // Smooth open/close + accordion behaviour. Falls back to plain <details>
+  // toggling if anything here fails.
+  (function () {
+    document.querySelectorAll('[data-accordion]').forEach((group) => {
+      const items = Array.from(group.querySelectorAll('.dax-item'));
+      const single = () => matchMedia('(min-width: 1024px)').matches;
+
+      const panelOf = (d) => d.querySelector('.dax-panel');
+      const setMax = (d, px) => { const p = panelOf(d); if (p) p.style.maxHeight = px; };
+
+      group.classList.add('armed');
+      // init: open items get their real height; others collapsed
+      items.forEach((d) => setMax(d, d.open ? panelOf(d).scrollHeight + 'px' : '0px'));
+
+      items.forEach((d) => {
+        const sum = d.querySelector('.dax-sum');
+        sum.addEventListener('click', (e) => {
+          e.preventDefault();
+          const willOpen = !d.open;
+          if (willOpen && single()) {
+            items.forEach((o) => { if (o !== d && o.open) { o.open = false; setMax(o, '0px'); } });
+          }
+          d.open = willOpen;
+          // next frame so scrollHeight is correct
+          requestAnimationFrame(() => setMax(d, willOpen ? panelOf(d).scrollHeight + 'px' : '0px'));
+        });
+      });
+
+      // keep an open panel's max-height honest on resize
+      let t = 0;
+      addEventListener('resize', () => {
+        clearTimeout(t);
+        t = window.setTimeout(() => items.forEach((d) => { if (d.open) setMax(d, panelOf(d).scrollHeight + 'px'); }), 150);
+      }, { passive: true });
+    });
+  })();
+</script>

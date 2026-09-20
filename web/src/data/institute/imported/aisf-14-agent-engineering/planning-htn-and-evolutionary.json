@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::planning-htn-and-evolutionary",
+  "num": 11,
+  "slug": "planning-htn-and-evolutionary",
+  "title": "Planning with HTN and Evolutionary Search",
+  "tagline": "Symbolic planning handles the cases where the plan is provably correct. Evolutionary code search handles the cases where the fitness function is machine-checkable. ChatHTN (2025) and AlphaEvolve (2025) show what each unlocks when paired with an LLM.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Explain Hierarchical Task Networks: tasks, methods, operators, preconditions, effects.",
+    "Describe ChatHTN's hybrid loop — symbolic search with LLM fallback decomposition.",
+    "Explain AlphaEvolve's evolutionary loop and why it only works with a programmatic evaluator.",
+    "Implement a toy HTN planner plus a toy evolutionary search in stdlib."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>ReWOO (Lesson 02), Plan-and-Execute, and ReAct cover most agent planning. Two cases they don&#39;t cover well:</p>\n<ol>\n<li><strong>Plans with provable correctness.</strong> Scheduling, flight pathing, compliance workflows — the plan must be sound by construction. A fluent LLM plan that sometimes hallucinates a step is unacceptable.</li>\n<li><strong>Optimizations with a machine-checkable fitness function.</strong> Matrix multiplication, scheduling heuristics, compiler passes — the goal is not &quot;a correct plan&quot; but &quot;the best plan.&quot;</li>\n</ol>\n<p>HTN planning and AlphaEvolve solve the two different problems. Both use LLMs as amplifiers, not replacements.</p>\n<h2>The Concept</h2>\n<h3>Hierarchical Task Networks</h3>\n<p>An HTN is:</p>\n<ul>\n<li><strong>Tasks</strong> — compound (to be decomposed) and primitive (directly executable).</li>\n<li><strong>Methods</strong> — ways to decompose a compound task into subtasks, with preconditions.</li>\n<li><strong>Operators</strong> — primitive actions with preconditions and effects.</li>\n<li><strong>State</strong> — a set of facts.</li>\n</ul>\n<p>Planning: given a goal task and an initial state, find a decomposition into primitive operators whose preconditions are satisfied in sequence.</p>\n<p>HTN is older than LLMs and still the reference for provably-correct plans.</p>\n<h3>ChatHTN (Gopalakrishnan et al., 2025)</h3>\n<p>ChatHTN (arXiv:2505.11814) interleaves symbolic HTN with LLM queries:</p>\n<ol>\n<li>Try to decompose the current compound task with existing methods.</li>\n<li>If no method applies, ask the LLM: &quot;how would you decompose <code>task</code> in state <code>s</code>?&quot;</li>\n<li>Translate the LLM response into candidate subtasks.</li>\n<li>Validate against the operator schema; reject invalid decompositions.</li>\n<li>Recurse.</li>\n</ol>\n<p>The paper&#39;s central claim: every plan produced is provably sound because LLM suggestions only enter as candidate decompositions, never as direct plan edits. The symbolic layer owns correctness; the LLM expands the method library.</p>\n<p>Online method learning (OpenReview <code>gwYEDY9j2x</code>, 2025 follow-up) adds a learner that generalizes LLM-produced decompositions by regression — cutting LLM query frequency up to 75%.</p>\n<h3>AlphaEvolve (Novikov et al., 2025)</h3>\n<p>AlphaEvolve (arXiv:2506.13131, DeepMind, June 2025) is a different beast: evolutionary code search orchestrated by a Gemini 2.0 Flash/Pro ensemble.</p>\n<p>Loop:</p>\n<ol>\n<li>Start with a seed program + a programmatic evaluator (returns a fitness score).</li>\n<li>Ensemble of LLMs proposes mutations.</li>\n<li>Run mutations through the evaluator.</li>\n<li>Keep the best; mutate again.</li>\n</ol>\n<p>Published wins:</p>\n<ul>\n<li>First improvement over Strassen for 4x4 complex matrix multiplication in 56 years (48 scalar multiplications).</li>\n<li>0.7% recovered Google compute via a Borg scheduling heuristic.</li>\n<li>32% FlashAttention speedup on a frontier workload.</li>\n</ul>\n<p>The hard constraint: the fitness function must be machine-checkable. Evolutionary search over prose answers does not converge.</p>\n<h3>When to use which</h3>\n<table>\n<thead>\n<tr>\n<th>Problem class</th>\n<th>Use</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Scheduling with hard constraints</td>\n<td>HTN + ChatHTN</td>\n<td>Provable soundness</td>\n</tr>\n<tr>\n<td>Compiler optimization</td>\n<td>AlphaEvolve</td>\n<td>Machine-checkable fitness</td>\n</tr>\n<tr>\n<td>Multi-step task execution</td>\n<td>ReAct / ReWOO</td>\n<td>LLM in the loop, no formal guarantees</td>\n</tr>\n<tr>\n<td>Code improvement with tests</td>\n<td>AlphaEvolve</td>\n<td>Tests are the evaluator</td>\n</tr>\n<tr>\n<td>Policy-bound automation</td>\n<td>HTN</td>\n<td>Preconditions encode policy</td>\n</tr>\n</tbody></table>\n<h3>Where this pattern goes wrong</h3>\n<ul>\n<li><strong>HTN without operators.</strong> Without precondition/effect schemas the soundness claim collapses. ChatHTN&#39;s &quot;LLM suggests decomposition&quot; requires the schema to reject invalid moves.</li>\n<li><strong>AlphaEvolve without a real evaluator.</strong> &quot;Ask the LLM if the code is better&quot; is not a fitness function. The evaluator must be deterministic and fast.</li>\n<li><strong>Over-engineering.</strong> Most agent tasks don&#39;t need either. Reach for ReAct or ReWOO first.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>htn-tree-expand</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements two toys:</p>\n<ul>\n<li>A stdlib HTN planner with operators, methods, preconditions, effects, and a <code>LLMFallback</code> that kicks in when no method matches a compound task. The &quot;LLM&quot; is a scripted decomposer so the planner runs offline.</li>\n<li>A stdlib evolutionary search over arithmetic programs: grow expressions whose output minimizes <code>|f(x) - target|</code> over a test set. Evaluator is deterministic.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The trace shows the HTN planner decomposing a compound task (with a mid-plan LLM fallback) and the evolutionary loop converging on a target expression.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>HTN planners</strong> — <code>pyhop</code>, <code>SHOP3</code>, or build your own for domain-specific policy enforcement.</li>\n<li><strong>ChatHTN</strong> — research code; the pattern (symbolic + LLM fallback) ports cleanly to any HTN planner.</li>\n<li><strong>AlphaEvolve</strong> — DeepMind paper; the pattern (ensemble + evaluator) is reproducible. OpenEvolve and similar open-source forks are emerging.</li>\n<li><strong>Agent frameworks</strong> — none ship first-class HTN or AlphaEvolve yet. Build it as a subagent or a background worker.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-hybrid-planner.md</code> generates a hybrid planner scaffold (HTN or evolutionary) with the LLM role explicitly scoped.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Extend the HTN planner with backtracking: when an operator&#39;s postcondition fails at runtime, roll back and try the next method.</li>\n<li>Add a LLM-method cache to ChatHTN: when the LLM decomposes task <code>T</code> in state pattern <code>P</code>, store the result. Re-check the method library first on the next call.</li>\n<li>Swap the evolutionary search evaluator to a real test suite. Evolve a sort function that passes 20 test cases; report generations to convergence.</li>\n<li>Read AlphaEvolve&#39;s evaluator design notes. Design an evaluator for a domain you care about (SQL query optimization, test-suite minimization, deployment YAML).</li>\n<li>Combine: use HTN to decompose a compound task into subtasks, then use evolutionary search on each subtask&#39;s primitive operator. Where does it shine, where does it over-engineer?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>HTN</td>\n<td>&quot;Hierarchical planner&quot;</td>\n<td>Task decomposition with operators, preconditions, effects</td>\n</tr>\n<tr>\n<td>Method</td>\n<td>&quot;Decomposition rule&quot;</td>\n<td>Way to break a compound task into subtasks</td>\n</tr>\n<tr>\n<td>Operator</td>\n<td>&quot;Primitive action&quot;</td>\n<td>Concrete step with precondition and effect</td>\n</tr>\n<tr>\n<td>ChatHTN</td>\n<td>&quot;LLM + HTN&quot;</td>\n<td>Symbolic planner asks LLM when no method matches</td>\n</tr>\n<tr>\n<td>AlphaEvolve</td>\n<td>&quot;Evolutionary code search&quot;</td>\n<td>Ensemble LLMs mutate code; deterministic evaluator selects</td>\n</tr>\n<tr>\n<td>Fitness function</td>\n<td>&quot;Evaluator&quot;</td>\n<td>Deterministic, machine-checkable score over outputs</td>\n</tr>\n<tr>\n<td>Online method learning</td>\n<td>&quot;Cached LLM decomposition&quot;</td>\n<td>Store + generalize LLM plans to cut query cost</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2505.11814\" target=\"_blank\" rel=\"noopener\">Gopalakrishnan et al., ChatHTN (arXiv:2505.11814)</a> — symbolic + LLM hybrid planner</li>\n<li><a href=\"https://arxiv.org/abs/2506.13131\" target=\"_blank\" rel=\"noopener\">Novikov et al., AlphaEvolve (arXiv:2506.13131)</a> — evolutionary code search with LLM mutations</li>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a> — when to reach for a planner vs a simple loop</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"HTN planner (with scripted LLM fallback) plus a toy evolutionary search.\n\nTwo demos, one file. HTN shows the ChatHTN pattern: symbolic planner falls back\nto an LLM for decomposition when no method matches. Evolutionary search shows\nthe AlphaEvolve pattern: ensemble mutations filtered by a deterministic evaluator.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport random\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass Operator:\n    name: str\n    preconditions: tuple[str, ...]\n    effects_add: tuple[str, ...]\n    effects_remove: tuple[str, ...] = ()\n\n    def applicable(self, state: set[str]) -> bool:\n        return all(p in state for p in self.preconditions)\n\n    def apply(self, state: set[str]) -> set[str]:\n        new_state = set(state)\n        for fact in self.effects_remove:\n            new_state.discard(fact)\n        for fact in self.effects_add:\n            new_state.add(fact)\n        return new_state\n\n\n@dataclass\nclass Method:\n    name: str\n    task: str\n    preconditions: tuple[str, ...]\n    subtasks: tuple[str, ...]\n\n    def applicable(self, state: set[str]) -> bool:\n        return all(p in state for p in self.preconditions)\n\n\nclass ScriptedLLM:\n    \"\"\"Stands in for ChatHTN's LLM fallback. Returns scripted decompositions.\"\"\"\n\n    def __init__(self, scripts: dict[str, tuple[str, ...]]) -> None:\n        self._scripts = scripts\n        self.calls: list[str] = []\n\n    def decompose(self, task: str, state: set[str]) -> tuple[str, ...] | None:\n        self.calls.append(task)\n        return self._scripts.get(task)\n\n\n@dataclass\nclass HTNPlanner:\n    operators: dict[str, Operator]\n    methods: dict[str, list[Method]]\n    llm: ScriptedLLM\n    cached_methods: dict[str, tuple[str, ...]] = field(default_factory=dict)\n\n    def plan(self, task: str, state: set[str],\n             depth: int = 0, max_depth: int = 12) -> list[str] | None:\n        if depth > max_depth:\n            return None\n        if task in self.operators:\n            op = self.operators[task]\n            if op.applicable(state):\n                return [task]\n            return None\n        applicable = [m for m in self.methods.get(task, []) if m.applicable(state)]\n        if not applicable and task in self.cached_methods:\n            subtasks = self.cached_methods[task]\n            return self._expand(list(subtasks), state, depth)\n        if not applicable:\n            suggested = self.llm.decompose(task, state)\n            if suggested is None:\n                return None\n            if not all(s in self.operators or s in self.methods for s in suggested):\n                return None\n            self.cached_methods[task] = suggested\n            return self._expand(list(suggested), state, depth)\n        method = applicable[0]\n        return self._expand(list(method.subtasks), state, depth)\n\n    def _expand(self, subtasks: list[str], state: set[str], depth: int) -> list[str] | None:\n        plan: list[str] = []\n        current_state = set(state)\n        for subtask in subtasks:\n            sub_plan = self.plan(subtask, current_state, depth=depth + 1)\n            if sub_plan is None:\n                return None\n            for step in sub_plan:\n                op = self.operators.get(step)\n                if op is None or not op.applicable(current_state):\n                    return None\n                current_state = op.apply(current_state)\n                plan.append(step)\n        return plan\n\n\ndef htn_demo() -> None:\n    print(\"-\" * 70)\n    print(\"demo 1: ChatHTN-style hybrid HTN planner\")\n    print(\"-\" * 70)\n    operators = {\n        \"open_editor\": Operator(\"open_editor\", (\"logged_in\",), (\"editor_open\",)),\n        \"write_tests\": Operator(\"write_tests\", (\"editor_open\",), (\"tests_written\",)),\n        \"run_tests\": Operator(\"run_tests\", (\"tests_written\",), (\"tests_passing\",)),\n        \"open_pr\": Operator(\"open_pr\", (\"tests_passing\",), (\"pr_open\",)),\n    }\n    methods: dict[str, list[Method]] = {\n        \"ship_change\": [\n            Method(\"ship_change_m1\", \"ship_change\", (\"logged_in\",),\n                   (\"open_editor\", \"write_tests\", \"run_tests\", \"open_pr\")),\n        ],\n    }\n    llm = ScriptedLLM({\n        \"ship_feature_with_migration\": (\n            \"open_editor\", \"write_tests\", \"run_tests\", \"open_pr\",\n        ),\n    })\n    planner = HTNPlanner(operators=operators, methods=methods, llm=llm)\n\n    state = {\"logged_in\"}\n    print(f\"\\ncase A: goal=ship_change (method library matches)\")\n    plan = planner.plan(\"ship_change\", state)\n    print(f\"  plan: {plan}\")\n    print(f\"  llm calls: {planner.llm.calls}\")\n\n    print(f\"\\ncase B: goal=ship_feature_with_migration (no method -> LLM fallback)\")\n    plan = planner.plan(\"ship_feature_with_migration\", state)\n    print(f\"  plan: {plan}\")\n    print(f\"  llm calls (cumulative): {planner.llm.calls}\")\n    print(f\"  cache hit for next time: {planner.cached_methods}\")\n\n    print(f\"\\ncase C: goal=ship_feature_with_migration (cached now -> no LLM call)\")\n    llm_calls_before = len(planner.llm.calls)\n    plan = planner.plan(\"ship_feature_with_migration\", state)\n    print(f\"  plan: {plan}\")\n    new_calls = len(planner.llm.calls) - llm_calls_before\n    print(f\"  new LLM calls this round: {new_calls}  (expect 0)\")\n\n\ndef evolutionary_demo() -> None:\n    print()\n    print(\"-\" * 70)\n    print(\"demo 2: AlphaEvolve-style evolutionary search (toy)\")\n    print(\"-\" * 70)\n    random.seed(0)\n\n    def evaluator(a: int, b: int) -> float:\n        total = 0.0\n        for x in range(-5, 6):\n            target = 3 * x + 7\n            guess = a * x + b\n            total += (target - guess) ** 2\n        return total\n\n    def random_mutation(a: int, b: int) -> tuple[int, int]:\n        da = random.choice((-2, -1, 0, 1, 2))\n        db = random.choice((-2, -1, 0, 1, 2))\n        return a + da, b + db\n\n    population: list[tuple[int, int, float]] = [\n        (random.randint(-10, 10), random.randint(-10, 10), 0.0)\n        for _ in range(6)\n    ]\n    population = [(a, b, evaluator(a, b)) for (a, b, _) in population]\n    population.sort(key=lambda x: x[2])\n\n    generations = 12\n    print(f\"\\nseed population (a*x + b, target 3x + 7)\")\n    for a, b, fit in population[:3]:\n        print(f\"  a={a:3d}  b={b:3d}  fitness={fit:.2f}\")\n\n    for gen in range(1, generations + 1):\n        survivors = population[:3]\n        children: list[tuple[int, int, float]] = []\n        for a, b, _ in survivors:\n            for _ in range(3):\n                na, nb = random_mutation(a, b)\n                children.append((na, nb, evaluator(na, nb)))\n        population = sorted(survivors + children, key=lambda x: x[2])[:6]\n        if gen % 3 == 0:\n            best = population[0]\n            print(f\"  gen {gen:02d}: best a={best[0]:3d} b={best[1]:3d} \"\n                  f\"fitness={best[2]:.2f}\")\n\n    best = population[0]\n    print(f\"\\nconverged on: a={best[0]}  b={best[1]}  fitness={best[2]:.2f}\")\n    print(f\"expected:     a=3    b=7    fitness=0.00\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"HTN + EVOLUTIONARY SEARCH — Phase 14, Lesson 11\")\n    print(\"=\" * 70)\n    htn_demo()\n    evolutionary_demo()\n    print()\n    print(\"HTN: LLM amplifies method library; symbolic layer owns correctness.\")\n    print(\"AlphaEvolve: ensemble mutates, deterministic evaluator selects.\")\n    print(\"both require machine-checkable structure. reach for ReAct first.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does an HTN add over a free-form LLM plan?",
+      "options": [
+        "Better embeddings",
+        "Cheaper inference",
+        "Provable correctness when operator preconditions and effects are enforced",
+        "Shorter prompts"
+      ],
+      "answer": 2,
+      "explanation": "HTN's symbolic operators with preconditions and effects guarantee soundness by construction."
+    },
+    {
+      "q": "Which problem class is AlphaEvolve built for?",
+      "options": [
+        "Multi-turn chat memory",
+        "Free-form prose generation",
+        "Vector search ranking",
+        "Optimizations with a machine-checkable, deterministic fitness function"
+      ],
+      "answer": 3,
+      "explanation": "Evolutionary search needs a deterministic evaluator; AlphaEvolve targets domains where one exists."
+    },
+    {
+      "q": "How does ChatHTN preserve plan soundness while using an LLM?",
+      "options": [
+        "It uses a vector database",
+        "LLM suggestions only enter as candidate decompositions, validated against the operator schema; the symbolic layer owns correctness",
+        "It does not; soundness is best-effort",
+        "It fine-tunes the LLM on HTN traces"
+      ],
+      "answer": 1,
+      "explanation": "The LLM expands the method library but cannot bypass operator preconditions and effects."
+    },
+    {
+      "q": "Which AlphaEvolve result does the lesson cite?",
+      "options": [
+        "First improvement over Strassen for 4x4 complex matrix multiplication in 56 years",
+        "First proof of P=NP",
+        "Beating GPT-4 on HumanEval",
+        "10x speedup of inference on Gemini"
+      ],
+      "answer": 0,
+      "explanation": "AlphaEvolve found 48 scalar multiplications for 4x4 complex matmul, the first improvement on Strassen in 56 years."
+    },
+    {
+      "q": "Which element of an HTN is a primitive directly-executable action with preconditions and effects?",
+      "options": [
+        "State",
+        "Task",
+        "Method",
+        "Operator"
+      ],
+      "answer": 3,
+      "explanation": "Operators are the primitives; methods decompose compound tasks; state is a set of facts."
+    },
+    {
+      "q": "What is the lesson's warning about AlphaEvolve without a real evaluator?",
+      "options": [
+        "It is slow",
+        "It cannot run on GPUs",
+        "Asking an LLM whether the code is better is not a fitness function; the evaluator must be deterministic and fast",
+        "It violates Apache 2.0"
+      ],
+      "answer": 2,
+      "explanation": "Without a deterministic evaluator the search has no signal to converge on."
+    },
+    {
+      "q": "When should you reach for ReAct or ReWOO instead of HTN or AlphaEvolve?",
+      "options": [
+        "Never; HTN is strictly better",
+        "When you do not need formal soundness or a machine-checkable fitness; most agent tasks land here",
+        "When you have a GPU cluster available",
+        "When latency is below 100 ms"
+      ],
+      "answer": 1,
+      "explanation": "The lesson explicitly warns against over-engineering: most tasks do not need formal planning or evolutionary search."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/11-planning-htn-and-evolutionary"
+  }
+}

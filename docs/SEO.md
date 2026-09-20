@@ -66,22 +66,24 @@ Do this once, in order, after the `sikhiuni.com` rebrand ships:
 ## IndexNow
 
 The site ships an IndexNow key file at `web/public/f59b13b5e863a021f1afc9be79af4a0a.txt` (see that file for the actual
-key — a 32-character hex filename whose contents are the same key). After a deploy that
-changes or adds URLs, ping the IndexNow endpoint to get near-instant re-crawling from Bing,
-DuckDuckGo (via Bing), Seznam, and Naver — no signup, free:
+key — a 32-character hex filename whose contents are the same key). `scripts/indexnow_ping.py`
+pings the IndexNow endpoint automatically on every push to `master`, via the "Notify search
+engines" step in `.github/workflows/deploy.yml` — no manual step needed. It submits a fixed
+set of core pages (home, catalog, programs, about, professors, santhiya, search) plus any
+course whose `courses.json` entry differs from the previous commit (new or edited courses),
+for near-instant re-crawling from Bing, DuckDuckGo (via Bing), Seznam, and Naver. Best-effort:
+a failed submission (network blip, API downtime) logs a warning and never fails the deploy.
+
+To ping manually (e.g. after a change that isn't a `courses.json` diff, or to test):
+
+```
+python3 scripts/indexnow_ping.py
+```
+
+Or by hand, for a single URL:
 
 ```
 GET https://api.indexnow.org/indexnow?url=https://sikhiuni.com/&key=f59b13b5e863a021f1afc9be79af4a0a
-```
-
-Or POST a batch for multiple URLs:
-
-```
-POST https://api.indexnow.org/indexnow
-Content-Type: application/json
-
-{"host": "sikhiuni.com", "key": "f59b13b5e863a021f1afc9be79af4a0a", "keyLocation": "https://sikhiuni.com/f59b13b5e863a021f1afc9be79af4a0a.txt",
- "urlList": ["https://sikhiuni.com/course/...", "https://sikhiuni.com/program/..."]}
 ```
 
 This is optional and additive — it does not replace the sitemap, it just speeds up discovery

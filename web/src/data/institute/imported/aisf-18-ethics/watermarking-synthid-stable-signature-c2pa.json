@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::watermarking-synthid-stable-signature-c2pa",
+  "num": 23,
+  "slug": "watermarking-synthid-stable-signature-c2pa",
+  "title": "Watermarking — SynthID, Stable Signature, C2PA",
+  "tagline": "Three technologies structure 2026 AI-generated-content provenance. SynthID (Google DeepMind) — image watermarking launched August 2023, text+video May 2024 (Gemini + Veo), text open-sourced October 2024 via Responsible GenAI Toolkit, unified multi-media detector November 2025 alongside Gemini 3 Pro. Text watermarking adjusts next-token sampling probabilities imperceptibly; image/video watermarks survive compression, cropping, filters, frame-rate changes. Stable Signature (Fernandez et al., ICCV 2023, arXiv:2303.15435) — fine-tunes the latent diffusion decoder so every output contains a fixed message; cropped (10% of content) generated images detected >90% at FPR<1e-6. Follow-up \"Stable Signature is Unstable\" (arXiv:2405.07145, May 2024) — fine-tuning removes the watermark while preserving quality. C2PA — cryptographically signed, tamper-evident metadata standard (C2PA 2.2 Explainer 2025). Watermarking and C2PA are complementary: metadata can be stripped but carries richer provenance; watermarks persist through transcoding but carry less information.",
+  "type": "Build",
+  "languages": "Python (stdlib, token-watermark embed + detect)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Describe token-level watermarking (SynthID-text style) and the mechanism by which it is detectable.",
+    "Describe Stable Signature and the 2024 removal attack that broke it.",
+    "State C2PA's role and why it is complementary to watermarking.",
+    "Describe the key limitations: model-specific signal, robustness under paraphrase, and meaning-preserving attacks (arXiv:2508.20228)."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>2023-2024 saw deepfakes and AI-generated content enter political and consumer contexts at scale. Watermarking is the proposed technical provenance signal: mark generations at creation time, detect them later. 2025 evidence: no watermark is unconditionally robust, but layered with C2PA metadata the combination provides a usable provenance story.</p>\n<h2>The Concept</h2>\n<h3>Text watermarking (SynthID-text style)</h3>\n<p>The Kirchenbauer et al. 2023 mechanism, productionized by Google:</p>\n<ol>\n<li>At each decoding step, hash the previous K tokens to produce a pseudorandom partition of the vocabulary into &quot;green&quot; and &quot;red&quot; sets.</li>\n<li>Bias sampling toward the green set by adding δ to green logits.</li>\n<li>The generation contains more green tokens than chance would produce.</li>\n</ol>\n<p>Detection: rehash each prefix, count green tokens in the generation, compute a z-score. The z-score is &gt;0 for watermarked text, ~0 for human text.</p>\n<p>Properties:</p>\n<ul>\n<li>Imperceptible to readers (δ is small enough that quality loss is minor).</li>\n<li>Detectable with access to the vocabulary partition function.</li>\n<li>Not robust to paraphrase — rewriting the text destroys the signal.</li>\n</ul>\n<p>SynthID-text is open-sourced October 2024 via Google&#39;s Responsible GenAI Toolkit.</p>\n<h3>Stable Signature (image)</h3>\n<p>Fernandez et al. ICCV 2023. Fine-tune the latent diffusion decoder so every generated image contains a fixed binary message embedded in the latent representation. Detection is decoded from the latent with a neural decoder. Cropped (to 10% of content) images detected &gt;90% at FPR&lt;1e-6.</p>\n<p>May 2024 &quot;Stable Signature is Unstable&quot; (arXiv:2405.07145): fine-tuning the decoder removes the watermark while preserving image quality. Adversarial post-generation fine-tuning is cheap; the watermark&#39;s adversarial robustness is limited.</p>\n<h3>SynthID unified detector (November 2025)</h3>\n<p>Alongside Gemini 3 Pro: a multi-media detector that reads SynthID signals from text, image, audio, and video in one API. Unifies the Google provenance stack.</p>\n<h3>C2PA</h3>\n<p>Coalition for Content Provenance and Authenticity. Cryptographically signed tamper-evident metadata standard. C2PA 2.2 Explainer (2025). A C2PA manifest records provenance claims (who created, when, what transformations) signed by the creator&#39;s key.</p>\n<p>Complementary to watermarking:</p>\n<ul>\n<li>Metadata can be stripped; watermarks cannot (easily).</li>\n<li>Metadata is rich (full provenance chain); watermarks carry bits.</li>\n<li>C2PA depends on platform adoption; watermarks embed automatically.</li>\n</ul>\n<p>Google integrates both in Search, Ads, and &quot;About this image.&quot;</p>\n<h3>Limitations</h3>\n<ul>\n<li><strong>Model-specific.</strong> SynthID watermarks generations from SynthID-enabled models. A generation from a model without SynthID is not watermarked, so &quot;no SynthID signal&quot; is not proof of authenticity.</li>\n<li><strong>Paraphrase.</strong> Text watermarks do not survive meaning-preserving paraphrase.</li>\n<li><strong>Transformation attacks.</strong> arXiv:2508.20228 (2025) shows meaning-preserving attacks that destroy both text watermarks and many image watermarks.</li>\n<li><strong>Fine-tune removal.</strong> Per &quot;Stable Signature is Unstable,&quot; post-generation fine-tuning removes embedded watermarks.</li>\n</ul>\n<h3>EU AI Act Article 50</h3>\n<p>Transparency Code for AI-generated content labeling (first draft December 2025, second draft March 2026, expected final June 2026 per the <a href=\"https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content\" target=\"_blank\" rel=\"noopener\">European Commission status page</a>). The Code remains in draft as of April 2026 and the timeline is subject to change. The regulatory layer that requires the technical layer. Deepfakes must be labeled.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lessons 22-23 are about what the model emits (private data, provenance signal). Lesson 27 covers training-data governance. Lesson 24 is the regulatory framework that requires these technical measures.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>an-watermark-greenlist</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> builds a toy text watermark. Tokens are integers 0..N-1; watermarked sampling biases toward the hash-defined green set. A detector computes the green-token z-score. You can observe detection at 1000-token generations, watch paraphrase destroy the signal, and measure the false-positive rate on human text.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-provenance-audit.md</code>. Given a content deployment with a provenance claim, it audits: the watermark mechanism (if any), the C2PA signing chain (if any), the adversarial robustness of each, and the per-modality coverage.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Run <code>code/main.py</code>. Report z-scores for watermarked 1000-token generation vs human-authored text. Identify the false-positive rate at the 95% confidence threshold.</p>\n</li>\n<li><p>Implement a paraphrase attack that replaces 30% of tokens with synonyms. Re-measure the z-score.</p>\n</li>\n<li><p>Read Kirchenbauer et al. 2023 Section 6 on robustness. Why do text watermarks fail under paraphrase but image watermarks survive cropping?</p>\n</li>\n<li><p>Design a deployment that uses SynthID-text + C2PA metadata. Describe the provenance chain a consumer sees. Identify one failure mode of each component.</p>\n</li>\n<li><p>The 2024 &quot;Stable Signature is Unstable&quot; result shows fine-tuning removes the image watermark. Design a deployment control that limits this attack — for example, require signed releases of fine-tuned checkpoints.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>SynthID</td>\n<td>&quot;Google&#39;s watermark&quot;</td>\n<td>Cross-modal provenance signal; text, image, audio, video</td>\n</tr>\n<tr>\n<td>Token watermark</td>\n<td>&quot;Kirchenbauer-style&quot;</td>\n<td>Biased-sampling text watermark detectable via green-token z-score</td>\n</tr>\n<tr>\n<td>Stable Signature</td>\n<td>&quot;image watermark&quot;</td>\n<td>Fine-tuned-decoder watermark; ICCV 2023</td>\n</tr>\n<tr>\n<td>C2PA</td>\n<td>&quot;the metadata standard&quot;</td>\n<td>Cryptographically signed tamper-evident provenance metadata</td>\n</tr>\n<tr>\n<td>Paraphrase robustness</td>\n<td>&quot;does rewording break it&quot;</td>\n<td>Text watermark property; currently limited</td>\n</tr>\n<tr>\n<td>Fine-tune removal</td>\n<td>&quot;adversarial unwatermark&quot;</td>\n<td>Attack that removes image watermark via decoder fine-tuning</td>\n</tr>\n<tr>\n<td>Cross-modal detector</td>\n<td>&quot;unified SynthID&quot;</td>\n<td>November 2025 unified API across modalities</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2301.10226\" target=\"_blank\" rel=\"noopener\">Kirchenbauer et al. — A Watermark for Large Language Models (ICML 2023, arXiv:2301.10226)</a> — the token-watermark mechanism</li>\n<li><a href=\"https://arxiv.org/abs/2303.15435\" target=\"_blank\" rel=\"noopener\">Fernandez et al. — Stable Signature (ICCV 2023, arXiv:2303.15435)</a> — image watermark paper</li>\n<li><a href=\"https://arxiv.org/abs/2405.07145\" target=\"_blank\" rel=\"noopener\">&quot;Stable Signature is Unstable&quot; (arXiv:2405.07145)</a> — the removal attack</li>\n<li><a href=\"https://deepmind.google/models/synthid/\" target=\"_blank\" rel=\"noopener\">Google DeepMind — SynthID</a> — the cross-modal watermark</li>\n<li><a href=\"https://c2pa.org/specifications/specifications/2.2/explainer/Explainer.html\" target=\"_blank\" rel=\"noopener\">C2PA 2.2 Explainer (2025)</a> — metadata standard</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy token-watermark (SynthID-text-style) — stdlib Python.\n\nVocabulary: integers 0..N-1. Each decoding step hashes the previous k tokens\nmodulo N to partition the vocabulary into green (even hash) and red (odd\nhash). Sampling is biased toward green. Detector computes green-token\nz-score; reported at 1000 tokens.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport hashlib\nimport math\nimport random\n\n\nrandom.seed(61)\n\n\nVOCAB = 200\nK = 4  # hash context length\n\n\ndef green_set(prev_tokens: list[int]) -> set[int]:\n    \"\"\"Pseudorandom partition of the vocabulary into green (half of it).\"\"\"\n    seed = \",\".join(str(t) for t in prev_tokens[-K:])\n    digest = hashlib.sha256(seed.encode()).hexdigest()\n    h = int(digest, 16)\n    # partition: token is green iff (token + h) mod 2 == 0\n    return {t for t in range(VOCAB) if (t + h) % 2 == 0}\n\n\ndef unwatermarked_sample(n: int, seed_prefix: list[int]) -> list[int]:\n    out = list(seed_prefix)\n    for _ in range(n):\n        out.append(random.randrange(VOCAB))\n    return out\n\n\ndef watermarked_sample(n: int, seed_prefix: list[int], bias: float = 0.9) -> list[int]:\n    \"\"\"Bias = probability of sampling from the green set.\"\"\"\n    out = list(seed_prefix)\n    for _ in range(n):\n        greens = green_set(out)\n        use_green = random.random() < bias\n        pool = list(greens) if use_green else list(set(range(VOCAB)) - greens)\n        out.append(random.choice(pool))\n    return out\n\n\ndef detect(tokens: list[int]) -> float:\n    \"\"\"Returns z-score: (green count - expected) / sqrt(expected * p(1-p)).\"\"\"\n    if len(tokens) <= K:\n        return 0.0\n    green_count = 0\n    for i in range(K, len(tokens)):\n        greens = green_set(tokens[:i])\n        if tokens[i] in greens:\n            green_count += 1\n    n = len(tokens) - K\n    expected = n * 0.5\n    std = math.sqrt(n * 0.5 * 0.5)\n    return (green_count - expected) / std\n\n\ndef paraphrase(tokens: list[int], ratio: float = 0.3) -> list[int]:\n    \"\"\"Replace ratio of tokens at random with random tokens.\"\"\"\n    out = list(tokens)\n    for i in range(len(out)):\n        if random.random() < ratio:\n            out[i] = random.randrange(VOCAB)\n    return out\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"TOY TOKEN WATERMARK (Phase 18, Lesson 23)\")\n    print(\"=\" * 70)\n\n    seed = [random.randrange(VOCAB) for _ in range(K)]\n\n    watermarked = watermarked_sample(1000, seed)\n    plain = unwatermarked_sample(1000, seed)\n\n    print(f\"\\nwatermarked z-score       : {detect(watermarked):.2f}\")\n    print(f\"unwatermarked z-score     : {detect(plain):.2f}\")\n    print(\"(z >= 4 is very strong evidence of watermark.)\")\n\n    # Paraphrase attack\n    para = paraphrase(watermarked, ratio=0.3)\n    print(f\"after 30% paraphrase      : {detect(para):.2f}\")\n    para2 = paraphrase(watermarked, ratio=0.6)\n    print(f\"after 60% paraphrase      : {detect(para2):.2f}\")\n\n    # FPR on human-text\n    fprs = [detect(unwatermarked_sample(1000, seed)) for _ in range(100)]\n    fpr_above_4 = sum(1 for z in fprs if z >= 4) / len(fprs)\n    print(f\"\\nFPR (z >= 4) over 100 human draws : {fpr_above_4:.3f}\")\n\n    print(\"\\n\" + \"=\" * 70)\n    print(\"TAKEAWAY: the text watermark is detectable at >=1000 tokens with\")\n    print(\"strong z-scores and <1% FPR at z=4. paraphrase of 30% weakens the\")\n    print(\"signal; 60% destroys it. text watermarks do not survive paraphrase.\")\n    print(\"C2PA metadata + watermark is the deployment combination: watermark\")\n    print(\"survives compression, metadata survives (as long as it is not stripped).\")\n    print(\"=\" * 70)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "How does Kirchenbauer-style (SynthID-text) token watermarking embed a signal?",
+      "options": [
+        "By encrypting the output with a public key",
+        "At each decoding step, hash the previous K tokens to partition the vocabulary into green/red sets and bias sampling toward green; detection counts green tokens via a z-score",
+        "By inserting a hidden HTML comment",
+        "By modifying the prompt template"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What is the primary limitation of text watermarks against paraphrase?",
+      "options": [
+        "Paraphrase only affects image watermarks",
+        "They actually survive paraphrase",
+        "Paraphrase strengthens the watermark",
+        "Rewording or paraphrasing the text destroys the green-token statistical signal"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What does Stable Signature (Fernandez et al., ICCV 2023) do?",
+      "options": [
+        "Adds a visible watermark in the corner of the image",
+        "Signs the metadata with a private key",
+        "Uses C2PA to sign the image at upload",
+        "Fine-tunes the latent diffusion decoder so every generated image carries a fixed embedded message detectable from the latent"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What does the May 2024 'Stable Signature is Unstable' result demonstrate?",
+      "options": [
+        "The watermark is provably unforgeable",
+        "The watermark requires C2PA to function",
+        "The watermark fails only on JPEG compression",
+        "Post-generation fine-tuning of the decoder can remove the watermark while preserving image quality, undermining adversarial robustness"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "How are C2PA metadata and watermarking complementary?",
+      "options": [
+        "C2PA replaces watermarks entirely",
+        "Metadata can be stripped but carries rich provenance chain; watermarks persist through transcoding but carry few bits; layered, they provide a usable provenance story",
+        "Watermarks are signed by the same keys as C2PA",
+        "They are interchangeable"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Why is 'no SynthID signal' NOT proof of authenticity (human origin)?",
+      "options": [
+        "Because SynthID is closed-source",
+        "Because SynthID always produces false positives on human text",
+        "Because SynthID only watermarks generations from SynthID-enabled models; content from any model without SynthID is unwatermarked by default",
+        "Because SynthID only works on Gemini outputs"
+      ],
+      "answer": 2,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/23-watermarking-synthid-stable-signature-c2pa"
+  }
+}

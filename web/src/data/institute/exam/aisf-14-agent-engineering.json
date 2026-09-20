@@ -1,0 +1,2652 @@
+{
+  "track": "aisf-14-agent-engineering",
+  "count": 294,
+  "questions": [
+    {
+      "q": "Why does an LLM on its own behave like an autocomplete rather than an agent?",
+      "options": [
+        "It cannot read files, run queries, or verify claims against the outside world",
+        "Its context window is too small to hold a question",
+        "It only emits one token at a time",
+        "It refuses to answer without a system prompt"
+      ]
+    },
+    {
+      "q": "Which three labels appear in the canonical ReAct trace from Yao et al. 2022?",
+      "options": [
+        "Prompt, Response, Reward",
+        "Plan, Execute, Reflect",
+        "Thought, Action, Observation",
+        "System, User, Assistant"
+      ]
+    },
+    {
+      "q": "Which item is NOT one of the five ingredients the lesson lists for an agent loop?",
+      "options": [
+        "Tool registry",
+        "Message buffer",
+        "Observation formatter",
+        "Gradient optimizer"
+      ]
+    },
+    {
+      "q": "What is the role of a turn budget in the loop?",
+      "options": [
+        "It controls how many tools the registry exposes",
+        "It rate-limits the LLM provider",
+        "It hard-caps loop iterations to prevent runaway agents",
+        "It caps the number of tokens per response"
+      ]
+    },
+    {
+      "q": "What changed in the 2025-2026 native-reasoning shift compared to prompt-based Thought tokens?",
+      "options": [
+        "Thought tokens are now emitted on a separate reasoning channel passed through turns",
+        "Models stopped using tool calls and rely on chain-of-thought only",
+        "Observations are removed from the prompt entirely",
+        "The loop control flow was replaced with a DAG"
+      ]
+    },
+    {
+      "q": "Why does the lesson say tool outputs are untrusted input?",
+      "options": [
+        "Tool runtimes are slow and unreliable",
+        "Retrieved content can carry hidden instructions like delete-the-repo and only direct user input counts as permission",
+        "Tool results are always larger than the model's context window",
+        "The provider strips tool output bytes by default"
+      ]
+    },
+    {
+      "q": "Why does the lesson claim every 2026 framework still runs ReAct under the hood?",
+      "options": [
+        "Because LangGraph forces all other frameworks to inherit from it",
+        "Because providers require the ReAct keywords in the prompt",
+        "Because Yao et al. own a patent on the loop",
+        "Because the observe-think-act control flow is invariant; frameworks differ in checkpointing, actors, role templates, and tracing around it"
+      ]
+    },
+    {
+      "q": "Why does ReAct's prompt grow quadratically with depth?",
+      "options": [
+        "Each step carries the full prior context including every previous thought and observation",
+        "The model re-tokenizes itself on every step",
+        "Tool schemas are duplicated per call",
+        "The provider charges per byte rather than per token"
+      ]
+    },
+    {
+      "q": "What is the three-role split that defines ReWOO?",
+      "options": [
+        "Planner, Workers, Solver",
+        "Reader, Writer, Reviewer",
+        "Generator, Critic, Optimizer",
+        "Actor, Evaluator, Reflector"
+      ]
+    },
+    {
+      "q": "What headline numbers does the paper report for ReWOO vs ReAct on HotpotQA?",
+      "options": [
+        "10x fewer tokens and -2 accuracy",
+        "~5x fewer tokens and +4 absolute accuracy",
+        "Same tokens and +1 accuracy",
+        "~2x more tokens and +10 accuracy"
+      ]
+    },
+    {
+      "q": "What does a placeholder like #E1 inside a ReWOO plan node mean?",
+      "options": [
+        "A reference substituted at dispatch time with the output of an earlier worker node",
+        "A planner version identifier",
+        "An error code returned by worker 1",
+        "A retry counter for evidence fetching"
+      ]
+    },
+    {
+      "q": "Why does ReWOO localize failures better than ReAct?",
+      "options": [
+        "The Planner re-emits a fresh DAG after every error",
+        "Workers crash the run on any error",
+        "ReWOO retries every failed call up to ten times",
+        "An error in a worker becomes a string the Solver sees alongside the original plan, so degradation is per-node not per-step"
+      ]
+    },
+    {
+      "q": "Which task shape best fits Plan-and-Act over plain ReWOO?",
+      "options": [
+        "A pure arithmetic question",
+        "A 40-step web or mobile navigation trajectory",
+        "A two-step factoid lookup",
+        "A single-turn classification"
+      ]
+    },
+    {
+      "q": "What does ReWOO's planner distillation result imply for production agents?",
+      "options": [
+        "Frontier models must be used at every step",
+        "A small planner (around 7B) can match a large teacher because the planner never sees observations",
+        "Planning quality drops below 7B parameters",
+        "Distillation requires gradient-based RL data"
+      ]
+    },
+    {
+      "q": "What does Reflexion replace in standard reinforcement learning?",
+      "options": [
+        "Episodic memory with parametric memory",
+        "Gradient updates with natural-language reflections stored between trials",
+        "Policy networks with random search",
+        "Reward shaping with a constant reward"
+      ]
+    },
+    {
+      "q": "What three components define a Reflexion system?",
+      "options": [
+        "Planner, Worker, Solver",
+        "Selector, Expander, Backpropagator",
+        "Generator, Critic, Optimizer",
+        "Actor, Evaluator, Self-Reflector"
+      ]
+    },
+    {
+      "q": "Which evaluator type uses an external binary signal like a unit test or a known correct answer?",
+      "options": [
+        "Heuristic",
+        "Scalar",
+        "Self-evaluated",
+        "Vote-based"
+      ]
+    },
+    {
+      "q": "Why is self-evaluation a weaker signal than scalar feedback?",
+      "options": [
+        "The model judging itself has no external grounding so it can rubber-stamp its own answer",
+        "It is slower to compute",
+        "It always requires a larger model",
+        "It cannot run on tools"
+      ]
+    },
+    {
+      "q": "Which case does the lesson list as a place where Reflexion does NOT help?",
+      "options": [
+        "An external transient failure like the network being down",
+        "HotpotQA multi-hop questions",
+        "Code generation where tests can score",
+        "ALFWorld navigation tasks"
+      ]
+    },
+    {
+      "q": "What is memory rot in the Reflexion pattern?",
+      "options": [
+        "Losing reflections when the process restarts",
+        "The reflection prompt exceeds the context window",
+        "Reflections get encrypted by the provider",
+        "Episodic buffer fills with obsolete or wrong reflections and slows or biases future trials"
+      ]
+    },
+    {
+      "q": "Which production pattern is the lesson's clearest match for Reflexion?",
+      "options": [
+        "Claude Code's CLAUDE.md learnings prepended to future sessions",
+        "Anthropic's prompt caching",
+        "Cursor's apply-edits flow",
+        "OpenAI's batch API"
+      ]
+    },
+    {
+      "q": "Why does chain-of-thought struggle on Game of 24?",
+      "options": [
+        "A linear walk cannot backtrack when an early step is wrong, so later steps compound the error",
+        "CoT requires a calculator tool that GPT-4 lacks",
+        "The model cannot multiply integers",
+        "The prompt is too short"
+      ]
+    },
+    {
+      "q": "What is a node in a Tree of Thoughts search?",
+      "options": [
+        "A tool registered with the runtime",
+        "A weight update during fine-tuning",
+        "A token produced by the model",
+        "A coherent intermediate step or thought, with K possible child expansions"
+      ]
+    },
+    {
+      "q": "Which of these three is NOT one of LATS's roles for the LLM?",
+      "options": [
+        "Self-reflector that writes reflections on failure",
+        "Optimizer that updates model weights between rollouts",
+        "Value function that scores partial trajectories",
+        "Policy that proposes next actions"
+      ]
+    },
+    {
+      "q": "Name the four MCTS phases the lesson lists.",
+      "options": [
+        "Sample, Score, Sort, Submit",
+        "Plan, Execute, Reflect, Stop",
+        "Select, Expand, Simulate, Backpropagate",
+        "Search, Synthesize, Synthesize-Again, Stop"
+      ]
+    },
+    {
+      "q": "In UCT, what is the role of the exploration constant c?",
+      "options": [
+        "It scales the value estimate Q",
+        "It sets the maximum tree depth",
+        "It controls the number of rollouts",
+        "It weights the exploration term sqrt(ln N / n) against the exploitation term Q"
+      ]
+    },
+    {
+      "q": "When is search actively harmful compared to a single trajectory?",
+      "options": [
+        "Whenever tokens are cheap",
+        "When the task is code generation",
+        "When the task involves multiple correct answers",
+        "When the evaluator is noisy and there is a single right answer, so the search converges on a good-scoring wrong answer"
+      ]
+    },
+    {
+      "q": "Roughly how much more token usage should you budget for ToT on Game of 24 compared with CoT?",
+      "options": [
+        "100x to 1000x",
+        "Less than CoT because of pruning",
+        "About 2x",
+        "About 10x"
+      ]
+    },
+    {
+      "q": "What three prompts make up a Self-Refine loop?",
+      "options": [
+        "Plan, execute, solve",
+        "Generate, feedback, refine",
+        "Actor, evaluator, reflector",
+        "Search, score, synthesize"
+      ]
+    },
+    {
+      "q": "Why does Self-Refine require history on the refine step?",
+      "options": [
+        "History is needed for billing",
+        "Providers cache only on history",
+        "It speeds up token generation",
+        "Without prior outputs and critiques the refine step repeats earlier mistakes; the ablation shows quality drops sharply"
+      ]
+    },
+    {
+      "q": "What does CRITIC change relative to Self-Refine?",
+      "options": [
+        "It uses a larger model for generation",
+        "It runs the feedback step in parallel",
+        "It replaces the self-feedback step with an external tool-grounded verifier",
+        "It removes the refine step"
+      ]
+    },
+    {
+      "q": "Which Anthropic workflow pattern matches Self-Refine and CRITIC in Claude-friendly language?",
+      "options": [
+        "Parallel sampling",
+        "Prompt chain",
+        "Evaluator-Optimizer",
+        "Router"
+      ]
+    },
+    {
+      "q": "What is a rubber-stamp loop and how does the lesson recommend avoiding it?",
+      "options": [
+        "A guardrail that times out; widen the timeout",
+        "A retry that always fails; raise the budget",
+        "Same model and same prompt critiquing its own output and approving it; use structurally different prompts or a separate smaller critic",
+        "A test that always passes; remove the test"
+      ]
+    },
+    {
+      "q": "Which SDK feature in OpenAI Agents SDK is CRITIC-shaped?",
+      "options": [
+        "Sessions",
+        "Tracing",
+        "Handoffs",
+        "Output guardrails (which can call tools)"
+      ]
+    },
+    {
+      "q": "What stop condition does the lesson recommend for 2026 evaluator-optimizer loops?",
+      "options": [
+        "Stop only when the model says 'fine'",
+        "Never stop; let the agent self-improve indefinitely",
+        "Stop only when the verifier passes",
+        "Combine: verifier passes OR (model says fine AND iterations >= 2) OR iterations >= max_iterations"
+      ]
+    },
+    {
+      "q": "What signal does Toolformer use to decide whether to keep a candidate tool annotation?",
+      "options": [
+        "Whether the tool returns within 100 ms",
+        "Human label agreement",
+        "Whether including the tool result reduces next-token loss on surrounding text",
+        "Whether the tool emits valid JSON"
+      ]
+    },
+    {
+      "q": "What is the BFCL V4 split that the lesson reports?",
+      "options": [
+        "100% single-turn",
+        "50% live, 50% synthetic",
+        "33% agentic, 33% planning, 33% reflection",
+        "40% agentic, 30% multi-turn, 10% live, 10% non-live, 10% hallucination"
+      ]
+    },
+    {
+      "q": "Why is a tool's description load-bearing?",
+      "options": [
+        "It is what the user sees in the UI",
+        "The model reads it to choose the right tool; bad descriptions are the top cause of wrong-tool failures",
+        "It is required by JSON Schema",
+        "It controls billing buckets"
+      ]
+    },
+    {
+      "q": "What role does tool_use_id play in parallel tool calling?",
+      "options": [
+        "It correlates each tool result with its originating call so results returning out of order route correctly",
+        "It authorizes the call against an API key",
+        "It compresses the JSON payload",
+        "It enables caching"
+      ]
+    },
+    {
+      "q": "Which class of failure does V3 state-based evaluation try to catch?",
+      "options": [
+        "Token leakage",
+        "Schema versioning drift",
+        "Slow tool execution",
+        "AST-matching tool calls that look right but leave the API in the wrong state"
+      ]
+    },
+    {
+      "q": "Which 2026 problem does the lesson NOT list among the open ones for function calling?",
+      "options": [
+        "Long-horizon tool chaining",
+        "Token-level decoding speed",
+        "Dynamic decision-making across many tools",
+        "Memory across turns"
+      ]
+    },
+    {
+      "q": "Why is a generic run_shell(cmd) tool called a red flag in this lesson?",
+      "options": [
+        "It cannot be called in parallel",
+        "It widens the sandbox boundary; specific tools like git_status() bound read/write surface and risk",
+        "It is slow",
+        "Providers reject it"
+      ]
+    },
+    {
+      "q": "What OS analogy does MemGPT build on?",
+      "options": [
+        "Virtual memory: main context as RAM, external store as disk, memory tools as page in and out",
+        "Processes and threads",
+        "Network sockets",
+        "File descriptors"
+      ]
+    },
+    {
+      "q": "Why do bigger context windows not fully solve memory?",
+      "options": [
+        "The model refuses long input",
+        "Long context costs nothing",
+        "Overflow, dilution of attention, and lack of cross-session persistence still bite even with 128k windows",
+        "Providers cap them at 4k tokens"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of MemGPT's canonical memory tools?",
+      "options": [
+        "archival_memory_search",
+        "core_memory_append",
+        "conversation_search",
+        "gradient_memory_update"
+      ]
+    },
+    {
+      "q": "What does the interrupt pattern do in MemGPT?",
+      "options": [
+        "It halts the entire agent run on any error",
+        "Mid-conversation the agent invokes a memory tool, the runtime executes it, and the result splices into the next turn",
+        "It bypasses the context window entirely",
+        "It triggers a model retrain"
+      ]
+    },
+    {
+      "q": "Which production system did MemGPT evolve into in 2024?",
+      "options": [
+        "Pinecone",
+        "Mem0",
+        "Zep",
+        "Letta"
+      ]
+    },
+    {
+      "q": "What is memory poisoning in this context?",
+      "options": [
+        "Reading from disk when RAM is available",
+        "Embedding model version drift",
+        "A bug that corrupts vector indices",
+        "An attacker's content gets stored as a memory note and is re-ingested on future recalls"
+      ]
+    },
+    {
+      "q": "Why does the lesson say production memory systems are MemGPT variants?",
+      "options": [
+        "Letta, Mem0, Assistants threads, and Claude Agent SDK all run the two-tier (or more) paged-memory pattern; differences are operational shape",
+        "They share weights",
+        "They use the same vector DB",
+        "MemGPT owns the trademark"
+      ]
+    },
+    {
+      "q": "What are Letta's three memory tiers?",
+      "options": [
+        "RAM, swap, disk",
+        "Cache, KV, archival",
+        "Core, recall, archival",
+        "Working, episodic, semantic"
+      ]
+    },
+    {
+      "q": "Which production problem does sleep-time compute target?",
+      "options": [
+        "Lower embedding cost",
+        "Faster JSON parsing",
+        "Higher accuracy on math problems",
+        "Tail latency from doing memory consolidation on the critical path"
+      ]
+    },
+    {
+      "q": "Which property is NOT a memory block field in Letta?",
+      "options": [
+        "limit",
+        "embedding_model_version",
+        "label",
+        "value"
+      ]
+    },
+    {
+      "q": "Why can the sleep-time agent run a stronger model than the primary?",
+      "options": [
+        "Memory ops cost half tokens",
+        "It receives a private API key",
+        "It is off the critical path, so it is not latency-constrained",
+        "It is exempt from rate limits"
+      ]
+    },
+    {
+      "q": "What pattern do the Human and Persona blocks generalize to?",
+      "options": [
+        "OS processes",
+        "Arbitrary user-defined typed editable blocks (Task, Project, Safety, ...)",
+        "JSON-RPC channels",
+        "Vector embeddings"
+      ]
+    },
+    {
+      "q": "What is silent drift in this pattern?",
+      "options": [
+        "A primary agent never seeing that the sleep-time agent rewrote a block underneath it; fix with versioning and visible diffs",
+        "Embedding model upgrades",
+        "Slow disk writes",
+        "Rate-limit jitter"
+      ]
+    },
+    {
+      "q": "What replaced inline `Thought:` tokens and the send_message/heartbeat pattern in Letta V1?",
+      "options": [
+        "Native reasoning emitted on a separate channel and passed through turns",
+        "A second LLM dedicated to thoughts",
+        "A bigger system prompt",
+        "Manual user-typed thoughts"
+      ]
+    },
+    {
+      "q": "Which query class does a KV store handle best?",
+      "options": [
+        "Reachability across customers sharing a billing entity",
+        "Direct fact lookup keyed by (user, type, entity)",
+        "Temporal queries valid-at-time",
+        "Semantic similarity over long conversations"
+      ]
+    },
+    {
+      "q": "What are the three stores Mem0 writes in parallel on each add()?",
+      "options": [
+        "Postgres, Redis, ClickHouse",
+        "Cache, queue, log",
+        "Embedding, attention, FFN",
+        "Vector, KV, graph"
+      ]
+    },
+    {
+      "q": "What three dimensions feed Mem0's fusion score?",
+      "options": [
+        "Confidence, perplexity, BLEU",
+        "Precision, recall, F1",
+        "Relevance, importance, recency",
+        "Latency, throughput, cost"
+      ]
+    },
+    {
+      "q": "What does Mem0g do when an incoming fact contradicts an existing edge?",
+      "options": [
+        "Raises an exception",
+        "Rewrites the user_id",
+        "Marks the existing edge invalid but does not delete it, so temporal queries can still traverse",
+        "Deletes the edge"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend tuning fusion weights per product?",
+      "options": [
+        "It is required by Apache 2.0",
+        "Vector libraries reject equal weights",
+        "Recency dominates for chat agents while importance dominates for compliance agents and relevance dominates for retrieval agents",
+        "Providers require it"
+      ]
+    },
+    {
+      "q": "What is the scope taxonomy Mem0 uses?",
+      "options": [
+        "User, session, agent",
+        "Local, regional, global",
+        "Public, private, secret",
+        "Read, write, admin"
+      ]
+    },
+    {
+      "q": "What is embedding drift in this pattern, and how does the lesson recommend mitigating it?",
+      "options": [
+        "Vectors get encrypted; rotate keys",
+        "The embedding API changes URL; pin a domain",
+        "Embeddings overflow integers; switch to float64",
+        "Vector retrieval quality degrades as the corpus grows; periodically re-embed the top-N most used records"
+      ]
+    },
+    {
+      "q": "What does Voyager treat as the action space?",
+      "options": [
+        "Primitive Minecraft commands",
+        "Reinforcement learning Q-values",
+        "Text prompts only",
+        "Executable code (JavaScript functions) stored, retrieved, and composed"
+      ]
+    },
+    {
+      "q": "What three components define a Voyager agent?",
+      "options": [
+        "Retriever, generator, ranker",
+        "Encoder, decoder, value head",
+        "Automatic curriculum, skill library, iterative prompting",
+        "Planner, executor, judge"
+      ]
+    },
+    {
+      "q": "What three signals can return from a skill execution attempt?",
+      "options": [
+        "Success, error (with stack trace), self-verification failure",
+        "Pass, fail, retry",
+        "Heartbeat, ack, nack",
+        "Green, yellow, red"
+      ]
+    },
+    {
+      "q": "How does the automatic curriculum pick the next task?",
+      "options": [
+        "Random uniform over the action space",
+        "Just above current capability, based on environment state and skill inventory (the exploration sweet spot)",
+        "Always the hardest available task",
+        "User-supplied list only"
+      ]
+    },
+    {
+      "q": "Which 2026 product is the lesson's clearest match for the Voyager skill?",
+      "options": [
+        "Claude Agent SDK skills: named, retrievable code plus instructions loaded on demand",
+        "AWS Lambda layers",
+        "Pinecone indices",
+        "OpenAI fine-tuning"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend dedup on write for the skill library?",
+      "options": [
+        "Without dedup, the same skill gets added many times with slightly different descriptions; retrieval should return one canonical version",
+        "Providers reject duplicates",
+        "Git blocks duplicates",
+        "Disk is expensive"
+      ]
+    },
+    {
+      "q": "What problem does composed-skill drift describe?",
+      "options": [
+        "A skill stops compiling after a Python upgrade",
+        "A parent skill silently picks up a refined child version it was never tested against; fix by pinning skill versions",
+        "Skills get encrypted in storage",
+        "Retrieval returns nothing"
+      ]
+    },
+    {
+      "q": "What does an HTN add over a free-form LLM plan?",
+      "options": [
+        "Better embeddings",
+        "Cheaper inference",
+        "Provable correctness when operator preconditions and effects are enforced",
+        "Shorter prompts"
+      ]
+    },
+    {
+      "q": "Which problem class is AlphaEvolve built for?",
+      "options": [
+        "Multi-turn chat memory",
+        "Free-form prose generation",
+        "Vector search ranking",
+        "Optimizations with a machine-checkable, deterministic fitness function"
+      ]
+    },
+    {
+      "q": "How does ChatHTN preserve plan soundness while using an LLM?",
+      "options": [
+        "It uses a vector database",
+        "LLM suggestions only enter as candidate decompositions, validated against the operator schema; the symbolic layer owns correctness",
+        "It does not; soundness is best-effort",
+        "It fine-tunes the LLM on HTN traces"
+      ]
+    },
+    {
+      "q": "Which AlphaEvolve result does the lesson cite?",
+      "options": [
+        "First improvement over Strassen for 4x4 complex matrix multiplication in 56 years",
+        "First proof of P=NP",
+        "Beating GPT-4 on HumanEval",
+        "10x speedup of inference on Gemini"
+      ]
+    },
+    {
+      "q": "Which element of an HTN is a primitive directly-executable action with preconditions and effects?",
+      "options": [
+        "State",
+        "Task",
+        "Method",
+        "Operator"
+      ]
+    },
+    {
+      "q": "What is the lesson's warning about AlphaEvolve without a real evaluator?",
+      "options": [
+        "It is slow",
+        "It cannot run on GPUs",
+        "Asking an LLM whether the code is better is not a fitness function; the evaluator must be deterministic and fast",
+        "It violates Apache 2.0"
+      ]
+    },
+    {
+      "q": "When should you reach for ReAct or ReWOO instead of HTN or AlphaEvolve?",
+      "options": [
+        "Never; HTN is strictly better",
+        "When you do not need formal soundness or a machine-checkable fitness; most agent tasks land here",
+        "When you have a GPU cluster available",
+        "When latency is below 100 ms"
+      ]
+    },
+    {
+      "q": "How does Anthropic distinguish a workflow from an agent?",
+      "options": [
+        "Workflows are engineer-owned predefined graphs; agents are model-owned dynamic tool direction",
+        "Workflows are stateless; agents are stateful",
+        "Workflows run on CPUs; agents need GPUs",
+        "Workflows use embeddings; agents use tools"
+      ]
+    },
+    {
+      "q": "What are the three capabilities of the augmented LLM that underpins all five patterns?",
+      "options": [
+        "Search (retrieval), tools (actions), memory (persistence)",
+        "Vector, KV, graph",
+        "Plan, execute, reflect",
+        "Embeddings, fine-tuning, RAG"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the five Anthropic workflow patterns?",
+      "options": [
+        "Evaluator-optimizer",
+        "Gradient distillation",
+        "Prompt chaining",
+        "Routing"
+      ]
+    },
+    {
+      "q": "Which two shapes does parallelization come in?",
+      "options": [
+        "Sync and async",
+        "Stateful and stateless",
+        "Hot and cold",
+        "Sectioning (different chunks) and voting (same prompt N times, aggregate)"
+      ]
+    },
+    {
+      "q": "Which workflow pattern is Self-Refine generalized?",
+      "options": [
+        "Orchestrator-workers",
+        "Evaluator-optimizer",
+        "Prompt chaining",
+        "Routing"
+      ]
+    },
+    {
+      "q": "When do workflows beat agents according to the lesson?",
+      "options": [
+        "Always",
+        "Only on GPUs",
+        "On predictable, cost-bounded, or compliance-bounded tasks where the graph can be enumerated and audited",
+        "Only for chat"
+      ]
+    },
+    {
+      "q": "What is the lesson's recommended default starting point?",
+      "options": [
+        "A multi-agent framework",
+        "Fine-tune the model",
+        "Build a custom MCTS",
+        "Direct API calls; add frameworks only when durable state, actor concurrency, or role templating earns its cost"
+      ]
+    },
+    {
+      "q": "What does LangGraph treat as the core unit of the agent?",
+      "options": [
+        "A vector index",
+        "A state machine with typed state, function nodes, and conditional edges",
+        "A single tool registry",
+        "A free-form LLM call"
+      ]
+    },
+    {
+      "q": "Which problem does durable execution solve?",
+      "options": [
+        "Reducing inference cost",
+        "Generating embeddings faster",
+        "Resuming a 40-step run from step 38 when it fails, with exact state, instead of starting over",
+        "Translating between providers"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of the three topologies LangGraph supports?",
+      "options": [
+        "Gradient ring",
+        "Hierarchical (nested subgraphs)",
+        "Supervisor",
+        "Swarm (peer-to-peer)"
+      ]
+    },
+    {
+      "q": "Why must nodes be deterministic for resume to work cleanly?",
+      "options": [
+        "It is required by the GIL",
+        "Determinism reduces token cost",
+        "Resume assumes the same inputs produce the same state update; random seeds, wall-clock, and external APIs must be captured",
+        "Providers require determinism"
+      ]
+    },
+    {
+      "q": "What is a conditional edge?",
+      "options": [
+        "An edge with a TTL",
+        "An edge chosen by a function of state, used to branch the graph",
+        "An edge that runs only on GPUs",
+        "An edge weighted by training loss"
+      ]
+    },
+    {
+      "q": "What goes wrong when checkpoints are too small?",
+      "options": [
+        "The disk fills up",
+        "The graph cannot reach END",
+        "Tool state and memory writes are not recoverable; full state must serialize",
+        "The model produces shorter answers"
+      ]
+    },
+    {
+      "q": "Where does human-in-the-loop fit into LangGraph's design?",
+      "options": [
+        "Pause before a critical node, surface serialized state to a human, accept modifications, resume; the checkpointer makes this cheap",
+        "Only at START and END",
+        "Through a separate provider API",
+        "It requires a fork of the runtime"
+      ]
+    },
+    {
+      "q": "What is the only legal way actors interact in AutoGen v0.4?",
+      "options": [
+        "Direct access to a shared dict",
+        "Mutating each other's prompts",
+        "Shared SQL transactions",
+        "Asynchronous messages exchanged through inboxes; no shared memory"
+      ]
+    },
+    {
+      "q": "What are the three API layers of AutoGen v0.4?",
+      "options": [
+        "Core, AgentChat, Extensions",
+        "Frontend, Backend, Database",
+        "Tools, Models, Memory",
+        "Plan, Act, Reflect"
+      ]
+    },
+    {
+      "q": "Why does decoupling delivery from handling give fault isolation?",
+      "options": [
+        "The runtime catches handler failures in B without crashing A; A's send() returned immediately and never blocked",
+        "Each actor runs on a separate machine",
+        "Handlers are pure functions",
+        "The runtime restarts the OS on failure"
+      ]
+    },
+    {
+      "q": "Which AgentChat topology rotates agents in a fixed order?",
+      "options": [
+        "SelectorGroupChat",
+        "Magentic-One",
+        "RoundRobinGroupChat",
+        "Supervisor"
+      ]
+    },
+    {
+      "q": "What is Magentic-One in this lesson?",
+      "options": [
+        "A reference multi-agent team for web browsing, code execution, and file handling built on AgentChat",
+        "An OTel exporter",
+        "A new LLM model",
+        "A serialization format"
+      ]
+    },
+    {
+      "q": "What is the lesson's stated status of AutoGen v0.4 in early 2026?",
+      "options": [
+        "Deprecated and removed",
+        "Replaced by LangGraph",
+        "Just announced",
+        "Stable but in maintenance mode; Microsoft Agent Framework is the forward path"
+      ]
+    },
+    {
+      "q": "Which observability standard does AutoGen v0.4 emit by default?",
+      "options": [
+        "Datadog APM",
+        "Prometheus metrics only",
+        "OpenTelemetry spans with gen_ai.* attributes per the OTel GenAI semantic conventions",
+        "StatsD"
+      ]
+    },
+    {
+      "q": "What are CrewAI's four primitives?",
+      "options": [
+        "Tool, Prompt, Model, Memory",
+        "Agent, Task, Crew, Process",
+        "Node, Edge, Reducer, Checkpointer",
+        "Actor, Message, Inbox, Runtime"
+      ]
+    },
+    {
+      "q": "What is the recommended production starting point per the CrewAI docs?",
+      "options": [
+        "Sequential process",
+        "Flow",
+        "Crew",
+        "Hierarchical process"
+      ]
+    },
+    {
+      "q": "What is the difference between a Crew and a Flow?",
+      "options": [
+        "Flow has no agents",
+        "Crew is paid, Flow is free",
+        "Crew is autonomous and LLM-driven; Flow is event-driven, code-owned, deterministic and testable",
+        "Crew runs on GPUs only"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of the four memory types CrewAI ships?",
+      "options": [
+        "Quantized",
+        "Entity",
+        "Long-term",
+        "Short-term"
+      ]
+    },
+    {
+      "q": "What is backstory bloat and how does the lesson recommend handling it?",
+      "options": [
+        "2000-word agent backstories push out context budget; keep them tight",
+        "Storing too many crews; archive old ones",
+        "Slow Bedrock calls; switch regions",
+        "Too many tools; delete some"
+      ]
+    },
+    {
+      "q": "When is Hierarchical process worth picking over Sequential?",
+      "options": [
+        "When you have 4+ specialists that need a manager Agent to route between them",
+        "Always",
+        "When you have one task",
+        "When you do not have any tools"
+      ]
+    },
+    {
+      "q": "Why does the lesson caution against using a free-form Crew in production?",
+      "options": [
+        "Output variability is high and debugging is painful without a Flow wrapper",
+        "Crews are unsupported",
+        "Crews cost more than Flows",
+        "Crews lack memory"
+      ]
+    },
+    {
+      "q": "What are the five primitives of the OpenAI Agents SDK?",
+      "options": [
+        "Plan, Worker, Solver, Evaluator, Reflector",
+        "Tool, Prompt, Model, Memory, Trace",
+        "Agent, Handoff, Guardrail, Session, Tracing",
+        "Node, Edge, Reducer, Checkpointer, Subgraph"
+      ]
+    },
+    {
+      "q": "How does the model see a handoff?",
+      "options": [
+        "As a special token",
+        "As a system message",
+        "As a custom HTTP endpoint",
+        "As a tool named transfer_to_<agent_name>"
+      ]
+    },
+    {
+      "q": "Which three guardrail types does the SDK ship?",
+      "options": [
+        "Hard, soft, and best-effort guardrails",
+        "Pre, post, and inline guardrails",
+        "Input, output, and tool guardrails",
+        "Static, dynamic, and federated guardrails"
+      ]
+    },
+    {
+      "q": "What is the difference between parallel and blocking guardrails?",
+      "options": [
+        "Parallel runs alongside the main LLM (lower latency, wastes tokens on trip); blocking runs first (no wasted tokens on trip)",
+        "Blocking only works on output",
+        "Parallel costs more money always",
+        "Blocking is asynchronous; parallel is synchronous"
+      ]
+    },
+    {
+      "q": "How is tracing enabled in the SDK?",
+      "options": [
+        "Only on the hosted dashboard",
+        "Off by default; enable per agent",
+        "Only via OpenTelemetry collector",
+        "On by default; OPENAI_AGENTS_DISABLE_TRACING=1 opts out"
+      ]
+    },
+    {
+      "q": "What is handoff drift and how does the lesson recommend mitigating it?",
+      "options": [
+        "Agent A hands off to B which hands back to A in a loop; add a hop counter",
+        "Sessions overflow; archive old ones",
+        "Tracing falls behind; reduce span volume",
+        "Guardrails desync; retrain"
+      ]
+    },
+    {
+      "q": "Why are built-in tools a guardrail gap?",
+      "options": [
+        "They do not support handoffs",
+        "Tool guardrails only fire on function tools; built-in tools (file reader, web fetch) need separate policy",
+        "They cannot be traced",
+        "They are slower than function tools"
+      ]
+    },
+    {
+      "q": "What is the difference between the Anthropic Client SDK and the Claude Agent SDK?",
+      "options": [
+        "Client SDK is raw Messages API; Agent SDK is the Claude Code harness shape with built-in tools, MCP, hooks, subagents, and session store",
+        "There is no difference",
+        "Client SDK is for Python only",
+        "Client SDK is paid; Agent SDK is free"
+      ]
+    },
+    {
+      "q": "What are the two documented purposes of subagents?",
+      "options": [
+        "Authn and authz",
+        "Logging and metrics",
+        "Caching and rate limiting",
+        "Parallelization and context isolation"
+      ]
+    },
+    {
+      "q": "Which method is NOT part of the session store surface?",
+      "options": [
+        "append",
+        "compile_prompt",
+        "load",
+        "list_subkeys"
+      ]
+    },
+    {
+      "q": "Which is NOT a Claude Agent SDK lifecycle hook?",
+      "options": [
+        "PreEmbedding",
+        "PreToolUse",
+        "PostToolUse",
+        "PreCompact"
+      ]
+    },
+    {
+      "q": "How does trace context propagate across the agent and CLI subprocess?",
+      "options": [
+        "Only via the provider's dashboard",
+        "Through the file system",
+        "Through environment variables only",
+        "Through W3C trace context headers passed into the CLI subprocess"
+      ]
+    },
+    {
+      "q": "What is subagent over-spawn and when does it happen?",
+      "options": [
+        "Spawning more subagents than CPU cores",
+        "Spawning before SessionStart",
+        "Spawning 100 subagents for 100 tiny tasks where overhead dominates; batch instead",
+        "Forgetting to close subagents"
+      ]
+    },
+    {
+      "q": "What does Claude Managed Agents trade off against the self-hosted SDK?",
+      "options": [
+        "Tracing for streaming",
+        "Tools for memory",
+        "Latency for cost",
+        "Control for managed infrastructure (long-running async, built-in prompt caching, built-in compaction)"
+      ]
+    },
+    {
+      "q": "Which language pairing does the lesson recommend for each runtime?",
+      "options": [
+        "Agno for TypeScript, Mastra for Python",
+        "Both are Go-first",
+        "Agno for Python, Mastra for TypeScript",
+        "Both are Rust-first"
+      ]
+    },
+    {
+      "q": "What is Agno's recommended production deployment shape?",
+      "options": [
+        "A long-lived stateful daemon",
+        "A serverless cron worker only",
+        "A stateless session-scoped FastAPI backend; each request starts a fresh agent and session state lives in a DB",
+        "A WebSocket-only server"
+      ]
+    },
+    {
+      "q": "What are Mastra's three primitives?",
+      "options": [
+        "Node, Edge, State",
+        "Plan, Worker, Solver",
+        "Agents, Tools, Workflows",
+        "Actor, Message, Inbox"
+      ]
+    },
+    {
+      "q": "Roughly what agent-instantiation cost does Agno target per its docs?",
+      "options": [
+        "About 1 second and 1 GiB per agent",
+        "About 2 microseconds with about 3.75 KiB per agent",
+        "About 200 milliseconds and 100 MiB per agent",
+        "About 10 minutes and 4 GiB per agent"
+      ]
+    },
+    {
+      "q": "What does Mastra's Unified Model Router give?",
+      "options": [
+        "A vector DB layer",
+        "A single client surface for thousands of models across many providers",
+        "A graph checkpointer",
+        "A queue for tool calls"
+      ]
+    },
+    {
+      "q": "When is perf-for-perf's-sake the wrong reason to pick Agno?",
+      "options": [
+        "When using Langfuse",
+        "When the workload is one slow agent call per request and overhead is not the bottleneck",
+        "When using Python 3.13",
+        "When deploying to AWS"
+      ]
+    },
+    {
+      "q": "What licensing surface should you read carefully before forking Mastra?",
+      "options": [
+        "There is no license file",
+        "ee/ directories are source-available rather than Apache 2.0 and restrict commercial use",
+        "All of Mastra is GPL",
+        "Mastra requires CLA but no license review"
+      ]
+    },
+    {
+      "q": "What does SWE-bench's evaluator check on a candidate patch?",
+      "options": [
+        "Patch length under 200 lines",
+        "Previously failing tests now pass (FAIL_TO_PASS) and previously passing tests still pass (PASS_TO_PASS)",
+        "BLEU score against the reference fix",
+        "Patch passes a separate LLM judge"
+      ]
+    },
+    {
+      "q": "Why does SWE-bench Verified exist?",
+      "options": [
+        "It includes more languages",
+        "It runs faster",
+        "OpenAI's 500-task human-curated subset removes ambiguous issues and unreliable tests",
+        "It uses a different patch format"
+      ]
+    },
+    {
+      "q": "What did SWE-bench+ find about successful patches?",
+      "options": [
+        "32.67% leaked solution text in the issue and 31.08% had suspiciously weak test coverage",
+        "Patches always exceeded 1000 lines",
+        "There is no contamination",
+        "All patches were memorized"
+      ]
+    },
+    {
+      "q": "What is GAIA's design philosophy?",
+      "options": [
+        "Hard for humans, easy for AI",
+        "Pure benchmark of vector retrieval",
+        "Only single-turn questions",
+        "Conceptually simple for humans (about 92%) but hard for AI (early GPT-4 with plugins: about 15%)"
+      ]
+    },
+    {
+      "q": "Which is NOT one of AgentBench's environment categories?",
+      "options": [
+        "Games (Alfworld, LTP)",
+        "Web (WebShop, Mind2Web)",
+        "Gradient (RL, IRL)",
+        "Code (Bash, DB, KG)"
+      ]
+    },
+    {
+      "q": "What does the lesson identify as the wrong way to report SWE-bench numbers?",
+      "options": [
+        "Reporting per-repo breakdowns",
+        "Reporting one aggregate number without mentioning Verified or SWE-bench+ context",
+        "Reporting step counts",
+        "Reporting wall-clock"
+      ]
+    },
+    {
+      "q": "Which dimension do these benchmarks NOT measure?",
+      "options": [
+        "Test transitions",
+        "Step counts",
+        "Per-task success",
+        "Real-world operational cost (tokens, wall-clock), adversarial safety, and your own domain"
+      ]
+    },
+    {
+      "q": "Why does WebArena self-host its four target apps?",
+      "options": [
+        "To avoid TLS",
+        "To pin reproducible versions so evaluation is execution-based and not flaky",
+        "To save money",
+        "To run on GPUs"
+      ]
+    },
+    {
+      "q": "Why does OSWorld use real OS screenshots rather than accessibility APIs?",
+      "options": [
+        "Screenshots cost less",
+        "Accessibility APIs leak PII",
+        "Accessibility APIs are too fast",
+        "Screenshots force the agent to do real GUI grounding in 1920x1080, matching production constraints"
+      ]
+    },
+    {
+      "q": "What two primary failure modes does OSWorld surface?",
+      "options": [
+        "Latency and bandwidth",
+        "Hallucination and refusal",
+        "Embedding drift and token leakage",
+        "GUI grounding and operational knowledge"
+      ]
+    },
+    {
+      "q": "What does OSWorld-Human add on top of the base benchmark?",
+      "options": [
+        "Manually curated gold action trajectories that surface a 1.4-2.7x agent step-inefficiency gap",
+        "A larger screen resolution",
+        "More tasks",
+        "A new OS"
+      ]
+    },
+    {
+      "q": "Which release-time number does the lesson cite for WebArena?",
+      "options": [
+        "Best agent at 50% with human at 50%",
+        "Best agent at 0% across the board",
+        "Best agent at 99% with human at 100%",
+        "Best GPT-4 agent 14.41% success vs human 78.24%"
+      ]
+    },
+    {
+      "q": "What does the lesson warn happens with screenshot-only evaluation when the agent uses DOM or accessibility APIs?",
+      "options": [
+        "Nothing changes",
+        "Tests pass trivially",
+        "You exceed the rate limit",
+        "You miss the grounding challenge OSWorld is designed to measure"
+      ]
+    },
+    {
+      "q": "Why is ignoring trajectory length a benchmarking failure?",
+      "options": [
+        "Length is the only metric that matters",
+        "It hides cost and inefficiency that success rate alone misses (the 1.4-2.7x gap OSWorld-Human surfaces)",
+        "Trajectories are not measurable",
+        "Trajectory length always matches gold"
+      ]
+    },
+    {
+      "q": "What input does Claude computer use take, and what does it emit?",
+      "options": [
+        "Screenshots in (vision-based), keyboard/mouse commands out",
+        "Accessibility tree in, keyboard/mouse commands out",
+        "DOM XML in, JavaScript out",
+        "JSON in, SQL out"
+      ]
+    },
+    {
+      "q": "What is Gemini 2.5 Computer Use's distinguishing safety feature?",
+      "options": [
+        "A per-step safety service that assesses each action before execution and rejects unsafe ones",
+        "Read-only mode by default",
+        "Hard-coded WAF rules",
+        "Mandatory CAPTCHAs"
+      ]
+    },
+    {
+      "q": "What does the lesson identify as untrusted input across all three models?",
+      "options": [
+        "Nothing; everything is trusted",
+        "Only HTTPS responses",
+        "Screenshots, DOM text, tool outputs, PDF content, anything retrieved",
+        "Only PDF content"
+      ]
+    },
+    {
+      "q": "Which OSWorld / WebArena numbers does the lesson cite for OpenAI CUA at launch?",
+      "options": [
+        "Numbers not reported",
+        "OSWorld 99%, WebArena 99%",
+        "OSWorld 0%, WebArena 0%",
+        "OSWorld 38.1%, WebArena 58.1%, WebVoyager 87%"
+      ]
+    },
+    {
+      "q": "Which defense pattern is NOT in the 2026 convergence list?",
+      "options": [
+        "Allowlist/blocklist of navigation targets",
+        "Per-step safety classifier",
+        "Human-in-the-loop for sensitive actions",
+        "Auto-clicking through dialogs to save time"
+      ]
+    },
+    {
+      "q": "What is the principal attack the lesson highlights against computer-use agents?",
+      "options": [
+        "Network outages",
+        "OS update lag",
+        "Slow rendering",
+        "A malicious page or PDF embedding instructions in retrieved content that the model treats as user intent"
+      ]
+    },
+    {
+      "q": "When is human-in-the-loop confirmation specifically recommended?",
+      "options": [
+        "Never",
+        "On sensitive actions like login, purchase, file delete",
+        "Only when the model asks",
+        "On read-only navigation"
+      ]
+    },
+    {
+      "q": "Which two flow directions does a Pipecat pipeline use?",
+      "options": [
+        "Read and write",
+        "Hot and cold",
+        "Inbound and outbound",
+        "DOWNSTREAM (source to sink) and UPSTREAM (feedback, cancel, barge-in)"
+      ]
+    },
+    {
+      "q": "What is the canonical Pipecat voice pipeline?",
+      "options": [
+        "VAD -> STT -> LLM -> TTS -> transport",
+        "Audio -> JSON -> SQL -> response",
+        "LLM -> embed -> retrieve -> answer",
+        "TTS -> STT -> LLM -> VAD"
+      ]
+    },
+    {
+      "q": "Which two voice agent classes does LiveKit Agents ship?",
+      "options": [
+        "BatchAgent and StreamAgent",
+        "TextAgent and SpeechAgent",
+        "MultimodalAgent (direct audio) and VoicePipelineAgent (STT/LLM/TTS cascade)",
+        "LocalAgent and CloudAgent"
+      ]
+    },
+    {
+      "q": "What is barge-in and how is it handled?",
+      "options": [
+        "An LLM cost spike; reduce tokens",
+        "The user interrupts while the agent is speaking; UPSTREAM cancel frames stop TTS mid-utterance",
+        "Captcha failure; retry",
+        "A provider outage; switch regions"
+      ]
+    },
+    {
+      "q": "What end-to-end latency does the lesson describe as premium?",
+      "options": [
+        "About 450-600 ms",
+        "About 1500 ms",
+        "About 50 ms",
+        "About 5000 ms"
+      ]
+    },
+    {
+      "q": "What goes wrong if STT confidence is ignored?",
+      "options": [
+        "Calls get cheaper",
+        "Latency improves",
+        "TTS gets faster",
+        "Low-confidence transcripts feed the LLM as if gospel, producing wrong answers; gate on confidence or ask for confirmation"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend summing component latencies before shipping?",
+      "options": [
+        "Latency is required by WebRTC",
+        "Every component adds 50-200 ms; the sum determines whether the experience feels broken",
+        "Providers bill by latency",
+        "It satisfies a compliance requirement"
+      ]
+    },
+    {
+      "q": "Which span name represents an agent run in the GenAI conventions?",
+      "options": [
+        "invoke_agent (optionally suffixed by gen_ai.agent.name)",
+        "agent.start",
+        "agent_loop",
+        "run_chain"
+      ]
+    },
+    {
+      "q": "Which three span categories does the GenAI SIG define?",
+      "options": [
+        "Frontend, backend, db",
+        "Read, write, exec",
+        "Latency, error, throughput",
+        "Model/client, agent, tool"
+      ]
+    },
+    {
+      "q": "When does an invoke_agent span use kind CLIENT vs INTERNAL?",
+      "options": [
+        "Always INTERNAL",
+        "CLIENT for HTTPS only",
+        "Always CLIENT",
+        "CLIENT for remote agent services (OpenAI Assistants, Bedrock Agents); INTERNAL for in-process frameworks (LangChain, CrewAI, local ReAct)"
+      ]
+    },
+    {
+      "q": "What is the default rule for content capture (inputs and outputs)?",
+      "options": [
+        "Capture everything by default",
+        "Instrumentations SHOULD NOT capture by default; capture is opt-in via gen_ai.* attributes",
+        "Capture only on errors",
+        "Capture only output, never input"
+      ]
+    },
+    {
+      "q": "Which attribute identifies the corpus or store consulted for a retrieval?",
+      "options": [
+        "gen_ai.data_source.id",
+        "gen_ai.provider.name",
+        "gen_ai.agent.name",
+        "gen_ai.request.model"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend for storing prompt content in production?",
+      "options": [
+        "Store content externally (S3, log store) and record reference IDs on the span instead",
+        "Capture full prompts on every span as plain text",
+        "Encrypt prompts in span attributes",
+        "Never store any content"
+      ]
+    },
+    {
+      "q": "How do you opt into the experimental stable preview of GenAI conventions?",
+      "options": [
+        "Pay for a license",
+        "Edit the OTel collector config",
+        "Set OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental",
+        "Rebuild the SDK from source"
+      ]
+    },
+    {
+      "q": "What license does Langfuse ship under after the June 2025 open-sourcing of formerly commercial modules?",
+      "options": [
+        "Apache 2.0",
+        "GPLv3",
+        "Elastic License 2.0",
+        "MIT"
+      ]
+    },
+    {
+      "q": "What is Arize Phoenix strongest at according to the lesson?",
+      "options": [
+        "Deep agent-specific evaluation: trace clustering, anomaly detection, RAG retrieval relevancy, OpenInference auto-instrumentation",
+        "Automated optimization loop",
+        "Prompt versioning",
+        "Static analysis of code"
+      ]
+    },
+    {
+      "q": "Which platform pairs automated prompt optimization with guardrails (PII redaction, topical constraints) and LLM-judge hallucination detection?",
+      "options": [
+        "Langfuse",
+        "Phoenix",
+        "Jaeger",
+        "Opik"
+      ]
+    },
+    {
+      "q": "Which platform does the lesson recommend for an all-in-one with prompt management?",
+      "options": [
+        "Opik",
+        "Datadog APM",
+        "Phoenix",
+        "Langfuse"
+      ]
+    },
+    {
+      "q": "What does the lesson say about vendor-published platform benchmarks?",
+      "options": [
+        "They are definitive",
+        "Take them as directional; measure your own corpus",
+        "Only Opik's are reliable",
+        "They are forbidden by OpenTelemetry"
+      ]
+    },
+    {
+      "q": "Why is tracing without evaluation considered expensive logging?",
+      "options": [
+        "Providers charge for spans",
+        "You see runs but you do not score them, so regressions are invisible and bisection is impossible",
+        "Disk costs more than CPU",
+        "Spans cannot be replayed"
+      ]
+    },
+    {
+      "q": "What is the lesson's warning about self-rolled LLM-judges?",
+      "options": [
+        "CRITIC applies: judges need external grounding for factual verification or they rubber-stamp",
+        "They must run on GPUs",
+        "They are forbidden by Apache 2.0",
+        "They only work in TypeScript"
+      ]
+    },
+    {
+      "q": "What does the Society of Minds protocol have N model instances do?",
+      "options": [
+        "Independently propose answers, then over R rounds read and critique each other's proposals until they converge",
+        "Train on a shared dataset",
+        "Each runs a different benchmark",
+        "Negotiate prices"
+      ]
+    },
+    {
+      "q": "Why does cross-model debate (e.g. ChatGPT + Bard) outperform single-model debate?",
+      "options": [
+        "It is cheaper",
+        "Different vendors negotiate prices",
+        "Vendors share weights",
+        "Heterogeneity reduces shared blind spots so cross-critique catches more errors"
+      ]
+    },
+    {
+      "q": "What is the main token-cost win of a sparse topology over full mesh?",
+      "options": [
+        "Each debater reads only a subset of peers, so critique-op count drops while accuracy often matches",
+        "It removes the LLM",
+        "Sparse topology doubles the rounds",
+        "Sparse topology requires no models"
+      ]
+    },
+    {
+      "q": "Which case does the lesson list as where debate hurts?",
+      "options": [
+        "A simple factual lookup, because one lookup is cheaper than five debates",
+        "Open-ended reasoning",
+        "Chess move validity",
+        "Biography generation"
+      ]
+    },
+    {
+      "q": "What is convergence collapse?",
+      "options": [
+        "Process crash",
+        "TLS handshake failure",
+        "Network outage",
+        "All agents converge on the first wrong answer; mitigate with required disagreement rounds"
+      ]
+    },
+    {
+      "q": "Why does prompt homogenization undermine debate?",
+      "options": [
+        "It violates Apache 2.0",
+        "It bypasses the supervisor",
+        "Identical prompts produce nearly identical answers, removing the cross-critique signal",
+        "It uses too many tokens"
+      ]
+    },
+    {
+      "q": "Which production pattern is a debate variant per the lesson?",
+      "options": [
+        "Pure single-shot RAG",
+        "Vector indexing",
+        "Anthropic orchestrator-workers with a synthesis step",
+        "Cron-only schedule"
+      ]
+    },
+    {
+      "q": "What is MASFT's central claim?",
+      "options": [
+        "Failures are random noise",
+        "Failures are due to network outages",
+        "Failures vanish with bigger models",
+        "Multi-agent failures are fundamental design flaws, not LLM limitations to be fixed with better base models"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the five recurring industry failure modes the lesson lists?",
+      "options": [
+        "Hallucinated actions",
+        "Cascading errors",
+        "Scope creep",
+        "Embedding versioning"
+      ]
+    },
+    {
+      "q": "What is a cascading error in this lesson?",
+      "options": [
+        "A YAML parser error",
+        "One wrong call triggers downstream effects across systems (a phantom SKU triggers four downstream API calls)",
+        "A cron failure",
+        "An LLM rate-limit cascade"
+      ]
+    },
+    {
+      "q": "Which two manifestations does the LLM Agent Hallucinations Survey list?",
+      "options": [
+        "Hot and cold tokens",
+        "Instruction-following Deviation and Long-range Contextual Misuse",
+        "Greedy and beam search",
+        "Soft and hard prompts"
+      ]
+    },
+    {
+      "q": "What does success hallucination mean?",
+      "options": [
+        "A unit test passed",
+        "The agent returns a success message even though the target state did not change (often on a 400 from a tool)",
+        "The user thinks success when none happened",
+        "The model is overconfident on benchmarks"
+      ]
+    },
+    {
+      "q": "Why is tagging only crashes insufficient?",
+      "options": [
+        "Logging is paid",
+        "Most agent failures produce valid-looking output that does not crash; content-level checks are needed",
+        "Crashes leak PII",
+        "Crashes are slow"
+      ]
+    },
+    {
+      "q": "What mitigation does the lesson recommend at every step of a reasoning chain?",
+      "options": [
+        "Add a sleep()",
+        "Disable retries",
+        "Automated verification gates that check factual grounding against environment state",
+        "Lower temperature only"
+      ]
+    },
+    {
+      "q": "What is indirect prompt injection?",
+      "options": [
+        "A model misclick",
+        "A user typing 'ignore all rules' directly",
+        "Instructions embedded in data the agent retrieves (a page, PDF, email, memory note) that override the developer prompt on ingest",
+        "A typo in the system prompt"
+      ]
+    },
+    {
+      "q": "What does the lesson say processing retrieved prompts is equivalent to?",
+      "options": [
+        "A static analysis pass",
+        "Arbitrary code execution on the agent's tool-use surface",
+        "Free speech",
+        "A pure function call"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the five demonstrated exploit classes?",
+      "options": [
+        "Persistent memory poisoning",
+        "Cache invalidation",
+        "Data theft",
+        "Worming"
+      ]
+    },
+    {
+      "q": "What does PVE stand for?",
+      "options": [
+        "Pre-Vectorize-Embed",
+        "Prompt-Validator-Executor: a cheap fast validator runs on each tool call before the expensive main model commits",
+        "Provider-Verifier-Encoder",
+        "Plan-Verify-Execute, an HTN dialect"
+      ]
+    },
+    {
+      "q": "Why is 'system prompt says ignore untrusted instructions' insufficient?",
+      "options": [
+        "It is too short",
+        "It is instruction-following, not enforcement; the model can still be overridden by sufficiently persuasive injected content",
+        "Providers strip it",
+        "It is encrypted"
+      ]
+    },
+    {
+      "q": "What is overtrust of retrieved memory?",
+      "options": [
+        "Loading the wrong model",
+        "Yesterday's agent wrote a poisoned memory note; today's agent reads it and re-executes the injection",
+        "Forgetting to vacuum the index",
+        "Caching too aggressively"
+      ]
+    },
+    {
+      "q": "What metadata does the lesson recommend attaching to every piece of content?",
+      "options": [
+        "A token count",
+        "A timestamp only",
+        "An encryption key",
+        "A source tag: user_message vs tool_output vs retrieved; validator refuses directives in retrieved content"
+      ]
+    },
+    {
+      "q": "Which four orchestration patterns does the lesson list?",
+      "options": [
+        "Push, pull, batch, stream",
+        "Supervisor-worker, swarm/peer-to-peer, hierarchical, debate",
+        "Sequential, parallel, distributed, federated",
+        "Plan, act, reflect, refine"
+      ]
+    },
+    {
+      "q": "What is the 2026 LangChain recommendation regarding supervision?",
+      "options": [
+        "Always use create_supervisor",
+        "Avoid supervision entirely",
+        "Prefer direct tool calls over create_supervisor for finer context-engineering control",
+        "Run supervisors on GPUs"
+      ]
+    },
+    {
+      "q": "What distinguishes a swarm from a supervisor-worker topology?",
+      "options": [
+        "Swarm runs on cron only",
+        "Swarm has no central router; agents hand off directly via a shared tool surface",
+        "Swarm uses GPUs",
+        "Swarm is single-agent"
+      ]
+    },
+    {
+      "q": "When is hierarchical orchestration justified?",
+      "options": [
+        "Never; it is an antipattern",
+        "Only with GPUs",
+        "When a single supervisor's context budget cannot hold descriptions of all specialists",
+        "Always; it scales for free"
+      ]
+    },
+    {
+      "q": "What is the recommended decision order Anthropic supports?",
+      "options": [
+        "Start with a single agent plus workflow patterns; add topology only when needed; supervisor before swarm before hierarchical; debate when accuracy beats cost",
+        "Start with debate",
+        "Always start with hierarchical multi-agent",
+        "Start with swarm and contract toward single"
+      ]
+    },
+    {
+      "q": "What is fake hierarchy in this lesson?",
+      "options": [
+        "Three layers of supervisors because 'enterprise' when there are only two actual teams; collapse it",
+        "An orchestrator written in TypeScript",
+        "Mislabelled YAML",
+        "A test fixture"
+      ]
+    },
+    {
+      "q": "How do you mitigate bouncing handoffs in a swarm (A -> B -> A -> B)?",
+      "options": [
+        "Pin the temperature to 0",
+        "Lower the rate limit",
+        "Add a hop counter and refuse after N transfers",
+        "Disable tracing"
+      ]
+    },
+    {
+      "q": "What are the six runtime shapes the lesson lists?",
+      "options": [
+        "Map, filter, reduce, fold, scan, group",
+        "Request-response, streaming, durable execution, queue-based, event-driven, scheduled",
+        "REST, gRPC, GraphQL, WebSocket, SSE, MQTT",
+        "Read, write, exec, fork, exit, wait"
+      ]
+    },
+    {
+      "q": "When is request-response a poor fit?",
+      "options": [
+        "On internal services",
+        "When the task takes longer than about 30 seconds and users hang up while workers pile up",
+        "On REST APIs",
+        "On a 1-second classification"
+      ]
+    },
+    {
+      "q": "What is durable execution's core property?",
+      "options": [
+        "Lower token cost",
+        "Faster inference",
+        "Native voice support",
+        "State is checkpointed after every step so the runtime can resume from the last successful step on failure"
+      ]
+    },
+    {
+      "q": "Which Anthropic observation justifies queue-based runtimes for long-horizon agents?",
+      "options": [
+        "Tasks must run synchronously",
+        "Tasks always complete in 5 seconds",
+        "Computer use announcement: dozens-to-hundreds of steps per task is normal",
+        "Cron solves everything"
+      ]
+    },
+    {
+      "q": "What does the lesson mean by 'observability is load-bearing'?",
+      "options": [
+        "Providers require it for billing",
+        "Logs are pretty",
+        "Disk gets full",
+        "Without OTel GenAI spans and a Langfuse/Phoenix/Opik backend you cannot debug a multi-step agent that failed at step 40"
+      ]
+    },
+    {
+      "q": "Why must queue workers have a dead-letter queue (DLQ)?",
+      "options": [
+        "DLQ makes jobs faster",
+        "Without DLQ, failed jobs vanish silently",
+        "DLQ is encrypted",
+        "DLQ is required by AWS"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend pairing cron-shaped agents with?",
+      "options": [
+        "Durable execution so a failing nightly run resumes next tick",
+        "WebRTC",
+        "GPU autoscalers",
+        "Streaming SSE"
+      ]
+    },
+    {
+      "q": "What are the three evaluation layers the lesson names?",
+      "options": [
+        "Unit, integration, end-to-end",
+        "Smoke, regression, acceptance",
+        "Pre, check, post",
+        "Static benchmarks, custom offline evals, online production evals"
+      ]
+    },
+    {
+      "q": "What is Anthropic's recommended starting point?",
+      "options": [
+        "Start with multi-agent debate",
+        "Start with simple prompts, optimize them with comprehensive evaluation, and add multi-step agentic systems only when needed",
+        "Start with a frontier model only",
+        "Start with hierarchical orchestration"
+      ]
+    },
+    {
+      "q": "What is the evaluator-optimizer tight loop?",
+      "options": [
+        "Proposer generates output, evaluator judges, refine until evaluator passes (Self-Refine generalized)",
+        "Sample, sort, deduplicate",
+        "Cache, retry, fail",
+        "Train, evaluate, deploy"
+      ]
+    },
+    {
+      "q": "What is the 2026 best practice for where evals live?",
+      "options": [
+        "Owned exclusively by the QA team",
+        "Only run quarterly",
+        "Next to code, run in CI on every PR, gate merges on eval scores",
+        "In a separate vendor dashboard only"
+      ]
+    },
+    {
+      "q": "Why does the lesson warn against an LLM-judge without grounding?",
+      "options": [
+        "It violates Apache 2.0",
+        "Judges hallucinate too; pair with the CRITIC pattern so judgment grounds on external tools",
+        "It is too slow",
+        "It only works on GPUs"
+      ]
+    },
+    {
+      "q": "What is the danger of over-fitting to evals?",
+      "options": [
+        "Vector indices fragment",
+        "Compute cost rises",
+        "Latency drops too far",
+        "Optimizing for the eval set diverges from production usefulness; rotate cases"
+      ]
+    },
+    {
+      "q": "Why do flaky evals cause problems?",
+      "options": [
+        "They exceed the context window",
+        "They cannot reach the database",
+        "They double inference cost",
+        "Non-deterministic cases produce false alarms; pin seeds and snapshot state"
+      ]
+    },
+    {
+      "q": "What does the lesson identify as the root cause of agent failures on real tasks?",
+      "options": [
+        "Outdated training data",
+        "Workbench failures: missing surfaces around the model, not LLM limitations",
+        "Slow network",
+        "Insufficient model parameters"
+      ]
+    },
+    {
+      "q": "What are the seven workbench surfaces the lesson names?",
+      "options": [
+        "Read, write, exec, fork, exit, wait, kill",
+        "Plan, act, reflect, refine, debate, vote, ship",
+        "Instructions, state, scope, feedback, verification, review, handoff",
+        "Train, eval, deploy, monitor, retrain, scale, retire"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the eight distributed-systems primitives the lesson maps surfaces to?",
+      "options": [
+        "Worker",
+        "Backpropagation",
+        "Function",
+        "Trigger"
+      ]
+    },
+    {
+      "q": "What did Vercel's reported harness change move success rate from and to?",
+      "options": [
+        "50% to 70%, by adding RAG",
+        "20% to 60%",
+        "0% to 100%, by switching models",
+        "80% to 100%, by deleting 80% of the agent's tools"
+      ]
+    },
+    {
+      "q": "What does Terminal Bench 2.0 demonstrate about model vs harness?",
+      "options": [
+        "Same model moved from outside top 30 to rank five by changing only the harness",
+        "Models alone determine ranking",
+        "Only GPUs matter",
+        "Harness changes do not matter"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend doing when you hear new harness vocabulary?",
+      "options": [
+        "Reject it",
+        "Wait for OpenAI to standardize it",
+        "Adopt the vocabulary verbatim",
+        "Translate back to primitives (function, worker, trigger, runtime, HTTP/RPC, queue, persistence, policy) before adopting"
+      ]
+    },
+    {
+      "q": "Where does chat history sit relative to the workbench?",
+      "options": [
+        "Chat is the system of record",
+        "Chat is volatile; the repo is the system of record",
+        "Both are equivalent",
+        "Neither matters"
+      ]
+    },
+    {
+      "q": "What three files form the smallest useful workbench?",
+      "options": [
+        "model.py, prompts.py, tools.py",
+        "Dockerfile, Makefile, .gitignore",
+        "AGENTS.md (router), agent_state.json (state), task_board.json (queue)",
+        "README.md, CHANGELOG.md, LICENSE"
+      ]
+    },
+    {
+      "q": "What is the lesson's framing of AGENTS.md?",
+      "options": [
+        "A secret kept out of the repo",
+        "A pure prompt-cache key",
+        "A short router that points at deeper docs and the state and board",
+        "A 3000-line onboarding manual"
+      ]
+    },
+    {
+      "q": "What does Augment Code's data say about a good AGENTS.md?",
+      "options": [
+        "A good AGENTS.md gives a quality jump equivalent to upgrading from Haiku to Opus; a bad one is worse than no file",
+        "Length always helps",
+        "Only Claude reads it",
+        "It has no measurable effect"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend file-backed state over chat-history state?",
+      "options": [
+        "Files are smaller",
+        "Disk is cheaper",
+        "Chat history is volatile; the file survives session death, conversation trimming, and tool resets",
+        "It is required by SOC 2"
+      ]
+    },
+    {
+      "q": "What does the lesson say happens when conflicting instructions land in AGENTS.md?",
+      "options": [
+        "Cost rises slightly",
+        "Nothing",
+        "Latency drops",
+        "Conflicting instructions silently drop the agent from interactive to greedy mode (AMBIG-SWE: 48.8% to 28% resolve rate)"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend cross-tool symlinks like CLAUDE.md -> AGENTS.md?",
+      "options": [
+        "To satisfy MIT",
+        "To pass auditing",
+        "So a single source of truth fans out to every coding agent without forking",
+        "To save bytes"
+      ]
+    },
+    {
+      "q": "What pattern do nested AGENTS.md files follow?",
+      "options": [
+        "Only the root file is read",
+        "Walk from the working file toward the repo root, concatenate every AGENTS.md found on the way (nearest wins; sub-directories extend root)",
+        "Random selection",
+        "Alphabetical merge"
+      ]
+    },
+    {
+      "q": "What is the difference between an aspirational rule and an operational rule?",
+      "options": [
+        "Aspirational rules require a manager",
+        "Aspirational rules have no check ('be careful'); operational rules carry a machine-checkable function the workbench can run",
+        "Aspirational rules are paid; operational rules are free",
+        "Operational rules are longer"
+      ]
+    },
+    {
+      "q": "What five categories does the lesson cover most rules with?",
+      "options": [
+        "Plan, act, reflect, refine, ship",
+        "Read, write, exec, fork, exit",
+        "Low, medium, high, critical, fatal",
+        "Startup, forbidden, definition of done, uncertainty, approval"
+      ]
+    },
+    {
+      "q": "Which severity tag stops execution and requires an operator override?",
+      "options": [
+        "soft",
+        "warn",
+        "block",
+        "info"
+      ]
+    },
+    {
+      "q": "Why does the lesson recommend tagging severity at write time?",
+      "options": [
+        "Linters require it",
+        "Teams overstate severity early and weaken it under deadline pressure; writing severity up front forces the calibration",
+        "It looks prettier in markdown",
+        "It saves tokens"
+      ]
+    },
+    {
+      "q": "What does the markdown-as-source, JSON-as-cache pattern do?",
+      "options": [
+        "Replaces markdown",
+        "Encrypts the rules",
+        "Disables review",
+        "agent-rules.md is the authored file; agent-rules.lock.json is a hot-path cache regenerated by a pre-commit hook (same shape as package.json + lock)"
+      ]
+    },
+    {
+      "q": "What is rule expiry as a forcing function?",
+      "options": [
+        "Rules over 24 hours fail closed",
+        "Each rule carries an expires_at (default 90 days); unfired rules trigger a quarterly review to justify, weaken, or delete them",
+        "Rules expire automatically; no review needed",
+        "Rules expire when the cache is full"
+      ]
+    },
+    {
+      "q": "How do rules relate to framework guardrails?",
+      "options": [
+        "Rules replace guardrails",
+        "Only one of them is required",
+        "Guardrails enforce rules at runtime; the rule set is the human-readable contract those guardrails implement",
+        "Guardrails are an alternative to rules"
+      ]
+    },
+    {
+      "q": "What is the durability test that decides whether a piece of information belongs in repo memory?",
+      "options": [
+        "Whether the user marked it as important",
+        "Whether it would be useful three months from now in a CI rerun; if yes, repo; if no, telemetry",
+        "Whether it is JSON",
+        "Whether it fits in 4 kB"
+      ]
+    },
+    {
+      "q": "What schema field carries the agent's contract version?",
+      "options": [
+        "schema_version",
+        "model_id",
+        "session_uuid",
+        "build_hash"
+      ]
+    },
+    {
+      "q": "How does atomic write work?",
+      "options": [
+        "tempfile.mkstemp in the same directory, write, fsync, os.replace (atomic rename) over the target",
+        "Append-only with a CRC",
+        "Encrypt and overwrite",
+        "Truncate-then-write to the target"
+      ]
+    },
+    {
+      "q": "Why are idempotency keys required for non-idempotent tool calls?",
+      "options": [
+        "If the agent crashes after a tool call but before checkpointing the result, retry safely; log call ID before execution and skip the call on retry",
+        "To shorten output",
+        "For billing",
+        "To deduplicate logs"
+      ]
+    },
+    {
+      "q": "Where should large artifacts (CSVs, long transcripts, generated files) live relative to state?",
+      "options": [
+        "Concatenated into one giant log",
+        "In environment variables",
+        "Inline in agent_state.json",
+        "As separate files (or object storage) with only the path kept in state, so checkpoints stay small and fast"
+      ]
+    },
+    {
+      "q": "What does event sourcing for audit + snapshots for resume buy you?",
+      "options": [
+        "Replay agent decisions verbatim by reading the snapshot then replaying events after it; same shape as Postgres WAL",
+        "Faster inference",
+        "Lower disk usage",
+        "Native voice support"
+      ]
+    },
+    {
+      "q": "What does the lesson say happens when schema_version mismatches?",
+      "options": [
+        "The manager silently upgrades",
+        "The state is deleted",
+        "The agent retries",
+        "The manager refuses to load until a migration script in tools/migrate_state.py runs"
+      ]
+    },
+    {
+      "q": "What does an init script eliminate?",
+      "options": [
+        "Authn tokens",
+        "Provider rate limits",
+        "Latency from inference",
+        "The per-session setup tax: probing runtime, listing the repo, retrying the same checks each new session"
+      ]
+    },
+    {
+      "q": "What is the init script's failure-mode contract?",
+      "options": [
+        "Fail loud, fail fast, fail in one place; refuse to start when the workbench is broken",
+        "Always succeed",
+        "Retry forever",
+        "Fail soft and continue"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the probes the lesson lists?",
+      "options": [
+        "Token-by-token sampling temperature",
+        "Test command resolvability",
+        "Dependency availability",
+        "Runtime versions"
+      ]
+    },
+    {
+      "q": "Why does the lesson say init must be idempotent?",
+      "options": [
+        "It satisfies SOC 2",
+        "It is required by JSON Schema",
+        "Idempotence saves money",
+        "Running it twice should be a no-op except for a fresh timestamp, so it can be wired into CI, hooks, or a pre-task slash command"
+      ]
+    },
+    {
+      "q": "What is last-known-good commit anchoring?",
+      "options": [
+        "The earliest commit in the repo",
+        "Probe the current commit against an LKG file; refuse to start if the diff exceeds a budget without human ratification",
+        "The most recent commit by the team lead",
+        "The merge base of HEAD and main"
+      ]
+    },
+    {
+      "q": "What does the lock file with TTL pattern do?",
+      "options": [
+        "Writes prereqs.lock after a successful probe pass; subsequent runs trust the lock for 24h and skip expensive probes if the manifest hash matches",
+        "Locks the repo from edits",
+        "Disables CI",
+        "Blocks all writes for 24 hours"
+      ]
+    },
+    {
+      "q": "What should NEVER appear in the init hot path?",
+      "options": [
+        "Network calls, LLM calls, external license checks; probes are deterministic plumbing under three seconds",
+        "Reading the lockfile",
+        "Local filesystem reads",
+        "Reading env vars"
+      ]
+    },
+    {
+      "q": "Why is scope creep called the most under-monitored failure mode?",
+      "options": [
+        "It is too rare to monitor",
+        "Tests catch it automatically",
+        "It crashes the agent loudly",
+        "Each touch had a plausible reason in the moment; together they form a different change than was reviewed"
+      ]
+    },
+    {
+      "q": "Which contract field does the lesson call half the contract?",
+      "options": [
+        "approvals_required",
+        "forbidden_files (the negative space)",
+        "goal",
+        "task_id"
+      ]
+    },
+    {
+      "q": "Why pin allowed/forbidden to globs rather than raw paths?",
+      "options": [
+        "Globs encrypt better",
+        "Globs are faster",
+        "Raw paths are not JSON-serializable",
+        "Real repos move files; globs survive refactors between sessions"
+      ]
+    },
+    {
+      "q": "What does the 'violation budget' pattern do?",
+      "options": [
+        "Charges per violation",
+        "Allows minor scope slips as warnings within a budget; only excess triggers a merge refusal — the difference between a gate that ships and one that gets disabled",
+        "Throttles model calls",
+        "Sets a monthly budget for the agent"
+      ]
+    },
+    {
+      "q": "What did the specsmaxxing practitioner report?",
+      "options": [
+        "Latency dropped 90%",
+        "Cost rose 5x",
+        "Rabbit-hole rate dropped from 52% to 21% in three weeks without changing the agent; the contract did the work, not the model",
+        "Tests slowed down"
+      ]
+    },
+    {
+      "q": "What are the multi-contract merge semantics (least privilege)?",
+      "options": [
+        "Last contract wins",
+        "Intersect allowed_files; union forbidden_files; min time_budget; accumulate approvals; deny-all sticks; merge of None defers to the other side",
+        "Random tie-break",
+        "First contract wins"
+      ]
+    },
+    {
+      "q": "Why do time and network budgets belong in the contract too?",
+      "options": [
+        "Providers require them",
+        "Wall clock and external-host access are scope dimensions; file globs alone are necessary but not sufficient",
+        "They make the JSON smaller",
+        "They are required by Apache 2.0"
+      ]
+    },
+    {
+      "q": "What does the feedback runner force the agent to do?",
+      "options": [
+        "React to imagined output",
+        "React to facts: structured stdout/stderr/exit/duration records captured into the loop on every command",
+        "Skip verification",
+        "Use a different model"
+      ]
+    },
+    {
+      "q": "How does feedback differ from telemetry?",
+      "options": [
+        "Feedback is for the next turn of this run; telemetry is for operators reviewing runs across time (different files, different retention)",
+        "They are the same thing",
+        "Telemetry is paid",
+        "Telemetry uses OTel; feedback uses GraphQL"
+      ]
+    },
+    {
+      "q": "Which field MUST appear in every feedback record?",
+      "options": [
+        "exit_code (and a null exit must refuse to advance the loop)",
+        "embedding_vector",
+        "model_id",
+        "prompt_cache_token"
+      ]
+    },
+    {
+      "q": "How does the runner truncate large outputs?",
+      "options": [
+        "Compresses with gzip",
+        "Random sampling",
+        "First 10 lines only",
+        "Deterministic head + tail with a 'truncated N lines' marker so the same output always produces the same record"
+      ]
+    },
+    {
+      "q": "Why redact at write time rather than read time?",
+      "options": [
+        "Read-time redaction breaks JSON",
+        "The file on disk is what an attacker reaches; redacting only on read leaves secrets in JSONL files",
+        "It is faster",
+        "Compression"
+      ]
+    },
+    {
+      "q": "What does parent_command_id give the workbench?",
+      "options": [
+        "Faster file I/O",
+        "Lower memory",
+        "Retries link to their parent attempt so the reviewer and audit see the failure chain; without it retries look like independent successes",
+        "Cheaper inference"
+      ]
+    },
+    {
+      "q": "Why cap feedback_record.jsonl at 1 MB with rotation?",
+      "options": [
+        "Disks are too slow",
+        "The agent only reads the current file; rotation keeps runtime cost bounded while CI artifacts capture the full set",
+        "JSON does not handle larger files",
+        "The provider charges per byte"
+      ]
+    },
+    {
+      "q": "What single question does the verification gate answer?",
+      "options": [
+        "Is this task actually complete? (reading scope, rule, feedback, and diff artifacts)",
+        "Is the prompt optimal?",
+        "Is the model fast?",
+        "Is the token budget healthy?"
+      ]
+    },
+    {
+      "q": "Why must the gate be deterministic?",
+      "options": [
+        "The same artifact set must produce the same verdict every time; LLM judges belong in the reviewer (qualitative), not the gate (status)",
+        "Providers require it",
+        "Determinism is free",
+        "It saves money"
+      ]
+    },
+    {
+      "q": "What is the gate's override discipline?",
+      "options": [
+        "Block-severity findings can only be overridden by a human with a recorded override_reason and overridden_by user id in a signed audit log",
+        "Overrides are forbidden",
+        "Anyone can override silently",
+        "Override requires a manager email"
+      ]
+    },
+    {
+      "q": "What is the Hybrid Norm pairing the lesson cites?",
+      "options": [
+        "GPU and CPU split",
+        "Hot/cold prompts",
+        "Verifiable rewards (tests, schemas, exit codes) answer 'did it solve the problem?'; LLM rubrics answer 'is it readable, secure, on-style?'",
+        "Cache vs no-cache"
+      ]
+    },
+    {
+      "q": "How does defense-in-depth layer the gates?",
+      "options": [
+        "Pre-commit hook -> CI status check -> pre-tool authz hook -> pre-merge gate; each layer is deterministic so failure in one is caught by the next",
+        "Single gate at merge time",
+        "Only a chat reminder",
+        "Only IDE warnings"
+      ]
+    },
+    {
+      "q": "What does a coverage_floor check protect against?",
+      "options": [
+        "Hot-path latency",
+        "Agents quietly deleting tests that fail; the gate fails if measured coverage drops below the floor or last merge by more than 1 percentage point",
+        "Cold starts",
+        "Outdated lockfiles"
+      ]
+    },
+    {
+      "q": "When should --strict mode promote every warn to block?",
+      "options": [
+        "Always",
+        "Never",
+        "Only on Sundays",
+        "Release branches, ship-blocking PRs, post-incident triage; not the daily default because strict-on-everything corrodes flow"
+      ]
+    },
+    {
+      "q": "Why cannot the builder reliably grade its own work?",
+      "options": [
+        "It runs out of tokens",
+        "The model rejects self-grading",
+        "Acceptance is necessary but not sufficient; problem-fit, scope discipline, documented assumptions, and handoff readiness need a different role with different inputs",
+        "It loses authentication"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the five rubric dimensions?",
+      "options": [
+        "Inference latency",
+        "Problem fit",
+        "Scope discipline",
+        "Verification quality"
+      ]
+    },
+    {
+      "q": "What does role separation require?",
+      "options": [
+        "A different system prompt and different inputs; the same model can play both roles if posture changes and the reviewer has no write access to the diff",
+        "A different model",
+        "A new account",
+        "Different physical hardware"
+      ]
+    },
+    {
+      "q": "What does Cloudflare's 2026 review architecture look like?",
+      "options": [
+        "Round-robin two reviewers",
+        "Up to seven specialist reviewers in parallel under a Review Coordinator that deduplicates findings; top-tier model only for the coordinator, cheaper tiers for specialists",
+        "One big reviewer",
+        "Single sequential LLM"
+      ]
+    },
+    {
+      "q": "Which of these is NOT one of the four LLM-judge biases the lesson lists?",
+      "options": [
+        "Vector locality",
+        "Verbosity bias (longer outputs score higher)",
+        "Self-preference (same model family)",
+        "Position bias (A,B vs B,A ordering inconsistency)"
+      ]
+    },
+    {
+      "q": "What is a calibration set?",
+      "options": [
+        "A new training corpus",
+        "10-20 historical task close-outs with known correct verdicts; rerun on every prompt change; if reviewer agreement falls below 80%, fix the rubric before shipping",
+        "An A/B test fixture",
+        "A vector index"
+      ]
+    },
+    {
+      "q": "Where does the reviewer's report integrate with the rest of the workbench?",
+      "options": [
+        "It replaces verification",
+        "It only goes to the manager",
+        "It bundles into the handoff packet (Lesson 40); human review starts from the report, not from a blank page",
+        "It overrides the gate"
+      ]
+    },
+    {
+      "q": "Which field is the load-bearing one in a handoff packet?",
+      "options": [
+        "next_action (without it, the document is a status report, not a handoff)",
+        "verdict_pointer",
+        "summary",
+        "commands_run"
+      ]
+    },
+    {
+      "q": "Why are handoffs generated, not written?",
+      "options": [
+        "Hand-written handoffs get skipped on a hard day; the generator reads workbench artifacts and emits the packet, so the agent just leaves the workbench in a state the generator can summarize",
+        "Apache 2.0 requires it",
+        "Generators are faster",
+        "Generators encrypt better"
+      ]
+    },
+    {
+      "q": "Which two forms does the packet ship in?",
+      "options": [
+        "Email and Slack",
+        "PDF and PNG",
+        "YAML and TOML",
+        "handoff.md (human-readable) and handoff.json (machine-readable, both from the same source artifacts; JSON wins on divergence)"
+      ]
+    },
+    {
+      "q": "How does the lesson distinguish compaction from handoff?",
+      "options": [
+        "They are the same",
+        "Compaction is paid, handoff is free",
+        "Handoff requires GPU",
+        "Compaction extends a session; handoff closes one cleanly and starts the next in fresh context. The packet is what makes that transition cheap"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend about when to wrap up a session?",
+      "options": [
+        "Before 50-75% context budget, while context is intact; cheap to write before compression artifacts pollute state",
+        "At 100% context, then panic",
+        "Only after a merge",
+        "Only at midnight"
+      ]
+    },
+    {
+      "q": "What does the lesson recommend trimming the feedback log to in the packet?",
+      "options": [
+        "Last K entries plus every entry with a non-zero exit, so the packet stays small while the failure history survives",
+        "Random N entries",
+        "First K entries only",
+        "Only the most recent entry"
+      ]
+    },
+    {
+      "q": "What metadata makes coordination across multi-agent sessions work?",
+      "options": [
+        "branch, last_known_good_commit, and status (active | superseded | archived); only one active handoff per branch and topic",
+        "A shared Slack channel",
+        "A central queue",
+        "Top secret encryption"
+      ]
+    },
+    {
+      "q": "What is the goal of running the same task through prompt-only and workbench-guided pipelines?",
+      "options": [
+        "To benchmark GPUs",
+        "To compare models",
+        "To produce a before/after report you can hand to a skeptic with numbers, not arguments",
+        "To pick a vendor"
+      ]
+    },
+    {
+      "q": "Which is NOT one of the five outcomes measured?",
+      "options": [
+        "files_outside_scope",
+        "model_perplexity",
+        "acceptance_met",
+        "tests_actually_run"
+      ]
+    },
+    {
+      "q": "What did LangChain's Anatomy of an Agent Harness measure on Terminal Bench 2.0?",
+      "options": [
+        "Top model lost 25 places",
+        "Models all converged at top-3",
+        "Harness changes did not move the rank",
+        "Same model moved from outside top 30 to rank five by changing only the harness"
+      ]
+    },
+    {
+      "q": "What does the preprints.org paper cite as the failure rate for enterprise agent projects?",
+      "options": [
+        "8%",
+        "About 88% fail to reach production, with failures clustering around runtime, not reasoning",
+        "About 50%",
+        "None fail"
+      ]
+    },
+    {
+      "q": "What does WebAgent baseline accuracy do in long-context conditions?",
+      "options": [
+        "Stays flat",
+        "Drops from 40-50% to under 10% mostly from infinite loops and goal loss",
+        "Goes up by 30%",
+        "Halves but stays above 30%"
+      ]
+    },
+    {
+      "q": "What does the lesson say about false negatives (cases where prompt-only is faster)?",
+      "options": [
+        "Single-step factual tasks, one-line lints, formatter runs are faster prompt-only; enumerate them honestly so the workbench is not framed as overkill",
+        "They prove the workbench fails",
+        "They do not exist",
+        "They invalidate the harness thesis"
+      ]
+    },
+    {
+      "q": "Where do you cite the report from this lesson?",
+      "options": [
+        "Internal HR review",
+        "Only at hackathons",
+        "When someone wants to drop the verification gate 'just for this sprint', or when a new agent product launches and needs a portable time-savings benchmark",
+        "Only in marketing decks"
+      ]
+    },
+    {
+      "q": "What does the capstone produce?",
+      "options": [
+        "A monitoring dashboard",
+        "A versioned drop-in directory (agent-workbench-pack/) with the seven surfaces plus a bin/install.sh that lays them down idempotently",
+        "A research paper",
+        "A new LLM"
+      ]
+    },
+    {
+      "q": "Which is NOT part of the pack layout?",
+      "options": [
+        "vendor_proprietary_weights/",
+        "schemas/",
+        "AGENTS.md + docs/",
+        "scripts/"
+      ]
+    },
+    {
+      "q": "Why does the pack carry a VERSION file?",
+      "options": [
+        "To track agent IQ",
+        "For SEO",
+        "To advertise on Hacker News",
+        "Major bumps for schema/script changes that require migrations; minor for additions; patch for doc-only; the target repo records which version it was installed against"
+      ]
+    },
+    {
+      "q": "What does cross-tool distribution look like in this pack?",
+      "options": [
+        "One source file with symlinks (ln -s AGENTS.md CLAUDE.md, .cursor/rules/, .github/copilot-instructions.md) so the same source fans out to every coding agent",
+        "Manual copy per tool",
+        "Hard-code each tool's path",
+        "A vendor lock per tool"
+      ]
+    },
+    {
+      "q": "How does the lesson recommend the uninstaller behave?",
+      "options": [
+        "Delete only docs",
+        "Refuse on non-trivial state; never delete user agent_state.json, task_board.json, or outputs/; only remove schemas, scripts, docs, and AGENTS.md (with opt-out)",
+        "Delete everything including state",
+        "Disable git"
+      ]
+    },
+    {
+      "q": "What stays OUT of the pack?",
+      "options": [
+        "Scripts",
+        "Schemas",
+        "Project-specific tasks, vendor SDK calls, team onboarding prose — the pack is framework-agnostic and lives next to onboarding, not inside it",
+        "The installer"
+      ]
+    },
+    {
+      "q": "Through what channel does the pack ship to many coding agents at once?",
+      "options": [
+        "SkillKit-style distribution (skillkit install agent-workbench-pack) lays it down across 32 AI agents from a single source",
+        "Email attachment",
+        "Hand-copy",
+        "GitHub release notes only"
+      ]
+    }
+  ]
+}

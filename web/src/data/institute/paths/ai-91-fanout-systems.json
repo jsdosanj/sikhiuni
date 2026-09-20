@@ -1,0 +1,32 @@
+{
+  "track": "ai-91-fanout-systems",
+  "school": "ai",
+  "blurb": "The public map of Fanout's system design course — deep notes, interview case studies, and from-scratch implementations, read at the source.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to build this reading map. No lesson text, video, or diagram is reproduced here — every card opens the real page at fanout.sh. Most of the course's roughly 350 modules, real-world system designs, and case studies sit behind Fanout's paid Pro plans; the pages below are the free public map over that curriculum."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "course-map",
+      "title": "The course map",
+      "objective": "Read the free overview of Fanout's system design course before deciding which paid module to start with.",
+      "teach": "Fanout's system design course runs in three public parts: fundamentals (requirements through distributed storage and search), real-world systems (a URL shortener through a video platform), and documented case studies (Instagram, Stripe, Discord, Dynamo, GitLab). The overview, roadmap, and resources pages are free; the modules and case studies themselves are Fanout's paid content, priced separately from the AI research course.",
+      "labs": [
+        { "title": "System Design Course: Concepts, Cases and Builds", "provider": "Fanout", "href": "https://fanout.sh/system", "cost": "free" },
+        { "title": "System Design Overview", "provider": "Fanout", "href": "https://fanout.sh/system/overview", "cost": "free" },
+        { "title": "System Design Roadmap", "provider": "Fanout", "href": "https://fanout.sh/system/roadmap", "cost": "free" },
+        { "title": "System Design Resources", "provider": "Fanout", "href": "https://fanout.sh/system/resources", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Fanout Course Pricing", "provider": "Fanout", "href": "https://fanout.sh/pricing", "note": "The system design modules and case studies sit behind Fanout's paid plans, priced alongside the AI research and ML math courses." }
+  ]
+}

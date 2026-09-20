@@ -1,0 +1,81 @@
+{
+  "id": "aisf-00-setup::git-and-collaboration",
+  "num": 2,
+  "slug": "git-and-collaboration",
+  "title": "Git & Collaboration",
+  "tagline": "Version control is not optional. Every experiment, every model, every lesson you build here gets tracked.",
+  "type": "Learn",
+  "languages": "--",
+  "time": "~30 minutes",
+  "objectives": [
+    "Configure git identity and use the daily workflow of add, commit, and push",
+    "Create and merge branches for isolated experiments without breaking main",
+    "Write a `.gitignore` that excludes model checkpoints and large binary files",
+    "Navigate the commit history with `git log` to understand project evolution"
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>You&#39;re about to write hundreds of code files across 20 phases. Without version control you will lose work, break things you can&#39;t undo, and have no way to collaborate with others.</p>\n<p>Git is the tool. GitHub is where the code lives. This lesson covers what you need for this course and nothing more.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">sequenceDiagram\n    participant WD as Working Directory\n    participant SA as Staging Area\n    participant LR as Local Repo\n    participant R as Remote (GitHub)\n    WD-&gt;&gt;SA: git add\n    SA-&gt;&gt;LR: git commit\n    LR-&gt;&gt;R: git push\n    R-&gt;&gt;LR: git fetch\n    LR-&gt;&gt;WD: git pull</pre>\n<p>Three things to remember:</p>\n<ol>\n<li>Save often (<code>git commit</code>)</li>\n<li>Push to remote (<code>git push</code>)</li>\n<li>Branch for experiments (<code>git checkout -b experiment</code>)</li>\n</ol>\n<p class=\"i-lesson-figure\"><em>Diagram <code>s0-commit-dag</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: Configure git</h3>\n<pre><code class=\"language-bash\">git config --global user.name &quot;Your Name&quot;\ngit config --global user.email &quot;you@example.com&quot;\n</code></pre>\n<h3>Step 2: The daily workflow</h3>\n<pre><code class=\"language-bash\">git status\ngit add file.py\ngit commit -m &quot;Add perceptron implementation&quot;\ngit push origin main\n</code></pre>\n<h3>Step 3: Branching for experiments</h3>\n<pre><code class=\"language-bash\">git checkout -b experiment/new-optimizer\n\n# ... make changes, commit ...\n\ngit checkout main\ngit merge experiment/new-optimizer\n</code></pre>\n<h3>Step 4: Working with this course repo</h3>\n<p>You can&#39;t push to the course repo itself — only maintainers have write access. Fork it on GitHub first (the Fork button, top right) so <code>origin</code> points at your own copy:</p>\n<pre><code class=\"language-bash\">git clone https://github.com/YOUR-USERNAME/ai-engineering-from-scratch.git\ncd ai-engineering-from-scratch\n\ngit checkout -b my-progress\n# work through lessons, commit your code\ngit push origin my-progress\n</code></pre>\n<h2>Use It</h2>\n<p>For this course, you need exactly these commands:</p>\n<table>\n<thead>\n<tr>\n<th>Command</th>\n<th>When</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>git clone</code></td>\n<td>Get the course repo</td>\n</tr>\n<tr>\n<td><code>git add</code> + <code>git commit</code></td>\n<td>Save your work</td>\n</tr>\n<tr>\n<td><code>git push</code></td>\n<td>Back it up to GitHub</td>\n</tr>\n<tr>\n<td><code>git checkout -b</code></td>\n<td>Try something without breaking main</td>\n</tr>\n<tr>\n<td><code>git log --oneline</code></td>\n<td>See what you&#39;ve done</td>\n</tr>\n</tbody></table>\n<p>That&#39;s it. You don&#39;t need rebase, cherry-pick, or submodules for this course.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Fork this repo, clone your fork, create a branch called <code>my-progress</code>, make a file, commit it, push it</li>\n<li>Create a <code>.gitignore</code> that excludes model checkpoint files (<code>.pt</code>, <code>.pth</code>, <code>.safetensors</code>)</li>\n<li>Look at the commit history of this repo with <code>git log --oneline</code> and read how lessons were added</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Commit</td>\n<td>&quot;Saving&quot;</td>\n<td>A snapshot of your entire project at a point in time</td>\n</tr>\n<tr>\n<td>Branch</td>\n<td>&quot;A copy&quot;</td>\n<td>A pointer to a commit that moves forward as you work</td>\n</tr>\n<tr>\n<td>Merge</td>\n<td>&quot;Combining code&quot;</td>\n<td>Taking changes from one branch and applying them to another</td>\n</tr>\n<tr>\n<td>Remote</td>\n<td>&quot;The cloud&quot;</td>\n<td>A copy of your repo hosted somewhere else (GitHub, GitLab)</td>\n</tr>\n</tbody></table>\n",
+  "hasMermaid": true,
+  "code": {},
+  "quiz": [
+    {
+      "q": "What does 'version control' primarily help you do?",
+      "options": [
+        "Automatically fix bugs in your code",
+        "Speed up code execution",
+        "Track changes to files over time and collaborate with others",
+        "Compress files to save disk space"
+      ],
+      "answer": 2,
+      "explanation": "Version control systems like git track every change made to files, allowing you to revert to previous states and collaborate with others on the same codebase."
+    },
+    {
+      "q": "What is a 'repository' in the context of software development?",
+      "options": [
+        "A package manager for installing libraries",
+        "A collection of files and their complete change history managed by version control",
+        "A database for storing user data",
+        "A cloud storage service like Google Drive"
+      ],
+      "answer": 1,
+      "explanation": "A repository (repo) is a directory tracked by git that contains all project files along with the full history of changes made to those files."
+    },
+    {
+      "q": "What is the correct sequence for saving and backing up your work in git?",
+      "options": [
+        "git push, git add, git commit",
+        "git clone, git add, git push",
+        "git add, git commit, git push",
+        "git commit, git add, git push"
+      ],
+      "answer": 2,
+      "explanation": "First you stage changes with 'git add', then save a snapshot with 'git commit', then upload to the remote with 'git push'. This is the daily workflow."
+    },
+    {
+      "q": "What does 'git checkout -b experiment/new-optimizer' do?",
+      "options": [
+        "Creates a new branch named experiment/new-optimizer and switches to it",
+        "Deletes the branch experiment/new-optimizer",
+        "Downloads a branch from GitHub called experiment/new-optimizer",
+        "Reverts all files to match the experiment/new-optimizer branch"
+      ],
+      "answer": 0,
+      "explanation": "The '-b' flag creates a new branch with the given name and immediately switches to it, allowing you to experiment without affecting the main branch."
+    },
+    {
+      "q": "Why should you add '.pt', '.pth', and '.safetensors' to your .gitignore?",
+      "options": [
+        "They are model checkpoint files that are too large for git and can be re-generated",
+        "Git cannot track binary files of any kind",
+        "They are Python test files that should not be committed",
+        "They contain sensitive API keys"
+      ],
+      "answer": 0,
+      "explanation": "Model checkpoint files (.pt, .pth, .safetensors) are often gigabytes in size. Git is not designed for large binary files, so these should be excluded and re-generated or stored separately."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/00-setup-and-tooling/02-git-and-collaboration"
+  }
+}

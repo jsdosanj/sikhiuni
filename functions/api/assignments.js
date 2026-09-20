@@ -1,6 +1,8 @@
+import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent } from "./_lib.js";
 
 async function ensure(env) {
+  return schemaOnce(env.DB, "assignments", async () => {
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, teacher_id TEXT NOT NULL, " +
     "title TEXT NOT NULL, instructions TEXT NOT NULL, due_at INTEGER, points INTEGER NOT NULL DEFAULT 100, " +
@@ -12,6 +14,7 @@ async function ensure(env) {
     "grade INTEGER, feedback TEXT, graded_by TEXT, graded_at INTEGER, status TEXT NOT NULL DEFAULT 'submitted', " +
     "UNIQUE (assignment_id, user_id))"
   ).run();
+  });
 }
 
 async function ownsCourse(env, user, courseId) {

@@ -1,0 +1,188 @@
+{
+  "track": "aisf-12-multimodal",
+  "phaseDir": "12-multimodal-ai",
+  "blurb": "Models that see, hear, read, and reason across modalities.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-12-multimodal::vision-transformer-patch-tokens",
+      "num": 1,
+      "slug": "vision-transformer-patch-tokens",
+      "title": "Vision Transformers and the Patch-Token Primitive",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::clip-contrastive-pretraining",
+      "num": 2,
+      "slug": "clip-contrastive-pretraining",
+      "title": "CLIP and Contrastive Vision-Language Pretraining",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::blip2-qformer-bridge",
+      "num": 3,
+      "slug": "blip2-qformer-bridge",
+      "title": "From CLIP to BLIP-2 — Q-Former as Modality Bridge",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::flamingo-gated-cross-attention",
+      "num": 4,
+      "slug": "flamingo-gated-cross-attention",
+      "title": "Flamingo and Gated Cross-Attention for Few-Shot VLMs",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::llava-visual-instruction-tuning",
+      "num": 5,
+      "slug": "llava-visual-instruction-tuning",
+      "title": "LLaVA and Visual Instruction Tuning",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::any-resolution-patch-n-pack",
+      "num": 6,
+      "slug": "any-resolution-patch-n-pack",
+      "title": "Any-Resolution Vision: Patch-n'-Pack and NaFlex",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::open-weight-vlm-recipes",
+      "num": 7,
+      "slug": "open-weight-vlm-recipes",
+      "title": "Open-Weight VLM Recipes: What Actually Matters",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::llava-onevision-single-multi-video",
+      "num": 8,
+      "slug": "llava-onevision-single-multi-video",
+      "title": "LLaVA-OneVision: Single-Image, Multi-Image, Video in One Model",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::qwen-vl-family-dynamic-fps",
+      "num": 9,
+      "slug": "qwen-vl-family-dynamic-fps",
+      "title": "Qwen-VL Family and Dynamic-FPS Video",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::internvl3-native-multimodal",
+      "num": 10,
+      "slug": "internvl3-native-multimodal",
+      "title": "InternVL3: Native Multimodal Pretraining",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::chameleon-early-fusion-tokens",
+      "num": 11,
+      "slug": "chameleon-early-fusion-tokens",
+      "title": "Chameleon and Early-Fusion Token-Only Multimodal Models",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::emu3-next-token-for-generation",
+      "num": 12,
+      "slug": "emu3-next-token-for-generation",
+      "title": "Emu3: Next-Token Prediction for Image and Video Generation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::transfusion-autoregressive-diffusion",
+      "num": 13,
+      "slug": "transfusion-autoregressive-diffusion",
+      "title": "Transfusion: Autoregressive Text + Diffusion Image in One Transformer",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::show-o-discrete-diffusion-unified",
+      "num": 14,
+      "slug": "show-o-discrete-diffusion-unified",
+      "title": "Show-o and Discrete-Diffusion Unified Models",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::janus-pro-decoupled-encoders",
+      "num": 15,
+      "slug": "janus-pro-decoupled-encoders",
+      "title": "Janus-Pro: Decoupled Encoders for Unified Multimodal Models",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::mio-any-to-any-streaming",
+      "num": 16,
+      "slug": "mio-any-to-any-streaming",
+      "title": "MIO and Any-to-Any Streaming Multimodal Models",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::video-language-temporal-grounding",
+      "num": 17,
+      "slug": "video-language-temporal-grounding",
+      "title": "Video-Language Models: Temporal Tokens and Grounding",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::long-video-million-token",
+      "num": 18,
+      "slug": "long-video-million-token",
+      "title": "Long-Video Understanding at Million-Token Context",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::audio-language-whisper-to-af3",
+      "num": 19,
+      "slug": "audio-language-whisper-to-af3",
+      "title": "Audio-Language Models: the Whisper to Audio Flamingo 3 Arc",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::omni-models-thinker-talker",
+      "num": 20,
+      "slug": "omni-models-thinker-talker",
+      "title": "Omni Models: Qwen2.5-Omni and the Thinker-Talker Split",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::embodied-vlas-openvla-pi0-groot",
+      "num": 21,
+      "slug": "embodied-vlas-openvla-pi0-groot",
+      "title": "Embodied VLAs: RT-2, OpenVLA, π0, GR00T",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::document-diagram-understanding",
+      "num": 22,
+      "slug": "document-diagram-understanding",
+      "title": "Document and Diagram Understanding",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::colpali-vision-native-rag",
+      "num": 23,
+      "slug": "colpali-vision-native-rag",
+      "title": "ColPali and Vision-Native Document RAG",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::multimodal-rag-cross-modal",
+      "num": 24,
+      "slug": "multimodal-rag-cross-modal",
+      "title": "Multimodal RAG and Cross-Modal Retrieval",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-12-multimodal::multimodal-agents-computer-use",
+      "num": 25,
+      "slug": "multimodal-agents-computer-use",
+      "title": "Multimodal Agents and Computer-Use (Capstone)",
+      "nQuiz": 0
+    }
+  ]
+}

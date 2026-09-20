@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import DeptHero from '../../components/departments/DeptHero.astro';
+import DeptSections from '../../components/departments/DeptSections.astro';
+import { departments } from '../../lib/departments';
+const d = departments.find((x) => x.id === 'history')!;
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `${d.name}, Sikhi University`, description: d.blurb,
+  url: 'https://sikhiuni.com/departments/history',
+  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+};
+const eras = [
+  ['1469', 'Guru Nānak Sāhib', 'The founding, and the first of the ten Gurus. The Udāsīs, and a new way of seeing.'],
+  ['1604', 'The Ādi Granth', 'Guru Arjan Sāhib compiles the scripture and installs it at Darbār Sāhib.'],
+  ['1699', 'The Khālsā', 'Guru Gobind Singh Jī gives the Panth its form on Vaisākhī at Anandpur.'],
+  ['1799', 'Sarkār-i-Khālsā', 'Ranjīt Singh takes Lahore, four decades of Sikh sovereignty across Punjab.'],
+  ['1849', 'Annexation', 'The Sikh kingdom falls to the East India Company after the Anglo-Sikh wars.'],
+  ['1920', 'The Akālī Lehar', 'The Gurdwārā reform movement; the SGPC is founded.'],
+  ['1947', 'Partition', 'Punjab is cut in two, the largest forced migration in recorded history.'],
+  ['1984', 'Ghallūghārā', 'The attack on Darbār Sāhib, and the years that followed.'],
+  ['Now', 'A global Panth', 'Sikhs on every continent, and the questions the diaspora carries.'],
+];
+---
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page hi-page" style={`--dept:${d.accent}`}>
+    <DeptHero d={d}>
+      <section class="hi-sig" aria-label="A timeline of the Sikh past">
+        <div class="wrap hi-in">
+          <div class="hi-head">
+            <figure class="hi-glass" aria-hidden="true">
+              <svg viewBox="0 0 80 120" class="hi-hg">
+                <path d="M12 8 H68 M12 112 H68 M14 10 C14 40 34 52 40 60 C46 52 66 40 66 10 M14 110 C14 80 34 68 40 60 C46 68 66 80 66 110" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                <clipPath id="hi-top"><path d="M16 12 C16 38 34 50 40 58 C46 50 64 38 64 12 Z" /></clipPath>
+                <clipPath id="hi-bot"><path d="M16 108 C16 82 34 70 40 62 C46 70 64 82 64 108 Z" /></clipPath>
+                <rect class="hi-sand-top" x="14" y="12" width="52" height="46" clip-path="url(#hi-top)" />
+                <rect class="hi-sand-bot" x="14" y="108" width="52" height="0" clip-path="url(#hi-bot)" />
+                <line class="hi-stream" x1="40" y1="58" x2="40" y2="64" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </figure>
+            <div>
+              <p class="hi-kicker">Five and a half centuries, Nānak to now</p>
+              <h2 class="hi-h">Walk it like a museum, every course sits on this line</h2>
+            </div>
+          </div>
+
+          <ol class="hi-timeline">
+            <span class="hi-spine" aria-hidden="true"></span>
+            {eras.map(([yr, t, b]) => (
+              <li class="hi-node">
+                <span class="hi-dot" aria-hidden="true"></span>
+                <span class="hi-yr">{yr}</span>
+                <span class="hi-t">{t}</span>
+                <span class="hi-b">{b}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    </DeptHero>
+    <DeptSections d={d} />
+  </div>
+
+  <style>
+    .hi-sig { background: linear-gradient(180deg, #1a3554, #10243b); color: #ecd9c4; padding: clamp(3.5rem, 8vw, 6rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
+    .hi-head { display: flex; align-items: center; gap: 22px; }
+    .hi-glass { margin: 0; flex: none; width: 64px; color: color-mix(in srgb, var(--dept) 50%, #fff); }
+    .hi-hg { width: 100%; height: auto; }
+    .hi-sand-top { fill: #e8b872; animation: hi-drain 6s linear infinite; }
+    .hi-sand-bot { fill: #e8b872; animation: hi-fill 6s linear infinite; }
+    .hi-stream { stroke: #e8b872; opacity: .8; animation: hi-stream 6s steps(1) infinite; }
+    @keyframes hi-drain { from { height: 46px; y: 12px; } to { height: 0; y: 58px; } }
+    @keyframes hi-fill  { from { height: 0; y: 108px; } to { height: 46px; y: 62px; } }
+    @keyframes hi-stream { 0%,92% { opacity: .8; } 96%,100% { opacity: 0; } }
+    .hi-kicker { font-family: var(--font-sans, system-ui); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: color-mix(in srgb, var(--dept) 50%, #fff); }
+    .hi-h { margin: 6px 0 0; font-size: clamp(1.2rem, 2.6vw, 1.6rem); font-weight: 800; color: #fff; max-width: 26ch; }
+
+    .hi-timeline { list-style: none; margin: 34px 0 0; padding: 0 0 0 34px; position: relative; }
+    .hi-spine {
+      position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px;
+      background: linear-gradient(#e8b872, color-mix(in srgb, var(--dept) 40%, transparent));
+      transform-origin: top; transform: scaleY(0);
+      animation: hi-draw linear both; animation-timeline: view(); animation-range: entry 0% cover 70%;
+    }
+    @keyframes hi-draw { to { transform: scaleY(1); } }
+    @supports not (animation-timeline: view()) { .hi-spine { animation: hi-draw 1.4s ease-out both; } }
+    .hi-node { position: relative; padding: 0 0 26px; }
+    .hi-dot { position: absolute; left: -34px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #e8b872; box-shadow: 0 0 12px color-mix(in srgb, var(--dept) 70%, transparent); }
+    .hi-yr { font-family: var(--font-sans, system-ui); font-weight: 800; font-size: 20px; color: color-mix(in srgb, var(--dept) 35%, #fff); }
+    .hi-t { display: block; margin-top: 2px; font-weight: 800; font-size: 16px; color: #fff; }
+    .hi-b { display: block; margin-top: 6px; font-size: 13.5px; line-height: 1.6; color: #c9b193; max-width: 58ch; }
+    @media (prefers-reduced-motion: reduce) {
+      .hi-sand-top, .hi-sand-bot, .hi-stream { animation: none; }
+      .hi-sand-top { height: 23px; } .hi-sand-bot { height: 23px; y: 85px; }
+      .hi-spine { transform: scaleY(1); animation: none; }
+    }
+  </style>
+</Base>

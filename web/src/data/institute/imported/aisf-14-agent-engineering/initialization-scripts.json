@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::initialization-scripts",
+  "num": 35,
+  "slug": "initialization-scripts",
+  "title": "Initialization Scripts for Agents",
+  "tagline": "Every session that starts cold pays a tax. The agent reads the same files, retries the same probes, and rediscovers the same paths. An init script pays the tax once and writes the answers into state.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~45 minutes",
+  "objectives": [
+    "Identify the work an agent should never have to redo per session.",
+    "Build a deterministic init script that probes runtime, dependencies, and repo health.",
+    "Persist the probe result so the agent reads it instead of re-running checks.",
+    "Fail loud, fast, and with one place to look when initialization fails."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Open a session. The agent guesses the Python version. Guesses the test command. Lists the repo root five times to find the entry point. Tries to import a package that is not installed. Asks the user where the config file lives. By the time it makes a real edit, ten thousand tokens have gone to setup work that should have been a single script.</p>\n<p>The fix is one initialization script that runs before the agent does anything else and writes a <code>init_report.json</code> the agent reads at startup.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">flowchart TD\n  Start[Session Start] --&gt; Init[init_agent.py]\n  Init --&gt; Probes[probe runtime / deps / paths / env / tests]\n  Probes --&gt; Report[init_report.json]\n  Report --&gt; Decision{healthy?}\n  Decision -- yes --&gt; Agent[Agent Loop]\n  Decision -- no --&gt; Halt[fail loud, halt, surface to human]</pre>\n<h3>What the init script probes</h3>\n<table>\n<thead>\n<tr>\n<th>Probe</th>\n<th>Why it matters</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Runtime versions</td>\n<td>Wrong Python or Node version means silent wrong-version bugs</td>\n</tr>\n<tr>\n<td>Dependency availability</td>\n<td>A missing package later costs ten times the cost of catching it now</td>\n</tr>\n<tr>\n<td>Test command</td>\n<td>The agent must know how to verify; if the command is missing the workbench is broken</td>\n</tr>\n<tr>\n<td>Repo paths</td>\n<td>Hard-coded paths drift; resolve them once and pin</td>\n</tr>\n<tr>\n<td>Environment variables</td>\n<td>Missing <code>OPENAI_API_KEY</code> is a failure surface, not a runtime mystery</td>\n</tr>\n<tr>\n<td>State + board freshness</td>\n<td>Stale state from a crashed session is a footgun</td>\n</tr>\n<tr>\n<td>Last-known-good commit</td>\n<td>Anchor for the handoff diff at the end of the session</td>\n</tr>\n</tbody></table>\n<h3>Fail loud, fail fast, fail in one place</h3>\n<p>A probe failure means halt and surface to the human. No &quot;the agent will figure it out.&quot; The whole point of init is to refuse to start when the workbench is broken.</p>\n<h3>Idempotent</h3>\n<p>Run it twice in a row. The second run should be a no-op except for a fresh timestamp. Idempotency is what lets you wire the script into CI, hooks, or a pre-task slash command.</p>\n<h3>Init versus startup rules</h3>\n<p>Rules (Phase 14 · 33) describe what must be true to act. Init is the script that establishes that those rules can be checked. Rules without init become &quot;be careful.&quot; Init without rules becomes a polished failure.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-init-probes</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements <code>init_agent.py</code>:</p>\n<ul>\n<li>Five probes: Python version, listed dependencies via <code>importlib.util.find_spec</code>, test command resolvability, required env vars, state file freshness.</li>\n<li>Each probe returns <code>(name, status, detail)</code>.</li>\n<li>The script writes <code>init_report.json</code> with the full probe set and exits non-zero if any block-severity probe fails.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The script prints the table of probes, writes <code>init_report.json</code>, and exits zero on the happy path or non-zero with a list of failed probes.</p>\n<h2>Production patterns in the wild</h2>\n<p>Three patterns separate a useful init script from a ceremony.</p>\n<p><strong>Last-known-good commit anchoring.</strong> Probe the current commit against a <code>LKG</code> file written on the last successful merge. If the diff exceeds a budget (default 50 files), refuse to start and require a human to ratify the new baseline. This is what Cloudflare&#39;s AI Code Review uses to scope reviewer agents: every review session anchors against the same last-known-good and never compounds drift across sessions.</p>\n<p><strong>Lock files with TTL.</strong> Write a <code>prereqs.lock</code> after the first successful probe pass. Subsequent runs trust the lock for N hours (24h default) and skip the expensive probes. The init script reads the lock first; if it is fresh and the dependency manifest hash matches, it short-circuits. This is the same pattern Docker uses for layer caches: idempotent probe + content hash = skip.</p>\n<p><strong>No network, no LLM, no surprises in the hot path.</strong> Init probes are deterministic plumbing. A probe that calls an LLM to classify a failure or that hits an external service to check a license is not a probe; it is a workflow. If a probe takes longer than three seconds in a dry run, treat that as a workbench smell and either move it out of init or cache its result.</p>\n<h2>Use It</h2>\n<p>In production:</p>\n<ul>\n<li><strong>Claude Code hooks.</strong> <code>pre-task</code> hook calls the init script and refuses to launch the agent if it fails.</li>\n<li><strong>GitHub Actions.</strong> A <code>setup-agent</code> job runs the init script; the agent job depends on it.</li>\n<li><strong>Docker entrypoint.</strong> The agent container runs the init script before exec-ing the agent runtime; logs surface on failure.</li>\n</ul>\n<p>The init script is portable because it makes no calls to a specific framework. Bash, Make, or a tasks file can all wrap it.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-init-script.md</code> interviews the project, classifies its setup work into probes, and emits a project-specific <code>init_agent.py</code> plus a CI workflow that runs it before any agent step.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a probe that diffs the current commit against the last-known-good commit and refuses to start if more than 50 files changed.</li>\n<li>Wire the script to write a <code>prereqs.lock</code> file and refuse to start if the lock is older than seven days.</li>\n<li>Add a <code>--fix</code> flag that auto-installs missing dev dependencies but never modifies runtime dependencies without approval.</li>\n<li>Move probes from hardcoded functions to a YAML registry. Defend the trade-off.</li>\n<li>Add a timing budget per probe. A probe that runs longer than three seconds is a workbench smell.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Probe</td>\n<td>&quot;A check&quot;</td>\n<td>A deterministic function returning <code>(name, status, detail)</code></td>\n</tr>\n<tr>\n<td>Init report</td>\n<td>&quot;Setup output&quot;</td>\n<td>JSON written next to state with the probe results</td>\n</tr>\n<tr>\n<td>Idempotent</td>\n<td>&quot;Safe to re-run&quot;</td>\n<td>Two runs in a row produce identical reports modulo timestamp</td>\n</tr>\n<tr>\n<td>Fail loud</td>\n<td>&quot;Don&#39;t swallow&quot;</td>\n<td>Halt and surface to the human; no silent fallback</td>\n</tr>\n<tr>\n<td>Setup tax</td>\n<td>&quot;Bootstrap cost&quot;</td>\n<td>The tokens the agent spends per session rediscovering the obvious</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Effective harnesses for long-running agents</a></li>\n<li><a href=\"https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-composite-action\" target=\"_blank\" rel=\"noopener\">GitHub Actions, composite actions for setup</a></li>\n<li><a href=\"https://microservices.io/post/architecture/2026/03/09/genai-development-platform-part-1-development-guardrails.html\" target=\"_blank\" rel=\"noopener\">microservices.io, GenAI dev platform: guardrails</a> — pre-commit + CI checks as init</li>\n<li><a href=\"https://www.augmentcode.com/guides/how-to-build-agents-md\" target=\"_blank\" rel=\"noopener\">Augment Code, How to Build Your AGENTS.md (2026)</a> — init expectations</li>\n<li><a href=\"https://codex.danielvaughan.com/2026/03/31/codex-cli-context-compaction-architecture/\" target=\"_blank\" rel=\"noopener\">Codex Blog, Codex CLI Context Compaction</a> — session start as compaction-aware init</li>\n<li>Phase 14 · 33 — the rule set this script enables</li>\n<li>Phase 14 · 34 — the state file this script seeds</li>\n<li>Phase 14 · 38 — the verification gate the init script feeds</li>\n<li>Phase 14 · 40 — the handoff that consumes the init report&#39;s last-known-good</li>\n</ul>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Deterministic agent initialization script.\n\nRuns probes (runtime, deps, test command, env, state freshness, last-known-good\ndiff, timing budget), writes init_report.json, supports prereqs.lock TTL\nshort-circuit, and exits non-zero when any block-severity probe fails.\n\nRun: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport importlib.util\nimport json\nimport os\nimport re\nimport shutil\nimport subprocess\nimport sys\nimport time\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\n\nHERE = Path(__file__).parent\nWORK = HERE / \"workdir\"\nSTATE_PATH = WORK / \"agent_state.json\"\nREPORT_PATH = WORK / \"init_report.json\"\nLOCK_PATH = WORK / \"prereqs.lock\"\nLKG_PATH = WORK / \"last_known_good.json\"\n\nREQUIRED_PYTHON = (3, 10)\nREQUIRED_DEPS = [\"json\", \"dataclasses\"]\nREQUIRED_TEST_COMMAND = \"python3\"\nREQUIRED_ENV_VARS: list[str] = []\nSTATE_FRESHNESS_SECONDS = 24 * 60 * 60\nLOCK_TTL_SECONDS = 24 * 60 * 60\nPROBE_BUDGET_SECONDS = 3.0\nLKG_FILE_DIFF_BUDGET = 50\n\n\nSHA_PATTERN = re.compile(r\"^[0-9a-fA-F]{7,40}$\")\n\n\n@dataclass\nclass Probe:\n    name: str\n    status: str\n    detail: str\n    duration_ms: int = 0\n\n\ndef _timed(probe_fn):\n    def _wrap(*a, **kw) -> Probe:\n        started = time.time()\n        result = probe_fn(*a, **kw)\n        result.duration_ms = int((time.time() - started) * 1000)\n        if result.duration_ms > PROBE_BUDGET_SECONDS * 1000 and result.status == \"pass\":\n            result.status = \"warn\"\n            result.detail = f\"{result.detail} (slow: {result.duration_ms}ms > {int(PROBE_BUDGET_SECONDS * 1000)}ms)\"\n        return result\n    return _wrap\n\n\n@_timed\ndef probe_runtime() -> Probe:\n    major, minor = sys.version_info[:2]\n    if (major, minor) >= REQUIRED_PYTHON:\n        return Probe(\"runtime\", \"pass\", f\"python {major}.{minor}\")\n    return Probe(\"runtime\", \"fail\", f\"need >= {REQUIRED_PYTHON}, have {major}.{minor}\")\n\n\n@_timed\ndef probe_dependencies() -> Probe:\n    missing = [dep for dep in REQUIRED_DEPS if importlib.util.find_spec(dep) is None]\n    if missing:\n        return Probe(\"dependencies\", \"fail\", f\"missing: {missing}\")\n    return Probe(\"dependencies\", \"pass\", f\"all of {REQUIRED_DEPS} importable\")\n\n\n@_timed\ndef probe_test_command() -> Probe:\n    if shutil.which(REQUIRED_TEST_COMMAND):\n        return Probe(\"test_command\", \"pass\", f\"{REQUIRED_TEST_COMMAND} resolvable on PATH\")\n    return Probe(\"test_command\", \"fail\", f\"{REQUIRED_TEST_COMMAND} not on PATH\")\n\n\n@_timed\ndef probe_env() -> Probe:\n    missing = [k for k in REQUIRED_ENV_VARS if not os.environ.get(k)]\n    if missing:\n        return Probe(\"env\", \"fail\", f\"missing env vars: {missing}\")\n    return Probe(\"env\", \"pass\", f\"all of {REQUIRED_ENV_VARS or '[]'} present\")\n\n\n@_timed\ndef probe_state_freshness() -> Probe:\n    if not STATE_PATH.exists():\n        return Probe(\"state_freshness\", \"warn\", \"no state file yet; first run\")\n    age = time.time() - STATE_PATH.stat().st_mtime\n    if age > STATE_FRESHNESS_SECONDS:\n        hours = int(age // 3600)\n        return Probe(\"state_freshness\", \"warn\", f\"state is {hours}h old; confirm before continuing\")\n    return Probe(\"state_freshness\", \"pass\", f\"state is {int(age)}s old\")\n\n\n@_timed\ndef probe_lkg_diff() -> Probe:\n    \"\"\"Refuse to launch when diff against last-known-good exceeds the file budget.\n\n    Anchors every session against the same baseline so drift cannot compound.\n    \"\"\"\n    if not LKG_PATH.exists():\n        return Probe(\"lkg_diff\", \"warn\", \"no last_known_good.json; pin one after first successful merge\")\n    try:\n        lkg = json.loads(LKG_PATH.read_text())\n        baseline = lkg.get(\"commit\")\n        if not baseline:\n            return Probe(\"lkg_diff\", \"warn\", \"lkg file present but commit field empty\")\n    except json.JSONDecodeError as exc:\n        return Probe(\"lkg_diff\", \"fail\", f\"lkg file unreadable: {exc}\")\n    if not isinstance(baseline, str) or not SHA_PATTERN.match(baseline):\n        return Probe(\"lkg_diff\", \"warn\", \"lkg commit invalid; skipped\")\n    try:\n        out = subprocess.run(\n            [\"git\", \"diff\", \"--name-only\", baseline, \"HEAD\"],\n            capture_output=True, text=True, timeout=2.0, cwd=HERE,\n        )\n    except (FileNotFoundError, subprocess.TimeoutExpired):\n        return Probe(\"lkg_diff\", \"warn\", \"git unavailable or slow; skipped\")\n    if out.returncode != 0:\n        return Probe(\"lkg_diff\", \"warn\", f\"git diff failed: {out.stderr.strip()[:60]}\")\n    changed = [ln for ln in out.stdout.splitlines() if ln.strip()]\n    if len(changed) > LKG_FILE_DIFF_BUDGET:\n        return Probe(\"lkg_diff\", \"fail\", f\"{len(changed)} files changed since {baseline[:7]} (budget {LKG_FILE_DIFF_BUDGET})\")\n    return Probe(\"lkg_diff\", \"pass\", f\"{len(changed)} files changed since {baseline[:7]}\")\n\n\ndef _deps_fingerprint() -> str:\n    h = hashlib.sha256()\n    h.update(str(sorted(REQUIRED_DEPS)).encode())\n    h.update(REQUIRED_TEST_COMMAND.encode())\n    h.update(str(sorted(REQUIRED_ENV_VARS)).encode())\n    h.update(str(REQUIRED_PYTHON).encode())\n    return h.hexdigest()[:16]\n\n\ndef lock_is_fresh() -> bool:\n    \"\"\"Cache pattern: re-use prior probe pass when nothing material changed.\n\n    Same shape as Docker layer caches: idempotent probe + content hash = skip.\n    \"\"\"\n    if not LOCK_PATH.exists():\n        return False\n    try:\n        lock = json.loads(LOCK_PATH.read_text())\n    except json.JSONDecodeError:\n        return False\n    if not isinstance(lock, dict) or lock.get(\"fingerprint\") != _deps_fingerprint():\n        return False\n    written_at = lock.get(\"written_at\", 0)\n    if not isinstance(written_at, (int, float)):\n        try:\n            written_at = float(written_at)\n        except (TypeError, ValueError):\n            return False\n    age = time.time() - written_at\n    return age < LOCK_TTL_SECONDS\n\n\ndef write_lock() -> None:\n    LOCK_PATH.write_text(\n        json.dumps({\"fingerprint\": _deps_fingerprint(), \"written_at\": time.time()}, indent=2) + \"\\n\"\n    )\n\n\ndef run_probes() -> list[Probe]:\n    return [\n        probe_runtime(),\n        probe_dependencies(),\n        probe_test_command(),\n        probe_env(),\n        probe_state_freshness(),\n        probe_lkg_diff(),\n    ]\n\n\ndef main(argv: list[str] | None = None) -> int:\n    ap = argparse.ArgumentParser()\n    ap.add_argument(\"--no-cache\", action=\"store_true\", help=\"ignore prereqs.lock and run every probe\")\n    ap.add_argument(\"--write-lkg\", action=\"store_true\", help=\"pin current HEAD as last-known-good\")\n    args = ap.parse_args(argv)\n\n    WORK.mkdir(exist_ok=True)\n\n    if args.write_lkg:\n        try:\n            head = subprocess.check_output([\"git\", \"rev-parse\", \"HEAD\"], cwd=HERE, text=True, timeout=2.0).strip()\n            LKG_PATH.write_text(json.dumps({\"commit\": head, \"written_at\": time.time()}, indent=2) + \"\\n\")\n            print(f\"pinned LKG -> {head[:7]}\")\n            return 0\n        except (FileNotFoundError, subprocess.CalledProcessError) as exc:\n            print(f\"lkg pin failed: {exc}\", file=sys.stderr)\n            return 1\n\n    if not args.no_cache and lock_is_fresh():\n        print(f\"prereqs.lock fresh (TTL {LOCK_TTL_SECONDS}s); skipping probes\")\n        return 0\n\n    probes = run_probes()\n    report = {\n        \"timestamp\": time.time(),\n        \"probes\": [asdict(p) for p in probes],\n        \"ok\": all(p.status != \"fail\" for p in probes),\n    }\n    REPORT_PATH.write_text(json.dumps(report, indent=2) + \"\\n\")\n\n    width = max(len(p.name) for p in probes)\n    for p in probes:\n        print(f\"  {p.name:<{width}}  {p.status:>4}  {p.duration_ms:>4}ms  {p.detail}\")\n\n    if not report[\"ok\"]:\n        print(\"\\ninit failed; refuse to launch agent\", file=sys.stderr)\n        return 1\n    write_lock()\n    print(\"\\ninit ok (lock refreshed)\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+  },
+  "quiz": [
+    {
+      "q": "What does an init script eliminate?",
+      "options": [
+        "Authn tokens",
+        "Provider rate limits",
+        "Latency from inference",
+        "The per-session setup tax: probing runtime, listing the repo, retrying the same checks each new session"
+      ],
+      "answer": 3,
+      "explanation": "The script pays the tax once and writes the answers into init_report.json the agent reads."
+    },
+    {
+      "q": "What is the init script's failure-mode contract?",
+      "options": [
+        "Fail loud, fail fast, fail in one place; refuse to start when the workbench is broken",
+        "Always succeed",
+        "Retry forever",
+        "Fail soft and continue"
+      ],
+      "answer": 0,
+      "explanation": "The whole point is to refuse to start when the workbench is broken; silent fallback defeats the purpose."
+    },
+    {
+      "q": "Which is NOT one of the probes the lesson lists?",
+      "options": [
+        "Token-by-token sampling temperature",
+        "Test command resolvability",
+        "Dependency availability",
+        "Runtime versions"
+      ],
+      "answer": 0,
+      "explanation": "Probes include runtime versions, deps, test command, paths, env vars, state freshness, last-known-good commit."
+    },
+    {
+      "q": "Why does the lesson say init must be idempotent?",
+      "options": [
+        "It satisfies SOC 2",
+        "It is required by JSON Schema",
+        "Idempotence saves money",
+        "Running it twice should be a no-op except for a fresh timestamp, so it can be wired into CI, hooks, or a pre-task slash command"
+      ],
+      "answer": 3,
+      "explanation": "Idempotence makes init safe to call from many entry points (hooks, CI, slash command)."
+    },
+    {
+      "q": "What is last-known-good commit anchoring?",
+      "options": [
+        "The earliest commit in the repo",
+        "Probe the current commit against an LKG file; refuse to start if the diff exceeds a budget without human ratification",
+        "The most recent commit by the team lead",
+        "The merge base of HEAD and main"
+      ],
+      "answer": 1,
+      "explanation": "Cloudflare's AI Code Review scopes reviewers against the LKG to prevent drift compounding across sessions."
+    },
+    {
+      "q": "What does the lock file with TTL pattern do?",
+      "options": [
+        "Writes prereqs.lock after a successful probe pass; subsequent runs trust the lock for 24h and skip expensive probes if the manifest hash matches",
+        "Locks the repo from edits",
+        "Disables CI",
+        "Blocks all writes for 24 hours"
+      ],
+      "answer": 0,
+      "explanation": "Same shape as Docker layer caches: idempotent probe + content hash = skip."
+    },
+    {
+      "q": "What should NEVER appear in the init hot path?",
+      "options": [
+        "Network calls, LLM calls, external license checks; probes are deterministic plumbing under three seconds",
+        "Reading the lockfile",
+        "Local filesystem reads",
+        "Reading env vars"
+      ],
+      "answer": 0,
+      "explanation": "A probe that calls an LLM is a workflow, not a probe; keep init deterministic."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/35-initialization-scripts"
+  }
+}

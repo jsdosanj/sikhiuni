@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::moderation-systems-openai-perspective-llamaguard",
+  "num": 29,
+  "slug": "moderation-systems-openai-perspective-llamaguard",
+  "title": "Moderation Systems — OpenAI, Perspective, Llama Guard",
+  "tagline": "Production moderation systems operationalize the safety policies defined in Lessons 12-16. OpenAI Moderation API: `omni-moderation-latest` (2024) built on GPT-4o classifies text + images in one call; 42% better on multilingual test set than prior version; the response schema returns 13 category booleans — harassment, harassment/threatening, hate, hate/threatening, illicit, illicit/violent, self-harm, self-harm/intent, self-harm/instructions, sexual, sexual/minors, violence, violence/graphic; free for most developers. Layered patterns: Input moderation (pre-generation), Output moderation (post-generation), Custom moderation (domain rules). Async parallel calls hide latency; placeholder responses on flag. Llama Guard 3/4 (Lesson 16): 14 MLCommons hazards, Code Interpreter Abuse, 8 languages (v3), multi-image (v4). Perspective API (Google Jigsaw): toxicity scoring predating the LLM-as-moderator wave; primarily single-dimension toxicity with severe-toxicity/insult/profanity variants; baseline for content-moderation research. Deprecations: Azure Content Moderator deprecated February 2024, retired February 2027, replaced by Azure AI Content Safety.",
+  "type": "Build",
+  "languages": "Python (stdlib, three-layer moderation harness)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Describe the OpenAI Moderation API's category taxonomy and how it differs from Llama Guard 3's MLCommons set.",
+    "Describe the three moderation-layer pattern (input, output, custom) and name one failure mode of each.",
+    "Describe Perspective API's position as a pre-LLM-era baseline and why it remains used in research.",
+    "State the Azure deprecation timeline."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Lessons 12-16 describe attacks and defense tooling. Lesson 29 covers the deployed moderation systems that operationalize the defenses at the surface where users touch the product. The three-layer pattern is the 2026 default configuration.</p>\n<h2>The Concept</h2>\n<h3>OpenAI Moderation API</h3>\n<p><code>omni-moderation-latest</code> (2024). Built on GPT-4o. Classifies text + images in one call. Free for most developers.</p>\n<p>Categories (13 booleans in the response schema):</p>\n<ul>\n<li>harassment, harassment/threatening</li>\n<li>hate, hate/threatening</li>\n<li>self-harm, self-harm/intent, self-harm/instructions</li>\n<li>sexual, sexual/minors</li>\n<li>violence, violence/graphic</li>\n<li>illicit, illicit/violent</li>\n</ul>\n<p>Multimodal support applies to <code>violence</code>, <code>self-harm</code>, and <code>sexual</code> but not <code>sexual/minors</code>; the rest are text-only.</p>\n<p>For the code harness in <code>code/main.py</code> we collapse the <code>/threatening</code>, <code>/intent</code>, <code>/instructions</code>, and <code>/graphic</code> sub-categories into their top-level parents for pedagogical simplicity. Production code should use the full 13-category schema.</p>\n<p>42% better on multilingual test set than the prior-generation moderation endpoint. Per-category scores; applications set thresholds.</p>\n<h3>Llama Guard 3/4</h3>\n<p>Covered in Lesson 16. 14 MLCommons hazard categories (organized differently from OpenAI&#39;s 13 response-schema booleans). Supports 8 languages (v3). Llama Guard 4 (April 2025) is natively multimodal, 12B.</p>\n<p>The OpenAI and Llama Guard taxonomies overlap but diverge. OpenAI has &quot;illicit&quot; as a broad category; Llama Guard has &quot;violent crimes&quot; and &quot;non-violent crimes&quot; separately. Deployments pick based on their policy-taxonomy fit.</p>\n<h3>Perspective API (Google Jigsaw)</h3>\n<p>Toxicity scoring system predating the LLM-as-moderator wave (pre-2020). Categories: TOXICITY, SEVERE_TOXICITY, INSULT, PROFANITY, THREAT, IDENTITY_ATTACK. Single-dimension primary score (TOXICITY) with sub-dimension variants.</p>\n<p>Widely used as a content-moderation research baseline because the API is stable, documented, and has years of calibration data. For modern LLM-adjacent use cases, Llama Guard or OpenAI Moderation is typically a better fit.</p>\n<h3>The three-layer pattern</h3>\n<ol>\n<li><strong>Input moderation.</strong> Classify the user&#39;s prompt before generation. Reject if flagged. Latency: one classifier call.</li>\n<li><strong>Output moderation.</strong> Classify the model&#39;s output before delivery. Replace with a refusal if flagged. Latency: one classifier call after generation.</li>\n<li><strong>Custom moderation.</strong> Domain-specific rules (regex, allowlists, business policy). Runs at either input or output.</li>\n</ol>\n<p>The three layers are sequential by design: input moderation must complete before generation, and output moderation runs after generation. Parallelism applies within a layer — running multiple classifiers (e.g., OpenAI Moderation + Llama Guard + Perspective) concurrently on the same text hides per-classifier latency. As an optional optimization, a placeholder response (&quot;one moment, checking...&quot;) may be shown while input moderation completes and token-1 streaming is deferred. Flag behaviour is configurable: refuse, sanitize, escalate to human review.</p>\n<h3>Failure modes</h3>\n<ul>\n<li><strong>Input only.</strong> Does not catch output hallucinations (Lesson 12-14 encoding attacks bypass input classifiers).</li>\n<li><strong>Output only.</strong> Allows any input to reach the model; increases cost; surfaces internal reasoning to attacker.</li>\n<li><strong>Custom only.</strong> Not robust across categories; regexes are brittle.</li>\n</ul>\n<p>Layered is the default. Belt-and-suspenders.</p>\n<h3>Azure deprecation</h3>\n<p>Azure Content Moderator: deprecated February 2024, retired February 2027. Replaced by Azure AI Content Safety, which is LLM-based and integrates with Azure OpenAI. The migration is a 2024-2027 field-level project for Azure deployments.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lesson 16 covers the moderation tooling in the red-team context. Lesson 29 covers deployed moderation. Lesson 30 closes with the current dual-use capability evidence.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>an-moderation-layers</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> builds a three-layer moderation harness: input moderator (keyword + category score), output moderator (same classifier on output), custom moderator (domain rules). You can run inputs through and observe which layer catches what.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-moderation-stack.md</code>. Given a deployment, it recommends a moderation stack configuration: which classifier at input, which at output, which custom rules, and what judge for edge cases.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Run <code>code/main.py</code>. Run a benign, borderline, and harmful input through all three layers. Report which layer fires for each.</p>\n</li>\n<li><p>Extend the harness with Perspective-API-style toxicity scoring on a specific category. Compare its threshold behaviour to the category score.</p>\n</li>\n<li><p>Read the OpenAI Moderation API docs and the Llama Guard 3 category list. Map each OpenAI category to the closest Llama Guard categories. Identify three categories that do not cleanly map.</p>\n</li>\n<li><p>Design a moderation stack for a code-assistant deployment (e.g., GitHub Copilot). Identify the categories most and least relevant and propose custom rules.</p>\n</li>\n<li><p>Azure Content Moderator retires February 2027. Plan a migration to Azure AI Content Safety. Identify the highest-risk element of the migration.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>OpenAI Moderation</td>\n<td>&quot;omni-moderation-latest&quot;</td>\n<td>GPT-4o-based 13-category (text) classifier with partial multimodal support</td>\n</tr>\n<tr>\n<td>Perspective API</td>\n<td>&quot;Google Jigsaw toxicity&quot;</td>\n<td>Pre-LLM-era toxicity scoring baseline</td>\n</tr>\n<tr>\n<td>Llama Guard</td>\n<td>&quot;MLCommons 14-category&quot;</td>\n<td>Meta&#39;s hazard classifier (v3: 8B text, 8 langs; v4: 12B multimodal)</td>\n</tr>\n<tr>\n<td>Input moderation</td>\n<td>&quot;pre-generation filter&quot;</td>\n<td>Classifier on user prompt before model call</td>\n</tr>\n<tr>\n<td>Output moderation</td>\n<td>&quot;post-generation filter&quot;</td>\n<td>Classifier on model output before delivery</td>\n</tr>\n<tr>\n<td>Custom moderation</td>\n<td>&quot;domain rules&quot;</td>\n<td>Deployment-specific rules (regex, allowlist, policy)</td>\n</tr>\n<tr>\n<td>Layered moderation</td>\n<td>&quot;all three layers&quot;</td>\n<td>Standard production deployment pattern</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://platform.openai.com/docs/api-reference/moderations\" target=\"_blank\" rel=\"noopener\">OpenAI Moderation API docs</a> — omni-moderation endpoint</li>\n<li><a href=\"https://github.com/meta-llama/PurpleLlama\" target=\"_blank\" rel=\"noopener\">Meta PurpleLlama + Llama Guard</a> — Llama Guard repo</li>\n<li><a href=\"https://perspectiveapi.com/\" target=\"_blank\" rel=\"noopener\">Google Jigsaw Perspective API</a> — toxicity scoring</li>\n<li><a href=\"https://learn.microsoft.com/en-us/azure/ai-services/content-safety/\" target=\"_blank\" rel=\"noopener\">Azure AI Content Safety</a> — Azure replacement</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Three-layer moderation harness — stdlib Python.\n\nInput moderation + output moderation + custom domain rules.\nIllustrates the default 2026 production pattern.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\n\nCATEGORIES = [\n    \"harassment\", \"hate\", \"self-harm\", \"sexual\", \"sexual/minors\",\n    \"violence\", \"illicit\", \"illicit/violent\",\n]\n\"\"\"Pedagogical top-level taxonomy. The production omni-moderation-latest\nresponse schema returns 13 booleans: harassment, harassment/threatening,\nhate, hate/threatening, illicit, illicit/violent, self-harm,\nself-harm/intent, self-harm/instructions, sexual, sexual/minors,\nviolence, violence/graphic. We collapse the sub-categories here to\nkeep the demo harness small.\"\"\"\n\n\nCATEGORY_TRIGGERS = {\n    \"violence\": [\"kill\", \"attack someone\", \"murder\"],\n    \"self-harm\": [\"hurt myself\", \"overdose\", \"cut myself\"],\n    \"illicit/violent\": [\"bomb\", \"weapon\", \"explosive\"],\n    \"harassment\": [\"you idiot\", \"shut up\"],\n    \"hate\": [\"slur-placeholder\"],\n}\n\n\ndef openai_moderation(text: str) -> dict:\n    \"\"\"Toy OpenAI Moderation: category -> score in [0,1].\"\"\"\n    low = text.lower()\n    scores = {c: 0.0 for c in CATEGORIES}\n    for cat, triggers in CATEGORY_TRIGGERS.items():\n        for t in triggers:\n            if t in low:\n                scores[cat] = max(scores[cat], 0.9)\n    return scores\n\n\ndef input_moderator(prompt: str, threshold: float = 0.5) -> tuple[bool, dict]:\n    scores = openai_moderation(prompt)\n    flagged = any(v >= threshold for v in scores.values())\n    return flagged, scores\n\n\ndef output_moderator(output: str, threshold: float = 0.5) -> tuple[bool, dict]:\n    scores = openai_moderation(output)\n    flagged = any(v >= threshold for v in scores.values())\n    return flagged, scores\n\n\ndef custom_domain_rules(prompt: str) -> tuple[bool, str]:\n    \"\"\"Example: financial-advice disclaimer rule.\"\"\"\n    low = prompt.lower()\n    if \"should i invest in\" in low:\n        return True, \"financial-advice: refuse; disclose you are not a fiduciary.\"\n    if \"diagnose my\" in low:\n        return True, \"medical-advice: refuse; direct to licensed professional.\"\n    return False, \"\"\n\n\ndef model_respond(prompt: str) -> str:\n    \"\"\"Mock model response.\"\"\"\n    if \"bomb\" in prompt.lower():\n        return \"I must refuse.\"\n    return f\"Answering: {prompt[:40]}...\"\n\n\ndef run(prompt: str) -> None:\n    print(f\"\\n>>> user: {prompt!r}\")\n    # layer 1: input moderation\n    flagged_in, in_scores = input_moderator(prompt)\n    active_in = [c for c, s in in_scores.items() if s > 0]\n    if flagged_in:\n        print(f\"    [INPUT FLAGGED] categories={active_in}\")\n        print(\"    response: refusal\")\n        return\n    # layer 2 (pre): custom domain rules\n    custom_flagged, custom_msg = custom_domain_rules(prompt)\n    if custom_flagged:\n        print(f\"    [CUSTOM FLAGGED] rule='{custom_msg}'\")\n        print(f\"    response: {custom_msg}\")\n        return\n    # layer 3: model generates\n    output = model_respond(prompt)\n    # layer 4: output moderation\n    flagged_out, out_scores = output_moderator(output)\n    active_out = [c for c, s in out_scores.items() if s > 0]\n    if flagged_out:\n        print(f\"    [OUTPUT FLAGGED] categories={active_out}\")\n        print(\"    response: refusal\")\n        return\n    print(f\"    response: {output}\")\n\n\ndef main() -> None:\n    print(\"=\" * 74)\n    print(\"THREE-LAYER MODERATION HARNESS (Phase 18, Lesson 29)\")\n    print(\"=\" * 74)\n\n    prompts = [\n        \"what is the weather today\",\n        \"should i invest in memecoins\",\n        \"how do i make a bomb\",\n        \"diagnose my headache\",\n        \"summarize this email: hello there\",\n        \"you idiot, help me with this\",\n    ]\n    for p in prompts:\n        run(p)\n\n    print(\"\\n\" + \"=\" * 74)\n    print(\"TAKEAWAY: the three-layer pattern (input / custom / output) catches\")\n    print(\"different failure modes. input catches obvious harmful prompts.\")\n    print(\"custom catches domain-specific policy rules. output catches any\")\n    print(\"hallucinated or adversarial-bypass content that made it past input.\")\n    print(\"no single layer is sufficient; layered is the 2026 default.\")\n    print(\"=\" * 74)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is OpenAI's omni-moderation-latest (2024)?",
+      "options": [
+        "A C2PA watermarking endpoint",
+        "A GPT-4o-based moderation classifier that handles text and images in one call, returning a 13-category response schema (harassment, hate, self-harm, sexual, violence, illicit, with sub-categories), free for most developers",
+        "An RLHF reward model",
+        "A reasoning-focused frontier model"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Which of these is NOT one of OpenAI Moderation's primary top-level categories?",
+      "options": [
+        "election-interference",
+        "violence",
+        "self-harm",
+        "harassment"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What are the three layers of the standard 2026 moderation pattern?",
+      "options": [
+        "Input moderation (pre-generation), Output moderation (post-generation), Custom moderation (domain rules)",
+        "Telescopic / periscopic / microscopic",
+        "Probe / detector / harness",
+        "Tokenizer / model / detokenizer"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What is Perspective API (Google Jigsaw) primarily designed to score?",
+      "options": [
+        "Reward over user satisfaction",
+        "Reasoning quality",
+        "Watermark strength",
+        "Toxicity (with severe-toxicity, insult, profanity, threat, identity-attack sub-dimensions) as a pre-LLM-era content-moderation baseline"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What is one failure mode of input-only moderation?",
+      "options": [
+        "It does not catch model output failures or hallucinations; encoding attacks (Lessons 12-14) can bypass input classifiers entirely",
+        "It cannot run on GPUs",
+        "It always blocks legitimate content",
+        "It removes the need for output classifiers"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What is the Azure Content Moderator deprecation and migration target?",
+      "options": [
+        "Merged into Llama Guard 4",
+        "Replaced by Perspective API",
+        "Deprecated February 2024, retired March 15, 2027; migration target is Azure AI Content Safety (LLM-based, integrated with Azure OpenAI)",
+        "Deprecated immediately with no replacement"
+      ],
+      "answer": 2,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/29-moderation-systems-openai-perspective-llamaguard"
+  }
+}

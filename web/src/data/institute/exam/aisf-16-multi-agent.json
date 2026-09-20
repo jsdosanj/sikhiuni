@@ -1,0 +1,96 @@
+{
+  "track": "aisf-16-multi-agent",
+  "count": 10,
+  "questions": [
+    {
+      "q": "What is the 'single-agent ceiling'?",
+      "options": [
+        "The point where a single agent fails because the task exceeds one context window, requires different expertise, or needs parallel work",
+        "The maximum model size that can run on a single GPU",
+        "The maximum number of tools an agent can use",
+        "The limit on how many API calls an agent can make per minute"
+      ]
+    },
+    {
+      "q": "Why might you use multiple specialized agents instead of one powerful general agent?",
+      "options": [
+        "Each agent can have a focused system prompt, smaller context, and specialized tools, leading to better performance on its specific subtask",
+        "Multiple agents are always cheaper than a single large model",
+        "General agents cannot use tools",
+        "Multiple agents can share the same context window"
+      ]
+    },
+    {
+      "q": "When is a pipeline (sequential) multi-agent pattern better than a parallel fan-out pattern?",
+      "options": [
+        "When each stage depends on the output of the previous stage, such as research then code then review",
+        "When you have more GPUs than tasks",
+        "When you want to minimize total latency",
+        "When all subtasks are independent of each other"
+      ]
+    },
+    {
+      "q": "What is the supervisor pattern in multi-agent systems?",
+      "options": [
+        "A human manually assigns tasks to each agent",
+        "A pattern where agents vote on the best response",
+        "A central orchestrator agent that decomposes the task, delegates to worker agents, collects results, and decides next steps",
+        "A monitoring system that logs agent actions for debugging"
+      ]
+    },
+    {
+      "q": "What is the primary tradeoff of multi-agent systems compared to single agents?",
+      "options": [
+        "Multi-agent systems always produce lower quality results",
+        "Multi-agent systems cannot use external tools",
+        "Multi-agent systems require more training data",
+        "Increased complexity, latency, and cost from multiple LLM calls and inter-agent communication, traded for better handling of complex tasks"
+      ]
+    },
+    {
+      "q": "What problem does MCP (Model Context Protocol) solve for AI agents?",
+      "options": [
+        "It encrypts communication between agents",
+        "It compresses large context windows to fit in smaller models",
+        "It gives agents a standard way to discover and use tools exposed by external servers, without hardcoding tool implementations",
+        "It provides a standard format for training data"
+      ]
+    },
+    {
+      "q": "What is the difference between MCP and A2A?",
+      "options": [
+        "MCP is for Python agents and A2A is for JavaScript agents",
+        "MCP is open source and A2A is proprietary",
+        "MCP connects agents to tools (agent-to-tool), while A2A connects agents to other agents (agent-to-agent) for task delegation",
+        "MCP is synchronous and A2A is asynchronous"
+      ]
+    },
+    {
+      "q": "In A2A, what is an 'agent card' and why is it important?",
+      "options": [
+        "A security credential that authenticates an agent's identity",
+        "A configuration file that sets the agent's system prompt",
+        "A visual dashboard showing agent performance metrics",
+        "A JSON document at a well-known URL that describes an agent's capabilities, skills, and endpoint, enabling other agents to discover and delegate tasks to it"
+      ]
+    },
+    {
+      "q": "Why do multi-agent systems need structured communication protocols instead of just passing strings between agents?",
+      "options": [
+        "String parsing is computationally expensive for LLMs",
+        "Structured protocols provide type safety, discoverability, error handling, and interoperability between agents built by different teams with different frameworks",
+        "Strings are too large to send over HTTP",
+        "Structured protocols are required by all cloud providers"
+      ]
+    },
+    {
+      "q": "How does ACP (Agent Communication Protocol) differ from A2A in its design goals?",
+      "options": [
+        "ACP uses WebSockets while A2A uses HTTP",
+        "ACP is faster than A2A for real-time applications",
+        "ACP only works within a single organization while A2A works across organizations",
+        "ACP focuses on enterprise auditability with full message history and compliance tracking, while A2A focuses on lightweight task delegation"
+      ]
+    }
+  ]
+}

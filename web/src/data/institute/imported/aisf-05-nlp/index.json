@@ -1,0 +1,216 @@
+{
+  "track": "aisf-05-nlp",
+  "phaseDir": "05-nlp-foundations-to-advanced",
+  "blurb": "Language is the interface to intelligence. Master every layer.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-05-nlp::text-processing",
+      "num": 1,
+      "slug": "text-processing",
+      "title": "Text Processing — Tokenization, Stemming, Lemmatization",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::bag-of-words-tfidf",
+      "num": 2,
+      "slug": "bag-of-words-tfidf",
+      "title": "Bag of Words, TF-IDF, and Text Representation",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::word-embeddings-word2vec",
+      "num": 3,
+      "slug": "word-embeddings-word2vec",
+      "title": "Word Embeddings — Word2Vec from Scratch",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::glove-fasttext-subword",
+      "num": 4,
+      "slug": "glove-fasttext-subword",
+      "title": "GloVe, FastText, and Subword Embeddings",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::sentiment-analysis",
+      "num": 5,
+      "slug": "sentiment-analysis",
+      "title": "Sentiment Analysis",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::named-entity-recognition",
+      "num": 6,
+      "slug": "named-entity-recognition",
+      "title": "Named Entity Recognition",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::pos-tagging-parsing",
+      "num": 7,
+      "slug": "pos-tagging-parsing",
+      "title": "POS Tagging and Syntactic Parsing",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::cnns-rnns-for-text",
+      "num": 8,
+      "slug": "cnns-rnns-for-text",
+      "title": "CNNs and RNNs for Text",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::sequence-to-sequence",
+      "num": 9,
+      "slug": "sequence-to-sequence",
+      "title": "Sequence-to-Sequence Models",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::attention-mechanism",
+      "num": 10,
+      "slug": "attention-mechanism",
+      "title": "Attention Mechanism — The Breakthrough",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::machine-translation",
+      "num": 11,
+      "slug": "machine-translation",
+      "title": "Machine Translation",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::text-summarization",
+      "num": 12,
+      "slug": "text-summarization",
+      "title": "Text Summarization",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::question-answering",
+      "num": 13,
+      "slug": "question-answering",
+      "title": "Question Answering Systems",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::information-retrieval-search",
+      "num": 14,
+      "slug": "information-retrieval-search",
+      "title": "Information Retrieval and Search",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::topic-modeling",
+      "num": 15,
+      "slug": "topic-modeling",
+      "title": "Topic Modeling — LDA and BERTopic",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::text-generation-pre-transformer",
+      "num": 16,
+      "slug": "text-generation-pre-transformer",
+      "title": "Text Generation Before Transformers — N-gram Language Models",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::chatbots-rule-to-neural",
+      "num": 17,
+      "slug": "chatbots-rule-to-neural",
+      "title": "Chatbots — Rule-Based to Neural to LLM Agents",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::multilingual-nlp",
+      "num": 18,
+      "slug": "multilingual-nlp",
+      "title": "Multilingual NLP",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::subword-tokenization",
+      "num": 19,
+      "slug": "subword-tokenization",
+      "title": "Subword Tokenization — BPE, WordPiece, Unigram, SentencePiece",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::structured-outputs-constrained-decoding",
+      "num": 20,
+      "slug": "structured-outputs-constrained-decoding",
+      "title": "Structured Outputs & Constrained Decoding",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::nli-textual-entailment",
+      "num": 21,
+      "slug": "nli-textual-entailment",
+      "title": "Natural Language Inference — Textual Entailment",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::embedding-models-deep-dive",
+      "num": 22,
+      "slug": "embedding-models-deep-dive",
+      "title": "Embedding Models — The 2026 Deep Dive",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::chunking-strategies-rag",
+      "num": 23,
+      "slug": "chunking-strategies-rag",
+      "title": "Chunking Strategies for RAG",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::coreference-resolution",
+      "num": 24,
+      "slug": "coreference-resolution",
+      "title": "Coreference Resolution",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::entity-linking",
+      "num": 25,
+      "slug": "entity-linking",
+      "title": "Entity Linking & Disambiguation",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::relation-extraction-kg",
+      "num": 26,
+      "slug": "relation-extraction-kg",
+      "title": "Relation Extraction & Knowledge Graph Construction",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::llm-evaluation-frameworks",
+      "num": 27,
+      "slug": "llm-evaluation-frameworks",
+      "title": "LLM Evaluation — RAGAS, DeepEval, G-Eval",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::long-context-evaluation",
+      "num": 28,
+      "slug": "long-context-evaluation",
+      "title": "Long-Context Evaluation — NIAH, RULER, LongBench, MRCR",
+      "nQuiz": 8
+    },
+    {
+      "id": "aisf-05-nlp::dialogue-state-tracking",
+      "num": 29,
+      "slug": "dialogue-state-tracking",
+      "title": "Dialogue State Tracking",
+      "nQuiz": 8
+    }
+  ]
+}

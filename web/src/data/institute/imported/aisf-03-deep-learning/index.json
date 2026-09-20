@@ -1,0 +1,104 @@
+{
+  "track": "aisf-03-deep-learning",
+  "phaseDir": "03-deep-learning-core",
+  "blurb": "Neural networks from first principles. No frameworks until you build one yourself.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-03-deep-learning::the-perceptron",
+      "num": 1,
+      "slug": "the-perceptron",
+      "title": "The Perceptron",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::multi-layer-networks",
+      "num": 2,
+      "slug": "multi-layer-networks",
+      "title": "Multi-Layer Networks and Forward Pass",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::backpropagation",
+      "num": 3,
+      "slug": "backpropagation",
+      "title": "Backpropagation from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::activation-functions",
+      "num": 4,
+      "slug": "activation-functions",
+      "title": "Activation Functions",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::loss-functions",
+      "num": 5,
+      "slug": "loss-functions",
+      "title": "Loss Functions",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::optimizers",
+      "num": 6,
+      "slug": "optimizers",
+      "title": "Optimizers",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::regularization",
+      "num": 7,
+      "slug": "regularization",
+      "title": "Regularization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::weight-initialization",
+      "num": 8,
+      "slug": "weight-initialization",
+      "title": "Weight Initialization and Training Stability",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::learning-rate-schedules",
+      "num": 9,
+      "slug": "learning-rate-schedules",
+      "title": "Learning Rate Schedules and Warmup",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::mini-framework",
+      "num": 10,
+      "slug": "mini-framework",
+      "title": "Build Your Own Mini Framework",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::intro-to-pytorch",
+      "num": 11,
+      "slug": "intro-to-pytorch",
+      "title": "Introduction to PyTorch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::intro-to-jax",
+      "num": 12,
+      "slug": "intro-to-jax",
+      "title": "Introduction to JAX",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-03-deep-learning::debugging-neural-networks",
+      "num": 13,
+      "slug": "debugging-neural-networks",
+      "title": "Debugging Neural Networks",
+      "nQuiz": 5
+    }
+  ]
+}

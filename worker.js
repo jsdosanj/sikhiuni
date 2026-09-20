@@ -1,15 +1,22 @@
 // Sikhi University Worker entrypoint.
-// Static files in site/ are served by the [assets] binding; /api/* is dispatched
+// Static files from the Astro build (web/dist) are served by the [assets]
+// binding -- NOT site/, which is legacy and unreachable (confirmed 2026-09-06
+// against wrangler.toml's `[assets] directory = "./web/dist"`). /api/* is dispatched
 // to the existing handlers (unchanged) that live under functions/api/.
 import { onRequestGet as meGet, onRequestPost as mePost } from "./functions/api/me.js";
+import { onRequestPost as activityHeartbeatPost } from "./functions/api/activity/heartbeat.js";
+import { onRequestGet as activityStatsGet } from "./functions/api/activity/stats.js";
 import { onRequestGet as progressGet, onRequestPost as progressPost } from "./functions/api/progress.js";
 import { onRequestPost as authRequestPost } from "./functions/api/auth/request.js";
 import { onRequestGet as authVerifyGet } from "./functions/api/auth/verify.js";
 import { onRequestPost as authLogoutPost } from "./functions/api/auth/logout.js";
 import { onRequestGet as authSsoGet } from "./functions/api/auth/sso.js";
 import { onRequestPost as authSignupPost } from "./functions/api/auth/signup.js";
+import { onRequestPost as authRegisterStartPost } from "./functions/api/auth/register-start.js";
+import { onRequestPost as authRegisterCompletePost } from "./functions/api/auth/register-complete.js";
 import { onRequestPost as authLoginPost } from "./functions/api/auth/login.js";
 import { onRequestPost as authForgotPasswordPost } from "./functions/api/auth/forgot-password.js";
+import { onRequestPost as authVerifyResetCodePost } from "./functions/api/auth/verify-reset-code.js";
 import { onRequestPost as authResetPasswordPost } from "./functions/api/auth/reset-password.js";
 import { onRequestPost as mfaEnrollPost } from "./functions/api/auth/mfa/enroll.js";
 import { onRequestPost as mfaConfirmPost } from "./functions/api/auth/mfa/confirm.js";
@@ -41,6 +48,7 @@ import { onRequestGet as gradebookGet, onRequestPost as gradebookPost } from "./
 import { onRequestPost as quizPost } from "./functions/api/quiz.js";
 import { onRequestGet as courseContentGet } from "./functions/api/course-content.js";
 import { onRequestPost as programExamPost } from "./functions/api/program-exam.js";
+import { onRequestPost as instituteExamPost } from "./functions/api/institute-exam.js";
 import { onRequestGet as announcementsGet, onRequestPost as announcementsPost } from "./functions/api/announcements.js";
 import { onRequestGet as discussionsGet, onRequestPost as discussionsPost } from "./functions/api/discussions.js";
 import { onRequestGet as discussionsModerateGet, onRequestPost as discussionsModeratePost } from "./functions/api/discussions/moderate.js";
@@ -78,14 +86,19 @@ import { sendDailyReminders } from "./functions/push-sender.js";
 // path -> { GET, POST } handlers. Each handler takes { request, env }.
 const routes = {
   "/api/me": { GET: meGet, POST: mePost },
+  "/api/activity/heartbeat": { POST: activityHeartbeatPost },
+  "/api/activity/stats": { GET: activityStatsGet },
   "/api/progress": { GET: progressGet, POST: progressPost },
   "/api/auth/request": { POST: authRequestPost },
   "/api/auth/verify": { GET: authVerifyGet },
   "/api/auth/logout": { POST: authLogoutPost },
   "/api/auth/sso": { GET: authSsoGet },
-  "/api/auth/signup": { POST: authSignupPost },
+  "/api/auth/signup": { POST: authSignupPost },  // 410 since 2026-09-06 — kept so a stale client gets an explicit answer
+  "/api/auth/register-start": { POST: authRegisterStartPost },
+  "/api/auth/register-complete": { POST: authRegisterCompletePost },
   "/api/auth/login": { POST: authLoginPost },
   "/api/auth/forgot-password": { POST: authForgotPasswordPost },
+  "/api/auth/verify-reset-code": { POST: authVerifyResetCodePost },
   "/api/auth/reset-password": { POST: authResetPasswordPost },
   "/api/auth/mfa/enroll": { POST: mfaEnrollPost },
   "/api/auth/mfa/confirm": { POST: mfaConfirmPost },
@@ -115,6 +128,7 @@ const routes = {
   "/api/quiz": { POST: quizPost },
   "/api/course-content": { GET: courseContentGet },
   "/api/program-exam": { POST: programExamPost },
+  "/api/institute-exam": { POST: instituteExamPost },
   "/api/announcements": { GET: announcementsGet, POST: announcementsPost },
   "/api/discussions": { GET: discussionsGet, POST: discussionsPost },
   "/api/discussions/moderate": { GET: discussionsModerateGet, POST: discussionsModeratePost },
@@ -156,8 +170,14 @@ const routes = {
 const RATE_LIMITS = {
   "/api/auth/request": { limit: 20, window: 60 },  // magic-link sends (anti mail-bomb)
   "/api/auth/forgot-password": { limit: 20, window: 60 },  // password-reset sends (same rule -- this is where Resend cost actually lives now)
+  "/api/auth/verify-reset-code": { limit: 10, window: 60 },  // 6-digit code brute-force guard, same as MFA verify
   "/api/auth/login": { limit: 30, window: 60 },  // password guess throttle
   "/api/auth/signup": { limit: 20, window: 60 },
+  // register-start SENDS MAIL, so it gets the anti-mail-bomb limit, not the
+  // looser signup one. register-complete is a 6-digit code guess, so it gets
+  // the same treatment as the MFA code check below.
+  "/api/auth/register-start": { limit: 20, window: 60 },
+  "/api/auth/register-complete": { limit: 10, window: 60 },
   "/api/translate": { limit: 60, window: 60 },     // paid Workers AI — cap per-IP cost
   "/api/feedback": { limit: 15, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
@@ -170,6 +190,18 @@ const RATE_LIMITS = {
   "/api/teacher/archive-request": { limit: 5, window: 60 },
   "/api/discussions/report": { limit: 5, window: 60 },
   "/api/submissions": { limit: 10, window: 60 },
+  // Grading endpoints. These score against server-only answer keys, so the
+  // response is the only channel back to an attacker — which makes repeated
+  // submission the way you reconstruct a key. The handlers each refuse to be a
+  // single-question oracle (quiz.js grades against the full key length,
+  // institute-exam.js and program-exam.js require a minimum sample and own their
+  // pass mark), but none of them was throttled, so a boundary-tuning attack could
+  // run at full speed. A real learner submits a lesson check or an exam a handful
+  // of times a minute at most; these caps are far above honest use and well below
+  // useful brute-force. Fails open like every other limit here (CSO 2026-09-09).
+  "/api/quiz": { limit: 30, window: 60 },
+  "/api/program-exam": { limit: 10, window: 60 },
+  "/api/institute-exam": { limit: 10, window: 60 },
 };
 const RL_ENFORCE = true;
 
@@ -204,6 +236,8 @@ async function checkRateLimit(env, key, limit, windowSec) {
 // previews) are deliberately NOT redirected.
 const CANONICAL_ORIGIN = "https://sikhiuni.com";
 const LEGACY_HOSTS = new Set([
+  "sikh-university.com",
+  "www.sikh-university.com",
   "sikh-university.dosanjhlabs.com",
   "sikh-university.jasvant-dosanjh.workers.dev",
 ]);
@@ -264,13 +298,40 @@ function renderTeacherPage(profile, assignedCourseIds, shellResp) {
   return new Response(transformed.body, { status: 200, headers });
 }
 
+// Best-effort daily prune of tables that only ever grow (rate_limits is
+// insert/update-only in checkRateLimit above; sessions/magic_tokens are never
+// deleted on expiry, only filtered by expires_at at read time). Each table is
+// independent so one failing DELETE can't block the others.
+async function pruneExpired(env) {
+  if (!env.DB) return { skipped: true };
+  const nowMs = Date.now();
+  const nowSec = Math.floor(nowMs / 1000);
+  const jobs = [
+    ["rate_limits", "DELETE FROM rate_limits WHERE reset_at < ?1", nowSec],
+    ["sessions", "DELETE FROM sessions WHERE expires_at < ?1", nowMs],
+    ["magic_tokens", "DELETE FROM magic_tokens WHERE expires_at < ?1", nowMs],
+  ];
+  const result = {};
+  for (const [table, sql, param] of jobs) {
+    try {
+      const { meta } = await env.DB.prepare(sql).bind(param).run();
+      result[table] = meta.changes;
+    } catch (e) { result[table] = `error: ${String(e)}`; }
+  }
+  return result;
+}
+
 export default {
-  // Daily coursework reminder sweep (wrangler.toml [triggers]). Payload-less
-  // Web Push: the service worker supplies the notification text.
+  // Daily coursework reminder sweep + best-effort table prune (wrangler.toml
+  // [triggers]). Payload-less Web Push: the service worker supplies the
+  // notification text.
   async scheduled(event, env, ctx) {
     ctx.waitUntil(sendDailyReminders(env).then((r) => {
       if (!r.skipped) console.log("push_reminders", JSON.stringify(r));
     }).catch((e) => console.error("push_reminders_error", String(e))));
+    ctx.waitUntil(pruneExpired(env).then((r) => {
+      if (!r.skipped) console.log("prune_expired", JSON.stringify(r));
+    }).catch((e) => console.error("prune_expired_error", String(e))));
   },
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -286,6 +347,12 @@ export default {
     // blocked (e.g. during a Safe Browsing review).
     if (LEGACY_HOSTS.has(url.hostname) && !pathname.startsWith("/api/") && !pathname.startsWith("/media/") && !pathname.startsWith("/assets/data/")) {
       return Response.redirect(CANONICAL_ORIGIN + pathname + url.search, 301);
+    }
+    // The engineering wing moved /institute -> /technology (2026-08). 301 the
+    // old paths, preserving the sub-path and query. Kept in run_worker_first so
+    // the Worker actually runs for these.
+    if (pathname === "/institute" || pathname.startsWith("/institute/")) {
+      return Response.redirect(CANONICAL_ORIGIN + "/technology" + pathname.slice("/institute".length) + url.search, 301);
     }
     if (pathname.startsWith("/api/")) {
       const route = routes[pathname];
@@ -398,6 +465,21 @@ export default {
     // engines and AI/ML training. Per-bot rules live in /robots.txt and /ai.txt;
     // human-readable policy at /ai-policy. Search indexing is untouched (no
     // noindex here) and never was restricted.
+    // The Code Lab's sandboxed runner workers (Vite emits them to /_lab/,
+    // routed here by run_worker_first). They execute learner code: the JS
+    // runner does `new Function(snippet)` (needs 'unsafe-eval'); the Python
+    // runner imports Pyodide from jsDelivr and fetches its wasm/stdlib. This
+    // widened policy is scoped to exactly those worker files — same-origin,
+    // no DOM, cannot touch the page — so the site-wide CSP stays strict.
+    if (pathname.startsWith('/_lab/')) {
+      h.set('Content-Security-Policy',
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; " +
+        "connect-src 'self' https://cdn.jsdelivr.net; " +
+        "worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; base-uri 'self'");
+      return new Response(assetResp.body, { status: assetResp.status, statusText: assetResp.statusText, headers: h });
+    }
+
     if (!ct.includes('text/html')) {
       return new Response(assetResp.body, { status: assetResp.status, statusText: assetResp.statusText, headers: h });
     }
@@ -405,13 +487,33 @@ export default {
     h.set('X-Frame-Options', 'DENY');
     h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     h.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+
+    // Institute of Technology — /technology/* (routed here by run_worker_first):
+    // the code lab runs Python via Pyodide ('wasm-unsafe-eval' + the jsDelivr CDN) and renders
+    // learner HTML in a sandboxed srcdoc iframe (frame-src 'self'). Take the
+    // asset layer's OWN hash-hardened CSP (from web/public/_headers, post
+    // build-csp) and only widen those three directives — everything else the
+    // site forbids stays forbidden. Falls back to the hardened baseline if the
+    // asset response somehow carried no CSP.
+    if (pathname === '/technology' || pathname.startsWith('/technology/')) {
+      const assetCsp = assetResp.headers.get('content-security-policy')
+        || "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' https:; font-src 'self'; connect-src 'self' blob: https://api.banidb.com https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self' blob:; form-action 'self'; base-uri 'self'; frame-ancestors 'none'";
+      const CDN = 'https://cdn.jsdelivr.net';
+      const instCsp = assetCsp
+        .replace(/script-src ([^;]*)/, `script-src $1 'wasm-unsafe-eval' ${CDN}`)
+        .replace(/connect-src ([^;]*)/, `connect-src $1 ${CDN}`)
+        .replace(/frame-src ([^;]*)/, "frame-src 'self' $1");
+      h.set('Content-Security-Policy', instCsp);
+      return new Response(assetResp.body, { status: assetResp.status, statusText: assetResp.statusText, headers: h });
+    }
+
     // Single authoritative CSP for HTML documents (this override wins over the
     // static _headers file, so the CSP lives here only). connect-src is tightened
     // to the one external origin the client actually calls (the BaniDB verse viewer).
     h.set('Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; " +
+      "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: https:; media-src 'self' https:; font-src 'self'; " +
-      "connect-src 'self' https://api.banidb.com; " +
+      "connect-src 'self' blob: https://api.banidb.com https://cloudflareinsights.com; " +
       "frame-src https://www.youtube-nocookie.com https://www.youtube.com; " +
       "worker-src 'self' blob:; " +
       "form-action 'self' https://formsubmit.co; base-uri 'self'; frame-ancestors 'none'");

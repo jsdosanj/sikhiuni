@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::embedding-models-deep-dive",
+  "num": 22,
+  "slug": "embedding-models-deep-dive",
+  "title": "Embedding Models — The 2026 Deep Dive",
+  "tagline": "Word2Vec gave you a vector per word. Modern embedding models give you a vector per passage, cross-lingual, with sparse, dense, and multi-vector views, sized to fit your index. Pick wrong and your RAG retrieves the wrong thing.",
+  "type": "Learn",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>Your RAG system retrieves the wrong passage 40% of the time. The culprit is rarely the vector database or the prompt. It is the embedding model.</p>\n<p>Choosing an embedding in 2026 means picking across five axes:</p>\n<ol>\n<li><strong>Dense vs sparse vs multi-vector.</strong> One vector per passage, or one per token, or a sparse weighted bag of words.</li>\n<li><strong>Language coverage.</strong> Monolingual English models still win on English-only tasks. Multilingual models win when corpora are mixed.</li>\n<li><strong>Context length.</strong> 512 tokens vs 8,192 vs 32,768 — and real effective capacity is often 60-70% of the advertised max.</li>\n<li><strong>Dimension budget.</strong> 3,072 floats at full precision = 12 KB per vector. At 100M vectors, storage is $1,300/month. Matryoshka truncation cuts this 4×.</li>\n<li><strong>Open vs hosted.</strong> Open-weight means you control the stack and data. Hosted means you trade control for always-latest.</li>\n</ol>\n<p>This lesson names the tradeoffs so you can pick on evidence, not on whatever was popular last quarter.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/embedding-modes.svg\" alt=\"Dense, sparse, and multi-vector embeddings\" loading=\"lazy\"><figcaption>Dense, sparse, and multi-vector embeddings</figcaption></figure>\n<p><strong>Dense embeddings.</strong> One vector per passage (usually 384-3,072 dimensions). Cosine similarity ranks passages by semantic proximity. OpenAI <code>text-embedding-3-large</code>, BGE-M3 dense mode, Voyage-3. Default choice.</p>\n<p><strong>Sparse embeddings.</strong> SPLADE-style. A transformer predicts a weight for every vocab token, then zeros out most of them. Result is a sparse vector of size |vocab|. Captures lexical matching (like BM25) but with learned term weights. Strong on keyword-heavy queries.</p>\n<p><strong>Multi-vector (late interaction).</strong> ColBERTv2, Jina-ColBERT. One vector per token. Scoring with MaxSim: for each query token, find the most similar document token, sum the scores. More expensive to store and score, but wins on long queries and domain-specific corpora.</p>\n<p><strong>BGE-M3: all three at once.</strong> Single model outputs dense, sparse, and multi-vector representations simultaneously. Each can be queried independently; scores fuse via weighted sum. The 2026 default when you want flexibility from one checkpoint.</p>\n<p><strong>Matryoshka Representation Learning.</strong> Trained so the first N dimensions of the vector form a useful standalone embedding. Truncate a 1,536-dim vector to 256 dim and pay ~1% accuracy for 6× storage savings. Supported by OpenAI text-3, Cohere v4, Voyage-4, Jina v5, Gemini Embedding 2, Nomic v1.5+.</p>\n<h3>The MTEB leaderboard tells a partial story</h3>\n<p>Massive Text Embedding Benchmark — 56 tasks across 8 task types at launch (2022), expanded to 100+ tasks in MTEB v2. In early 2026, Gemini Embedding 2 tops retrieval (67.71 MTEB-R). Cohere embed-v4 leads general (65.2 MTEB). BGE-M3 leads open-weight multilingual (63.0). The leaderboard is necessary but not sufficient — always benchmark on your domain.</p>\n<h3>The three-tier pattern</h3>\n<table>\n<thead>\n<tr>\n<th>Use case</th>\n<th>Pattern</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Fast first-pass</td>\n<td>Dense bi-encoder (BGE-M3, text-3-small)</td>\n</tr>\n<tr>\n<td>Recall boost</td>\n<td>Sparse (SPLADE, BGE-M3 sparse) + RRF fuse</td>\n</tr>\n<tr>\n<td>Precision on top-50</td>\n<td>Multi-vector (ColBERTv2) or cross-encoder reranker</td>\n</tr>\n</tbody></table>\n<p>Most production stacks use all three.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>gx-matryoshka</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: baseline — dense embeddings with Sentence-BERT</h3>\n<pre><code class=\"language-python\">from sentence_transformers import SentenceTransformer\nimport numpy as np\n\nencoder = SentenceTransformer(&quot;BAAI/bge-small-en-v1.5&quot;)\ncorpus = [\n    &quot;The first iPhone launched in 2007.&quot;,\n    &quot;Apple released the iPod in 2001.&quot;,\n    &quot;Android is an operating system from Google.&quot;,\n]\nemb = encoder.encode(corpus, normalize_embeddings=True)\n\nquery = &quot;When was the iPhone released?&quot;\nq_emb = encoder.encode([query], normalize_embeddings=True)[0]\nscores = emb @ q_emb\nprint(sorted(enumerate(scores), key=lambda x: -x[1]))\n</code></pre>\n<p><code>normalize_embeddings=True</code> makes the dot product equal cosine similarity. Always set it.</p>\n<h3>Step 2: Matryoshka truncation</h3>\n<pre><code class=\"language-python\">def truncate(vectors, dim):\n    out = vectors[:, :dim]\n    return out / np.linalg.norm(out, axis=1, keepdims=True)\n\nemb_256 = truncate(emb, 256)\nemb_128 = truncate(emb, 128)\n</code></pre>\n<p>Re-normalize after truncation. Nomic v1.5, OpenAI text-3, and Voyage-4 are trained so this is lossless for the first few levels. Non-Matryoshka models (original Sentence-BERT) degrade sharply when truncated.</p>\n<h3>Step 3: BGE-M3 multi-functionality</h3>\n<pre><code class=\"language-python\">from FlagEmbedding import BGEM3FlagModel\n\nmodel = BGEM3FlagModel(&quot;BAAI/bge-m3&quot;, use_fp16=True)\n\noutput = model.encode(\n    corpus,\n    return_dense=True,\n    return_sparse=True,\n    return_colbert_vecs=True,\n)\n# output[&quot;dense_vecs&quot;]:    (n_docs, 1024)\n# output[&quot;lexical_weights&quot;]: list of dict {token_id: weight}\n# output[&quot;colbert_vecs&quot;]:  list of (n_tokens, 1024) arrays\n</code></pre>\n<p>Three indexes, one inference call. Score fusion:</p>\n<pre><code class=\"language-python\">dense_score = ... # cosine over dense_vecs\nsparse_score = model.compute_lexical_matching_score(q_lex, d_lex)\ncolbert_score = model.colbert_score(q_col, d_col)\nfinal = 0.4 * dense_score + 0.2 * sparse_score + 0.4 * colbert_score\n</code></pre>\n<p>Tune the weights on your domain.</p>\n<h3>Step 4: MTEB eval on a custom task</h3>\n<pre><code class=\"language-python\">from mteb import MTEB\n\ntasks = [&quot;ArguAna&quot;, &quot;SciFact&quot;, &quot;NFCorpus&quot;]\nevaluation = MTEB(tasks=tasks)\nresults = evaluation.run(encoder, output_folder=&quot;./mteb-results&quot;)\n</code></pre>\n<p>Run your candidate models on a <em>representative</em> subset. Do not trust leaderboard rank alone — your domain matters.</p>\n<h3>Step 5: hand-rolled cosine from scratch</h3>\n<p>See <code>code/main.py</code>. Averaged Hashing Trick embeddings (stdlib-only). Not competitive with transformer embeddings, but shows the shape: tokenize → vector → normalize → dot product.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>Same model for query and doc.</strong> Some models (Voyage, Jina-ColBERT) use asymmetric encoding — query and document pass through different paths. Always check the model card.</li>\n<li><strong>Missing prefix.</strong> <code>bge-*</code> models need <code>&quot;Represent this sentence for searching relevant passages: &quot;</code> prepended to queries. 3-5 point recall gap if you forget.</li>\n<li><strong>Over-trimming Matryoshka.</strong> 1,536 → 256 is usually safe. 1,536 → 64 is not. Validate on your eval set.</li>\n<li><strong>Context truncation.</strong> Most models silently truncate inputs over their max length. Long docs need chunking (see lesson 23).</li>\n<li><strong>Ignoring latency tail.</strong> MTEB scores hide p99 latency. A 600M model might beat a 335M model by 2 points but cost 3× more per query.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>English-only, fast, API</td>\n<td><code>text-embedding-3-large</code> or <code>voyage-3-large</code></td>\n</tr>\n<tr>\n<td>Open-weight, English</td>\n<td><code>BAAI/bge-large-en-v1.5</code></td>\n</tr>\n<tr>\n<td>Open-weight, multilingual</td>\n<td><code>BAAI/bge-m3</code> or <code>Qwen3-Embedding-8B</code></td>\n</tr>\n<tr>\n<td>Long context (32k+)</td>\n<td>Voyage-3-large, Cohere embed-v4, Qwen3-Embedding-8B</td>\n</tr>\n<tr>\n<td>CPU-only deployment</td>\n<td>Nomic Embed v2 (137M params, MoE)</td>\n</tr>\n<tr>\n<td>Storage-constrained</td>\n<td>Matryoshka-truncated + int8 quantization</td>\n</tr>\n<tr>\n<td>Keyword-heavy queries</td>\n<td>Add SPLADE sparse, RRF-fuse with dense</td>\n</tr>\n</tbody></table>\n<p>2026 pattern: start with BGE-M3 or text-3-large, evaluate on your domain with MTEB, swap if a domain-specific model wins by more than 3 points.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-embedding-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: embedding-picker\ndescription: Pick embedding model, dimension, and retrieval mode for a given corpus and deployment.\nversion: 1.0.0\nphase: 5\nlesson: 22\ntags: [nlp, embeddings, retrieval]\n---\n\nGiven a corpus (size, languages, domain, avg length), deployment target (cloud / edge / on-prem), latency budget, and storage budget, output:\n\n1. Model. Named checkpoint or API. One-sentence reason.\n2. Dimension. Full / Matryoshka-truncated / int8-quantized. Reason tied to storage budget.\n3. Mode. Dense / sparse / multi-vector / hybrid. Reason.\n4. Query prefix / template if required by the model card.\n5. Evaluation plan. MTEB tasks relevant to domain + held-out domain eval with nDCG@10.\n\nRefuse recommendations that truncate Matryoshka to &lt;64 dims without domain validation. Refuse ColBERTv2 for corpora under 10k passages (overhead not justified). Flag long-document corpora (&gt;8k tokens) routed to models with 512-token windows.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Encode 100 sentences with <code>bge-small-en-v1.5</code> at full dim (384), then at Matryoshka 128. Measure MRR drop on 10 queries.</li>\n<li><strong>Medium.</strong> Compare BGE-M3 dense, sparse, and colbert on 500 passages from your domain. Which wins on recall@10? Does RRF fusion beat the best single mode?</li>\n<li><strong>Hard.</strong> Run MTEB on three candidate models across your top-2 domain tasks. Report MTEB score, p99 latency on a 100-query batch, and $/1M queries. Pick the Pareto-optimal one.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Dense embedding</td>\n<td>The vector</td>\n<td>One fixed-size vector per text. Cosine similarity for ranking.</td>\n</tr>\n<tr>\n<td>Sparse embedding</td>\n<td>Learned BM25</td>\n<td>One weight per vocab token; mostly zeros; trained end-to-end.</td>\n</tr>\n<tr>\n<td>Multi-vector</td>\n<td>ColBERT-style</td>\n<td>One vector per token; MaxSim scoring; bigger index, better recall.</td>\n</tr>\n<tr>\n<td>Matryoshka</td>\n<td>Russian doll trick</td>\n<td>First N dims are a valid smaller embedding on their own.</td>\n</tr>\n<tr>\n<td>MTEB</td>\n<td>The benchmark</td>\n<td>Massive Text Embedding Benchmark — 56 tasks at launch, 100+ in v2.</td>\n</tr>\n<tr>\n<td>BEIR</td>\n<td>The retrieval benchmark</td>\n<td>18 zero-shot retrieval tasks; often cited for cross-domain robustness.</td>\n</tr>\n<tr>\n<td>Asymmetric encoding</td>\n<td>Query ≠ doc path</td>\n<td>Model uses different projections for queries and documents.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/1908.10084\" target=\"_blank\" rel=\"noopener\">Reimers, Gurevych (2019). Sentence-BERT</a> — the bi-encoder paper.</li>\n<li><a href=\"https://arxiv.org/abs/2210.07316\" target=\"_blank\" rel=\"noopener\">Muennighoff et al. (2022). MTEB: Massive Text Embedding Benchmark</a> — the leaderboard paper.</li>\n<li><a href=\"https://arxiv.org/abs/2402.03216\" target=\"_blank\" rel=\"noopener\">Chen et al. (2024). BGE-M3: Multi-lingual, Multi-functionality, Multi-granularity</a> — the unified three-mode model.</li>\n<li><a href=\"https://arxiv.org/abs/2205.13147\" target=\"_blank\" rel=\"noopener\">Kusupati et al. (2022). Matryoshka Representation Learning</a> — the dimension-ladder training objective.</li>\n<li><a href=\"https://arxiv.org/abs/2112.01488\" target=\"_blank\" rel=\"noopener\">Santhanam et al. (2022). ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction</a> — late interaction in production.</li>\n<li><a href=\"https://huggingface.co/spaces/mteb/leaderboard\" target=\"_blank\" rel=\"noopener\">MTEB leaderboard on Hugging Face</a> — live rankings.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import hashlib\nimport math\nimport re\nfrom collections import Counter\n\n\ndef tokenize(text):\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\ndef hash_token(token, dim, seed=0):\n    h = hashlib.md5(f\"{seed}:{token}\".encode()).digest()\n    return int.from_bytes(h[:4], \"big\") % dim\n\n\ndef hash_embed(text, dim=256):\n    vec = [0.0] * dim\n    for tok in tokenize(text):\n        idx = hash_token(tok, dim)\n        sign = 1.0 if hash_token(tok, 2, seed=1) == 1 else -1.0\n        vec[idx] += sign\n    norm = math.sqrt(sum(v * v for v in vec))\n    if norm == 0:\n        return vec\n    return [v / norm for v in vec]\n\n\ndef cosine(a, b):\n    if len(a) != len(b):\n        raise ValueError(f\"cosine: dim mismatch {len(a)} vs {len(b)}\")\n    return sum(x * y for x, y in zip(a, b))\n\n\ndef truncate_matryoshka(vec, new_dim):\n    out = vec[:new_dim]\n    norm = math.sqrt(sum(v * v for v in out))\n    if norm == 0:\n        return out\n    return [v / norm for v in out]\n\n\ndef rank(corpus_embs, query_emb):\n    scored = [(cosine(e, query_emb), i) for i, e in enumerate(corpus_embs)]\n    scored.sort(reverse=True)\n    return scored\n\n\ndef sparse_embed(text):\n    return Counter(tokenize(text))\n\n\ndef sparse_score(q_sparse, d_sparse):\n    total = 0.0\n    for tok, q_weight in q_sparse.items():\n        total += q_weight * d_sparse.get(tok, 0)\n    return total\n\n\ndef rrf_fuse(rankings, k=60):\n    scores = {}\n    for ranking in rankings:\n        for rank, (_, idx) in enumerate(ranking):\n            scores[idx] = scores.get(idx, 0.0) + 1.0 / (k + rank + 1)\n    return sorted(scores.items(), key=lambda x: -x[1])\n\n\ndef main():\n    corpus = [\n        \"Apple released the first iPhone on June 29, 2007.\",\n        \"Macworld 2007 featured the iPhone announcement by Steve Jobs.\",\n        \"Android launched in 2008 as Google's mobile operating system.\",\n        \"The first iPod was released by Apple in 2001.\",\n        \"Fraud refers to wrongful or criminal deception for financial gain.\",\n        \"Section 420 of the Indian Penal Code covers cheating.\",\n    ]\n\n    query = \"When was the first iPhone released?\"\n\n    print(\"=== dense (hash-trick) retrieval ===\")\n    dense_corpus = [hash_embed(doc, dim=256) for doc in corpus]\n    dense_query = hash_embed(query, dim=256)\n    dense_ranked = rank(dense_corpus, dense_query)\n    for score, idx in dense_ranked[:3]:\n        print(f\"  {score:.3f}  {corpus[idx]}\")\n\n    print()\n    print(\"=== Matryoshka truncation: 256 -> 64 ===\")\n    matryoshka_corpus = [truncate_matryoshka(v, 64) for v in dense_corpus]\n    matryoshka_query = truncate_matryoshka(dense_query, 64)\n    matryoshka_ranked = rank(matryoshka_corpus, matryoshka_query)\n    for score, idx in matryoshka_ranked[:3]:\n        print(f\"  {score:.3f}  {corpus[idx]}\")\n\n    print()\n    print(\"=== sparse (lexical) retrieval ===\")\n    sparse_corpus = [sparse_embed(doc) for doc in corpus]\n    sparse_query = sparse_embed(query)\n    sparse_scores = [(sparse_score(sparse_query, d), i) for i, d in enumerate(sparse_corpus)]\n    sparse_scores.sort(reverse=True)\n    for score, idx in sparse_scores[:3]:\n        print(f\"  {score:.3f}  {corpus[idx]}\")\n\n    print()\n    print(\"=== RRF fusion (dense + sparse) ===\")\n    fused = rrf_fuse([dense_ranked[:5], sparse_scores[:5]])[:3]\n    for idx, score in fused:\n        print(f\"  {score:.4f}  {corpus[idx]}\")\n\n    print()\n    print(\"note: the hash-trick embedder is for demonstration.\")\n    print(\"real dense embeddings come from transformers (BGE, Nomic, Voyage).\")\n    print(\"Matryoshka truncation, cosine ranking, and RRF fusion all stay identical.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is a dense embedding?",
+      "options": [
+        "One fixed-size vector per text where cosine similarity ranks passages by semantic proximity",
+        "A token-level alignment matrix",
+        "A sparse weight per vocab token",
+        "A graph over documents"
+      ],
+      "answer": 0,
+      "explanation": "Dense embeddings give one vector per text (typically 384-3072 dim); cosine ranks similarity."
+    },
+    {
+      "q": "What does Matryoshka Representation Learning enable?",
+      "options": [
+        "Faster softmax",
+        "Multilingual training",
+        "Cross-encoder rescoring",
+        "Truncating a trained embedding to its first N dimensions and getting a still-useful smaller embedding"
+      ],
+      "answer": 3,
+      "explanation": "Matryoshka training makes the first N dims of the vector standalone-useful, enabling cheap truncation."
+    },
+    {
+      "q": "How do multi-vector (ColBERT) embeddings score query-doc pairs?",
+      "options": [
+        "Cosine of mean-pooled token vectors",
+        "Cross-entropy",
+        "MaxSim: for each query token find the most similar document token, then sum the maxima",
+        "Earth-mover's distance"
+      ],
+      "answer": 2,
+      "explanation": "ColBERT-style late interaction uses MaxSim across per-token vectors."
+    },
+    {
+      "q": "What does BGE-M3 output simultaneously?",
+      "options": [
+        "Only a sparse vector",
+        "Only a dense vector",
+        "Dense, sparse, and multi-vector (colbert) representations from one model in a single inference",
+        "Only a colbert vector"
+      ],
+      "answer": 2,
+      "explanation": "BGE-M3 emits three retrieval modes from one model, useful for fused hybrid scoring."
+    },
+    {
+      "q": "Why must you re-normalize a Matryoshka-truncated vector before cosine similarity?",
+      "options": [
+        "Truncation changes the vector norm; without re-normalizing, dot product no longer equals cosine",
+        "Cosine ignores normalization",
+        "Truncation breaks training",
+        "Required by FAISS only"
+      ],
+      "answer": 0,
+      "explanation": "Re-normalizing after truncation restores unit norm so dot product equals cosine again."
+    },
+    {
+      "q": "Why do BGE models often need a query-side prefix string?",
+      "options": [
+        "To compress queries",
+        "Prefixes change tokenizer behavior",
+        "Required by FAISS",
+        "BGE was trained with an explicit query prompt; omitting it costs 3-5 points recall"
+      ],
+      "answer": 3,
+      "explanation": "BGE models expect a 'Represent this sentence for searching...' prefix on queries."
+    },
+    {
+      "q": "Why is MTEB necessary but not sufficient for picking an embedding model?",
+      "options": [
+        "MTEB only covers English",
+        "MTEB rewards bigger models",
+        "MTEB ignores latency",
+        "Leaderboard ranks are average across many tasks; your specific domain may differ, so always benchmark on your data"
+      ],
+      "answer": 3,
+      "explanation": "MTEB averages across tasks; domain-specific eval can flip the ranking."
+    },
+    {
+      "q": "When should you add SPLADE sparse retrieval alongside dense embeddings?",
+      "options": [
+        "On small corpora only",
+        "Whenever the encoder is multilingual",
+        "When queries are keyword-heavy or contain identifiers/codes that dense embeddings blur",
+        "Whenever Matryoshka is used"
+      ],
+      "answer": 2,
+      "explanation": "SPLADE captures lexical/keyword matches that dense models can miss; fuse with dense via RRF."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/22-embedding-models-deep-dive"
+  }
+}

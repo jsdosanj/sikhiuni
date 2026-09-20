@@ -1,0 +1,95 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { tracks, professorOf } from '../../../lib/institute';
+
+const DATA_FILE: Record<string, string> = {
+  'sikh-code-foundations': 'coding-fundamentals',
+  'sikh-code-agentic': 'ai-coding',
+};
+
+export function getStaticPaths() {
+  return tracks
+    .filter((t) => t.kind === 'dojo' && t.status === 'published')
+    .map((t) => ({ params: { slug: t.id }, props: { t } }));
+}
+const { t } = Astro.props;
+const prof = professorOf(t);
+const dataFile = DATA_FILE[t.id];
+const isTerminal = t.engine === 'terminal';
+
+const covers = isTerminal
+  ? ['Variables', 'Strings', 'Conditionals', 'Loops', 'Functions', 'Arrays & objects', 'Errors', 'Classes & async', 'Comments']
+  : ['Setup, /init, /memory, /mcp, /permissions, /skills', 'Daily, /plan, /model, /compact, /context, /btw', 'Parallel, /agents, /batch, /background, /fork', 'Shipping, /diff, /code-review, /security-review, /simplify', 'Sessions, /clear, /resume, /branch, /rename', 'Troubleshooting, /rewind, /doctor, /debug, /usage'];
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: t.title,
+  description: t.summary,
+  provider: { '@type': 'EducationalOrganization', name: 'Sikhi University · Institute of Technology' },
+  isAccessibleForFree: true,
+  inLanguage: 'en',
+  educationalLevel: t.level,
+  ...(prof ? { author: { '@type': 'Organization', name: prof.name } } : {}),
+};
+---
+<Base title={`${t.title}, Institute of Technology`} description={t.summary} institute ogType="article">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <InstituteRail />
+
+  <header class="i-dojo-head">
+    <div class="i-wrap">
+      <a class="i-mono i-dojo-crumb" href={`/technology/track/${t.id}`}>&larr; {t.title}</a>
+      <span class="i-label i-mono">{t.kind} &middot; {t.license}</span>
+      <h1>{t.title}</h1>
+      <p class="i-prose i-dojo-sum">
+        {isTerminal
+          ? 'Watch each topic type itself out and explain what it teaches, line by line. Use the tabs or the arrows to move between topics; pause any time.'
+          : 'The real Claude Code command set. It runs a scripted tour, press any key, or type / to drive it yourself: arrow to select, tab to complete, enter to run.'}
+      </p>
+    </div>
+  </header>
+
+  <section class="i-wrap i-dojo-stage-wrap">
+    <div id="i-dojo-mount" data-src={`/data/institute/dojo/${dataFile}.json`} class="i-dojo-stage">
+      <p class="i-mono" style="padding:28px;color:var(--i-muted)">Loading the dojo…</p>
+    </div>
+  </section>
+
+  <section class="i-wrap i-dojo-below">
+    <span class="i-label">what this covers</span>
+    <ul class="i-dojo-covers">{covers.map((c) => <li class="i-prose">{c}</li>)}</ul>
+    <p class="i-prose i-dojo-src">
+      Rebuilt for the Institute from the sikhi.io <a href="https://sikhi.io">Sikh Code</a> dojos by {prof?.name || 'Sikhi University'}, CC BY-SA 4.0.
+      {!isTerminal && <> The command reference tracks the public Claude Code documentation. <a href="https://claude.com/product/claude-code" target="_blank" rel="noopener">Get Claude Code &nearr;</a></>}
+      {' '}See <a href="/technology/licenses">sources &amp; licenses</a>.
+    </p>
+  </section>
+
+  <style>
+    .i-dojo-head { border-bottom: 1px solid var(--i-line); padding: 30px 0 26px; background: var(--i-ground-deep); }
+    .i-dojo-crumb { display: block; width: fit-content; color: var(--i-ink-dim); text-decoration: none; font-size: 12px; margin-bottom: 10px; }
+    .i-dojo-crumb:hover { color: var(--i-filament); }
+    .i-dojo-head h1 { margin: 8px 0 0; font-size: clamp(22px, 4vw, 32px); }
+    .i-dojo-sum { margin-top: 10px; font-size: 14.5px; max-width: 64ch; }
+
+    .i-dojo-stage-wrap { padding: 20px 24px 8px; }
+    .i-dojo-stage {
+      height: clamp(520px, 80vh, 880px);
+      border: 1px solid var(--i-line); border-radius: 12px; overflow: hidden;
+      background: #070B14;
+    }
+
+    .i-dojo-below { padding: 24px; }
+    .i-dojo-covers { margin: 10px 0 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+    .i-dojo-covers li { margin: 5px 0; font-size: 13.5px; line-height: 1.5; break-inside: avoid; }
+    .i-dojo-src { margin-top: 18px; font-size: 12.5px; color: var(--i-muted); }
+    @media (max-width: 560px) { .i-dojo-covers { columns: 1; } }
+  </style>
+
+  <script>
+    import { initDojo } from '../../../lib/institute/dojo/mount';
+    initDojo();
+  </script>
+</Base>

@@ -1,0 +1,229 @@
+{
+  "title": "Claude Desktop & Code",
+  "subtitle": "written for people who do not write code",
+  "lede": "Claude Desktop is an app on your computer where you can talk to an AI that can read your files, edit them, run programs, browse the web, and finish real work for you. It is built for people who do not write code as much as for those who do. This guide walks you through every part of it in plain English, with each feature followed by what it actually lets you do.",
+  "sourceNote": "Written by Sikhi University for the Institute, adapted from the sikhi.io Claude Code guide. Product details track the public Anthropic documentation; no Anthropic branding is used beyond naming the product. CC BY-SA 4.0.",
+  "groups": [
+    {
+      "id": "start",
+      "part": "Part 1",
+      "title": "Getting started",
+      "blurb": "Install the app, sign in, and finish your first task. No terminal, no setup steps beyond what is below.",
+      "sections": [
+        {
+          "id": "what-is-claude",
+          "title": "What Claude actually is",
+          "body": "Claude is an AI you can talk to in writing or by voice. The desktop app gives Claude permission to help you with tasks that involve your real files and folders. You point at a folder, you describe what you want, Claude reads what is there, asks before changing anything, and shows you exactly what changed so you can accept or reject each step. There is no command line and no programming required.",
+          "enables": "You can ask Claude to do work that previously required a friend who codes, a freelancer, or a research assistant. Cleaning up a messy folder of receipts, drafting a long letter using a stack of notes, summarising a hundred PDFs, fixing a broken website, organising photos by date, or comparing two contracts side by side. The desktop app turns any folder on your computer into a workspace where Claude can act, while you stay in charge of what gets approved."
+        },
+        {
+          "id": "install",
+          "title": "Install the desktop app",
+          "body": "Download the installer for your computer, run it, and sign in with your Anthropic account. The app is available for macOS (both Intel and Apple Silicon) and Windows (x64 and ARM64). Linux is not supported in the app, so Linux users use the command-line version which we cover at the end. A paid plan (Pro, Max, Team, or Enterprise) is required to use the Code tab.",
+          "enables": "Once installed, you have one icon on your dock or start menu that opens a working AI assistant with file access. No browser tabs to manage. No copy-pasting between a chat and your editor. The app is self-contained and ready to act.",
+          "steps": [
+            "Go to claude.ai and download the desktop installer for your operating system.",
+            "Run the installer and follow the prompts.",
+            "Open the app and sign in with your Anthropic account, the same account you use for claude.ai.",
+            "If the Code tab asks you to upgrade, choose a Pro or Max plan. Pro is enough for most personal use."
+          ]
+        },
+        {
+          "id": "tabs",
+          "title": "Three tabs: Chat, Cowork, Code",
+          "body": "At the top of the app you have three tabs. Chat is general conversation with no file access, like the website. Cowork is an autonomous background worker that runs in the cloud and continues even if you close the app, useful for long jobs you do not want to babysit. Code is the interactive workspace where Claude reads and edits files on your computer in real time and asks before each change. For most desktop work the Code tab is the main one.",
+          "enables": "You can choose how involved you want to be. Chat for quick questions or learning. Cowork for set-it-and-forget-it tasks like a weekly report. Code for hands-on work where you want to see and approve every step. The tab is just a setting, you can switch any time."
+        },
+        {
+          "id": "first-session",
+          "title": "Your first session",
+          "body": "Click the Code tab. Choose Local to work on files on your own computer. Click Select folder and pick any folder, even a freshly made empty one. Choose a model from the dropdown next to the send button (Sonnet is a good starting point, Opus is the most capable, Haiku is fastest). Then type what you want done in plain English. Claude reads, plans, and starts working, asking for permission the first time it tries each new kind of action.",
+          "enables": "Anything you can describe in a sentence becomes a task. The session is a conversation, not a single command, so you can refine as you go. If Claude misunderstands, you say so in the next message. If you want to change direction, you change direction. You are not running a script, you are working with someone.",
+          "examples": [
+            "Make a folder called 'Photos by year' and move every image in this folder into a subfolder named after its year.",
+            "Read every PDF in this folder and write me a one-page summary of all of them.",
+            "Look at my CV and rewrite it so it fits on a single page in a more modern style.",
+            "Find every email address mentioned in any file in this folder and put them all into a CSV.",
+            "Build me a simple webpage that shows a list of my favourite books from the notes file in this folder."
+          ]
+        },
+        {
+          "id": "diff",
+          "title": "The diff view: see and approve every change",
+          "body": "When Claude proposes a file change, the app shows a diff: a side-by-side or stacked view with the old version on one side and the new version on the other. Lines that were removed are highlighted red. Lines that were added are highlighted green. You see exactly what is changing before anything is saved. Click Accept to apply, Reject to throw it away, or leave a comment on a specific line and Claude rewrites based on your feedback.",
+          "enables": "You stay in control without needing to understand every detail. The visual makes the change obvious even if the file is technical. Nothing on your computer changes until you have approved it. If you accept by mistake, the app keeps a history so you can undo."
+        },
+        {
+          "id": "permissions",
+          "title": "Permission modes",
+          "body": "There are three settings that control how often Claude asks before doing something. Ask permissions is the default and asks before every change. Auto accept edits stops asking for routine file edits, useful when you trust the task and want speed. Plan mode asks Claude to design an approach without touching any files at all, useful before a big change so you can read the plan first and adjust it.",
+          "enables": "Match how cautious you want to be to how comfortable you are with the task. Use Ask the first time you try anything. Switch to Auto accept once you have seen the kind of work and trust it. Use Plan when you want to think out loud with the AI before any action is taken. You can change mode mid-conversation."
+        },
+        {
+          "id": "context",
+          "title": "Adding files, images, and PDFs",
+          "body": "Three ways to give Claude context. Type @ followed by a filename to mention a specific file from the current folder, and Claude pulls it in. Click the paperclip to attach an image or PDF from anywhere on your computer. Or drag any file directly into the chat box. Claude can read images (including handwriting and screenshots), parse PDFs, and inspect spreadsheets.",
+          "enables": "Your hands are the interface. A screenshot of an error becomes a question. A photograph of a handwritten letter becomes searchable text. A PDF of a bank statement becomes a summary of your spending. Mixing words, files, and pictures in the same message makes it possible to describe what you want the way you would to a human helper."
+        },
+        {
+          "id": "voice",
+          "title": "Voice and image input",
+          "body": "Hold the microphone button (or tap to toggle it on) and speak instead of typing. Claude transcribes and responds. Combine voice with file attachments, for example say what you want while a screenshot is loaded. Image input understands diagrams, photos, scanned documents, and on-screen content.",
+          "enables": "Long instructions become easier. Reading a passage out loud is faster than typing it. Asking 'what is wrong with this picture?' while showing the picture is the natural form of the question. Voice removes the typing barrier for people who think faster than they type."
+        }
+      ]
+    },
+    {
+      "id": "everyday",
+      "part": "Part 2",
+      "title": "Working faster",
+      "blurb": "Once your first task works, these features make Claude useful for ongoing work, not just one-off requests.",
+      "sections": [
+        {
+          "id": "slash",
+          "title": "Slash commands and skills",
+          "body": "Type a forward slash in the prompt box and a menu of commands appears. Some are built-in, like /help to learn what is possible, /clear to start a fresh conversation, or /resume to continue an earlier one. Skills are pre-written instructions for specific tasks, for example 'review this code for security issues' or 'check my writing for grammar.' You can also write your own as a saved instruction.",
+          "enables": "Repeated tasks become one tap instead of one paragraph. Once you have written 'review this for grammar' three times, save it as a skill. The next time you press /grammar and Claude knows what to do without you re-explaining. Over weeks you build a personal library of one-tap actions."
+        },
+        {
+          "id": "plugins",
+          "title": "Plugins, the app store inside the app",
+          "body": "Click the plus button next to the prompt box and select Plugins to browse a marketplace of pre-built bundles. Each plugin adds new skills, new commands, and sometimes new connectors to outside services like GitHub, Slack, or Linear. Install one and the new abilities show up immediately, alongside whatever you already have.",
+          "enables": "Without writing anything yourself, you can add capability that took someone else weeks to build. A photography plugin adds 'rename my photos by camera and date.' A writing plugin adds 'analyse this draft for tone.' A finance plugin adds 'summarise this bank statement.' Plugins make the app expand to whatever your work is."
+        },
+        {
+          "id": "parallel",
+          "title": "Parallel sessions, work on more than one thing",
+          "body": "The sidebar shows every conversation as a separate session, each in its own copy of the project so they do not interfere with each other. Open a new session for a new task, switch between them with one click, and the model remembers where each one left off. Open a side chat to ask a quick question that does not affect the main thread.",
+          "enables": "You stop waiting on the AI to finish one thing before starting the next. Three sessions can run side by side: one drafting a letter, one organising a folder, one researching a topic. You move between them as work in your own life moves between subjects."
+        },
+        {
+          "id": "background",
+          "title": "Background and remote sessions",
+          "body": "Long jobs do not need you to watch them. Send a session to the cloud and it keeps running even after you close the app. The Cowork tab is purpose-built for autonomous background work: you describe a goal, Claude works on it for hours in a cloud computer with its own environment, and you check the result later. Scheduled tasks let you set Claude to run on a recurring basis, for example a daily summary at 8am, a weekly tidy of your downloads folder, or a monthly report from connected tools.",
+          "enables": "Time you would have lost to busywork becomes recovered time. The agent runs while you sleep. The weekly report writes itself. The Monday morning briefing is waiting when you open the laptop. You set the recurring intent once and the work happens forever afterwards."
+        },
+        {
+          "id": "preview",
+          "title": "Live preview and integrated terminal",
+          "body": "If your task involves a website or app, the Preview pane runs it inside Claude Desktop so the agent can see the live result, click around, and respond to what it sees. The integrated terminal is available with one keystroke and lets you watch any commands the agent runs. The whole workspace, chat, files, terminal, and preview, can be rearranged into whatever layout suits the task.",
+          "enables": "Iteration becomes immediate. Make a change, see the change. The agent does not just guess at how the website looks, it views it and adjusts. For non-developers this matters because it means asking 'make this button more visible' produces a result the AI can verify visually, not just edit blindly."
+        },
+        {
+          "id": "connectors",
+          "title": "Connectors to outside tools",
+          "body": "From the plus button, choose Connectors and you can link Claude Desktop to outside services like Gmail, Google Calendar, Google Drive, GitHub, Slack, Linear, and many more. Once connected, Claude can read your inbox, draft replies, post to channels, schedule meetings, or pull tasks from your project tracker, all inside the same conversation.",
+          "enables": "Your scattered tools become one workspace. Instead of switching between five tabs to compose a project update, you ask Claude to gather the latest from Linear, the relevant Slack thread, and the meeting notes from Drive, and draft a one-paragraph summary. The plumbing between apps is something the AI now handles for you."
+        },
+        {
+          "id": "scheduled",
+          "title": "Scheduled tasks",
+          "body": "Tell Claude to do something on a schedule: every morning, every Monday, the first of every month. The task can use any of the connectors and tools you have set up. Combined with Cowork, scheduled tasks become a small automated team that works on your behalf without prompting from you.",
+          "enables": "A daily morning briefing pulled from your inbox and calendar. A weekly digest of what changed across your projects. A monthly receipt-organiser that files everything in your downloads folder by category. Recurring effort that used to consume Sunday afternoons becomes invisible."
+        }
+      ]
+    },
+    {
+      "id": "advanced-but-easy",
+      "part": "Part 3",
+      "title": "Capability without complexity",
+      "blurb": "These features sound technical but the desktop app makes them clickable.",
+      "sections": [
+        {
+          "id": "memory",
+          "title": "Memory: Claude remembers across sessions",
+          "body": "Claude has two kinds of long-term memory. The first is a file called CLAUDE.md that you can keep at the root of any project folder, written in plain English, that tells Claude how this project works (your conventions, what to avoid, who is involved). The second is auto-memory: Claude writes notes to itself about your preferences, your role, your past corrections, so future conversations open already oriented.",
+          "enables": "You stop re-explaining the same five facts every time. Tell Claude once that this folder is your wedding planning project and that you prefer warm writing tones, and the next session it already knows. Tell it once that pushing to production needs a confirmation, and it remembers forever. The relationship gets easier over time.",
+          "examples": [
+            "Ask Claude to 'create a CLAUDE.md for this folder describing my preferences', and it will draft one based on the conversation so far.",
+            "Tell Claude 'remember I prefer Oxford commas' and it stores that in auto-memory."
+          ]
+        },
+        {
+          "id": "subagents",
+          "title": "Specialised helpers (subagents)",
+          "body": "Some tasks are better handled by a fresh, specialised agent rather than the main conversation. Claude can launch a sub-agent for, say, a security review of a document, or to research one specific topic in depth, or to plan an architectural decision. The sub-agent has its own focus, its own toolset, and reports back a clean summary instead of pasting raw output into your main thread.",
+          "enables": "You stay focused. Long investigations or specialist reviews happen in their own window and return a one-paragraph answer instead of fifty pages of raw work. You can also run several sub-agents in parallel: one researches, one drafts, one reviews, while you steer."
+        },
+        {
+          "id": "review-pr",
+          "title": "Watch and merge pull requests automatically",
+          "body": "If your project lives on GitHub, Claude Desktop can watch your pull requests, read the test results, fix anything that fails, and merge automatically when everything passes. You see status updates inline as the checks run. For non-developers this still applies indirectly: it means projects you commission can be largely self-driving.",
+          "enables": "The boring parts of shipping disappear. The agent waits, watches, fixes, retries, merges. Your involvement is needed only when something genuinely requires a human decision. This is one of the closest things in the app to having a junior engineer who never sleeps."
+        }
+      ]
+    },
+    {
+      "id": "developer",
+      "part": "Part 4",
+      "title": "For developers",
+      "blurb": "If you are comfortable with a terminal, this section unlocks the full toolbox.",
+      "sections": [
+        {
+          "id": "cli",
+          "title": "Claude Code CLI",
+          "body": "There is a command-line version of Claude Code that runs in your terminal. Install it with one npm command. Once installed, type 'claude' inside any folder to start a session. The CLI has the same engine as the desktop app and shares configuration files (CLAUDE.md, plugins, MCP servers, hooks, settings).",
+          "enables": "Use Claude inside your existing dev workflow. Pipe its output to other commands. Run it in CI. Connect it to remote servers over SSH. Use it on Linux where the desktop app does not run.",
+          "snippet": "npm install -g @anthropic-ai/claude-code\ncd ~/your-project\nclaude"
+        },
+        {
+          "id": "permissions-dev",
+          "title": "Permission rules in settings.json",
+          "body": "Tool calls are gated by an allow / deny / ask matrix in settings.json. Three layers cascade: user settings (~/.claude/settings.json), project settings (.claude/settings.json, committed to git), and project-local (.claude/settings.local.json, gitignored). Patterns can match exact strings, prefixes, or a tool wholesale.",
+          "enables": "Pre-authorise routine commands so the agent does not ask twice, deny destructive ones outright, and ship the rules with your repo so every contributor inherits the same posture.",
+          "snippet": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(npm *)\", \"Bash(git *)\", \"Read\", \"Edit\"],\n    \"deny\": [\"Bash(rm -rf *)\", \"Bash(git push --force *)\"]\n  }\n}"
+        },
+        {
+          "id": "hooks",
+          "title": "Hooks",
+          "body": "Hooks fire at lifecycle events: PreToolUse, PostToolUse, Stop, PreCompact, Notification, SessionStart. They run shell commands, prompt a small model, or invoke a full agent. Each receives JSON describing the event on stdin.",
+          "enables": "Auto-format on every Edit, block force-push at the gate, run tests after a write, push a notification when long work finishes, inject extra context when a particular file is touched. Anything that should happen 'every time' becomes deterministic."
+        },
+        {
+          "id": "mcp",
+          "title": "MCP servers (the developer side of connectors)",
+          "body": "The same connector system used in Desktop is exposed at the protocol level as Model Context Protocol (MCP) servers. Configure them in .mcp.json. Anyone can write a server that exposes their tool to Claude.",
+          "enables": "Build your own connectors for any internal system. A Postgres connector for live database access. A Cloudflare connector for worker logs. A custom connector for a private API. The agent gains capabilities you author in a few hundred lines of code."
+        },
+        {
+          "id": "modes",
+          "title": "Modes and worktrees",
+          "body": "Plan, default, auto, and accept-edits modes change how aggressively the agent acts. Worktrees let multiple agents operate on the same repo in isolated git branches simultaneously, which the desktop app uses for parallel sessions and which the CLI exposes via the Agent tool.",
+          "enables": "Match the operating mode to the work, and run several agents in parallel without their changes colliding. Real concurrency on a single project, with one human directing."
+        }
+      ]
+    }
+  ],
+  "courses": {
+    "part": "Part 5",
+    "title": "Official Anthropic courses",
+    "blurb": "Free, self-paced training straight from Anthropic on anthropic.skilljar.com. Everything above is the plain-English version; these are the structured lessons.",
+    "list": [
+      { "name": "Claude 101", "desc": "Learn how to use Claude for everyday work tasks, understand core features, and explore resources for more advanced learning.", "href": "https://anthropic.skilljar.com/claude-101" },
+      { "name": "Claude Code 101", "desc": "Learn how to use Claude Code effectively in your daily development workflow.", "href": "https://anthropic.skilljar.com/claude-code-101" },
+      { "name": "Claude Platform 101", "desc": "Training for developers building on the Claude Developer Platform, from API basics to advanced usage.", "href": "https://anthropic.skilljar.com/claude-platform-101" },
+      { "name": "Introduction to Claude Cowork", "desc": "Learn to work alongside Claude on your real files and projects, with a focus on task loops and workflows.", "href": "https://anthropic.skilljar.com/introduction-to-claude-cowork" },
+      { "name": "Claude Code in Action", "desc": "Integrate Claude Code into your development workflow.", "href": "https://anthropic.skilljar.com/claude-code-in-action" },
+      { "name": "AI Fluency: Framework & Foundations", "desc": "Learn to collaborate with AI systems effectively, efficiently, ethically, and safely.", "href": "https://anthropic.skilljar.com/ai-fluency-framework-foundations" },
+      { "name": "Building with the Claude API", "desc": "A comprehensive course covering the full spectrum of working with Anthropic models using the Claude API.", "href": "https://anthropic.skilljar.com/claude-with-the-anthropic-api" },
+      { "name": "Introduction to Model Context Protocol", "desc": "Training on building MCP servers and clients using Python, covering tools, resources, and prompts.", "href": "https://anthropic.skilljar.com/introduction-to-model-context-protocol" },
+      { "name": "AI Fluency for Educators", "desc": "A course enabling faculty and educational leaders to apply AI fluency in teaching practice.", "href": "https://anthropic.skilljar.com/ai-fluency-for-educators" },
+      { "name": "AI Fluency for Students", "desc": "Training helping students develop AI fluency skills for learning and academic success.", "href": "https://anthropic.skilljar.com/ai-fluency-for-students" },
+      { "name": "Model Context Protocol: Advanced Topics", "desc": "Advanced MCP implementation patterns including sampling, notifications, and file system access.", "href": "https://anthropic.skilljar.com/model-context-protocol-advanced-topics" },
+      { "name": "Claude with Amazon Bedrock", "desc": "AWS accreditation program training for working with Claude through Amazon Bedrock.", "href": "https://anthropic.skilljar.com/claude-in-amazon-bedrock" },
+      { "name": "Claude with Google Cloud's Vertex AI", "desc": "A comprehensive course covering working with Anthropic models through Google Cloud's Vertex AI.", "href": "https://anthropic.skilljar.com/claude-with-google-vertex" },
+      { "name": "Teaching AI Fluency", "desc": "A course empowering faculty to teach and assess AI fluency in instructor-led settings.", "href": "https://anthropic.skilljar.com/teaching-ai-fluency" },
+      { "name": "AI Fluency for Nonprofits", "desc": "Training for nonprofit professionals to develop AI competency while maintaining organizational mission.", "href": "https://anthropic.skilljar.com/ai-fluency-for-nonprofits" },
+      { "name": "Introduction to Agent Skills", "desc": "Learn how to build, configure, and share Skills in Claude Code, reusable markdown instructions.", "href": "https://anthropic.skilljar.com/introduction-to-agent-skills" },
+      { "name": "Introduction to Subagents", "desc": "Using and creating sub-agents in Claude Code for task delegation and specialized workflows.", "href": "https://anthropic.skilljar.com/introduction-to-subagents" },
+      { "name": "AI Capabilities and Limitations", "desc": "An introductory course about how AI works.", "href": "https://anthropic.skilljar.com/ai-capabilities-and-limitations" },
+      { "name": "AI Fluency for Small Businesses", "desc": "Training helping small businesses develop AI competency to increase impact and efficiency.", "href": "https://anthropic.skilljar.com/ai-fluency-for-small-businesses" },
+      { "name": "AI Fluency for Builders", "desc": "A course empowering builders to develop AI fluency, increasing impact and efficiency.", "href": "https://anthropic.skilljar.com/ai-fluency-for-builders" }
+    ]
+  },
+  "closing": {
+    "eyebrow": "A start, not an end",
+    "body": "Open the app. Pick a folder. Ask for one thing. Watch it happen. Approve or reject. Ask for the next thing. Within an hour, you will already know more than most users learn in a month, because you will have used it.",
+    "line": "A tool you have not picked up is not yet yours."
+  }
+}

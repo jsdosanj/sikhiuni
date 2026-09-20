@@ -1,0 +1,80 @@
+{
+  "intro": "The Institute teaches you to build AI systems. Claude is the model most of that building happens with — in the code lab, in the agent phases, in the capstone. This is the map to learning Claude itself: what we teach in-house, and Anthropic's own free curriculum, which we link to rather than rehost.",
+  "ours": [
+    {
+      "title": "The Claude Code guide",
+      "href": "/technology/guide/claude-code",
+      "blurb": "A plain-English map of Claude Desktop and Claude Code for people with no coding experience — every feature named, then explained by what it lets you do. Part 5 links Anthropic's official courses."
+    },
+    {
+      "title": "Sikh Code — the agentic dojo",
+      "href": "/technology/dojo/sikh-code-agentic",
+      "blurb": "The real Claude Code command set as a REPL you drive. Type / to explore — each command is its own short lesson, synced to the docs."
+    }
+  ],
+  "academy": {
+    "name": "Anthropic Academy",
+    "url": "https://anthropic.skilljar.com/",
+    "home": "https://www.anthropic.com/learn",
+    "note": "Anthropic's official learning platform. Free; sign-in is through Skilljar and does not need an Anthropic account. Sikhi University is not affiliated with Anthropic — every link here goes straight to their site and nothing is rehosted. “Claude” and “Anthropic” are their trademarks.",
+    "groups": [
+      {
+        "label": "Start here",
+        "courses": [
+          { "title": "Claude 101", "slug": "claude-101", "blurb": "Everyday Claude — core features and the advanced resources." },
+          { "title": "AI Capabilities and Limitations", "slug": "ai-capabilities-and-limitations", "blurb": "How models actually work, and where they fail." },
+          { "title": "AI Fluency: Framework & Foundations", "slug": "ai-fluency-framework-foundations", "blurb": "A framework for collaborating with AI, including ethics and safety." }
+        ]
+      },
+      {
+        "label": "Build with Claude",
+        "courses": [
+          { "title": "Claude Platform 101", "slug": "claude-platform-101", "blurb": "The Claude platform, foundational to advanced." },
+          { "title": "Building with the Claude API", "slug": "claude-with-the-anthropic-api", "blurb": "The full spectrum of working with the models through the API." },
+          { "title": "Claude Code 101", "slug": "claude-code-101", "blurb": "Using Claude Code in a real development workflow." },
+          { "title": "Claude Code in Action", "slug": "claude-code-in-action", "blurb": "Long sessions — steering, configuration, verification." },
+          { "title": "Introduction to Claude Cowork", "slug": "introduction-to-claude-cowork", "blurb": "Real files, task loops, plugins, multi-step projects." }
+        ]
+      },
+      {
+        "label": "Agents, tools & MCP",
+        "courses": [
+          { "title": "Introduction to Model Context Protocol", "slug": "introduction-to-model-context-protocol", "blurb": "Build MCP servers and clients in Python." },
+          { "title": "Model Context Protocol: Advanced Topics", "slug": "model-context-protocol-advanced-topics", "blurb": "Production MCP — sampling, file-system access, patterns." },
+          { "title": "Introduction to agent skills", "slug": "introduction-to-agent-skills", "blurb": "Reusable markdown instructions an agent can load." },
+          { "title": "Introduction to subagents", "slug": "introduction-to-subagents", "blurb": "Context management and specialised workflows." }
+        ]
+      },
+      {
+        "label": "Claude on a cloud",
+        "courses": [
+          { "title": "Claude in Amazon Bedrock", "slug": "claude-in-amazon-bedrock", "blurb": "Running Claude on AWS Bedrock." },
+          { "title": "Claude with Google Vertex", "slug": "claude-with-google-vertex", "blurb": "Running Claude on Google Cloud." }
+        ]
+      },
+      {
+        "label": "AI Fluency by role",
+        "courses": [
+          { "title": "AI Fluency for Builders", "slug": "ai-fluency-for-builders", "blurb": "Owning the full arc from problem to shipped solution." },
+          { "title": "AI Fluency for Creative Work", "slug": "ai-fluency-for-creative-work", "blurb": "Intentional AI use in a creative practice." },
+          { "title": "AI Fluency for educators", "slug": "ai-fluency-for-educators", "blurb": "For faculty and instructional designers." },
+          { "title": "Teaching AI Fluency", "slug": "teaching-ai-fluency", "blurb": "Faculty-led instruction and assessment." },
+          { "title": "AI Fluency for students", "slug": "ai-fluency-for-students", "blurb": "Learning and career planning with AI." },
+          { "title": "AI Fluency for nonprofits", "slug": "ai-fluency-for-nonprofits", "blurb": "Impact while staying on mission." },
+          { "title": "AI Fluency for Small Businesses", "slug": "ai-fluency-for-small-businesses", "blurb": "Efficiency for small enterprises." }
+        ]
+      },
+      {
+        "label": "Certification",
+        "courses": [
+          { "title": "Claude Certified Architect — Foundations", "slug": "claude-certified-architect-foundations-certification", "blurb": "Anthropic's foundations-level certification." }
+        ]
+      }
+    ]
+  },
+  "companion": {
+    "name": "Claude 101 (claude101.com)",
+    "url": "https://claude101.com",
+    "note": "A community-run companion — 18 short guides across four levels, from “Claude for Dummies” to app connectors and workplace use. Not affiliated with Anthropic or Sikhi University; linked, not rehosted."
+  }
+}

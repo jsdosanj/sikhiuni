@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+import claude from '../../data/institute/claude.json';
+
+const acad = claude.academy;
+const courseUrl = (slug: string) => `${acad.url}${slug}`;
+---
+<Base
+  title="Learning Claude, Institute of Technology"
+  description="Where to learn Claude: the Institute's own Claude Code guide and agentic dojo, plus Anthropic's free Academy curriculum, 23 courses on Claude, the API, Claude Code, MCP, agents and AI fluency. Link-out, nothing rehosted."
+  institute
+>
+  <InstituteRail />
+
+  <section class="i-wrap i-cl-head">
+    <span class="i-label">/technology/claude</span>
+    <h1>Learning Claude</h1>
+    <p class="i-prose">{claude.intro}</p>
+  </section>
+
+  <section class="i-wrap i-cl-sec">
+    <span class="i-label">in the Institute</span>
+    <div class="i-cl-grid">
+      {claude.ours.map((c) => (
+        <a class="i-panel i-cl-card" href={c.href}>
+          <strong class="i-cl-card-t">{c.title}</strong>
+          <span class="i-prose i-cl-card-b">{c.blurb}</span>
+          <span class="i-cl-go i-mono">open &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="i-wrap i-cl-sec">
+    <span class="i-label">Anthropic Academy &middot; {acad.groups.reduce((n, g) => n + g.courses.length, 0)} courses</span>
+    <h2>Anthropic's own curriculum</h2>
+    <p class="i-prose">{acad.note}</p>
+    <p>
+      <a class="i-btn i-btn-primary" href={acad.url} target="_blank" rel="noopener">Open Anthropic Academy &nearr;</a>
+      <a class="i-btn i-btn-ghost" href={acad.home} target="_blank" rel="noopener">anthropic.com/learn &nearr;</a>
+    </p>
+
+    {acad.groups.map((g) => (
+      <div class="i-cl-group">
+        <span class="i-label">{g.label}</span>
+        <ul class="i-cl-list">
+          {g.courses.map((c) => (
+            <li>
+              <a href={courseUrl(c.slug)} target="_blank" rel="noopener">
+                <span class="i-cl-list-t">{c.title} <span class="i-mono i-cl-ext" aria-hidden="true">&nearr;</span></span>
+                <span class="i-cl-list-b i-prose">{c.blurb}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <section class="i-wrap i-cl-sec i-cl-last">
+    <span class="i-label">community</span>
+    <h2>{claude.companion.name}</h2>
+    <p class="i-prose">{claude.companion.note}</p>
+    <p><a class="i-btn i-btn-ghost" href={claude.companion.url} target="_blank" rel="noopener">Visit claude101.com &nearr;</a></p>
+    <p class="i-prose" style="margin-top:20px;font-size:13px;color:var(--i-muted)">
+      Full attribution and licences: <a href="/technology/licenses">/technology/licenses</a>.
+    </p>
+  </section>
+
+  <style>
+    .i-cl-head { padding: 40px 24px 8px; }
+    .i-cl-head h1 { margin: 6px 0 10px; font-size: clamp(24px, 4vw, 34px); }
+    .i-cl-head p { max-width: 66ch; }
+
+    .i-cl-sec { padding: 32px 24px; border-top: 1px solid var(--i-line-soft); }
+    .i-cl-last { border-bottom: 0; }
+    .i-cl-sec > .i-label { display: block; margin-bottom: 8px; }
+    .i-cl-sec > h2 { margin: 0 0 10px; font-size: clamp(19px, 3vw, 25px); }
+    .i-cl-sec > p { max-width: 66ch; margin: 0 0 18px; }
+
+    .i-cl-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .i-cl-card { display: flex; flex-direction: column; text-decoration: none; }
+    .i-cl-card-t { font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 16px; color: var(--i-ink); }
+    .i-cl-card-b { display: block; margin-top: 6px; font-size: 13.5px; flex: 1; }
+    .i-cl-go { margin-top: 12px; color: var(--i-filament); font-size: 12px; letter-spacing: 0.06em; }
+
+    .i-cl-group { margin-top: 22px; }
+    .i-cl-group > .i-label { display: block; margin-bottom: 8px; }
+    .i-cl-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); max-width: 760px; }
+    .i-cl-list > li { border-top: 1px solid var(--i-line-soft); }
+    .i-cl-list > li:first-child { border-top: 0; }
+    .i-cl-list a { display: block; padding: 12px 16px; text-decoration: none; transition: background 150ms; }
+    .i-cl-list a:hover { background: color-mix(in srgb, var(--i-signal) 7%, var(--i-surface)); }
+    .i-cl-list-t { display: block; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 14.5px; color: var(--i-ink); }
+    .i-cl-ext { color: var(--i-muted); font-size: 11px; }
+    .i-cl-list-b { display: block; margin-top: 3px; font-size: 13px; }
+  </style>
+</Base>

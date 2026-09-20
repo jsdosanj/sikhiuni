@@ -1,0 +1,141 @@
+{
+  "rohit-ghumare": {
+    "name": "Rohit Ghumare",
+    "kind": "person",
+    "role": "Author, AI Engineering from Scratch",
+    "bio": "Rohit Ghumare wrote 'AI Engineering from Scratch' — 511 lessons that build every algorithm from raw math before a framework gets imported. The Institute's AI-engineering phases are adapted from that curriculum, used under the MIT License. Modifications: reformatted into Sikhi University's course structure, with the code lab, quizzes, and seva-framed intros added.",
+    "links": [
+      { "label": "aiengineeringfromscratch.com", "href": "https://aiengineeringfromscratch.com" },
+      { "label": "github.com/rohitg00", "href": "https://github.com/rohitg00" }
+    ],
+    "license": "MIT"
+  },
+  "freecodecamp": {
+    "name": "freeCodeCamp",
+    "kind": "org",
+    "role": "Curriculum, freeCodeCamp.org",
+    "bio": "freeCodeCamp.org is a 501(c)(3) non-profit. Its curriculum is CC BY-SA 4.0 and its platform code is BSD-3-Clause. The Institute links to the freeCodeCamp curriculum and is not affiliated with, sponsored by, or endorsed by freeCodeCamp.org. Certifications are issued by freeCodeCamp.",
+    "links": [
+      { "label": "freecodecamp.org/learn", "href": "https://www.freecodecamp.org/learn/" }
+    ],
+    "license": "CC-BY-SA-4.0"
+  },
+  "sikh-code": {
+    "name": "Sikhi University · Sikh Code",
+    "kind": "org",
+    "role": "Sikhi University",
+    "bio": "The Institute's own coding courses, guides, and the Build for the Panth capstone — written by Sikhi University, offered under CC BY-SA 4.0 (prose) and MIT (engine code).",
+    "links": [
+      { "label": "sikhi.io", "href": "https://sikhi.io" }
+    ],
+    "license": "CC-BY-SA-4.0"
+  },
+  "acsu": {
+    "name": "Awesome Cyber Security University",
+    "kind": "org",
+    "role": "Curation — Oaker Min (brootware) and contributors",
+    "bio": "A community-curated roadmap of free, learn-by-doing security training, released into the public domain under CC0 1.0. The Cybersecurity School's four practitioner paths follow its sequencing — pre-security, blue team, red team, then applied practice. Modifications: re-cut into the Institute's module structure, with Sikhi University's own objectives, teaching notes, and seva-framed intros written around each module. The labs themselves are hosted by the platforms that run them and are linked, never rehosted.",
+    "links": [
+      { "label": "brootware.github.io/awesome-cyber-security-university", "href": "https://brootware.github.io/awesome-cyber-security-university/" },
+      { "label": "github.com/brootware/awesome-cyber-security-university", "href": "https://github.com/brootware/awesome-cyber-security-university" }
+    ],
+    "license": "CC0-1.0"
+  },
+  "niccs": {
+    "name": "NICCS · CISA",
+    "kind": "org",
+    "role": "National Initiative for Cybersecurity Careers and Studies",
+    "bio": "NICCS is the US Cybersecurity and Infrastructure Security Agency's education portal. Through the Cybersecurity Education and Training Assistance Program (CETAP) it funds CYBER.ORG, whose K-12 curriculum, CYBERPortal, and browser-based cyber range are free to educators. The Institute's 'Cyber for Schools & Families' path is a reading map over those public resources — every item links out to NICCS, CISA, or CYBER.ORG. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.",
+    "links": [
+      { "label": "niccs.cisa.gov", "href": "https://niccs.cisa.gov/" },
+      { "label": "cyber.org", "href": "https://cyber.org/educational-cybersecurity-resources" }
+    ],
+    "license": "US Government work — public domain (17 U.S.C. § 105)"
+  },
+  "cloudsec-labs": {
+    "name": "Awesome CloudSec Labs",
+    "kind": "org",
+    "role": "Directory — Jason Ostrom (iknowjason) and contributors",
+    "bio": "A directory of free cloud-native security labs: CTFs, self-hosted workshops, and deliberately vulnerable environments across AWS, Azure, Google Cloud, Kubernetes and CI/CD. Unlike the CC0 roadmap behind this school's other paths, it carries no stated licence, so the Institute does not adapt it — the Cloud Security path's own module structure and every teaching note are Sikhi University's, and this directory is credited and linked as where the labs were found. Each lab keeps its own licence and is linked at its own home; check that licence before you run one.",
+    "links": [
+      { "label": "github.com/iknowjason/Awesome-CloudSec-Labs", "href": "https://github.com/iknowjason/Awesome-CloudSec-Labs" }
+    ],
+    "license": "No stated licence — linked, never adapted"
+  },
+  "fanout": {
+    "name": "Fanout",
+    "kind": "org",
+    "role": "Course platform — Suraj Gaud",
+    "bio": "Fanout is an independent, for-profit technical-education platform built by Suraj Gaud, covering AI research, system design, ML mathematics, LLM inference engineering, and open robotics. Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to point students at its free public pages, so this wing is a reading map, not an adaptation — no lesson text, video, lab code, or paper note is reproduced here, and every card opens the real page at fanout.sh. The items linked are Fanout's own free public pages, its sixteen interactive Labs, and a handful of free sample lessons; the full 108-lesson AI research course, the 301-lesson ML math course, and most of the system design course sit behind Fanout's paid Monthly, Quarterly, Annual, or limited Lifetime plans, which these paths do not include or require. Sikhi University is not affiliated with, sponsored by, or endorsed by Fanout or Suraj Gaud.",
+    "links": [
+      { "label": "fanout.sh", "href": "https://fanout.sh/" },
+      { "label": "fanout.sh/ai/overview", "href": "https://fanout.sh/ai/overview" }
+    ],
+    "license": "Vendor content — link-out only, no content used"
+  },
+  "it-vendor-training": {
+    "name": "Apple and Microsoft IT training",
+    "kind": "org",
+    "role": "Vendor training — Apple Inc. and Microsoft Corporation",
+    "bio": "Apple Professional Training and Microsoft Learn both publish their IT curriculum free and self-paced, and both award credentials employers already recognise. The Institute's IT Support path is a reading map over those two catalogues, written by Sikhi University, with every course linked at its vendor's own site — no course text, video, lab, or assessment is reproduced here. Apple, Mac, macOS, Apple Business Manager and Apple School Manager are trademarks of Apple Inc.; Microsoft, Azure, Windows and Microsoft 365 are trademarks of Microsoft Corporation. Sikhi University is not affiliated with, sponsored by, or endorsed by either company, and neither certifies this path.",
+    "links": [
+      { "label": "it-training.apple.com", "href": "https://it-training.apple.com/" },
+      { "label": "learn.microsoft.com/credentials", "href": "https://learn.microsoft.com/en-us/credentials/" }
+    ],
+    "license": "Vendor content — link-out only, no content used"
+  },
+  "owasp-genai": {
+    "name": "OWASP GenAI Security Project",
+    "kind": "org",
+    "role": "Community frameworks — Top 10 for LLM Applications, for Agentic Applications, and the Agentic Skills Top 10",
+    "bio": "A global open-source project documenting the security risks of generative and agentic AI. Its three 2026 lists are the spine of the Institute's AI & Agentic Security path: the LLM Top 10, the Top 10 for Agentic Applications, and the Agentic Skills Top 10 (project lead Ken Huang), the last of which is licensed CC BY-SA 4.0 and so is quoted here with attribution and share-alike rather than only linked. The teaching notes and the ordering are Sikhi University's; the attack scenarios and mitigations live in OWASP's own documents and are deliberately not copied. OWASP is a registered trademark of the OWASP Foundation; Sikhi University is not affiliated with, sponsored by, or endorsed by the OWASP Foundation.",
+    "links": [
+      { "label": "genai.owasp.org", "href": "https://genai.owasp.org/" },
+      { "label": "owasp.org/www-project-agentic-skills-top-10", "href": "https://owasp.org/www-project-agentic-skills-top-10/" }
+    ],
+    "license": "CC-BY-SA-4.0 (Agentic Skills Top 10) · other lists linked, not copied"
+  },
+  "google-eng": {
+    "name": "Google Engineering",
+    "kind": "org",
+    "role": "Publisher, Google Engineering Practices and the Google Style Guides",
+    "bio": "Google publishes the code-review guides and language style guides its own engineers work to, under the CC BY 3.0 licence. The Engineering Craft path teaches from those documents and sends you to read them in full at their source; the teaching, commentary and exercises around them are Sikhi University's. Modifications: the seven review headings are reproduced with attribution as the licence permits, everything else is written fresh. Sikhi University is not affiliated with, sponsored by, or endorsed by Google.",
+    "links": [
+      { "label": "google.github.io/eng-practices", "href": "https://google.github.io/eng-practices/" },
+      { "label": "google.github.io/styleguide", "href": "https://google.github.io/styleguide/" }
+    ],
+    "license": "CC-BY-3.0"
+  },
+  "apple-design": {
+    "name": "Apple Design",
+    "kind": "org",
+    "role": "Publisher, Human Interface Guidelines",
+    "bio": "Apple's Human Interface Guidelines are the reference text for Interface Foundations. They are Apple's copyrighted documentation and are not openly licensed, so nothing from them is reproduced here: every module is Sikhi University's own teaching about documents you read on Apple's site, under Apple's terms, with no Apple imagery, icons or screenshots used. Apple trademarks are used nominatively to name the platforms under discussion. Sikhi University is not affiliated with, sponsored by, or endorsed by Apple.",
+    "links": [
+      { "label": "developer.apple.com/design", "href": "https://developer.apple.com/design/human-interface-guidelines/" },
+      { "label": "Apple Design Resources", "href": "https://developer.apple.com/design/resources/" }
+    ],
+    "license": "Vendor documentation — link-out only"
+  },
+  "google-design": {
+    "name": "Material Design",
+    "kind": "org",
+    "role": "Publisher, Material Design 3",
+    "bio": "Material Design 3 is Google's design system, read in the Design Systems path as a worked example of role-based tokens and fully specified components. The guidance site is Google product documentation, not openly licensed, so it is linked and never rehosted; the Material component implementations are separately open-source under Apache 2.0 and are linked as code. The Google HTML/CSS style guide used in the same path is CC BY 3.0. Sikhi University is not affiliated with, sponsored by, or endorsed by Google.",
+    "links": [
+      { "label": "m3.material.io", "href": "https://m3.material.io/" },
+      { "label": "github.com/material-components", "href": "https://github.com/material-components" }
+    ],
+    "license": "Guidance: link-out only · Components: Apache-2.0"
+  },
+  "refero": {
+    "name": "Refero",
+    "kind": "org",
+    "role": "Reference library of shipped interfaces",
+    "bio": "Refero is a privately operated library of screenshots of other companies' shipped products, used in Design in Practice as somewhere to go and look rather than as content. Nothing from it is copied, embedded, hot-linked or rehosted, and no screenshot appears here; the exercises are about what you notice on their site, under their terms. Sikhi University is not affiliated with, sponsored by, or endorsed by Refero or by any company whose interface appears in it.",
+    "links": [
+      { "label": "styles.refero.design", "href": "https://styles.refero.design/" }
+    ],
+    "license": "Link-out only, no content used"
+  }
+}

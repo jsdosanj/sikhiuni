@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::relation-extraction-kg",
+  "num": 26,
+  "slug": "relation-extraction-kg",
+  "title": "Relation Extraction & Knowledge Graph Construction",
+  "tagline": "NER found the entities. Entity linking anchored them. Relation extraction finds the edges between them. A knowledge graph is the sum of nodes, edges, and their provenance.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>An analyst reads: &quot;Tim Cook became CEO of Apple in 2011.&quot; Four facts:</p>\n<ul>\n<li><code>(Tim Cook, role, CEO)</code></li>\n<li><code>(Tim Cook, employer, Apple)</code></li>\n<li><code>(Tim Cook, start_date, 2011)</code></li>\n<li><code>(Apple, type, Organization)</code></li>\n</ul>\n<p>Relation Extraction (RE) turns free text into structured triples <code>(subject, relation, object)</code>. Aggregate across a corpus and you have a knowledge graph. Aggregate and query and you have a reasoning substrate for RAG, analytics, or compliance audits.</p>\n<p>The 2026 problem: LLMs extract relations enthusiastically. Too enthusiastically. They hallucinate triples that the source text does not support. Without provenance, you cannot tell real triples from plausible fiction. The 2026 answer is AEVS-style anchor-and-verify pipelines.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/relation-extraction.svg\" alt=\"Text → triples → knowledge graph\" loading=\"lazy\"><figcaption>Text → triples → knowledge graph</figcaption></figure>\n<p><strong>Triple form.</strong> <code>(subject_entity, relation_type, object_entity)</code>. Relations come from a closed ontology (Wikidata properties, FIBO, UMLS) or an open set (OpenIE-style, anything goes).</p>\n<p><strong>Three extraction approaches.</strong></p>\n<ol>\n<li><strong>Rule / pattern-based.</strong> Hearst patterns: &quot;X such as Y&quot; → <code>(Y, isA, X)</code>. Plus hand-crafted regex. Brittle, precise, explainable.</li>\n<li><strong>Supervised classifier.</strong> Given two entity mentions in a sentence, predict the relation from a fixed set. Trained on TACRED, ACE, KBP. Standard 2015–2022.</li>\n<li><strong>Generative LLM.</strong> Prompt the model to emit triples. Works out of the box. Needs provenance, or hallucinates plausible-looking junk.</li>\n</ol>\n<p><strong>AEVS (Anchor-Extraction-Verification-Supplement, 2026).</strong> The current hallucination-mitigation framework:</p>\n<ul>\n<li><strong>Anchor.</strong> Identify every entity span and relation-phrase span with exact positions.</li>\n<li><strong>Extract.</strong> Generate triples linked to anchor spans.</li>\n<li><strong>Verify.</strong> Match each triple element back to the source text; reject anything unsupported.</li>\n<li><strong>Supplement.</strong> A coverage pass ensures no anchored span is dropped.</li>\n</ul>\n<p>Hallucinations drop sharply. Requires more compute but is auditable.</p>\n<p><strong>The open-vs-closed tradeoff.</strong></p>\n<ul>\n<li><strong>Closed ontology.</strong> Fixed property list (e.g., Wikidata&#39;s 11,000+ properties). Predictable. Queryable. Hard to invent.</li>\n<li><strong>Open IE.</strong> Any verbal phrase becomes a relation. High recall. Low precision. Messy to query.</li>\n</ul>\n<p>Production KGs usually mix: open IE for discovery, then canonicalize relations onto a closed ontology before merging into the main graph.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>relation-triples</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: pattern-based extraction</h3>\n<pre><code class=\"language-python\">PATTERNS = [\n    (r&quot;(?P&lt;s&gt;[A-Z]\\w+) (?:is|was) (?:a|an|the) (?P&lt;o&gt;[A-Z]?\\w+)&quot;, &quot;isA&quot;),\n    (r&quot;(?P&lt;s&gt;[A-Z]\\w+) (?:is|was) born in (?P&lt;o&gt;\\w+)&quot;, &quot;bornIn&quot;),\n    (r&quot;(?P&lt;s&gt;[A-Z]\\w+) works? (?:at|for) (?P&lt;o&gt;[A-Z]\\w+)&quot;, &quot;worksAt&quot;),\n    (r&quot;(?P&lt;s&gt;[A-Z]\\w+) founded (?P&lt;o&gt;[A-Z]\\w+)&quot;, &quot;founded&quot;),\n]\n</code></pre>\n<p>See <code>code/main.py</code> for the full toy extractor. Hearst patterns still ship in domain-specific pipelines because they are debuggable.</p>\n<h3>Step 2: supervised relation classification</h3>\n<pre><code class=\"language-python\">from transformers import AutoTokenizer, AutoModelForSequenceClassification\n\ntok = AutoTokenizer.from_pretrained(&quot;Babelscape/rebel-large&quot;)\nmodel = AutoModelForSequenceClassification.from_pretrained(&quot;Babelscape/rebel-large&quot;)\n\ntext = &quot;Tim Cook was born in Alabama. He later became CEO of Apple.&quot;\nencoded = tok(text, return_tensors=&quot;pt&quot;, truncation=True)\noutput = model.generate(**encoded, max_length=200)\ntriples = tok.batch_decode(output, skip_special_tokens=False)\n</code></pre>\n<p>REBEL is a seq2seq relation extractor: text in, triples out, already in Wikidata property ids. Fine-tuned on distant-supervision data. Standard open-weights baseline.</p>\n<h3>Step 3: LLM-prompted extraction with anchoring</h3>\n<pre><code class=\"language-python\">prompt = f&quot;&quot;&quot;Extract (subject, relation, object) triples from the text.\nFor each triple, include the exact character span in the source text.\n\nText: {text}\n\nOutput JSON:\n[{{&quot;subject&quot;: {{&quot;text&quot;: &quot;...&quot;, &quot;span&quot;: [start, end]}},\n   &quot;relation&quot;: &quot;...&quot;,\n   &quot;object&quot;: {{&quot;text&quot;: &quot;...&quot;, &quot;span&quot;: [start, end]}}}}, ...]\n\nOnly include triples fully supported by the text. No inference beyond what is stated.\n&quot;&quot;&quot;\n</code></pre>\n<p>Verify every returned span against the source. Reject anything where <code>text[start:end] != triple_entity</code>. This is the AEVS &quot;verify&quot; step in its minimal form.</p>\n<h3>Step 4: canonicalize onto a closed ontology</h3>\n<pre><code class=\"language-python\">RELATION_MAP = {\n    &quot;is the CEO of&quot;: &quot;P169&quot;,       # &quot;chief executive officer&quot;\n    &quot;was born in&quot;:   &quot;P19&quot;,         # &quot;place of birth&quot;\n    &quot;founded&quot;:        &quot;P112&quot;,       # &quot;founded by&quot; (inverted subject/object)\n    &quot;works at&quot;:       &quot;P108&quot;,       # &quot;employer&quot;\n}\n\n\ndef canonicalize(relation):\n    rel_low = relation.lower().strip()\n    if rel_low in RELATION_MAP:\n        return RELATION_MAP[rel_low]\n    return None   # drop unmapped open relations or route to manual review\n</code></pre>\n<p>Canonicalization is often 60-80% of the engineering work. Budget for it.</p>\n<h3>Step 5: build a small graph and query</h3>\n<pre><code class=\"language-python\">triples = extract(text)\ngraph = {}\nfor s, r, o in triples:\n    graph.setdefault(s, []).append((r, o))\n\n\ndef neighbors(node, relation=None):\n    return [(r, o) for r, o in graph.get(node, []) if relation is None or r == relation]\n\n\nprint(neighbors(&quot;Tim Cook&quot;, relation=&quot;P108&quot;))    # -&gt; [(P108, Apple)]\n</code></pre>\n<p>This is the atom of every RAG-over-KG system. Scale it with RDF triple stores (Blazegraph, Virtuoso), property graphs (Neo4j), or vector-augmented graph stores.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>Coreference before RE.</strong> &quot;He founded Apple&quot; — RE needs to know who &quot;he&quot; is. Run coref first (lesson 24).</li>\n<li><strong>Entity canonicalization.</strong> &quot;Apple Inc&quot; and &quot;Apple&quot; must resolve to the same node. Entity linking first (lesson 25).</li>\n<li><strong>Hallucinated triples.</strong> LLMs emit triples the text does not support. Enforce span verification.</li>\n<li><strong>Relation canonicalization drift.</strong> Open IE relations are inconsistent (&quot;was born in,&quot; &quot;came from,&quot; &quot;is a native of&quot;). Collapse to canonical ids or the graph is unqueryable.</li>\n<li><strong>Temporal errors.</strong> &quot;Tim Cook is CEO of Apple&quot; — true now, false in 2005. Many relations are time-bounded. Use qualifiers (<code>P580</code> start time, <code>P582</code> end time in Wikidata).</li>\n<li><strong>Domain mismatch.</strong> REBEL trained on Wikipedia. Legal, medical, and scientific text often need domain-fine-tuned RE models.</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Fast production, general domain</td>\n<td>REBEL or LlamaPred with Wikidata canonicalization</td>\n</tr>\n<tr>\n<td>Domain-specific (biomed, legal)</td>\n<td>SciREX-style domain fine-tune + custom ontology</td>\n</tr>\n<tr>\n<td>LLM-prompted, audited output</td>\n<td>AEVS pipeline: anchor → extract → verify → supplement</td>\n</tr>\n<tr>\n<td>High-volume news IE</td>\n<td>Pattern-based + supervised hybrid</td>\n</tr>\n<tr>\n<td>Building a KG from scratch</td>\n<td>Open IE + manual canonicalization pass</td>\n</tr>\n<tr>\n<td>Temporal KG</td>\n<td>Extract with qualifiers (start/end time, point in time)</td>\n</tr>\n</tbody></table>\n<p>The integration pattern: NER → coref → entity linking → relation extraction → ontology mapping → graph load. Every stage is a potential quality gate.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-re-designer.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: re-designer\ndescription: Design a relation extraction pipeline with provenance and canonicalization.\nversion: 1.0.0\nphase: 5\nlesson: 26\ntags: [nlp, relation-extraction, knowledge-graph]\n---\n\nGiven a corpus (domain, language, volume) and downstream use (KG-RAG, analytics, compliance), output:\n\n1. Extractor. Pattern-based / supervised / LLM / AEVS hybrid. Reason tied to precision vs recall target.\n2. Ontology. Closed property list (Wikidata / domain) or open IE with canonicalization pass.\n3. Provenance. Every triple carries source char-span + doc id. Non-negotiable for audit.\n4. Merge strategy. Canonical entity id + relation id + temporal qualifiers; dedup policy.\n5. Evaluation. Precision / recall on 200 hand-labelled triples + hallucination-rate on LLM-extracted sample.\n\nRefuse any LLM-based RE pipeline without span verification (source provenance). Refuse open-IE output flowing into a production graph without canonicalization. Flag pipelines with no temporal qualifier on time-bounded relations (employer, spouse, position).\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Run the pattern extractor in <code>code/main.py</code> on 5 news-article sentences. Hand-check precision.</li>\n<li><strong>Medium.</strong> Use REBEL (or a small LLM) on the same sentences. Compare triples. Which extractor has higher precision? Higher recall?</li>\n<li><strong>Hard.</strong> Build the AEVS pipeline: extract with LLM + verify spans against source. Measure hallucination rate before vs after the verify step on 50 Wikipedia-style sentences.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Triple</td>\n<td>Subject-relation-object</td>\n<td><code>(s, r, o)</code> tuple that is the atomic unit of a KG.</td>\n</tr>\n<tr>\n<td>Open IE</td>\n<td>Extract anything</td>\n<td>Open-vocabulary relation phrases; high recall, low precision.</td>\n</tr>\n<tr>\n<td>Closed ontology</td>\n<td>Fixed schema</td>\n<td>Bounded set of relation types (Wikidata, UMLS, FIBO).</td>\n</tr>\n<tr>\n<td>Canonicalization</td>\n<td>Normalize everything</td>\n<td>Map surface names / relations to canonical ids.</td>\n</tr>\n<tr>\n<td>AEVS</td>\n<td>Grounded extraction</td>\n<td>Anchor-Extraction-Verification-Supplement pipeline (2026).</td>\n</tr>\n<tr>\n<td>Provenance</td>\n<td>Source-of-truth link</td>\n<td>Every triple carries a doc id + char-span to its source.</td>\n</tr>\n<tr>\n<td>Distant supervision</td>\n<td>Cheap labels</td>\n<td>Align text with an existing KG to create training data.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.aclweb.org/anthology/P09-1113.pdf\" target=\"_blank\" rel=\"noopener\">Mintz et al. (2009). Distant supervision for relation extraction without labeled data</a> — the distant-supervision paper.</li>\n<li><a href=\"https://aclanthology.org/2021.findings-emnlp.204.pdf\" target=\"_blank\" rel=\"noopener\">Huguet Cabot, Navigli (2021). REBEL: Relation Extraction By End-to-end Language generation</a> — seq2seq RE workhorse.</li>\n<li><a href=\"https://arxiv.org/abs/1909.03546\" target=\"_blank\" rel=\"noopener\">Wadden et al. (2019). Entity, Relation, and Event Extraction with Contextualized Span Representations (DyGIE++)</a> — joint IE.</li>\n<li><a href=\"https://www.mdpi.com/2073-431X/15/3/178\" target=\"_blank\" rel=\"noopener\">AEVS — Anchor-Extraction-Verification-Supplement framework</a> — 2026 hallucination-mitigation design.</li>\n<li><a href=\"https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial\" target=\"_blank\" rel=\"noopener\">Wikidata SPARQL tutorial</a> — canonical graph queries.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\nfrom collections import defaultdict\n\n\nPATTERNS = [\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) was born in ([A-Z][A-Za-z]+)\"), \"P19\"),\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) founded ([A-Z][A-Za-z]+(?: Inc)?)\"), \"P112\"),\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) (?:became|is|was) CEO of ([A-Z][A-Za-z]+(?: Inc)?)\"), \"P169\"),\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) works? (?:at|for) ([A-Z][A-Za-z]+(?: Inc)?)\"), \"P108\"),\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) (?:studied|graduated) (?:at|from) ([A-Z][A-Za-z]+(?: University)?)\"), \"P69\"),\n    (re.compile(r\"([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?) (?:acquired|bought) ([A-Z][A-Za-z]+(?: Inc)?)\"), \"P1830\"),\n]\n\n\nRELATION_LABELS = {\n    \"P19\":   \"place of birth\",\n    \"P112\":  \"founded\",\n    \"P169\":  \"CEO of\",\n    \"P108\":  \"employer\",\n    \"P69\":   \"educated at\",\n    \"P1830\": \"acquired\",\n}\n\n\ndef extract(text):\n    triples = []\n    for pattern, rel in PATTERNS:\n        for m in pattern.finditer(text):\n            subj = m.group(1)\n            obj = m.group(2)\n            span = (m.start(), m.end())\n            triples.append({\"subject\": subj, \"relation\": rel, \"object\": obj, \"span\": span, \"evidence\": m.group(0)})\n    return triples\n\n\ndef verify(triples, text):\n    verified = []\n    for t in triples:\n        s, e = t[\"span\"]\n        if text[s:e] != t[\"evidence\"]:\n            continue\n        if t[\"subject\"] not in text or t[\"object\"] not in text:\n            continue\n        verified.append(t)\n    return verified\n\n\ndef build_graph(triples):\n    graph = defaultdict(list)\n    for t in triples:\n        graph[t[\"subject\"]].append((t[\"relation\"], t[\"object\"], t[\"evidence\"]))\n    return graph\n\n\ndef print_graph(graph):\n    for subj in sorted(graph):\n        for rel, obj, ev in graph[subj]:\n            label = RELATION_LABELS.get(rel, rel)\n            print(f\"  ({subj}) --[{label}]--> ({obj})\")\n            print(f\"      evidence: \\\"{ev}\\\"\")\n\n\ndef main():\n    doc = (\n        \"Tim Cook became CEO of Apple in 2011. \"\n        \"Steve Jobs founded Apple in 1976. \"\n        \"Larry Page founded Google with Sergey Brin. \"\n        \"Sundar Pichai is CEO of Google. \"\n        \"Satya Nadella was born in Hyderabad. \"\n        \"Elon Musk acquired Twitter in 2022. \"\n        \"Dario Amodei studied at Princeton University. \"\n        \"Yann LeCun works at Meta.\"\n    )\n\n    print(\"=== rule-based relation extraction (with provenance) ===\")\n    print(f\"document: {doc}\")\n    print()\n\n    triples = extract(doc)\n    verified = verify(triples, doc)\n\n    print(f\"extracted: {len(triples)}  verified: {len(verified)}\")\n    print()\n    graph = build_graph(verified)\n    print_graph(graph)\n\n    print()\n    print(\"=== query: Tim Cook's employer ===\")\n    for rel, obj, ev in graph.get(\"Tim Cook\", []):\n        if rel == \"P169\":\n            print(f\"  Tim Cook is CEO of {obj}\")\n            print(f\"  source: \\\"{ev}\\\"\")\n\n    print()\n    print(\"note: rule-based RE = high precision, low recall.\")\n    print(\"production stacks mix patterns + REBEL + LLM with AEVS verification.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the atomic unit of a knowledge graph?",
+      "options": [
+        "A token",
+        "A POS tag",
+        "A (subject, relation, object) triple",
+        "A sentence"
+      ],
+      "answer": 2,
+      "explanation": "KGs store information as (s, r, o) triples; aggregated triples form the graph."
+    },
+    {
+      "q": "What does AEVS stand for in 2026 relation extraction?",
+      "options": [
+        "Aggregated Entity-Value Schema",
+        "Async Entity Validation Service",
+        "Auto-Encoder Vector Search",
+        "Anchor-Extraction-Verification-Supplement: anchor spans, extract triples, verify against source, supplement coverage"
+      ],
+      "answer": 3,
+      "explanation": "AEVS is the 2026 hallucination-mitigation framework for grounded RE."
+    },
+    {
+      "q": "Why must each triple carry source provenance (doc id + span)?",
+      "options": [
+        "Provenance is required by SPARQL",
+        "It speeds up extraction",
+        "Provenance changes the ontology",
+        "Provenance lets you audit triples and reject hallucinations whose spans do not match the source text"
+      ],
+      "answer": 3,
+      "explanation": "Provenance enables auditing and is the core of AEVS-style hallucination detection."
+    },
+    {
+      "q": "What does canonicalization of relations do?",
+      "options": [
+        "Adds embeddings",
+        "Removes triples",
+        "Maps surface verb phrases (e.g. 'was born in', 'is a native of') onto a fixed property id so the graph is queryable",
+        "Translates the document"
+      ],
+      "answer": 2,
+      "explanation": "Canonicalization collapses paraphrases into canonical KG property ids."
+    },
+    {
+      "q": "Why does relation extraction usually need coreference resolution first?",
+      "options": [
+        "Pronouns like 'he founded Apple' must be resolved to a named entity before triple extraction",
+        "Coref normalizes case",
+        "Coref provides positions",
+        "Coref adds embeddings"
+      ],
+      "answer": 0,
+      "explanation": "Without coref, RE attaches relations to pronouns instead of the underlying named entity."
+    },
+    {
+      "q": "Which choice trades open IE recall for graph queryability?",
+      "options": [
+        "Random sampling of triples",
+        "Embedding-only graphs",
+        "Mapping open-IE relations onto a closed ontology (e.g. Wikidata properties) before merging into the KG",
+        "Skipping NER"
+      ],
+      "answer": 2,
+      "explanation": "Closed ontologies make the graph queryable; the canonicalization step pays for itself downstream."
+    },
+    {
+      "q": "Why do many production KGs use temporal qualifiers (start/end time)?",
+      "options": [
+        "Required by RDF",
+        "To remove NIL entities",
+        "Faster SPARQL",
+        "Many relations are time-bounded (employer, spouse, role); qualifiers prevent 'forever true' claims that go stale"
+      ],
+      "answer": 3,
+      "explanation": "Time-bounded relations need qualifiers (e.g. Wikidata P580/P582) or facts go silently stale."
+    },
+    {
+      "q": "What is REBEL?",
+      "options": [
+        "A tokenizer",
+        "A coreference model",
+        "A seq2seq relation extractor that outputs triples already in Wikidata property ids",
+        "A vector database"
+      ],
+      "answer": 2,
+      "explanation": "REBEL (Babelscape) is a seq2seq RE model trained on distantly supervised Wikidata triples."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/26-relation-extraction-kg"
+  }
+}

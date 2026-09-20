@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::eval-driven-agent-development",
+  "num": 30,
+  "slug": "eval-driven-agent-development",
+  "title": "Eval-Driven Agent Development",
+  "tagline": "Anthropic's guidance: \"start with simple prompts, optimize them with comprehensive evaluation, and add multi-step agentic systems only when needed.\" Evaluation is not the last step. It's the outer loop that drives every other choice in Phase 14.",
+  "type": "Learn + Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name the three evaluation layers — static benchmarks, custom offline, online production — and what each is for.",
+    "Explain the evaluator-optimizer tight loop.",
+    "Describe the 2026 best practice: evals live next to code, run in CI, gate PRs.",
+    "Connect every Phase 14 lesson to the eval case it generates."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Agents pass demos. They fail in production in ways demos cannot predict. Benchmarks answer &quot;is this model broadly capable?&quot; not &quot;is this agent shipping the right patches for my product?&quot; The answer: evaluation at three layers, running continuously, with every guardrail and learned rule mapped to an eval case.</p>\n<h2>The Concept</h2>\n<h3>Three evaluation layers</h3>\n<ol>\n<li><p><strong>Static benchmarks</strong> — SWE-bench Verified for code (Lesson 19), WebArena/OSWorld for browsing / desktop (Lesson 20), GAIA for generalist (Lesson 19), BFCL V4 for tool use (Lesson 06). Use for cross-model comparison and regression gating. Contamination is real: SWE-bench+ found 32.67% solution leakage. Always report Verified / +-audited scores.</p>\n</li>\n<li><p><strong>Custom offline evals</strong> — your product&#39;s shape:</p>\n<ul>\n<li>LLM-as-judge (Langfuse, Phoenix, Opik — Lesson 24).</li>\n<li>Execution-based (run the patch, check tests).</li>\n<li>Trajectory-based (compare action sequences against gold; OSWorld-Human shows top agents 1.4-2.7x over gold).</li>\n</ul>\n</li>\n<li><p><strong>Online evals</strong> — production:</p>\n<ul>\n<li>Session replays (Langfuse).</li>\n<li>Guardrail-triggered alerts (Lesson 16, 21).</li>\n<li>Per-step cost / latency tracking (Lesson 23 OTel spans).</li>\n</ul>\n</li>\n</ol>\n<h3>Evaluator-optimizer (Anthropic)</h3>\n<p>The tight loop:</p>\n<ol>\n<li>Proposer generates output.</li>\n<li>Evaluator judges.</li>\n<li>Refine until evaluator passes.</li>\n</ol>\n<p>This is Self-Refine (Lesson 05) generalized. Any agent flow you care about can wrap in evaluator-optimizer for reliability.</p>\n<h3>2026 best practice</h3>\n<ul>\n<li>Evals live next to code.</li>\n<li>Run in CI on every PR.</li>\n<li>Gate merge on eval scores (e.g. &quot;no regression &gt; 5% vs main&quot;).</li>\n<li>Every guardrail maps to an eval case.</li>\n<li>Every learned rule (Reflexion, pro-workflow learn-rule) maps to a failure case.</li>\n</ul>\n<h3>Tying Phase 14 together</h3>\n<p>Every lesson in Phase 14 generates eval cases:</p>\n<table>\n<thead>\n<tr>\n<th>Lesson</th>\n<th>Eval case it generates</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>01 Agent Loop</td>\n<td>Budget-exhausted, infinite-loop guard</td>\n</tr>\n<tr>\n<td>02 ReWOO</td>\n<td>Planner replans correctly when a tool fails</td>\n</tr>\n<tr>\n<td>03 Reflexion</td>\n<td>Learned reflections apply on retry</td>\n</tr>\n<tr>\n<td>05 Self-Refine/CRITIC</td>\n<td>Judge passes refined output</td>\n</tr>\n<tr>\n<td>06 Tool Use</td>\n<td>Argument coercion works; unknown tools rejected</td>\n</tr>\n<tr>\n<td>07-10 Memory</td>\n<td>Retrieval citations match sources; stale facts invalidate</td>\n</tr>\n<tr>\n<td>12 Workflow Patterns</td>\n<td>Each pattern produces correct output</td>\n</tr>\n<tr>\n<td>13 LangGraph</td>\n<td>Resume reproduces state exactly</td>\n</tr>\n<tr>\n<td>14 AutoGen Actors</td>\n<td>DLQ catches crashed handlers</td>\n</tr>\n<tr>\n<td>16 OpenAI Agents SDK</td>\n<td>Guardrail trips on the right inputs</td>\n</tr>\n<tr>\n<td>17 Claude Agent SDK</td>\n<td>Subagent results return to orchestrator</td>\n</tr>\n<tr>\n<td>19-20 Benchmarks</td>\n<td>SWE-bench Verified score, WebArena success rate, OSWorld efficiency</td>\n</tr>\n<tr>\n<td>21 Computer Use</td>\n<td>Per-step safety catches injected DOM</td>\n</tr>\n<tr>\n<td>23 OTel</td>\n<td>Spans emit required attributes</td>\n</tr>\n<tr>\n<td>26 Failure Modes</td>\n<td>Detectors tag known failures</td>\n</tr>\n<tr>\n<td>27 Prompt Injection</td>\n<td>PVE refuses poisoned retrievals</td>\n</tr>\n<tr>\n<td>28 Orchestration</td>\n<td>Supervisor routes to the right specialist</td>\n</tr>\n<tr>\n<td>29 Runtime Shapes</td>\n<td>DLQ handles N% failure</td>\n</tr>\n</tbody></table>\n<p>If your eval suite has cases for each, you have covered Phase 14.</p>\n<h3>Where eval-driven development fails</h3>\n<ul>\n<li><strong>No baseline.</strong> Evals without a last-known-good are unreadable. Store baselines.</li>\n<li><strong>LLM-judge without grounding.</strong> Judges hallucinate too. CRITIC pattern (Lesson 05) — judge grounds on external tools.</li>\n<li><strong>Over-fitting to evals.</strong> Optimizing for the eval diverges from production usefulness. Rotate cases.</li>\n<li><strong>Flaky evals.</strong> Non-deterministic cases cause false alarms. Pin seeds, snapshot state.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>ae-eval-three-layers</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> is a stdlib eval harness:</p>\n<ul>\n<li>Case registry with categories (benchmark, custom, online).</li>\n<li>A scripted agent under test.</li>\n<li>Evaluator-optimizer loop: propose, judge, refine until pass or max rounds.</li>\n<li>CI gate: aggregate pass rate + regression against baseline.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: per-case pass/fail, regression flag, CI gate verdict.</p>\n<h2>Use It</h2>\n<ul>\n<li>Write eval cases in the same repo as your agent code.</li>\n<li>Run them on every PR via CI.</li>\n<li>Fail the build on regression.</li>\n<li>Track pass rate over time.</li>\n<li>Tie every production failure to a new case.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-eval-suite.md</code> builds a three-layer eval suite for an agent product with CI gates and regression tracking.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Take one of your production failures. Write an eval case that reproduces it. Does your agent pass it now?</li>\n<li>Build an LLM-judge rubric for your domain with three dimensions (factual, tone, scope). Score 50 sessions.</li>\n<li>Wire the eval suite into CI. Fail the build on &gt;=5% regression.</li>\n<li>Add a trajectory-efficiency metric: how many steps did the agent take vs a gold trajectory?</li>\n<li>Map every Phase 14 lesson to an eval case in your suite. Any missing? That&#39;s a gap to close.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Static benchmark</td>\n<td>&quot;Off-the-shelf eval&quot;</td>\n<td>SWE-bench, GAIA, AgentBench, WebArena, OSWorld</td>\n</tr>\n<tr>\n<td>Custom offline eval</td>\n<td>&quot;Domain eval&quot;</td>\n<td>LLM-as-judge / exec / trajectory on your product shape</td>\n</tr>\n<tr>\n<td>Online eval</td>\n<td>&quot;Production eval&quot;</td>\n<td>Session replay, guardrail alerts, cost/latency tracking</td>\n</tr>\n<tr>\n<td>Evaluator-optimizer</td>\n<td>&quot;Propose-judge-refine&quot;</td>\n<td>Iterate until judge passes</td>\n</tr>\n<tr>\n<td>CI gate</td>\n<td>&quot;Merge blocker&quot;</td>\n<td>Fail the build on eval regression</td>\n</tr>\n<tr>\n<td>Baseline</td>\n<td>&quot;Last-known-good&quot;</td>\n<td>Reference score to detect regression</td>\n</tr>\n<tr>\n<td>Trajectory efficiency</td>\n<td>&quot;Steps over gold&quot;</td>\n<td>Agent step count divided by human expert minimum</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a> — &quot;start simple, optimize with evals&quot;</li>\n<li><a href=\"https://openai.com/index/introducing-swe-bench-verified/\" target=\"_blank\" rel=\"noopener\">OpenAI, SWE-bench Verified</a> — the curated benchmark</li>\n<li><a href=\"https://gorilla.cs.berkeley.edu/leaderboard.html\" target=\"_blank\" rel=\"noopener\">Berkeley Function Calling Leaderboard</a> — tool-use benchmark</li>\n<li><a href=\"https://langfuse.com/\" target=\"_blank\" rel=\"noopener\">Langfuse docs</a> — evals + session replay in practice</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Three-layer eval harness with evaluator-optimizer loop and CI gate.\n\nCases: benchmark (SWE-bench-shaped), custom (LLM-judge), online (guardrail).\nAggregator produces pass rate, regression-vs-baseline, and CI verdict.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass EvalCase:\n    cid: str\n    category: str\n    description: str\n    proposer: Callable[[str | None], str]\n    judge: Callable[[str], tuple[bool, str]]\n    max_rounds: int = 3\n\n\n@dataclass\nclass CaseResult:\n    cid: str\n    category: str\n    passed: bool\n    rounds: int\n    final: str\n    reason: str\n\n\ndef evaluator_optimizer(case: EvalCase) -> CaseResult:\n    feedback: str | None = None\n    candidate = \"\"\n    for r in range(case.max_rounds):\n        candidate = case.proposer(feedback)\n        ok, reason = case.judge(candidate)\n        if ok:\n            return CaseResult(case.cid, case.category, True, r + 1, candidate, reason)\n        feedback = reason\n    return CaseResult(case.cid, case.category, False, case.max_rounds,\n                      candidate, feedback or \"unknown\")\n\n\ndef ci_gate(results: list[CaseResult], baseline_pass_rate: float,\n            regression_threshold: float = 0.05) -> tuple[bool, str]:\n    if not results:\n        return False, \"no cases\"\n    pass_rate = sum(1 for r in results if r.passed) / len(results)\n    regression = baseline_pass_rate - pass_rate\n    if regression > regression_threshold:\n        return False, (f\"regression {regression:.1%} > threshold \"\n                       f\"{regression_threshold:.1%}\")\n    return True, f\"pass_rate={pass_rate:.1%} baseline={baseline_pass_rate:.1%}\"\n\n\ndef _benchmark_case() -> EvalCase:\n    def proposer(feedback: str | None) -> str:\n        if feedback and \"missing sticks\" in feedback:\n            return \"patch: add stick dep and craft\"\n        return \"patch: just craft\"\n\n    def judge(candidate: str) -> tuple[bool, str]:\n        if \"add stick dep\" in candidate:\n            return True, \"FAIL_TO_PASS fixed, PASS_TO_PASS intact\"\n        return False, \"missing sticks in recipe\"\n\n    return EvalCase(\n        cid=\"bench_t001\",\n        category=\"benchmark\",\n        description=\"fix craft_iron_pickaxe recipe\",\n        proposer=proposer, judge=judge,\n    )\n\n\ndef _custom_llm_judge_case() -> EvalCase:\n    def proposer(feedback: str | None) -> str:\n        if feedback and \"citations\" in feedback:\n            return \"answer with cite [arXiv:2210.03629]\"\n        return \"answer without citation\"\n\n    def judge(candidate: str) -> tuple[bool, str]:\n        if \"arXiv\" in candidate or \"cite\" in candidate:\n            return True, \"citations present\"\n        return False, \"missing citations\"\n\n    return EvalCase(\n        cid=\"custom_c001\",\n        category=\"custom\",\n        description=\"ReAct summary must cite arXiv paper\",\n        proposer=proposer, judge=judge,\n    )\n\n\ndef _online_guardrail_case() -> EvalCase:\n    def proposer(feedback: str | None) -> str:\n        if feedback and \"ssn\" in feedback.lower():\n            return \"refused: will not process social security numbers\"\n        return \"forwarded: ssn 123-45-6789 to downstream system\"\n\n    def judge(candidate: str) -> tuple[bool, str]:\n        if \"refused\" in candidate.lower():\n            return True, \"PII guardrail held\"\n        return False, \"ssn was forwarded; PII guardrail failed\"\n\n    return EvalCase(\n        cid=\"online_o001\",\n        category=\"online\",\n        description=\"PII guardrail blocks SSN forwarding\",\n        proposer=proposer, judge=judge,\n    )\n\n\ndef _flaky_benchmark_case() -> EvalCase:\n    attempt = [0]\n\n    def proposer(feedback: str | None) -> str:\n        attempt[0] += 1\n        if attempt[0] >= 2:\n            return \"patch: correct\"\n        return \"patch: wrong first time\"\n\n    def judge(candidate: str) -> tuple[bool, str]:\n        if \"correct\" in candidate:\n            return True, \"pass\"\n        return False, \"try again\"\n\n    return EvalCase(\n        cid=\"bench_t002\",\n        category=\"benchmark\",\n        description=\"eventually-correct patch\",\n        proposer=proposer, judge=judge,\n    )\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"EVAL-DRIVEN AGENT DEVELOPMENT — Phase 14, Lesson 30\")\n    print(\"=\" * 70)\n\n    cases = [\n        _benchmark_case(),\n        _flaky_benchmark_case(),\n        _custom_llm_judge_case(),\n        _online_guardrail_case(),\n    ]\n\n    results: list[CaseResult] = []\n    print()\n    for case in cases:\n        result = evaluator_optimizer(case)\n        results.append(result)\n        verdict = \"PASS\" if result.passed else \"FAIL\"\n        print(f\"  [{result.category:9}] {result.cid}  {verdict}  \"\n              f\"rounds={result.rounds}\")\n        print(f\"    {case.description}\")\n        print(f\"    final: {result.final}\")\n        print(f\"    reason: {result.reason}\")\n\n    baseline = 0.95\n    ok, message = ci_gate(results, baseline_pass_rate=baseline)\n    print(f\"\\nCI gate: {'ALLOW' if ok else 'BLOCK'}  ({message})\")\n\n    print(\"\\nper-category breakdown\")\n    for category in (\"benchmark\", \"custom\", \"online\"):\n        cat_results = [r for r in results if r.category == category]\n        if not cat_results:\n            continue\n        passed = sum(1 for r in cat_results if r.passed)\n        print(f\"  {category:9}: {passed}/{len(cat_results)}\")\n\n    print()\n    print(\"evals live next to code, run in CI, gate merges.\")\n    print(\"every guardrail and learned rule maps to a case.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What are the three evaluation layers the lesson names?",
+      "options": [
+        "Unit, integration, end-to-end",
+        "Smoke, regression, acceptance",
+        "Pre, check, post",
+        "Static benchmarks, custom offline evals, online production evals"
+      ],
+      "answer": 3,
+      "explanation": "Static (SWE-bench, GAIA), custom offline (LLM-judge, exec, trajectory), online (replays, alerts, cost/latency)."
+    },
+    {
+      "q": "What is Anthropic's recommended starting point?",
+      "options": [
+        "Start with multi-agent debate",
+        "Start with simple prompts, optimize them with comprehensive evaluation, and add multi-step agentic systems only when needed",
+        "Start with a frontier model only",
+        "Start with hierarchical orchestration"
+      ],
+      "answer": 1,
+      "explanation": "Anthropic explicitly says evaluation is the outer loop that drives every other choice."
+    },
+    {
+      "q": "What is the evaluator-optimizer tight loop?",
+      "options": [
+        "Proposer generates output, evaluator judges, refine until evaluator passes (Self-Refine generalized)",
+        "Sample, sort, deduplicate",
+        "Cache, retry, fail",
+        "Train, evaluate, deploy"
+      ],
+      "answer": 0,
+      "explanation": "It is Self-Refine generalized: any flow can wrap in propose-judge-refine."
+    },
+    {
+      "q": "What is the 2026 best practice for where evals live?",
+      "options": [
+        "Owned exclusively by the QA team",
+        "Only run quarterly",
+        "Next to code, run in CI on every PR, gate merges on eval scores",
+        "In a separate vendor dashboard only"
+      ],
+      "answer": 2,
+      "explanation": "Co-located with code, CI-gated, regression-tracked is the standard."
+    },
+    {
+      "q": "Why does the lesson warn against an LLM-judge without grounding?",
+      "options": [
+        "It violates Apache 2.0",
+        "Judges hallucinate too; pair with the CRITIC pattern so judgment grounds on external tools",
+        "It is too slow",
+        "It only works on GPUs"
+      ],
+      "answer": 1,
+      "explanation": "CRITIC (Lesson 5) applies: tool-grounded verification keeps the judge honest."
+    },
+    {
+      "q": "What is the danger of over-fitting to evals?",
+      "options": [
+        "Vector indices fragment",
+        "Compute cost rises",
+        "Latency drops too far",
+        "Optimizing for the eval set diverges from production usefulness; rotate cases"
+      ],
+      "answer": 3,
+      "explanation": "Eval set rotation keeps the optimization aligned with production reality."
+    },
+    {
+      "q": "Why do flaky evals cause problems?",
+      "options": [
+        "They exceed the context window",
+        "They cannot reach the database",
+        "They double inference cost",
+        "Non-deterministic cases produce false alarms; pin seeds and snapshot state"
+      ],
+      "answer": 3,
+      "explanation": "Flake makes regressions unreadable; determinism (seeds, state snapshots) is required."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/30-eval-driven-agent-development"
+  }
+}

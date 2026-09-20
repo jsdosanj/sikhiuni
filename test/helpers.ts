@@ -163,6 +163,7 @@ export function mockEnv(opts: MockEnvOpts = {}) {
   const DB: any = { _certStore: [] as CertRow[] };
   const ctx: Ctx = { user, progress, certById, dbThrows, rows, ownsCourse, cohortByCode, cohortById, mfaEnrolled, userFlags, DB };
   DB.prepare = (sql: string) => makeStmt(sql, ctx);
+  DB.batch = async (statements: any[]) => Promise.all(statements.map(stmt => stmt.run()));
   return { DB, ADMIN_EMAILS: adminEmails, AI: {}, MEDIA: {} };
 }
 

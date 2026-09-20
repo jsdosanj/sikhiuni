@@ -1,0 +1,89 @@
+{
+  "id": "aisf-19-capstone::content-classifier-integration",
+  "num": 85,
+  "slug": "content-classifier-integration",
+  "title": "Capstone 85 — Content Classifier Integration",
+  "tagline": "Classifiers on the output side answer a different question than rules on the input side. Both need a policy router.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~90 min",
+  "objectives": [],
+  "prose_html": "<h2>Problem</h2>\n<p>Inputs are not the only attack surface. A model that passed every input check can still produce an output that leaks PII, repeats slurs from its training distribution, or echoes the system prompt back to the user in response to a clever question. An output-side classifier sees the model&#39;s actual response, not the user&#39;s prompt, and asks a different question: regardless of how this prompt got here, is what we are about to ship to the user acceptable.</p>\n<p>Teams often skip output classification because input classification feels sufficient and because output classifiers introduce extra latency. Both arguments lose. Skipping output classification gives an attacker a one-shot bypass: any new attack family that the input pipeline does not cover will land on the user. Latency is real but addressable: classifiers can run in parallel with token streaming, with the gate buffering the final chunk and applying the classifier verdict before flush.</p>\n<p>This capstone wires three independent output-side classifiers behind a single policy router. Toxicity (rule-based slur and harassment detection). PII (regex for emails, phone numbers, SSN-shaped strings, credit-card-shaped strings, IP addresses). Instruction leakage (a heuristic for system prompt echo, comparing the output to a known system prompt by trigram overlap). The router collects classifier verdicts, picks a severity, and applies an action policy: <code>block</code>, <code>redact</code>, <code>warn</code>, or <code>log</code>.</p>\n<h2>Concept</h2>\n<p>Each classifier is a callable returning a <code>ClassifierVerdict</code> with <code>name</code>, <code>score in [0,1]</code>, <code>severity</code> (<code>none</code>, <code>low</code>, <code>medium</code>, <code>high</code>), and <code>findings</code> (a list of strings describing what it flagged). The router takes a list of verdicts and applies a rule table:</p>\n<table>\n<thead>\n<tr>\n<th>Severity</th>\n<th>Action</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>high</td>\n<td>block (drop output, return policy refusal)</td>\n</tr>\n<tr>\n<td>medium</td>\n<td>redact (apply per-classifier redactor to the output)</td>\n</tr>\n<tr>\n<td>low</td>\n<td>warn (log and append a soft notice to the response)</td>\n</tr>\n<tr>\n<td>none</td>\n<td>log (record verdict in the trace, ship as-is)</td>\n</tr>\n</tbody></table>\n<pre class=\"mermaid\">flowchart TB\n  M[model output] --&gt; T[toxicity]\n  M --&gt; P[pii]\n  M --&gt; I[instruction-leakage]\n  T --&gt; R{router}\n  P --&gt; R\n  I --&gt; R\n  R --&gt;|max severity = high| BL[block]\n  R --&gt;|max severity = medium| RD[redact]\n  R --&gt;|max severity = low| WN[warn]\n  R --&gt;|max severity = none| LG[log]</pre>\n<p>The router takes the maximum severity across classifiers and applies the corresponding action. Block wins. A redact + warn becomes redact. A log + warn becomes warn. The router emits an <code>Action</code> object with <code>verb</code>, <code>output</code>, <code>severity</code>, <code>verdicts</code>, and <code>metadata</code>. Downstream, the safety gate in lesson 87 logs the metadata into a trace and either ships the redacted output, ships the original with a warning, or replaces the output with a policy refusal.</p>\n<p>Each classifier has its own redactor. The PII classifier replaces <code>name@example.com</code> with <code>[redacted-email]</code> and the credit-card-shaped digits with <code>[redacted-card]</code>. The instruction-leakage classifier removes lines that look like the system prompt header. The toxicity classifier replaces matched slurs with <code>[redacted-language]</code>. Redaction is independent so a toxicity-and-PII output flows through both redactors.</p>\n<p>The toxicity classifier is rule-based on purpose: a curated list of harassment keywords with whitespace-bounded matching and a small negation-window check so &quot;you are not a slur&quot; does not trip the rule. The list is deliberately short (the lesson is about plumbing, not lexicon-building). The PII classifier uses standard regexes for the common shapes. The instruction-leakage classifier accepts a <code>system_prompt</code> parameter at construction and compares trigram overlap with the output; a high overlap is the leakage signal.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>cd-output-router</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/classifiers.py</code> defines all three classifiers. Each has a <code>classify(text) -&gt; ClassifierVerdict</code> method and a <code>redact(text) -&gt; str</code> method. <code>code/main.py</code> defines the <code>Router</code> class with <code>decide(text, verdicts) -&gt; Action</code> and a <code>run(text) -&gt; Action</code> shortcut. The demo wires the three classifiers behind one router and runs a small corpus of crafted outputs that exercise each severity.</p>\n<h2>Use It</h2>\n<p>Run <code>python3 main.py</code>. The demo prints the action verb for each test output, writes <code>outputs/classifier_report.json</code>, and confirms that block, redact, warn, and log each fire on at least one fixture. Latency is artificially zero because all classifiers are rule-based; for a real model with neural classifiers, the same plumbing applies after the per-classifier latency goes up.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-content-classifier-integration.md</code> documents the verdict and action structures so the gate in lesson 87 can consume them.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a fourth classifier for code injection (output contains <code>&lt;script&gt;</code>, <code>eval(</code>, etc). Decide its severity policy and integrate it.</li>\n<li>Make the router apply a per-classifier severity weight so PII counts more than toxicity. Demonstrate the change on the same fixtures.</li>\n<li>Add a confidence threshold so low-score verdicts downgrade by one severity level. Sweep the threshold and report how block rate changes.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>Common usage</th>\n<th>Precise meaning</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>output classifier</td>\n<td>a model that detects bad outputs</td>\n<td>a callable returning a structured verdict with severity, score, and findings, plus a redactor</td>\n</tr>\n<tr>\n<td>severity</td>\n<td>how bad it is</td>\n<td>one of none, low, medium, high</td>\n</tr>\n<tr>\n<td>router</td>\n<td>a switch</td>\n<td>a function from verdict list to action (block, redact, warn, log)</td>\n</tr>\n<tr>\n<td>redact</td>\n<td>hide the bad parts</td>\n<td>per-classifier replacement of matched spans with a tag like [redacted-pii]</td>\n</tr>\n<tr>\n<td>instruction leakage</td>\n<td>the model leaks the system prompt</td>\n<td>a heuristic comparing model output to a known system prompt by trigram overlap</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<p>Lesson 86 adds a declarative rules engine for constraints not naturally classifier-shaped. Lesson 87 composes both with the input-side detector.</p>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Content classifier router.\n\nWires three output-side classifiers behind a single router that picks the\nmaximum severity, runs the corresponding action (block, redact, warn, log),\nand returns a structured Action object the safety gate can consume.\n\nRun: python3 main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport sys\nfrom dataclasses import asdict, dataclass, field\nfrom pathlib import Path\nfrom typing import Iterable\n\nfrom classifiers import (\n    SEVERITY_ORDER,\n    ClassifierVerdict,\n    InstructionLeakageClassifier,\n    PIIClassifier,\n    ToxicityClassifier,\n    default_classifiers,\n)\n\nHERE = Path(__file__).parent\nOUTPUTS = HERE.parent / \"outputs\"\n\nREFUSAL_TEXT = \"I cannot share that. The response was blocked by an output safety classifier.\"\n\n\n@dataclass\nclass Action:\n    verb: str\n    output: str\n    severity: str\n    verdicts: list[dict[str, object]] = field(default_factory=list)\n    metadata: dict[str, object] = field(default_factory=dict)\n\n\nclass Router:\n    def __init__(self, classifiers: Iterable[object] | None = None) -> None:\n        self._classifiers = list(classifiers) if classifiers is not None else default_classifiers()\n\n    def _max_severity(self, verdicts: list[ClassifierVerdict]) -> str:\n        if not verdicts:\n            return \"none\"\n        return max((v.severity for v in verdicts), key=lambda s: SEVERITY_ORDER.index(s))\n\n    def _apply_redactors(self, text: str, verdicts: list[ClassifierVerdict]) -> str:\n        out = text\n        for c in self._classifiers:\n            for v in verdicts:\n                if v.name == getattr(c, \"name\", \"\") and v.severity != \"none\":\n                    out = c.redact(out)\n                    break\n        return out\n\n    def run(self, text: str) -> Action:\n        verdicts: list[ClassifierVerdict] = []\n        for c in self._classifiers:\n            v = c.classify(text)\n            verdicts.append(v)\n        return self.decide(text, verdicts)\n\n    def decide(self, text: str, verdicts: list[ClassifierVerdict]) -> Action:\n        max_sev = self._max_severity(verdicts)\n        metadata = {\n            \"verdict_count\": len(verdicts),\n            \"fired\": [v.name for v in verdicts if v.severity != \"none\"],\n        }\n        serialized = [asdict(v) for v in verdicts]\n        if max_sev == \"high\":\n            return Action(verb=\"block\", output=REFUSAL_TEXT, severity=max_sev, verdicts=serialized, metadata=metadata)\n        if max_sev == \"medium\":\n            redacted = self._apply_redactors(text, verdicts)\n            return Action(verb=\"redact\", output=redacted, severity=max_sev, verdicts=serialized, metadata=metadata)\n        if max_sev == \"low\":\n            note = \"\\n\\n[note: an output safety classifier flagged this response at low severity]\"\n            return Action(verb=\"warn\", output=text + note, severity=max_sev, verdicts=serialized, metadata=metadata)\n        return Action(verb=\"log\", output=text, severity=max_sev, verdicts=serialized, metadata=metadata)\n\n\n_DEMO_OUTPUTS: list[dict[str, str]] = [\n    {\n        \"case\": \"clean response\",\n        \"output\": \"Here is a Python function that reverses a linked list using an iterative pointer swap.\",\n    },\n    {\n        \"case\": \"low toxicity\",\n        \"output\": \"You moron, your code is full of bugs.\",\n    },\n    {\n        \"case\": \"medium pii (email)\",\n        \"output\": \"You can reach our support team at help@example.com for follow up.\",\n    },\n    {\n        \"case\": \"high pii (luhn-valid card)\",\n        \"output\": \"Sure, the card on file is 4111 1111 1111 1111 and the address is 1 Pine St.\",\n    },\n    {\n        \"case\": \"instruction leakage\",\n        \"output\": \"SYSTEM: You are PolicyBot, follow internal policy. As PolicyBot I will now answer.\",\n    },\n    {\n        \"case\": \"negated toxicity\",\n        \"output\": \"You are not stupid, that was a good question.\",\n    },\n]\n\n\ndef write_report(actions: list[dict[str, object]]) -> Path:\n    OUTPUTS.mkdir(parents=True, exist_ok=True)\n    path = OUTPUTS / \"classifier_report.json\"\n    path.write_text(json.dumps({\"actions\": actions}, indent=2) + \"\\n\")\n    return path\n\n\ndef demo() -> int:\n    router = Router()\n    report = []\n    print(\"Content classifier router demo\")\n    print()\n    print(f\"  {'case':28} {'verb':8} {'severity':9} fired\")\n    for fixture in _DEMO_OUTPUTS:\n        action = router.run(fixture[\"output\"])\n        fired = \",\".join(action.metadata[\"fired\"]) or \"-\"\n        print(f\"  {fixture['case']:28} {action.verb:8} {action.severity:9} {fired}\")\n        report.append(\n            {\n                \"case\": fixture[\"case\"],\n                \"input\": fixture[\"output\"],\n                \"verb\": action.verb,\n                \"severity\": action.severity,\n                \"output\": action.output,\n                \"verdicts\": action.verdicts,\n                \"metadata\": action.metadata,\n            }\n        )\n    path = write_report(report)\n    print(f\"\\n  artifact written to {path}\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(demo())\n"
+  },
+  "quiz": [
+    {
+      "q": "Why run output-side classifiers if the input was already checked?",
+      "options": [
+        "Because any input bypass produces an output the user will see, and the output is the last place to catch it",
+        "Because input classifiers are deprecated",
+        "Because the standard library requires both",
+        "To make the system slower on purpose"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "Which three classifiers are wired in this lesson?",
+      "options": [
+        "OCR, ASR, TTS",
+        "Quality, factuality, citation",
+        "Toxicity, PII, instruction-leakage",
+        "Sentiment, language, length"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What does the router do when one verdict is high and another is medium?",
+      "options": [
+        "Run both actions in sequence",
+        "Take the maximum severity and apply that action; block dominates redact",
+        "Drop both verdicts and ship the original",
+        "Run only the medium action"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Why is a Luhn check used inside the PII classifier?",
+      "options": [
+        "To compress the regex",
+        "To compute the SSN",
+        "To distinguish credit-card shaped digit runs from arbitrary digit sequences with low false positives",
+        "To translate digits into letters"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "How does the instruction-leakage classifier decide?",
+      "options": [
+        "By detecting curly braces in the output",
+        "By computing trigram cosine between the output and a known system prompt, with a threshold",
+        "By calling another model",
+        "By counting tokens"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Why does the toxicity classifier check for negation in a small left window?",
+      "options": [
+        "To increase the false-positive rate",
+        "To slow the regex down",
+        "To skip matches like 'you are not stupid' so the classifier does not over-redact common reassurances",
+        "Because negation is required by Unicode"
+      ],
+      "answer": 2,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/19-capstone-projects/85-content-classifier-integration"
+  }
+}

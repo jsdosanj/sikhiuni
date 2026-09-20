@@ -1,0 +1,3 @@
+{
+  "blurb": "This is where an LLM becomes a product: prompting, retrieval, evaluation, serving, watching it in production. Every Panth tool that uses a language model — search, question-answering, a study companion — is built with the techniques in this phase, and stands or falls on the evals you write."
+}

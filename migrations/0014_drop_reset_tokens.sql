@@ -1,0 +1,16 @@
+-- 0014 -- drop password_reset_tokens (2026-09-07)
+--
+-- The old link-based password reset (migrations/0010_password_auth.sql) was
+-- converged onto a 6-digit code bound to the requesting browser
+-- (migrations/0013_reset_codes.sql). reset-password.js kept a deliberate,
+-- time-limited grace-window branch reading this table so links minted by the
+-- old flow (valid for one hour) still worked out their remaining time after
+-- the 0013 deploy. That branch has now been removed from the code -- more
+-- than an hour has comfortably passed since the deploy, so every token this
+-- table could ever hold has expired.
+--
+-- This is genuinely destructive DDL (unlike every prior migration in this
+-- repo, which was additive-only) and that is deliberate: the table held
+-- bearer credentials, and leaving it around after its only reader is gone is
+-- a liability with no remaining use, not a safety net.
+DROP TABLE IF EXISTS password_reset_tokens;

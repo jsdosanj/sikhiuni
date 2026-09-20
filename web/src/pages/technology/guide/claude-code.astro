@@ -1,0 +1,168 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { trackById, professorOf } from '../../../lib/institute';
+import guide from '../../../data/institute/guide/claude-code.json';
+
+const track = trackById('claude-code-guide');
+const prof = track ? professorOf(track) : undefined;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'LearningResource',
+  name: 'Claude Desktop & Code, a plain-English guide',
+  description: guide.lede,
+  learningResourceType: 'Guide',
+  isAccessibleForFree: true,
+  inLanguage: 'en',
+  provider: { '@type': 'EducationalOrganization', name: 'Sikhi University · Institute of Technology' },
+};
+---
+<Base
+  title="Claude Desktop & Code, Institute of Technology"
+  description="A plain-English map of Claude Desktop and Claude Code for people with zero coding experience, each feature named, then what it lets you do."
+  institute
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <InstituteRail />
+
+  <header class="i-ghead">
+    <div class="i-wrap">
+      <a class="i-mono i-gcrumb" href="/technology/track/claude-code-guide">&larr; Sikh Code</a>
+      <span class="i-label i-mono">guide &middot; {track?.license || 'CC-BY-SA-4.0'}</span>
+      <h1>{guide.title}</h1>
+      <p class="i-prose i-glede-sub">{guide.subtitle}</p>
+      <p class="i-prose i-glede">{guide.lede}</p>
+    </div>
+  </header>
+
+  <div class="i-gwrap">
+    <nav class="i-gtoc" aria-label="Contents">
+      <span class="i-label">contents</span>
+      <ol>
+        {guide.groups.map((g) => (
+          <li><a href={`#${g.id}`}><span class="i-mono">{g.part}</span> {g.title}</a></li>
+        ))}
+        <li><a href="#courses"><span class="i-mono">{guide.courses.part}</span> {guide.courses.title}</a></li>
+      </ol>
+    </nav>
+
+    {guide.groups.map((g) => (
+      <section class="i-ggroup" id={g.id}>
+        <div class="i-ggroup-head">
+          <span class="i-label i-mono">{g.part}</span>
+          <h2>{g.title}</h2>
+          <p class="i-prose">{g.blurb}</p>
+        </div>
+
+        {g.sections.map((s) => (
+          <article class="i-panel i-gsec" id={s.id}>
+            <h3>{s.title}</h3>
+            <p class="i-prose">{s.body}</p>
+
+            {s.steps && (
+              <ol class="i-gsteps">{s.steps.map((step) => <li class="i-prose">{step}</li>)}</ol>
+            )}
+
+            <div class="i-genables">
+              <span class="i-label">what this makes possible</span>
+              <p class="i-prose">{s.enables}</p>
+            </div>
+
+            {s.examples && (
+              <div class="i-gex">
+                <span class="i-label">try saying</span>
+                <ul>{s.examples.map((ex) => <li class="i-prose"><em>&ldquo;{ex}&rdquo;</em></li>)}</ul>
+              </div>
+            )}
+
+            {s.snippet && <pre class="i-gsnippet"><code>{s.snippet}</code></pre>}
+          </article>
+        ))}
+      </section>
+    ))}
+
+    <section class="i-ggroup" id="courses">
+      <div class="i-ggroup-head">
+        <span class="i-label i-mono">{guide.courses.part}</span>
+        <h2>{guide.courses.title}</h2>
+        <p class="i-prose">{guide.courses.blurb}</p>
+      </div>
+      <div class="i-gcourses">
+        {guide.courses.list.map((c) => (
+          <a class="i-panel i-gcourse" href={c.href} target="_blank" rel="noopener">
+            <strong>{c.name}</strong>
+            <span class="i-prose">{c.desc}</span>
+            <span class="i-mono i-gcourse-go">open course &nearr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="i-gclose">
+      <span class="i-label">{guide.closing.eyebrow}</span>
+      <p class="i-prose">{guide.closing.body}</p>
+      <p class="i-gclose-line">{guide.closing.line}</p>
+      <p class="i-prose i-gsrc">{guide.sourceNote} Written by {prof?.name || 'Sikhi University'}. See <a href="/technology/licenses">sources &amp; licenses</a>.</p>
+      <p style="margin-top:16px"><a class="i-btn i-btn-ghost" href="/technology/track/claude-code-guide">&larr; Back to Sikh Code</a></p>
+    </section>
+  </div>
+
+  <style>
+    .i-ghead { border-bottom: 1px solid var(--i-line); padding: 34px 0 32px; background: var(--i-ground-deep); }
+    .i-gcrumb { display: block; width: fit-content; color: var(--i-ink-dim); text-decoration: none; font-size: 12px; margin-bottom: 12px; }
+    .i-gcrumb:hover { color: var(--i-filament); }
+    .i-ghead h1 { margin: 8px 0 0; font-size: clamp(26px, 5vw, 40px); }
+    .i-glede-sub { margin-top: 6px; font-size: 14px; font-style: italic; color: var(--i-muted); }
+    .i-glede { margin-top: 16px; font-size: 15.5px; max-width: 66ch; }
+
+    .i-gwrap { max-width: 760px; margin: 0 auto; padding: 8px 24px 80px; }
+
+    .i-gtoc { margin: 26px 0 8px; }
+    .i-gtoc ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; border: 1px solid var(--i-line); border-radius: var(--i-r-md); overflow: hidden; }
+    .i-gtoc li { border-top: 1px solid var(--i-line-soft); }
+    .i-gtoc li:first-child { border-top: 0; }
+    .i-gtoc a { display: block; padding: 11px 16px; text-decoration: none; color: var(--i-ink-dim); font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 14px; }
+    .i-gtoc a:hover { background: color-mix(in srgb, var(--i-signal) 7%, var(--i-surface)); color: var(--i-filament); }
+    .i-gtoc a .i-mono { color: var(--i-filament); font-weight: 400; margin-right: 8px; font-size: 11px; }
+
+    .i-ggroup { padding: 34px 0 8px; scroll-margin-top: 20px; }
+    .i-ggroup-head { margin-bottom: 18px; }
+    .i-ggroup-head h2 { margin: 8px 0 6px; font-size: clamp(21px, 3.4vw, 28px); }
+    .i-ggroup-head .i-prose { font-size: 14px; }
+
+    .i-gsec { margin-top: 14px; scroll-margin-top: 20px; }
+    .i-gsec h3 { margin: 4px 0 8px; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 17px; color: var(--i-ink); }
+    .i-gsec .i-prose { font-size: 14.5px; }
+    .i-gsteps { margin: 12px 0 0; padding-left: 20px; }
+    .i-gsteps li { margin: 6px 0; line-height: 1.6; }
+
+    .i-genables { margin-top: 14px; border-left: 2px solid var(--i-filament); padding: 2px 0 2px 16px; }
+    .i-genables .i-label { display: block; margin-bottom: 4px; }
+    .i-genables .i-prose { color: var(--i-ink); font-size: 14px; }
+
+    .i-gex { margin-top: 14px; border: 1px solid var(--i-line-soft); border-radius: var(--i-r-sm); padding: 12px 14px; background: var(--i-surface-2); }
+    .i-gex ul { list-style: none; margin: 8px 0 0; padding: 0; }
+    .i-gex li { margin: 5px 0; font-size: 13px; color: var(--i-ink-dim); }
+    .i-gex li::before { content: "› "; color: var(--i-filament); }
+
+    .i-gsnippet {
+      margin: 14px 0 0; background: var(--i-surface-2); border: 1px solid var(--i-line);
+      border-radius: var(--i-r-md); padding: 14px 16px; overflow-x: auto;
+      font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: var(--i-ink);
+    }
+
+    .i-gcourses { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+    .i-gcourse { display: flex; flex-direction: column; text-decoration: none; }
+    .i-gcourse:hover { border-color: color-mix(in srgb, var(--i-signal) 40%, var(--i-line)); }
+    .i-gcourse strong { font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 14.5px; color: var(--i-ink); }
+    .i-gcourse .i-prose { margin-top: 5px; font-size: 12.5px; flex: 1; }
+    .i-gcourse-go { margin-top: 10px; font-size: 11px; color: var(--i-filament); letter-spacing: 0.04em; }
+
+    .i-gclose { margin-top: 40px; padding-top: 26px; border-top: 1px solid var(--i-line); }
+    .i-gclose .i-prose { font-size: 15px; }
+    .i-gclose-line { margin: 14px 0 0; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 17px; color: var(--i-filament); font-style: italic; }
+    .i-gsrc { margin-top: 22px; font-size: 12.5px; color: var(--i-muted); }
+  </style>
+</Base>

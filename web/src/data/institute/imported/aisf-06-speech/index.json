@@ -1,0 +1,132 @@
+{
+  "track": "aisf-06-speech",
+  "phaseDir": "06-speech-and-audio",
+  "blurb": "The other half of human communication. Hear, understand, speak.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-06-speech::audio-fundamentals",
+      "num": 1,
+      "slug": "audio-fundamentals",
+      "title": "Audio Fundamentals — Waveforms, Sampling, Fourier Transform",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::spectrograms-mel-features",
+      "num": 2,
+      "slug": "spectrograms-mel-features",
+      "title": "Spectrograms, Mel Scale & Audio Features",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::audio-classification",
+      "num": 3,
+      "slug": "audio-classification",
+      "title": "Audio Classification — From k-NN on MFCCs to AST and BEATs",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::speech-recognition-asr",
+      "num": 4,
+      "slug": "speech-recognition-asr",
+      "title": "Speech Recognition (ASR) — CTC, RNN-T, Attention",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::whisper-architecture-finetuning",
+      "num": 5,
+      "slug": "whisper-architecture-finetuning",
+      "title": "Whisper — Architecture & Fine-Tuning",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::speaker-recognition-verification",
+      "num": 6,
+      "slug": "speaker-recognition-verification",
+      "title": "Speaker Recognition & Verification",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::text-to-speech",
+      "num": 7,
+      "slug": "text-to-speech",
+      "title": "Text-to-Speech (TTS) — From Tacotron to F5 and Kokoro",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::voice-cloning-conversion",
+      "num": 8,
+      "slug": "voice-cloning-conversion",
+      "title": "Voice Cloning & Voice Conversion",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::music-generation",
+      "num": 9,
+      "slug": "music-generation",
+      "title": "Music Generation — MusicGen, Stable Audio, Suno, and the Licensing Earthquake",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::audio-language-models",
+      "num": 10,
+      "slug": "audio-language-models",
+      "title": "Audio-Language Models — Qwen2.5-Omni, Audio Flamingo, GPT-4o Audio",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::real-time-audio-processing",
+      "num": 11,
+      "slug": "real-time-audio-processing",
+      "title": "Real-Time Audio Processing",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::voice-assistant-pipeline",
+      "num": 12,
+      "slug": "voice-assistant-pipeline",
+      "title": "Build a Voice Assistant Pipeline — The Phase 6 Capstone",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::neural-audio-codecs",
+      "num": 13,
+      "slug": "neural-audio-codecs",
+      "title": "Neural Audio Codecs — EnCodec, SNAC, Mimi, DAC and the Semantic-Acoustic Split",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::voice-activity-detection-turn-taking",
+      "num": 14,
+      "slug": "voice-activity-detection-turn-taking",
+      "title": "Voice Activity Detection & Turn-Taking — Silero, Cobra, and the Flush Trick",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::streaming-speech-to-speech-moshi-hibiki",
+      "num": 15,
+      "slug": "streaming-speech-to-speech-moshi-hibiki",
+      "title": "Streaming Speech-to-Speech — Moshi, Hibiki, and Full-Duplex Dialogue",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::anti-spoofing-audio-watermarking",
+      "num": 16,
+      "slug": "anti-spoofing-audio-watermarking",
+      "title": "Voice Anti-Spoofing & Audio Watermarking — ASVspoof 5, AudioSeal, WaveVerify",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-06-speech::audio-evaluation-metrics",
+      "num": 17,
+      "slug": "audio-evaluation-metrics",
+      "title": "Audio Evaluation — WER, MOS, UTMOS, MMAU, FAD, and the Open Leaderboards",
+      "nQuiz": 0
+    }
+  ]
+}

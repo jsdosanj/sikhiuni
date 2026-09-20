@@ -1,0 +1,56 @@
+{
+  "track": "ai-92-fanout-math",
+  "school": "ai",
+  "blurb": "Fanout's 301-lesson machine learning mathematics course, mapped through its free course pages, six free sample lessons on sets, and its Math Decoder notation tool.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to build this reading map. No lesson text or worked example is reproduced here — every card opens the real page at fanout.sh. Six of the course's 301 lessons are free samples; the remainder sit behind Fanout's paid Pro plans."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "course-map",
+      "title": "The course map",
+      "objective": "See the shape of Fanout's twelve-module mathematics path — sets, linear algebra, calculus, probability, and inference — before starting the free sample lessons.",
+      "teach": "The math course underpins both the AI research and ML math phases the AI School already teaches — think of it as a second, more exhaustive pass, structured as 301 short topic-level lessons rather than long chapters. This module is free; the lessons it maps are mostly paid.",
+      "labs": [
+        { "title": "Machine Learning Mathematics Course", "provider": "Fanout", "href": "https://fanout.sh/ml-math", "cost": "free" },
+        { "title": "ML Math Resources", "provider": "Fanout", "href": "https://fanout.sh/ml-math/resources", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "free-sample-lessons",
+      "title": "Six free sample lessons on sets",
+      "objective": "Work through Fanout's free set-theory lessons — set-builder notation, indicator functions, Cartesian products, argmax and argmin, suprema, and interior/boundary points — as a sample of the course's teaching style.",
+      "teach": "These are Fanout's own selected free lessons out of 301. Set theory is the course's first module, so this is also a fair test of whether the ground-up, topic-by-topic pace suits you before any paid commitment.",
+      "labs": [
+        { "title": "Describe planar regions in set-builder notation", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-planar-regions-in-set-builder-form-t-020hek0", "cost": "free" },
+        { "title": "Turn predicates into indicator functions", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-indicator-functions-for-predicates-t-1289tky", "cost": "free" },
+        { "title": "Visualize Cartesian products as regions", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-cartesian-products-as-regions-t-09634sc", "cost": "free" },
+        { "title": "How to find argmax and argmin in tables and graphs", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-reading-argmax-and-argmin-from-data-t-1kn9xdk", "cost": "free" },
+        { "title": "When is a supremum not a maximum", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-supremum-and-infimum-t-07348eh", "cost": "free" },
+        { "title": "How to identify interior and boundary points in R²", "provider": "Fanout", "href": "https://fanout.sh/ml-math/lessons/sets-interior-and-boundary-points-t-1qzjuqn", "cost": "free" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "math-decoder",
+      "title": "The Math Decoder",
+      "objective": "Use Fanout's Math Decoder to look up unfamiliar notation the moment it stalls a paper, by glyph, pronunciation, LaTeX, or meaning.",
+      "teach": "This is the tool worth bookmarking independently of the course: paste in the symbol you don't recognise from a paper and get a plain-English decoding, cross-referenced to a worked formula where one exists. It's free and permanently public.",
+      "labs": [
+        { "title": "Math Decoder for AI Research Papers", "provider": "Fanout", "href": "https://fanout.sh/math-decoder", "cost": "free" },
+        { "title": "Functions, mappings, and bound variables", "provider": "Fanout", "href": "https://fanout.sh/ml-math/decoder/functions-mappings-and-bound-variables", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Fanout Course Pricing", "provider": "Fanout", "href": "https://fanout.sh/pricing", "note": "The remaining 295 of 301 ML math lessons sit behind Fanout's paid plans." }
+  ]
+}

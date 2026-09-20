@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::ai-control-subversion",
+  "num": 10,
+  "slug": "ai-control-subversion",
+  "title": "AI Control — Safety Despite Subversion",
+  "tagline": "Greenblatt, Shlegeris, Sachan, Roger (Redwood Research, arXiv:2312.06942, ICML 2024). Control reframes the safety question: given an untrusted strong model U that may be adversarially optimizing against you, what protocols let you extract useful work while bounding the probability of an unacceptable outcome? Resources are a trusted weaker model T, a budget of trusted human labor H, and the ability to edit U's outputs. Within this frame, Trusted Editing Pareto-dominates Untrusted Monitoring on code-backdoor tasks. The frame inherits worst-case assumptions from security engineering: safety is the probability that an adversarially chosen U cannot cause a concrete unacceptable outcome, measured under red-team pressure that stands in for U.",
+  "type": "Learn",
+  "languages": "Python (stdlib, safety-vs-usefulness frontier on code-backdoor task)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Define the AI Control threat model: untrusted strong model U, trusted weaker model T, trusted human budget H.",
+    "Describe the Trusted Editing protocol and why it Pareto-dominates Untrusted Monitoring on the ICML 2024 code-backdoor task.",
+    "Explain the difference between alignment (U is trustworthy) and control (U is not trustworthy and we are safe anyway).",
+    "State the three limits of control: humans do not scale, trusted weak models eventually lag, control does not produce trustworthy strong models."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Lessons 7-9 establish that a frontier model may be deceptively aligned, scheming, or faking alignment. The safety question re-frames: can we extract useful work from a model we do not trust, without giving it the opportunity to cause unacceptable outcomes? This is the control problem, and it is structured like classical security: assume worst-case adversary, design a protocol, measure the adversary&#39;s success rate under red-team pressure.</p>\n<h2>The Concept</h2>\n<h3>The threat model</h3>\n<p>Control assumes:</p>\n<ul>\n<li>U — untrusted strong model. Capable. Possibly adversarial (the evaluation treats it as if it were).</li>\n<li>T — trusted weaker model. Less capable, but known not to be adversarial.</li>\n<li>H — trusted human labor. Small budget; does not scale.</li>\n</ul>\n<p>The system must produce useful output using U. The adversary tries to cause a concrete unacceptable outcome (e.g., a backdoor in the shipped code) while maintaining a fraction of legitimate useful work to pass usefulness thresholds.</p>\n<p>Control gives up on trusting U. It asks what protocols maintain safety in U&#39;s absence of trust.</p>\n<h3>The ICML 2024 backdoor task</h3>\n<p>Prompts are competition-level coding problems. U produces a candidate solution. A hidden oracle flags if the solution contains a backdoor (a specific input that makes the code produce a wrong output). Red team controls U and is allowed to see all protocol internals. The protocol must maximize solved-problem rate while keeping backdoor-shipping rate below a threshold.</p>\n<h3>Four protocols compared</h3>\n<ul>\n<li><strong>Baseline:</strong> ship U&#39;s output directly. Usefulness maxed. Safety minimal.</li>\n<li><strong>Upfront auditing:</strong> use H on all outputs. Safety maxed. Budget exhausted quickly.</li>\n<li><strong>Untrusted Monitoring:</strong> a second instance of U scores the first instance&#39;s output; H audits flagged outputs. Risk: the two U instances can collude.</li>\n<li><strong>Trusted Editing:</strong> T edits U&#39;s output on every query. If T is not confident, route to H.</li>\n</ul>\n<p>Greenblatt et al. find Trusted Editing Pareto-dominates Untrusted Monitoring: higher usefulness at every safety level.</p>\n<h3>Why Trusted Editing wins</h3>\n<p>Untrusted Monitoring requires that U&#39;s second instance cannot coordinate with the first. Collusion is possible via steganographic cues or shared training priors. The protocol has to invest budget in collusion-resistance (paraphrasing, obfuscation) that reduces the monitor&#39;s signal. Trusted Editing avoids collusion entirely because T is trusted — any edit T proposes is, by assumption, not adversarial. The cost is that T is less capable, so it may over-reject or miss subtle backdoors.</p>\n<h3>The four protocol axes</h3>\n<ol>\n<li>Which role U plays: producer only, monitor, or both.</li>\n<li>Which role T plays: editor, monitor, or resampler.</li>\n<li>How H is allocated: uniform audit, random audit, or flag-directed audit.</li>\n<li>How much compute the protocol spends on collusion-resistance.</li>\n</ol>\n<h3>Alignment vs control</h3>\n<ul>\n<li>Alignment: &quot;is U safe to trust?&quot; Lessons 2, 4, 5, 6, 7, 8, 9 all bear on this.</li>\n<li>Control: &quot;can we use U safely without trusting it?&quot; Lesson 10.</li>\n</ul>\n<p>Alignment is a property of the model. Control is a property of the deployment protocol. Control does not produce aligned models; it produces safe use of possibly-unaligned models. Both agendas are needed.</p>\n<h3>Three fundamental limits</h3>\n<ul>\n<li>Humans do not scale. The H budget is bounded by the number of humans willing to audit hard AI outputs.</li>\n<li>Trusted weak models eventually lag. When T is much weaker than U, T&#39;s editing signal becomes noise.</li>\n<li>Control is not alignment. Protocols that work at ASL-3 (Lesson 18) may not work at ASL-4 — if U can manipulate T or reason about H&#39;s audit distribution, control fails.</li>\n</ul>\n<h3>The 2025 development</h3>\n<p>UK AISI and Redwood collaborate on Control Safety Cases (metr.org / redwoodresearch.org 2025): a control safety case argues that under worst-case assumptions about U, the protocol bounds the probability of an unacceptable outcome. Safety cases (Lesson 18) inherit the control frame.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lessons 6-9 describe the threat (deception is possible). Lesson 10 describes the defensive paradigm under the assumption that the threat is real. Lesson 11 describes the complementary offensive paradigm (make U trustworthy via scalable oversight).</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>al-control-protocol</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> simulates the four protocols on a toy backdoor task. U produces outputs; a fraction are backdoored (red-team policy). T approves or edits. H is called on a budget. You can sweep the budget and the collusion parameter to reproduce the Pareto frontier in Greenblatt et al. 2024 Figure 2 (shape, not numbers).</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-control-protocol-audit.md</code>. Given a deployment protocol description, it identifies the U / T / H roles, names the collusion vectors, and estimates the protocol&#39;s position on the usefulness-safety frontier under red-team pressure.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Run <code>code/main.py</code>. Reproduce the usefulness-safety frontier for Trusted Editing vs Untrusted Monitoring. Identify the budget regime in which Untrusted Monitoring&#39;s collusion assumption becomes pivotal.</p>\n</li>\n<li><p>Add a new protocol: &quot;T resamples with low temperature, then U edits T&#39;s output.&quot; Measure its position on the frontier. Why does this fail more catastrophically than Trusted Editing?</p>\n</li>\n<li><p>The 2024 paper assumes U can see the protocol. Design a protocol that hides from U which outputs are being audited. What does this protocol require from the deployment infrastructure?</p>\n</li>\n<li><p>Read Greenblatt et al. 2024 Section 7 (collusion). Propose a collusion-resistance measure and explain its expected usefulness cost.</p>\n</li>\n<li><p>Articulate a control safety case for a deployment that uses U = GPT-4-class, T = GPT-3.5-class, H = 1% of outputs audited. Identify the single strongest assumption the case depends on.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>AI Control</td>\n<td>&quot;safety under subversion&quot;</td>\n<td>Protocol design that bounds unacceptable outcomes under a worst-case U</td>\n</tr>\n<tr>\n<td>Untrusted model (U)</td>\n<td>&quot;the strong model&quot;</td>\n<td>The capable model we want to extract work from but do not trust</td>\n</tr>\n<tr>\n<td>Trusted model (T)</td>\n<td>&quot;the weak model&quot;</td>\n<td>A weaker model, known not to be adversarial, used as editor/monitor</td>\n</tr>\n<tr>\n<td>Trusted human (H)</td>\n<td>&quot;the audit budget&quot;</td>\n<td>Bounded expert labor; expensive; the ground-truth signal</td>\n</tr>\n<tr>\n<td>Trusted Editing</td>\n<td>&quot;T edits U&quot;</td>\n<td>Protocol where T is the gate on U&#39;s outputs; H called on ambiguous outputs</td>\n</tr>\n<tr>\n<td>Untrusted Monitoring</td>\n<td>&quot;U monitors U&quot;</td>\n<td>Protocol where a second U instance scores outputs; collusion-resistant only with extra investment</td>\n</tr>\n<tr>\n<td>Control safety case</td>\n<td>&quot;the formal argument&quot;</td>\n<td>Written argument that a protocol bounds the adversary&#39;s success under worst-case U</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2312.06942\" target=\"_blank\" rel=\"noopener\">Greenblatt, Shlegeris, Sachan, Roger — AI Control (arXiv:2312.06942)</a> — the canonical ICML 2024 paper</li>\n<li><a href=\"https://redwoodresearch.substack.com/\" target=\"_blank\" rel=\"noopener\">Redwood Research — Recent AI Control papers index</a> — 2024-2025 follow-ups</li>\n<li><a href=\"https://metr.org/blog/2025-03-26-common-elements-of-frontier-ai-safety-policies/\" target=\"_blank\" rel=\"noopener\">UK AISI + METR — Control safety cases</a> — operationalization for frontier labs</li>\n<li><a href=\"https://arxiv.org/abs/2401.05566\" target=\"_blank\" rel=\"noopener\">Hubinger et al. — Sleeper Agents (Lesson 7, arXiv:2401.05566)</a> — the threat model control assumes</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"AI Control protocol simulation — stdlib Python.\n\nFour protocols on a toy backdoor task:\n  baseline   : ship U's output directly.\n  upfront    : audit every output with H (budget-limited).\n  untrusted  : second U scores outputs (collusion-risk).\n  trusted_ed : T edits every output; H on low-confidence T flags.\n\nOutcomes: backdoor-ship rate (safety-inverted) and useful-output rate.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport random\n\n\nrandom.seed(23)\n\n\ndef u_produce(backdoor_rate: float) -> tuple[str, bool]:\n    \"\"\"U produces an output. Returns (output, is_backdoored).\"\"\"\n    is_backdoor = random.random() < backdoor_rate\n    return (\"useful\" if not is_backdoor else \"backdoor\"), is_backdoor\n\n\ndef t_edit(output: str, is_backdoor: bool, t_skill: float,\n           overreject: float = 0.05) -> tuple[str, bool, bool]:\n    \"\"\"T edits. Returns (edited, still_backdoored, t_low_confidence).\n\n    T succeeds at removing backdoors with probability t_skill. T also rejects\n    a fraction of benign outputs (overreject).\n    \"\"\"\n    if is_backdoor:\n        if random.random() < t_skill:\n            return (\"useful\", False, False)\n        return (\"backdoor\", True, True)\n    # benign input: T over-rejects with some probability\n    if random.random() < overreject:\n        return (\"rejected\", False, True)\n    return (\"useful\", False, False)\n\n\ndef untrusted_monitor(is_backdoor: bool, collusion: float) -> bool:\n    \"\"\"Second U instance scores. If it colludes, it passes backdoors.\n\n    collusion = probability the monitor colludes with the producer.\n    Returns True if the monitor flags the output (i.e. catches it).\n    \"\"\"\n    if not is_backdoor:\n        # monitor correctly passes benign with high probability\n        return random.random() < 0.05\n    # monitor would normally flag; collusion suppresses that signal.\n    if random.random() < collusion:\n        return False\n    return random.random() < 0.80\n\n\ndef run_protocol(name: str, backdoor_rate: float, h_budget: float,\n                 n: int, t_skill: float = 0.7, collusion: float = 0.30) -> None:\n    useful, shipped_backdoor, used_h = 0, 0, 0\n    for _ in range(n):\n        _, is_bd = u_produce(backdoor_rate)\n        if name == \"baseline\":\n            if not is_bd:\n                useful += 1\n            else:\n                shipped_backdoor += 1\n        elif name == \"upfront\":\n            if used_h / n < h_budget:\n                used_h += 1\n                if not is_bd:\n                    useful += 1\n            else:\n                if not is_bd:\n                    useful += 1\n                else:\n                    shipped_backdoor += 1\n        elif name == \"untrusted\":\n            flagged = untrusted_monitor(is_bd, collusion)\n            if flagged:\n                if used_h / n < h_budget:\n                    used_h += 1\n                else:\n                    if not is_bd:\n                        useful += 1\n                    else:\n                        shipped_backdoor += 1\n            else:\n                if not is_bd:\n                    useful += 1\n                else:\n                    shipped_backdoor += 1\n        elif name == \"trusted_ed\":\n            edited, still_bd, low_conf = t_edit(\"x\", is_bd, t_skill)\n            if low_conf and used_h / n < h_budget:\n                used_h += 1\n                if not is_bd:\n                    useful += 1\n            else:\n                if edited == \"useful\":\n                    useful += 1\n                elif still_bd:\n                    shipped_backdoor += 1\n    print(f\"\\n{name:>12s}  useful={useful/n:.3f}  backdoor={shipped_backdoor/n:.3f}\"\n          f\"  H used={used_h/n:.3f}\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"AI CONTROL PROTOCOL SIMULATION (Phase 18, Lesson 10)\")\n    print(\"=\" * 70)\n\n    for br in (0.05, 0.10, 0.20):\n        print(f\"\\n-- backdoor-rate = {br}, H budget = 0.10, n = 1000 --\")\n        for proto in (\"baseline\", \"upfront\", \"untrusted\", \"trusted_ed\"):\n            run_protocol(proto, backdoor_rate=br, h_budget=0.10, n=1000)\n\n    print(\"\\n-- collusion sweep on untrusted monitoring (backdoor_rate=0.10) --\")\n    for col in (0.0, 0.20, 0.50, 0.80):\n        print(f\"\\ncollusion={col}\")\n        run_protocol(\"untrusted\", backdoor_rate=0.10, h_budget=0.10, n=1000,\n                     collusion=col)\n\n    print(\"\\n\" + \"=\" * 70)\n    print(\"TAKEAWAY: trusted editing Pareto-dominates untrusted monitoring on\")\n    print(\"this toy task. collusion between two U instances erodes untrusted\")\n    print(\"monitoring's safety signal. trusted editing has no collusion risk\")\n    print(\"because T is, by assumption, not adversarial. cost: T's editing\")\n    print(\"signal is bounded by T's capability; at larger U-T capability gaps\")\n    print(\"control eventually fails. see Greenblatt 2023.\")\n    print(\"=\" * 70)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which best captures the difference between alignment and AI control?",
+      "options": [
+        "They are synonyms",
+        "Control is about hardware; alignment is about software",
+        "Alignment asks whether U is trustworthy; control asks whether we can safely use U without trusting it",
+        "Control replaces the loss function while alignment changes the optimizer"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What does the AI Control threat model assume?",
+      "options": [
+        "U is untrusted strong, T is trusted weak, H is bounded trusted human labor",
+        "Only U exists",
+        "U and T are both adversarial",
+        "All three resources (U, T, H) are trusted"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What is the key risk in Untrusted Monitoring that Trusted Editing avoids?",
+      "options": [
+        "T cannot edit text",
+        "Hardware contention",
+        "Two instances of U can collude or share priors, so the protocol must spend budget on collusion-resistance",
+        "Humans cannot be audited"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "On the Greenblatt et al. (ICML 2024) code-backdoor task, what does Trusted Editing achieve relative to Untrusted Monitoring?",
+      "options": [
+        "It only wins at zero human budget",
+        "They are exactly equivalent",
+        "It is strictly worse",
+        "It strictly Pareto-dominates: higher usefulness at every safety level"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "Which of the following is NOT one of the lesson's three fundamental limits of control?",
+      "options": [
+        "Control produces aligned models as a byproduct",
+        "Trusted weak models eventually lag U",
+        "Control may fail at higher capability levels if U can manipulate T or reason about H's audit distribution",
+        "Humans do not scale"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What does a Control Safety Case argue?",
+      "options": [
+        "That U is trustworthy",
+        "That T is more capable than U",
+        "That under worst-case assumptions about U, the deployment protocol bounds the probability of an unacceptable outcome",
+        "That the model passed a manual jailbreak test"
+      ],
+      "answer": 2,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/10-ai-control-subversion"
+  }
+}

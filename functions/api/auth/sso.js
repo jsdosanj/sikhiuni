@@ -1,5 +1,6 @@
 import { newId, sessionCookie, isAdminEmail, logEvent } from "../_lib.js";
 import { verifySsoToken } from "../../_sso.js";
+import { insertUserWithOptin, sendWelcomeEmail } from "./_onboarding.js";
 
 // GET /api/auth/sso?sso_token=...&return=/some/path
 //
@@ -11,7 +12,8 @@ import { verifySsoToken } from "../../_sso.js";
 // newly-provisioned one), then redirects to a same-origin-only `return`
 // path (never an absolute URL -- that would make this an open redirect off
 // a trusted-looking sikhiuni.com link).
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet(context) {
+  const { request, env } = context;
   const url = new URL(request.url);
   const token = url.searchParams.get("sso_token") || "";
   const returnPath = url.searchParams.get("return") || "/dashboard.html";
@@ -27,16 +29,37 @@ export async function onRequestGet({ request, env }) {
   const payload = await verifySsoToken(token, secret);
   if (!payload) return fail("This sign-in link is invalid or expired.");
 
+  // Hub-and-spoke enforcement (Decision 3 of
+  // .cc/plan-sso-receiver-punjabiuni-sikhiuni.md, in sikhi.io's repo):
+  // sikhi.io is the only token issuer today, but verifySsoToken itself
+  // (functions/_sso.js) deliberately doesn't check `iss` -- it stays a
+  // generic verifier. All three sites currently share ONE secret, so
+  // without this check a token minted by (or forged as coming from) any
+  // other secret-holder would be accepted just as readily as one actually
+  // minted by sikhi.io.
+  if (payload.iss !== "sikhi.io") return fail("This sign-in link is invalid or expired.");
+
   const email = payload.email;
   let user = await env.DB.prepare("SELECT id, role FROM users WHERE email = ?").bind(email).first();
   const wantAdmin = isAdminEmail(env, email);
   if (!user) {
+    // FIRST LANDING = this person's signup moment here, so it is the one and
+    // only place that seeds marketing_optin from the token's optional
+    // `marketingOptIn` claim, and the one and only place that mails a
+    // welcome. Absence of the claim reads as no consent (an older sikhi.io
+    // issuer simply doesn't send it). On every LATER login the existing-user
+    // branches below run instead and never touch the column -- a choice made
+    // on this site must win over the hub's echo of it, and re-syncing on
+    // every login would silently clobber it.
     const id = newId();
     const role = wantAdmin ? "admin" : "learner";
-    await env.DB.prepare("INSERT INTO users (id, email, name, role, created_at) VALUES (?,?,?,?,?)")
-      .bind(id, email, payload.name || null, role, Date.now()).run();
+    await insertUserWithOptin(env, {
+      id, email, name: payload.name || null, role, createdAt: Date.now(),
+      emailVerified: true, marketing: payload.marketingOptIn === true,
+    });
     user = { id, role };
     await logEvent(env, { id, role }, "user_created", email, "sso:sikhi.io");
+    sendWelcomeEmail(context, email, payload.name || null);
   } else if (wantAdmin && user.role !== "admin") {
     await env.DB.prepare("UPDATE users SET role='admin' WHERE id=?").bind(user.id).run();
   } else if (!wantAdmin && user.role === "admin") {

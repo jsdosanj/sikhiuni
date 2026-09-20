@@ -86,6 +86,38 @@ export function awardSeal(id: string): boolean {
   return true;
 }
 
+// ── Leitner card state (su_v1_games_cards) ─────────────────────────────────
+// A separate key from PKEY: this is per-card scheduling state (box 0-5, next
+// due timestamp), not the aggregate stars/seals/streak progress above. Deck
+// scope is the caller's job (e.g. yaad-patte.ts) — this just persists whatever
+// card ids that caller uses. Distinct namespace from baal-updesh.astro's own
+// su_v1_fc_<hash> keys (its course-term/word deck): a learner's arcade-letter
+// recall and their Baal Updesh flashcard progress are intentionally separate
+// decks, not merged.
+const CARDKEY = 'su_v1_games_cards';
+export type CardState = { box: number; due: number };
+
+function readCards(): Record<string, CardState> {
+  try {
+    const raw = localStorage.getItem(CARDKEY);
+    const p = raw ? JSON.parse(raw) : {};
+    return p && typeof p === 'object' ? p : {};
+  } catch {
+    return {};
+  }
+}
+export function getCard(id: string): CardState {
+  const c = readCards()[id];
+  return c && Number.isFinite(c.box) && Number.isFinite(c.due) ? c : { box: 0, due: 0 };
+}
+export function setCard(id: string, state: CardState): void {
+  try {
+    const all = readCards();
+    all[id] = state;
+    localStorage.setItem(CARDKEY, JSON.stringify(all));
+  } catch {}
+}
+
 // ── Kid mode (su_v1_games_kid) ─────────────────────────────────────────────
 export function kidMode(): boolean {
   try { return JSON.parse(localStorage.getItem(KIDKEY) || 'false') === true; } catch { return false; }

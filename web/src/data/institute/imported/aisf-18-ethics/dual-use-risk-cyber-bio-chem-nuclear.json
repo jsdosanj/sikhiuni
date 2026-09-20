@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::dual-use-risk-cyber-bio-chem-nuclear",
+  "num": 30,
+  "slug": "dual-use-risk-cyber-bio-chem-nuclear",
+  "title": "Dual-Use Risk — Cyber, Bio, Chem, Nuclear Uplift",
+  "tagline": "The 2026 dual-use picture, domain by domain. Bio/chem: Lesson 17 covers WMDP; Anthropic's bioweapon-acquisition trial (2.53x uplift) and OpenAI's April 2025 Preparedness Framework v2 warning (\"on the cusp of meaningfully helping novices create known biological threats\") mark the inflection point. Cyber (November 2025 Anthropic report): Chinese-linked state actors used Claude's agentic coding tool to automate up to 90% of a cyberattack campaign, with human intervention only in 4-6 steps; OpenAI \"trusted access\" pilot gives vetted security organisations capability access for defensive dual-use work. Chem/bio execution gap erosion: the classic defense was \"information access alone is insufficient.\" Vision-enabled frontier models (GPT-5.2, Gemini 3 Pro, Claude Opus 4.5, Grok 4.1) can observe wet-lab video and provide real-time correction. December 2025: OpenAI demonstrated GPT-5 iterating on wet-lab experiments, achieving 79x efficiency improvement via AI-driven protocol optimization. Novice-vs-expert pattern: AI provides greater relative uplift to novices but greater absolute capability to experts.",
+  "type": "Learn",
+  "languages": "none",
+  "time": "~75 minutes",
+  "objectives": [
+    "Describe the 2024-2025 bio-uplift narrative: \"mild uplift\" -> \"on the cusp\" -> \"2.53x uplift insufficient to rule out ASL-3.\"",
+    "Describe the November 2025 Anthropic cyber report: Chinese-linked automation at up to 90% of a cyberattack campaign.",
+    "Describe the chem/bio execution-gap erosion: vision-enabled real-time correction of wet-lab experiments.",
+    "State the novice-relative vs expert-absolute asymmetry and its implication for safety-case construction."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Lesson 17 is the measurement methodology. Lesson 30 is the 2026 state of the measurement. The picture shifted materially between 2024 and late 2025: each domain crossed a threshold that the 2024 frameworks did not anticipate.</p>\n<h2>The Concept</h2>\n<h3>Bio/chem uplift narrative</h3>\n<p>Three phases (repeated from Lesson 17 for coherence):</p>\n<ol>\n<li><strong>2024 &quot;mild uplift.&quot;</strong> Early Preparedness/RSP evaluations reported small novice advantages over internet search.</li>\n<li><strong>April 2025 &quot;on the cusp.&quot;</strong> OpenAI PF v2 warned models were &quot;on the cusp of meaningfully helping novices create known biological threats.&quot;</li>\n<li><strong>2025 Anthropic bioweapon-acquisition trial.</strong> Controlled novice study; 2.53x uplift on acquisition-phase tasks; insufficient to rule out ASL-3.</li>\n</ol>\n<p>The shift is qualitative: &quot;mild&quot; evolved into &quot;plausibly enabling&quot; within eighteen months, even without a capability breakthrough.</p>\n<h3>Chem/bio execution-gap erosion</h3>\n<p>Historic defense: information is necessary but not sufficient; the skill of executing the protocol blocks novices. 2025 frontier models with vision break this defense partially:</p>\n<ul>\n<li><strong>Real-time protocol correction.</strong> GPT-5.2, Gemini 3 Pro, Claude Opus 4.5, Grok 4.1 can observe wet-lab video and flag errors mid-procedure.</li>\n<li><strong>December 2025 OpenAI demonstration.</strong> GPT-5 iterating on wet-lab experiments achieves 79x efficiency improvement via protocol optimization.</li>\n</ul>\n<p>The implication: execution-skill-as-defense is eroding. Procurement and equipment gaps remain, but the tacit-knowledge gap is narrowing.</p>\n<h3>Cyber uplift (November 2025)</h3>\n<p>Anthropic&#39;s November 2025 report: Chinese-linked state actors used Claude&#39;s agentic coding tool to automate 80-90% of a cyberattack campaign. Human intervention was required in only 4-6 steps.</p>\n<p>Implications:</p>\n<ul>\n<li>Agentic coding is the attack-automation primitive. Previous AI cyber assistance was bounded at code-snippet level; agentic workflows integrate reconnaissance, exploitation, post-exploitation, and exfiltration.</li>\n<li>The 4-6 human steps are the bottleneck; future capability gains would reduce that count.</li>\n<li>Defensive dual-use: OpenAI&#39;s &quot;trusted access&quot; pilot provides vetted security organisations (established incident-response firms, government) with capability access for defense. Asymmetry in access favors defenders if the pilot scales.</li>\n</ul>\n<h3>Nuclear</h3>\n<p>The least-analyzed of the four CBRN domains in public documentation. The threat model is different: fissile-material acquisition dominates the difficulty, not information. AI uplift on the information layer provides limited novice uplift in practice. No 2024-2025 major-lab report identifies a nuclear-specific threshold crossing.</p>\n<h3>Novice-relative vs expert-absolute</h3>\n<p>A pattern across all four domains:</p>\n<ul>\n<li><strong>Novice-relative uplift.</strong> High. Multiplicative. Per Anthropic 2025 bio, 2.53x.</li>\n<li><strong>Expert-absolute capability.</strong> High ceiling. An expert extracts more than a novice because the expert knows what to ask and how to interpret.</li>\n</ul>\n<p>Implication for safety cases: addressing only novice uplift (via input filters, refusals, uncertainty) is insufficient for expert-absolute control. Additional measures required: elicitation-hardening, capability unlearning (Lesson 17), and control protocols (Lesson 10).</p>\n<h3>Cross-domain synthesis</h3>\n<table>\n<thead>\n<tr>\n<th>Domain</th>\n<th>2024</th>\n<th>2025</th>\n<th>Inflection</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Bio</td>\n<td>mild uplift</td>\n<td>2.53x uplift, ASL-3 approach</td>\n<td>acquisition-phase automation</td>\n</tr>\n<tr>\n<td>Chem</td>\n<td>mild uplift</td>\n<td>execution-gap erosion via vision</td>\n<td>real-time wet-lab correction</td>\n</tr>\n<tr>\n<td>Cyber</td>\n<td>code assistance</td>\n<td>80-90% campaign automation</td>\n<td>agentic coding</td>\n</tr>\n<tr>\n<td>Nuclear</td>\n<td>limited</td>\n<td>limited</td>\n<td>material-access bottleneck holds</td>\n</tr>\n</tbody></table>\n<p>Three domains crossed thresholds. One remains bounded by non-informational barriers.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lesson 30 is the capstone: the current dual-use picture that every prior lesson contributes to measuring, limiting, or governing. Lessons 17-18 give the measurement and frameworks; Lessons 12-16 give the evaluation tooling; Lessons 24-25 give the regulatory and disclosure layer; Lesson 28 gives the research ecosystem. Lesson 30 is where the evidence lands.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>an-uplift-asymmetry</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p>No code. Read the Anthropic November 2025 cyber report, OpenAI&#39;s Preparedness Framework v2 April 2025 update, and the Council on Strategic Risks 2025 AI x Bio wrapup.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-dual-use-triage.md</code>. Given a 2026 capability claim or incident report, it triages across the four domains and identifies whether the claim affects novice-relative uplift, expert-absolute capability, or both.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Read Anthropic&#39;s November 2025 cyber report. Enumerate the 4-6 human-intervention steps and argue which would be first to automate in a next-generation model.</p>\n</li>\n<li><p>The chem/bio execution gap is eroding via vision. Design an evaluation that measures tacit-knowledge uplift without crossing ITAR/EAR boundaries.</p>\n</li>\n<li><p>Nuclear uplift appears bounded by material access. Argue for and against the position that a future AI breakthrough could shift this bottleneck.</p>\n</li>\n<li><p>Construct a safety case (Lesson 18 three-pillar) for a cyber-capable frontier model that bounds both novice and expert uplift.</p>\n</li>\n<li><p>Pick one of the four domains and write a one-paragraph 2027 forecast based on the 2024-2025 trajectory. Identify the evidence that would falsify your forecast.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Uplift</td>\n<td>&quot;AI helps attackers&quot;</td>\n<td>Increase in attacker capability attributable to AI assistance</td>\n</tr>\n<tr>\n<td>Novice-relative uplift</td>\n<td>&quot;multiplicative&quot;</td>\n<td>How much AI helps a novice vs status-quo</td>\n</tr>\n<tr>\n<td>Expert-absolute capability</td>\n<td>&quot;ceiling&quot;</td>\n<td>Maximum capability an expert can extract from the model</td>\n</tr>\n<tr>\n<td>Execution gap</td>\n<td>&quot;doing vs knowing&quot;</td>\n<td>Historical defense: tacit wet-lab skill blocks novices</td>\n</tr>\n<tr>\n<td>Agentic coding</td>\n<td>&quot;autonomous attacks&quot;</td>\n<td>Multi-step autonomous cyber-task execution</td>\n</tr>\n<tr>\n<td>Acquisition phase</td>\n<td>&quot;pre-synthesis steps&quot;</td>\n<td>Procurement, equipment, permit stages of a bio threat</td>\n</tr>\n<tr>\n<td>Trusted access</td>\n<td>&quot;defender-only pilot&quot;</td>\n<td>OpenAI 2025 program giving vetted defenders capability access</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.anthropic.com/news/disrupting-AI-espionage\" target=\"_blank\" rel=\"noopener\">Anthropic — November 2025 cyber threat report</a> — Chinese-linked campaign automation</li>\n<li><a href=\"https://openai.com/index/updating-our-preparedness-framework/\" target=\"_blank\" rel=\"noopener\">OpenAI — Preparedness Framework v2 (April 15, 2025)</a> — bio &quot;on the cusp&quot;</li>\n<li><a href=\"https://www.anthropic.com/responsible-scaling-policy\" target=\"_blank\" rel=\"noopener\">Anthropic — RSP v3.0 (February 2026)</a> — ASL-3 bio thresholds</li>\n<li><a href=\"https://councilonstrategicrisks.org/2025/12/22/2025-aixbio-wrapped-a-year-in-review-and-projections-for-2026/\" target=\"_blank\" rel=\"noopener\">Council on Strategic Risks — 2025 AI x Bio wrapup</a> — year-end synthesis</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Dual-use triage table — stdlib Python.\n\nPrints the 2024-2025 cross-domain dual-use picture as a table.\nReference-only; primary sources cited in docs/en.md.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\n\nDOMAINS = [\n    {\n        \"domain\": \"bio\",\n        \"2024_state\": \"mild uplift\",\n        \"2025_state\": \"2.53x novice-relative uplift; ASL-3 approach\",\n        \"inflection\": \"acquisition-phase automation\",\n        \"bottleneck_remaining\": \"pathogen procurement, biosafety equipment\",\n    },\n    {\n        \"domain\": \"chem\",\n        \"2024_state\": \"mild uplift\",\n        \"2025_state\": \"execution-gap erosion via vision-enabled LLMs\",\n        \"inflection\": \"real-time wet-lab protocol correction\",\n        \"bottleneck_remaining\": \"precursor procurement, specialized equipment\",\n    },\n    {\n        \"domain\": \"cyber\",\n        \"2024_state\": \"code-snippet assistance\",\n        \"2025_state\": \"80-90% campaign automation (Anthropic Nov 2025)\",\n        \"inflection\": \"agentic coding workflows\",\n        \"bottleneck_remaining\": \"4-6 human intervention steps\",\n    },\n    {\n        \"domain\": \"nuclear\",\n        \"2024_state\": \"limited\",\n        \"2025_state\": \"limited\",\n        \"inflection\": \"(no major 2024-2025 inflection reported)\",\n        \"bottleneck_remaining\": \"fissile-material acquisition dominates\",\n    },\n]\n\n\ndef main() -> None:\n    print(\"=\" * 82)\n    print(\"2026 DUAL-USE PICTURE (Phase 18, Lesson 30)\")\n    print(\"=\" * 82)\n\n    for d in DOMAINS:\n        print(f\"\\n{d['domain'].upper()}\")\n        print(f\"  2024 state             : {d['2024_state']}\")\n        print(f\"  2025 state             : {d['2025_state']}\")\n        print(f\"  inflection             : {d['inflection']}\")\n        print(f\"  remaining bottleneck   : {d['bottleneck_remaining']}\")\n\n    print(\"\\n\" + \"=\" * 82)\n    print(\"TAKEAWAY: three of four CBRN domains crossed thresholds in 2025.\")\n    print(\"bio: 2.53x uplift, ASL-3 approach. chem: execution-gap erosion.\")\n    print(\"cyber: agentic automation of 80-90% of campaigns. nuclear remains\")\n    print(\"bounded by material access. safety cases must target novice-relative\")\n    print(\"AND expert-absolute; input-filter-only defenses do not suffice.\")\n    print(\"=\" * 82)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "How did the 2024-2025 bio-uplift narrative evolve?",
+      "options": [
+        "It stayed unchanged across 2024-2025",
+        "From 'severe uplift' to 'no measurable uplift'",
+        "From 'mild uplift' (2024) to 'on the cusp of meaningfully helping novices create known biological threats' (April 2025) to '2.53x uplift insufficient to rule out ASL-3' (Anthropic 2025)",
+        "From 'no uplift' to 'mild uplift'"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What did Anthropic's November 2025 cyber threat report find?",
+      "options": [
+        "Frontier models refused all cyber tasks",
+        "Open-source models exceeded frontier capability",
+        "Chinese-linked state actors used Claude's agentic coding tool to automate 80-90% of a cyberattack campaign, with human intervention only in 4-6 steps",
+        "Cyberattacks remained entirely manual"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "How are vision-enabled frontier models eroding the chem/bio execution gap?",
+      "options": [
+        "By increasing context length only",
+        "By replacing all lab equipment with virtual simulators",
+        "By observing wet-lab video and providing real-time protocol correction; OpenAI's December 2025 demonstration showed GPT-5 iterating on wet-lab experiments at 79x efficiency improvement via AI-driven protocol optimization",
+        "By generating fake protocols"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "Why has nuclear-domain uplift remained bounded relative to bio/chem/cyber?",
+      "options": [
+        "Frontier models refuse to discuss physics",
+        "All nuclear information has been removed from training data",
+        "Nuclear is the easiest domain to attack with AI",
+        "The threat model is dominated by fissile-material acquisition (a non-informational, procurement-and-equipment bottleneck), so AI uplift on the information layer provides limited novice uplift in practice"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What does the novice-relative vs expert-absolute asymmetry imply for safety cases?",
+      "options": [
+        "Addressing only novice uplift (input filters, refusals, uncertainty) is insufficient for expert-absolute control; additional measures like elicitation-hardening, capability unlearning, and control protocols are needed",
+        "Both are perfectly addressed by RLHF",
+        "Expert-absolute capability is automatically zero",
+        "Only novice uplift matters"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What is OpenAI's 'trusted access' pilot in the cyber dual-use context?",
+      "options": [
+        "A patch for CVE-2025-32711",
+        "Granting vetted security organisations (incident-response firms, government) capability access for defensive dual-use work, creating an access asymmetry that favours defenders if it scales",
+        "An open-source release of GPT-5",
+        "Closing all API access"
+      ],
+      "answer": 1,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/30-dual-use-risk-cyber-bio-chem-nuclear"
+  }
+}

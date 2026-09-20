@@ -1,0 +1,139 @@
+{
+  "track": "aisf-02-ml",
+  "phaseDir": "02-ml-fundamentals",
+  "blurb": "Classical machine learning is still the backbone of most production AI.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-02-ml::what-is-machine-learning",
+      "num": 1,
+      "slug": "what-is-machine-learning",
+      "title": "What Is Machine Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::linear-regression",
+      "num": 2,
+      "slug": "linear-regression",
+      "title": "Linear Regression",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::logistic-regression",
+      "num": 3,
+      "slug": "logistic-regression",
+      "title": "Logistic Regression",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::decision-trees",
+      "num": 4,
+      "slug": "decision-trees",
+      "title": "Decision Trees and Random Forests",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::support-vector-machines",
+      "num": 5,
+      "slug": "support-vector-machines",
+      "title": "Support Vector Machines",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::knn-and-distances",
+      "num": 6,
+      "slug": "knn-and-distances",
+      "title": "K-Nearest Neighbors and Distances",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::unsupervised-learning",
+      "num": 7,
+      "slug": "unsupervised-learning",
+      "title": "Unsupervised Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::feature-engineering",
+      "num": 8,
+      "slug": "feature-engineering",
+      "title": "Feature Engineering & Selection",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::model-evaluation",
+      "num": 9,
+      "slug": "model-evaluation",
+      "title": "Model Evaluation",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::bias-variance",
+      "num": 10,
+      "slug": "bias-variance",
+      "title": "Bias-Variance Tradeoff",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::ensemble-methods",
+      "num": 11,
+      "slug": "ensemble-methods",
+      "title": "Ensemble Methods",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::hyperparameter-tuning",
+      "num": 12,
+      "slug": "hyperparameter-tuning",
+      "title": "Hyperparameter Tuning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::ml-pipelines",
+      "num": 13,
+      "slug": "ml-pipelines",
+      "title": "ML Pipelines",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::naive-bayes",
+      "num": 14,
+      "slug": "naive-bayes",
+      "title": "Naive Bayes",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::time-series",
+      "num": 15,
+      "slug": "time-series",
+      "title": "Time Series Fundamentals",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::anomaly-detection",
+      "num": 16,
+      "slug": "anomaly-detection",
+      "title": "Anomaly Detection",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::imbalanced-data",
+      "num": 17,
+      "slug": "imbalanced-data",
+      "title": "Handling Imbalanced Data",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-02-ml::feature-selection",
+      "num": 18,
+      "slug": "feature-selection",
+      "title": "Feature Selection",
+      "nQuiz": 5
+    }
+  ]
+}

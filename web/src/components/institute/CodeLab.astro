@@ -1,0 +1,87 @@
+---
+// The Code Lab bench. One per "try it" block in a lesson.
+//   id      , unique per lesson-exercise; the localStorage buffer key. NOT the
+//              progress id — see `track` / `lessonIndex` for that.
+//   track   , the track id this lesson belongs to (progress `course_id`).
+//   lessonIndex, the lesson's position in its track (progress `lessonId`).
+//   lang    , 'js' (worker + console), 'py' (Pyodide worker + console), or
+//              'html' (sandboxed preview).
+//   starter , the code the editor opens with.
+//   checks  , [{ name, hint, test }] run after each Run (see lib/institute/check-runner).
+//   solution, revealed after 3 failed Runs, or via the button.
+//   title   , corner-label on the editor pane.
+import type { Check } from '../../lib/institute/check-runner';
+
+interface Props {
+  id: string;
+  lang?: 'js' | 'html' | 'py';
+  starter: string;
+  checks?: Check[];
+  solution?: string;
+  title?: string;
+  /** Track id + the lesson's index in it: what /api/progress records against. */
+  track?: string;
+  lessonIndex?: number;
+}
+const { id, lang = 'js', starter, checks = [], solution, title, track, lessonIndex } = Astro.props;
+const cfg = { id, lang, starter, checks, solution, track, lessonIndex };
+// A lesson's starter/solution can itself contain "</script>" (HTML exercises),
+// which would close this JSON block early. Escape "<" the standard way.
+const cfgJson = JSON.stringify(cfg).replace(/</g, '\\u003c');
+const label =
+  title || (lang === 'html' ? 'index.html, bench' : lang === 'py' ? 'main.py, bench' : 'script.js, bench');
+---
+<div class="i-lab" data-lang={lang}>
+  <script type="application/json" class="i-lab-cfg" set:html={cfgJson} />
+
+  <div class="i-lab-top">
+    <span class="i-lab-dot" aria-hidden="true"></span>
+    <span class="i-lab-dot" aria-hidden="true"></span>
+    <span class="i-lab-dot" aria-hidden="true"></span>
+    <span class="i-lab-label">{label}</span>
+    <span class="i-lab-actions">
+      <button type="button" class="i-lab-reset" title="Restore the starter code">reset</button>
+      {solution && <button type="button" class="i-lab-solution" hidden>show solution</button>}
+    </span>
+  </div>
+
+  <div class="i-lab-grid">
+    <label class="i-lab-editorwrap">
+      <span class="sr-only">Code editor for {label}</span>
+      <textarea
+        class="i-lab-code"
+        spellcheck="false"
+        autocapitalize="off"
+        autocorrect="off"
+        wrap="off"
+        aria-label={`Code editor, ${label}`}
+      >{starter}</textarea>
+    </label>
+
+    <div class="i-lab-out">
+      {lang === 'html' && (
+        <details class="i-lab-panel" open>
+          <summary>preview</summary>
+          <iframe class="i-lab-preview" sandbox="allow-scripts" title="Live preview" loading="lazy"></iframe>
+        </details>
+      )}
+      <details class="i-lab-panel" open>
+        <summary>console</summary>
+        <div class="i-lab-console" role="log" aria-live="polite" aria-label="Console output"></div>
+      </details>
+      {checks.length > 0 && (
+        <div class="i-lab-checkswrap">
+          <span class="i-lab-checks-title">checks</span>
+          <div class="i-lab-checks" role="status" aria-live="polite"></div>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <button type="button" class="i-lab-run i-btn i-btn-run">&#9654; Run</button>
+</div>
+
+<script>
+  import { initCodeLabs } from '../../lib/institute/code-lab';
+  initCodeLabs();
+</script>

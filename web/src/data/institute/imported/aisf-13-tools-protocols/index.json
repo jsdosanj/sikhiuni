@@ -1,0 +1,230 @@
+{
+  "track": "aisf-13-tools-protocols",
+  "phaseDir": "13-tools-and-protocols",
+  "blurb": "The interfaces between AI and the real world.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-13-tools-protocols::the-tool-interface",
+      "num": 1,
+      "slug": "the-tool-interface",
+      "title": "The Tool Interface — Why Agents Need Structured I/O",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::function-calling-deep-dive",
+      "num": 2,
+      "slug": "function-calling-deep-dive",
+      "title": "Function Calling Deep Dive — OpenAI, Anthropic, Gemini",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::parallel-and-streaming-tool-calls",
+      "num": 3,
+      "slug": "parallel-and-streaming-tool-calls",
+      "title": "Parallel Tool Calls and Streaming with Tools",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::structured-output",
+      "num": 4,
+      "slug": "structured-output",
+      "title": "Structured Output — JSON Schema, Pydantic, Zod, Constrained Decoding",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::tool-schema-design",
+      "num": 5,
+      "slug": "tool-schema-design",
+      "title": "Tool Schema Design — Naming, Descriptions, Parameter Constraints",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-fundamentals",
+      "num": 6,
+      "slug": "mcp-fundamentals",
+      "title": "MCP Fundamentals: Stateless Requests and JSON-RPC",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::building-an-mcp-server",
+      "num": 7,
+      "slug": "building-an-mcp-server",
+      "title": "Building an MCP Server: Stateless Python and TypeScript",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::building-an-mcp-client",
+      "num": 8,
+      "slug": "building-an-mcp-client",
+      "title": "Building an MCP Client: Discovery, Routing, and Dual-Era Fallback",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-transports",
+      "num": 9,
+      "slug": "mcp-transports",
+      "title": "MCP Transports: stdio and Stateless Streamable HTTP",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-resources-and-prompts",
+      "num": 10,
+      "slug": "mcp-resources-and-prompts",
+      "title": "MCP Resources and Prompts: Addressable Context for Stateless Servers",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-sampling",
+      "num": 11,
+      "slug": "mcp-sampling",
+      "title": "MCP Model Input: Sampling Migration and Stateless MRTR",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-roots-and-elicitation",
+      "num": 12,
+      "slug": "mcp-roots-and-elicitation",
+      "title": "Explicit Scope and Stateless Elicitation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-async-tasks",
+      "num": 13,
+      "slug": "mcp-async-tasks",
+      "title": "MCP Tasks Extension: Durable Work on a Stateless Core",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-apps",
+      "num": 14,
+      "slug": "mcp-apps",
+      "title": "MCP Apps on the Stateless Protocol",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-security-tool-poisoning",
+      "num": 15,
+      "slug": "mcp-security-tool-poisoning",
+      "title": "MCP Security: Poisoned Metadata, Routing, and MRTR State",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-security-oauth-2-1",
+      "num": 16,
+      "slug": "mcp-security-oauth-2-1",
+      "title": "MCP Authorization: CIMD, Issuer Binding, PKCE, and Step-Up",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-gateways-and-registries",
+      "num": 17,
+      "slug": "mcp-gateways-and-registries",
+      "title": "Stateless MCP Gateways and Registry Admission",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-auth-production",
+      "num": 18,
+      "slug": "mcp-auth-production",
+      "title": "MCP Auth in Production: Issuer-Bound Enrollment and Tokens",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::a2a-protocol",
+      "num": 19,
+      "slug": "a2a-protocol",
+      "title": "A2A — Agent-to-Agent Protocol",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::opentelemetry-genai",
+      "num": 20,
+      "slug": "opentelemetry-genai",
+      "title": "OpenTelemetry GenAI — Tracing Tool Calls End-to-End",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::llm-routing-layer",
+      "num": 21,
+      "slug": "llm-routing-layer",
+      "title": "LLM Routing Layer — LiteLLM, OpenRouter, Portkey",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-13-tools-protocols::skills-and-agent-sdks",
+      "num": 22,
+      "slug": "skills-and-agent-sdks",
+      "title": "Agent Skills: Portable Contract and Runtime Boundary",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::capstone-tool-ecosystem",
+      "num": 23,
+      "slug": "capstone-tool-ecosystem",
+      "title": "Capstone: Stateless Tool Ecosystem",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::skill-discovery-and-progressive-disclosure",
+      "num": 24,
+      "slug": "skill-discovery-and-progressive-disclosure",
+      "title": "Skill Discovery and Progressive Disclosure",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::skill-invocation-and-routing",
+      "num": 25,
+      "slug": "skill-invocation-and-routing",
+      "title": "Skill Invocation and Routing",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::skill-permissions-sandboxes-and-trust",
+      "num": 26,
+      "slug": "skill-permissions-sandboxes-and-trust",
+      "title": "Skill Permissions, Sandboxes, and Trust",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::skill-evals-packaging-and-portability",
+      "num": 27,
+      "slug": "skill-evals-packaging-and-portability",
+      "title": "Skill Evals, Packaging, and Portability",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-tool-contracts-and-content",
+      "num": 28,
+      "slug": "mcp-tool-contracts-and-content",
+      "title": "MCP Tool Contracts and Content",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-reliability-cancellation-and-flow-control",
+      "num": 29,
+      "slug": "mcp-reliability-cancellation-and-flow-control",
+      "title": "MCP Reliability, Cancellation, and Flow Control",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-registry-supply-chain-and-drift",
+      "num": 30,
+      "slug": "mcp-registry-supply-chain-and-drift",
+      "title": "MCP Registry Supply Chain: Admission, Drift, and Rollback",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-13-tools-protocols::mcp-conformance-versioning-and-operations",
+      "num": 31,
+      "slug": "mcp-conformance-versioning-and-operations",
+      "title": "MCP Conformance Engineering: Versioning, Evidence, and Operations",
+      "nQuiz": 6
+    }
+  ]
+}

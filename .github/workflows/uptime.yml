@@ -8,19 +8,50 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: uptime
+  cancel-in-progress: true
 jobs:
   check:
     name: probe production
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Probe health endpoint + homepage
         run: |
           SITE=https://sikhiuni.com
+          UA="sikhiuni-uptime/1 (+github-actions)"
+          CURL_OPTS=(-A "$UA" --connect-timeout 10 --max-time 30 --retry 2 --retry-delay 5 --retry-connrefused)
+
           echo "Probing $SITE/api/health"
-          CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' "$SITE/api/health" || echo 000)
+          set +e
+          CODE=$(curl -s "${CURL_OPTS[@]}" -o /tmp/health.json -w '%{http_code}' "$SITE/api/health")
+          RC=$?
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            echo "::error::health probe failed at the transport level (curl exit $RC — connect/DNS/TLS timeout, not an HTTP error)"
+            exit 1
+          fi
           echo "HTTP $CODE"; cat /tmp/health.json || true; echo
-          [ "$CODE" = "200" ] || { echo "::error::health endpoint returned $CODE"; exit 1; }
-          grep -q '"ok":true' /tmp/health.json || { echo "::error::health reports a failing binding"; exit 1; }
+          [ "$CODE" = "200" ] || { echo "::error::health endpoint returned HTTP $CODE"; exit 1; }
+          DB_OK=$(grep -o '"db":[a-z]*' /tmp/health.json || echo "db:missing")
+          R2_OK=$(grep -o '"r2":[a-z]*' /tmp/health.json || echo "r2:missing")
+          echo "bindings: $DB_OK $R2_OK"
+          grep -q '"ok":true' /tmp/health.json || { echo "::error::health reports a failing binding ($DB_OK $R2_OK)"; exit 1; }
+
           echo "Probing $SITE/ (homepage)"
-          curl -sf -o /dev/null "$SITE/" || { echo "::error::homepage unreachable"; exit 1; }
+          set +e
+          curl -s "${CURL_OPTS[@]}" -o /dev/null -w 'connect=%{time_connect}s total=%{time_total}s\n' -f "$SITE/"
+          RC=$?
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            echo "::error::homepage probe failed (curl exit $RC)"
+            exit 1
+          fi
+
           echo "All checks passed."
+          {
+            echo "### Uptime check OK"
+            echo "- health: HTTP $CODE ($DB_OK $R2_OK)"
+            echo "- homepage: reachable"
+          } >> "$GITHUB_STEP_SUMMARY"

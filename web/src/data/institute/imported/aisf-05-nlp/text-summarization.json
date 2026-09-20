@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::text-summarization",
+  "num": 12,
+  "slug": "text-summarization",
+  "title": "Text Summarization",
+  "tagline": "Extractive systems tell you what the document said. Abstractive systems tell you what the author meant. Different tasks, different pitfalls.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~75 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>A 2,000-word news article lands in your feed. You need 120 words that capture it. You can either pick the three most important sentences from the article (extractive) or rewrite the content in your own words (abstractive). Both are called summarization. They are completely different problems.</p>\n<p>Extractive summarization is a ranking problem. Score every sentence, return the top-<code>k</code>. The output is always grammatical because it is lifted verbatim. The risk is missing content that is distributed across the article.</p>\n<p>Abstractive summarization is a generation problem. A transformer produces new text conditioned on the input. The output is fluent and compressive but may hallucinate facts that were not in the source. The risk is confident fabrication.</p>\n<p>This lesson builds both, with the failure mode each one owns.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/summarization.svg\" alt=\"Extractive TextRank vs abstractive transformer\" loading=\"lazy\"><figcaption>Extractive TextRank vs abstractive transformer</figcaption></figure>\n<p><strong>Extractive.</strong> Treat the article as a graph where nodes are sentences and edges are similarities. Run PageRank (or something like it) over the graph to score sentences by how connected they are to everything else. Highest-scoring sentences are the summary. The canonical implementation is <strong>TextRank</strong> (Mihalcea and Tarau, 2004).</p>\n<p><strong>Abstractive.</strong> Fine-tune a transformer encoder-decoder (BART, T5, Pegasus) on document-summary pairs. At inference, the model reads the document and generates the summary token-by-token via cross-attention. Pegasus in particular uses a gap-sentence pretraining objective that makes it excellent at summarization without much fine-tuning.</p>\n<p>Evaluation with <strong>ROUGE</strong> (Recall-Oriented Understudy for Gisting Evaluation). ROUGE-1 and ROUGE-2 score unigram and bigram overlap. ROUGE-L scores longest common subsequence. Higher is better but 40 ROUGE-L is &quot;good&quot; and 50 is &quot;exceptional.&quot; Every paper reports all three. Use the <code>rouge-score</code> package.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>summarize-collapse</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: TextRank (extractive)</h3>\n<pre><code class=\"language-python\">import math\nimport re\nfrom collections import Counter\n\n\ndef sentence_split(text):\n    return re.split(r&quot;(?&lt;=[.!?])\\s+&quot;, text.strip())\n\n\ndef similarity(s1, s2):\n    w1 = Counter(s1.lower().split())\n    w2 = Counter(s2.lower().split())\n    intersection = sum((w1 &amp; w2).values())\n    denom = math.log(len(w1) + 1) + math.log(len(w2) + 1)\n    if denom == 0:\n        return 0.0\n    return intersection / denom\n\n\ndef textrank(text, top_k=3, damping=0.85, iterations=50, epsilon=1e-4):\n    sentences = sentence_split(text)\n    n = len(sentences)\n    if n &lt;= top_k:\n        return sentences\n\n    sim = [[0.0] * n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            if i != j:\n                sim[i][j] = similarity(sentences[i], sentences[j])\n\n    scores = [1.0] * n\n    for _ in range(iterations):\n        new_scores = [1 - damping] * n\n        for i in range(n):\n            total_out = sum(sim[i]) or 1e-9\n            for j in range(n):\n                if sim[i][j] &gt; 0:\n                    new_scores[j] += damping * sim[i][j] / total_out * scores[i]\n        if max(abs(s - ns) for s, ns in zip(scores, new_scores)) &lt; epsilon:\n            scores = new_scores\n            break\n        scores = new_scores\n\n    ranked = sorted(range(n), key=lambda k: scores[k], reverse=True)[:top_k]\n    ranked.sort()\n    return [sentences[i] for i in ranked]\n</code></pre>\n<p>Two things worth naming. The similarity function uses log-normalized word overlap, which is the original TextRank variant. Cosine of TF-IDF vectors works too. The damping factor 0.85 and iteration count are the PageRank defaults.</p>\n<h3>Step 2: abstractive with BART</h3>\n<pre><code class=\"language-python\">from transformers import pipeline\n\nsummarizer = pipeline(&quot;summarization&quot;, model=&quot;facebook/bart-large-cnn&quot;)\n\narticle = &quot;&quot;&quot;(long news article text)&quot;&quot;&quot;\n\nsummary = summarizer(article, max_length=120, min_length=60, do_sample=False)\nprint(summary[0][&quot;summary_text&quot;])\n</code></pre>\n<p>BART-large-CNN is fine-tuned on the CNN/DailyMail corpus. It produces news-style summaries out of the box. For other domains (scientific papers, dialog, legal), use the corresponding Pegasus checkpoint or fine-tune on your target data.</p>\n<h3>Step 3: ROUGE evaluation</h3>\n<pre><code class=\"language-python\">from rouge_score import rouge_scorer\n\nscorer = rouge_scorer.RougeScorer([&quot;rouge1&quot;, &quot;rouge2&quot;, &quot;rougeL&quot;], use_stemmer=True)\nscores = scorer.score(reference_summary, generated_summary)\nprint({k: round(v.fmeasure, 3) for k, v in scores.items()})\n</code></pre>\n<p>Always use stemming. Without it, &quot;running&quot; and &quot;run&quot; count as different words and ROUGE undercounts.</p>\n<h3>Beyond ROUGE (2026 summarization eval)</h3>\n<p>ROUGE has been the dominant summarization metric for twenty years and it is insufficient on its own in 2026. A large-scale meta-analysis of NLG papers showed:</p>\n<ul>\n<li><strong>BERTScore</strong> (contextual embedding similarity) gained ground through 2023 and is now reported alongside ROUGE in most summarization papers.</li>\n<li><strong>BARTScore</strong> treats evaluation as generation: score the summary by how likely a pretrained BART assigns it given the source.</li>\n<li><strong>MoverScore</strong> (Earth Mover&#39;s Distance over contextual embeddings) reached the top spot in 2025 summarization benchmarks because it captures semantic overlap better than ROUGE.</li>\n<li><strong>FactCC</strong> and <strong>QA-based faithfulness</strong> were common 2021-2023, now often replaced by <strong>G-Eval</strong> (a GPT-4 prompt chain that scores coherence, consistency, fluency, relevance with chain-of-thought reasoning).</li>\n<li><strong>G-Eval</strong> and similar LLM-judge approaches match human judgment ~80% of the time when rubrics are well-designed.</li>\n</ul>\n<p>Production recommendation: report ROUGE-L for legacy comparison, BERTScore for semantic overlap, G-Eval for coherence and factuality. Calibrate against 50-100 human-labeled summaries.</p>\n<h3>Step 4: the factuality problem</h3>\n<p>Abstractive summaries are prone to hallucination. Extractive summaries carry a much lower hallucination risk because the output is lifted verbatim from the source, though they can still mislead if source sentences are decontextualized, outdated, or quoted out of order. This is the single biggest reason production systems still prefer extractive methods for compliance-adjacent content.</p>\n<p>Hallucination types to name:</p>\n<ul>\n<li><strong>Entity swap.</strong> Source says &quot;John Smith.&quot; Summary says &quot;John Brown.&quot;</li>\n<li><strong>Number drift.</strong> Source says &quot;25,000.&quot; Summary says &quot;25 million.&quot;</li>\n<li><strong>Polarity flip.</strong> Source says &quot;rejected the offer.&quot; Summary says &quot;accepted the offer.&quot;</li>\n<li><strong>Fact invention.</strong> Source does not mention the CEO. Summary says the CEO approved.</li>\n</ul>\n<p>Evaluation approaches that work:</p>\n<ul>\n<li><strong>FactCC.</strong> A binary classifier trained on entailment between source sentence and summary sentence. Predicts factual/not-factual.</li>\n<li><strong>QA-based factuality.</strong> Ask a QA model questions whose answers are in the source. If the summary supports different answers, flag.</li>\n<li><strong>Entity-level F1.</strong> Compare named entities in source vs summary. Entities present only in the summary are suspect.</li>\n</ul>\n<p>For anything user-facing where factuality matters (news, medical, legal, financial), extractive is the safer default. Abstractive needs a factuality check in the loop.</p>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Use case</th>\n<th>Recommended</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>News, 3-5 sentence summary, English</td>\n<td><code>facebook/bart-large-cnn</code></td>\n</tr>\n<tr>\n<td>Scientific papers</td>\n<td><code>google/pegasus-pubmed</code> or a tuned T5</td>\n</tr>\n<tr>\n<td>Multi-document, long-form</td>\n<td>Any LLM with 32k+ context, prompted</td>\n</tr>\n<tr>\n<td>Dialog summarization</td>\n<td><code>philschmid/bart-large-cnn-samsum</code></td>\n</tr>\n<tr>\n<td>Extractive, low hallucination risk by construction</td>\n<td>TextRank or <code>sumy</code>&#39;s LSA / LexRank</td>\n</tr>\n</tbody></table>\n<p>LLMs with long context often beat specialized models in 2026 when compute is not a constraint. The tradeoff is cost and reproducibility; specialized models give more consistent outputs.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-summary-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: summary-picker\ndescription: Pick extractive or abstractive, named library, factuality check.\nversion: 1.0.0\nphase: 5\nlesson: 12\ntags: [nlp, summarization]\n---\n\nGiven a task (document type, compliance requirement, length, compute budget), output:\n\n1. Approach. Extractive or abstractive. Explain in one sentence why.\n2. Starting model / library. Name it. `sumy.TextRankSummarizer`, `facebook/bart-large-cnn`, `google/pegasus-pubmed`, or an LLM prompt.\n3. Evaluation plan. ROUGE-1, ROUGE-2, ROUGE-L (use rouge-score with stemming). Plus factuality check if abstractive.\n4. One failure mode to probe. Entity swap is the most common in abstractive news summarization; flag samples where source entities do not appear in summary.\n\nRefuse abstractive summarization for medical, legal, financial, or regulated content without a factuality gate. Flag input over the model&#39;s context window as needing chunked map-reduce summarization (not just truncation).\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Run TextRank on 5 news articles. Compare the top-3 sentences to a reference summary. Measure ROUGE-L. You should see 30-45 ROUGE-L on CNN/DailyMail-style articles.</li>\n<li><strong>Medium.</strong> Implement entity-level factuality: extract named entities from source and summary (spaCy), compute recall of source entities in summary and precision of summary entities against source. High precision and low recall mean safe but terse; low precision means hallucinated entities.</li>\n<li><strong>Hard.</strong> Compare BART-large-CNN against an LLM (Claude or GPT-4) on 50 CNN/DailyMail articles. Report ROUGE-L, factuality (by entity F1), and cost per summary. Document where each wins.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Extractive</td>\n<td>Pick sentences</td>\n<td>Return sentences verbatim from the source. Never hallucinates.</td>\n</tr>\n<tr>\n<td>Abstractive</td>\n<td>Rewrite</td>\n<td>Generate new text conditioned on source. Can hallucinate.</td>\n</tr>\n<tr>\n<td>ROUGE</td>\n<td>Summary metric</td>\n<td>N-gram / LCS overlap between system output and reference.</td>\n</tr>\n<tr>\n<td>TextRank</td>\n<td>Graph-based extractive</td>\n<td>PageRank over sentence similarity graph.</td>\n</tr>\n<tr>\n<td>Factuality</td>\n<td>Is it right</td>\n<td>Whether summary claims are supported by the source.</td>\n</tr>\n<tr>\n<td>Hallucination</td>\n<td>Made-up content</td>\n<td>Content in the summary that the source does not support.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://aclanthology.org/W04-3252/\" target=\"_blank\" rel=\"noopener\">Mihalcea and Tarau (2004). TextRank: Bringing Order into Texts</a> — the extractive canonical paper.</li>\n<li><a href=\"https://arxiv.org/abs/1910.13461\" target=\"_blank\" rel=\"noopener\">Lewis et al. (2019). BART: Denoising Sequence-to-Sequence Pre-training</a> — the BART paper.</li>\n<li><a href=\"https://arxiv.org/abs/1912.08777\" target=\"_blank\" rel=\"noopener\">Zhang et al. (2019). PEGASUS: Pre-training with Extracted Gap-sentences</a> — Pegasus and the gap-sentence objective.</li>\n<li><a href=\"https://aclanthology.org/W04-1013/\" target=\"_blank\" rel=\"noopener\">Lin (2004). ROUGE: A Package for Automatic Evaluation of Summaries</a> — ROUGE paper.</li>\n<li><a href=\"https://arxiv.org/abs/2005.00661\" target=\"_blank\" rel=\"noopener\">Maynez et al. (2020). On Faithfulness and Factuality in Abstractive Summarization</a> — the factuality landscape paper.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import math\nimport re\nfrom collections import Counter\n\n\ndef sentence_split(text):\n    return [s.strip() for s in re.split(r\"(?<=[.!?])\\s+\", text.strip()) if s.strip()]\n\n\ndef similarity(s1, s2):\n    w1 = Counter(s1.lower().split())\n    w2 = Counter(s2.lower().split())\n    intersection = sum((w1 & w2).values())\n    denom = math.log(len(w1) + 1) + math.log(len(w2) + 1)\n    if denom == 0:\n        return 0.0\n    return intersection / denom\n\n\ndef textrank(text, top_k=3, damping=0.85, iterations=50, epsilon=1e-4):\n    sentences = sentence_split(text)\n    n = len(sentences)\n    if n <= top_k:\n        return sentences\n\n    sim = [[0.0] * n for _ in range(n)]\n    for i in range(n):\n        for j in range(n):\n            if i != j:\n                sim[i][j] = similarity(sentences[i], sentences[j])\n\n    scores = [1.0] * n\n    for _ in range(iterations):\n        new_scores = [1 - damping] * n\n        for i in range(n):\n            total_out = sum(sim[i]) or 1e-9\n            for j in range(n):\n                if sim[i][j] > 0:\n                    new_scores[j] += damping * sim[i][j] / total_out * scores[i]\n        if max(abs(s - ns) for s, ns in zip(scores, new_scores)) < epsilon:\n            scores = new_scores\n            break\n        scores = new_scores\n\n    ranked = sorted(range(n), key=lambda k: scores[k], reverse=True)[:top_k]\n    ranked.sort()\n    return [sentences[i] for i in ranked]\n\n\ndef rouge_n(hyp, ref, n=1):\n    def ngrams(tokens, k):\n        return Counter(tuple(tokens[i:i + k]) for i in range(len(tokens) - k + 1))\n\n    hyp_tokens = hyp.lower().split()\n    ref_tokens = ref.lower().split()\n    hyp_ngrams = ngrams(hyp_tokens, n)\n    ref_ngrams = ngrams(ref_tokens, n)\n    if not ref_ngrams:\n        return 0.0\n    overlap = sum((hyp_ngrams & ref_ngrams).values())\n    total = sum(ref_ngrams.values())\n    return overlap / total\n\n\ndef main():\n    article = (\n        \"Researchers at a Canadian university published a paper on efficient transformers. \"\n        \"The paper introduces a new attention variant that runs in linear time. \"\n        \"The authors trained models up to 1 billion parameters on public data. \"\n        \"Benchmarks show the new attention matches standard attention on most tasks. \"\n        \"The authors released training code and weights on GitHub. \"\n        \"Several research labs have already replicated the main results. \"\n        \"The paper has been accepted at NeurIPS.\"\n    )\n    reference = (\n        \"Researchers introduced a linear-time attention variant, trained up to 1B parameters, \"\n        \"matched standard attention on benchmarks, and released code and weights.\"\n    )\n\n    summary = textrank(article, top_k=3)\n    joined = \" \".join(summary)\n    print(\"=== TextRank summary ===\")\n    for s in summary:\n        print(f\"  - {s}\")\n    print()\n\n    print(\"=== ROUGE against reference ===\")\n    for n in [1, 2]:\n        score = rouge_n(joined, reference, n=n)\n        print(f\"  ROUGE-{n}: {score:.3f}\")\n    print()\n    print(\"For production, use the `rouge-score` package with stemming for a proper F-measure.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the key behavioral difference between extractive and abstractive summarization?",
+      "options": [
+        "Extractive is multilingual only",
+        "Extractive returns sentences verbatim from the source; abstractive generates new text and can hallucinate",
+        "Extractive uses TF-IDF; abstractive uses Word2Vec",
+        "Extractive is slower than abstractive"
+      ],
+      "answer": 1,
+      "explanation": "Extractive lifts sentences verbatim; abstractive rewrites and risks hallucination."
+    },
+    {
+      "q": "What does ROUGE measure?",
+      "options": [
+        "Token-level perplexity",
+        "Embedding similarity",
+        "N-gram and longest-common-subsequence overlap between system and reference summaries",
+        "Reading time"
+      ],
+      "answer": 2,
+      "explanation": "ROUGE-1/2/L measure unigram, bigram, and LCS overlap with references."
+    },
+    {
+      "q": "How does TextRank score sentences in extractive summarization?",
+      "options": [
+        "By running a PageRank-style iteration over a graph where edges are sentence-similarity weights",
+        "By embedding cosine to the question",
+        "By comparing to a reference summary",
+        "By raw word count"
+      ],
+      "answer": 0,
+      "explanation": "TextRank uses PageRank over a sentence-similarity graph; highly connected sentences score highest."
+    },
+    {
+      "q": "Why enable stemming when computing ROUGE?",
+      "options": [
+        "Without stemming, 'running' and 'run' count as different tokens and ROUGE undercounts true overlap",
+        "Stemming normalizes case",
+        "Stemming is required by the rouge-score package",
+        "To speed up ROUGE"
+      ],
+      "answer": 0,
+      "explanation": "Stemming merges morphological variants so ROUGE credits semantically equivalent forms."
+    },
+    {
+      "q": "Which 2026 metric is purpose-built to detect summary hallucinations via NLI entailment?",
+      "options": [
+        "Faithfulness checks (e.g. FactCC or RAGAS faithfulness) using NLI between source and summary claims",
+        "BLEU",
+        "chrF",
+        "ROUGE-L"
+      ],
+      "answer": 0,
+      "explanation": "NLI-based faithfulness scoring flags claims in the summary not entailed by the source."
+    },
+    {
+      "q": "Why is extractive summarization preferred for compliance-adjacent content?",
+      "options": [
+        "Extractive supports longer outputs",
+        "Outputs are lifted verbatim from the source, eliminating the abstractive hallucination class",
+        "It is faster",
+        "ROUGE scores are higher"
+      ],
+      "answer": 1,
+      "explanation": "Verbatim extraction cannot invent content, which matters where factuality is regulated."
+    },
+    {
+      "q": "Which of these is an abstractive hallucination type to monitor for?",
+      "options": [
+        "Long sentences",
+        "Entity swap (e.g. 'John Smith' rendered as 'John Brown'), number drift, polarity flip, or fact invention",
+        "Punctuation drift",
+        "Stopword removal"
+      ],
+      "answer": 1,
+      "explanation": "Entity swaps, numeric drift, polarity flips, and invented facts are the canonical abstractive failure modes."
+    },
+    {
+      "q": "When would you reach for a Pegasus checkpoint over BART-large-CNN?",
+      "options": [
+        "When evaluating BLEU",
+        "When you need extractive output",
+        "For domains like scientific abstracts where Pegasus's gap-sentence pretraining objective is a closer fit",
+        "When the input is short"
+      ],
+      "answer": 2,
+      "explanation": "Pegasus's gap-sentence objective excels at long-form domain summarization (e.g. pubmed)."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/12-text-summarization"
+  }
+}

@@ -13,3 +13,10 @@ Self-hosted fonts, all under the SIL Open Font License 1.1 (OFL):
 
 woff2 subsets were retrieved from Google Fonts (which serves these OFL families).
 The OFL permits bundling and redistribution; full license: https://openfontlicense.org
+
+--- Institute of Technology faces (added 2026-08-28) ---
+Chakra Petch — Cadson Demak. SIL Open Font License 1.1.
+  https://fonts.google.com/specimen/Chakra+Petch/about
+JetBrains Mono — JetBrains. SIL Open Font License 1.1.
+  https://github.com/JetBrains/JetBrainsMono
+Only the Latin subsets are vendored (the Institute is English-authoritative).

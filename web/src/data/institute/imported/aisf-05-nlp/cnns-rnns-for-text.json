@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::cnns-rnns-for-text",
+  "num": 8,
+  "slug": "cnns-rnns-for-text",
+  "title": "CNNs and RNNs for Text",
+  "tagline": "Convolutions learn n-grams. Recurrences remember. Both are superseded by attention. Both still matter on constrained hardware.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~75 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>TF-IDF and Word2Vec produced flat vectors that ignored word order. A classifier built on them could not tell <code>dog bites man</code> from <code>man bites dog</code>. Word order sometimes carries the signal.</p>\n<p>Two families of architectures filled that gap before transformers arrived.</p>\n<p><strong>Convolutional nets for text (TextCNN).</strong> Apply 1D convolutions over sequences of word embeddings. A filter of width 3 is a learnable trigram detector: it spans three words and outputs a score. Stack different widths (2, 3, 4, 5) to detect multi-scale patterns. Max-pool to a fixed-size representation. Flat, parallel, fast.</p>\n<p><strong>Recurrent nets (RNN, LSTM, GRU).</strong> Process tokens one at a time, maintaining a hidden state that carries information forward. Sequential, memory-bearing, flexible input lengths. Dominated sequence modeling from 2014 to 2017, then attention happened.</p>\n<p>This lesson builds both, then names the failure that motivated attention.</p>\n<h2>The Concept</h2>\n<p><strong>TextCNN</strong> (Kim, 2014). Tokens get embedded. A width-<code>k</code> 1D convolution slides a filter over consecutive <code>k</code>-grams of embeddings, producing a feature map. Global max-pooling over that map picks the strongest activation. Concatenate max-pooled outputs from several filter widths. Feed to a classifier head.</p>\n<p>Why it works. A filter is a learnable n-gram. Max-pooling is position-invariant, so &quot;not good&quot; fires the same feature at the start or middle of a review. Three filter widths with 100 filters each gives you 300 learned n-gram detectors. Training is parallel; no sequential dependency.</p>\n<p><strong>RNN.</strong> At each time step <code>t</code>, the hidden state <code>h_t = f(W * x_t + U * h_{t-1} + b)</code>. Share <code>W</code>, <code>U</code>, <code>b</code> across time. The hidden state at time <code>T</code> is a summary of the entire prefix. For classification, pool across <code>h_1 ... h_T</code> (max, mean, or last).</p>\n<p>Plain RNNs suffer vanishing gradients. The <strong>LSTM</strong> adds gates that decide what to forget, what to store, and what to output, stabilizing gradients through long sequences. The <strong>GRU</strong> simplifies LSTM to two gates; performs similarly with fewer parameters.</p>\n<p><strong>Bidirectional RNNs</strong> run one RNN forward and another backward, concatenating hidden states. Every token&#39;s representation sees both left and right context. Essential for tagging tasks.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>rnn-unroll</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: TextCNN in PyTorch</h3>\n<pre><code class=\"language-python\">import torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\n\nclass TextCNN(nn.Module):\n    def __init__(self, vocab_size, embed_dim, n_classes, filter_widths=(2, 3, 4), n_filters=64, dropout=0.3):\n        super().__init__()\n        self.embed = nn.Embedding(vocab_size, embed_dim, padding_idx=0)\n        self.convs = nn.ModuleList([\n            nn.Conv1d(embed_dim, n_filters, kernel_size=k)\n            for k in filter_widths\n        ])\n        self.dropout = nn.Dropout(dropout)\n        self.fc = nn.Linear(n_filters * len(filter_widths), n_classes)\n\n    def forward(self, token_ids):\n        x = self.embed(token_ids).transpose(1, 2)\n        pooled = []\n        for conv in self.convs:\n            c = F.relu(conv(x))\n            p = F.max_pool1d(c, c.size(2)).squeeze(2)\n            pooled.append(p)\n        h = torch.cat(pooled, dim=1)\n        return self.fc(self.dropout(h))\n</code></pre>\n<p>The <code>transpose(1, 2)</code> reshapes <code>[batch, seq_len, embed_dim]</code> to <code>[batch, embed_dim, seq_len]</code> because <code>nn.Conv1d</code> treats the middle axis as channels. The pooled output is fixed-size regardless of input length.</p>\n<h3>Step 2: LSTM classifier</h3>\n<pre><code class=\"language-python\">class LSTMClassifier(nn.Module):\n    def __init__(self, vocab_size, embed_dim, hidden_dim, n_classes, bidirectional=True, dropout=0.3):\n        super().__init__()\n        self.embed = nn.Embedding(vocab_size, embed_dim, padding_idx=0)\n        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=bidirectional)\n        factor = 2 if bidirectional else 1\n        self.dropout = nn.Dropout(dropout)\n        self.fc = nn.Linear(hidden_dim * factor, n_classes)\n\n    def forward(self, token_ids):\n        x = self.embed(token_ids)\n        out, _ = self.lstm(x)\n        pooled = out.max(dim=1).values\n        return self.fc(self.dropout(pooled))\n</code></pre>\n<p>Max-pool over the sequence, not last-state pool. For classification, max-pooling usually beats taking the last hidden state because information at the end of a long sequence tends to dominate the last state.</p>\n<h3>Step 3: the vanishing gradient demo (intuition)</h3>\n<p>A plain RNN without gating cannot learn long-range dependencies. Consider a toy task: predict whether token <code>A</code> appeared anywhere in a sequence. If <code>A</code> is at position 1 and the sequence is 100 tokens long, the gradient from the loss has to flow back through 99 multiplications of the recurrent weight. If the weight is less than 1, the gradient vanishes. If more than 1, it explodes.</p>\n<pre><code class=\"language-python\">def vanishing_gradient_sim(seq_len, recurrent_weight=0.9):\n    import math\n    return math.pow(recurrent_weight, seq_len)\n\n\n# At weight=0.9 over 100 steps:\n#   0.9 ^ 100 ≈ 2.7e-5\n# The gradient from step 100 to step 1 is effectively zero.\n</code></pre>\n<p>LSTMs fix this with a <strong>cell state</strong> that runs through the network with only additive interactions (the forget gate scales it multiplicatively, but gradients still flow along the &quot;highway&quot;). GRUs do something similar with fewer parameters. Both give you stable training through 100+ step sequences.</p>\n<h3>Step 4: why this still was not enough</h3>\n<p>Three problems persisted even with LSTMs.</p>\n<ol>\n<li><strong>Sequential bottleneck.</strong> Training an RNN on a sequence of length 1000 requires 1000 serial forward/backward steps. Cannot parallelize across time.</li>\n<li><strong>Fixed-size context vector in encoder-decoder setups.</strong> The decoder sees only the final hidden state of the encoder, compressed over the entire input. Long inputs lose detail. Lesson 09 covers this directly.</li>\n<li><strong>Distant-dependency accuracy ceiling.</strong> LSTMs outperform plain RNNs but still struggle to propagate specific information across 200+ steps.</li>\n</ol>\n<p>Attention solved all three. Transformers dropped recurrence entirely. Lesson 10 is the pivot.</p>\n<h2>Use It</h2>\n<p>PyTorch&#39;s <code>nn.LSTM</code>, <code>nn.GRU</code>, and <code>nn.Conv1d</code> are production-ready. Training code is standard.</p>\n<p>Hugging Face ships pretrained embeddings you plug in as the input layer:</p>\n<pre><code class=\"language-python\">from transformers import AutoModel\n\nencoder = AutoModel.from_pretrained(&quot;bert-base-uncased&quot;)\nfor param in encoder.parameters():\n    param.requires_grad = False\n\n\nclass BertCNN(nn.Module):\n    def __init__(self, n_classes, filter_widths=(2, 3, 4), n_filters=64):\n        super().__init__()\n        self.encoder = encoder\n        self.convs = nn.ModuleList([nn.Conv1d(768, n_filters, kernel_size=k) for k in filter_widths])\n        self.fc = nn.Linear(n_filters * len(filter_widths), n_classes)\n\n    def forward(self, input_ids, attention_mask):\n        with torch.no_grad():\n            out = self.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state\n        x = out.transpose(1, 2)\n        pooled = [F.max_pool1d(F.relu(conv(x)), kernel_size=conv(x).size(2)).squeeze(2) for conv in self.convs]\n        return self.fc(torch.cat(pooled, dim=1))\n</code></pre>\n<p>Use-when-it-fits-the-constraint checklist.</p>\n<ul>\n<li><strong>Edge / on-device inference.</strong> TextCNN with GloVe embeddings is 10-100x smaller than a transformer. If your deploy target is a phone, this is the stack.</li>\n<li><strong>Streaming / online classification.</strong> RNN processes one token at a time; transformers need the full sequence. For real-time incoming text, LSTMs still win.</li>\n<li><strong>Tiny models for baselines.</strong> Fast iteration on a new task. Train a TextCNN in 5 minutes on a CPU.</li>\n<li><strong>Sequence labeling with limited data.</strong> BiLSTM-CRF (lesson 06) is still a production-grade NER architecture for 1k-10k labeled sentences.</li>\n</ul>\n<p>Everything else goes to a transformer.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/prompt-text-encoder-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: text-encoder-picker\ndescription: Pick a text encoder architecture for a given constraint set.\nphase: 5\nlesson: 08\n---\n\nGiven constraints (task, data volume, latency budget, deploy target, compute budget), output:\n\n1. Encoder architecture: TextCNN, BiLSTM, BiLSTM-CRF, transformer fine-tune, or &quot;use a pretrained transformer as a frozen encoder + small head&quot;.\n2. Embedding input: random init, GloVe / fastText frozen, or contextualized transformer embeddings.\n3. Training recipe in 5 lines: optimizer, learning rate, batch size, epochs, regularization.\n4. One monitoring signal. For RNN/CNN models: attention mechanism absence means they miss long-range deps; check per-length accuracy. For transformers: fine-tuning collapse if LR too high; check train loss.\n\nRefuse to recommend fine-tuning a transformer when data is under ~500 labeled examples without showing that a TextCNN / BiLSTM baseline has plateaued. Flag edge deployment as needing architecture-before-everything.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Train a TextCNN on a 3-class toy dataset (you invent the data). Verify that filter widths (2, 3, 4) outperform a single width (3) on average F1.</li>\n<li><strong>Medium.</strong> Implement max-pool, mean-pool, and last-state pooling for the LSTM classifier. Compare on a small dataset; document which pooling wins and hypothesize why.</li>\n<li><strong>Hard.</strong> Build a BiLSTM-CRF NER tagger (combine lesson 06 and this one). Train on CoNLL-2003. Compare to the CRF-alone baseline from lesson 06 and to a BERT fine-tune. Report training time, memory, and F1.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>TextCNN</td>\n<td>CNN for text</td>\n<td>Stack of 1D convolutions over word embeddings with global max-pool. Kim (2014).</td>\n</tr>\n<tr>\n<td>RNN</td>\n<td>Recurrent net</td>\n<td>Hidden state updated at each time step: <code>h_t = f(W x_t + U h_{t-1})</code>.</td>\n</tr>\n<tr>\n<td>LSTM</td>\n<td>Gated RNN</td>\n<td>Adds input / forget / output gates + a cell state. Trains stably through long sequences.</td>\n</tr>\n<tr>\n<td>GRU</td>\n<td>Simpler LSTM</td>\n<td>Two gates instead of three. Similar accuracy, fewer parameters.</td>\n</tr>\n<tr>\n<td>Bidirectional</td>\n<td>Both directions</td>\n<td>Forward + backward RNN concatenated. Every token sees both sides of its context.</td>\n</tr>\n<tr>\n<td>Vanishing gradient</td>\n<td>Training signal dies</td>\n<td>Repeated multiplication by &lt;1 weights in plain RNNs makes early-step gradients effectively zero.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/1408.5882\" target=\"_blank\" rel=\"noopener\">Kim, Y. (2014). Convolutional Neural Networks for Sentence Classification</a> — the TextCNN paper. Eight pages. Readable.</li>\n<li><a href=\"https://www.bioinf.jku.at/publications/older/2604.pdf\" target=\"_blank\" rel=\"noopener\">Hochreiter, S. and Schmidhuber, J. (1997). Long Short-Term Memory</a> — the LSTM paper. Unexpectedly lucid.</li>\n<li><a href=\"https://colah.github.io/posts/2015-08-Understanding-LSTMs/\" target=\"_blank\" rel=\"noopener\">Olah, C. (2015). Understanding LSTM Networks</a> — the diagrams that made LSTMs accessible to everyone.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import math\n\n\ndef vanishing_gradient_sim(seq_len, recurrent_weight=0.9):\n    return math.pow(recurrent_weight, seq_len)\n\n\ndef conv1d_over_embeddings(embeddings, filter_matrix, bias=0.0):\n    filter_width = len(filter_matrix)\n    embed_dim = len(embeddings[0])\n    out = []\n    for i in range(len(embeddings) - filter_width + 1):\n        total = bias\n        for k in range(filter_width):\n            for d in range(embed_dim):\n                total += embeddings[i + k][d] * filter_matrix[k][d]\n        out.append(max(total, 0.0))\n    return out\n\n\ndef max_pool(values):\n    return max(values) if values else 0.0\n\n\ndef main():\n    print(\"=== vanishing gradient sim ===\")\n    for length in [10, 50, 100, 200]:\n        print(f\"  len={length:3d}  w=0.9  gradient attenuation = {vanishing_gradient_sim(length):.2e}\")\n    print(\"  a plain RNN loses 99.99% of its gradient by step 100.\")\n    print()\n\n    print(\"=== TextCNN conceptual pass ===\")\n    embeddings = [\n        [1.0, 0.2, 0.5],\n        [0.8, 0.9, 0.1],\n        [0.3, 0.4, 0.7],\n        [0.6, 0.5, 0.5],\n        [0.1, 0.8, 0.2],\n    ]\n    filter_w2 = [[0.5, 0.0, 0.5], [0.2, 0.3, 0.1]]\n    filter_w3 = [[0.3, 0.3, 0.3], [0.2, 0.4, 0.1], [0.5, 0.2, 0.1]]\n\n    act_w2 = conv1d_over_embeddings(embeddings, filter_w2, bias=-0.5)\n    act_w3 = conv1d_over_embeddings(embeddings, filter_w3, bias=-0.4)\n\n    print(f\"  5 tokens x 3 embed_dim\")\n    print(f\"  width-2 filter activations: {[round(x, 2) for x in act_w2]}\")\n    print(f\"  width-3 filter activations: {[round(x, 2) for x in act_w3]}\")\n    print(f\"  max-pooled features:        [{max_pool(act_w2):.2f}, {max_pool(act_w3):.2f}]\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is a 1D convolutional filter of width 3 over word embeddings effectively learning?",
+      "options": [
+        "A learnable bigram detector",
+        "A learnable trigram (n-gram) detector",
+        "A position embedding",
+        "A unigram count"
+      ],
+      "answer": 1,
+      "explanation": "A width-3 filter spans three consecutive tokens, acting as a learnable trigram detector."
+    },
+    {
+      "q": "Why does an LSTM use a cell state with mostly additive interactions?",
+      "options": [
+        "Faster softmax",
+        "To avoid matrix inversion",
+        "Additive flow lets gradients propagate through long sequences without vanishing or exploding",
+        "It saves memory"
+      ],
+      "answer": 2,
+      "explanation": "The cell-state highway keeps gradients stable across hundreds of steps, fixing vanishing-gradient issues."
+    },
+    {
+      "q": "Why does TextCNN use global max-pooling after the convolutional layer?",
+      "options": [
+        "To reduce vocabulary",
+        "Max-pool gives a fixed-size, position-invariant representation by selecting the strongest activation per filter",
+        "To enable backpropagation",
+        "To remove embeddings"
+      ],
+      "answer": 1,
+      "explanation": "Global max-pool produces a fixed-size feature vector regardless of input length, with position invariance."
+    },
+    {
+      "q": "What is the main advantage of a bidirectional RNN over a one-way RNN for sequence labeling?",
+      "options": [
+        "Cheaper memory",
+        "Avoids embeddings",
+        "Each token's representation sees both left and right context, which is essential for tagging",
+        "Faster training"
+      ],
+      "answer": 2,
+      "explanation": "Bidirectional networks concatenate forward + backward hidden states so labels can use full context."
+    },
+    {
+      "q": "Why does max-pooling over an LSTM's outputs often beat using just the last hidden state for classification?",
+      "options": [
+        "Max-pool removes capitalization",
+        "Last-state pool ignores padding",
+        "Max-pool is differentiable; last-state is not",
+        "Information at the end of a long sequence tends to dominate the last state, hiding earlier evidence"
+      ],
+      "answer": 3,
+      "explanation": "Max-pool aggregates strongest signal across positions; last-state can lose earlier evidence."
+    },
+    {
+      "q": "Which limitation of LSTM/RNN encoder-decoders motivated attention?",
+      "options": [
+        "They require subword tokenizers",
+        "The decoder sees only a fixed-size encoder state, losing detail on long inputs; recurrence also serializes training",
+        "They cannot embed tokens",
+        "They cannot use embeddings"
+      ],
+      "answer": 1,
+      "explanation": "Fixed-size summarization plus serial training were two failures attention removed."
+    },
+    {
+      "q": "When does a TextCNN or BiLSTM still beat a transformer in 2026?",
+      "options": [
+        "Whenever the dataset is multilingual",
+        "Edge / on-device, streaming token-by-token inputs, or tiny-data baselines",
+        "When latency requirements are extremely loose",
+        "On image inputs"
+      ],
+      "answer": 1,
+      "explanation": "Small architectures still win on edge inference, streaming inputs, and rapid baselines."
+    },
+    {
+      "q": "What is the vanishing gradient problem in plain RNNs?",
+      "options": [
+        "Inputs become zero",
+        "Repeated multiplication by recurrent weights smaller than 1 makes gradients toward early steps shrink toward zero",
+        "Loss becomes negative",
+        "Embedding matrix becomes singular"
+      ],
+      "answer": 1,
+      "explanation": "Long-product gradients vanish (or explode) without gating; this is why LSTMs and GRUs exist."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/08-cnns-rnns-for-text"
+  }
+}

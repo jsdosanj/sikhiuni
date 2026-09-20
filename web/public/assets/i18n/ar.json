@@ -503,5 +503,6 @@
   "verify.notfound.title": "غير موجودة.",
   "verify.ph.certid": "SU-…",
   "verify.submit": "تحقّق",
-  "verify.valid": "شهادة صالحة"
+  "verify.valid": "شهادة صالحة",
+  "nav.departments": "الأقسام"
 }

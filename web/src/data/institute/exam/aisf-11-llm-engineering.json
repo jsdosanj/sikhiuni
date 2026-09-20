@@ -1,0 +1,780 @@
+{
+  "track": "aisf-11-llm-engineering",
+  "count": 86,
+  "questions": [
+    {
+      "q": "What is the most common mistake people make when writing prompts for LLMs?",
+      "options": [
+        "Not using enough examples",
+        "Writing vague, underspecified instructions that leave the model guessing about format, scope, and constraints",
+        "Using the wrong API",
+        "Using too many tokens"
+      ]
+    },
+    {
+      "q": "What are the four core components of an effective prompt?",
+      "options": [
+        "System, user, assistant, function",
+        "Query, document, answer, score",
+        "Role, context, constraints, and output format",
+        "Input, output, model, temperature"
+      ]
+    },
+    {
+      "q": "Why should you include output format instructions in your prompts?",
+      "options": [
+        "It prevents hallucination",
+        "Without format instructions, the model chooses its own structure, which varies between calls and is hard to parse programmatically",
+        "It makes the prompt shorter",
+        "It reduces API costs"
+      ]
+    },
+    {
+      "q": "What is the purpose of a system prompt?",
+      "options": [
+        "To set persistent behavioral rules, role, and constraints that apply to the entire conversation",
+        "To define the model's architecture",
+        "To authenticate the API call",
+        "To compress the conversation history"
+      ]
+    },
+    {
+      "q": "How should you test whether a prompt change actually improved output quality?",
+      "options": [
+        "Run the prompt on a diverse test set and measure changes in defined metrics (accuracy, format compliance, relevance)",
+        "Ask the model if it's doing better",
+        "Check the API response time",
+        "Read a few outputs and make a judgment call"
+      ]
+    },
+    {
+      "q": "What is the key difference between zero-shot and few-shot prompting?",
+      "options": [
+        "Zero-shot gives only the instruction; few-shot includes example input-output demonstrations before the actual query",
+        "Zero-shot doesn't use a system prompt",
+        "Few-shot uses a different model",
+        "Zero-shot is faster"
+      ]
+    },
+    {
+      "q": "What does 'Chain of Thought' prompting do?",
+      "options": [
+        "It instructs the model to show intermediate reasoning steps before giving the final answer, improving accuracy on multi-step problems",
+        "It generates longer responses",
+        "It chains multiple API calls together",
+        "It connects multiple models in sequence"
+      ]
+    },
+    {
+      "q": "How does Tree-of-Thought differ from Chain-of-Thought?",
+      "options": [
+        "It explores multiple reasoning paths in parallel and evaluates which path leads to the best answer",
+        "It uses a tree data structure for storage",
+        "It uses a different model",
+        "It's just a longer chain of thought"
+      ]
+    },
+    {
+      "q": "When selecting few-shot examples, what matters most?",
+      "options": [
+        "Using the shortest examples",
+        "Choosing diverse examples that cover different cases and demonstrate the exact format and reasoning pattern you want",
+        "Using as many examples as possible",
+        "Using examples from the test set"
+      ]
+    },
+    {
+      "q": "Why does CoT prompting improve accuracy even though the model has the same knowledge with or without it?",
+      "options": [
+        "It uses more compute",
+        "It activates hidden model capabilities",
+        "It changes the model weights",
+        "Generating intermediate tokens creates a larger effective context for the final answer, allowing the model to condition on its own reasoning"
+      ]
+    },
+    {
+      "q": "Why is getting structured JSON output from LLMs challenging?",
+      "options": [
+        "JSON is too complex for LLMs",
+        "LLMs only output plain text",
+        "LLMs can't generate JSON",
+        "LLMs generate free-form text token by token and can produce invalid JSON (missing brackets, wrong types, extra text) at any point"
+      ]
+    },
+    {
+      "q": "What is constrained decoding?",
+      "options": [
+        "Limiting the model's vocabulary size",
+        "Using a smaller model",
+        "Compressing the output",
+        "Restricting which tokens the model can generate at each step to ensure the output conforms to a grammar or schema"
+      ]
+    },
+    {
+      "q": "What is the benefit of using Pydantic models for LLM output validation?",
+      "options": [
+        "They define typed schemas that automatically validate, parse, and reject malformed LLM outputs with clear error messages",
+        "They make API calls faster",
+        "They reduce token usage",
+        "They improve model accuracy"
+      ]
+    },
+    {
+      "q": "What should you do when the LLM returns invalid JSON despite instructions?",
+      "options": [
+        "Switch to a different model",
+        "Manually fix the JSON",
+        "Implement a retry loop that sends the validation error back to the model as context for a corrected attempt",
+        "Increase the temperature"
+      ]
+    },
+    {
+      "q": "When should you use the API's native JSON mode vs prompt-based JSON extraction?",
+      "options": [
+        "Always use prompt-based extraction",
+        "Always use native JSON mode",
+        "Use native mode for guaranteed structure; use prompt-based for complex extraction where you need the model to reason about what to extract",
+        "They produce identical results"
+      ]
+    },
+    {
+      "q": "What problem do embeddings solve that keyword search cannot?",
+      "options": [
+        "Embeddings use less storage",
+        "Embeddings capture semantic meaning, matching 'payment didn't go through' with 'charge was declined' even though they share no words",
+        "Embeddings are faster",
+        "Embeddings work offline"
+      ]
+    },
+    {
+      "q": "What does cosine similarity measure between two embedding vectors?",
+      "options": [
+        "The angle between the vectors, indicating how similar their directions are regardless of magnitude",
+        "The Euclidean distance",
+        "The sum of their components",
+        "The number of matching dimensions"
+      ]
+    },
+    {
+      "q": "What is the typical dimensionality of modern text embedding models?",
+      "options": [
+        "2-10 dimensions",
+        "768-3072 dimensions",
+        "50-100 dimensions",
+        "100,000+ dimensions"
+      ]
+    },
+    {
+      "q": "Why should you evaluate embedding quality using retrieval benchmarks rather than just inspecting similarity scores?",
+      "options": [
+        "Similarity scores don't use cosine distance",
+        "Retrieval benchmarks are faster",
+        "Similarity scores are always wrong",
+        "Absolute similarity values vary by model; what matters is whether relevant documents rank higher than irrelevant ones (precision@k, recall)"
+      ]
+    },
+    {
+      "q": "When would you use a local/open-source embedding model instead of an API-based one?",
+      "options": [
+        "When you need data privacy, offline operation, lower cost at scale, or domain-specific fine-tuning",
+        "API models don't support batching",
+        "Local models produce higher quality embeddings",
+        "Local models are always better"
+      ]
+    },
+    {
+      "q": "What is the difference between prompt engineering and context engineering?",
+      "options": [
+        "Context engineering is about database design",
+        "A prompt is the user's query; context is everything in the model's window: system prompt, tools, retrieved docs, history, and the prompt itself",
+        "They are the same thing",
+        "Prompt engineering is more advanced"
+      ]
+    },
+    {
+      "q": "Why does context window order matter for LLM performance?",
+      "options": [
+        "Order only matters for code",
+        "LLMs have recency and primacy biases, paying more attention to the beginning and end of the context window",
+        "Alphabetical order helps the model search faster",
+        "It doesn't -- LLMs process all tokens equally"
+      ]
+    },
+    {
+      "q": "A coding assistant uses 22,700 tokens of a 128K context window. Why is budget management still important?",
+      "options": [
+        "Only the prompt matters",
+        "Token counting is inaccurate",
+        "128K should be enough for any use case",
+        "Long conversations, large code files, and retrieved documentation can quickly fill the window; without budget management, critical context gets truncated"
+      ]
+    },
+    {
+      "q": "What is the sliding window strategy for conversation history?",
+      "options": [
+        "Keeping only the N most recent turns in context and dropping older turns, optionally summarizing them first",
+        "Expanding the context window dynamically",
+        "Moving the model to a different server",
+        "Processing the conversation in fixed-size chunks"
+      ]
+    },
+    {
+      "q": "How should a context assembler allocate tokens across components?",
+      "options": [
+        "Maximize retrieval context always",
+        "Equal allocation to each component",
+        "Minimize system prompt tokens",
+        "Dynamically based on query type: a simple question needs less retrieval context; a complex question needs more, with generation headroom always reserved"
+      ]
+    },
+    {
+      "q": "What does RAG stand for and what problem does it solve?",
+      "options": [
+        "Recurrent Attention Generation -- improving attention mechanisms",
+        "Retrieval-Augmented Generation -- giving LLMs access to external knowledge they weren't trained on",
+        "Reduced Architecture Generation -- making models smaller",
+        "Random Augmented Generation -- generating random outputs"
+      ]
+    },
+    {
+      "q": "Why is RAG preferred over fine-tuning for most knowledge-grounded applications?",
+      "options": [
+        "RAG is cheaper, instantly updatable when documents change, and provides source attribution -- fine-tuning is expensive and becomes stale",
+        "RAG produces better models",
+        "Fine-tuning doesn't work",
+        "RAG uses less memory"
+      ]
+    },
+    {
+      "q": "What is the correct order of steps in a basic RAG pipeline?",
+      "options": [
+        "Chunk documents, embed chunks, store in vector DB, embed query, retrieve similar chunks, generate answer with context",
+        "Generate, retrieve, embed, chunk",
+        "Embed query, generate answer, retrieve documents",
+        "Store documents, query the LLM, add documents to response"
+      ]
+    },
+    {
+      "q": "What is a common failure mode in basic RAG systems?",
+      "options": [
+        "The embeddings are too large",
+        "The vector database crashes",
+        "The retrieved chunks are semantically similar to the query but don't contain the actual answer (e.g., returning 'revenue strategy' when asked for 'Q3 revenue numbers')",
+        "The LLM refuses to answer"
+      ]
+    },
+    {
+      "q": "How do you evaluate RAG quality?",
+      "options": [
+        "By checking if the LLM produces any output",
+        "Using both retrieval metrics (did we find the right chunks?) and generation metrics (is the answer faithful to the retrieved context?)",
+        "By measuring response time only",
+        "By counting the number of retrieved documents"
+      ]
+    },
+    {
+      "q": "What is the limitation of basic top-k semantic search in RAG?",
+      "options": [
+        "It requires GPU",
+        "It retrieves chunks that are semantically similar to the query but may not contain the actual answer, especially for ambiguous or multi-hop questions",
+        "It's too slow",
+        "It can't handle large documents"
+      ]
+    },
+    {
+      "q": "What is hybrid search in the context of RAG?",
+      "options": [
+        "Combining BM25 keyword matching with semantic vector search to capture both exact terms and meaning-based relevance",
+        "Using both CPU and GPU for search",
+        "Searching across multiple databases",
+        "Using two different LLMs"
+      ]
+    },
+    {
+      "q": "What does a cross-encoder reranker do in an advanced RAG pipeline?",
+      "options": [
+        "It encodes documents into vectors",
+        "It generates the final answer",
+        "It splits documents into chunks",
+        "It takes (query, document) pairs and scores their relevance with higher accuracy than embedding similarity, reordering the initial retrieval results"
+      ]
+    },
+    {
+      "q": "What is the HyDE (Hypothetical Document Embedding) query transformation technique?",
+      "options": [
+        "Encrypting the query for privacy",
+        "Using the LLM to generate a hypothetical answer, then embedding that answer as the search query instead of the original question",
+        "Expanding abbreviations in the query",
+        "Hiding the query from the model"
+      ]
+    },
+    {
+      "q": "Why does parent-child chunking improve RAG over flat chunking?",
+      "options": [
+        "It's faster to index",
+        "Small child chunks are used for precise retrieval, but the larger parent chunk is returned for context, preventing the 'lost context' problem",
+        "It reduces the number of chunks",
+        "It eliminates the need for embeddings"
+      ]
+    },
+    {
+      "q": "What is the core insight behind LoRA (Low-Rank Adaptation)?",
+      "options": [
+        "Smaller models are always better",
+        "Weight updates during fine-tuning have low intrinsic rank, so they can be approximated by two small matrices instead of updating the full weight matrix",
+        "Most weights don't matter",
+        "Fine-tuning only needs the last layer"
+      ]
+    },
+    {
+      "q": "How much memory does LoRA save compared to full fine-tuning of an 8B model?",
+      "options": [
+        "Only saves disk space",
+        "No savings",
+        "From ~56GB down to ~6GB by training <1% of parameters while keeping base weights frozen",
+        "50% reduction"
+      ]
+    },
+    {
+      "q": "What is QLoRA?",
+      "options": [
+        "A different fine-tuning algorithm",
+        "LoRA applied to quantized activations",
+        "Quantized LoRA: the base model is loaded in 4-bit precision while LoRA adapters train in 16-bit, combining memory savings from both techniques",
+        "A faster version of LoRA"
+      ]
+    },
+    {
+      "q": "What does the 'rank' parameter (r) in LoRA control?",
+      "options": [
+        "The learning rate",
+        "The number of training epochs",
+        "The capacity of the adapter: higher rank captures more complex adaptations but uses more parameters and memory",
+        "The number of layers to fine-tune"
+      ]
+    },
+    {
+      "q": "What happens when you merge LoRA weights back into the base model?",
+      "options": [
+        "Merging is not possible",
+        "The model becomes larger",
+        "The model needs to be retrained",
+        "The adapter matrices are added to the base weights (W_merged = W_base + B*A), producing a standard model with no inference overhead"
+      ]
+    },
+    {
+      "q": "Can LLMs actually execute functions or access external systems?",
+      "options": [
+        "No -- LLMs only generate text (typically JSON) describing which function to call; your code must execute it",
+        "LLMs execute functions through embeddings",
+        "Only GPT-4 can execute functions",
+        "Yes, LLMs can call APIs directly"
+      ]
+    },
+    {
+      "q": "What is a tool schema in the context of function calling?",
+      "options": [
+        "The API endpoint URL",
+        "A database schema",
+        "The model's architecture diagram",
+        "A JSON description of a function's name, parameters, types, and purpose that tells the model what tools are available"
+      ]
+    },
+    {
+      "q": "What is the standard pattern for a multi-turn function calling loop?",
+      "options": [
+        "Call all functions at once",
+        "The model executes functions internally",
+        "Send message -> model requests tool call -> execute function -> send result back -> model generates final response (repeat if needed)",
+        "Parse the entire conversation as a batch"
+      ]
+    },
+    {
+      "q": "How do you prevent infinite tool calling loops?",
+      "options": [
+        "Use a faster model",
+        "Set a maximum number of tool call iterations and implement a timeout, breaking the loop if the limit is reached",
+        "Remove all tool schemas after the first call",
+        "Infinite loops can't happen with function calling"
+      ]
+    },
+    {
+      "q": "Why are clear, descriptive parameter names and descriptions important in tool schemas?",
+      "options": [
+        "The model uses descriptions to decide which tool to call and how to fill in parameters -- vague descriptions lead to wrong tool selections and incorrect arguments",
+        "They improve response time",
+        "They are required by the API",
+        "They make the code more readable"
+      ]
+    },
+    {
+      "q": "Why is manually reading a few LLM outputs not a reliable evaluation method?",
+      "options": [
+        "Manual review is too expensive",
+        "It takes too long",
+        "Small samples miss failure modes that only appear at scale, and human judgment is inconsistent across reviewers and sessions",
+        "LLM outputs are always correct"
+      ]
+    },
+    {
+      "q": "What is regression testing in the context of LLM applications?",
+      "options": [
+        "Testing on the training data",
+        "Measuring model loss during training",
+        "Running a fixed set of test cases after every change (prompt, model, parameters) to ensure quality hasn't degraded",
+        "Testing linear regression models"
+      ]
+    },
+    {
+      "q": "What is the LLM-as-judge evaluation approach?",
+      "options": [
+        "Using a strong LLM to score outputs against rubrics, replacing expensive human evaluation while scaling to thousands of test cases",
+        "Comparing two models' parameter counts",
+        "Having the model evaluate its own training loss",
+        "Using the model's confidence scores"
+      ]
+    },
+    {
+      "q": "What makes a good evaluation dataset for an LLM application?",
+      "options": [
+        "As many examples as possible",
+        "Random samples from the internet",
+        "Only the hardest examples",
+        "Diverse inputs covering common cases, edge cases, adversarial inputs, and expected outputs with clear rubrics"
+      ]
+    },
+    {
+      "q": "How should you handle non-deterministic LLM outputs in evaluation?",
+      "options": [
+        "Run each test case multiple times and use aggregate metrics (pass rate, average score) to account for output variance",
+        "Only evaluate the first output",
+        "Set temperature to 0 for all evaluations",
+        "Non-determinism doesn't affect evaluation"
+      ]
+    },
+    {
+      "q": "Why do AI startups often fail from cost issues rather than model quality?",
+      "options": [
+        "Models are always good enough",
+        "Per-call costs compound rapidly: 10K users making 10 calls/day costs $250/day in tokens before charging a single dollar",
+        "API providers offer unlimited free tiers",
+        "Cost optimization is easy"
+      ]
+    },
+    {
+      "q": "What is semantic caching for LLM applications?",
+      "options": [
+        "Pre-generating all possible responses",
+        "Caching embeddings only",
+        "Storing responses for previous queries and serving cached responses when a new query is semantically similar (not just exactly matching)",
+        "Caching model weights"
+      ]
+    },
+    {
+      "q": "What is model routing as a cost optimization strategy?",
+      "options": [
+        "Caching responses from multiple models",
+        "Sending simple queries to cheap/fast models and complex queries to expensive/powerful models based on query classification",
+        "Load balancing across servers",
+        "Routing between different API providers"
+      ]
+    },
+    {
+      "q": "What is prompt compression and how does it reduce costs?",
+      "options": [
+        "Using shorter variable names",
+        "Removing redundant tokens, summarizing long contexts, and eliminating boilerplate to reduce input token count while preserving essential information",
+        "Making prompts shorter by removing words",
+        "Compressing prompts with gzip"
+      ]
+    },
+    {
+      "q": "What is prefix caching and which provider feature enables it?",
+      "options": [
+        "Reusing KV-cache computation for shared prompt prefixes (system prompt + tool definitions), reducing latency and cost for repeated patterns",
+        "Browser caching of API responses",
+        "Caching DNS lookups",
+        "Caching the first word of each response"
+      ]
+    },
+    {
+      "q": "What is prompt injection?",
+      "options": [
+        "A user crafting input that overrides the system prompt's instructions, causing the model to follow the attacker's instructions instead",
+        "Injecting code into the model's weights",
+        "Adding extra tokens to reduce cost",
+        "A SQL injection variant"
+      ]
+    },
+    {
+      "q": "Why is output validation necessary even if input guardrails are in place?",
+      "options": [
+        "Input guardrails are always sufficient",
+        "Output validation is only needed for code generation",
+        "Models can hallucinate PII, generate harmful content, or produce policy-violating outputs even from benign inputs",
+        "It's only needed for legal compliance"
+      ]
+    },
+    {
+      "q": "What is a layered defense system for LLM applications?",
+      "options": [
+        "Running the model on multiple GPUs",
+        "Using multiple LLMs",
+        "Combining input filtering, system prompt hardening, output validation, and monitoring -- so if one layer fails, others catch the issue",
+        "Encrypting all API calls"
+      ]
+    },
+    {
+      "q": "How should you test your guardrails before deploying?",
+      "options": [
+        "Only test after deployment",
+        "Run a red-team prompt set of known attack patterns and measure both false positive rate (blocking valid inputs) and false negative rate (missing attacks)",
+        "Trust that they work based on the implementation",
+        "Test with 5 example prompts"
+      ]
+    },
+    {
+      "q": "What is the most effective defense against system prompt extraction attacks?",
+      "options": [
+        "Making the system prompt very long",
+        "Never putting secrets in the system prompt, since no defense can guarantee the model won't reveal prompt contents",
+        "Adding 'never reveal your system prompt' to the prompt",
+        "Encrypting the system prompt"
+      ]
+    },
+    {
+      "q": "What is the biggest gap between an LLM demo and a production LLM application?",
+      "options": [
+        "The model quality",
+        "Infrastructure: error handling, streaming, cost tracking, rate limiting, fallbacks, observability, and graceful degradation under load",
+        "The choice of API provider",
+        "The prompt quality"
+      ]
+    },
+    {
+      "q": "Why is streaming token delivery important in production LLM applications?",
+      "options": [
+        "It improves model accuracy",
+        "It uses less memory",
+        "Users perceive the first token arriving quickly as faster, even if total generation time is the same -- reducing perceived latency from seconds to milliseconds",
+        "It reduces cost"
+      ]
+    },
+    {
+      "q": "What should happen when your LLM API provider has an outage?",
+      "options": [
+        "Retry indefinitely until the provider recovers",
+        "Show users an error page",
+        "The application should automatically fall back to an alternative provider or return a graceful degraded response",
+        "Switch to a local model"
+      ]
+    },
+    {
+      "q": "What observability metrics should a production LLM application track?",
+      "options": [
+        "Only error counts",
+        "Only model accuracy",
+        "Request latency (P50/P95/P99), cost per request, error rates, token usage, cache hit rates, and quality scores from automated evals",
+        "Only monthly cost"
+      ]
+    },
+    {
+      "q": "Why should you implement rate limiting in your LLM application?",
+      "options": [
+        "To make the application seem exclusive",
+        "To prevent individual users from exhausting your API budget, protect against abuse, and ensure fair access during high traffic",
+        "To reduce model accuracy",
+        "Rate limiting is only needed for free tiers"
+      ]
+    },
+    {
+      "q": "In MCP 2026-07-28, where does a client send its protocol version and capabilities?",
+      "options": [
+        "Only in the HTTP cookie",
+        "Only in an initialize request",
+        "In params._meta on every request",
+        "In a server-side session record"
+      ]
+    },
+    {
+      "q": "What must every modern MCP server implement for up-front version and capability discovery?",
+      "options": [
+        "server/discover",
+        "sessions/create",
+        "logging/setLevel",
+        "initialize"
+      ]
+    },
+    {
+      "q": "Which Streamable HTTP shape is current in MCP 2026-07-28?",
+      "options": [
+        "A DELETE request after every tool call",
+        "A WebSocket session identified by Mcp-Session-Id",
+        "One POST per JSON-RPC message; request POSTs receive JSON or request-scoped SSE",
+        "A GET stream plus a separate POST endpoint"
+      ]
+    },
+    {
+      "q": "How should a server distinguish missing protocol-version metadata from a well-formed but unsupported version?",
+      "options": [
+        "Return -32022 for both cases",
+        "Return HTTP 301 for a missing version and mint Mcp-Session-Id for an unsupported version",
+        "Return -32602 for missing or non-string metadata and -32022 with supported/requested for an unsupported string",
+        "Accept a missing version and return -32601 for an unsupported version"
+      ]
+    },
+    {
+      "q": "A multi-step tool needs continuity across calls. What is the modern MCP design?",
+      "options": [
+        "Put mutable state in clientInfo",
+        "Restore Mcp-Session-Id for this tool only",
+        "Mint an opaque handle and require it as a later tool argument",
+        "Store state behind the TCP connection"
+      ]
+    },
+    {
+      "q": "How does a modern server ask for user, model, or root input during a tool operation?",
+      "options": [
+        "It writes the question to stderr",
+        "It opens a second SSE connection",
+        "It returns input_required and the client retries with inputResponses",
+        "It sends an independent server-to-client JSON-RPC request"
+      ]
+    },
+    {
+      "q": "What discount does Anthropic apply to cache reads versus the base input rate?",
+      "options": [
+        "25% off",
+        "90% off",
+        "75% off",
+        "50% off"
+      ]
+    },
+    {
+      "q": "Why must dynamic timestamps go below the cache breakpoint, not above it?",
+      "options": [
+        "Anthropic explicitly rejects timestamps in cached blocks",
+        "Timestamps confuse the tokenizer",
+        "They cost more tokens than static text",
+        "Caches only hit when the prefix is byte-identical; a changing timestamp breaks the match for everything after it"
+      ]
+    },
+    {
+      "q": "OpenAI's prompt caching is configured how?",
+      "options": [
+        "A system-level flag you toggle per project",
+        "Automatic prefix matching with no configuration",
+        "A CachedContent API you create and reference",
+        "Explicit cache_control markers"
+      ]
+    },
+    {
+      "q": "For Anthropic, what write premium does the 1-hour extended TTL cost vs the 5-minute default?",
+      "options": [
+        "4x the write premium",
+        "2x the write premium (50% over baseline)",
+        "No write premium",
+        "Same"
+      ]
+    },
+    {
+      "q": "How many reuses are needed to break even on Anthropic's 25% write premium?",
+      "options": [
+        "5",
+        "10",
+        "1",
+        "2"
+      ]
+    },
+    {
+      "q": "Why does the `messages` field in a LangGraph State TypedDict need `Annotated[list, add_messages]`?",
+      "options": [
+        "It compresses the message list when checkpoints are written to disk.",
+        "It enables streaming of token deltas from the model.",
+        "It converts plain dicts into LangChain message objects at runtime.",
+        "Without the reducer, node updates overwrite the list instead of appending, so every turn loses the prior history."
+      ]
+    },
+    {
+      "q": "What is the difference between `interrupt_before=['tools']` and `interrupt_after=['tools']`?",
+      "options": [
+        "`interrupt_before` pauses after the model emits tool_calls but before the tools execute; `interrupt_after` pauses after the tools have already run.",
+        "`interrupt_before` runs the tool in a sandbox first; `interrupt_after` runs it in production.",
+        "No difference; they are aliases.",
+        "`interrupt_before` is for unit tests; `interrupt_after` is for production."
+      ]
+    },
+    {
+      "q": "Given a thread's checkpoint history, how do you time-travel to a prior state and explore a different branch?",
+      "options": [
+        "Set `graph.rewind = True` and reinvoke.",
+        "Call `graph.reset(thread_id)` then `graph.invoke(new_input, config)`.",
+        "Delete the checkpoint directory and reinvoke with the same thread_id.",
+        "Invoke the graph with the desired prior `checkpoint_id` in the config; passing `None` as input replays from that checkpoint, passing a new value appends to it before resuming."
+      ]
+    },
+    {
+      "q": "In a four-node ReAct graph (agent, tools, conditional edge, static edge back to agent), where does the conditional edge live?",
+      "options": [
+        "From `START`, routing to either `agent` or `END` based on input length.",
+        "From `tools` back to `agent`, routing on whether tool output was empty.",
+        "There is no conditional edge; both are static.",
+        "From `agent`, routing to `tools` if the last message has tool_calls and to `END` otherwise."
+      ]
+    },
+    {
+      "q": "When should you use `Send(node_name, state)` instead of a plain edge?",
+      "options": [
+        "To invoke a node in a different process for isolation.",
+        "To defer a node until a timer expires.",
+        "To retry a node after a failure.",
+        "To dispatch N parallel executions of a target node whose outputs merge back through the state reducer."
+      ]
+    },
+    {
+      "q": "Which framework is the right first pick for a workflow that must resume after a crash, accept a human approval mid-run, and fan out to three retrievers in parallel?",
+      "options": [
+        "LangGraph",
+        "Agno",
+        "AutoGen",
+        "CrewAI"
+      ]
+    },
+    {
+      "q": "Why does LLM-selected routing cost more tokens per turn than explicit routing?",
+      "options": [
+        "A planner LLM call picks the next step each turn, adding prompt and completion tokens for every decision.",
+        "It duplicates the tool list for every agent in the crew.",
+        "It sends the whole conversation history to a verifier model.",
+        "It pre-fetches the next node in parallel to hedge latency."
+      ]
+    },
+    {
+      "q": "Proposer-critic dialogue in code review naturally maps to which framework's core abstraction?",
+      "options": [
+        "LangGraph's StateGraph",
+        "AutoGen's GroupChat / ConversableAgent pair",
+        "CrewAI's sequential Crew",
+        "Agno's single Agent with tools"
+      ]
+    },
+    {
+      "q": "Which framework has built-in storage drivers (SQLite, Postgres, Redis, Mongo, DynamoDB) attached directly to the Agent class for session and memory persistence?",
+      "options": [
+        "Agno",
+        "CrewAI",
+        "AutoGen",
+        "LangGraph"
+      ]
+    },
+    {
+      "q": "You have a two-call summarizer: fetch text, summarize. Which option is the right framework choice?",
+      "options": [
+        "AutoGen GroupChat — two agents can argue about the best summary.",
+        "Plain Python with the provider SDK — no framework is the fastest framework for tiny pipelines.",
+        "CrewAI with researcher + summarizer roles — roles make it clearer.",
+        "LangGraph StateGraph — always use a framework for reliability."
+      ]
+    }
+  ]
+}

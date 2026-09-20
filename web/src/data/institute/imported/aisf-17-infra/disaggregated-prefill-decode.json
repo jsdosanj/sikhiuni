@@ -1,0 +1,94 @@
+{
+  "id": "aisf-17-infra::disaggregated-prefill-decode",
+  "num": 17,
+  "slug": "disaggregated-prefill-decode",
+  "title": "Disaggregated Prefill/Decode — NVIDIA Dynamo and llm-d",
+  "tagline": "Prefill is compute-bound; decode is memory-bound. Running both on the same GPU wastes one resource. Disaggregation splits them onto separate pools and transfers KV cache between them over NIXL (RDMA/InfiniBand or TCP fallback). NVIDIA Dynamo (GTC 2025 announce, 1.0 GA) sits above vLLM/SGLang/TRT-LLM — its Planner Profiler + SLA Planner auto-rate-match prefill:decode ratios to meet SLOs. NVIDIA publishes throughput gains in this ballpark — developer.nvidia.com (2025-06) shows a ~6x improvement for DeepSeek-R1 MoE on GB200 NVL72 + Dynamo in the medium-latency regime, and the Dynamo product page (developer.nvidia.com, undated) advertises up to 50x MoE throughput on GB300 NVL72 + Dynamo vs Hopper. The \"30x\" figure is a community aggregate across full-stack Blackwell + Dynamo + DeepSeek-R1 reports; we have not found a single primary source stating exactly 30x, so treat it as a directional claim. llm-d (Red Hat + AWS) is Kubernetes-native: prefill / decode / router as independent Services with per-role HPA. llm-d 0.5 adds hierarchical KV offloading, cache-aware LoRA routing, UCCL networking, scale-to-zero. Economics: internal rollup of multiple customer disclosures suggests 30–40% savings on $2M-class inference spend (i.e., $600-800K/year) when switching from colocated serving to disaggregated with Dynamo at constant SLA; the specific $2M→$600-800K figure is an internal composite, not a single published case study — use it as an order-of-magnitude anchor, not a reference citation. Short prompts (<512 tokens, short output) don't justify the transfer cost.",
+  "type": "Learn",
+  "languages": "Python (stdlib, toy disaggregated-vs-colocated simulator)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Explain why prefill and decode have different optimal GPU allocations and quantify the waste under colocation.",
+    "Diagram the disaggregated architecture: prefill pool, decode pool, KV transfer via NIXL, router.",
+    "Name the condition when disaggregation does NOT pay off (short prompts, short outputs).",
+    "Distinguish NVIDIA Dynamo (stack-above) from llm-d (Kubernetes-native) and match each to an operational context."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>You run Llama 3.3 70B on 8 H100s. Under mixed workload (long prompts + short outputs), GPUs idle during decode because most of the compute was spent on prefill. Under different workload (short prompts + long outputs), the opposite happens. Colocated prefill + decode means you over-provision both.</p>\n<p>Budget impact: 20-40% of GPU time is wasted on the wrong resource. You are buying H100 compute to run memory-bound decode, or buying H100 HBM bandwidth to run compute-bound prefill. Both are expensive waste.</p>\n<p>Disaggregation splits prefill and decode onto separate pools sized for each&#39;s bottleneck. KV cache transfers from prefill pool to decode pool via high-bandwidth interconnect.</p>\n<h2>The Concept</h2>\n<h3>Why the bottlenecks differ</h3>\n<p><strong>Prefill</strong> — run the transformer over the full input prompt in one forward. Matrix multiplications dominate; compute-bound. H100 FP8 gives ~2000 TFLOPS of useful throughput. Batch efficiency is good — one forward processes many tokens.</p>\n<p><strong>Decode</strong> — generate one token at a time, reading the full weights each iteration. Memory-bandwidth-bound. HBM3 gives ~3 TB/s. Batch efficiency is good only at high concurrency — the weights read amortizes across the batch.</p>\n<p>Colocating them: you buy GPUs optimized for both. H100 is good at both but costs the same either way. At scale, you want prefill pool on H100 / compute-heavy; decode pool on H200 / memory-heavy, or with aggressive quantization.</p>\n<h3>The architecture</h3>\n<pre><code>            ┌──────────────┐\n  Request → │    Router    │ ───────────────────────┐\n            └──────┬───────┘                        │\n                   │                                │\n                   ▼ (prompt only)                  │\n            ┌──────────────┐    KV cache    ┌───────▼──────┐\n            │ Prefill pool │ ─── NIXL ────► │ Decode pool  │\n            │  (compute)   │                │  (memory)    │\n            └──────────────┘                └──────┬───────┘\n                                                   │ tokens\n                                                   ▼\n                                                 Client\n</code></pre>\n<p>NIXL is NVIDIA&#39;s inter-node transport. Uses RDMA/InfiniBand when available, TCP fallback otherwise. Transfer latency is real — typically 20-80 ms for KV cache of a 4K-token prompt on 70B FP8. This is why short prompts don&#39;t justify disaggregation: the transfer tax exceeds the savings.</p>\n<h3>Dynamo vs llm-d</h3>\n<p><strong>NVIDIA Dynamo</strong> (GTC 2025 announce, 1.0 GA):</p>\n<ul>\n<li>Sits above vLLM, SGLang, TRT-LLM as an orchestrator.</li>\n<li>Planner Profiler measures workload, SLA Planner auto-configures prefill:decode ratios.</li>\n<li>Rust core, Python extensibility.</li>\n<li>Throughput gains: NVIDIA reports 6x for DeepSeek-R1 MoE on GB200 NVL72 + Dynamo in the medium-latency regime (developer.nvidia.com, 2025-06); community reports of &quot;up to 30x&quot; on full Blackwell + Dynamo + DeepSeek-R1 stacks lack a single primary source and should be treated as directional.</li>\n<li>GB300 NVL72 + Dynamo: up to 50x MoE throughput vs Hopper per the Dynamo product page (developer.nvidia.com, undated).</li>\n</ul>\n<p><strong>llm-d</strong> (Red Hat + AWS, Kubernetes-native):</p>\n<ul>\n<li>Prefill / decode / router as independent Kubernetes Services.</li>\n<li>Per-role HPA with queue depth (prefill) / KV utilization (decode) signals.</li>\n<li><code>topologyConstraint packDomain: rack</code> packs prefill+decode cliques on the same rack for high-bandwidth KV transfer.</li>\n<li>llm-d 0.5 (2026): hierarchical KV offloading, cache-aware LoRA routing, UCCL networking, scale-to-zero.</li>\n</ul>\n<p>Use Dynamo if you want a managed stack-above orchestrator. Use llm-d if you want Kubernetes-native primitives and are committed to the CNCF ecosystem.</p>\n<h3>Economics</h3>\n<p>Internal composite (not a single published case study — order-of-magnitude anchor):</p>\n<ul>\n<li>$2M/year inference spend on colocated serving.</li>\n<li>Switched to disaggregated with Dynamo.</li>\n<li>Same request volume, same P99 latency SLA.</li>\n<li>Reported savings: $600K–$800K/year (30–40% reduction).</li>\n<li>No new hardware.</li>\n</ul>\n<p>We synthesize this figure from multiple customer disclosures rather than a single citable case study; closest published data point is Baseten&#39;s 2x faster TTFT / 61% higher throughput with Dynamo KV routing (baseten.co, 2025-10), and VAST + CoreWeave&#39;s projection of 60–130% more tokens/$ at 40–60% KV hit rate (vastdata.com, 2025-12). The savings come from right-sizing each pool; prefill-heavy workloads (RAG with 8K+ prefixes) benefit more than balanced ones.</p>\n<h3>When NOT to disaggregate</h3>\n<ul>\n<li>Prompts &lt; 512 tokens and outputs &lt; 200 tokens: transfer tax dominates gain.</li>\n<li>Small cluster (&lt; 4 GPUs): not enough pool diversity.</li>\n<li>Team cannot operate two GPU pools with per-role scaling: Dynamo helps but not trivially.</li>\n<li>No RDMA fabric: TCP transfer tax is heavier.</li>\n</ul>\n<h3>The router integrates with Phase 17 · 11</h3>\n<p>Disaggregated routers are KV-cache-aware (Phase 17 · 11). A request lands on the decode pool holding its prefix — if no match, it flows prefill → decode. Hit rate and disaggregation compound — the cache-aware router determines whether a new prefill is even needed.</p>\n<h3>MoE on Blackwell is where the real numbers are</h3>\n<p>GB300 NVL72 + Dynamo shows 50x MoE throughput over Hopper baselines. MoE expert routing is compute-heavy on prefill but memory-heavy on decode (expert caches), so disaggregation is a double win. 2026 frontier model serving is MoE-dominant (DeepSeek-V3, future GPT-5 variants).</p>\n<h3>Numbers you should remember</h3>\n<p>Benchmark numbers drift — NVIDIA and the inference stack post updated results every quarter. Re-check before quoting.</p>\n<ul>\n<li>DeepSeek-R1 on GB200 NVL72 + Dynamo: ~6x throughput vs baseline in the medium-latency regime (developer.nvidia.com, 2025-06); community &quot;up to 30x&quot; claims on full Blackwell + Dynamo stacks are directional aggregates without a single primary source.</li>\n<li>GB300 NVL72 + Dynamo: up to 50x MoE throughput vs Hopper (developer.nvidia.com, undated).</li>\n<li>Savings anchor (internal composite, not a single case study): $600-800K/year off a $2M annual spend at constant SLA.</li>\n<li>Disaggregation threshold: prompts &gt;512 tokens + outputs &gt;200 tokens.</li>\n<li>KV transfer via NIXL: 20-80 ms for 4K-prompt KV on 70B FP8.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>prefill-decode-split</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> simulates colocated vs disaggregated serving. Reports throughput, cost per request, and the prompt-length crossover.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-disaggregation-decider.md</code>. Given workload and cluster, decides whether to disaggregate.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run <code>code/main.py</code>. At what prompt length does disaggregation beat colocation?</li>\n<li>Design the prefill pool and decode pool for a RAG service with P99 prefix length 8K, output 300.</li>\n<li>Dynamo vs llm-d: pick one for a pure-Kubernetes shop with no Python runtime preference.</li>\n<li>Compute KV transfer cost: 4K prefill on 70B FP8 = ~500 MB KV. At RDMA 100 GB/s, transfer = 5 ms. At TCP 10 GB/s = 50 ms. Which matters for your SLA?</li>\n<li>MoE expert routing changes KV access patterns. How does disaggregation behave with MoE that activates different experts per token?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Disaggregated serving</td>\n<td>&quot;split prefill/decode&quot;</td>\n<td>Separate GPU pools for each phase</td>\n</tr>\n<tr>\n<td>NIXL</td>\n<td>&quot;NVIDIA transport&quot;</td>\n<td>Dynamo&#39;s inter-node KV transfer (RDMA/TCP)</td>\n</tr>\n<tr>\n<td>NVIDIA Dynamo</td>\n<td>&quot;the orchestrator&quot;</td>\n<td>Stack-above coordinator for vLLM/SGLang/TRT-LLM</td>\n</tr>\n<tr>\n<td>llm-d</td>\n<td>&quot;Kubernetes native&quot;</td>\n<td>Red Hat + AWS K8s disaggregated stack</td>\n</tr>\n<tr>\n<td>Planner Profiler</td>\n<td>&quot;Dynamo auto-config&quot;</td>\n<td>Measures workload, configures pool ratios</td>\n</tr>\n<tr>\n<td>SLA Planner</td>\n<td>&quot;Dynamo policy&quot;</td>\n<td>Auto-rate-matches prefill:decode to meet SLOs</td>\n</tr>\n<tr>\n<td><code>packDomain: rack</code></td>\n<td>&quot;llm-d topology&quot;</td>\n<td>Pack prefill+decode on same rack for fast KV</td>\n</tr>\n<tr>\n<td>UCCL</td>\n<td>&quot;unified collective&quot;</td>\n<td>llm-d 0.5 networking layer for scale-to-zero</td>\n</tr>\n<tr>\n<td>MoE expert routing</td>\n<td>&quot;expert per token&quot;</td>\n<td>DeepSeek-V3 pattern; disaggregation helps</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models/\" target=\"_blank\" rel=\"noopener\">NVIDIA — Introducing Dynamo</a></li>\n<li><a href=\"https://developer.nvidia.com/blog/deploying-disaggregated-llm-inference-workloads-on-kubernetes/\" target=\"_blank\" rel=\"noopener\">NVIDIA — Disaggregated LLM Inference on Kubernetes</a></li>\n<li><a href=\"https://nvidia.github.io/TensorRT-LLM/blogs/tech_blog/blog5_Disaggregated_Serving_in_TensorRT-LLM.html\" target=\"_blank\" rel=\"noopener\">TensorRT-LLM Disaggregated Serving blog</a></li>\n<li><a href=\"https://github.com/llm-d/llm-d\" target=\"_blank\" rel=\"noopener\">llm-d GitHub</a></li>\n<li><a href=\"https://github.com/llm-d/llm-d/releases\" target=\"_blank\" rel=\"noopener\">llm-d 0.5 release notes</a></li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Colocated vs disaggregated serving simulator — stdlib Python.\n\nModels one request through colocated (same GPU) vs disaggregated (prefill pool + decode pool + KV transfer).\nSweeps prompt length to find the crossover.\n\"\"\"\n\nfrom __future__ import annotations\n\n\n# illustrative 2026 constants for 70B FP8 on H100 class\nPREFILL_TOK_PER_MS = 40.0         # prefill throughput per GPU per ms\nDECODE_TOK_PER_MS_COLOCATED = 0.10\nDECODE_TOK_PER_MS_DECODE_GPU = 0.18   # memory-optimized pool (H200-like)\nKV_BYTES_PER_TOKEN_70B_FP8 = 125_000\nNIXL_RDMA_GB_S = 100\nNIXL_TCP_GB_S = 10\n\n\ndef ms_colocated(prompt: int, output: int) -> float:\n    prefill_ms = prompt / PREFILL_TOK_PER_MS\n    decode_ms = output / DECODE_TOK_PER_MS_COLOCATED\n    return prefill_ms + decode_ms\n\n\ndef ms_disaggregated(prompt: int, output: int, use_rdma: bool = True) -> float:\n    prefill_ms = prompt / PREFILL_TOK_PER_MS\n    kv_bytes = prompt * KV_BYTES_PER_TOKEN_70B_FP8\n    transport = NIXL_RDMA_GB_S if use_rdma else NIXL_TCP_GB_S\n    transfer_ms = (kv_bytes / 1e9) / transport * 1000\n    decode_ms = output / DECODE_TOK_PER_MS_DECODE_GPU\n    return prefill_ms + transfer_ms + decode_ms\n\n\ndef main() -> None:\n    print(\"=\" * 95)\n    print(\"DISAGGREGATED vs COLOCATED — same request, different GPU placement\")\n    print(\"=\" * 95)\n    header = f\"{'prompt':>7}  {'output':>7}  {'colocated (ms)':>15}  {'disagg RDMA (ms)':>17}  {'disagg TCP (ms)':>16}  Winner\"\n    print(header)\n    print(\"-\" * len(header))\n    cases = [\n        (256, 100), (512, 200), (1024, 300), (2048, 400),\n        (4096, 500), (8192, 800), (16384, 1200), (32768, 2000),\n    ]\n    for prompt, output in cases:\n        colo = ms_colocated(prompt, output)\n        rdma = ms_disaggregated(prompt, output, use_rdma=True)\n        tcp = ms_disaggregated(prompt, output, use_rdma=False)\n        winner = \"colocated\" if colo < rdma else \"disaggregated\"\n        print(f\"{prompt:>7}  {output:>7}  {colo:>14.1f}  {rdma:>17.1f}  {tcp:>16.1f}  {winner}\")\n\n    print()\n    print(\"Read: disaggregation wins at longer prompts where decode throughput improvement\")\n    print(\"on memory-optimized pool outweighs the KV transfer tax. TCP transport raises the\")\n    print(\"break-even; RDMA makes disaggregation profitable earlier.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Why do prefill and decode want different optimal GPU configurations?",
+      "options": [
+        "Prefill must run on AMD and decode on NVIDIA",
+        "They use different model weights",
+        "Prefill is compute-bound on matmul throughput; decode is memory-bound on HBM bandwidth, so colocating them wastes one resource",
+        "Decode requires more network bandwidth"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What transport does NVIDIA Dynamo use to move KV cache between the prefill and decode pools?",
+      "options": [
+        "gRPC bidi only",
+        "NIXL (RDMA/InfiniBand when available, TCP fallback)",
+        "Plain HTTP",
+        "Shared filesystem on NFS"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "When does disaggregation NOT pay off according to the lesson?",
+      "options": [
+        "RAG with 8K+ prefixes",
+        "MoE workloads on Blackwell",
+        "Multi-tenant serving with shared system prompts",
+        "Prompts under 512 tokens and outputs under 200 tokens, where the KV transfer tax dominates the gain"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What is the core architectural difference between Dynamo and llm-d?",
+      "options": [
+        "Dynamo is open source; llm-d is closed",
+        "Dynamo runs on CPU; llm-d on GPU",
+        "Dynamo is a stack-above orchestrator over vLLM/SGLang/TRT-LLM; llm-d is Kubernetes-native with prefill/decode/router as independent Services",
+        "Dynamo requires AMD; llm-d requires NVIDIA"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "Which Dynamo components automatically tune the prefill:decode ratio for an SLO?",
+      "options": [
+        "Marlin kernels",
+        "Planner Profiler and SLA Planner",
+        "Cluster Autoscaler",
+        "Sidecar proxy and Envoy filter"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "How does disaggregation interact with cache-aware routing from Phase 17 · 11?",
+      "options": [
+        "Disaggregation disables KV cache reuse entirely",
+        "The cache-aware router can land a request on the decode pool already holding its prefix; on miss it flows prefill -> decode, so the two compound",
+        "They are mutually exclusive",
+        "Cache-aware routing is only for colocated serving"
+      ],
+      "answer": 1,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/17-infrastructure-and-production/17-disaggregated-prefill-decode"
+  }
+}

@@ -1,0 +1,360 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { tracks, trackSlug, professorOf, trackById, gurmukhiHtml } from '../../../lib/institute';
+import type { PathTrack } from '../../../lib/institute';
+import capstone from '../../../data/institute/capstone/briefs.json';
+
+const indexes = import.meta.glob('../../../data/institute/imported/*/index.json', { eager: true });
+const examBanks = import.meta.glob('../../../data/institute/exam/*.json', { eager: true });
+const intros = import.meta.glob('../../../data/institute/ours/*/intro.json', { eager: true });
+const pathData_ = import.meta.glob('../../../data/institute/paths/*.json', { eager: true });
+
+export function getStaticPaths() {
+  return tracks.map((t) => ({ params: { slug: trackSlug(t) }, props: { t } }));
+}
+const { t } = Astro.props;
+const prof = professorOf(t);
+const prereq = t.prereq ? trackById(t.prereq) : null;
+
+const idxMod = indexes[`../../../data/institute/imported/${t.id}/index.json`];
+const idx = idxMod && (idxMod.default ?? idxMod);
+const isImported = t.kind === 'phase' && idx && idx.lessons?.length > 0;
+
+const examMod = examBanks[`../../../data/institute/exam/${t.id}.json`] as any;
+const examBank = examMod && (examMod.default ?? examMod);
+const hasExam = isImported && t.status === 'published' && examBank && examBank.count > 0;
+
+// The seva-framed phase intro (C4): the Institute's own voice on why this
+// phase is worth a Sikh engineer's time. ours/<track>/intro.json.
+const introMod = intros[`../../../data/institute/ours/${t.id}/intro.json`] as any;
+const seva: { blurb?: string } | null = introMod && (introMod.default ?? introMod);
+const examN = hasExam ? Math.min(20, examBank.count) : 0;
+const pnum = String(t.num ?? 0).padStart(2, '0');
+
+const isCapstone = t.kind === 'capstone' && t.status === 'published';
+const isGuide = t.kind === 'guide' && t.status === 'published';
+const isDojo = t.kind === 'dojo' && t.status === 'published';
+
+// Cybersecurity School paths (C-modules): our teaching note per module, then the
+// free labs it sends you to. Nothing is rehosted — every lab opens at its source.
+const pathMod = pathData_[`../../../data/institute/paths/${t.id}.json`] as any;
+const pathData: PathTrack | null = pathMod ? (pathMod.default ?? pathMod) : null;
+const isPath = t.kind === 'path' && t.status === 'published' && !!pathData;
+
+const ld = {
+  '@context': 'https://schema.org', '@type': 'Course',
+  name: t.title, description: t.summary,
+  provider: { '@type': 'EducationalOrganization', name: 'Sikhi University · Institute of Technology' },
+  isAccessibleForFree: true, inLanguage: 'en', educationalLevel: t.level,
+  ...(prof ? { author: { '@type': prof.kind === 'org' ? 'Organization' : 'Person', name: prof.name } } : {}),
+};
+---
+<Base title={`${t.title}, Institute of Technology`} description={t.summary} institute ogType="article">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <InstituteRail />
+
+  <header class="i-thead">
+    <div class="i-wrap">
+      <span class="i-label i-mono">
+        {t.kind}{typeof t.num === 'number' ? ` · ${t.kind === 'path' ? 'p' : 'f'}${String(t.num).padStart(2, '0')}` : ''} · {t.license}
+      </span>
+      <h1>{t.title}</h1>
+      <p class="i-prose i-thead-sum" set:html={gurmukhiHtml(seva?.blurb || idx?.blurb || t.summary)} />
+      {seva?.blurb && (idx?.blurb || t.summary) && (
+        <p class="i-mono i-thead-upstream">Upstream: <span set:html={gurmukhiHtml(idx?.blurb || t.summary)} /></p>
+      )}
+      <p class="i-mono i-thead-meta">
+        {isImported ? `${idx.lessons.length} lessons` : isPath ? `${pathData!.modules.length} modules` : (t.lessonCount || t.topicCount || t.projectCount || 0) + ' ' + (t.kind === 'dojo' ? 'topics' : t.kind === 'capstone' ? 'projects' : 'lessons')}
+        {' · '}{t.level}-level
+        {prereq ? <> · prereq: <a href={`/technology/track/${trackSlug(prereq)}`}>{prereq.title}</a></> : null}
+        {prof ? <> · <a href={prof.links?.[0]?.href || '#'} target="_blank" rel="noopener">{prof.name}</a></> : null}
+      </p>
+    </div>
+  </header>
+
+  {isCapstone ? (
+    <section class="i-wrap i-track-body">
+      <p class="i-prose i-cap-intro">{capstone.intro}</p>
+
+      <ol class="i-cap-list">
+        {capstone.briefs.map((b, i) => (
+          <li>
+            <a href={`/technology/capstone/${b.slug}`}>
+              <span class="i-cap-num i-mono">{String(i + 1).padStart(2, '0')}</span>
+              <span class="i-cap-text">
+                <strong class="i-cap-title">{b.title}</strong>
+                <span class="i-cap-one i-prose">{b.oneLine}</span>
+              </span>
+              <span class="i-cap-arrow i-mono" aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div class="i-panel i-cap-how">
+        <span class="i-corner">how the capstone works</span>
+        <ol>{capstone.howItWorks.map((s) => <li class="i-prose">{s}</li>)}</ol>
+      </div>
+
+      <p class="i-prose" style="margin-top:20px;font-size:13px;color:var(--i-muted)">
+        {capstone.licenseNote} Written by {prof?.name || 'Sikhi University'}. See <a href="/technology/licenses">sources &amp; licenses</a>.
+      </p>
+    </section>
+  ) : isGuide ? (
+    <section class="i-wrap i-track-body">
+      <p class="i-prose i-cap-intro">
+        A plain-English map of Claude Desktop and Claude Code, for people with no coding experience.
+        Every feature is named, then explained by what it lets you do. Developer detail sits at the end,
+        so a beginner is never blocked by it, and Part 5 links the official Anthropic courses.
+      </p>
+      <p><a class="i-btn i-btn-primary" href="/technology/guide/claude-code">Open the guide &rarr;</a></p>
+    </section>
+  ) : isDojo ? (
+    <section class="i-wrap i-track-body">
+      <p class="i-prose i-cap-intro">
+        {t.engine === 'terminal'
+          ? `A from-scratch crash course, ${t.topicCount} topics, each a real file that types itself out and explains what it teaches, line by line, as it goes.`
+          : `The real Claude Code command set. Type / to explore, every command is its own short lesson, with the reason it exists, synced to the docs.`}
+      </p>
+      <p>
+        <a class="i-btn i-btn-primary" href={`/technology/dojo/${t.id}`}>Enter the dojo &rarr;</a>
+      </p>
+      <p class="i-prose" style="margin-top:20px;font-size:13px;color:var(--i-muted)">
+        Rebuilt for the Institute from the sikhi.io <a href="https://sikhi.io">Sikh Code</a> dojos, by {prof?.name || 'Sikhi University'}. CC BY-SA 4.0. See <a href="/technology/licenses">sources &amp; licenses</a>.
+      </p>
+    </section>
+  ) : isPath ? (
+    <section class="i-wrap i-track-body">
+      <div class="i-panel i-path-note">
+        <span class="i-corner">how this path works</span>
+        <p class="i-prose">
+          Each module below is a step: what you should be able to do at the end of it, a note
+          from us on why it matters and how to approach it, and the free labs where you actually
+          do the work. <strong>The labs are not hosted here.</strong> Every one opens on the
+          platform that runs it, and each card says which platform and what it honestly costs
+          &mdash; most are free or free with an account, but some vendor exams are paid and some
+          self-hosted labs bill your own cloud account while they run. Read the cost line before
+          you click.
+        </p>
+      </div>
+
+      {pathData!.warning && (
+        <div class="i-panel i-path-warn" role="note">
+          <span class="i-corner">before you deploy anything</span>
+          <p class="i-prose">
+            <span class="i-warn-glyph" aria-hidden="true">&#9651;</span>
+            {pathData!.warning}
+          </p>
+        </div>
+      )}
+
+      <ol class="i-modlist">
+        {pathData!.modules.map((mod) => (
+          <li class="i-panel i-mod" id={mod.slug}>
+            <span class="i-corner">module {String(mod.num).padStart(2, '0')}</span>
+            <h2 class="i-mod-title">{mod.title}</h2>
+            <p class="i-mod-obj i-prose"><span class="i-mono i-mod-objlabel">you will be able to</span> {mod.objective}</p>
+            <p class="i-prose i-mod-teach" set:html={gurmukhiHtml(mod.teach)} />
+            {mod.checklist && (
+              <div class="i-checklist">
+                <span class="i-mono i-checklist-label">{mod.checklist.label}</span>
+                <dl class="i-checklist-rows">
+                  {mod.checklist.items.map((c) => (
+                    <div>
+                      <dt><span class="i-mono i-checklist-id">{c.id}</span> {c.title}</dt>
+                      <dd class="i-prose">{c.note}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p class="i-prose i-checklist-note">{mod.checklist.note}</p>
+              </div>
+            )}
+            <ul class="i-lablist">
+              {mod.labs.map((lab) => (
+                <li>
+                  {lab.href.startsWith('/') ? (
+                    <a class="i-lab" href={lab.href}>
+                      <span class="i-lab-title">{lab.title}</span>
+                      <span class="i-mono i-lab-meta">{lab.provider} &middot; {lab.cost}</span>
+                    </a>
+                  ) : (
+                    <a class="i-lab" href={lab.href} target="_blank" rel="noopener">
+                      <span class="i-lab-title">{lab.title} &nearr;</span>
+                      <span class="i-mono i-lab-meta">{lab.provider} &middot; {lab.cost}</span>
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+
+      {pathData!.bench.length > 0 && (
+        <div class="i-panel i-bench-shelf">
+          <span class="i-corner">bench references</span>
+          <p class="i-prose">Keep these open while you work. They are read at the source, never copied here.</p>
+          <ul class="i-lablist">
+            {pathData!.bench.map((b) => (
+              <li>
+                <a class="i-lab" href={b.href} target="_blank" rel="noopener">
+                  <span class="i-lab-title">{b.title} &nearr;</span>
+                  <span class="i-mono i-lab-meta">{b.provider}</span>
+                  <span class="i-prose i-lab-note">{b.note}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p class="i-prose i-path-credit">
+        {pathData!.creditLabel || 'Sequencing adapted from'}{' '}
+        <a href={pathData!.adaptedFrom.href} target="_blank" rel="noopener">{pathData!.adaptedFrom.name}</a>
+        {' '}({pathData!.adaptedFrom.license}). {pathData!.adaptedFrom.note} Module structure and
+        teaching notes by Sikhi University, CC BY-SA 4.0.
+        See <a href="/technology/licenses">sources &amp; licenses</a>.
+      </p>
+    </section>
+  ) : isImported ? (
+    <section class="i-wrap i-track-body">
+      <ol class="i-lessonlist">
+        {idx.lessons.map((l) => (
+          <li>
+            <a href={`/technology/lesson/${t.id}/${l.slug}`}>
+              <span class="i-ll-num i-mono">{String(l.num).padStart(2, '0')}</span>
+              <span class="i-ll-title">{l.title}</span>
+              {l.nQuiz > 0 && <span class="i-ll-tag i-mono">{l.nQuiz}-q check</span>}
+            </a>
+          </li>
+        ))}
+      </ol>
+      {hasExam ? (
+        <div class="i-panel i-cert-cta">
+          <span class="i-corner">Phase {pnum} certificate</span>
+          <h2>Finish the phase, then sit the exam</h2>
+          <p class="i-prose">
+            The {idx.lessons.length} lessons above and a <strong>{examN}-question exam</strong> stand between
+            you and the <em>Sikhi University &middot; Institute of Technology</em> certificate for this phase.
+            The exam is graded on our server, needs 80% to pass, and verifies at <a href="/verify">/verify</a>.
+            Experienced already? You can <a href={`/technology/exam/${t.slug}`}>go straight to the exam</a>.
+          </p>
+          <p class="i-cert-cta-actions">
+            <a class="i-btn i-btn-primary" href={`/technology/exam/${t.slug}`}>Take the Phase {pnum} exam &rarr;</a>
+            <a class="i-btn i-btn-ghost" href={`/technology/cert?track=${t.slug}`}>View my certificate</a>
+          </p>
+        </div>
+      ) : (
+        <div class="i-panel i-cert-cta">
+          <span class="i-corner">reading track</span>
+          <h2>No phase exam yet</h2>
+          <p class="i-prose">
+            The upstream curriculum doesn't ship a quiz bank for this phase, so there is no
+            Phase&nbsp;{pnum} exam or certificate for now &mdash; read it for the material.
+            The phases with an exam are marked <span class="i-mono">exam&nbsp;+&nbsp;cert</span> on
+            the <a href="/technology">curriculum spine</a>.
+          </p>
+        </div>
+      )}
+      <p class="i-prose" style="margin-top:20px;font-size:13px;color:var(--i-muted)">
+        Adapted from <a href="https://aiengineeringfromscratch.com">AI Engineering from Scratch</a> by {prof?.name || 'Rohit Ghumare'}, used under the MIT License. Reformatted into the Institute's structure. See <a href="/technology/licenses">sources &amp; licenses</a>.
+      </p>
+    </section>
+  ) : (
+    <section class="i-wrap i-track-body">
+      <div class="i-empty">
+        <p class="i-mono" style="letter-spacing:.14em;text-transform:uppercase;color:var(--i-signal)">status: {t.status}</p>
+        <p class="i-prose" style="margin:12px auto 0;max-width:52ch">
+          {t.kind === 'dojo' && "The live terminal engine ports from sikhi.io in Wave 3."}
+          {t.kind === 'guide' && "Ports from sikhi.io in Wave 3."}
+          {t.kind === 'capstone' && "The “Build for the Panth” project briefs are being finalised."}
+        </p>
+        <p style="margin-top:20px"><a class="i-btn i-btn-ghost" href="/technology/catalog">&larr; Back to the catalogue</a></p>
+      </div>
+    </section>
+  )}
+
+  <style>
+    .i-thead { border-bottom: 1px solid var(--i-line); padding: 36px 0 30px; background: var(--i-ground-deep); }
+    .i-thead h1 { margin: 10px 0 0; font-size: clamp(24px, 4vw, 36px); }
+    .i-thead-sum { margin-top: 12px; font-size: 17px; max-width: 60ch; }
+    .i-thead-upstream { margin-top: 8px; font-size: 11.5px; color: var(--i-muted); max-width: 60ch; letter-spacing: 0.02em; }
+    .i-thead-meta { margin-top: 14px; font-size: 12px; color: var(--i-muted); letter-spacing: 0.05em; }
+    .i-track-body { padding: 36px 24px 72px; }
+    .i-lessonlist { list-style: none; margin: 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); max-width: 720px; }
+    .i-lessonlist > li { border-top: 1px solid var(--i-line-soft); }
+    .i-lessonlist > li:first-child { border-top: 0; }
+    .i-lessonlist a { display: flex; align-items: baseline; gap: 14px; padding: 12px 16px; text-decoration: none; transition: background 150ms; }
+    .i-lessonlist a:hover { background: color-mix(in srgb, var(--i-signal) 7%, var(--i-surface)); }
+    .i-ll-num { color: var(--i-filament); font-weight: 700; font-size: 12px; flex: none; }
+    .i-ll-title { color: var(--i-ink); font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 15px; }
+    .i-ll-tag { margin-left: auto; color: var(--i-muted); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; flex: none; }
+
+    .i-cert-cta { max-width: 720px; margin-top: 22px; }
+    .i-cert-cta h2 { margin: 6px 0 8px; font-size: 18px; }
+    .i-cert-cta .i-prose { font-size: 14px; }
+    .i-cert-cta-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 0; }
+
+    .i-cap-intro { max-width: 68ch; font-size: 15.5px; margin: 0 0 24px; }
+    .i-cap-list { list-style: none; margin: 0 0 26px; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-md); max-width: 760px; }
+    .i-cap-list > li { border-top: 1px solid var(--i-line-soft); }
+    .i-cap-list > li:first-child { border-top: 0; }
+    .i-cap-list a { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: start; padding: 16px 18px; text-decoration: none; transition: background 150ms; }
+    .i-cap-list a:hover { background: color-mix(in srgb, var(--i-signal) 7%, var(--i-surface)); }
+    .i-cap-num { color: var(--i-filament); font-weight: 700; font-size: 13px; padding-top: 2px; }
+    .i-cap-title { display: block; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 16px; color: var(--i-ink); }
+    .i-cap-one { display: block; margin-top: 3px; font-size: 13.5px; }
+    .i-cap-arrow { color: var(--i-filament); align-self: center; }
+    .i-cap-how { max-width: 760px; }
+    .i-cap-how ol { margin: 10px 0 0; padding-left: 20px; }
+    .i-cap-how li { margin: 6px 0; font-size: 14px; }
+
+    /* Cybersecurity School paths: a stack of module panels, each ending in the
+       free labs it sends you out to. */
+    .i-path-note { max-width: 760px; margin-bottom: 26px; }
+    .i-path-note .i-prose { margin: 8px 0 0; font-size: 14px; }
+    /* A caution, not a failure: --filament plus a triangle glyph, never colour
+       alone (DESIGN-INSTITUTE.md §Color, semantic). */
+    .i-path-warn {
+      max-width: 760px; margin-bottom: 26px;
+      border-color: color-mix(in srgb, var(--i-filament) 45%, var(--i-line));
+    }
+    .i-path-warn .i-prose { margin: 8px 0 0; font-size: 14px; }
+    .i-warn-glyph { color: var(--i-filament); font-weight: 700; margin-right: 8px; }
+    .i-modlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; max-width: 760px; }
+    /* Each module carries an id, so it is a shareable deep link. Two layers of
+       sticky chrome sit above it — the fixed .su-nav and the .i-rail below it —
+       and without this the linked module's heading lands underneath both. */
+    .i-mod { scroll-margin-top: calc(env(safe-area-inset-top) + 7rem); }
+    .i-mod-title { margin: 8px 0 0; font-size: 19px; }
+    .i-mod-obj { margin: 10px 0 0; font-size: 14px; }
+    .i-mod-objlabel {
+      display: block; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--i-filament); margin-bottom: 3px;
+    }
+    .i-mod-teach { margin: 12px 0 0; font-size: 14.5px; }
+    /* A reproduced framework (a numbered risk list). Hairline-ruled rows, the
+       id in mono — the instrument-panel motif, not a decorated callout. */
+    .i-checklist { margin-top: 16px; border: 1px solid var(--i-line); border-radius: var(--i-r-sm); background: color-mix(in srgb, var(--i-ground-deep) 45%, transparent); }
+    .i-checklist-label { display: block; padding: 10px 14px 8px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--i-filament); }
+    .i-checklist-rows { margin: 0; padding: 0 0 4px; }
+    .i-checklist-rows > div { padding: 9px 14px; border-top: 1px solid var(--i-line-soft); }
+    .i-checklist-rows dt { font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 14px; color: var(--i-ink); }
+    .i-checklist-id { color: var(--i-filament); font-size: 11.5px; margin-right: 6px; }
+    .i-checklist-rows dd { margin: 4px 0 0; font-size: 13.5px; }
+    .i-checklist-note { padding: 10px 14px 12px; margin: 0; border-top: 1px solid var(--i-line-soft); font-size: 12px; color: var(--i-muted); }
+
+    .i-lablist { list-style: none; margin: 14px 0 0; padding: 0; border: 1px solid var(--i-line); border-radius: var(--i-r-sm); }
+    .i-lablist > li { border-top: 1px solid var(--i-line-soft); }
+    .i-lablist > li:first-child { border-top: 0; }
+    .i-lab { display: block; padding: 10px 14px; text-decoration: none; transition: background 150ms; }
+    .i-lab:hover { background: color-mix(in srgb, var(--i-filament) 8%, transparent); }
+    .i-lab-title { display: block; font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 14.5px; color: var(--i-ink); }
+    .i-lab-meta { display: block; margin-top: 2px; font-size: 10.5px; color: var(--i-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    .i-lab-note { display: block; margin-top: 5px; font-size: 13px; }
+    .i-bench-shelf { max-width: 760px; margin-top: 26px; }
+    .i-bench-shelf .i-prose { margin: 8px 0 0; font-size: 13.5px; }
+    .i-path-credit { max-width: 760px; margin-top: 22px; font-size: 13px; color: var(--i-muted); }
+  </style>
+</Base>

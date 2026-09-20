@@ -1,0 +1,1248 @@
+{
+  "track": "aisf-13-tools-protocols",
+  "count": 138,
+  "questions": [
+    {
+      "q": "What creates protocol state between two MCP 2026-07-28 requests?",
+      "options": [
+        "The HTTP connection",
+        "Nothing in the protocol core",
+        "Mcp-Session-Id",
+        "The stdio process"
+      ]
+    },
+    {
+      "q": "Which two params._meta fields are required on every modern request?",
+      "options": [
+        "clientInfo and cacheScope",
+        "protocolVersion and clientCapabilities",
+        "sessionId and capabilities",
+        "serverInfo and ttlMs"
+      ]
+    },
+    {
+      "q": "What method must every modern MCP server implement for up-front discovery?",
+      "options": [
+        "tools/list",
+        "initialize",
+        "server/discover",
+        "notifications/initialized"
+      ]
+    },
+    {
+      "q": "What does error code -32022 mean?",
+      "options": [
+        "Internal error",
+        "Header mismatch",
+        "Method not found",
+        "Unsupported protocol version"
+      ]
+    },
+    {
+      "q": "Which result requires ttlMs and cacheScope in MCP 2026-07-28?",
+      "options": [
+        "A JSON-RPC error",
+        "A tools/list result",
+        "A tools/call result",
+        "A cancellation notification"
+      ]
+    },
+    {
+      "q": "How should a server choose capabilities for the current request?",
+      "options": [
+        "Read them from Mcp-Session-Id",
+        "Infer them from the process",
+        "Reuse the first request's declaration",
+        "Read them from the current request metadata"
+      ]
+    },
+    {
+      "q": "Where does a modern MCP server read client capabilities?",
+      "options": [
+        "From Mcp-Session-Id",
+        "From the first initialize call",
+        "From every current request",
+        "From the process environment"
+      ]
+    },
+    {
+      "q": "Which method must a modern server implement?",
+      "options": [
+        "initialize",
+        "server/discover",
+        "resources/subscribe",
+        "shutdown"
+      ]
+    },
+    {
+      "q": "Which successful result fields are required on tools/list?",
+      "options": [
+        "protocolVersion and tools",
+        "resultType, ttlMs, cacheScope, tools",
+        "initialized and tools",
+        "sessionId and tools"
+      ]
+    },
+    {
+      "q": "Why should a server sort tools deterministically?",
+      "options": [
+        "To stabilize caches and model context",
+        "To create a session",
+        "To negotiate the protocol",
+        "To replace authorization"
+      ]
+    },
+    {
+      "q": "A valid tool call runs but the domain operation fails. Which shape fits?",
+      "options": [
+        "notifications/initialized",
+        "HTTP DELETE",
+        "A complete tool result with isError true",
+        "A new server request"
+      ]
+    },
+    {
+      "q": "What should end a stdio server's transport lifetime?",
+      "options": [
+        "EOF on stdin",
+        "A GET request",
+        "A mandatory shutdown RPC",
+        "Mcp-Session-Id expiry"
+      ]
+    },
+    {
+      "q": "What should a dual-era stdio client send first?",
+      "options": [
+        "Mcp-Session-Id",
+        "server/discover",
+        "initialize",
+        "HTTP GET"
+      ]
+    },
+    {
+      "q": "A discovery probe returns -32022 with a mutually supported version. What should the client do?",
+      "options": [
+        "Retry modern discovery at the supported version",
+        "Send initialize",
+        "Open HTTP GET",
+        "Ignore the server"
+      ]
+    },
+    {
+      "q": "Which condition is sufficient to select the legacy era?",
+      "options": [
+        "Any -32601 error",
+        "The peer is on a legacy allowlist",
+        "The peer is allowlisted and a bounded initialize probe returns a valid supported legacy result",
+        "A discovery timeout by itself"
+      ]
+    },
+    {
+      "q": "How should a client handle two tools named search?",
+      "options": [
+        "Silently overwrite one",
+        "Trust startup order",
+        "Prefix or reject by declared policy",
+        "Create a protocol session"
+      ]
+    },
+    {
+      "q": "A legacy result omits resultType after the client negotiated a legacy era. How is it interpreted?",
+      "options": [
+        "As input_required",
+        "As complete",
+        "As a transport error",
+        "As server/discover"
+      ]
+    },
+    {
+      "q": "What must happen after a modern transport loss before routing resumes?",
+      "options": [
+        "Reconnect, rediscover, and relist",
+        "Resume with Last-Event-ID",
+        "Echo Mcp-Session-Id",
+        "Reuse old connection metadata"
+      ]
+    },
+    {
+      "q": "Which HTTP method carries every modern Streamable HTTP message?",
+      "options": [
+        "PATCH",
+        "DELETE",
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "q": "What should a modern-only MCP endpoint return for GET and DELETE?",
+      "options": [
+        "301",
+        "200",
+        "202",
+        "405"
+      ]
+    },
+    {
+      "q": "Which headers must match the body on every modern request?",
+      "options": [
+        "Mcp-Session-Id and Last-Event-ID",
+        "ETag and If-None-Match",
+        "MCP-Protocol-Version and Mcp-Method",
+        "Cookie and Host"
+      ]
+    },
+    {
+      "q": "How does a client request long-lived change notifications?",
+      "options": [
+        "POST subscriptions/listen",
+        "resources/subscribe",
+        "Mcp-Session-Id",
+        "GET /mcp"
+      ]
+    },
+    {
+      "q": "A modern request-scoped SSE stream breaks before its final response. What next?",
+      "options": [
+        "DELETE the session",
+        "Reuse the same response stream",
+        "Resume with Last-Event-ID",
+        "Retry safely with a new JSON-RPC id"
+      ]
+    },
+    {
+      "q": "What should a server do with Mcp-Session-Id on a 2026-07-28 request?",
+      "options": [
+        "Ignore it and do not echo it",
+        "Reject every request that includes it",
+        "Use it for routing",
+        "Rotate it"
+      ]
+    },
+    {
+      "q": "A host needs to retrieve a stable architecture note by URI. Which MCP primitive fits best?",
+      "options": [
+        "A resource",
+        "A cancellation notification",
+        "A protocol session",
+        "A destructive tool"
+      ]
+    },
+    {
+      "q": "What should a 2026-07-28 server return when resources/read receives an unknown resource URI?",
+      "options": [
+        "A resources/list_changed notification",
+        "JSON-RPC error -32601",
+        "An empty successful contents array",
+        "JSON-RPC error -32602"
+      ]
+    },
+    {
+      "q": "Which cache policy is safest for a user-owned note returned by resources/read?",
+      "options": [
+        "Public because the URI is stable",
+        "Shared across users when the MIME type matches",
+        "Private with a bounded TTL",
+        "Public with an unlimited TTL"
+      ]
+    },
+    {
+      "q": "What identifies every notification on a subscriptions/listen response stream?",
+      "options": [
+        "The original listen request ID in subscription metadata",
+        "The resource MIME type",
+        "A newly generated protocol session",
+        "The server process ID"
+      ]
+    },
+    {
+      "q": "Why must resources/list and prompts/list be deterministic for the same request inputs?",
+      "options": [
+        "To grant public access to all returned entries",
+        "To avoid validating pagination cursors",
+        "To stabilize caches, snapshots, and host interfaces",
+        "To make list membership depend on a prior read"
+      ]
+    },
+    {
+      "q": "What must a current MCP server expose even when clients may call resources/list directly?",
+      "options": [
+        "A resources/subscribe method for every URI",
+        "An initialize method that creates a protocol session",
+        "A standalone HTTP GET event stream",
+        "server/discover with supported revisions and capabilities"
+      ]
+    },
+    {
+      "q": "A new MCP server needs model inference. What is the default architecture under 2026-07-28?",
+      "options": [
+        "Integrate directly with a model provider",
+        "Send sampling/createMessage before every tool call",
+        "Store the client's model key in a protocol session",
+        "Open a permanent SSE stream for Sampling"
+      ]
+    },
+    {
+      "q": "How does a 2026-07-28 server request compatibility Sampling during tools/call?",
+      "options": [
+        "It writes the prompt into server/discover",
+        "It places the prompt in an Mcp-Session-Id header",
+        "It returns resultType input_required with sampling/createMessage in inputRequests",
+        "It sends a reverse JSON-RPC request on the same connection"
+      ]
+    },
+    {
+      "q": "Which property proves an MRTR retry is an independent JSON-RPC request?",
+      "options": [
+        "It omits per-request metadata",
+        "It uses the same id as the original request",
+        "It uses a fresh id while repeating the original method and arguments",
+        "It removes the original tool arguments"
+      ]
+    },
+    {
+      "q": "What must protect requestState when it affects resource access?",
+      "options": [
+        "HMAC or authenticated encryption bound to principal, request, and expiry",
+        "Base64 encoding alone",
+        "A clientInfo name",
+        "A long-lived transport session"
+      ]
+    },
+    {
+      "q": "The client did not advertise Sampling in its per-request capabilities. What exact protocol response should the server use?",
+      "options": [
+        "Send the embedded sampling request anyway",
+        "Return -32021 with data.requiredCapabilities, or choose a non-Sampling path",
+        "Add the capability to the client's metadata",
+        "Assume capability from a previous request"
+      ]
+    },
+    {
+      "q": "Which migration keeps a two-round compatibility loop stateless at the protocol layer?",
+      "options": [
+        "Carry only current-round inputResponses and signed phase state on each fresh retry",
+        "Store phase state under Mcp-Session-Id",
+        "Reuse the original request id until completion",
+        "Accumulate all model responses in a hidden session"
+      ]
+    },
+    {
+      "q": "What security guarantee did MCP Roots provide?",
+      "options": [
+        "Informational workspace guidance, not authorization or sandboxing",
+        "Operating-system isolation for every server process",
+        "Proof that the caller owns every file below the root",
+        "Automatic prevention of symbolic-link escapes"
+      ]
+    },
+    {
+      "q": "What is the clearest modern replacement when workspace scope changes per tool call?",
+      "options": [
+        "A hidden value stored under a transport session",
+        "A roots/list request sent after mutation",
+        "The self-reported clientInfo name",
+        "An explicit workspace URI argument that the server authorizes"
+      ]
+    },
+    {
+      "q": "How is form-mode elicitation delivered under MCP 2026-07-28?",
+      "options": [
+        "As an HTTP redirect from server/discover",
+        "Through notifications/roots/list_changed",
+        "As a reverse request over an Mcp-Session-Id stream",
+        "Inside inputRequests on an input_required result"
+      ]
+    },
+    {
+      "q": "Which value must never be collected through form-mode elicitation?",
+      "options": [
+        "A boolean destructive-action confirmation",
+        "A note id selected from an enum",
+        "An API access token",
+        "A non-sensitive display preference"
+      ]
+    },
+    {
+      "q": "A user declines a deletion elicitation. What is the safe result?",
+      "options": [
+        "Delete because the model already selected the note",
+        "Treat the missing content as implicit consent",
+        "Return a complete non-error refusal outcome and preserve the note",
+        "Repeat the same dialog until the user accepts"
+      ]
+    },
+    {
+      "q": "Which design safely binds a destructive confirmation to what the user saw?",
+      "options": [
+        "Base64-encode the chosen note id without a signature",
+        "Sign the principal, original argument digest, candidate ids, phase, and expiry, then re-check the live target",
+        "Use clientInfo as the authoritative user identity",
+        "Trust any note id returned with action accept"
+      ]
+    },
+    {
+      "q": "How can a stateless MCP server support work that lasts ten minutes?",
+      "options": [
+        "Keep an Mcp-Session-Id connection open for ten minutes",
+        "Store progress only in initialize state",
+        "Require every client to use sticky load balancing",
+        "Return an explicit durable task handle backed by application storage"
+      ]
+    },
+    {
+      "q": "When may a server return resultType task from tools/call?",
+      "options": [
+        "After the current request advertises the extension and the task is durably readable",
+        "Whenever a previous session advertised Tasks",
+        "Before persistence so the client can poll optimistically",
+        "Only when params._meta.task.required is true"
+      ]
+    },
+    {
+      "q": "A tasks/get response has resultType complete and status working. What does that mean?",
+      "options": [
+        "The response violates the extension",
+        "The underlying job completed",
+        "The task was cancelled",
+        "The polling RPC completed but the job is still running"
+      ]
+    },
+    {
+      "q": "How does a client answer input_required after a task already exists?",
+      "options": [
+        "Call tasks/result with an answer field",
+        "Open a new initialize session",
+        "Retry the original tools/call with the same id",
+        "Send tasks/update with inputResponses for outstanding task keys"
+      ]
+    },
+    {
+      "q": "What does a successful tasks/cancel response guarantee?",
+      "options": [
+        "The server acknowledged cancellation intent",
+        "The result has been deleted",
+        "The final task status will be cancelled",
+        "The worker has already stopped"
+      ]
+    },
+    {
+      "q": "Which method set matches the current official Tasks extension?",
+      "options": [
+        "tools/task, notifications/task_result, and roots/list",
+        "tasks/get, tasks/update, and tasks/cancel",
+        "tasks/create, tasks/subscribe, and tasks/delete",
+        "tasks/status, tasks/result, and tasks/list"
+      ]
+    },
+    {
+      "q": "Where should a modern MCP App bind its UI resource to a tool?",
+      "options": [
+        "Only in the final text result",
+        "In a standalone HTTP GET stream",
+        "In an MCP session cookie",
+        "In the tool definition returned by tools/list"
+      ]
+    },
+    {
+      "q": "How does a 2026-07-28 client advertise MCP Apps support?",
+      "options": [
+        "With notifications/initialized",
+        "With Mcp-Session-Id",
+        "In io.modelcontextprotocol/clientCapabilities.extensions on each request",
+        "By accepting all ui:// resources"
+      ]
+    },
+    {
+      "q": "What does ui/initialize initialize?",
+      "options": [
+        "A protocol-level server session",
+        "OAuth client registration",
+        "The Apps postMessage bridge between an iframe and host",
+        "The Streamable HTTP GET channel"
+      ]
+    },
+    {
+      "q": "Which resource response is safest for a user-independent bundled App?",
+      "options": [
+        "No resultType and no cache policy",
+        "resultType complete, a bounded ttlMs, public cacheScope, and deny-first CSP",
+        "A session token embedded in the HTML",
+        "An unlimited ttlMs and wildcard CSP domains"
+      ]
+    },
+    {
+      "q": "A host receives a resources/read body for one URI but a different Mcp-Name header. What should happen?",
+      "options": [
+        "Open both resources",
+        "Prefer the header",
+        "Prefer the body",
+        "Return HTTP 400 with JSON-RPC error -32020"
+      ]
+    },
+    {
+      "q": "What is the correct fallback for a host without MCP Apps support?",
+      "options": [
+        "Return HTML as trusted host chrome",
+        "Keep the tool usable with ordinary text or structured output and omit the UI binding",
+        "Create a hidden session and retry",
+        "Grant the extension automatically"
+      ]
+    },
+    {
+      "q": "Which MCP field is safe to use as an authenticated client identity?",
+      "options": [
+        "None of the self-reported clientInfo fields",
+        "clientInfo.name",
+        "clientInfo.version",
+        "clientCapabilities"
+      ]
+    },
+    {
+      "q": "What should a gateway hash after approving a tool?",
+      "options": [
+        "The canonical complete descriptor, including description, schema, and relevant annotations",
+        "Only the tool name",
+        "Only the server display name",
+        "The current session identifier"
+      ]
+    },
+    {
+      "q": "How should a gateway expose two backend tools both named search?",
+      "options": [
+        "Ask the model to infer the server",
+        "Randomly choose a backend",
+        "Use stable qualified names such as notes.search and issues.search",
+        "Keep the last discovered tool"
+      ]
+    },
+    {
+      "q": "Which client capability declarations support an MCP form elicitation?",
+      "options": [
+        "Either elicitation: {} implicitly or elicitation: {form: {}} explicitly",
+        "Any non-empty extensions object",
+        "Only a protocol session with form enabled",
+        "Only elicitation.url"
+      ]
+    },
+    {
+      "q": "Why must requestState be integrity protected and bound to exact arguments?",
+      "options": [
+        "To select a cache scope",
+        "To replace OAuth",
+        "To stop a client from reusing or altering confirmation for another action",
+        "To make JSON smaller"
+      ]
+    },
+    {
+      "q": "Which is the correct order for a modern gateway?",
+      "options": [
+        "Trust clientInfo, execute, then audit",
+        "Accept declared capabilities as permission",
+        "Authenticate, validate wire and headers, check capability compatibility, authorize, then execute",
+        "Create a session, route by discovery order, then authorize"
+      ]
+    },
+    {
+      "q": "Which mechanism is preferred for new MCP OAuth client enrollment in 2026-07-28?",
+      "options": [
+        "An access token in the URL",
+        "Mcp-Session-Id",
+        "Client ID Metadata Documents",
+        "Dynamic Client Registration"
+      ]
+    },
+    {
+      "q": "What application_type should a desktop client with a loopback redirect declare during DCR fallback?",
+      "options": [
+        "web",
+        "stateless",
+        "native",
+        "confidential"
+      ]
+    },
+    {
+      "q": "What must a client do with an authorization response iss value?",
+      "options": [
+        "Normalize it and compare hostnames",
+        "Store it as clientInfo",
+        "Ignore it after PKCE succeeds",
+        "Compare it exactly with the recorded issuer before using the response"
+      ]
+    },
+    {
+      "q": "How should a client key issuer-minted OAuth credentials and access tokens?",
+      "options": [
+        "Issuer-minted credentials by issuer and tokens by issuer plus resource",
+        "All registrations and tokens under one global client name",
+        "By the server display name only",
+        "By protocol session identifier"
+      ]
+    },
+    {
+      "q": "A resource returns 403 with scope notes:delete. What is the correct next step?",
+      "options": [
+        "Add notes:delete locally without authorization",
+        "Explain the scope, obtain consent, authorize for it, then retry with a new request id",
+        "Send the MCP token to a downstream API",
+        "Reuse the current token and ignore the challenge"
+      ]
+    },
+    {
+      "q": "What is the RFC 9728 metadata URL for the MCP resource https://notes.example.com/mcp?",
+      "options": [
+        "https://notes.example.com/.well-known/oauth-protected-resource/mcp",
+        "https://auth.example.com/.well-known/oauth-protected-resource",
+        "https://notes.example.com/.well-known/oauth-protected-resource",
+        "https://notes.example.com/mcp/.well-known/oauth-protected-resource"
+      ]
+    },
+    {
+      "q": "What must a current MCP gateway preserve between ordinary client requests?",
+      "options": [
+        "One Mcp-Session-Id per backend",
+        "The last HTTP connection",
+        "A standalone GET event stream",
+        "No protocol session; each request carries the information needed to validate and route it"
+      ]
+    },
+    {
+      "q": "A principal-filtered tools/list result should usually use which cache scope?",
+      "options": [
+        "public",
+        "global",
+        "private",
+        "session"
+      ]
+    },
+    {
+      "q": "How should a gateway forward a tool call to a current backend?",
+      "options": [
+        "Open a GET stream first",
+        "Copy the outer bearer token and session id",
+        "Reuse the outer JSON-RPC id as durable state",
+        "Create a fresh self-contained request with gateway client metadata and mediated capabilities"
+      ]
+    },
+    {
+      "q": "How should a gateway use an official Registry server.json record during admission?",
+      "options": [
+        "Validate its publication shape, then join it to separate verified publisher, provenance, policy, and approval state",
+        "Treat publication as a completed security review",
+        "Copy verification claims from arbitrary record fields",
+        "Trust any record whose name looks familiar"
+      ]
+    },
+    {
+      "q": "How are long-lived list-change notifications opened in modern Streamable HTTP?",
+      "options": [
+        "Through a POST subscriptions/listen request whose response is SSE",
+        "Through resources/subscribe",
+        "Through a standalone GET with Last-Event-ID",
+        "Through notifications/initialized"
+      ]
+    },
+    {
+      "q": "Which Tasks extension routing rule is current?",
+      "options": [
+        "Use tasks/result for final output",
+        "Use tasks/list to recover all tasks in a session",
+        "Route tasks/get, tasks/update, and tasks/cancel using taskId as Mcp-Name",
+        "Store the task in Mcp-Session-Id"
+      ]
+    },
+    {
+      "q": "An MCP client discovers a different authorization-server issuer for the same resource. What should it do with its existing registration and access token?",
+      "options": [
+        "Reuse only the access token after changing its audience locally",
+        "Enroll for the new issuer and keep credentials isolated by issuer",
+        "Reuse both because the MCP resource URL did not change",
+        "Store both under the tool name instead of the issuer"
+      ]
+    },
+    {
+      "q": "Which enrollment approach is preferred by the MCP 2026-07-28 authorization profile?",
+      "options": [
+        "RFC 7591 Dynamic Client Registration for every request",
+        "A Client ID Metadata Document served from the client's HTTPS URL",
+        "A protocol session that stores one global client identifier",
+        "A shared client secret embedded in every desktop client"
+      ]
+    },
+    {
+      "q": "A deprecated DCR request describes a loopback desktop client. Which metadata is essential to classify it correctly?",
+      "options": [
+        "Mcp-Session-Id",
+        "A wildcard redirect URI",
+        "application_type set to native",
+        "A reusable bearer token"
+      ]
+    },
+    {
+      "q": "Why does the client validate the RFC 9207 iss value before redeeming an authorization code?",
+      "options": [
+        "To prevent redeeming an honest issuer's code at the wrong token endpoint",
+        "To avoid refreshing the JWKS cache",
+        "To replace PKCE with issuer discovery",
+        "To select a tool from server/discover"
+      ]
+    },
+    {
+      "q": "Where should an MCP resource server cache authorization for the current stateless transport?",
+      "options": [
+        "Under Mcp-Session-Id until the client sends DELETE",
+        "Inside the server/discover result for all later calls",
+        "In the SSE connection until it reconnects",
+        "Nowhere as a protocol-session decision; validate the bearer token on every request"
+      ]
+    },
+    {
+      "q": "Which deployment evidence is strongest before trusting an authorization server?",
+      "options": [
+        "The target server's discovered metadata checked against PKCE, issuer, enrollment, and resource-binding requirements",
+        "A vendor category table copied from an older lesson",
+        "A product page that says OAuth is supported",
+        "A successful login that does not inspect the token audience"
+      ]
+    },
+    {
+      "q": "A team has a reusable review method and an existing API that supplies pull request data. Which design assigns each concern to the right primitive according to the runtime policy?",
+      "options": [
+        "Put the review method in an Agent Skill and expose the API through an MCP tool",
+        "Replace the API with a longer user prompt",
+        "Put both the method and the API implementation in AGENTS.md",
+        "Use a lifecycle hook as the only source of review instructions"
+      ]
+    },
+    {
+      "q": "Why should a validator require the SKILL.md name to match its containing directory?",
+      "options": [
+        "It guarantees every host supports the same invocation syntax",
+        "It gives discovery and packaging one stable identity instead of two conflicting names",
+        "It makes the Markdown heading render correctly",
+        "It allows the skill to bypass host permissions"
+      ]
+    },
+    {
+      "q": "A SKILL.md contains a field that only one runtime understands. What is the portable interpretation?",
+      "options": [
+        "Move the field into the skill name",
+        "Treat it as a host extension and validate it only under an explicit host policy",
+        "The field silently becomes part of the core standard",
+        "Every runtime must implement it before loading the skill"
+      ]
+    },
+    {
+      "q": "Which primitive best represents a check that must run after every tool call?",
+      "options": [
+        "An MCP resource",
+        "A one-shot prompt",
+        "A repository glossary",
+        "A lifecycle hook"
+      ]
+    },
+    {
+      "q": "When is AGENTS.md a better home than an Agent Skill?",
+      "options": [
+        "When an external service needs an authenticated API call",
+        "When a script needs to be executed outside the workspace jail",
+        "When conventions should apply throughout work in a repository",
+        "When instructions should load only for a rare specialist task"
+      ]
+    },
+    {
+      "q": "What does a valid Agent Skill grant by itself?",
+      "options": [
+        "A universal slash command in every agent host",
+        "Discoverable procedural instructions, subject to the host runtime's policies",
+        "Permission to execute every bundled script",
+        "Automatic network access"
+      ]
+    },
+    {
+      "q": "What does a successful run of this lesson's stdlib harness prove?",
+      "options": [
+        "The in-process policy and data flow behaved as asserted",
+        "A real MCP transport completed initialization",
+        "An OAuth authorization server issued a valid token",
+        "A collector received every OpenTelemetry span"
+      ]
+    },
+    {
+      "q": "Which flow matches MCP revision 2026-07-28 for discovering a server and polling long-running work?",
+      "options": [
+        "server/connect, tools/poll, tasks/status",
+        "server/discover, tools/call returning a task handle, tasks/get",
+        "initialize, tools/call, tasks/result",
+        "GET /mcp, tools/call, tasks/list"
+      ]
+    },
+    {
+      "q": "How does A2A v1 name the send-message operation in its gRPC and JSON-RPC bindings?",
+      "options": [
+        "AgentMessage",
+        "message/create",
+        "tasks/send",
+        "SendMessage"
+      ]
+    },
+    {
+      "q": "Which MCP Apps SDK call lets an App request a tool on its originating server?",
+      "options": [
+        "host.callTool(name, args)",
+        "app.callServerTool({ name, arguments })",
+        "app.invoke(name, args)",
+        "server.tools.call(args)"
+      ]
+    },
+    {
+      "q": "What authority does the capstone Agent Skill provide over MCP tools and the sandbox?",
+      "options": [
+        "It bypasses approval after explicit invocation",
+        "It grants every tool named in the body",
+        "It grants read-only network access",
+        "None; host adapters and policy still authorize each capability"
+      ]
+    },
+    {
+      "q": "Which evidence best proves that telemetry crossed the production export boundary?",
+      "options": [
+        "A skill instruction saying to emit spans",
+        "A local dictionary containing a traceId key",
+        "A diagram of the intended span hierarchy",
+        "Receiver-side collector data with trace and parent assertions"
+      ]
+    },
+    {
+      "q": "A host finds the same skill name in project and user scopes. What determines which one wins?",
+      "options": [
+        "The host's documented scope-precedence policy",
+        "The directory with the newest timestamp",
+        "The longest SKILL.md body",
+        "The skill description's first verb"
+      ]
+    },
+    {
+      "q": "What belongs in the first discovery catalog sent to a model before implementation?",
+      "options": [
+        "Every script, asset, and reference in full",
+        "A compact identity record such as name and description",
+        "The output from running every bundled script",
+        "Only the modification timestamp"
+      ]
+    },
+    {
+      "q": "Which sequence correctly implements progressive disclosure under this contract?",
+      "options": [
+        "Load all bodies, discard most, then build a catalog",
+        "Read references first, then infer which skill owns them",
+        "Run scripts, load assets, then discover names",
+        "Catalog metadata, load the selected SKILL.md body, then read a needed reference"
+      ]
+    },
+    {
+      "q": "Why should an equal-precedence duplicate be reported as ambiguous?",
+      "options": [
+        "Because choosing by incidental directory order makes routing nondeterministic and hard to audit",
+        "Because every collision means both skills are invalid YAML",
+        "Because duplicate names automatically receive network access",
+        "Because the user scope must always win"
+      ]
+    },
+    {
+      "q": "A SKILL.md references `references/archive/schema.md` in a bundle that permits only one-level references. What should validation do?",
+      "options": [
+        "Copy the file to a global cache automatically",
+        "Execute it to discover whether it is useful",
+        "Reject it as a deeper reference chain than the package contract allows",
+        "Follow it because every relative path is safe"
+      ]
+    },
+    {
+      "q": "What is the most defensible response when a catalog exceeds its declared context budget?",
+      "options": [
+        "Apply deterministic limits, report omitted entries, and allow narrower discovery",
+        "Ignore the budget whenever a skill has a long description",
+        "Remove skill names while keeping full instruction bodies",
+        "Randomly sample entries on every run"
+      ]
+    },
+    {
+      "q": "Which event is an example of programmatic skill activation from the host perspective?",
+      "options": [
+        "An evaluation harness selects a named skill for a scheduled scenario",
+        "A user chooses a named skill in the host UI",
+        "A model infers a skill from semantic relevance",
+        "A catalog reads descriptions during discovery"
+      ]
+    },
+    {
+      "q": "A host recognizes `user-invocable: false`. How should a portability guide describe that field?",
+      "options": [
+        "A filesystem permission bit",
+        "A replacement for the skill description",
+        "A host-specific invocation extension interpreted by an adapter",
+        "A required field in every Agent Skill"
+      ]
+    },
+    {
+      "q": "What should an implicit model router do with a near-miss query below its activation threshold?",
+      "options": [
+        "Activate the alphabetically first skill",
+        "Lower the threshold silently for that request",
+        "Convert the query into a human slash command",
+        "Decline activation and continue without the skill or request clarification"
+      ]
+    },
+    {
+      "q": "In the human/model 2x2, what does `human=true, model=false` mean?",
+      "options": [
+        "The skill has unrestricted tool authority",
+        "A human may invoke it explicitly, but the model should not select it implicitly",
+        "Only an evaluation harness may activate it",
+        "The model may activate it only after a network request"
+      ]
+    },
+    {
+      "q": "Why does an evaluation harness usually activate a skill by exact name?",
+      "options": [
+        "It makes descriptions unnecessary",
+        "Exact naming grants sandbox escape privileges",
+        "It isolates skill behavior from routing variance so repeated runs are comparable",
+        "It proves all hosts share one command syntax"
+      ]
+    },
+    {
+      "q": "Which design keeps invocation and authority correctly separated?",
+      "options": [
+        "Allow model activation only when the bundle contains a shell script",
+        "If a user invokes a skill, approve every action it requests",
+        "Route activation through host policy, then review each requested action under the permission model",
+        "Let extension metadata replace filesystem and network policy"
+      ]
+    },
+    {
+      "q": "A SKILL.md says `You may write anywhere on disk`. What authority does that sentence provide?",
+      "options": [
+        "No authority; the host permission model still decides each action",
+        "Write access to the user's home directory",
+        "Write access to every path named by a reference",
+        "Write access after the model repeats the sentence"
+      ]
+    },
+    {
+      "q": "Why must a workspace jail resolve symlinks before checking containment?",
+      "options": [
+        "Resolved paths automatically redact secrets",
+        "Resolution makes every path writable",
+        "Symlinks always contain malformed YAML",
+        "A lexical in-workspace path can point through a symlink to a target outside the jail"
+      ]
+    },
+    {
+      "q": "An external webpage embedded in a task says to disable approval checks. How should the runtime treat that text in this scenario?",
+      "options": [
+        "As a portable SKILL.md extension",
+        "As untrusted data that cannot expand authority",
+        "As a new top-priority system policy",
+        "As approval from the user"
+      ]
+    },
+    {
+      "q": "What is the safest educational way to demonstrate destructive-command review?",
+      "options": [
+        "Allow it whenever the skill bundle contains a script",
+        "Run the command in the course repository and restore files later",
+        "Parse and classify an argv vector, return `deny`, and never execute it",
+        "Print a shell string that students can paste without review"
+      ]
+    },
+    {
+      "q": "A skill proposes an HTTPS call to an origin outside the network allowlist. The user previously invoked the skill. What is the correct verdict?",
+      "options": [
+        "Allow only if the description mentions the internet",
+        "Allow, because invocation implies network consent",
+        "Rewrite the hostname to the first allowlisted host",
+        "Deny under the network policy; activation is not authorization"
+      ]
+    },
+    {
+      "q": "What should happen when a write request contains possible secret material and no approved secret-use path exists?",
+      "options": [
+        "Trust it if the target path is inside the workspace",
+        "Replace it with a random value and continue",
+        "Log the payload so reviewers can inspect the full value",
+        "Deny it without printing the value, and require a separately authorized secret workflow"
+      ]
+    },
+    {
+      "q": "Which evaluation set best reveals whether a skill description over-triggers in the lesson model?",
+      "options": [
+        "Clear positive prompts plus semantically close prompts that should remain negative",
+        "Only one successful end-to-end demonstration",
+        "A list of supported file extensions",
+        "Only prompts copied from the skill name"
+      ]
+    },
+    {
+      "q": "A trigger test has 8 true positives and 2 false positives. What is its precision?",
+      "options": [
+        "0.8 recall, but precision cannot be computed",
+        "0.8",
+        "0.2",
+        "1.0"
+      ]
+    },
+    {
+      "q": "Why compare baseline and with-skill artifacts using the same assertions?",
+      "options": [
+        "To guarantee the skill works in every host",
+        "To remove the need for trigger tests",
+        "To let the skill modify the expected result during evaluation",
+        "To measure whether the skill improves the task output rather than merely activating"
+      ]
+    },
+    {
+      "q": "A host loads SKILL.md but drops `references/` and `scripts/` during installation. How should a portability matrix classify a bundle that requires both?",
+      "options": [
+        "Native, because the frontmatter loaded",
+        "Adapter required, with the missing companion-file and script capabilities listed",
+        "Unsupported, even if an adapter could preserve files",
+        "Guaranteed portable after renaming the directory"
+      ]
+    },
+    {
+      "q": "What does a repeated-run rate add beyond one passing trigger evaluation?",
+      "options": [
+        "A replacement for structural package lint",
+        "Permission for the skill to execute bundled scripts",
+        "Evidence about consistency across multiple executions of each case",
+        "A universal host invocation command"
+      ]
+    },
+    {
+      "q": "Which release gate is most complete for an Agent Skill bundle?",
+      "options": [
+        "The bundle has many reference files and a long description",
+        "The skill works on the author's machine without a baseline",
+        "SKILL.md exists and one positive prompt activates it",
+        "All six layers pass, local captured-mode values have matching source-bound digests, and an out-of-bundle trusted attestation binds the complete evidence root"
+      ]
+    },
+    {
+      "q": "A tool publishes an outputSchema with type array. Which structuredContent value is valid?",
+      "options": [
+        "Any JSON value because outputSchema is only documentation",
+        "Only an object because MCP structured results are object-only",
+        "An array whose items satisfy the published schema",
+        "A text block without structuredContent"
+      ]
+    },
+    {
+      "q": "A tools/list result contains nextCursor as an empty string. What should the client do?",
+      "options": [
+        "Treat the empty string as the end of pagination",
+        "Send another list request with the exact empty string cursor",
+        "Replace it with cursor zero",
+        "Decode it to discover the next page number"
+      ]
+    },
+    {
+      "q": "Which parameter should be rejected by a strict deployment policy when marked with x-mcp-header?",
+      "options": [
+        "A string token field mirrored as Token",
+        "An integer shard field mirrored as Shard",
+        "A string region field mirrored as Region",
+        "A boolean dry_run field mirrored as Dry-Run"
+      ]
+    },
+    {
+      "q": "What is the main difference between a resource_link block and an embedded resource block?",
+      "options": [
+        "A resource link points to data fetched later, while an embedded resource carries data now",
+        "A resource link is automatically authorized forever",
+        "An embedded resource must also appear in resources/list",
+        "Only resource links can include a URI"
+      ]
+    },
+    {
+      "q": "How should a client handle one malformed tool descriptor in a tools/list page?",
+      "options": [
+        "Reject that tool while continuing to evaluate unrelated tools",
+        "Silently repair the descriptor",
+        "Expose it but add a warning to the model prompt",
+        "Treat every tool execution as a JSON-RPC notification"
+      ]
+    },
+    {
+      "q": "Which failure belongs in a JSON-RPC error rather than a tool result with isError true?",
+      "options": [
+        "A report source is temporarily unavailable",
+        "A downstream API returns an actionable tool-specific error",
+        "A business rule rejects a requested date",
+        "The requested tool name does not exist"
+      ]
+    },
+    {
+      "q": "A mutation response is lost and the client retries with a new JSON-RPC id. What makes the retry safe?",
+      "options": [
+        "The new JSON-RPC id automatically deduplicates the mutation",
+        "The tool descriptor includes an idempotentHint",
+        "A durable application idempotency key reused with identical arguments",
+        "The retry uses the same HTTP connection"
+      ]
+    },
+    {
+      "q": "How does a client cancel an in-flight request over stdio in MCP 2026-07-28?",
+      "options": [
+        "Call tasks/cancel for the JSON-RPC id",
+        "Send notifications/cancelled with the active request id",
+        "Close a per-request SSE stream",
+        "Send a DELETE request to the MCP endpoint"
+      ]
+    },
+    {
+      "q": "How does a client cancel an in-flight Streamable HTTP request?",
+      "options": [
+        "Close that request's SSE response stream",
+        "POST notifications/cancelled to the MCP endpoint",
+        "Wait for the server to send notifications/cancelled",
+        "Send Last-Event-ID with an empty value"
+      ]
+    },
+    {
+      "q": "Progress keeps arriving before every idle timeout. Which deadline must still end a runaway request?",
+      "options": [
+        "An absolute maximum timeout measured from request start",
+        "The next pagination cursor expiry",
+        "The proxy keepalive interval",
+        "The Task polling interval"
+      ]
+    },
+    {
+      "q": "What does a successful tasks/cancel response prove?",
+      "options": [
+        "The durable result was deleted",
+        "The worker has already stopped",
+        "The server acknowledged cancellation intent",
+        "The Task must eventually become cancelled"
+      ]
+    },
+    {
+      "q": "A subscription SSE stream drops after several progress events. Which recovery plan fits MCP 2026-07-28?",
+      "options": [
+        "Resume from Last-Event-ID and replay every in-flight mutation",
+        "Open a GET event stream and restore Mcp-Session-Id",
+        "Keep the old request id and assume no updates were lost",
+        "Open a new listen request, refetch authoritative state, and avoid unsafe mutation replay"
+      ]
+    },
+    {
+      "q": "What does successful publication in an MCP Registry establish for a production gateway?",
+      "options": [
+        "The record passed Registry publication controls, while local runtime admission is still required",
+        "The live endpoint exactly matches the published package",
+        "The newest version should immediately replace every older route",
+        "The server is safe for every principal"
+      ]
+    },
+    {
+      "q": "Which namespace comparison rejects com.exampleevil/tool when the verified namespace is com.example?",
+      "options": [
+        "Check whether the whole name starts with com.example",
+        "Search for the substring example",
+        "Split at the slash and compare the namespace segment exactly",
+        "Trust the namespace written inside server.json"
+      ]
+    },
+    {
+      "q": "A live server adds a new tool while its Registry record and package coordinate stay unchanged. Which evidence detects this?",
+      "options": [
+        "A fresh normalized descriptor digest compared with the admitted toolset pin",
+        "The Registry publication timestamp",
+        "The namespace authentication method",
+        "The semantic version string alone"
+      ]
+    },
+    {
+      "q": "What should happen when an admitted Registry version changes from active to deprecated?",
+      "options": [
+        "Quarantine it from new routing and retain the historical admission evidence",
+        "Rewrite the published record back to active",
+        "Delete all evidence so clients cannot discover it",
+        "Ignore status because package ownership was already verified"
+      ]
+    },
+    {
+      "q": "Which target is eligible for an automatic rollback?",
+      "options": [
+        "Any version whose name sorts before the candidate",
+        "A previously admitted pin that is active under policy, healthy, and not quarantined",
+        "The version marked latest, even if it was never reviewed",
+        "A deleted Registry version with a familiar package name"
+      ]
+    },
+    {
+      "q": "Why should admission ledger heads be anchored in a separate trust domain?",
+      "options": [
+        "It makes artifact digests unnecessary",
+        "It lets publishers set Registry-managed status",
+        "It converts mutable version ranges into exact pins",
+        "A local hash chain detects edits, while a separate anchor makes a complete local rewrite detectable"
+      ]
+    },
+    {
+      "q": "Why is one successful SDK tools/list call insufficient conformance evidence?",
+      "options": [
+        "The normalized value may hide wire fields, version behavior, proxy changes, and invalid responses",
+        "SDKs cannot call MCP tools",
+        "A successful call always selects the legacy era",
+        "Conformance applies only to Registry publishers"
+      ]
+    },
+    {
+      "q": "A modern probe returns JSON-RPC error -32021. What should a fallback-capable client do?",
+      "options": [
+        "Immediately send initialize for the legacy era",
+        "Treat the peer as offline",
+        "Keep the modern era and correct or report the missing capability declaration",
+        "Ignore the error and retry without capabilities"
+      ]
+    },
+    {
+      "q": "How should a modern client handle a result with resultType complete and an unfamiliar additive field?",
+      "options": [
+        "Change resultType to input_required",
+        "Reject every result containing an unknown key",
+        "Accept the known result type and preserve or deliberately ignore the additive field according to its role",
+        "Treat the unfamiliar field as a legacy handshake"
+      ]
+    },
+    {
+      "q": "What is the required JSON-RPC response to a notification with no id?",
+      "options": [
+        "A server/discover result",
+        "No JSON-RPC response",
+        "A complete result with null content",
+        "An error with id null"
+      ]
+    },
+    {
+      "q": "Which evidence best proves that a proxy preserved an origin protocol error?",
+      "options": [
+        "Redacted ingress, origin, and egress status and body evidence with stable digests",
+        "A screenshot of the gateway dashboard",
+        "The SDK exception class alone",
+        "The proxy process uptime"
+      ]
+    },
+    {
+      "q": "A candidate fails its negative transcripts and the previous version has no admission or health evidence. What should the release gate do?",
+      "options": [
+        "Select the newest Registry version",
+        "Promote because golden transcripts passed",
+        "Roll back to the package tagged latest",
+        "Hold the release until an eligible rollback target or a corrected candidate is proven"
+      ]
+    }
+  ]
+}

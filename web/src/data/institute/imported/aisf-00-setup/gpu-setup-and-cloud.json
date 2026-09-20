@@ -1,0 +1,81 @@
+{
+  "id": "aisf-00-setup::gpu-setup-and-cloud",
+  "num": 3,
+  "slug": "gpu-setup-and-cloud",
+  "title": "GPU Setup & Cloud",
+  "tagline": "Training on CPU is fine for learning. Training for real needs a GPU.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~45 minutes",
+  "objectives": [
+    "Verify local GPU availability using `nvidia-smi` and PyTorch's CUDA API",
+    "Configure Google Colab with a T4 GPU for free cloud-based experiments",
+    "Benchmark matrix multiplication on CPU vs GPU and measure the speedup",
+    "Estimate the largest model that fits in your VRAM using the fp16 rule of thumb"
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Most lessons in phases 1-3 run fine on CPU. But once you start training CNNs, transformers, or LLMs (phases 4+), you need GPU acceleration. A training run that takes 8 hours on CPU takes 10 minutes on GPU.</p>\n<p>You have three options: local GPU, cloud GPU, or Google Colab (free).</p>\n<h2>The Concept</h2>\n<pre><code>Your options:\n\n1. Local NVIDIA GPU\n   Cost: $0 (you already have it)\n   Setup: Install CUDA + cuDNN\n   Best for: Regular use, large datasets\n\n2. Google Colab (free tier)\n   Cost: $0\n   Setup: None\n   Best for: Quick experiments, no GPU at home\n\n3. Cloud GPU (Lambda, RunPod, Vast.ai)\n   Cost: $0.20-2.00/hr\n   Setup: SSH + install\n   Best for: Serious training, large models\n</code></pre>\n<p class=\"i-lesson-figure\"><em>Diagram <code>s0-gpu-dispatch</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Option 1: Local NVIDIA GPU</h3>\n<p>Check if you have one:</p>\n<pre><code class=\"language-bash\">nvidia-smi\n</code></pre>\n<p>Install PyTorch with CUDA:</p>\n<pre><code class=\"language-python\">import torch\n\nprint(f&quot;CUDA available: {torch.cuda.is_available()}&quot;)\nprint(f&quot;CUDA version: {torch.version.cuda}&quot;)\nif torch.cuda.is_available():\n    print(f&quot;GPU: {torch.cuda.get_device_name(0)}&quot;)\n    print(f&quot;Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB&quot;)\n</code></pre>\n<h3>Option 2: Google Colab</h3>\n<ol>\n<li>Go to <a href=\"https://colab.research.google.com\" target=\"_blank\" rel=\"noopener\">colab.research.google.com</a></li>\n<li>Runtime &gt; Change runtime type &gt; T4 GPU</li>\n<li>Run <code>!nvidia-smi</code> to verify</li>\n</ol>\n<p>Upload notebooks from this course directly to Colab.</p>\n<h3>Option 3: Cloud GPU</h3>\n<p>For Lambda Labs, RunPod, or Vast.ai:</p>\n<pre><code class=\"language-bash\">ssh user@your-gpu-instance\n\npip install torch torchvision torchaudio\npython -c &quot;import torch; print(torch.cuda.get_device_name(0))&quot;\n</code></pre>\n<h3>No GPU? No problem.</h3>\n<p>Most lessons work on CPU. The ones that need GPU will say so and include Colab links.</p>\n<pre><code class=\"language-python\">device = torch.device(&quot;cuda&quot; if torch.cuda.is_available() else &quot;cpu&quot;)\nprint(f&quot;Using: {device}&quot;)\n</code></pre>\n<h2>Build It: GPU vs CPU benchmark</h2>\n<pre><code class=\"language-python\">import torch\nimport time\n\nsize = 5000\n\na_cpu = torch.randn(size, size)\nb_cpu = torch.randn(size, size)\n\nstart = time.time()\nc_cpu = a_cpu @ b_cpu\ncpu_time = time.time() - start\nprint(f&quot;CPU: {cpu_time:.3f}s&quot;)\n\nif torch.cuda.is_available():\n    a_gpu = a_cpu.to(&quot;cuda&quot;)\n    b_gpu = b_cpu.to(&quot;cuda&quot;)\n\n    torch.cuda.synchronize()\n    start = time.time()\n    c_gpu = a_gpu @ b_gpu\n    torch.cuda.synchronize()\n    gpu_time = time.time() - start\n    print(f&quot;GPU: {gpu_time:.3f}s&quot;)\n    print(f&quot;Speedup: {cpu_time / gpu_time:.0f}x&quot;)\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li>Run the benchmark above and compare CPU vs GPU times</li>\n<li>If you don&#39;t have a GPU, run it on Google Colab and compare</li>\n<li>Check how much GPU memory you have and estimate the largest model you can fit (rule of thumb: 2 bytes per parameter for fp16)</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CUDA</td>\n<td>&quot;GPU programming&quot;</td>\n<td>NVIDIA&#39;s parallel computing platform that lets you run code on the GPU</td>\n</tr>\n<tr>\n<td>VRAM</td>\n<td>&quot;GPU memory&quot;</td>\n<td>Video RAM on the GPU, separate from system RAM. Limits model size.</td>\n</tr>\n<tr>\n<td>fp16</td>\n<td>&quot;Half precision&quot;</td>\n<td>16-bit floating point, uses half the memory of fp32 with minimal accuracy loss</td>\n</tr>\n<tr>\n<td>Tensor Core</td>\n<td>&quot;Fast matrix hardware&quot;</td>\n<td>Specialized GPU cores for matrix multiplication, 4-8x faster than regular cores</td>\n</tr>\n</tbody></table>\n",
+  "hasMermaid": false,
+  "code": {},
+  "quiz": [
+    {
+      "q": "Why is a GPU faster than a CPU for training neural networks?",
+      "options": [
+        "GPUs have higher clock speeds than CPUs",
+        "GPUs can perform thousands of parallel matrix operations simultaneously",
+        "GPUs use a more efficient programming language",
+        "GPUs have more RAM than CPUs"
+      ],
+      "answer": 1,
+      "explanation": "GPUs have thousands of cores optimized for parallel computation, making them ideal for the matrix multiplications that dominate neural network training."
+    },
+    {
+      "q": "What does VRAM refer to?",
+      "options": [
+        "The total RAM available across all devices",
+        "A type of CPU cache memory",
+        "Video RAM on the GPU, separate from system RAM",
+        "Virtual RAM used by the operating system for swap space"
+      ],
+      "answer": 2,
+      "explanation": "VRAM (Video RAM) is the dedicated memory on a GPU. It limits the size of models and batch sizes you can use during training, separate from your system's main RAM."
+    },
+    {
+      "q": "What command verifies that your NVIDIA GPU is detected and shows its current status?",
+      "options": [
+        "torch.cuda.list_devices()",
+        "nvidia-smi",
+        "lspci | grep gpu",
+        "gpu --status"
+      ],
+      "answer": 1,
+      "explanation": "nvidia-smi (NVIDIA System Management Interface) displays GPU utilization, memory usage, temperature, and running processes. It is the standard tool for verifying GPU availability."
+    },
+    {
+      "q": "When benchmarking GPU vs CPU matrix multiplication, why must you call torch.cuda.synchronize() before measuring GPU time?",
+      "options": [
+        "To transfer data from CPU to GPU memory",
+        "To ensure all GPU operations have completed before stopping the timer",
+        "To free unused GPU memory",
+        "To reset the GPU clock speed to its base frequency"
+      ],
+      "answer": 1,
+      "explanation": "GPU operations are asynchronous -- Python returns immediately while the GPU is still computing. synchronize() blocks until all GPU operations finish, giving accurate timing."
+    },
+    {
+      "q": "Using the fp16 rule of thumb, approximately how many parameters can fit in 24 GB of VRAM?",
+      "options": [
+        "6 billion parameters",
+        "24 billion parameters",
+        "12 billion parameters",
+        "48 billion parameters"
+      ],
+      "answer": 2,
+      "explanation": "In fp16, each parameter uses 2 bytes. 24 GB / 2 bytes = 12 billion parameters. This is a rough estimate; actual usage includes activations, gradients, and optimizer states."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/00-setup-and-tooling/03-gpu-setup-and-cloud"
+  }
+}

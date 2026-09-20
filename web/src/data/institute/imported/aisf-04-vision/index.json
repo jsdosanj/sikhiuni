@@ -1,0 +1,209 @@
+{
+  "track": "aisf-04-vision",
+  "phaseDir": "04-computer-vision",
+  "blurb": "From pixels to understanding across image, video, and 3D.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-04-vision::image-fundamentals",
+      "num": 1,
+      "slug": "image-fundamentals",
+      "title": "Image Fundamentals — Pixels, Channels, Color Spaces",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::convolutions-from-scratch",
+      "num": 2,
+      "slug": "convolutions-from-scratch",
+      "title": "Convolutions from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::cnns-lenet-to-resnet",
+      "num": 3,
+      "slug": "cnns-lenet-to-resnet",
+      "title": "CNNs — LeNet to ResNet",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::image-classification",
+      "num": 4,
+      "slug": "image-classification",
+      "title": "Image Classification",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::transfer-learning",
+      "num": 5,
+      "slug": "transfer-learning",
+      "title": "Transfer Learning & Fine-Tuning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::object-detection-yolo",
+      "num": 6,
+      "slug": "object-detection-yolo",
+      "title": "Object Detection — YOLO from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::semantic-segmentation-unet",
+      "num": 7,
+      "slug": "semantic-segmentation-unet",
+      "title": "Semantic Segmentation — U-Net",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::instance-segmentation-mask-rcnn",
+      "num": 8,
+      "slug": "instance-segmentation-mask-rcnn",
+      "title": "Instance Segmentation — Mask R-CNN",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::image-generation-gans",
+      "num": 9,
+      "slug": "image-generation-gans",
+      "title": "Image Generation — GANs",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::image-generation-diffusion",
+      "num": 10,
+      "slug": "image-generation-diffusion",
+      "title": "Image Generation — Diffusion Models",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::stable-diffusion",
+      "num": 11,
+      "slug": "stable-diffusion",
+      "title": "Stable Diffusion — Architecture & Fine-Tuning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::video-understanding",
+      "num": 12,
+      "slug": "video-understanding",
+      "title": "Video Understanding — Temporal Modeling",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::3d-vision-nerf",
+      "num": 13,
+      "slug": "3d-vision-nerf",
+      "title": "3D Vision — Point Clouds & NeRFs",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::vision-transformers",
+      "num": 14,
+      "slug": "vision-transformers",
+      "title": "Vision Transformers (ViT)",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::real-time-edge",
+      "num": 15,
+      "slug": "real-time-edge",
+      "title": "Real-Time Vision — Edge Deployment",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::vision-pipeline-capstone",
+      "num": 16,
+      "slug": "vision-pipeline-capstone",
+      "title": "Build a Complete Vision Pipeline — Capstone",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::self-supervised-vision",
+      "num": 17,
+      "slug": "self-supervised-vision",
+      "title": "Self-Supervised Vision — SimCLR, DINO, MAE",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::open-vocab-clip",
+      "num": 18,
+      "slug": "open-vocab-clip",
+      "title": "Open-Vocabulary Vision — CLIP",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::ocr-document-understanding",
+      "num": 19,
+      "slug": "ocr-document-understanding",
+      "title": "OCR & Document Understanding",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::image-retrieval-metric",
+      "num": 20,
+      "slug": "image-retrieval-metric",
+      "title": "Image Retrieval & Metric Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::keypoint-pose",
+      "num": 21,
+      "slug": "keypoint-pose",
+      "title": "Keypoint Detection & Pose Estimation",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::3d-gaussian-splatting",
+      "num": 22,
+      "slug": "3d-gaussian-splatting",
+      "title": "3D Gaussian Splatting from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::diffusion-transformers-rectified-flow",
+      "num": 23,
+      "slug": "diffusion-transformers-rectified-flow",
+      "title": "Diffusion Transformers & Rectified Flow",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::sam3-open-vocab-segmentation",
+      "num": 24,
+      "slug": "sam3-open-vocab-segmentation",
+      "title": "SAM 3 & Open-Vocabulary Segmentation",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::vision-language-models",
+      "num": 25,
+      "slug": "vision-language-models",
+      "title": "Vision-Language Models — The ViT-MLP-LLM Pattern",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::monocular-depth",
+      "num": 26,
+      "slug": "monocular-depth",
+      "title": "Monocular Depth & Geometry Estimation",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::multi-object-tracking",
+      "num": 27,
+      "slug": "multi-object-tracking",
+      "title": "Multi-Object Tracking & Video Memory",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-04-vision::world-models-video-diffusion",
+      "num": 28,
+      "slug": "world-models-video-diffusion",
+      "title": "World Models & Video Diffusion",
+      "nQuiz": 5
+    }
+  ]
+}

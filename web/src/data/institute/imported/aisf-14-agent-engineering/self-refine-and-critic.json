@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::self-refine-and-critic",
+  "num": 5,
+  "slug": "self-refine-and-critic",
+  "title": "Self-Refine and CRITIC: Iterative Output Improvement",
+  "tagline": "Self-Refine (Madaan et al., 2023) uses one LLM in three roles — generate, feedback, refine — in a loop. Average gain: +20 absolute on 7 tasks. CRITIC (Gou et al., 2023) hardens the feedback step by routing verification through external tools. In 2026 this pattern ships in every framework as \"evaluator-optimizer\" (Anthropic) or a guardrail loop (OpenAI Agents SDK).",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "State Self-Refine's three prompts (generate, feedback, refine) and explain why history matters for the refine prompt.",
+    "Explain CRITIC's critical insight: LLMs are unreliable at self-verification without external grounding.",
+    "Implement a stdlib Self-Refine loop with history and an optional external verifier.",
+    "Map this pattern to Anthropic's \"evaluator-optimizer\" workflow and OpenAI Agents SDK's output guardrails."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>An agent produces an answer that is almost right. Maybe a line of code has a syntax error. Maybe a summary is too long. Maybe a plan misses an edge case. What you want is: the agent critiques its own output, then fixes it.</p>\n<p>Self-Refine shows this works with a single model, no training data, no RL. But there is a catch: LLMs are bad at self-verification on hard facts. CRITIC names the fix — route the verify step through external tools (search, code interpreter, calculator, test runner).</p>\n<p>Together these two papers define the 2026 default for iterative improvement: generate, verify (externally when possible), refine, stop when the verifier passes.</p>\n<h2>The Concept</h2>\n<h3>Self-Refine (Madaan et al., NeurIPS 2023)</h3>\n<p>One LLM, three roles:</p>\n<pre><code>generate(task)            -&gt; output_0\nfeedback(task, output_0)  -&gt; critique_0\nrefine(task, output_0, critique_0, history) -&gt; output_1\nfeedback(task, output_1)  -&gt; critique_1\nrefine(task, output_1, critique_1, history) -&gt; output_2\n...\nstop when feedback says &quot;no issues&quot; or budget exhausted.\n</code></pre>\n<p>Key detail: <code>refine</code> sees the full history — all prior outputs and critiques — so it does not repeat mistakes. The paper ablates this: drop history and quality drops sharply.</p>\n<p>Headline: +20 absolute improvement averaged across 7 tasks (math, code, acronym, dialog) including GPT-4. No training, no external tools, single model.</p>\n<h3>CRITIC (Gou et al., arXiv:2305.11738, v4 Feb 2024)</h3>\n<p>Self-Refine&#39;s weakness: the feedback step is an LLM scoring itself. For factual claims this is unreliable (a hallucination often looks convincing to the model that produced it). CRITIC replaces <code>feedback(task, output)</code> with <code>verify(task, output, tools)</code> where <code>tools</code> includes:</p>\n<ul>\n<li>A search engine for factual claims.</li>\n<li>A code interpreter for code correctness.</li>\n<li>A calculator for arithmetic.</li>\n<li>Domain-specific verifiers (unit tests, type checkers, linters).</li>\n</ul>\n<p>The verifier produces a structured critique grounded in tool results. The refiner then conditions on this critique.</p>\n<p>Headline: CRITIC outperforms Self-Refine on factual tasks because the critique is grounded. On tasks without external verifiers (creative writing, formatting), CRITIC reduces to Self-Refine.</p>\n<h3>The stop condition</h3>\n<p>Two common shapes:</p>\n<ol>\n<li><strong>Verifier passes.</strong> External test returns success. Preferred when available (unit tests, type checker, guardrail assertion).</li>\n<li><strong>No feedback issued.</strong> Model says &quot;the output is fine.&quot; Cheaper but unreliable; pair with a max-iteration cap.</li>\n</ol>\n<p>2026 default: combine them. &quot;Stop if verifier passes OR model says fine AND iterations &gt;= 2 OR iterations &gt;= max_iterations.&quot;</p>\n<h3>Evaluator-Optimizer (Anthropic, 2024)</h3>\n<p>Anthropic&#39;s Dec 2024 post names this as one of the five workflow patterns. Two roles:</p>\n<ul>\n<li>Evaluator: scores the output and produces a critique.</li>\n<li>Optimizer: revises the output given the critique.</li>\n</ul>\n<p>Loop until the evaluator passes. This is Self-Refine/CRITIC in Anthropic&#39;s framing. The critical engineering detail Anthropic adds: the evaluator and optimizer prompts should be substantially different so the model does not just rubber-stamp.</p>\n<h3>OpenAI Agents SDK output guardrails</h3>\n<p>OpenAI Agents SDK ships this pattern as &quot;output guardrails.&quot; A guardrail is a validator that runs on the final output of an agent. If the guardrail trips (raises <code>OutputGuardrailTripwireTriggered</code>), the output is rejected and the agent can retry. Guardrails can call tools (CRITIC-style) or be pure functions (Self-Refine-style).</p>\n<h3>2026 pitfalls</h3>\n<ul>\n<li><strong>Rubber-stamp loops.</strong> Same model doing generation and critique with the same prompt style converges on &quot;looks good to me.&quot; Use structurally different prompts, or a smaller cheap model for critique.</li>\n<li><strong>Over-refinement.</strong> Each refine pass adds latency and tokens. Budget 1-3 passes; after that, escalate to human review.</li>\n<li><strong>CRITIC on trivial tasks.</strong> If there is no external verifier, CRITIC degenerates to Self-Refine; do not pay the latency for a stub verifier.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>self-refine</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements Self-Refine and CRITIC on a toy task: produce a short bullet list given a topic. The verifier checks format (3 bullets, each under 60 chars). CRITIC adds an external &quot;fact verifier&quot; that penalizes known hallucinations.</p>\n<p>Components:</p>\n<ul>\n<li><code>generate</code> — scripted producer.</li>\n<li><code>feedback</code> — LLM-style self-critique.</li>\n<li><code>verify_external</code> — CRITIC-style grounded verifier.</li>\n<li><code>refine</code> — rewrites output given history.</li>\n<li>Stop condition — verifier passes or max 4 iterations.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Compare the Self-Refine vs CRITIC runs. CRITIC catches a factual error Self-Refine missed because the external verifier has grounding the self-critic does not.</p>\n<h2>Use It</h2>\n<p>Anthropic&#39;s evaluator-optimizer is this pattern in Claude-friendly language. OpenAI Agents SDK&#39;s output guardrails are CRITIC-shaped (guardrails can call tools). LangGraph ships a reflection node that reads like Self-Refine. Google&#39;s Gemini 2.5 Computer Use adds a per-step safety evaluator that is a CRITIC variant: every action is verified before commit.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-refine-loop.md</code> configures an evaluator-optimizer loop given task shape, verifier availability, and iteration budget. Emits prompts for generator, evaluator/verifier, and optimizer, plus a stop policy.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run the toy with max_iterations=1. Does CRITIC still help?</li>\n<li>Replace the external verifier with a noisy one (random 30% false positives). What does the loop do? This is the 2026 reality of most guardrail stacks.</li>\n<li>Implement a &quot;generator-critic on different models&quot; variant: big model generates, small model critiques. Does it beat same-model?</li>\n<li>Read CRITIC Section 3 (arXiv:2305.11738 v4). Name the three verification-tool categories and give an example for each.</li>\n<li>Map OpenAI Agents SDK&#39;s <code>output_guardrails</code> to CRITIC&#39;s verifier role. What does the SDK get wrong, and what does it get right?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Self-Refine</td>\n<td>&quot;LLM that fixes itself&quot;</td>\n<td>Generate -&gt; feedback -&gt; refine loop in one model, with history</td>\n</tr>\n<tr>\n<td>CRITIC</td>\n<td>&quot;Tool-grounded verification&quot;</td>\n<td>Replace feedback with an external verifier (search, code, calc, tests)</td>\n</tr>\n<tr>\n<td>Evaluator-Optimizer</td>\n<td>&quot;Anthropic workflow pattern&quot;</td>\n<td>Two roles — evaluator scores, optimizer revises — looped to convergence</td>\n</tr>\n<tr>\n<td>Output guardrail</td>\n<td>&quot;Post-hoc check&quot;</td>\n<td>OpenAI Agents SDK validator that runs after an agent produces output</td>\n</tr>\n<tr>\n<td>Verify step</td>\n<td>&quot;Critique phase&quot;</td>\n<td>The load-bearing decision: grounded or self-rated</td>\n</tr>\n<tr>\n<td>Refine history</td>\n<td>&quot;What the model already tried&quot;</td>\n<td>Prior outputs + critiques prepended to refine prompt; drop and quality collapses</td>\n</tr>\n<tr>\n<td>Rubber-stamp loop</td>\n<td>&quot;Self-agreement failure&quot;</td>\n<td>Same-prompt critique returns &quot;looks good&quot;; fix with structurally different prompts</td>\n</tr>\n<tr>\n<td>Stop condition</td>\n<td>&quot;Convergence test&quot;</td>\n<td>Verifier passes OR no feedback AND iteration cap; never single-condition</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2303.17651\" target=\"_blank\" rel=\"noopener\">Madaan et al., Self-Refine (arXiv:2303.17651)</a> — the canonical paper</li>\n<li><a href=\"https://arxiv.org/abs/2305.11738\" target=\"_blank\" rel=\"noopener\">Gou et al., CRITIC (arXiv:2305.11738)</a> — tool-grounded verification</li>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a> — evaluator-optimizer workflow pattern</li>\n<li><a href=\"https://openai.github.io/openai-agents-python/\" target=\"_blank\" rel=\"noopener\">OpenAI Agents SDK docs</a> — output guardrails as CRITIC-shaped verifiers</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy Self-Refine and CRITIC loop.\n\nTask: produce a 3-bullet summary under 60 chars per bullet that does not contain\nknown factual errors. Self-Refine uses LLM-style self-critique; CRITIC routes\nverification through an external fact list.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\n\n\nKNOWN_WRONG_FACTS = [\n    \"paris is the capital of germany\",\n    \"mt everest is in europe\",\n    \"the sun orbits the earth\",\n]\n\n\n@dataclass\nclass Attempt:\n    iteration: int\n    output: str\n    critique: str\n    verified: bool\n\n\ndef generate(topic: str, history: list[Attempt]) -> str:\n    if not history:\n        return (\n            \"- Paris is the capital of Germany\\n\"\n            \"- Mt Everest is in Europe\\n\"\n            \"- Water boils at 100C\"\n        )\n    last = history[-1]\n    if \"germany\" in last.critique.lower():\n        return (\n            \"- Paris is the capital of France\\n\"\n            \"- Mt Everest is in Europe\\n\"\n            \"- Water boils at 100C\"\n        )\n    if \"everest\" in last.critique.lower():\n        return (\n            \"- Paris is the capital of France\\n\"\n            \"- Mt Everest is in Asia\\n\"\n            \"- Water boils at 100C at sea level\"\n        )\n    return history[-1].output\n\n\ndef feedback_self(output: str) -> tuple[str, bool]:\n    if \"Germany\" in output and \"Paris\" in output:\n        return \"first bullet reads wrong, double-check capital\", False\n    if \"Europe\" in output and \"Everest\" in output:\n        return \"second bullet's continent looks off to me\", False\n    return \"no issues\", True\n\n\ndef verify_external(output: str) -> tuple[str, bool]:\n    text = output.lower()\n    for fact in KNOWN_WRONG_FACTS:\n        key = fact.split(\" is \")[0] if \" is \" in fact else fact\n        if \"paris\" in text and \"germany\" in text:\n            return f\"verifier: 'paris is the capital of germany' contradicts reference data\", False\n        if \"everest\" in text and \"europe\" in text:\n            return f\"verifier: 'mt everest is in europe' contradicts reference data\", False\n    if len([l for l in output.splitlines() if l.startswith(\"-\")]) != 3:\n        return \"verifier: expected 3 bullet lines\", False\n    if any(len(l) > 60 for l in output.splitlines()):\n        return \"verifier: bullet exceeds 60 chars\", False\n    return \"verifier: ok\", True\n\n\ndef refine(topic: str, prev: str, critique: str, history: list[Attempt]) -> str:\n    return generate(topic, history)\n\n\ndef run_loop(topic: str, use_critic: bool, max_iters: int = 4) -> list[Attempt]:\n    history: list[Attempt] = []\n    output = generate(topic, history)\n    verify = verify_external if use_critic else (lambda o: feedback_self(o))\n    for i in range(1, max_iters + 1):\n        critique, ok = verify(output)\n        history.append(Attempt(i, output, critique, ok))\n        if ok:\n            break\n        output = refine(topic, output, critique, history)\n    return history\n\n\ndef print_run(label: str, history: list[Attempt]) -> None:\n    print(f\"\\n{label}\")\n    print(\"-\" * 60)\n    for a in history:\n        tag = \"OK \" if a.verified else \"...\"\n        print(f\"  iter {a.iteration} {tag} critique: {a.critique}\")\n        for line in a.output.splitlines():\n            print(f\"    {line}\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"SELF-REFINE and CRITIC — Phase 14, Lesson 05\")\n    print(\"=\" * 70)\n\n    hist_self = run_loop(\"world facts\", use_critic=False)\n    print_run(\"Self-Refine (self-critique only)\", hist_self)\n\n    hist_critic = run_loop(\"world facts\", use_critic=True)\n    print_run(\"CRITIC (external verifier)\", hist_critic)\n\n    def summary(hist: list[Attempt]) -> str:\n        return \"passed\" if hist and hist[-1].verified else \"did not converge\"\n\n    print()\n    print(f\"Self-Refine ended: {summary(hist_self)}  after {len(hist_self)} iters\")\n    print(f\"CRITIC    ended: {summary(hist_critic)}  after {len(hist_critic)} iters\")\n    print()\n    print(\"Observation: CRITIC's verifier is grounded against reference data; a\")\n    print(\"self-critic can fail to flag its own confident-sounding hallucination.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What three prompts make up a Self-Refine loop?",
+      "options": [
+        "Plan, execute, solve",
+        "Generate, feedback, refine",
+        "Actor, evaluator, reflector",
+        "Search, score, synthesize"
+      ],
+      "answer": 1,
+      "explanation": "Self-Refine uses one model in three roles: generate, feedback, refine."
+    },
+    {
+      "q": "Why does Self-Refine require history on the refine step?",
+      "options": [
+        "History is needed for billing",
+        "Providers cache only on history",
+        "It speeds up token generation",
+        "Without prior outputs and critiques the refine step repeats earlier mistakes; the ablation shows quality drops sharply"
+      ],
+      "answer": 3,
+      "explanation": "The refine prompt conditions on the full history so the model does not repeat its earlier errors."
+    },
+    {
+      "q": "What does CRITIC change relative to Self-Refine?",
+      "options": [
+        "It uses a larger model for generation",
+        "It runs the feedback step in parallel",
+        "It replaces the self-feedback step with an external tool-grounded verifier",
+        "It removes the refine step"
+      ],
+      "answer": 2,
+      "explanation": "CRITIC swaps self-critique for a verify step routed through search, code interpreter, calculator, or domain verifiers."
+    },
+    {
+      "q": "Which Anthropic workflow pattern matches Self-Refine and CRITIC in Claude-friendly language?",
+      "options": [
+        "Parallel sampling",
+        "Prompt chain",
+        "Evaluator-Optimizer",
+        "Router"
+      ],
+      "answer": 2,
+      "explanation": "Anthropic names this pattern Evaluator-Optimizer: an evaluator scores, an optimizer revises, loop until convergence."
+    },
+    {
+      "q": "What is a rubber-stamp loop and how does the lesson recommend avoiding it?",
+      "options": [
+        "A guardrail that times out; widen the timeout",
+        "A retry that always fails; raise the budget",
+        "Same model and same prompt critiquing its own output and approving it; use structurally different prompts or a separate smaller critic",
+        "A test that always passes; remove the test"
+      ],
+      "answer": 2,
+      "explanation": "Same-style self-critique converges on 'looks good to me'; differentiate the evaluator from the optimizer."
+    },
+    {
+      "q": "Which SDK feature in OpenAI Agents SDK is CRITIC-shaped?",
+      "options": [
+        "Sessions",
+        "Tracing",
+        "Handoffs",
+        "Output guardrails (which can call tools)"
+      ],
+      "answer": 3,
+      "explanation": "Output guardrails validate the final agent output and can call tools, matching CRITIC's verifier role."
+    },
+    {
+      "q": "What stop condition does the lesson recommend for 2026 evaluator-optimizer loops?",
+      "options": [
+        "Stop only when the model says 'fine'",
+        "Never stop; let the agent self-improve indefinitely",
+        "Stop only when the verifier passes",
+        "Combine: verifier passes OR (model says fine AND iterations >= 2) OR iterations >= max_iterations"
+      ],
+      "answer": 3,
+      "explanation": "A combined condition avoids single-condition failure modes."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/05-self-refine-and-critic"
+  }
+}

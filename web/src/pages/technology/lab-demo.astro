@@ -1,0 +1,68 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+import CodeLab from '../../components/institute/CodeLab.astro';
+
+// Wave 2 proof: the Code Lab, exercised end to end. This page is the template
+// every real lesson's "try it" block follows, prose in the serif column, the
+// bench beside it, checks that grade on Run. Not linked in the nav; noindex.
+
+const jsChecks = [
+  { name: 'add is a function', hint: 'declare `function add(a, b)`', test: "return typeof add === 'function';" },
+  { name: 'add(2, 3) returns 5', hint: 'return a + b', test: 'return add(2, 3) === 5;' },
+  { name: 'add(-4, 4) returns 0', hint: 'negatives count too', test: 'return add(-4, 4) === 0;' },
+  { name: 'handles decimals', hint: 'a + b works for these too', test: 'return Math.abs(add(0.1, 0.2) - 0.3) < 1e-9;' },
+];
+const jsStarter = `// Write a function that adds two numbers, then log the result.
+function add(a, b) {
+  // your code here
+}
+
+console.log(add(2, 3));
+`;
+const jsSolution = `function add(a, b) {
+  return a + b;
+}
+
+console.log(add(2, 3));
+`;
+
+const htmlChecks = [
+  { name: 'greet() is defined', hint: 'add a <script> with function greet(name)', test: "return typeof greet === 'function';" },
+  { name: "greet('Simran') says hello", hint: "return `Sat Sri Akal, ${name}`", test: "return greet('Simran') === 'Sat Sri Akal, Simran';" },
+];
+const htmlStarter = `<!doctype html>
+<h1>Sangat</h1>
+<p id="out"></p>
+
+<script>
+  function greet(name) {
+    // return a greeting string
+  }
+  document.getElementById('out').textContent = greet('Simran');
+</script>
+`;
+---
+<Base title="Code Lab, Institute of Technology" description="A working demo of the Institute's in-browser code lab: editor, runner, console, and auto-checks." institute noindex>
+  <InstituteRail />
+
+  <section class="i-wrap" style="padding:40px 24px 24px">
+    <span class="i-label">/technology/lab-demo</span>
+    <h1 style="margin:6px 0 8px;font-size:clamp(24px,4vw,32px)">The Code Lab</h1>
+    <p class="i-prose">This is the bench every lesson gives you: read the idea, write real code beside it, hit Run, watch the checks turn green. Your code autosaves as you type; Reset restores the starter; the solution reveals after a few tries.</p>
+  </section>
+
+  <section class="i-wrap" style="padding:8px 24px">
+    <span class="i-label">exercise 1, javascript</span>
+    <h2 style="margin:6px 0 8px;font-size:19px">Add two numbers</h2>
+    <p class="i-prose">A function takes inputs, does something, and hands a value back with <code>return</code>. Fill in <code>add</code> so it returns the sum of its two arguments.</p>
+    <CodeLab id="lab-demo::add" lang="js" starter={jsStarter} checks={jsChecks} solution={jsSolution} title="add.js, bench" />
+  </section>
+
+  <section class="i-wrap" style="padding:8px 24px 72px">
+    <span class="i-label">exercise 2, html + javascript</span>
+    <h2 style="margin:6px 0 8px;font-size:19px">A page that greets you</h2>
+    <p class="i-prose">HTML is the page; the <code>&lt;script&gt;</code> makes it do something. Finish <code>greet</code> so the paragraph reads <em>Sat Sri Akal, Simran</em>. The preview updates as you type.</p>
+    <CodeLab id="lab-demo::greet" lang="html" starter={htmlStarter} checks={htmlChecks} title="index.html, bench" />
+  </section>
+</Base>

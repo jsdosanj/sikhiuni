@@ -21,6 +21,15 @@ describe("canonical-host redirect", () => {
     expect(res.headers.get("location")).toBe("https://sikhiuni.com/course/abc?x=1&y=2");
   });
 
+  it("301s the legacy sikh-university.com alias to sikhiuni.com, preserving path + query", async () => {
+    const res = await worker.fetch(
+      new Request("https://sikh-university.com/course/abc?x=1"),
+      { ASSETS: htmlAssets },
+    );
+    expect(res.status).toBe(301);
+    expect(res.headers.get("location")).toBe("https://sikhiuni.com/course/abc?x=1");
+  });
+
   it("301s the bare workers.dev alias", async () => {
     const res = await worker.fetch(
       new Request("https://sikh-university.jasvant-dosanjh.workers.dev/"),

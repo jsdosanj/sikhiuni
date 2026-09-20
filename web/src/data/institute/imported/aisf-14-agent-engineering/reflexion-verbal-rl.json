@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::reflexion-verbal-rl",
+  "num": 3,
+  "slug": "reflexion-verbal-rl",
+  "title": "Reflexion: Verbal Reinforcement Learning",
+  "tagline": "Gradient-based RL needs thousands of trials and a GPU cluster to fix a failure mode. Reflexion (Shinn et al., NeurIPS 2023) does it in natural language: after each failed trial, the agent writes a reflection, stores it in episodic memory, and conditions the next trial on that memory. This is the pattern behind Letta's sleep-time compute, Claude Code's CLAUDE.md learnings, and pro-workflow's learn-rule.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name the three components of Reflexion (Actor, Evaluator, Self-Reflector) and the role of episodic memory.",
+    "Implement a stdlib Reflexion loop with binary evaluator, reflection buffer, and fresh re-attempts.",
+    "Choose between scalar, heuristic, and self-evaluated feedback sources for a given task.",
+    "Explain why verbal reinforcement catches errors that gradient-based RL would need thousands of trials to fix."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>An agent fails a task. In standard RL you would run thousands more trials, compute gradients, update weights. Expensive, slow, and most production agents do not have a training budget for every failure.</p>\n<p>Reflexion (Shinn et al., arXiv:2303.11366) asks a different question: what if the agent just thought about why it failed and tried again with that thought in its prompt? No weight updates. No gradient. Just natural language stored between trials.</p>\n<p>The result: on ALFWorld it beats ReAct and other non-fine-tuned baselines. On HotpotQA it improves over ReAct. On code generation (HumanEval/MBPP) it sets state of the art at the time. All without a single gradient step.</p>\n<h2>The Concept</h2>\n<h3>The three components</h3>\n<pre><code>Actor         : generates a trajectory (ReAct-style loop)\nEvaluator     : scores the trajectory — binary, heuristic, or self-eval\nSelf-Reflector: writes a natural-language reflection on the failure\n</code></pre>\n<p>Plus one data structure:</p>\n<pre><code>Episodic memory: list of prior reflections, prepended to the next trial&#39;s prompt\n</code></pre>\n<p>One trial runs the Actor. Evaluator scores it. If the score is low, Self-Reflector produces a reflection (&quot;I picked the wrong tool because I misread the question as asking about X when it was asking about Y&quot;). The reflection goes into episodic memory. Next trial starts fresh but sees the reflection.</p>\n<h3>Three evaluator types</h3>\n<ol>\n<li><strong>Scalar</strong> — an external binary signal. ALFWorld succeeds or fails. HumanEval tests pass or fail. Simplest, highest-signal.</li>\n<li><strong>Heuristic</strong> — predefined failure signatures. &quot;If the agent produced the same action twice in a row, mark as stuck.&quot; &quot;If the trajectory exceeds 50 steps, mark as inefficient.&quot;</li>\n<li><strong>Self-evaluated</strong> — the LLM scores its own trajectory. Needed when no ground truth is available. Weaker signal; pairs well with tool-grounded verification (Lesson 05 — CRITIC).</li>\n</ol>\n<p>The 2026 default is a mix: scalar when available, self-eval when not, heuristics as safety rails.</p>\n<h3>Why this generalizes</h3>\n<p>Reflexion is not a new algorithm so much as a named pattern. Almost every production &quot;self-healing&quot; agent runs some variant:</p>\n<ul>\n<li>Letta&#39;s sleep-time compute (Lesson 08): a separate agent reflects on past conversations and writes to memory blocks.</li>\n<li>Claude Code&#39;s <code>CLAUDE.md</code> / &quot;save memory&quot; pattern: reflections captured as learnings, prepended to future sessions.</li>\n<li>pro-workflow&#39;s <code>/learn-rule</code> command: corrections captured as explicit rules.</li>\n<li>LangGraph&#39;s reflection nodes: a node that scores output and routes to refine if needed.</li>\n</ul>\n<p>All derive from the same insight: natural language is a rich-enough medium to carry &quot;what I learned from failure&quot; between runs.</p>\n<h3>When it works and when it does not</h3>\n<p>Reflexion works when:</p>\n<ul>\n<li>There is a clear failure signal (test failure, tool error, wrong answer).</li>\n<li>The task class is reproducible (the same type of question can be asked again).</li>\n<li>The reflection has room to improve on the trajectory (enough action budget).</li>\n</ul>\n<p>Reflexion does not help when:</p>\n<ul>\n<li>The agent already succeeds on the first try.</li>\n<li>The failure is external (network down, tool broken) — reflection on &quot;the network was down&quot; does not help future runs.</li>\n<li>The reflection turns into superstition — storing a narrative about a one-off flaky run.</li>\n</ul>\n<p>2026 pitfall: memory rot. Reflections accumulate; some are obsolete or wrong; re-runs get slower as the episodic buffer grows. Mitigation: periodic compaction (Lesson 06), TTL on reflections, or a separate sleep-time cleanup agent (Letta).</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>react-trace</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements Reflexion on a toy puzzle: produce a 3-element list that sums to a target. The Actor emits candidate lists; the Evaluator checks the sum; the Self-Reflector writes a line about what went wrong. The reflection goes into episodic memory for the next trial.</p>\n<p>Components:</p>\n<ul>\n<li><code>Actor</code> — a scripted policy that improves when it sees reflections.</li>\n<li><code>Evaluator.binary()</code> — pass/fail on the target sum.</li>\n<li><code>SelfReflector</code> — generates a one-line diagnosis of the failure.</li>\n<li><code>EpisodicMemory</code> — a bounded list with TTL semantics.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The trace shows three trials. Trial 1 fails, a reflection is stored, trial 2 sees the reflection and improves but still fails, trial 3 succeeds. Compare with a baseline run (no reflection) — it stays stuck at trial 1&#39;s answer.</p>\n<h2>Use It</h2>\n<p>LangGraph ships reflection as a node pattern. Claude Code&#39;s <code>/memory</code> command and pro-workflow&#39;s <code>/learn-rule</code> externalize the episodic buffer as a markdown file. Letta&#39;s sleep-time compute runs the Self-Reflector on downtime so the primary agent stays latency-bound. OpenAI Agents SDK does not ship Reflexion directly; you build it with a custom Guardrail that rejects trajectories by score and a memory <code>Session</code> that survives across runs.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-reflexion-buffer.md</code> creates and maintains an episodic buffer with reflection capture, TTL, and deduplication. Given a task class and a failure, it emits a reflection that actually helps the next trial (not a generic &quot;be more careful&quot;).</p>\n<h2>Exercises</h2>\n<ol>\n<li>Switch from binary to scalar evaluator that returns a distance metric (how far from target). Does it converge faster?</li>\n<li>Add a TTL of 10 trials to reflections. Do older reflections hurt or help after that point?</li>\n<li>Implement heuristic evaluator: mark the trial as stuck if the same action repeats. How does this interact with Self-Reflector?</li>\n<li>Run Reflexion with an adversarial Actor that ignores reflections. What is the minimum reflection prompt engineering that forces the Actor to notice them?</li>\n<li>Read Section 4 of the Reflexion paper on AlfWorld. Reproduce the 130% success-rate improvement conceptually: what is the key delta vs vanilla ReAct?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Reflexion</td>\n<td>&quot;Self-correction&quot;</td>\n<td>Shinn et al. 2023 — Actor, Evaluator, Self-Reflector plus episodic memory</td>\n</tr>\n<tr>\n<td>Verbal reinforcement</td>\n<td>&quot;Learning without gradients&quot;</td>\n<td>Natural-language reflection prepended to the next trial&#39;s prompt</td>\n</tr>\n<tr>\n<td>Episodic memory</td>\n<td>&quot;Per-task reflections&quot;</td>\n<td>Bounded buffer of prior reflections for one task class</td>\n</tr>\n<tr>\n<td>Scalar evaluator</td>\n<td>&quot;Binary success signal&quot;</td>\n<td>Pass/fail or numeric score from ground truth</td>\n</tr>\n<tr>\n<td>Heuristic evaluator</td>\n<td>&quot;Pattern-based detector&quot;</td>\n<td>Predefined failure signatures (e.g. stuck-loop, too-many-steps)</td>\n</tr>\n<tr>\n<td>Self-evaluator</td>\n<td>&quot;LLM-as-judge on own trace&quot;</td>\n<td>Lower-signal fallback when no ground truth — pair with tool-grounded verification</td>\n</tr>\n<tr>\n<td>Memory rot</td>\n<td>&quot;Stale reflections&quot;</td>\n<td>Episodic buffer fills with obsolete entries; fix with compaction/TTL</td>\n</tr>\n<tr>\n<td>Sleep-time reflection</td>\n<td>&quot;Async self-reflection&quot;</td>\n<td>Run Self-Reflector off the hot path so primary agent stays fast</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2303.11366\" target=\"_blank\" rel=\"noopener\">Shinn et al., Reflexion: Language Agents with Verbal Reinforcement Learning (arXiv:2303.11366)</a> — the canonical paper</li>\n<li><a href=\"https://www.letta.com/blog/sleep-time-compute\" target=\"_blank\" rel=\"noopener\">Letta, Sleep-time Compute</a> — async reflection in production</li>\n<li><a href=\"https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Effective context engineering for AI agents</a> — managing the episodic buffer as part of context</li>\n<li><a href=\"https://docs.langchain.com/oss/python/langgraph/overview\" target=\"_blank\" rel=\"noopener\">LangGraph overview</a> — reflection node pattern</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy Reflexion loop — Actor, Evaluator, Self-Reflector, Episodic memory.\n\nTask: pick three integers from 1..9 that sum to a target. The Actor is\nscripted to start with a bad strategy and adapt when reflections are present.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\n\n\nTARGET = 20\n\n\n@dataclass\nclass Reflection:\n    trial: int\n    text: str\n\n\n@dataclass\nclass EpisodicMemory:\n    items: list[Reflection] = field(default_factory=list)\n    max_len: int = 6\n\n    def add(self, r: Reflection) -> None:\n        self.items.append(r)\n        if len(self.items) > self.max_len:\n            self.items.pop(0)\n\n    def as_prompt(self) -> str:\n        if not self.items:\n            return \"(no prior reflections)\"\n        lines = [f\"- trial {r.trial}: {r.text}\" for r in self.items]\n        return \"\\n\".join(lines)\n\n\nclass Actor:\n    \"\"\"Scripted policy. Without reflections it stays on bad choices; with\n    at least one reflection it moves toward the target sum.\"\"\"\n\n    def act(self, memory: EpisodicMemory) -> list[int]:\n        n = len(memory.items)\n        if n == 0:\n            return [1, 2, 3]\n        if n == 1:\n            return [5, 6, 7]\n        if n == 2:\n            return [6, 7, 7]\n        return [6, 7, 7]\n\n\ndef binary_evaluator(attempt: list[int], target: int) -> tuple[bool, int]:\n    total = sum(attempt)\n    return total == target, total - target\n\n\nclass SelfReflector:\n    def reflect(self, attempt: list[int], delta: int) -> str:\n        if delta < 0:\n            return f\"sum {sum(attempt)} is {-delta} short; pick larger values\"\n        if delta > 0:\n            return f\"sum {sum(attempt)} overshoots by {delta}; pick smaller values\"\n        return \"succeeded\"\n\n\n@dataclass\nclass TrialResult:\n    trial: int\n    attempt: list[int]\n    success: bool\n    delta: int\n    reflection: str\n\n\ndef run_reflexion(max_trials: int, use_memory: bool) -> list[TrialResult]:\n    actor = Actor()\n    reflector = SelfReflector()\n    memory = EpisodicMemory()\n    trials: list[TrialResult] = []\n    for t in range(1, max_trials + 1):\n        attempt = actor.act(memory if use_memory else EpisodicMemory())\n        success, delta = binary_evaluator(attempt, TARGET)\n        text = reflector.reflect(attempt, delta)\n        trials.append(TrialResult(t, attempt, success, delta, text))\n        if success:\n            break\n        memory.add(Reflection(trial=t, text=text))\n    return trials\n\n\ndef summarize(trials: list[TrialResult], name: str) -> None:\n    print(f\"\\n{name}\")\n    print(\"-\" * 60)\n    for r in trials:\n        mark = \"OK \" if r.success else \"...\"\n        print(f\"  trial {r.trial}: {r.attempt} sum={sum(r.attempt)} \"\n              f\"delta={r.delta:+d} {mark} -> {r.reflection}\")\n    last = trials[-1]\n    print(f\"  final: {'success' if last.success else 'failed'} \"\n          f\"at trial {last.trial}\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(f\"REFLEXION — pick three ints in [1..9] summing to {TARGET}\")\n    print(\"Phase 14, Lesson 03\")\n    print(\"=\" * 70)\n\n    trials_no_mem = run_reflexion(max_trials=4, use_memory=False)\n    summarize(trials_no_mem, \"BASELINE (no episodic memory)\")\n\n    trials_mem = run_reflexion(max_trials=4, use_memory=True)\n    summarize(trials_mem, \"REFLEXION (episodic memory on)\")\n\n    baseline_steps = len(trials_no_mem)\n    reflex_steps = len(trials_mem)\n    print()\n    print(f\"baseline used {baseline_steps} trials; reflexion used {reflex_steps}.\")\n    print(\"Without a reflection in the prompt, the scripted actor never adapts.\")\n    print(\"With one reflection, the actor corrects; with two, it converges.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does Reflexion replace in standard reinforcement learning?",
+      "options": [
+        "Episodic memory with parametric memory",
+        "Gradient updates with natural-language reflections stored between trials",
+        "Policy networks with random search",
+        "Reward shaping with a constant reward"
+      ],
+      "answer": 1,
+      "explanation": "Reflexion uses natural-language reflections in episodic memory instead of weight updates."
+    },
+    {
+      "q": "What three components define a Reflexion system?",
+      "options": [
+        "Planner, Worker, Solver",
+        "Selector, Expander, Backpropagator",
+        "Generator, Critic, Optimizer",
+        "Actor, Evaluator, Self-Reflector"
+      ],
+      "answer": 3,
+      "explanation": "Reflexion factors the agent into an Actor that runs trajectories, an Evaluator that scores them, and a Self-Reflector that writes lessons."
+    },
+    {
+      "q": "Which evaluator type uses an external binary signal like a unit test or a known correct answer?",
+      "options": [
+        "Heuristic",
+        "Scalar",
+        "Self-evaluated",
+        "Vote-based"
+      ],
+      "answer": 1,
+      "explanation": "Scalar evaluators read pass/fail signals from ground truth (ALFWorld success, HumanEval tests)."
+    },
+    {
+      "q": "Why is self-evaluation a weaker signal than scalar feedback?",
+      "options": [
+        "The model judging itself has no external grounding so it can rubber-stamp its own answer",
+        "It is slower to compute",
+        "It always requires a larger model",
+        "It cannot run on tools"
+      ],
+      "answer": 0,
+      "explanation": "Self-eval lacks an external check, so a confident hallucination scores well; pair it with tool-grounded verification."
+    },
+    {
+      "q": "Which case does the lesson list as a place where Reflexion does NOT help?",
+      "options": [
+        "An external transient failure like the network being down",
+        "HotpotQA multi-hop questions",
+        "Code generation where tests can score",
+        "ALFWorld navigation tasks"
+      ],
+      "answer": 0,
+      "explanation": "Reflecting on a transient external outage produces a reflection that does not help future runs."
+    },
+    {
+      "q": "What is memory rot in the Reflexion pattern?",
+      "options": [
+        "Losing reflections when the process restarts",
+        "The reflection prompt exceeds the context window",
+        "Reflections get encrypted by the provider",
+        "Episodic buffer fills with obsolete or wrong reflections and slows or biases future trials"
+      ],
+      "answer": 3,
+      "explanation": "Accumulated stale or wrong reflections degrade behavior; mitigate with compaction or TTL."
+    },
+    {
+      "q": "Which production pattern is the lesson's clearest match for Reflexion?",
+      "options": [
+        "Claude Code's CLAUDE.md learnings prepended to future sessions",
+        "Anthropic's prompt caching",
+        "Cursor's apply-edits flow",
+        "OpenAI's batch API"
+      ],
+      "answer": 0,
+      "explanation": "CLAUDE.md learnings, pro-workflow's learn-rule, and Letta's sleep-time compute all externalize the episodic reflection buffer."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/03-reflexion-verbal-rl"
+  }
+}

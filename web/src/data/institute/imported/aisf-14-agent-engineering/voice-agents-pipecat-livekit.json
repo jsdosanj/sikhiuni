@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::voice-agents-pipecat-livekit",
+  "num": 22,
+  "slug": "voice-agents-pipecat-livekit",
+  "title": "Voice Agents: Pipecat and LiveKit",
+  "tagline": "Voice agents are a first-class production category in 2026. Pipecat gives you a Python frame-based pipeline (VAD → STT → LLM → TTS → transport). LiveKit Agents bridges AI models to users over WebRTC. Production latency targets land at 450–600ms end-to-end for premium stacks.",
+  "type": "Learn",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Describe Pipecat's frame-based pipeline: DOWNSTREAM (source→sink) and UPSTREAM (control).",
+    "Name the canonical voice pipeline stages and which transports Pipecat supports.",
+    "Explain LiveKit Agents' two voice agent classes (MultimodalAgent, VoicePipelineAgent) and when each fits.",
+    "Summarize 2026 production latency expectations and how they drive architecture choices."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Voice agents are not a text loop with TTS bolted on. Latency budgets are brutal (~600ms), partial audio is the default, turn detection is a model, and transports range from telephony SIP to WebRTC. Either you build a frame-based pipeline (Pipecat) or you lean on a platform (LiveKit).</p>\n<h2>The Concept</h2>\n<h3>Pipecat (pipecat-ai/pipecat)</h3>\n<ul>\n<li>Python frame-based pipeline framework.</li>\n<li><code>Frame</code> → <code>FrameProcessor</code> chain.</li>\n<li>Two flow directions:<ul>\n<li><strong>DOWNSTREAM</strong> — source → sink (audio in, TTS out).</li>\n<li><strong>UPSTREAM</strong> — feedback and control (cancellation, metrics, barge-in).</li>\n</ul>\n</li>\n<li><code>PipelineTask</code> manages lifecycle with events (<code>on_pipeline_started</code>, <code>on_pipeline_finished</code>, <code>on_idle_timeout</code>) and observers for metrics/tracing/RTVI.</li>\n</ul>\n<p>Typical pipeline:</p>\n<pre><code>VAD (Silero) → STT → LLM (context alternates user/assistant) → TTS → transport\n</code></pre>\n<p>Transports: Daily, LiveKit, SmallWebRTCTransport, FastAPI WebSocket, WhatsApp.</p>\n<p>Pipecat Flows adds structured conversations (state machines). Pipecat Cloud is the managed runtime.</p>\n<h3>LiveKit Agents (livekit/agents)</h3>\n<ul>\n<li>Bridges AI models to users over WebRTC.</li>\n<li>Key concepts: <code>Agent</code>, <code>AgentSession</code>, <code>entrypoint</code>, <code>AgentServer</code>.</li>\n<li>Two voice agent classes:<ul>\n<li><strong>MultimodalAgent</strong> — direct audio via OpenAI Realtime or equivalent.</li>\n<li><strong>VoicePipelineAgent</strong> — STT → LLM → TTS cascade; gives text-level control.</li>\n</ul>\n</li>\n<li>Semantic turn detection via a transformer model.</li>\n<li>Native MCP integration.</li>\n<li>Telephony via SIP.</li>\n<li>50+ models with no API keys via LiveKit Inference; 200+ more via plugins.</li>\n</ul>\n<h3>Commercial platforms</h3>\n<p>Vapi (<del>450–600ms on an optimized premium stack) and Retell (</del>600ms end-to-end across 180 test calls) build on top of these. Pick a platform when you want a managed voice stack without a WebRTC team.</p>\n<h3>Where this pattern goes wrong</h3>\n<ul>\n<li><strong>No barge-in handling.</strong> User interrupts; agent keeps talking. Requires UPSTREAM cancel frames in Pipecat, equivalent in LiveKit.</li>\n<li><strong>STT confidence ignored.</strong> Low-confidence transcripts fed to the LLM as if gospel. Gate on confidence or request confirmation.</li>\n<li><strong>TTS mid-sentence cutoff.</strong> When the pipeline cancels mid-utterance, TTS needs to know or cut audio.</li>\n<li><strong>Latency budget ignored.</strong> Every component adds 50–200ms. Sum your chain before shipping.</li>\n</ul>\n<h3>Typical 2026 latencies</h3>\n<ul>\n<li>VAD: 20–60ms</li>\n<li>STT partial: 100–250ms</li>\n<li>LLM first token: 150–400ms</li>\n<li>TTS first audio: 100–200ms</li>\n<li>Transport RTT: 30–80ms</li>\n</ul>\n<p>End-to-end 450–600ms is premium. 800–1200ms is common. Anything &gt; 1500ms feels broken.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>voice-pipeline</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> is a frame-based toy pipeline with:</p>\n<ul>\n<li><code>Frame</code> types (audio, transcript, text, tts_audio, control).</li>\n<li><code>Processor</code> interface with <code>process(frame)</code>.</li>\n<li>A five-stage pipeline (VAD → STT → LLM → TTS → transport) as scripted processors.</li>\n<li>An UPSTREAM cancel frame to demonstrate barge-in.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The trace shows normal flow and a barge-in cancel that stops TTS mid-utterance.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>Pipecat</strong> for full control — custom processors, Python-first, pluggable providers.</li>\n<li><strong>LiveKit Agents</strong> for WebRTC-first deployments and telephony.</li>\n<li><strong>Vapi / Retell</strong> for hosted voice agents without a WebRTC team.</li>\n<li><strong>OpenAI Realtime / Gemini Live</strong> for direct audio-in/audio-out (MultimodalAgent).</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-voice-pipeline.md</code> scaffolds a Pipecat-shaped voice pipeline with VAD + STT + LLM + TTS + transport plus barge-in handling.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a metrics observer to your toy pipeline: count frames per stage per second. Where does latency accumulate?</li>\n<li>Implement confidence-gated STT: below threshold, request &quot;could you repeat that?&quot;</li>\n<li>Add semantic turn detection: simple rule — if transcript ends with &quot;?&quot;, end of turn.</li>\n<li>Read Pipecat&#39;s transport docs. Swap the stdlib transport for the SmallWebRTCTransport config (stub).</li>\n<li>Measure an OpenAI Realtime vs STT+LLM+TTS cascade on the same query. What latency cost does text-level control carry?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Frame</td>\n<td>&quot;Event&quot;</td>\n<td>Typed unit of data in the pipeline (audio, transcript, text, control)</td>\n</tr>\n<tr>\n<td>Processor</td>\n<td>&quot;Pipeline stage&quot;</td>\n<td>Handler with process(frame)</td>\n</tr>\n<tr>\n<td>DOWNSTREAM</td>\n<td>&quot;Forward flow&quot;</td>\n<td>Source to sink: audio in, speech out</td>\n</tr>\n<tr>\n<td>UPSTREAM</td>\n<td>&quot;Feedback flow&quot;</td>\n<td>Control: cancel, metrics, barge-in</td>\n</tr>\n<tr>\n<td>VAD</td>\n<td>&quot;Voice activity detection&quot;</td>\n<td>Detects when user is speaking</td>\n</tr>\n<tr>\n<td>Semantic turn detection</td>\n<td>&quot;Smart end-of-turn&quot;</td>\n<td>Model-based decision that the user is done</td>\n</tr>\n<tr>\n<td>MultimodalAgent</td>\n<td>&quot;Direct audio agent&quot;</td>\n<td>Audio in, audio out; no text in the middle</td>\n</tr>\n<tr>\n<td>VoicePipelineAgent</td>\n<td>&quot;Cascade agent&quot;</td>\n<td>STT + LLM + TTS; text-level control</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://docs.pipecat.ai/getting-started/introduction\" target=\"_blank\" rel=\"noopener\">Pipecat docs</a> — frame-based pipeline, processors, transports</li>\n<li><a href=\"https://docs.livekit.io/agents/\" target=\"_blank\" rel=\"noopener\">LiveKit Agents docs</a> — WebRTC + voice primitives</li>\n<li><a href=\"https://vapi.ai/\" target=\"_blank\" rel=\"noopener\">Vapi</a> — managed voice platform</li>\n<li><a href=\"https://www.retellai.com/\" target=\"_blank\" rel=\"noopener\">Retell AI</a> — managed voice, latency-benchmarked</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy Pipecat-style voice pipeline: VAD  STT  LLM  TTS  transport.\n\nFrames travel DOWNSTREAM (source to sink) and UPSTREAM (cancel/control).\nA scripted input shows normal flow plus a barge-in cancel that stops TTS.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass Frame:\n    kind: str\n    payload: Any\n    direction: str = \"downstream\"\n\n\nclass Processor:\n    def __init__(self, name: str) -> None:\n        self.name = name\n        self.next: Processor | None = None\n        self.prev: Processor | None = None\n        self.trace: list[str] = []\n\n    def process(self, frame: Frame) -> None:\n        self.trace.append(f\"{self.name} saw {frame.kind}\")\n        if self.next is not None and frame.direction == \"downstream\":\n            self.next.process(frame)\n        elif self.prev is not None and frame.direction == \"upstream\":\n            self.prev.process(frame)\n\n\nclass VAD(Processor):\n    def process(self, frame: Frame) -> None:\n        if frame.kind == \"audio_chunk\":\n            is_speech = bool(frame.payload)\n            self.trace.append(f\"VAD: speech={is_speech}\")\n            if is_speech:\n                super().process(Frame(\"vad_speech\", frame.payload))\n        else:\n            super().process(frame)\n\n\nclass STT(Processor):\n    def process(self, frame: Frame) -> None:\n        if frame.kind == \"vad_speech\":\n            transcript = str(frame.payload)\n            self.trace.append(f\"STT: -> {transcript!r}\")\n            super().process(Frame(\"transcript\", transcript))\n        else:\n            super().process(frame)\n\n\nclass LLM(Processor):\n    def __init__(self, name: str, replies: dict[str, str]) -> None:\n        super().__init__(name)\n        self.replies = replies\n\n    def process(self, frame: Frame) -> None:\n        if frame.kind == \"cancel\":\n            self.trace.append(\"LLM: cancelled\")\n            super().process(frame)\n            return\n        if frame.kind == \"transcript\":\n            text = str(frame.payload)\n            reply = self.replies.get(text, \"[no canned reply]\")\n            self.trace.append(f\"LLM: {text!r}  -> {reply!r}\")\n            super().process(Frame(\"text\", reply))\n        else:\n            super().process(frame)\n\n\nclass TTS(Processor):\n    def __init__(self, name: str) -> None:\n        super().__init__(name)\n        self.cancelled = False\n\n    def process(self, frame: Frame) -> None:\n        if frame.kind == \"cancel\":\n            self.cancelled = True\n            self.trace.append(\"TTS: cancel received; drop pending audio\")\n            super().process(frame)\n            return\n        if frame.kind == \"text\":\n            self.cancelled = False\n            words = str(frame.payload).split()\n            emitted: list[str] = []\n            for w in words:\n                if self.cancelled:\n                    self.trace.append(f\"TTS: cut mid-word after {emitted}\")\n                    break\n                emitted.append(w)\n            self.trace.append(f\"TTS: emitted {emitted}\")\n            super().process(Frame(\"tts_audio\", emitted))\n        else:\n            super().process(frame)\n\n\nclass Transport(Processor):\n    def __init__(self, name: str) -> None:\n        super().__init__(name)\n        self.delivered: list[list[str]] = []\n\n    def process(self, frame: Frame) -> None:\n        if frame.kind == \"tts_audio\":\n            self.delivered.append(list(frame.payload))\n            self.trace.append(f\"transport: sent {len(frame.payload)} words\")\n        else:\n            super().process(frame)\n\n\ndef link(*processors: Processor) -> None:\n    for a, b in zip(processors, processors[1:]):\n        a.next = b\n        b.prev = a\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"VOICE PIPELINE (PIPECAT-SHAPED) — Phase 14, Lesson 22\")\n    print(\"=\" * 70)\n\n    vad = VAD(\"vad\")\n    stt = STT(\"stt\")\n    llm = LLM(\"llm\", replies={\n        \"hello\": \"hi there, how can I help today?\",\n        \"refund please\": (\n            \"sure, I can help with a refund; what order number should I look up?\"\n        ),\n    })\n    tts = TTS(\"tts\")\n    transport = Transport(\"transport\")\n    link(vad, stt, llm, tts, transport)\n\n    print(\"\\nscenario 1: normal flow\")\n    vad.process(Frame(\"audio_chunk\", \"hello\"))\n    print(f\"  transport delivered: {transport.delivered[-1]}\")\n\n    print(\"\\nscenario 2: barge-in mid-utterance\")\n    tts.cancelled = False\n    vad.process(Frame(\"audio_chunk\", \"refund please\"))\n    transport.process(Frame(\"cancel\", None, direction=\"upstream\"))\n\n    print(\"  trace across pipeline\")\n    for proc in (vad, stt, llm, tts, transport):\n        for line in proc.trace:\n            print(f\"    {proc.name}: {line}\")\n\n    print()\n    print(\"barge-in needs UPSTREAM cancel frames that propagate back to TTS+LLM.\")\n    print(\"sum latency per stage; premium stack lands at 450-600ms end-to-end.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which two flow directions does a Pipecat pipeline use?",
+      "options": [
+        "Read and write",
+        "Hot and cold",
+        "Inbound and outbound",
+        "DOWNSTREAM (source to sink) and UPSTREAM (feedback, cancel, barge-in)"
+      ],
+      "answer": 3,
+      "explanation": "Frames flow downstream source-to-sink and upstream for control and cancellation."
+    },
+    {
+      "q": "What is the canonical Pipecat voice pipeline?",
+      "options": [
+        "VAD -> STT -> LLM -> TTS -> transport",
+        "Audio -> JSON -> SQL -> response",
+        "LLM -> embed -> retrieve -> answer",
+        "TTS -> STT -> LLM -> VAD"
+      ],
+      "answer": 0,
+      "explanation": "VAD detects voice activity, STT transcribes, LLM responds, TTS speaks, transport delivers."
+    },
+    {
+      "q": "Which two voice agent classes does LiveKit Agents ship?",
+      "options": [
+        "BatchAgent and StreamAgent",
+        "TextAgent and SpeechAgent",
+        "MultimodalAgent (direct audio) and VoicePipelineAgent (STT/LLM/TTS cascade)",
+        "LocalAgent and CloudAgent"
+      ],
+      "answer": 2,
+      "explanation": "MultimodalAgent uses direct audio (Realtime-style); VoicePipelineAgent uses STT->LLM->TTS for text-level control."
+    },
+    {
+      "q": "What is barge-in and how is it handled?",
+      "options": [
+        "An LLM cost spike; reduce tokens",
+        "The user interrupts while the agent is speaking; UPSTREAM cancel frames stop TTS mid-utterance",
+        "Captcha failure; retry",
+        "A provider outage; switch regions"
+      ],
+      "answer": 1,
+      "explanation": "Barge-in is user interruption; UPSTREAM cancellation is how Pipecat handles it cleanly."
+    },
+    {
+      "q": "What end-to-end latency does the lesson describe as premium?",
+      "options": [
+        "About 450-600 ms",
+        "About 1500 ms",
+        "About 50 ms",
+        "About 5000 ms"
+      ],
+      "answer": 0,
+      "explanation": "Premium stacks land around 450-600 ms; 800-1200 ms is common; over 1500 ms feels broken."
+    },
+    {
+      "q": "What goes wrong if STT confidence is ignored?",
+      "options": [
+        "Calls get cheaper",
+        "Latency improves",
+        "TTS gets faster",
+        "Low-confidence transcripts feed the LLM as if gospel, producing wrong answers; gate on confidence or ask for confirmation"
+      ],
+      "answer": 3,
+      "explanation": "Treating low-confidence STT as truth is a top voice-agent failure mode."
+    },
+    {
+      "q": "Why does the lesson recommend summing component latencies before shipping?",
+      "options": [
+        "Latency is required by WebRTC",
+        "Every component adds 50-200 ms; the sum determines whether the experience feels broken",
+        "Providers bill by latency",
+        "It satisfies a compliance requirement"
+      ],
+      "answer": 1,
+      "explanation": "Sum the chain (VAD + STT + LLM + TTS + transport) before shipping; targets are tight."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/22-voice-agents-pipecat-livekit"
+  }
+}

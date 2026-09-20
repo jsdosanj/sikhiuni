@@ -1,0 +1,97 @@
+{
+  "track": "aisf-00-setup",
+  "phaseDir": "00-setup-and-tooling",
+  "blurb": "Get your environment ready for everything that follows.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-00-setup::dev-environment",
+      "num": 1,
+      "slug": "dev-environment",
+      "title": "Dev Environment",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::git-and-collaboration",
+      "num": 2,
+      "slug": "git-and-collaboration",
+      "title": "Git & Collaboration",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::gpu-setup-and-cloud",
+      "num": 3,
+      "slug": "gpu-setup-and-cloud",
+      "title": "GPU Setup & Cloud",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::apis-and-keys",
+      "num": 4,
+      "slug": "apis-and-keys",
+      "title": "APIs & Keys",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::jupyter-notebooks",
+      "num": 5,
+      "slug": "jupyter-notebooks",
+      "title": "Jupyter Notebooks",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::python-environments",
+      "num": 6,
+      "slug": "python-environments",
+      "title": "Python Environments",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::docker-for-ai",
+      "num": 7,
+      "slug": "docker-for-ai",
+      "title": "Docker for AI",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::editor-setup",
+      "num": 8,
+      "slug": "editor-setup",
+      "title": "Editor Setup",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::data-management",
+      "num": 9,
+      "slug": "data-management",
+      "title": "Data Management",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::terminal-and-shell",
+      "num": 10,
+      "slug": "terminal-and-shell",
+      "title": "Terminal & Shell",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::linux-for-ai",
+      "num": 11,
+      "slug": "linux-for-ai",
+      "title": "Linux for AI",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-00-setup::debugging-and-profiling",
+      "num": 12,
+      "slug": "debugging-and-profiling",
+      "title": "Debugging and Profiling",
+      "nQuiz": 5
+    }
+  ]
+}

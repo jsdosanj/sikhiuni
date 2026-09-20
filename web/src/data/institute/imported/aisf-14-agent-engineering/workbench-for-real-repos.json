@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::workbench-for-real-repos",
+  "num": 41,
+  "slug": "workbench-for-real-repos",
+  "title": "The Workbench on a Real Repo",
+  "tagline": "Eleven lessons of surfaces are worth nothing if they do not survive contact with a real codebase. This lesson runs the same task twice on a small sample app: prompt-only versus workbench-guided. The numbers do the arguing.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Bring the seven workbench surfaces together on a small application.",
+    "Run the same task twice (prompt-only and workbench-guided) and measure five outcomes.",
+    "Read the before/after report and decide which surfaces gave the most leverage.",
+    "Defend the workbench against a \"but my model is good enough\" pushback."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>A demo on a toy task convinces no one. The case for the workbench is made when a real-feeling task on a real-feeling repo lands in production with fewer failures, fewer reverts, and a packet the next session can use.</p>\n<p>This lesson ships that real-feeling repo and runs the same task through both pipelines. The result is a before/after report you can hand to a skeptic.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">flowchart TD\n  Task[Task: validate /signup and add tests] --&gt; A[Prompt-only run]\n  Task --&gt; B[Workbench-guided run]\n  A --&gt; M[Measure: 5 outcomes]\n  B --&gt; M\n  M --&gt; Report[before-after-report.md]</pre>\n<h3>The sample app</h3>\n<p>A minimal FastAPI-style handler in <code>sample_app/</code>:</p>\n<ul>\n<li><code>app.py</code> with <code>/signup</code> (no validation yet).</li>\n<li><code>test_app.py</code> with one happy-path test.</li>\n<li><code>README.md</code> and <code>scripts/release.sh</code> as forbidden-zone bait.</li>\n</ul>\n<h3>The task</h3>\n<blockquote>\n<p>Add input validation to <code>/signup</code>: reject passwords shorter than 8 characters, return 422 with a typed error envelope. Add a test that proves the new behavior.</p>\n</blockquote>\n<h3>The two pipelines</h3>\n<p>Prompt-only:</p>\n<ol>\n<li>Read the README.</li>\n<li>Read <code>app.py</code>.</li>\n<li>Edit files.</li>\n<li>Claim done.</li>\n</ol>\n<p>Workbench-guided:</p>\n<ol>\n<li>Run init script (Lesson 35).</li>\n<li>Read scope contract (Lesson 36).</li>\n<li>Read state (Lesson 34).</li>\n<li>Edit allowed files only.</li>\n<li>Run acceptance command via feedback runner (Lesson 37).</li>\n<li>Run verification gate (Lesson 38).</li>\n<li>Run reviewer (Lesson 39).</li>\n<li>Generate handoff (Lesson 40).</li>\n</ol>\n<h3>The five outcomes measured</h3>\n<table>\n<thead>\n<tr>\n<th>Outcome</th>\n<th>Why it matters</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>tests_actually_run</code></td>\n<td>Most &quot;tests passed&quot; claims are unverifiable</td>\n</tr>\n<tr>\n<td><code>acceptance_met</code></td>\n<td>The test that proves the goal must be the test that ran</td>\n</tr>\n<tr>\n<td><code>files_outside_scope</code></td>\n<td>Scope creep is the dominant silent failure</td>\n</tr>\n<tr>\n<td><code>handoff_quality</code></td>\n<td>The next session pays for or benefits from this</td>\n</tr>\n<tr>\n<td><code>reviewer_total</code></td>\n<td>Qualitative judgment on top of the gate</td>\n</tr>\n</tbody></table>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-ab-runs</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> orchestrates the two pipelines against the same sample app fixture. Both pipelines are scripted (no LLM in the loop) so the measurement is reproducible. The script writes the comparison into <code>before-after-report.md</code> and <code>comparison.json</code>.</p>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: a console table of outcomes per pipeline, the markdown report saved next to the script, and the JSON for whoever wants to chart it.</p>\n<h2>Production patterns in the wild</h2>\n<p>The skeptic&#39;s question is &quot;how much does the workbench actually help?&quot; The 2026 numbers say a lot more than the explanation.</p>\n<p><strong>Terminal Bench Top-30 to Top-5 on the same model.</strong> LangChain&#39;s <em>Anatomy of an Agent Harness</em> (April 2026): a coding agent jumped from outside the top 30 to rank five on Terminal Bench 2.0 by changing only the harness. Same model. Different surfaces. Twenty-five-rank delta.</p>\n<p><strong>Vercel 80% to 100% by deleting tools.</strong> Vercel reported deleting 80% of its agent&#39;s tools moved the success rate from 80% to 100%. Smaller tool surface, sharper scope, fewer ways to fail. Negative space wins.</p>\n<p><strong>Harvey 2x accuracy via harness alone.</strong> Legal agents more than doubled their accuracy through harness optimization, no model change.</p>\n<p><strong>88% of enterprise AI agent projects fail to reach production.</strong> The preprints.org <em>Harness Engineering for Language Agents</em> paper (March 2026) traces the failures to runtime, not reasoning: stale state, brittle retries, overgrown context, poor recovery from intermediate mistakes.</p>\n<p><strong>Long-context collapse.</strong> WebAgent baseline 40-50% success drops to under 10% in long-context conditions, mostly from infinite loops and goal loss. The Ralph Loop and the handoff packet exist to absorb that.</p>\n<p><strong>False negatives still exist.</strong> Single-step factual tasks, one-line lints, formatter runs, anything the model has memorized verbatim — these run faster prompt-only. The benchmark should enumerate them honestly so the workbench is not framed as overkill.</p>\n<p>The takeaway is not &quot;harness wins forever.&quot; Models do absorb harness tricks over time. The takeaway is that today, the engineering load sits in the seven surfaces, and the numbers prove it.</p>\n<h2>Use It</h2>\n<p>This lesson is the case file you cite when:</p>\n<ul>\n<li>Someone asks why every PR carries an <code>agent-rules.md</code> and a scope contract.</li>\n<li>A team wants to drop the verification gate &quot;just for this sprint.&quot;</li>\n<li>A new agent product launches and you need a portable benchmark for whether it actually saves time.</li>\n</ul>\n<p>The numbers travel further than the explanation.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-workbench-benchmark.md</code> is a portable evaluation harness that runs any agent product through both pipelines against a project&#39;s own sample app and reports the five outcomes.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a sixth outcome: time-to-first-meaningful-edit. How do you measure it cleanly?</li>\n<li>Run the comparison on a real second-day task in your codebase. Where do the workbench numbers slip?</li>\n<li>Add a &quot;false negative&quot; pass: tasks where prompt-only would have been faster and the workbench overhead is real cost. Defend keeping the workbench anyway.</li>\n<li>Replace the scripted &quot;agent&quot; with a real LLM call. Which outcomes get noisier?</li>\n<li>Author a one-page summary aimed at a non-engineer. What survives the cut?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Sample app</td>\n<td>&quot;Toy repo&quot;</td>\n<td>Small but realistic enough to exercise all seven surfaces</td>\n</tr>\n<tr>\n<td>Pipeline</td>\n<td>&quot;Workflow&quot;</td>\n<td>Ordered sequence of surface reads/writes the agent follows</td>\n</tr>\n<tr>\n<td>Before/after report</td>\n<td>&quot;The receipts&quot;</td>\n<td>The artifact you hand to a skeptic</td>\n</tr>\n<tr>\n<td>False negative</td>\n<td>&quot;Workbench overkill&quot;</td>\n<td>Tasks where prompt-only is faster; useful to enumerate honestly</td>\n</tr>\n<tr>\n<td>Workbench benchmark</td>\n<td>&quot;Reliability score&quot;</td>\n<td>Portable harness that runs the comparison on your codebase</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://blog.langchain.com/the-anatomy-of-an-agent-harness/\" target=\"_blank\" rel=\"noopener\">LangChain, The Anatomy of an Agent Harness</a> — Terminal Bench Top-30 to Top-5 receipt</li>\n<li><a href=\"https://www.mongodb.com/company/blog/technical/agent-harness-why-llm-is-smallest-part-of-your-agent-system\" target=\"_blank\" rel=\"noopener\">MongoDB, The Agent Harness: Why the LLM Is the Smallest Part of Your Agent System</a> — Vercel + Harvey numbers</li>\n<li><a href=\"https://www.preprints.org/manuscript/202603.1756\" target=\"_blank\" rel=\"noopener\">preprints.org, Harness Engineering for Language Agents</a> — 88% enterprise failure rate, runtime root causes</li>\n<li><a href=\"https://news.ycombinator.com/item?id=46988596\" target=\"_blank\" rel=\"noopener\">HN: Improving 15 LLMs at Coding in One Afternoon. Only the Harness Changed</a> — replicated across 15 models</li>\n<li><a href=\"https://blog.cloudflare.com/ai-code-review/\" target=\"_blank\" rel=\"noopener\">Cloudflare, Orchestrating AI Code Review at Scale</a> — 131k review runs / 30 days in production</li>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a></li>\n<li>Phases 14 · 32 to 14 · 40 — the surfaces this lesson exercises end-to-end</li>\n<li>Phase 14 · 19 — SWE-bench, GAIA, AgentBench as the macro benchmarks this lesson complements</li>\n<li>Phase 14 · 30 — eval-driven agent development the same harness plugs into</li>\n</ul>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Run the same task on a sample app twice: prompt-only vs workbench-guided.\n\nBoth pipelines are scripted (no LLM) so the measurement is reproducible.\nWrites before-after-report.md and comparison.json next to this file.\n\nRun: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nfrom dataclasses import asdict, dataclass, field\nfrom pathlib import Path\n\nHERE = Path(__file__).parent\nSAMPLE = HERE / \"sample_app\"\n\n\nSAMPLE_APP_PY = '''\"\"\"Minimal signup handler. Treat as production-ish for this exercise.\"\"\"\n\nUSERS: dict[str, str] = {}\n\n\ndef signup(email: str, password: str) -> dict[str, object]:\n    USERS[email] = password\n    return {\"status\": 200, \"email\": email}\n'''\n\nSAMPLE_TEST_PY = '''from sample_app.app import signup\n\n\ndef test_signup_happy_path():\n    out = signup(\"a@b.co\", \"longenough\")\n    assert out[\"status\"] == 200\n'''\n\n\n@dataclass\nclass TaskOutcome:\n    pipeline: str\n    tests_actually_run: bool\n    acceptance_met: bool\n    files_outside_scope: list[str] = field(default_factory=list)\n    handoff_quality: str = \"missing\"\n    reviewer_total: int = 0\n\n\nALLOWED = {\"sample_app/app.py\", \"sample_app/test_app.py\"}\nFORBIDDEN = {\"sample_app/scripts/release.sh\"}\n\n\ndef run_prompt_only() -> TaskOutcome:\n    \"\"\"Edits a couple of files, never runs the test, claims done.\"\"\"\n    touched = [\"sample_app/app.py\", \"README.md\", \"sample_app/scripts/release.sh\"]\n    return TaskOutcome(\n        pipeline=\"prompt-only\",\n        tests_actually_run=False,\n        acceptance_met=False,\n        files_outside_scope=[p for p in touched if p not in ALLOWED],\n        handoff_quality=\"missing\",\n        reviewer_total=3,\n    )\n\n\ndef run_workbench() -> TaskOutcome:\n    \"\"\"Reads scope, edits inside scope, runs acceptance through feedback, gates, reviews, hands off.\"\"\"\n    touched = [\"sample_app/app.py\", \"sample_app/test_app.py\"]\n    return TaskOutcome(\n        pipeline=\"workbench-guided\",\n        tests_actually_run=True,\n        acceptance_met=True,\n        files_outside_scope=[p for p in touched if p not in ALLOWED],\n        handoff_quality=\"full packet\",\n        reviewer_total=9,\n    )\n\n\ndef write_report(po: TaskOutcome, wb: TaskOutcome) -> None:\n    lines = [\n        \"# Before / After: Agent Workbench on a Real Repo\",\n        \"\",\n        \"Same task. Same sample app. Two pipelines.\",\n        \"\",\n        \"| Outcome | Prompt only | Workbench |\",\n        \"|---------|-------------|-----------|\",\n        f\"| tests_actually_run | {po.tests_actually_run} | {wb.tests_actually_run} |\",\n        f\"| acceptance_met | {po.acceptance_met} | {wb.acceptance_met} |\",\n        f\"| files_outside_scope | {len(po.files_outside_scope)} | {len(wb.files_outside_scope)} |\",\n        f\"| handoff_quality | {po.handoff_quality} | {wb.handoff_quality} |\",\n        f\"| reviewer_total (/10) | {po.reviewer_total} | {wb.reviewer_total} |\",\n        \"\",\n        \"## Read\",\n        \"\",\n        \"Prompt only writes outside scope, claims done without running the acceptance command, \"\n        \"leaves no handoff, and scores low on review. Workbench keeps writes in scope, runs the \"\n        \"acceptance command through the feedback runner, passes the verification gate, and ships \"\n        \"a handoff packet the next session loads on startup.\",\n    ]\n    (HERE / \"before-after-report.md\").write_text(\"\\n\".join(lines) + \"\\n\")\n\n\ndef write_sample() -> None:\n    SAMPLE.mkdir(exist_ok=True)\n    (SAMPLE / \"app.py\").write_text(SAMPLE_APP_PY)\n    (SAMPLE / \"test_app.py\").write_text(SAMPLE_TEST_PY)\n    (SAMPLE / \"README.md\").write_text(\"# sample app\\n\\nForbidden zone for agent tasks.\\n\")\n    (SAMPLE / \"scripts\").mkdir(exist_ok=True)\n    (SAMPLE / \"scripts\" / \"release.sh\").write_text(\"#!/usr/bin/env bash\\necho release\\n\")\n\n\ndef main() -> None:\n    write_sample()\n    po = run_prompt_only()\n    wb = run_workbench()\n\n    for outcome in (po, wb):\n        print(f\"=== {outcome.pipeline} ===\")\n        for k, v in asdict(outcome).items():\n            print(f\"  {k}: {v}\")\n        print()\n\n    write_report(po, wb)\n    (HERE / \"comparison.json\").write_text(\n        json.dumps({\"prompt_only\": asdict(po), \"workbench\": asdict(wb)}, indent=2) + \"\\n\"\n    )\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the goal of running the same task through prompt-only and workbench-guided pipelines?",
+      "options": [
+        "To benchmark GPUs",
+        "To compare models",
+        "To produce a before/after report you can hand to a skeptic with numbers, not arguments",
+        "To pick a vendor"
+      ],
+      "answer": 2,
+      "explanation": "The numbers do the arguing; the case is made on a real-feeling task, not a toy."
+    },
+    {
+      "q": "Which is NOT one of the five outcomes measured?",
+      "options": [
+        "files_outside_scope",
+        "model_perplexity",
+        "acceptance_met",
+        "tests_actually_run"
+      ],
+      "answer": 1,
+      "explanation": "The five are tests_actually_run, acceptance_met, files_outside_scope, handoff_quality, reviewer_total."
+    },
+    {
+      "q": "What did LangChain's Anatomy of an Agent Harness measure on Terminal Bench 2.0?",
+      "options": [
+        "Top model lost 25 places",
+        "Models all converged at top-3",
+        "Harness changes did not move the rank",
+        "Same model moved from outside top 30 to rank five by changing only the harness"
+      ],
+      "answer": 3,
+      "explanation": "Twenty-five-rank delta on the same model is the headline harness-vs-model receipt."
+    },
+    {
+      "q": "What does the preprints.org paper cite as the failure rate for enterprise agent projects?",
+      "options": [
+        "8%",
+        "About 88% fail to reach production, with failures clustering around runtime, not reasoning",
+        "About 50%",
+        "None fail"
+      ],
+      "answer": 1,
+      "explanation": "The Harness Engineering for Language Agents preprint traces failures to runtime issues (stale state, brittle retries, overgrown context)."
+    },
+    {
+      "q": "What does WebAgent baseline accuracy do in long-context conditions?",
+      "options": [
+        "Stays flat",
+        "Drops from 40-50% to under 10% mostly from infinite loops and goal loss",
+        "Goes up by 30%",
+        "Halves but stays above 30%"
+      ],
+      "answer": 1,
+      "explanation": "Long-context collapse is what the Ralph Loop and handoff packet exist to absorb."
+    },
+    {
+      "q": "What does the lesson say about false negatives (cases where prompt-only is faster)?",
+      "options": [
+        "Single-step factual tasks, one-line lints, formatter runs are faster prompt-only; enumerate them honestly so the workbench is not framed as overkill",
+        "They prove the workbench fails",
+        "They do not exist",
+        "They invalidate the harness thesis"
+      ],
+      "answer": 0,
+      "explanation": "Honest enumeration of prompt-only-fastest cases keeps the harness argument credible."
+    },
+    {
+      "q": "Where do you cite the report from this lesson?",
+      "options": [
+        "Internal HR review",
+        "Only at hackathons",
+        "When someone wants to drop the verification gate 'just for this sprint', or when a new agent product launches and needs a portable time-savings benchmark",
+        "Only in marketing decks"
+      ],
+      "answer": 2,
+      "explanation": "The numbers travel further than the explanation; cite the report when pressure tries to short-circuit surfaces."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/41-workbench-for-real-repos"
+  }
+}

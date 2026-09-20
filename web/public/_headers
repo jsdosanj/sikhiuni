@@ -1,6 +1,25 @@
+# img-src includes blob: for <model-viewer>'s decoded glTF textures --
+# THREE.GLTFLoader creates a blob: URL per texture via
+# URL.createObjectURL() and assigns it as an <img> src; without blob: in
+# img-src every texture on the crest/emblem 3D models silently fails to
+# load. Found live on sikhiuni.com 2026-09-05, alongside the same-day fix
+# adding a WASM-execution allowance to the hardened script directive below
+# (build-csp.mjs) for that same 3D-texture-decoding feature.
+#
+# connect-src ALSO needs blob: -- the img-src fix above was necessary but
+# not sufficient. Found live on sikhiuni.com 2026-09-06: the crest still
+# rendered as a flat white silhouette (correct geometry/shading, no base
+# color) even with img-src fixed, because GLTFLoader's texture pipeline
+# additionally issues a real fetch() against the blob: URL it just created
+# (via ImageBitmapLoader, not always an <img> element) to decode the image
+# data -- and fetch() is gated by connect-src, not img-src. Same root-cause
+# class as the img-src fix, one directive over. Verified against the live
+# crest.glb: base color texture and material factors were already correct
+# on disk (metallicFactor 0.1, roughnessFactor 0.75, emissive zeroed) --
+# the texture fetch failing silently was the only remaining gap.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: geolocation=(), microphone=(), camera=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self'; connect-src 'self' https://api.banidb.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self' blob:; form-action 'self' https://formsubmit.co; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' https:; font-src 'self'; connect-src 'self' blob: https://api.banidb.com https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self' blob:; form-action 'self' https://formsubmit.co; base-uri 'self'; frame-ancestors 'none'

@@ -1,0 +1,112 @@
+{
+  "track": "cyber-05-cloud",
+  "school": "cyber",
+  "blurb": "The shared-responsibility model, then deliberately broken environments on AWS, Azure, Google Cloud, Kubernetes and CI/CD — attacked and then hardened, one platform at a time.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "creditLabel": "Labs discovered through",
+  "adaptedFrom": {
+    "name": "Awesome CloudSec Labs",
+    "href": "https://github.com/iknowjason/Awesome-CloudSec-Labs",
+    "license": "No stated licence",
+    "note": "That directory carries no licence file, so this path does not adapt it: the modules below are organised by platform on our own editorial judgement, every teaching note is Sikhi University's, and each lab is linked at its own home under its own licence. Go to the directory for the full catalogue."
+  },
+  "warning": "Several labs here are self-hosted: you deploy deliberately vulnerable infrastructure into a real cloud account, and it bills you at real rates. Use a throwaway account with a hard budget alarm, never a production one, and run the teardown the moment you are finished — an abandoned lab is both a bill and, because it is vulnerable on purpose, somebody else's foothold.",
+  "modules": [
+    {
+      "num": 1,
+      "slug": "shared-responsibility",
+      "title": "Whose fault is it? The shared-responsibility model",
+      "objective": "Say precisely which layer of a cloud service the provider secures and which layer you secure, and identify who is at fault for a given breach.",
+      "teach": "Almost every cloud breach that reaches the news is a customer-side misconfiguration that the provider's security did exactly what it promised. Learn the line before the tooling: the provider secures the cloud, you secure what you put in it, and the line moves depending on whether you bought a virtual machine, a container service, or a database. The browser-based challenges here need no account and no infrastructure — start with identity and permissions, because that is where the line is crossed most often.",
+      "labs": [
+        { "title": "The Big IAM Challenge", "provider": "Wiz", "href": "https://bigiamchallenge.com/", "cost": "free" },
+        { "title": "The Ultimate Cloud Security Championship", "provider": "Cloud Security Championship", "href": "https://www.cloudsecuritychampionship.com/", "cost": "free" },
+        { "title": "Pwned Labs", "provider": "Pwned Labs", "href": "https://pwnedlabs.io", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "aws",
+      "title": "AWS — identity first",
+      "objective": "Escalate privilege through misconfigured IAM roles and policies in a deliberately vulnerable AWS account, then write the policy that closes it.",
+      "teach": "AWS security is IAM security. Almost everything else follows from a role that trusts too much, a policy with a wildcard in the wrong field, or a set of credentials sitting in an instance's metadata. Work the guided scenarios before the free-form ones. Note the cost labels: the self-hosted labs deploy real resources into your account and bill you for them, whereas Amazon's own workshops run in an environment they provide.",
+      "labs": [
+        { "title": "CloudGoat", "provider": "Rhino Security Labs", "href": "https://github.com/RhinoSecurityLabs/cloudgoat", "cost": "free · your cloud bill" },
+        { "title": "IAM Vulnerable", "provider": "Bishop Fox", "href": "https://github.com/BishopFox/iam-vulnerable", "cost": "free · your cloud bill" },
+        { "title": "CloudFoxable", "provider": "Bishop Fox", "href": "https://github.com/BishopFox/cloudfoxable", "cost": "free · your cloud bill" },
+        { "title": "AWSGoat", "provider": "INE Labs", "href": "https://github.com/ine-labs/AWSGoat", "cost": "free · your cloud bill" },
+        { "title": "Sadcloud", "provider": "NCC Group", "href": "https://github.com/nccgroup/sadcloud", "cost": "free · your cloud bill" },
+        { "title": "AWS CIRT incident-response workshops", "provider": "Amazon Web Services", "href": "https://aws.amazon.com/blogs/security/aws-cirt-announces-the-release-of-five-publicly-available-workshops/", "cost": "free" },
+        { "title": "Well-Architected security workshop", "provider": "Amazon Web Services", "href": "https://catalog.workshops.aws/well-architected-security/en-US", "cost": "free" },
+        { "title": "The Cloud Hunting Games", "provider": "Wiz", "href": "https://www.cloudhuntinggames.com/", "cost": "free" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "azure",
+      "title": "Azure and Entra ID — the directory is the perimeter",
+      "objective": "Enumerate and abuse a misconfigured Entra ID tenant, and explain why a directory compromise is worse than a server compromise.",
+      "teach": "In a Microsoft estate the identity directory is the whole game: compromise it and every application that trusts it falls at once, without a single server being touched. Entra ID is what most organisations actually run, and its consent grants, application registrations and role assignments are where the mistakes live. The browser-based scenario needs nothing installed; the rest deploy into a tenant you should be willing to throw away.",
+      "labs": [
+        { "title": "Broken Azure", "provider": "Broken Azure", "href": "https://www.brokenazure.cloud/", "cost": "free" },
+        { "title": "EntraGoat", "provider": "Semperis", "href": "https://github.com/Semperis/EntraGoat", "cost": "free · your cloud bill" },
+        { "title": "BadZure", "provider": "Mauricio Velazco", "href": "https://github.com/mvelazc0/BadZure", "cost": "free · your cloud bill" },
+        { "title": "AzureGoat", "provider": "INE Labs", "href": "https://github.com/ine-labs/AzureGoat", "cost": "free · your cloud bill" },
+        { "title": "XMGoat", "provider": "XM Cyber", "href": "https://github.com/XMCyber/XMGoat", "cost": "free · your cloud bill" },
+        { "title": "Azure incident-response workshop", "provider": "Mandiant", "href": "https://github.com/mandiant/Azure_Workshop", "cost": "free · your cloud bill" },
+        { "title": "CONVEX", "provider": "Microsoft (Azure)", "href": "https://github.com/Azure/CONVEX", "cost": "free · your cloud bill" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "google-cloud",
+      "title": "Google Cloud — projects, service accounts, and the badge that proves it",
+      "objective": "Move laterally through a Google Cloud project by abusing service-account impersonation, and earn at least one skill badge on Google's own platform.",
+      "teach": "Google Cloud's resource hierarchy and its service accounts behave differently enough from AWS and Azure that assumptions carried over will mislead you. Do a vulnerable-project CTF first for the attacker's view, then spend time on Google's own platform for the defender's: its labs hand you a live environment rather than a simulation, and finishing a track earns a skill badge worth putting on a CV. The badges and labs are free; the full career certificate sits behind a subscription.",
+      "labs": [
+        { "title": "Google Skills — labs and skill badges", "provider": "Google", "href": "https://www.skills.google/", "cost": "free · account" },
+        { "title": "Google Cloud certificates and credentials", "provider": "Google", "href": "https://www.skills.google/credentials/certificate", "cost": "paid" },
+        { "title": "GCP Goat", "provider": "Joshua Jebaraj", "href": "https://gcpgoat.joshuajebaraj.com/index.html", "cost": "free · your cloud bill" },
+        { "title": "GCPGoat", "provider": "INE Labs", "href": "https://github.com/ine-labs/GCPGoat", "cost": "free · your cloud bill" },
+        { "title": "Thunder CTF", "provider": "Thunder CTF", "href": "https://thunder-ctf.cloud/", "cost": "free · your cloud bill" },
+        { "title": "GCP CTF Workshop", "provider": "n0jam", "href": "https://github.com/n0jam/gcp-ctf-workshop", "cost": "free · your cloud bill" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "kubernetes",
+      "title": "Kubernetes — the cluster as an attack surface",
+      "objective": "Break out of a pod, abuse a service account token, and describe the admission control that would have stopped you.",
+      "teach": "A cluster is a distributed operating system that most teams run with defaults they have never read. The classic findings are the same three every time: a container running as root, a service account token mounted where it was not needed, and a network policy nobody wrote. The browser-hosted games here need no cluster at all and are the fastest way in; the self-hosted ones let you then break a cluster you own.",
+      "labs": [
+        { "title": "EKS Cluster Games", "provider": "Wiz", "href": "https://eksclustergames.com/", "cost": "free · account" },
+        { "title": "K8s LAN Party", "provider": "Wiz", "href": "https://www.k8slanparty.com/", "cost": "free" },
+        { "title": "Kubernetes Goat", "provider": "Madhu Akula", "href": "https://github.com/madhuakula/kubernetes-goat", "cost": "free · your cloud bill" },
+        { "title": "OWASP EKS Goat", "provider": "OWASP Kubernetes Village", "href": "https://eksgoat.kubernetesvillage.com", "cost": "free · your cloud bill" },
+        { "title": "Secure Kubernetes — KubeCon NA CTF", "provider": "Secure Kubernetes", "href": "https://securekubernetes.com/", "cost": "free · your cloud bill" },
+        { "title": "Kube Security Lab", "provider": "Rory McCune", "href": "https://github.com/raesene/kube_security_lab", "cost": "free · your cloud bill" }
+      ]
+    },
+    {
+      "num": 6,
+      "slug": "pipeline",
+      "title": "Containers, infrastructure-as-code, and the pipeline",
+      "objective": "Find the misconfiguration in a Terraform module and in a CI/CD pipeline, and explain why the pipeline is the highest-value target in the whole estate.",
+      "teach": "This is the module that reframes everything before it. Your CI/CD pipeline holds credentials to every environment and deploys whatever it is told to — which makes it a more valuable target than any single server, and it is usually the least defended thing you own. Infrastructure-as-code is the other half: a misconfiguration written once in Terraform is deployed everywhere, forever, and is also the one place a single fix reaches every environment at once.",
+      "labs": [
+        { "title": "Container Security 101", "provider": "Jon Zeolla", "href": "https://jonzeolla.com/labs/container-security-101.html", "cost": "free" },
+        { "title": "contained.af", "provider": "genuinetools", "href": "https://github.com/genuinetools/contained.af", "cost": "free" },
+        { "title": "TerraGoat", "provider": "Bridgecrew (Prisma Cloud)", "href": "https://github.com/bridgecrewio/terragoat", "cost": "free · your cloud bill" },
+        { "title": "CI/CD Goat", "provider": "Cider Security Research", "href": "https://github.com/cider-security-research/cicd-goat", "cost": "free" },
+        { "title": "GitHub Actions Goat", "provider": "StepSecurity", "href": "https://github.com/step-security/github-actions-goat", "cost": "free" },
+        { "title": "CNAPPgoat", "provider": "Ermetic Research", "href": "https://github.com/ermetic-research/cnappgoat", "cost": "free · your cloud bill" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Awesome CloudSec Labs", "provider": "Jason Ostrom (iknowjason)", "href": "https://github.com/iknowjason/Awesome-CloudSec-Labs", "note": "The full directory the labs above were found through — far more than we mapped. No stated licence, so read it there." },
+    { "title": "Free cybersecurity and cloud certification courses", "provider": "Undercode Testing", "href": "https://undercodetesting.com/free-cybersecurity-and-cloud-certification-courses/", "note": "A community roundup of free vendor certification courses. An aggregator, not a syllabus — their editorial, linked and never copied." },
+    { "title": "SANS free security resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "The cloud and container cheat sheets. Copyright SANS, licensed for non-commercial use." }
+  ]
+}

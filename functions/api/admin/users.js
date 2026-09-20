@@ -1,4 +1,5 @@
 import { json, requireMfa, logEvent, parseBody } from "../_lib.js";
+import { mergeAccount } from "./_merge-account.js";
 
 // GET /api/admin/users -> list all users with roles (admin only)
 export async function onRequestGet({ request, env }) {
@@ -13,14 +14,38 @@ export async function onRequestGet({ request, env }) {
 // POST /api/admin/users { id, role: 'learner'|'teacher' } -> change a user's role (admin only).
 // Admin can only move people between learner and teacher. Granting/removing 'admin'
 // is intentionally NOT possible here — admin status is controlled solely by the
-// ADMIN_EMAILS env var, so there is exactly one admin.
+// ADMIN_EMAILS env var, which is a comma-separated allowlist and may name more
+// than one address.
 // POST /api/admin/users { id, action: 'mfa_reset' } -> clear a user's MFA enrollment
 // (break-glass for a teacher locked out of their authenticator). Logged.
+// POST /api/admin/users { action: 'merge', sourceId, targetId } -> fold a duplicate
+// account into the one that survives. `source` is deleted; `target` keeps its own
+// email, role and credentials. See _merge-account.js for exactly what moves.
 export async function onRequestPost({ request, env }) {
   const { user, error: authError } = await requireMfa(env, request, ["admin"]);
   if (authError) return authError;
   const { body, error } = await parseBody(request);
   if (error) return error;
+
+  if (body.action === "merge") {
+    const { sourceId, targetId } = body;
+    if (!sourceId || !targetId) return json({ error: "sourceId and targetId required" }, 400);
+    // Not a guard against malice so much as against a slip: merging an account
+    // into itself would delete it outright at the end of mergeAccount().
+    if (sourceId === targetId) return json({ error: "cannot merge an account into itself" }, 400);
+    const source = await env.DB.prepare("SELECT id, email FROM users WHERE id=?").bind(sourceId).first();
+    const target = await env.DB.prepare("SELECT id, email FROM users WHERE id=?").bind(targetId).first();
+    if (!source || !target) return json({ error: "not found" }, 404);
+
+    const { moved, dropped, skipped } = await mergeAccount(env, source, target);
+    // Logged BEFORE the response so the trail survives even if the client never
+    // sees it: after this, source.id appears in `events` with no `users` row to
+    // join against, and this line is what explains where it went.
+    await logEvent(env, user, "account_merge", target.id,
+      `${source.email} (${source.id}) -> ${target.email}; moved ${moved}, dropped ${dropped}` +
+      (Object.keys(skipped).length ? `, skipped ${JSON.stringify(skipped)}` : ""));
+    return json({ ok: true, moved, dropped, skipped });
+  }
 
   if (body.action === "mfa_reset") {
     if (!body.id) return json({ error: "id required" }, 400);

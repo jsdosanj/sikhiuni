@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::model-system-dataset-cards",
+  "num": 26,
+  "slug": "model-system-dataset-cards",
+  "title": "Model, System, and Dataset Cards",
+  "tagline": "Three documentation formats structure AI transparency. Model Cards (Mitchell et al. 2019) — nutrition labels for models: training data, quantitative disaggregated analyses, ethical considerations, caveats; only 0.3% of Hugging Face model cards document ethical considerations (Oreamuno et al. 2023). Datasheets for Datasets (Gebru et al. 2018, CACM) — motivation, composition, collection process, labeling, distribution, maintenance; electronics-datasheet analogy. Data Cards (Pushkarna et al., Google 2022) — modular layered detail (telescopic, periscopic, microscopic) as boundary objects for diverse readers. 2024-2025 developments: automated generation via LLMs (CardGen, Liu et al. 2024); model-card detail correlates with up to 29% download increase on HF (Liang et al. 2024); verifiable attestations (Laminator, Duddu et al. 2024); sustainability reporting additions for carbon/water (Jouneaux et al. July 2025); EU/ISO regulatory cards emerging. System Cards (Sidhpurwala 2024; Meta system-level transparency; \"Blueprints of Trust\" arXiv:2509.20394) — end-to-end AI system documentation covering security capabilities, prompt-injection protection, data-exfiltration detection, alignment with human values.",
+  "type": "Build",
+  "languages": "Python (stdlib, model-card + datasheet + system-card generator)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Describe the original Mitchell et al. 2019 model card and the Gebru et al. 2018 datasheet.",
+    "Describe Data Cards' telescopic/periscopic/microscopic layering.",
+    "Describe System Cards and their end-to-end coverage.",
+    "State three 2024-2025 developments (automated generation, verifiable attestations, sustainability reporting)."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Regulatory frameworks (Lesson 24) and lab safety policies (Lesson 18) both require documentation. Documentation formats evolved from model-specific (model cards) to dataset-specific (datasheets) to system-specific (system cards). Each addresses a different scope of transparency. The 2024-2025 automation and verifiable-attestation work addresses the long-standing adoption problem.</p>\n<h2>The Concept</h2>\n<h3>Model Cards (Mitchell et al. 2019)</h3>\n<p>Sections:</p>\n<ul>\n<li>Model details.</li>\n<li>Intended use.</li>\n<li>Factors (relevant demographic or environmental factors for evaluation).</li>\n<li>Metrics.</li>\n<li>Evaluation data.</li>\n<li>Training data.</li>\n<li>Quantitative analyses (disaggregated by factors).</li>\n<li>Ethical considerations.</li>\n<li>Caveats and recommendations.</li>\n</ul>\n<p>Adoption problem: Oreamuno et al. 2023 audit of Hugging Face model cards found only 0.3% document ethical considerations.</p>\n<h3>Datasheets for Datasets (Gebru et al. 2018)</h3>\n<p>Electronics-datasheet analogy. Sections:</p>\n<ul>\n<li>Motivation (why was the dataset created).</li>\n<li>Composition (what is in it).</li>\n<li>Collection process (how was it assembled).</li>\n<li>Labeling (if applicable).</li>\n<li>Uses (intended, prohibited, risks).</li>\n<li>Distribution.</li>\n<li>Maintenance.</li>\n</ul>\n<p>Published in CACM 2021. The datasheet is the upstream documentation; the model card depends on the datasheet being accurate.</p>\n<h3>Data Cards (Pushkarna et al., Google 2022)</h3>\n<p>Modular layered detail. Three zoom levels:</p>\n<ul>\n<li><strong>Telescopic.</strong> High-level summary for non-experts.</li>\n<li><strong>Periscopic.</strong> Middle-level overview for ML practitioners.</li>\n<li><strong>Microscopic.</strong> Detailed feature-level documentation for auditors.</li>\n</ul>\n<p>Boundary-object framing: different readers extract different information from the same document.</p>\n<h3>System Cards</h3>\n<p>Scope: end-to-end AI system including model + safety stack + deployment context. Sections typically include:</p>\n<ul>\n<li>Security capabilities.</li>\n<li>Prompt-injection protection.</li>\n<li>Data-exfiltration detection.</li>\n<li>Alignment with stated human values.</li>\n<li>Incident response.</li>\n</ul>\n<p>Sidhpurwala 2024 and Meta system-level transparency work. &quot;Blueprints of Trust&quot; (arXiv:2509.20394) formalizes the System Card as the deployment-layer complement to Model Cards.</p>\n<h3>2024-2025 developments</h3>\n<ul>\n<li><strong>CardGen (Liu et al. 2024).</strong> Automated model-card generation via LLMs; reports higher objectivity than many human-authored cards on the standardized Mitchell 2019 fields.</li>\n<li><strong>Download correlation (Liang et al. 2024).</strong> Detailed model cards correlate with up to 29% higher download rates on HF — adoption pressure is now market-driven, not only compliance-driven.</li>\n<li><strong>Laminator (Duddu et al. 2024).</strong> Verifiable attestations via hardware TEE / cryptographic signatures — allows the model card to carry a proof-of-claim, not just a claim.</li>\n<li><strong>Sustainability (Jouneaux et al. July 2025).</strong> Additions for carbon, water, and compute-energy footprint; emerging ISO standards.</li>\n<li><strong>Regulatory cards.</strong> EU AI Act (Lesson 24) GPAI Code of Practice Transparency chapter requires model cards as a compliance artifact.</li>\n</ul>\n<h3>Where this fits in Phase 18</h3>\n<p>Lessons 24-25 are regulatory and CVE layers. Lesson 26 is the documentation layer. Lesson 27 is training-data governance, which is the datasheet&#39;s upstream. Lesson 28 is the research ecosystem that produces evaluations referenced in cards.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>an-card-scopes</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> generates a minimal model card, datasheet, and system card for a toy deployment. Each follows the canonical section structure. You can inspect the format and compare the three scopes.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-card-audit.md</code>. Given a model card, datasheet, or system card, it audits section coverage, numerical disaggregation, and whether verifiable attestations are present.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Run <code>code/main.py</code>. Inspect the generated cards. Identify sections that are weak (placeholder-only) and specify what evidence would strengthen them.</p>\n</li>\n<li><p>Extend the model card with a quantitative disaggregated analysis across two demographic groups (Lesson 20).</p>\n</li>\n<li><p>Read Oreamuno et al. 2023 on the 0.3% adoption rate. Propose one structural change to the model card specification that would increase ethical-considerations adoption.</p>\n</li>\n<li><p>Laminator (Duddu et al. 2024) uses TEEs for verifiable attestations. Design a model-card field that carries a cryptographic attestation of an evaluation result and describe the verifier&#39;s role.</p>\n</li>\n<li><p>Write a System Card (System Card, not Model Card) for one of your past projects or a hypothetical deployment. Identify the highest-value section for third-party auditors.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Model Card</td>\n<td>&quot;the Mitchell card&quot;</td>\n<td>Mitchell et al. 2019 standard documentation for ML models</td>\n</tr>\n<tr>\n<td>Datasheet</td>\n<td>&quot;the Gebru datasheet&quot;</td>\n<td>Gebru et al. 2018 standard documentation for datasets</td>\n</tr>\n<tr>\n<td>Data Card</td>\n<td>&quot;the Pushkarna card&quot;</td>\n<td>Google 2022 modular layered data documentation</td>\n</tr>\n<tr>\n<td>System Card</td>\n<td>&quot;the deployment card&quot;</td>\n<td>End-to-end AI system documentation including safety stack</td>\n</tr>\n<tr>\n<td>Boundary object</td>\n<td>&quot;different readers, one doc&quot;</td>\n<td>Data Cards framing: same document serves diverse audiences</td>\n</tr>\n<tr>\n<td>Verifiable attestation</td>\n<td>&quot;the Laminator attestation&quot;</td>\n<td>Cryptographic or TEE proof attached to a documentation claim</td>\n</tr>\n<tr>\n<td>Sustainability field</td>\n<td>&quot;carbon / water footprint&quot;</td>\n<td>Emerging 2025 addition for environmental accounting</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/1810.03993\" target=\"_blank\" rel=\"noopener\">Mitchell et al. — Model Cards for Model Reporting (arXiv:1810.03993, FAT* 2019)</a> — the canonical model card</li>\n<li><a href=\"https://arxiv.org/abs/1803.09010\" target=\"_blank\" rel=\"noopener\">Gebru et al. — Datasheets for Datasets (CACM 2021, arXiv:1803.09010)</a> — datasheet paper</li>\n<li><a href=\"https://arxiv.org/abs/2204.01075\" target=\"_blank\" rel=\"noopener\">Pushkarna et al. — Data Cards (Google 2022)</a> — layered data documentation</li>\n<li><a href=\"https://arxiv.org/abs/2509.20394\" target=\"_blank\" rel=\"noopener\">Sidhpurwala et al. — Blueprints of Trust (arXiv:2509.20394)</a> — System Card formalization</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Minimal model-card, datasheet, system-card generator — stdlib Python.\n\nGenerates three canonical documents for a toy deployment:\n  - Model Card (Mitchell et al. 2019)\n  - Datasheet (Gebru et al. 2018)\n  - System Card (Sidhpurwala 2024 / \"Blueprints of Trust\" 2025)\n\nEach is a Markdown string printed to stdout. Sections follow the canonical\ntemplates.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\n\ndef model_card() -> str:\n    return \"\"\"\n# Model Card: ToyClassifier-1.0\n\n## Model Details\n- Developer: ai-engineering-from-scratch / Phase 18 / Lesson 26\n- Version: 1.0.0\n- Type: binary logistic classifier (toy)\n- License: MIT\n- Contact: phase-18-lesson-26\n\n## Intended Use\n- Primary: pedagogical demonstration\n- Out-of-scope: any production decision\n\n## Factors\n- Sensitive attributes: gender (binary in toy), age bucket\n- Environment: controlled synthetic data\n\n## Metrics\n- Accuracy, demographic parity, equalized odds (see Lesson 21)\n\n## Training Data\n- Synthetic dataset; see accompanying Datasheet\n\n## Quantitative Analysis\n- accuracy: 0.97 overall\n- demographic parity gap: +0.03 (group0 vs group1)\n- equalized odds TPR gap: -0.01\n\n## Ethical Considerations\n- Toy classifier; not validated for real-world use.\n- Bias metrics are placeholder; ship a full audit before any deployment.\n\n## Caveats and Recommendations\n- Retrain on deployment-specific data.\n- Apply Lesson 22 (DP) if training data contains PII.\n\"\"\"\n\n\ndef datasheet() -> str:\n    return \"\"\"\n# Datasheet: ToyBinaryClassification-1.0\n\n## Motivation\n- Created for pedagogical demonstration in Phase 18, Lesson 26\n- Funded by no one; not for production use\n\n## Composition\n- 1,500 synthetic examples\n- Features: 2-d continuous, 1 binary sensitive attribute\n- Labels: binary, derived from x[0] + x[1] > 0 rule\n\n## Collection Process\n- Synthetically generated via Python random.gauss with fixed seed\n- No human subjects involved\n\n## Labeling\n- Labels programmatically derived; no annotation error\n\n## Uses\n- Intended: teaching fairness metrics (Lesson 21) and bias probes (Lesson 20)\n- Not to be used: as a proxy for any production-scale dataset\n\n## Distribution\n- Included in Phase 18 / Lesson 26 repository\n\n## Maintenance\n- Static; regenerated on every run from fixed seed\n\"\"\"\n\n\ndef system_card() -> str:\n    return \"\"\"\n# System Card: ToyClassifier Service\n\n## Deployment\n- Scope: localhost pedagogical service\n- Stack: ToyClassifier-1.0 behind a single-threaded HTTP server\n\n## Security Capabilities\n- Prompt-injection: N/A (non-generative)\n- Data-exfiltration detection: basic egress rate limit\n- Rate limiting: 100 req/min per client\n\n## Alignment\n- Model reflects the synthetic-label rule only\n- No RLHF; no refusal policy\n\n## Incident Response\n- No production SLA; escalation goes nowhere\n- Issue tracker: Phase 18 / Lesson 26\n\n## Regulatory Alignment\n- EU AI Act: N/A (toy; no EU deployment)\n- GPAI Code of Practice: N/A (non-GPAI)\n- Transparency Code: N/A (no AI-generated content output)\n\"\"\"\n\n\ndef main() -> None:\n    print(\"=\" * 74)\n    print(\"CARDS GENERATOR (Phase 18, Lesson 26)\")\n    print(\"=\" * 74)\n    print(model_card())\n    print(datasheet())\n    print(system_card())\n    print(\"=\" * 74)\n    print(\"TAKEAWAY: three canonical cards cover three scopes. model cards\")\n    print(\"document the model; datasheets document the data; system cards\")\n    print(\"document the deployment. in 2026, EU AI Act GPAI Code of Practice\")\n    print(\"requires model cards as compliance artifacts. verifiable\")\n    print(\"attestations (Laminator 2024) are the next phase.\")\n    print(\"=\" * 74)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which best describes the original Mitchell et al. (2019) Model Card?",
+      "options": [
+        "A model checkpoint manifest only",
+        "A regulatory legal contract",
+        "A 'nutrition label' for ML models: training data, intended use, factors, metrics, evaluation data, quantitative disaggregated analyses, ethical considerations, caveats",
+        "An OpenAPI specification"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What did Oreamuno et al. (2023) find about ethical-considerations adoption in Hugging Face model cards?",
+      "options": [
+        "No model card has any text at all",
+        "Approximately 0.3% document ethical considerations",
+        "Approximately 80% document ethical considerations",
+        "All model cards document them"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What does Pushkarna et al. (Google 2022) Data Cards' telescopic / periscopic / microscopic layering provide?",
+      "options": [
+        "A pre-RLHF audit checklist",
+        "A telescope-themed visualization library",
+        "A boundary-object framing where the same document serves different readers (non-experts, ML practitioners, auditors) via three zoom levels of detail",
+        "A privacy-preserving query interface"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What scope does a System Card cover that Model Cards do not?",
+      "options": [
+        "Only the tokenizer",
+        "End-to-end AI system: model + safety stack + deployment context, including security capabilities, prompt-injection protection, data-exfiltration detection, alignment, and incident response",
+        "Only the prompt template",
+        "Only the dataset"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What did Liang et al. (2024) report about model-card detail and Hugging Face download rate?",
+      "options": [
+        "Only ethical-considerations sections affected downloads",
+        "Detail decreased download rates",
+        "Detailed model cards drive a +29.0% weekly download lift on HF for the treatment group vs control (diff-in-diff); adoption pressure is now market-driven, not only compliance-driven",
+        "Detail had no effect on downloads"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What does Laminator (Duddu et al. 2024) contribute to documentation?",
+      "options": [
+        "An automated benchmarking harness",
+        "Verifiable attestations via hardware TEE / cryptographic signatures, so the card can carry a proof-of-claim instead of just a claim",
+        "An LLM-based summary generator",
+        "A replacement for the Datasheets standard"
+      ],
+      "answer": 1,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/26-model-system-dataset-cards"
+  }
+}

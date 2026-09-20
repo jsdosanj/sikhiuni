@@ -1,0 +1,996 @@
+{
+  "track": "aisf-01-math",
+  "count": 110,
+  "questions": [
+    {
+      "q": "What does the dot product of two vectors measure?",
+      "options": [
+        "The number of dimensions the vectors share",
+        "How similar or aligned the two vectors are",
+        "The distance between the two vectors",
+        "The angle between the vectors in degrees"
+      ]
+    },
+    {
+      "q": "In AI, what does 'embedding' refer to?",
+      "options": [
+        "The process of converting code to machine instructions",
+        "A technique for compressing model weights",
+        "Inserting one model inside another",
+        "A vector representation that captures the meaning of something (word, image, user)"
+      ]
+    },
+    {
+      "q": "Three vectors v1=[1,0,0], v2=[0,1,0], v3=[2,1,0] are given. Are they linearly independent?",
+      "options": [
+        "Yes, because there are three vectors in 3D space",
+        "No, because v3 = 2*v1 + v2, so v3 is a linear combination of the others",
+        "Yes, because none of the vectors are identical",
+        "No, because they all have a zero component"
+      ]
+    },
+    {
+      "q": "What does the rank of a matrix tell you in the context of machine learning?",
+      "options": [
+        "The number of linearly independent columns, indicating how many dimensions of useful information it contains",
+        "The maximum value in the matrix",
+        "How fast the matrix can be multiplied",
+        "The number of non-zero entries in the matrix"
+      ]
+    },
+    {
+      "q": "How does LoRA (Low-Rank Adaptation) use linear algebra to efficiently fine-tune large language models?",
+      "options": [
+        "It decomposes weight updates into two small low-rank matrices instead of updating the full weight matrix",
+        "It removes unused rows from weight matrices to shrink the model",
+        "It freezes the embedding layer and only trains the output head",
+        "It converts all weights from float32 to int8"
+      ]
+    },
+    {
+      "q": "For matrix multiplication (m x n) @ (n x p), what must be true about the dimensions?",
+      "options": [
+        "m must be greater than p",
+        "m must equal p",
+        "The inner dimensions n must match",
+        "All dimensions must be equal"
+      ]
+    },
+    {
+      "q": "What is the identity matrix?",
+      "options": [
+        "A square matrix with ones on the diagonal and zeros elsewhere that acts as the multiplicative identity",
+        "A matrix of all ones",
+        "The transpose of any given matrix",
+        "A matrix where every element is unique"
+      ]
+    },
+    {
+      "q": "What is the key difference between element-wise multiplication and matrix multiplication?",
+      "options": [
+        "Element-wise is faster while matrix multiplication is more accurate",
+        "They produce the same result but use different notation",
+        "Element-wise only works on vectors while matrix multiplication works on matrices",
+        "Element-wise multiplies matching positions (same shape required), matrix multiplication takes dot products of rows and columns (inner dimensions must match)"
+      ]
+    },
+    {
+      "q": "In the expression 'output = relu(W @ x + b)', what role does broadcasting play?",
+      "options": [
+        "It converts the data types of W and x to match",
+        "It broadcasts the computation across multiple GPUs",
+        "It automatically stretches the bias vector b to match the shape of W @ x so they can be added",
+        "It repeats the relu activation across all elements"
+      ]
+    },
+    {
+      "q": "What does a determinant of zero for a matrix indicate?",
+      "options": [
+        "The matrix is singular: it crushes at least one dimension, cannot be inverted, and has no unique solution",
+        "The matrix is the identity matrix",
+        "The matrix has all zero entries",
+        "The matrix performs a rotation"
+      ]
+    },
+    {
+      "q": "What is an eigenvector of a matrix?",
+      "options": [
+        "A vector that the matrix only scales (never rotates) when multiplied",
+        "The diagonal entries of the matrix expressed as a vector",
+        "The largest row in the matrix",
+        "A vector perpendicular to all columns of the matrix"
+      ]
+    },
+    {
+      "q": "What does the determinant of a 2D transformation matrix represent geometrically?",
+      "options": [
+        "The number of eigenvectors the matrix has",
+        "The angle of rotation applied by the matrix",
+        "The factor by which the matrix scales area",
+        "The trace of the matrix"
+      ]
+    },
+    {
+      "q": "Why does the order of matrix transformations matter? (i.e., why is R @ S different from S @ R?)",
+      "options": [
+        "One order produces a larger matrix than the other",
+        "The determinants are different for each order",
+        "Matrix multiplication is not commutative: rotating then scaling gives a different result than scaling then rotating",
+        "Matrix addition is not commutative"
+      ]
+    },
+    {
+      "q": "In a recurrent neural network, what happens when the weight matrix has eigenvalues with magnitude greater than 1?",
+      "options": [
+        "The eigenvalues converge to 1 over training",
+        "The network becomes more stable",
+        "Outputs explode exponentially over time steps (exploding gradient problem)",
+        "The network learns faster"
+      ]
+    },
+    {
+      "q": "The matrix A = [[2, 1], [1, 2]] has eigenvalues 3 and 1. What does eigendecomposition A = V @ D @ V^(-1) reveal?",
+      "options": [
+        "A has rank 1 and maps all vectors to a line",
+        "A is equivalent to two rotations",
+        "A compresses all vectors by a factor of 2",
+        "A stretches space by 3x along the [1,1] direction and leaves the [1,-1] direction unchanged"
+      ]
+    },
+    {
+      "q": "What does the derivative of a function at a point tell you?",
+      "options": [
+        "The maximum value the function can reach",
+        "The area under the function up to that point",
+        "The rate of change (slope) of the function at that point",
+        "The value of the function at that point"
+      ]
+    },
+    {
+      "q": "What is a gradient in the context of machine learning?",
+      "options": [
+        "The difference between predicted and actual values",
+        "A measure of model accuracy",
+        "A vector of all partial derivatives that points in the direction of steepest ascent",
+        "The learning rate used during training"
+      ]
+    },
+    {
+      "q": "In gradient descent, what does the update rule 'w = w - lr * dL/dw' accomplish?",
+      "options": [
+        "It normalizes the weight to have magnitude 1",
+        "It increases the loss to test model robustness",
+        "It resets the weight to its initial value minus the gradient",
+        "It adjusts each weight in the direction that reduces the loss, scaled by the learning rate"
+      ]
+    },
+    {
+      "q": "Why can't Newton's method (which uses the Hessian matrix) be directly applied to neural networks with millions of parameters?",
+      "options": [
+        "Newton's method converges too slowly for deep networks",
+        "The Hessian is an N x N matrix, requiring O(N^2) storage and O(N^3) computation per step, which is intractable for millions of parameters",
+        "Newton's method requires analytical derivatives which cannot be computed for neural networks",
+        "Newton's method only works for convex functions"
+      ]
+    },
+    {
+      "q": "What is the numerical (central difference) approximation for f'(x)?",
+      "options": [
+        "(f(x+h) - f(x)) / h",
+        "f(x) * h",
+        "(f(x+h) - f(x-h)) / (2*h)",
+        "f(x+h) / h"
+      ]
+    },
+    {
+      "q": "What does the chain rule in calculus state?",
+      "options": [
+        "Functions can only be differentiated if they are linear",
+        "The derivative of composed functions is the product of their individual derivatives",
+        "The derivative of a sum is the sum of derivatives",
+        "The integral of a product is the product of integrals"
+      ]
+    },
+    {
+      "q": "What is a computational graph?",
+      "options": [
+        "A directed graph where nodes are operations and edges carry values forward or gradients backward",
+        "A diagram showing the architecture of a neural network",
+        "A graph database used for storing training data",
+        "A plot of loss vs training steps"
+      ]
+    },
+    {
+      "q": "Why does PyTorch use reverse-mode autodiff (backpropagation) instead of forward-mode?",
+      "options": [
+        "Forward mode cannot handle non-linear functions",
+        "Reverse mode computes all gradients in one backward pass, while forward mode needs one pass per input variable -- neural networks have millions of inputs but one loss output",
+        "Reverse mode is more numerically accurate",
+        "Reverse mode uses less memory"
+      ]
+    },
+    {
+      "q": "In the Value class autograd engine, why does the backward function use '+=' instead of '=' for accumulating gradients?",
+      "options": [
+        "Because a value used in multiple operations receives gradient contributions from each one, which must be summed",
+        "To average the gradients across multiple samples",
+        "To prevent numerical overflow in the gradients",
+        "Because Python does not support the '=' operator in closures"
+      ]
+    },
+    {
+      "q": "What is gradient checking and when should you use it?",
+      "options": [
+        "Checking that gradients are below a threshold to prevent exploding gradients",
+        "Comparing autodiff gradients against numerical finite-difference gradients to verify correctness of the backward pass",
+        "Checking that all parameters received non-zero gradients during training",
+        "Monitoring gradient magnitudes during training to detect vanishing gradients"
+      ]
+    },
+    {
+      "q": "What is the difference between a probability mass function (PMF) and a probability density function (PDF)?",
+      "options": [
+        "PMFs always sum to 0.5, PDFs integrate to 1",
+        "PMFs give exact probabilities for discrete outcomes, while PDFs give densities for continuous variables that must be integrated over an interval to get probability",
+        "There is no difference; they are the same concept with different names",
+        "PMFs are used for continuous variables, PDFs for discrete variables"
+      ]
+    },
+    {
+      "q": "What does the Central Limit Theorem state?",
+      "options": [
+        "The mean of many independent random samples converges to a normal distribution regardless of the source distribution",
+        "All data follows a normal distribution",
+        "The probability of rare events decreases as sample size increases",
+        "Large datasets always have low variance"
+      ]
+    },
+    {
+      "q": "Why does softmax subtract the maximum logit before exponentiating (the 'softmax trick')?",
+      "options": [
+        "To make all probabilities equal",
+        "To prevent numerical overflow from exponentiating large numbers while producing mathematically identical results",
+        "To speed up the computation by reducing the number of exponentiations",
+        "To normalize the logits to have mean zero"
+      ]
+    },
+    {
+      "q": "Cross-entropy loss for classification simplifies to -log(q(true_class)). What does this mean intuitively?",
+      "options": [
+        "Multiply the predicted probabilities by the true labels",
+        "Penalize the model based on how low its predicted probability is for the correct class -- lower prediction means higher loss",
+        "Average the log probabilities across all classes",
+        "Compute the entropy of the true distribution"
+      ]
+    },
+    {
+      "q": "Why do language models work with log probabilities instead of raw probabilities?",
+      "options": [
+        "Multiplying many small probabilities causes numerical underflow to zero; log probabilities convert products to sums, avoiding this",
+        "Log probabilities are easier to interpret visually",
+        "Raw probabilities cannot represent values less than 0.01",
+        "Log probabilities are required by the transformer architecture"
+      ]
+    },
+    {
+      "q": "In Bayes' theorem, what is the 'prior'?",
+      "options": [
+        "The final updated probability after seeing evidence",
+        "The probability of the evidence given the hypothesis",
+        "The probability of the evidence",
+        "Your belief about a hypothesis before observing any evidence"
+      ]
+    },
+    {
+      "q": "A rare disease affects 1 in 10,000 people. A 99% accurate test returns positive. What is the approximate probability you have the disease?",
+      "options": [
+        "99%",
+        "10%",
+        "50%",
+        "About 1%"
+      ]
+    },
+    {
+      "q": "What is Laplace smoothing in a Naive Bayes classifier and why is it necessary?",
+      "options": [
+        "It reduces the dimensionality of the feature space",
+        "It adds a small count to every feature to prevent zero probabilities from unseen words, which would zero out the entire product",
+        "It smooths the decision boundary between classes",
+        "It normalizes feature values to have zero mean and unit variance"
+      ]
+    },
+    {
+      "q": "How does MAP (Maximum A Posteriori) estimation differ from MLE (Maximum Likelihood Estimation)?",
+      "options": [
+        "MAP is faster to compute than MLE",
+        "MLE always produces better results than MAP",
+        "MAP incorporates a prior distribution over parameters, equivalent to adding regularization, while MLE only uses the likelihood",
+        "MAP uses a larger dataset than MLE"
+      ]
+    },
+    {
+      "q": "In sequential Bayesian updating, you start with Beta(1,1) and observe 7 heads and 3 tails. What is the posterior?",
+      "options": [
+        "Beta(8, 4)",
+        "Beta(1.7, 1.3)",
+        "Normal(0.7, 0.1)",
+        "Beta(7, 3)"
+      ]
+    },
+    {
+      "q": "What does 'optimization' mean in the context of training a neural network?",
+      "options": [
+        "Finding the model weights that minimize the loss function",
+        "Making the code run faster",
+        "Reducing the number of parameters in the model",
+        "Choosing the best hardware for training"
+      ]
+    },
+    {
+      "q": "What happens if the learning rate is too large during gradient descent?",
+      "options": [
+        "Training converges faster to the global minimum",
+        "The optimizer overshoots the minimum and the loss diverges (bounces or increases)",
+        "The model automatically reduces the learning rate",
+        "The gradients become zero"
+      ]
+    },
+    {
+      "q": "How does Adam differ from vanilla gradient descent?",
+      "options": [
+        "Adam computes exact second derivatives while GD uses first derivatives",
+        "Adam uses a fixed learning rate while GD uses adaptive rates",
+        "Adam processes the full dataset per step while GD uses mini-batches",
+        "Adam tracks running averages of gradients and squared gradients to give each weight its own adaptive learning rate"
+      ]
+    },
+    {
+      "q": "Why is the noise in mini-batch SGD considered beneficial rather than just a nuisance?",
+      "options": [
+        "Noise makes the loss function convex",
+        "Noise helps the optimizer escape shallow local minima and saddle points that a noiseless optimizer would get stuck in",
+        "Noise is not beneficial; it always slows convergence",
+        "Noise reduces memory usage during training"
+      ]
+    },
+    {
+      "q": "What does a cosine annealing learning rate schedule do?",
+      "options": [
+        "Increases the learning rate throughout training following a cosine curve",
+        "Starts with a high learning rate and smoothly decreases it following a cosine curve, with optional warmup",
+        "Alternates the learning rate between two fixed values",
+        "Sets the learning rate to the cosine of the current epoch number"
+      ]
+    },
+    {
+      "q": "What does 'entropy' measure in information theory?",
+      "options": [
+        "The number of bits in a binary message",
+        "The error rate of a communication channel",
+        "The energy of a physical system",
+        "The average surprise or uncertainty in a probability distribution"
+      ]
+    },
+    {
+      "q": "What is the cross-entropy loss commonly used for in neural networks?",
+      "options": [
+        "Generating new data samples",
+        "Regularizing model weights to prevent overfitting",
+        "Classification tasks, measuring how far predicted probabilities are from true labels",
+        "Regression tasks with continuous outputs"
+      ]
+    },
+    {
+      "q": "Why is minimizing cross-entropy equivalent to minimizing KL divergence during training?",
+      "options": [
+        "Because cross-entropy and KL divergence are the same formula",
+        "Because cross-entropy = entropy + KL divergence, and the entropy of the true labels is constant, so minimizing cross-entropy minimizes KL divergence",
+        "Because KL divergence is always zero during training",
+        "Because the model's entropy equals zero at convergence"
+      ]
+    },
+    {
+      "q": "A language model has perplexity 50 on a test set. What does this mean?",
+      "options": [
+        "The model has 50 layers",
+        "The model makes 50 errors per sentence",
+        "On average, the model is as uncertain as if it were choosing uniformly from 50 possible next tokens at each step",
+        "The model was trained for 50 epochs"
+      ]
+    },
+    {
+      "q": "How does mutual information differ from Pearson correlation for feature selection?",
+      "options": [
+        "Mutual information is faster to compute",
+        "They always give the same feature rankings",
+        "Pearson correlation works for any data type while mutual information only works for continuous data",
+        "Mutual information detects any statistical dependency (linear or nonlinear) while correlation only detects linear relationships"
+      ]
+    },
+    {
+      "q": "What is the 'curse of dimensionality'?",
+      "options": [
+        "As dimensions grow, distances become meaningless, volume concentrates in corners, and you need exponentially more data",
+        "Neural networks cannot process data with more than 100 features",
+        "High-dimensional data always contains noise",
+        "High-dimensional data takes too long to download"
+      ]
+    },
+    {
+      "q": "What does PCA find?",
+      "options": [
+        "Clusters of similar data points",
+        "The most important features by name",
+        "The orthogonal directions of maximum variance in the data",
+        "The optimal number of features to keep"
+      ]
+    },
+    {
+      "q": "After running PCA on 784-dimensional MNIST data with k=50 components, you find 95% of variance is captured. What does this tell you?",
+      "options": [
+        "95% of images belong to the same class",
+        "The data effectively lives in a ~50-dimensional subspace; the remaining 734 dimensions are mostly noise or redundancy",
+        "The model will achieve 95% accuracy",
+        "Only 50 pixels matter in each image"
+      ]
+    },
+    {
+      "q": "Why should you NOT use t-SNE as preprocessing before training a classifier?",
+      "options": [
+        "t-SNE is designed for visualization only: it distorts global distances, is stochastic, and the output coordinates have no consistent meaning across runs",
+        "t-SNE requires the labels to be known in advance",
+        "t-SNE is too slow for large datasets",
+        "t-SNE reduces data to exactly 2 dimensions which is too few"
+      ]
+    },
+    {
+      "q": "When would you choose kernel PCA over standard PCA?",
+      "options": [
+        "When you need the fastest possible computation",
+        "When you want interpretable principal components",
+        "When you have more samples than features",
+        "When the data lies on a nonlinear manifold that standard PCA cannot separate, like concentric circles"
+      ]
+    },
+    {
+      "q": "What advantage does SVD have over eigendecomposition?",
+      "options": [
+        "SVD is always faster to compute",
+        "SVD produces smaller output matrices",
+        "SVD works on any matrix of any shape, while eigendecomposition requires square matrices with full eigenvector sets",
+        "SVD does not require numerical computation"
+      ]
+    },
+    {
+      "q": "What does 'low-rank approximation' mean?",
+      "options": [
+        "Converting a matrix to a lower precision data type",
+        "Removing rows with low values from a matrix",
+        "Sorting the rows of a matrix by their magnitude",
+        "Approximating a matrix by keeping only its most important components, producing a simpler matrix with fewer independent directions"
+      ]
+    },
+    {
+      "q": "In SVD A = U * Sigma * V^T, what geometric operation does each factor represent?",
+      "options": [
+        "All three factors perform the same operation: rotation",
+        "U compresses, Sigma expands, V^T normalizes",
+        "V^T rotates in input space, Sigma scales along principal axes, U rotates into output space",
+        "U scales, Sigma rotates, V^T translates"
+      ]
+    },
+    {
+      "q": "Why does sklearn implement PCA using SVD instead of eigendecomposition of the covariance matrix?",
+      "options": [
+        "SVD produces different results that are more accurate for ML",
+        "SVD is easier to parallelize on GPUs",
+        "SVD works directly on the data matrix without forming the covariance matrix, avoiding squaring the condition number and improving numerical stability",
+        "SVD does not require centering the data"
+      ]
+    },
+    {
+      "q": "How does truncated SVD enable recommendation systems to predict missing ratings?",
+      "options": [
+        "It trains a neural network on the observed ratings",
+        "It decomposes the ratings matrix into latent user and movie profiles; the dot product of a user profile with a movie profile predicts the missing rating",
+        "It fills missing entries with the average rating",
+        "It clusters similar users together and copies their ratings"
+      ]
+    },
+    {
+      "q": "What does the 'shape' of a tensor describe?",
+      "options": [
+        "A tuple listing the size along each axis",
+        "The memory address of the tensor",
+        "The total number of elements in the tensor",
+        "The data type of the tensor elements"
+      ]
+    },
+    {
+      "q": "In PyTorch, what layout does an image batch tensor use by default?",
+      "options": [
+        "CHWN (channels, height, width, batch)",
+        "NHWC (batch, height, width, channels)",
+        "WHCN (width, height, channels, batch)",
+        "NCHW (batch, channels, height, width)"
+      ]
+    },
+    {
+      "q": "What is the result shape when broadcasting tensors of shape (8, 1, 6, 1) and (7, 1, 5)?",
+      "options": [
+        "(8, 7, 6, 5)",
+        "(8, 1, 6, 5)",
+        "(8, 7, 6, 1)",
+        "Broadcasting fails — shapes are incompatible"
+      ]
+    },
+    {
+      "q": "In the einsum expression 'bhtd,bhsd->bhts', what happens to the index 'd'?",
+      "options": [
+        "It is transposed between the two input tensors",
+        "It is summed over (contracted) because it appears in both inputs but not the output",
+        "It is broadcast across both tensors",
+        "It is kept in the output as a new axis"
+      ]
+    },
+    {
+      "q": "Why does calling .view() fail on a transposed tensor in PyTorch?",
+      "options": [
+        "The tensor is non-contiguous in memory after transpose, and view requires contiguous data",
+        "Transposed tensors have a different data type",
+        "Transpose changes the total number of elements",
+        "View only works on 2D tensors"
+      ]
+    },
+    {
+      "q": "What is the approximate range of numbers that float32 can represent?",
+      "options": [
+        "+/- 1.8e308",
+        "+/- 3.4e38",
+        "+/- 1.0e10",
+        "+/- 65,504"
+      ]
+    },
+    {
+      "q": "Why does 0.1 + 0.2 not equal 0.3 in floating-point arithmetic?",
+      "options": [
+        "The CPU has a bug in its addition circuit",
+        "0.1 and 0.2 cannot be represented exactly in binary floating point",
+        "Python rounds all decimals to integers",
+        "0.3 is not a valid floating-point number"
+      ]
+    },
+    {
+      "q": "In the stable softmax implementation, why do you subtract max(logits) before exponentiating?",
+      "options": [
+        "It normalizes the logits to have zero mean",
+        "It converts logits from float16 to float32",
+        "It makes the output probabilities more uniform",
+        "It prevents exp() from overflowing by ensuring the largest exponent is 0"
+      ]
+    },
+    {
+      "q": "When using centered finite differences for gradient checking, what happens if the step size h is too small (e.g., 1e-15)?",
+      "options": [
+        "The approximation becomes more accurate",
+        "The gradient automatically becomes zero",
+        "Catastrophic cancellation destroys the result because f(x+h) and f(x-h) are nearly identical",
+        "The function evaluation becomes faster"
+      ]
+    },
+    {
+      "q": "Why is bfloat16 generally preferred over float16 for neural network training?",
+      "options": [
+        "bfloat16 uses less memory than float16",
+        "bfloat16 has the same exponent range as float32, avoiding overflow on large activations without loss scaling",
+        "bfloat16 is supported by more GPU architectures than float16",
+        "bfloat16 has more mantissa bits, giving better precision"
+      ]
+    },
+    {
+      "q": "What does cosine similarity measure between two vectors?",
+      "options": [
+        "The angle between them, ignoring their magnitudes",
+        "The Euclidean distance between them",
+        "The maximum difference in any single dimension",
+        "The sum of their element-wise products"
+      ]
+    },
+    {
+      "q": "Why is L1 distance called 'Manhattan distance'?",
+      "options": [
+        "It only works in exactly two dimensions",
+        "It computes the maximum difference across all dimensions",
+        "It was invented in Manhattan",
+        "It measures distance along a grid, as if walking on city blocks"
+      ]
+    },
+    {
+      "q": "Why does L1 regularization (Lasso) produce sparse weights while L2 regularization (Ridge) does not?",
+      "options": [
+        "L1 uses a larger penalty constant than L2",
+        "The L1 diamond constraint has corners on the axes where weights are zero; loss contours are likely to touch at corners",
+        "L2 regularization only applies to the bias terms",
+        "L1 regularization clips weights below a threshold to zero"
+      ]
+    },
+    {
+      "q": "What advantage does Wasserstein distance have over KL divergence when comparing probability distributions?",
+      "options": [
+        "Wasserstein is always smaller than KL divergence",
+        "Wasserstein provides meaningful gradients even when distributions do not overlap, while KL goes to infinity",
+        "Wasserstein is symmetric but KL is not",
+        "Both B and C are correct"
+      ]
+    },
+    {
+      "q": "When would you use Mahalanobis distance instead of Euclidean distance?",
+      "options": [
+        "When features have different scales and are correlated with each other",
+        "When you need a faster computation than L2",
+        "When features are all binary (0 or 1)",
+        "When you are comparing strings instead of vectors"
+      ]
+    },
+    {
+      "q": "What does a p-value of 0.03 mean in a hypothesis test?",
+      "options": [
+        "There is a 3% probability of seeing data this extreme if the null hypothesis were true",
+        "The model improved by 3%",
+        "There is a 3% probability the null hypothesis is true",
+        "97% of the data supports the alternative hypothesis"
+      ]
+    },
+    {
+      "q": "Why do you divide by (n-1) instead of n when computing sample variance?",
+      "options": [
+        "It converts the variance to standard deviation",
+        "It only applies when the sample size is odd",
+        "It makes the computation faster",
+        "It accounts for the fact that the sample mean is not the true population mean (Bessel's correction)"
+      ]
+    },
+    {
+      "q": "You test 20 different model configurations at alpha = 0.05. What is the approximate probability of at least one false positive?",
+      "options": [
+        "5%",
+        "25%",
+        "95%",
+        "64%"
+      ]
+    },
+    {
+      "q": "Model A scores 0.9234 and Model B scores 0.9237 on 1 million test samples with p-value = 0.001. What should you conclude?",
+      "options": [
+        "Model A is better because it was tested first",
+        "Model B is significantly better and should be deployed immediately",
+        "The difference is statistically significant but a 0.03% improvement may not be practically significant",
+        "The test is invalid because the sample size is too large"
+      ]
+    },
+    {
+      "q": "What advantage does bootstrap have over the paired t-test for comparing two ML models?",
+      "options": [
+        "Bootstrap can only be used with neural networks",
+        "Bootstrap always produces smaller p-values",
+        "Bootstrap requires no distributional assumptions and works for any metric (AUC, F1, median)",
+        "Bootstrap needs fewer samples to reach significance"
+      ]
+    },
+    {
+      "q": "What does temperature < 1.0 do to a language model's output distribution?",
+      "options": [
+        "Removes all tokens except the top one",
+        "Has no effect on the output",
+        "Makes the distribution more uniform (more random)",
+        "Sharpens the distribution, making the highest-probability token more likely"
+      ]
+    },
+    {
+      "q": "What is the key difference between top-k and top-p (nucleus) sampling?",
+      "options": [
+        "Top-k is faster than top-p",
+        "Top-k keeps a fixed number of tokens; top-p keeps a variable number based on cumulative probability",
+        "Top-p only works with temperature = 1.0",
+        "Top-k works on logits while top-p works on probabilities"
+      ]
+    },
+    {
+      "q": "Why can't you backpropagate through a standard sampling operation z ~ N(mu, sigma^2)?",
+      "options": [
+        "The sampling operation is non-deterministic and has no well-defined derivative with respect to mu and sigma",
+        "PyTorch doesn't support normal distributions",
+        "Normal distributions don't have gradients",
+        "The gradient is always exactly zero"
+      ]
+    },
+    {
+      "q": "In Metropolis-Hastings MCMC, what happens if the proposal standard deviation is set much too large?",
+      "options": [
+        "The chain converges faster because it takes bigger steps",
+        "Most proposals land in low-probability regions and are rejected, so the chain barely moves",
+        "The burn-in period becomes zero",
+        "The stationary distribution changes to a uniform distribution"
+      ]
+    },
+    {
+      "q": "In rejection sampling, what happens to the acceptance rate as the dimensionality of the target distribution increases?",
+      "options": [
+        "It drops exponentially because most of the proposal volume gets rejected",
+        "It stays constant regardless of dimension",
+        "It increases because there are more dimensions to accept in",
+        "It approaches 50% in all cases"
+      ]
+    },
+    {
+      "q": "What does it mean geometrically when a system Ax = b has no exact solution?",
+      "options": [
+        "The vector b does not lie in the column space of A",
+        "The matrix A has all zero entries",
+        "The system has more unknowns than equations",
+        "The matrix A is symmetric"
+      ]
+    },
+    {
+      "q": "Why is partial pivoting used in Gaussian elimination?",
+      "options": [
+        "It selects the largest available pivot to minimize error amplification from dividing by small numbers",
+        "It eliminates the need for back substitution",
+        "It reduces the time complexity from O(n^3) to O(n^2)",
+        "It ensures the result is always an integer"
+      ]
+    },
+    {
+      "q": "Why is Cholesky decomposition preferred over LU for solving (X^T X + lambda I) w = X^T y in ridge regression?",
+      "options": [
+        "Cholesky gives a more accurate answer than LU",
+        "Cholesky works on any matrix while LU requires square matrices",
+        "LU decomposition cannot handle regularization terms",
+        "The matrix X^T X + lambda I is symmetric positive definite, so Cholesky is twice as fast as LU and requires half the storage"
+      ]
+    },
+    {
+      "q": "A matrix has condition number kappa = 10^8. You are using float64 (~15 digits of precision). How many digits of the solution can you trust?",
+      "options": [
+        "About 15 digits",
+        "About 7 digits (15 - log10(10^8) = 15 - 8)",
+        "Zero digits — the solution is meaningless",
+        "About 8 digits"
+      ]
+    },
+    {
+      "q": "What is the main advantage of LU decomposition over Gaussian elimination when you need to solve Ax = b for many different b vectors?",
+      "options": [
+        "The O(n^3) factorization is done once; each subsequent solve with a new b costs only O(n^2)",
+        "LU decomposition is more numerically stable",
+        "LU decomposition works on rectangular matrices",
+        "LU always produces a unique solution"
+      ]
+    },
+    {
+      "q": "What is the defining property of a convex function?",
+      "options": [
+        "It has exactly one critical point",
+        "The line segment between any two points on its graph lies above or on the graph",
+        "Its derivative is always positive",
+        "It can only be defined on positive real numbers"
+      ]
+    },
+    {
+      "q": "Which of these ML problems has a convex loss landscape?",
+      "options": [
+        "Training a 3-layer neural network with ReLU activations",
+        "Matrix factorization for recommendation",
+        "k-means clustering",
+        "Logistic regression with cross-entropy loss"
+      ]
+    },
+    {
+      "q": "Newton's method converges to the minimum of f(x) = 5x^2 + 3x + 1 in how many steps?",
+      "options": [
+        "About 100 steps",
+        "1 step (it is exact for quadratic functions)",
+        "About 10 steps",
+        "It depends on the learning rate"
+      ]
+    },
+    {
+      "q": "In the KKT conditions, what does 'complementary slackness' (lambda_i * g_i(x) = 0) mean?",
+      "options": [
+        "All constraints must be active at the optimum",
+        "Either a constraint is active (g_i = 0) or its multiplier is zero (lambda_i = 0) — an inactive constraint has no effect",
+        "The gradients of all constraints must be orthogonal",
+        "The Lagrangian is always zero at the optimum"
+      ]
+    },
+    {
+      "q": "Why does SGD find good solutions in non-convex neural network landscapes despite the lack of convexity guarantees?",
+      "options": [
+        "SGD always finds the global minimum",
+        "The loss function is irrelevant to model performance",
+        "In high dimensions, most critical points are saddle points (not bad local minima), and SGD noise helps escape them",
+        "Neural networks are secretly convex in high dimensions"
+      ]
+    },
+    {
+      "q": "What is the imaginary unit i defined by?",
+      "options": [
+        "i = -1",
+        "i^2 = -1",
+        "i^2 = 1",
+        "i = sqrt(2)"
+      ]
+    },
+    {
+      "q": "What does Euler's formula e^(i*theta) equal?",
+      "options": [
+        "cos(theta) + i*sin(theta)",
+        "sin(theta) + cos(theta)",
+        "i^theta",
+        "theta + i"
+      ]
+    },
+    {
+      "q": "What is the result of (3 + 2i)(1 + 4i)?",
+      "options": [
+        "-5 + 14i",
+        "5 + 14i",
+        "3 + 8i",
+        "4 + 6i"
+      ]
+    },
+    {
+      "q": "Why are complex numbers used in Rotary Position Embedding (RoPE) for transformers?",
+      "options": [
+        "RoPE uses imaginary numbers to handle negative positions",
+        "Complex numbers compress the position encoding to use less memory",
+        "Complex numbers are required by the attention softmax function",
+        "Multiplying query/key vectors by complex rotations encodes relative position as a rotation angle"
+      ]
+    },
+    {
+      "q": "The N-th roots of unity are N equally spaced points on the unit circle. What is their sum?",
+      "options": [
+        "1",
+        "N",
+        "N/2",
+        "0"
+      ]
+    },
+    {
+      "q": "What does the Fourier transform do to a signal?",
+      "options": [
+        "Decomposes the signal into sine waves of different frequencies, amplitudes, and phases",
+        "Removes noise from the signal",
+        "Converts the signal from analog to digital",
+        "Compresses the signal to use less storage"
+      ]
+    },
+    {
+      "q": "What is the time complexity of the Fast Fourier Transform (FFT) compared to the direct DFT?",
+      "options": [
+        "FFT is O(log N), DFT is O(N)",
+        "FFT is O(N), DFT is O(N log N)",
+        "Both are O(N^2)",
+        "FFT is O(N log N), DFT is O(N^2)"
+      ]
+    },
+    {
+      "q": "What does the convolution theorem state?",
+      "options": [
+        "Convolution in the time domain equals addition in the frequency domain",
+        "Convolution always increases the length of a signal",
+        "Convolution and correlation are identical operations",
+        "Convolution in the time domain equals pointwise multiplication in the frequency domain"
+      ]
+    },
+    {
+      "q": "Why does zero-padding a signal before FFT NOT increase the true frequency resolution?",
+      "options": [
+        "Zero-padding interpolates between existing frequency bins but cannot reveal frequency detail absent from the original samples",
+        "Zero-padding introduces noise that cancels the improvement",
+        "Zero-padding only works for power-of-2 signal lengths",
+        "The FFT algorithm ignores zero-padded samples"
+      ]
+    },
+    {
+      "q": "In the original Transformer's sinusoidal positional encodings, why are different dimension pairs assigned geometrically spaced frequencies?",
+      "options": [
+        "It ensures all encoding values are between 0 and 1",
+        "Each frequency provides a different resolution — high frequencies encode fine position, low frequencies encode coarse position, giving each position a unique fingerprint",
+        "Geometric spacing is required by the FFT algorithm",
+        "It reduces the computational cost of attention"
+      ]
+    },
+    {
+      "q": "What does the adjacency matrix A[i][j] = 1 represent?",
+      "options": [
+        "Node i has degree j",
+        "Node i and node j have the same label",
+        "The shortest path from i to j has length 1",
+        "There is an edge from node i to node j"
+      ]
+    },
+    {
+      "q": "What data structure does BFS use and what does it find?",
+      "options": [
+        "Stack; finds connected components",
+        "Queue; finds shortest paths in unweighted graphs",
+        "Priority queue; finds minimum spanning tree",
+        "Hash map; finds duplicate nodes"
+      ]
+    },
+    {
+      "q": "The graph Laplacian L = D - A of a connected graph has how many zero eigenvalues?",
+      "options": [
+        "Zero",
+        "Equal to the number of nodes",
+        "Equal to the number of edges",
+        "Exactly one"
+      ]
+    },
+    {
+      "q": "In GNN message passing, what does h_v^(k+1) = sigma(W * mean({h_u^(k) : u in neighbors(v)})) compute?",
+      "options": [
+        "The PageRank score of node v",
+        "The shortest path from v to all other nodes",
+        "A new feature vector for node v by aggregating neighbor features, transforming with learned weights, and applying a nonlinearity",
+        "The degree of node v at layer k+1"
+      ]
+    },
+    {
+      "q": "How does spectral clustering use the Fiedler vector (eigenvector of the second-smallest eigenvalue of L)?",
+      "options": [
+        "Nodes with the largest Fiedler vector entries form one cluster",
+        "The Fiedler vector is used as edge weights",
+        "Nodes with positive Fiedler vector values go in one group, nodes with negative values go in the other",
+        "The Fiedler vector determines the number of clusters"
+      ]
+    },
+    {
+      "q": "What is the Markov property?",
+      "options": [
+        "All states are equally likely at every step",
+        "The next state depends only on the current state, not on the history of previous states",
+        "The process always returns to its starting state",
+        "The process must have a finite number of states"
+      ]
+    },
+    {
+      "q": "In a 1D random walk, how does the expected distance from the origin scale with the number of steps n?",
+      "options": [
+        "Logarithmically: proportional to log(n)",
+        "As the square root: proportional to sqrt(n)",
+        "It stays constant regardless of n",
+        "Linearly: proportional to n"
+      ]
+    },
+    {
+      "q": "What is the stationary distribution of a Markov chain?",
+      "options": [
+        "The uniform distribution over all states",
+        "The initial distribution of states",
+        "The distribution of states after exactly one transition",
+        "The distribution that does not change under the transition matrix: pi * P = pi"
+      ]
+    },
+    {
+      "q": "In Langevin dynamics x_{t+1} = x_t - dt * grad(U) + sqrt(2*T*dt) * z, what happens as temperature T approaches 0?",
+      "options": [
+        "The process diverges to infinity",
+        "The process becomes a pure random walk",
+        "The process becomes pure gradient descent (deterministic optimization)",
+        "The process freezes at the initial position"
+      ]
+    },
+    {
+      "q": "In a diffusion model, what does the forward process do to a data sample over T steps?",
+      "options": [
+        "It sharpens the image by removing noise at each step",
+        "It gradually adds Gaussian noise until the sample becomes pure noise, following a Markov chain",
+        "It compresses the image to a lower resolution",
+        "It applies learned transformations to generate new data"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import { departments, wing, departmentEntryLabel, schoolCountWord } from '../../lib/departments';
+import { published } from '../../lib/data';
+
+const desc =
+  'The schools of Sikhi University, Theology, History, Language, Literature, Political Governance, the Arts, the Sciences, Health, Martial Arts, and the Institute of Technology. Every course belongs to one.';
+const cards = [
+  ...departments.map((d) => ({
+    href: `/departments/${d.slug}`,
+    name: d.name,
+    tagline: d.tagline,
+    accent: d.accent,
+    count: departmentEntryLabel(d),
+  })),
+  {
+    href: wing.href,
+    name: wing.name,
+    tagline: wing.tagline,
+    accent: wing.accent,
+    count: 'The engineering wing',
+  },
+];
+---
+<Base title="Departments, Sikhi University" description={desc} ambient="none">
+  <div class="dept-page dept-index" style="--dept:#b58015">
+    <header class="dx-hero dept-grain">
+      <div class="dx-hero-in wrap">
+        <p class="dept-eyebrow">One university</p>
+        <h1 class="dx-h1">{schoolCountWord} schools</h1>
+        <p class="dx-sub">
+          Every course at Sikhi University belongs to a department, each with its own faculty, its
+          own signature courses, and its own front door. Start with the one that fits your question,
+          or <a href="/catalog">browse all {published.length} courses</a>.
+        </p>
+      </div>
+    </header>
+
+    <section class="dx-grid-wrap">
+      <div class="wrap">
+        <div class="dx-grid">
+          {cards.map((c) => (
+            <a class="dx-card" href={c.href} style={`--dept:${c.accent}`} data-rise>
+              <span class="dx-card-body">
+                <span class="dx-card-name">{c.name}</span>
+                <span class="dx-card-tag">{c.tagline}</span>
+                <span class="dx-card-count">{c.count} &rarr;</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .dx-hero {
+      position: relative; overflow: hidden; color: var(--school-header-ink);
+      background: var(--school-header-bg);
+      padding: clamp(56px, 10vw, 120px) 24px clamp(40px, 6vw, 72px);
+    }
+    .dx-h1 { margin: 10px 0 0; font-size: clamp(44px, 9vw, 104px); font-weight: 800; letter-spacing: -0.02em; line-height: .98; }
+    .dx-sub { margin: 22px 0 0; max-width: 58ch; font-size: clamp(15px, 1.6vw, 18px); line-height: 1.75; color: var(--school-header-muted); }
+    .dx-sub a { color: var(--school-header-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+    .dx-grid-wrap { background: rgb(var(--c-paper)); padding: clamp(36px, 6vw, 72px) 24px clamp(56px, 8vw, 100px); }
+    .dx-grid { display: grid; gap: 18px; }
+    @media (min-width: 640px) { .dx-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1040px) { .dx-grid { grid-template-columns: repeat(3, 1fr); } }
+    .dx-card {
+      position: relative; display: flex; flex-direction: column; overflow: hidden;
+      border-radius: 18px; background: rgb(var(--c-surface)); border: 1px solid rgb(var(--c-line));
+      text-decoration: none; isolation: isolate;
+      transition: transform .24s var(--ease-out, ease), box-shadow .24s, border-color .24s;
+    }
+    .dx-card:hover { transform: translateY(-6px); box-shadow: 0 26px 54px rgb(11 30 58 / .16); border-color: var(--dept-45); }
+    .dx-card-media { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; background: #0d131c; }
+    .dx-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease-out, ease); }
+    .dx-card:hover .dx-card-media img { transform: scale(1.06); }
+    .dx-card-veil { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(10,15,22,.15)), linear-gradient(90deg, color-mix(in srgb, var(--dept) 28%, transparent), transparent 60%); }
+    .dx-card-body { display: flex; flex-direction: column; flex: 1; padding: 20px 20px 22px; border-top: 3px solid var(--dept); }
+    .dx-card-name { font-family: "Source Serif 4", Georgia, serif; font-size: 19px; font-weight: 800; color: rgb(var(--c-navy)); line-height: 1.2; }
+    .dx-card-tag { margin-top: 8px; flex: 1; font-size: 13.5px; line-height: 1.55; color: rgb(var(--c-muted)); font-style: italic; }
+    .dx-card-count { margin-top: 14px; font-family: var(--font-sans, system-ui); font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--dept); }
+  </style>
+
+  <script>
+    (function () {
+      const page = document.querySelector('.dept-index');
+      if (!page) return;
+      page.classList.add('revealed');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.1 });
+      page.querySelectorAll('[data-rise]').forEach((el) => io.observe(el));
+    })();
+  </script>
+</Base>

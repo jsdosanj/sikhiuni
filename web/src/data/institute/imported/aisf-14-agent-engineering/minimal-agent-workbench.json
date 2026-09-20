@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::minimal-agent-workbench",
+  "num": 32,
+  "slug": "minimal-agent-workbench",
+  "title": "The Minimal Agent Workbench",
+  "tagline": "The smallest useful workbench is three files: a root instructions router, a state file, and a task board. Everything else is layered on top. If a repo cannot carry these three, no model will save it.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~45 minutes",
+  "objectives": [
+    "Define the three files that form the minimum viable workbench.",
+    "Explain why a short root router beats a long monolithic `AGENTS.md`.",
+    "Build a state file the agent can read at every turn and write at the end.",
+    "Build a task board that survives multi-session work without chat history."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Most teams reach for a workbench by writing a 3000-line <code>AGENTS.md</code> and calling it done. The model loads it, ignores the parts it cannot summarize, and still fails on the same surfaces it always failed on.</p>\n<p>You need the opposite. A tiny root file that routes the agent into deeper files only when relevant. Durable state the agent reads before acting and writes after. A task board that says what is in flight, what is blocked, and what is up next.</p>\n<p>Three files. Each one with a job. Each one machine-readable enough to evolve into a real system later.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">flowchart LR\n  Agent[Agent Loop] --&gt; Router[AGENTS.md]\n  Router --&gt; State[agent_state.json]\n  Router --&gt; Board[task_board.json]\n  State --&gt; Agent\n  Board --&gt; Agent</pre>\n<h3>AGENTS.md is a router, not a manual</h3>\n<p>A good <code>AGENTS.md</code> is short. It points the agent at:</p>\n<ul>\n<li>The state file (where you are).</li>\n<li>The task board (what is left).</li>\n<li>The deeper rules (under <code>docs/agent-rules.md</code>).</li>\n<li>The verification command (how to know it works).</li>\n</ul>\n<p>Anything longer goes in deeper docs, loaded only when needed. Long manuals get ignored. Short routers get followed.</p>\n<h3>agent_state.json is the system of record</h3>\n<p>State carries: the active task id, the touched files, the assumptions made, the blockers, and the next action. The agent reads it at every turn. The next session reads it instead of replaying chat.</p>\n<p>State lives in a file because chat history is unreliable. Sessions die. Conversations get trimmed. The file does not.</p>\n<h3>task_board.json is the queue</h3>\n<p>The task board carries every task with status <code>todo | in_progress | done | blocked</code>. It is the queue the agent pulls from when state is empty, and the queue you read when you want to know whether the agent is on track.</p>\n<p>A task on the board has an id, a goal, an owner (<code>builder</code>, <code>reviewer</code>, or <code>human</code>), and acceptance criteria. The board is small on purpose: when it grows past a screen, you have a planning problem, not a board problem.</p>\n<h3>Three files is the floor, not the ceiling</h3>\n<p>Later lessons add scope contracts, feedback runners, verification gates, reviewer checklists, and handoff packets. The three files here are what they all assume.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-three-files</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> writes the minimal workbench into an empty repo and demonstrates a single agent turn that:</p>\n<ol>\n<li>Reads <code>agent_state.json</code>.</li>\n<li>Pulls the next task from <code>task_board.json</code> if state is empty.</li>\n<li>Touches a single file inside scope.</li>\n<li>Writes back updated state.</li>\n</ol>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The script creates <code>workdir/</code> next to itself, lays down the three files, runs one turn, and prints the diff. Re-run it to see how the second turn picks up where the first left off.</p>\n<h2>Use It</h2>\n<p>Inside production agent products, the same three files show up under different names:</p>\n<ul>\n<li><strong>Claude Code:</strong> <code>AGENTS.md</code> or <code>CLAUDE.md</code> for the router, <code>.claude/state.json</code>-style stores for state, hooks for the board.</li>\n<li><strong>Codex / Cursor:</strong> workspace rules for the router, session memory for state, queued tasks in the chat sidebar for the board.</li>\n<li><strong>Custom Python agent:</strong> the same files you just wrote.</li>\n</ul>\n<p>The names change. The shape does not.</p>\n<h2>Production patterns in the wild</h2>\n<p>The minimum workbench survives contact with real monorepos when three patterns are layered on top of it. They are independent; pick the ones your repo actually needs.</p>\n<p><strong>Nested <code>AGENTS.md</code> with nearest-wins precedence.</strong> OpenAI ships 88 <code>AGENTS.md</code> files across its main repo, one per subcomponent. Codex, Cursor, Claude Code, and Copilot all walk from the working file toward the repo root and concatenate every <code>AGENTS.md</code> they find on the way. Sub-directory files extend the root file. Codex adds <code>AGENTS.override.md</code> to replace rather than extend; the override mechanism is Codex-specific and avoid it for cross-tool work. Augment Code&#39;s measurement is the line that matters: the best <code>AGENTS.md</code> files give a quality jump equivalent to upgrading from Haiku to Opus; the worst ones make output worse than no file at all.</p>\n<p><strong>Anti-patterns to refuse, even when they look like coverage.</strong> Conflicting instructions silently drop the agent from interactive to greedy mode (ICLR 2026 AMBIG-SWE: 48.8% → 28% resolve rate); number priorities instead of stacking them flat. Unverifiable style rules (&quot;follow the Google Python Style Guide&quot;) with no enforcement command let the agent invent compliance; pair every style rule with the exact lint command. Leading with style instead of commands buries the verification path; commands first, style last. Writing for humans instead of agents wastes context budget; terseness is a feature.</p>\n<p><strong>Cross-tool symlinks.</strong> A single root file with symlinks (<code>ln -s AGENTS.md CLAUDE.md</code>, <code>ln -s AGENTS.md .github/copilot-instructions.md</code>, <code>ln -s AGENTS.md .cursorrules</code>) keeps every coding agent on the same source of truth. Nx&#39;s <code>nx ai-setup</code> automates this across Claude Code, Cursor, Copilot, Gemini, Codex, and OpenCode from a single config.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-minimal-workbench.md</code> generates the three-file workbench for any new repo: an <code>AGENTS.md</code> router tuned to the project, an <code>agent_state.json</code> with the right keys, and a <code>task_board.json</code> seeded with the current backlog.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a <code>last_run</code> timestamp to <code>agent_state.json</code>. Refuse to run if the file is older than 24 hours unless an operator confirms.</li>\n<li>Add a <code>priority</code> field to the task board and change the puller to always pick the highest priority <code>todo</code>.</li>\n<li>Migrate <code>task_board.json</code> to JSON Lines so each task is a line and diffs are clean in version control.</li>\n<li>Write a <code>lint_workbench.py</code> that fails if <code>AGENTS.md</code> is over 80 lines or references a file that does not exist.</li>\n<li>Decide which one of the three files would hurt the most to lose. Defend it.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Router</td>\n<td><code>AGENTS.md</code></td>\n<td>Short root file that points the agent at deeper docs and files</td>\n</tr>\n<tr>\n<td>State file</td>\n<td>&quot;The notes&quot;</td>\n<td>Machine-readable record of where the agent is, written every turn</td>\n</tr>\n<tr>\n<td>Task board</td>\n<td>&quot;The backlog&quot;</td>\n<td>JSON queue of work with status, owner, acceptance</td>\n</tr>\n<tr>\n<td>System of record</td>\n<td>&quot;Source of truth&quot;</td>\n<td>The file the workbench treats as authoritative when chat is gone</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://agents.md/\" target=\"_blank\" rel=\"noopener\">agents.md — the open spec</a> — adopted by Cursor, Codex, Claude Code, Copilot, Gemini, OpenCode</li>\n<li><a href=\"https://www.augmentcode.com/blog/how-to-write-good-agents-dot-md-files\" target=\"_blank\" rel=\"noopener\">Augment Code, A good AGENTS.md is a model upgrade. A bad one is worse than no docs at all</a> — measured quality jumps</li>\n<li><a href=\"https://blakecrosley.com/blog/agents-md-patterns\" target=\"_blank\" rel=\"noopener\">Blake Crosley, AGENTS.md Patterns: What Actually Changes Agent Behavior</a> — what works empirically, what does not</li>\n<li><a href=\"https://dev.to/datadog-frontend-dev/steering-ai-agents-in-monorepos-with-agentsmd-13g0\" target=\"_blank\" rel=\"noopener\">Datadog Frontend, Steering AI Agents in Monorepos with AGENTS.md</a> — nested precedence in practice</li>\n<li><a href=\"https://nx.dev/blog/nx-ai-agent-skills\" target=\"_blank\" rel=\"noopener\">Nx Blog, Teach Your AI Agent How to Work in a Monorepo</a> — single-source generation across six tools</li>\n<li><a href=\"https://thepromptshelf.dev/blog/agents-md-best-practices/\" target=\"_blank\" rel=\"noopener\">The Prompt Shelf, AGENTS.md Best Practices: Structure, Scope, and Real Examples</a> — section ordering that survives review</li>\n<li><a href=\"https://code.claude.com/docs/en/sub-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Claude Code subagents</a></li>\n<li>Phase 14 · 31 — the failure modes this minimum absorbs</li>\n<li>Phase 14 · 34 — the durable state schema this lesson previews</li>\n</ul>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Lay down the three-file minimal agent workbench and run a single turn.\n\nFiles written:\n  workdir/AGENTS.md         short router into state + board + deeper docs\n  workdir/agent_state.json  active task, touched files, blockers, next action\n  workdir/task_board.json   queue of tasks with status + acceptance\n\nRun: python3 code/main.py\nRe-run to see the second turn pick up where the first stopped.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nfrom dataclasses import asdict, dataclass, field\nfrom pathlib import Path\n\nROOT = Path(__file__).parent / \"workdir\"\n\n\nAGENTS_MD = \"\"\"# AGENTS.md\n\nThis repo runs with a workbench. Read these before acting:\n\n1. `agent_state.json` — where the last session stopped.\n2. `task_board.json` — what is in flight, what is next.\n3. `docs/agent-rules.md` — startup, scope, definition of done (load on demand).\n\nDefinition of done: the task referenced by `agent_state.active_task_id` has\n`status == \"done\"` on `task_board.json` and the verification command listed in\nits `acceptance` has exited 0.\n\nVerification command: `python3 -m pytest -x`\n\"\"\".lstrip()\n\n\n@dataclass\nclass AgentState:\n    active_task_id: str | None\n    touched_files: list[str] = field(default_factory=list)\n    assumptions: list[str] = field(default_factory=list)\n    blockers: list[str] = field(default_factory=list)\n    next_action: str = \"\"\n\n\n@dataclass\nclass Task:\n    id: str\n    goal: str\n    owner: str\n    acceptance: list[str]\n    status: str = \"todo\"\n\n\ndef write_initial(state_path: Path, board_path: Path, agents_path: Path) -> None:\n    if not agents_path.exists():\n        agents_path.write_text(AGENTS_MD)\n    if not state_path.exists():\n        state_path.write_text(json.dumps(asdict(AgentState(active_task_id=None)), indent=2) + \"\\n\")\n    if not board_path.exists():\n        board = [\n            Task(\n                id=\"T-001\",\n                goal=\"add input validation to /signup\",\n                owner=\"builder\",\n                acceptance=[\"pytest test_app.py::test_signup_rejects_short_password\"],\n            ),\n            Task(\n                id=\"T-002\",\n                goal=\"document the new /signup contract\",\n                owner=\"builder\",\n                acceptance=[\"docs/api.md mentions /signup constraints\"],\n            ),\n        ]\n        board_path.write_text(json.dumps([asdict(t) for t in board], indent=2) + \"\\n\")\n\n\ndef load_state(state_path: Path) -> AgentState:\n    raw = json.loads(state_path.read_text())\n    return AgentState(**raw)\n\n\ndef load_board(board_path: Path) -> list[Task]:\n    return [Task(**t) for t in json.loads(board_path.read_text())]\n\n\ndef save_state(state_path: Path, state: AgentState) -> None:\n    state_path.write_text(json.dumps(asdict(state), indent=2) + \"\\n\")\n\n\ndef save_board(board_path: Path, board: list[Task]) -> None:\n    board_path.write_text(json.dumps([asdict(t) for t in board], indent=2) + \"\\n\")\n\n\ndef run_one_turn(state: AgentState, board: list[Task]) -> tuple[AgentState, list[Task]]:\n    if state.active_task_id is None:\n        nxt = next((t for t in board if t.status == \"todo\"), None)\n        if nxt is None:\n            state.next_action = \"no work on the board, idle\"\n            return state, board\n        nxt.status = \"in_progress\"\n        state.active_task_id = nxt.id\n        state.next_action = f\"start work on {nxt.id}: {nxt.goal}\"\n        return state, board\n\n    active = next((t for t in board if t.id == state.active_task_id), None)\n    if active is None:\n        state.active_task_id = None\n        state.next_action = f\"active task missing from board; resetting and picking new work\"\n        return state, board\n    if \"app.py\" not in state.touched_files:\n        state.touched_files.append(\"app.py\")\n        state.next_action = f\"add test for {active.id} acceptance\"\n        return state, board\n\n    if \"test_app.py\" not in state.touched_files:\n        state.touched_files.append(\"test_app.py\")\n        state.next_action = f\"run verification command for {active.id}\"\n        return state, board\n\n    active.status = \"done\"\n    state.active_task_id = None\n    state.touched_files = []\n    state.next_action = \"pick next task from board\"\n    return state, board\n\n\ndef main() -> None:\n    ROOT.mkdir(exist_ok=True)\n    state_path = ROOT / \"agent_state.json\"\n    board_path = ROOT / \"task_board.json\"\n    agents_path = ROOT / \"AGENTS.md\"\n\n    write_initial(state_path, board_path, agents_path)\n    state = load_state(state_path)\n    board = load_board(board_path)\n\n    print(\"before turn:\")\n    print(f\"  active task : {state.active_task_id}\")\n    print(f\"  next action : {state.next_action!r}\")\n    print(f\"  todo on board: {[t.id for t in board if t.status == 'todo']}\")\n\n    state, board = run_one_turn(state, board)\n    save_state(state_path, state)\n    save_board(board_path, board)\n\n    print(\"\\nafter turn:\")\n    print(f\"  active task : {state.active_task_id}\")\n    print(f\"  touched     : {state.touched_files}\")\n    print(f\"  next action : {state.next_action!r}\")\n    print(f\"  board status: {[(t.id, t.status) for t in board]}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What three files form the smallest useful workbench?",
+      "options": [
+        "model.py, prompts.py, tools.py",
+        "Dockerfile, Makefile, .gitignore",
+        "AGENTS.md (router), agent_state.json (state), task_board.json (queue)",
+        "README.md, CHANGELOG.md, LICENSE"
+      ],
+      "answer": 2,
+      "explanation": "A short router, durable state, and a task queue are the floor."
+    },
+    {
+      "q": "What is the lesson's framing of AGENTS.md?",
+      "options": [
+        "A secret kept out of the repo",
+        "A pure prompt-cache key",
+        "A short router that points at deeper docs and the state and board",
+        "A 3000-line onboarding manual"
+      ],
+      "answer": 2,
+      "explanation": "AGENTS.md is a router, not a manual; long manuals get ignored."
+    },
+    {
+      "q": "What does Augment Code's data say about a good AGENTS.md?",
+      "options": [
+        "A good AGENTS.md gives a quality jump equivalent to upgrading from Haiku to Opus; a bad one is worse than no file",
+        "Length always helps",
+        "Only Claude reads it",
+        "It has no measurable effect"
+      ],
+      "answer": 0,
+      "explanation": "Augment Code's measurement: best files are model-upgrade-shaped, worst are worse than nothing."
+    },
+    {
+      "q": "Why does the lesson recommend file-backed state over chat-history state?",
+      "options": [
+        "Files are smaller",
+        "Disk is cheaper",
+        "Chat history is volatile; the file survives session death, conversation trimming, and tool resets",
+        "It is required by SOC 2"
+      ],
+      "answer": 2,
+      "explanation": "Sessions die and chat gets trimmed; the file is the durable system of record."
+    },
+    {
+      "q": "What does the lesson say happens when conflicting instructions land in AGENTS.md?",
+      "options": [
+        "Cost rises slightly",
+        "Nothing",
+        "Latency drops",
+        "Conflicting instructions silently drop the agent from interactive to greedy mode (AMBIG-SWE: 48.8% to 28% resolve rate)"
+      ],
+      "answer": 3,
+      "explanation": "AMBIG-SWE measured a large resolve-rate drop when contradictions appear; number priorities instead."
+    },
+    {
+      "q": "Why does the lesson recommend cross-tool symlinks like CLAUDE.md -> AGENTS.md?",
+      "options": [
+        "To satisfy MIT",
+        "To pass auditing",
+        "So a single source of truth fans out to every coding agent without forking",
+        "To save bytes"
+      ],
+      "answer": 2,
+      "explanation": "Symlinks (or Nx-style generators) keep one canonical source across Claude Code, Codex, Cursor, Copilot, etc."
+    },
+    {
+      "q": "What pattern do nested AGENTS.md files follow?",
+      "options": [
+        "Only the root file is read",
+        "Walk from the working file toward the repo root, concatenate every AGENTS.md found on the way (nearest wins; sub-directories extend root)",
+        "Random selection",
+        "Alphabetical merge"
+      ],
+      "answer": 1,
+      "explanation": "OpenAI ships 88 AGENTS.md files across its main repo; tools concatenate nearest-up-tree."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/32-minimal-agent-workbench"
+  }
+}

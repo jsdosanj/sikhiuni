@@ -1,0 +1,94 @@
+{
+  "id": "aisf-17-infra::vllm-production-stack-lmcache",
+  "num": 18,
+  "slug": "vllm-production-stack-lmcache",
+  "title": "Production Serving Stack — KV Offloading and Cache-Aware Routing",
+  "tagline": "A production serving stack wires router, engines, and observability into one Kubernetes deployment — and treats KV cache as a resource that can leave the GPU. KV offloading extracts KV cache out of GPU memory and reuses it across queries and engines (CPU DRAM, then disk/Ceph). vLLM's production-stack is the reference deployment; LMCache is the offloading layer. The vLLM 0.11.0 KV Offloading Connector (January 2026) makes this asynchronous and pluggable via the Connector API (v0.9.0+). The offload path is usually hidden from the request path, though cache misses and promotions can add end-to-end latency. LMCache is valuable even without shared prefixes — when a GPU runs out of KV slots, preempted requests can be restored from CPU instead of recomputing prefill. Published benchmarks on 16x H100 (80GB HBM) across 4 a3-highgpu-4g: when KV cache exceeds HBM, both native CPU offload and LMCache substantially improve throughput; at low KV footprint, all configs match baseline with small overhead.",
+  "type": "Learn",
+  "languages": "Python (stdlib, toy KV-spill simulator)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Diagram the vLLM production-stack layers: router, engines, KV offload, observability.",
+    "Explain the KV Offloading Connector API (v0.9.0+) and how the 0.11.0 asynchronous path hides offload latency.",
+    "Quantify when LMCache CPU-DRAM helps (KV > HBM) vs adds overhead (KV small enough to fit HBM).",
+    "Pick between native vLLM CPU offload and LMCache connector given deployment constraints."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Your vLLM serving shows GPUs at 100% HBM with preemption events whenever concurrency climbs. Requests get evicted, requeued, and you re-prefill the same 2K-token prompt four times in a minute. GPU compute is spent on redundant prefills; goodput is well below raw throughput.</p>\n<p>Adding more GPUs costs linearly. Adding more HBM is not possible. But CPU DRAM is cheap — one socket has 512 GB+ at latency orders of magnitude worse than HBM but fine for &quot;temporarily warm&quot; KV cache.</p>\n<p>LMCache extracts KV cache to CPU DRAM so preempted requests recover fast, and repeated prefixes across engines share cache without each engine re-prefilling.</p>\n<h2>The Concept</h2>\n<h3>vLLM production-stack</h3>\n<p><code>github.com/vllm-project/production-stack</code> is the reference Kubernetes deployment:</p>\n<ul>\n<li><strong>Router</strong> — cache-aware (Phase 17 · 11). Consumes KV events.</li>\n<li><strong>Engines</strong> — vLLM workers. One per GPU or per TP/PP group.</li>\n<li><strong>KV cache offload</strong> — LMCache deployment or native connector.</li>\n<li><strong>Observability</strong> — Prometheus scrape, Grafana dashboards, OTel traces.</li>\n<li><strong>Control plane</strong> — service discovery, config, rolling updates.</li>\n</ul>\n<p>Shipped as Helm chart + operator.</p>\n<h3>The KV Offloading Connector API (v0.9.0+)</h3>\n<p>vLLM 0.9.0 introduced a Connector API for pluggable KV cache backends. Your engine offloads blocks to the connector; connector stores them (RAM, disk, object storage, LMCache). Request needs a block, connector loads it back.</p>\n<p>vLLM 0.11.0 (January 2026) adds an asynchronous offload path — offload can happen in the background so the engine does not block on it in the common case. End-to-end latency and throughput still depend on workload shape, KV cache hit rate, and system pressure; vLLM&#39;s own notes call out that custom-kernel offload can degrade throughput at low hit rates and that async scheduling has known interaction issues with speculative decoding.</p>\n<h3>Native CPU offload vs LMCache</h3>\n<p><strong>Native vLLM CPU offload</strong>: engine-local. Stores KV blocks in host RAM. Fast to implement, zero network hop. Does not cross engines.</p>\n<p><strong>LMCache connector</strong>: cluster-scale. Stores blocks in a shared LMCache server (CPU DRAM + Ceph/S3 tier). Blocks are accessible to any engine. 16x H100 benchmarks published.</p>\n<p>Pick native when a single engine has HBM pressure. Pick LMCache when multiple engines share prefixes (RAG with common system prompts, multi-tenant with shared templates).</p>\n<h3>Benchmark behavior</h3>\n<p>The 16x H100 (80 GB HBM) spread across 4 a3-highgpu-4g test:</p>\n<ul>\n<li>Low KV footprint (short prompts, low concurrency): all configs match baseline, LMCache adds ~3-5% overhead.</li>\n<li>Moderate footprint: LMCache starts to help on prefix reuse across engines.</li>\n<li>KV exceeds HBM: native CPU offload and LMCache both improve throughput substantially; LMCache larger gain because cross-engine sharing.</li>\n</ul>\n<h3>When LMCache is decisive</h3>\n<ul>\n<li>Multi-tenant serving where system prompts are shared across tenants.</li>\n<li>RAG where document chunks repeat across queries.</li>\n<li>Fine-tuned variants (LoRA) on the same base where base-model KV reuse cuts redundant work.</li>\n<li>Preemption-heavy workloads: restore from CPU cheaper than re-prefill.</li>\n</ul>\n<h3>When NOT to enable</h3>\n<ul>\n<li>Small HBM pressure — you pay overhead without benefit.</li>\n<li>Short contexts (&lt;1K tokens) — transfer time &gt; re-prefill.</li>\n<li>Single-tenant single-prompt workload — no reuse to capture.</li>\n</ul>\n<h3>Integration with disaggregated serving</h3>\n<p>Phase 17 · 17 disaggregated serving + LMCache compounds: KV transfers from prefill pool to decode pool land in LMCache if not used; subsequent queries pull from LMCache. Phase 17 · 11 cache-aware router can route to the engine whose local OR LMCache-shared cache matches.</p>\n<h3>Numbers you should remember</h3>\n<ul>\n<li>vLLM 0.9.0: Connector API shipped.</li>\n<li>vLLM 0.11.0 (Jan 2026): asynchronous offload path; end-to-end latency impact depends on workload, KV hit rate, and system pressure (not an absolute guarantee).</li>\n<li>16x H100 benchmark: LMCache helps when KV footprint exceeds HBM.</li>\n<li>Small HBM pressure: 3-5% overhead without benefit.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>zero-sharding</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> simulates a preemption-heavy workload with and without LMCache. Reports re-prefills avoided, throughput gain, and the break-even HBM utilization.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-vllm-stack-decider.md</code>. Given workload shape and vLLM deployment, decides native vs LMCache vs neither.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run <code>code/main.py</code>. At what HBM utilization does LMCache start paying?</li>\n<li>A tenant shares a 6K-token system prompt across 200 queries/hour. Compute expected LMCache savings per tenant.</li>\n<li>The LMCache server is a single point of failure. Design the HA strategy (replicas, fallback to native).</li>\n<li>LMCache stores to Ceph on spinning disk. For a 4K-token KV at 70B FP8 (500 MB), what&#39;s the read time vs re-prefill?</li>\n<li>Argue whether the vLLM 0.11.0 asynchronous path is &quot;free&quot; — where does the overhead hide?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Production-stack</td>\n<td>&quot;the reference deployment&quot;</td>\n<td>vLLM&#39;s Kubernetes Helm chart + operator</td>\n</tr>\n<tr>\n<td>Connector API</td>\n<td>&quot;KV backend interface&quot;</td>\n<td>vLLM 0.9.0+ pluggable KV store interface</td>\n</tr>\n<tr>\n<td>Native CPU offload</td>\n<td>&quot;engine-local spill&quot;</td>\n<td>Store KV in host RAM of same engine</td>\n</tr>\n<tr>\n<td>LMCache</td>\n<td>&quot;cluster KV cache&quot;</td>\n<td>Cross-engine KV cache server on CPU DRAM + disk</td>\n</tr>\n<tr>\n<td>0.11.0 async</td>\n<td>&quot;non-blocking offload&quot;</td>\n<td>Offload hidden behind engine stream</td>\n</tr>\n<tr>\n<td>Preemption</td>\n<td>&quot;evict to make room&quot;</td>\n<td>KV cache shuffle when HBM full</td>\n</tr>\n<tr>\n<td>Prefix reuse</td>\n<td>&quot;same system prompt&quot;</td>\n<td>Multiple queries share beginning; cache hit</td>\n</tr>\n<tr>\n<td>Ceph tier</td>\n<td>&quot;disk tier&quot;</td>\n<td>Durable storage below DRAM in the cache hierarchy</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://blog.vllm.ai/2026/01/08/kv-offloading-connector.html\" target=\"_blank\" rel=\"noopener\">vLLM Blog — KV Offloading Connector (Jan 2026)</a></li>\n<li><a href=\"https://github.com/vllm-project/production-stack\" target=\"_blank\" rel=\"noopener\">vLLM Production Stack GitHub</a> — Helm chart + operator.</li>\n<li><a href=\"https://arxiv.org/html/2510.09665v2\" target=\"_blank\" rel=\"noopener\">LMCache for Enterprise-Scale LLM Inference (arXiv:2510.09665)</a></li>\n<li><a href=\"https://github.com/LMCache/LMCache\" target=\"_blank\" rel=\"noopener\">LMCache GitHub</a> — Connector implementation.</li>\n<li><a href=\"https://github.com/vllm-project/vllm/releases\" target=\"_blank\" rel=\"noopener\">vLLM 0.11.0 release notes</a> — asynchronous path details.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"vLLM production stack + LMCache simulator — stdlib Python.\n\nCompares three configs on a preemption-heavy workload:\n  NATIVE_ONLY   : vLLM with no offload, requests re-prefill on preemption\n  CPU_OFFLOAD   : native CPU offload, engine-local\n  LMCACHE       : cluster LMCache shared across 4 engines\n\nReports re-prefill count avoided, throughput gain, and break-even HBM utilization.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport random\n\n\nPREFILL_TOK_PER_MS = 40.0\nDECODE_TOK_PER_MS = 0.15\nCPU_OFFLOAD_TIME_MS_PER_BLOCK = 1.5\nLMCACHE_TIME_MS_PER_BLOCK = 3.0\nKV_BLOCK_TOKENS = 16\n\n\n@dataclass\nclass Request:\n    prompt_tokens: int\n    output_tokens: int\n    prefix_id: str  # for reuse across engines\n\n\ndef make_workload(n: int = 200, seed: int = 7) -> list[Request]:\n    rng = random.Random(seed)\n    prefixes = [f\"tpl_{i}\" for i in range(6)]  # small set = high reuse\n    reqs = []\n    for _ in range(n):\n        prompt = rng.choice([2000, 4000, 8000])\n        reqs.append(Request(prompt, rng.randint(150, 400), rng.choice(prefixes)))\n    return reqs\n\n\ndef simulate(config: str, reqs: list[Request]) -> dict:\n    \"\"\"Model a small cluster under HBM pressure.\"\"\"\n    engines_state: list[set[str]] = [set() for _ in range(4)]\n    shared_cache: set[str] = set()\n    hbm_capacity_blocks_per_engine = 900\n    total_time_ms = 0.0\n    re_prefills_avoided = 0\n    prefill_work = 0\n    rng = random.Random(11)\n\n    for r in reqs:\n        eng = rng.randrange(len(engines_state))\n        blocks = (r.prompt_tokens + KV_BLOCK_TOKENS - 1) // KV_BLOCK_TOKENS\n        cached_local = r.prefix_id in engines_state[eng]\n        cached_lmcache = r.prefix_id in shared_cache\n\n        if config == \"NATIVE_ONLY\":\n            if cached_local:\n                prefill_ms = 0\n                re_prefills_avoided += 1\n            else:\n                prefill_ms = r.prompt_tokens / PREFILL_TOK_PER_MS\n                engines_state[eng].add(r.prefix_id)\n                if len(engines_state[eng]) > 4:\n                    engines_state[eng].pop()\n        elif config == \"CPU_OFFLOAD\":\n            if cached_local:\n                prefill_ms = 0\n                re_prefills_avoided += 1\n            else:\n                prefill_ms = r.prompt_tokens / PREFILL_TOK_PER_MS\n                engines_state[eng].add(r.prefix_id)\n                prefill_ms += blocks * CPU_OFFLOAD_TIME_MS_PER_BLOCK * 0.1\n        elif config == \"LMCACHE\":\n            if cached_local:\n                prefill_ms = 0\n                re_prefills_avoided += 1\n            elif cached_lmcache:\n                prefill_ms = blocks * LMCACHE_TIME_MS_PER_BLOCK\n                engines_state[eng].add(r.prefix_id)\n                re_prefills_avoided += 1\n            else:\n                prefill_ms = r.prompt_tokens / PREFILL_TOK_PER_MS\n                shared_cache.add(r.prefix_id)\n                engines_state[eng].add(r.prefix_id)\n\n        decode_ms = r.output_tokens / DECODE_TOK_PER_MS\n        total_time_ms += prefill_ms + decode_ms\n        prefill_work += prefill_ms\n\n    return {\n        \"config\": config,\n        \"total_ms\": total_time_ms,\n        \"prefill_ms\": prefill_work,\n        \"re_prefills_avoided\": re_prefills_avoided,\n    }\n\n\ndef report(row: dict, baseline: float) -> None:\n    speedup = baseline / row[\"total_ms\"] if row[\"total_ms\"] else 1\n    print(f\"{row['config']:14}  total={row['total_ms']:8.0f} ms  \"\n          f\"prefill={row['prefill_ms']:7.0f} ms  \"\n          f\"avoided_re_prefill={row['re_prefills_avoided']:4}  \"\n          f\"speedup={speedup:4.2f}x\")\n\n\ndef main() -> None:\n    print(\"=\" * 80)\n    print(\"vLLM PRODUCTION STACK + LMCACHE — preemption-heavy, 4 engines, shared prefixes\")\n    print(\"=\" * 80)\n    base = make_workload()\n    baseline = simulate(\"NATIVE_ONLY\", [Request(r.prompt_tokens, r.output_tokens, r.prefix_id) for r in base])[\"total_ms\"]\n    for cfg in (\"NATIVE_ONLY\", \"CPU_OFFLOAD\", \"LMCACHE\"):\n        report(simulate(cfg, [Request(r.prompt_tokens, r.output_tokens, r.prefix_id) for r in base]), baseline)\n    print(\"\\nRead: when prefixes repeat across engines, LMCache avoids redundant prefills\")\n    print(\"even when each engine individually evicted the cache.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What problem does LMCache primarily address in a vLLM deployment?",
+      "options": [
+        "Tokenizer GIL contention",
+        "Network egress filtering",
+        "Cold-start image pull",
+        "KV cache pressure in HBM causing preemption and re-prefill of the same prefixes"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What vLLM API introduced pluggable KV cache backends?",
+      "options": [
+        "Prefix-caching flag",
+        "Connector API in vLLM v0.9.0",
+        "PagedAttention v2",
+        "ChunkedPrefill API"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What does the vLLM 0.11.0 (January 2026) release add to the KV offload path?",
+      "options": [
+        "Removal of LMCache support",
+        "Mandatory FP8 KV cache",
+        "An asynchronous offload path so the engine does not block on offload in the common case",
+        "Synchronous-only offload"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "When should you pick LMCache over native CPU offload?",
+      "options": [
+        "When you are running on CPU only",
+        "When multiple engines share prefixes across tenants, LoRA variants, or repeated RAG context, so cross-engine reuse pays",
+        "When a single engine has HBM pressure and no prefix sharing",
+        "When you want to disable KV caching entirely"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What happens to LMCache benefit when KV footprint stays well below HBM?",
+      "options": [
+        "LMCache automatically disables",
+        "Configs match baseline with roughly 3-5% overhead and no real benefit",
+        "Engine crashes",
+        "It still doubles throughput"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Why does LMCache compose with disaggregated serving (Phase 17 · 17)?",
+      "options": [
+        "KV transferred from prefill to decode lands in LMCache; later queries can pull from LMCache and skip prefill, so the cache-aware router can pick an engine whose local or LMCache-shared cache matches",
+        "It does not — they are mutually exclusive",
+        "Because LMCache replaces NIXL",
+        "Because LMCache runs on the same GPU as the engine"
+      ],
+      "answer": 0,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/17-infrastructure-and-production/18-vllm-production-stack-lmcache"
+  }
+}

@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import DeptHero from '../../components/departments/DeptHero.astro';
+import DeptSections from '../../components/departments/DeptSections.astro';
+import { departments } from '../../lib/departments';
+const d = departments.find((x) => x.id === 'the-sciences')!;
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `${d.name}, Sikhi University`, description: d.blurb,
+  url: 'https://sikhiuni.com/departments/the-sciences',
+  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+};
+---
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page sc-page" style={`--dept:${d.accent}`}>
+    <DeptHero d={d}>
+      <section class="sc-sig" aria-label="Gurbani on the scale of creation">
+        <div class="sc-stars" aria-hidden="true"></div>
+        <div class="wrap sc-in">
+          <div class="sc-atom" aria-hidden="true">
+            <span class="sc-nucleus"></span>
+            <span class="sc-orbit sc-o1"><i></i></span>
+            <span class="sc-orbit sc-o2"><i></i></span>
+            <span class="sc-orbit sc-o3"><i></i></span>
+          </div>
+          <div class="sc-copy">
+            <p class="sc-kicker">A universe of countless worlds, running on Hukam</p>
+            <p class="sc-verse" lang="pa">ਕੇਤੇ ਪਵਣ ਪਾਣੀ ਵੈਸੰਤਰ ਕੇਤੇ ਕਾਨ ਮਹੇਸ ॥</p>
+            <p class="sc-trans">&ldquo;How many winds, waters, fires. How many Krishnas and Shivas.&rdquo; &mdash; Japjī Sāhib, Aṅg 7</p>
+            <p class="sc-note">This department reads modern cosmology, evolution and neuroscience alongside that account &mdash; without forcing either to bend &mdash; and it teaches the research method and data literacy to do the reading well.</p>
+          </div>
+        </div>
+      </section>
+    </DeptHero>
+    <DeptSections d={d} />
+  </div>
+
+  <style>
+    .sc-sig { position: relative; overflow: hidden; background: radial-gradient(120% 100% at 78% 0%, #08201f, #04121a 55%, #020a10); color: #d6efe9; padding: clamp(4rem, 10vw, 7rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
+    .sc-stars {
+      position: absolute; inset: 0; opacity: .7;
+      background-image:
+        radial-gradient(1.4px 1.4px at 12% 22%, #fff, transparent), radial-gradient(1.2px 1.2px at 78% 14%, #cfeae6, transparent),
+        radial-gradient(1.6px 1.6px at 44% 68%, #fff, transparent), radial-gradient(1px 1px at 62% 40%, #9fd, transparent),
+        radial-gradient(1.3px 1.3px at 88% 74%, #fff, transparent), radial-gradient(1px 1px at 26% 84%, #bfe, transparent),
+        radial-gradient(1.5px 1.5px at 6% 60%, #fff, transparent), radial-gradient(1px 1px at 52% 8%, #fff, transparent);
+      animation: sc-drift 44s linear infinite alternate;
+    }
+    @keyframes sc-drift { to { transform: translate3d(-2%, -3%, 0); } }
+
+    .sc-in { position: relative; z-index: 1; display: grid; gap: 44px; align-items: center; }
+    @media (min-width: 880px) { .sc-in { grid-template-columns: 220px 1fr; gap: 64px; } }
+
+    .sc-atom { position: relative; width: 180px; height: 180px; margin: 0 auto; transform-style: preserve-3d; perspective: 600px; }
+    .sc-nucleus { position: absolute; inset: 0; margin: auto; width: 26px; height: 26px; border-radius: 50%; background: var(--dept); box-shadow: 0 0 30px color-mix(in srgb, var(--dept) 80%, transparent); }
+    .sc-orbit { position: absolute; inset: 0; border: 1.5px solid color-mix(in srgb, var(--dept) 45%, transparent); border-radius: 50%; transform-style: preserve-3d; }
+    .sc-orbit i { position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 8px; border-radius: 50%; background: #eafffb; box-shadow: 0 0 12px var(--dept); }
+    .sc-o1 { transform: rotateX(72deg) rotateY(0deg); animation: sc-spin 4.2s linear infinite; }
+    .sc-o2 { transform: rotateX(72deg) rotateY(60deg); animation: sc-spin 5.6s linear infinite reverse; }
+    .sc-o3 { transform: rotateX(72deg) rotateY(120deg); animation: sc-spin 6.8s linear infinite; }
+    @keyframes sc-spin { to { transform: rotateX(72deg) rotateY(360deg); } }
+
+    .sc-kicker { font-family: var(--font-sans, system-ui); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: color-mix(in srgb, var(--dept) 45%, #fff); }
+    .sc-verse { margin: 16px 0 0; max-width: 24ch; font-family: "Noto Serif Gurmukhi", "Noto Sans Gurmukhi", serif; font-size: clamp(1.35rem, 3.4vw, 2.4rem); line-height: 1.6; color: #eafffb; text-shadow: 0 0 34px color-mix(in srgb, var(--dept) 65%, transparent); }
+    .sc-trans { margin: 14px 0 0; font-size: 14px; color: #8fc7c0; font-style: italic; }
+    .sc-note { margin: 22px 0 0; max-width: 60ch; font-size: 14.5px; line-height: 1.72; color: #a9d4cd; }
+    @media (prefers-reduced-motion: reduce) { .sc-stars, .sc-orbit { animation: none; } }
+  </style>
+</Base>

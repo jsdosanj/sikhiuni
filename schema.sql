@@ -6,11 +6,85 @@ CREATE TABLE IF NOT EXISTS users (
   country TEXT,                                -- self-reported, from a fixed allowlist
   languages TEXT,                              -- comma-joined, from a fixed allowlist
   role TEXT NOT NULL DEFAULT 'learner',        -- learner | teacher | admin
+  created_at INTEGER NOT NULL,
+  marketing_optin INTEGER NOT NULL DEFAULT 0,  -- feature/product email consent; off unless explicitly given
+  username TEXT,                               -- chosen at registration (2026-09); NULL for every pre-2026-09 account
+  -- Backported from migrations/0010_password_auth.sql 2026-09-06. It had never
+  -- been added here, so `npm run db:seed` produced a database on which
+  -- password sign-in could NEVER work: every account creation died on
+  -- "table users has no column named password_hash". Found by the E2E suite,
+  -- which seeds a fresh local DB from this file and then tries to register.
+  -- NULLable on purpose: accounts predating password auth have none, and
+  -- forgot-password doubles as "set my first password" for them.
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  password_hash TEXT
+);
+-- Usernames are unique per SITE, never across sites — identity across
+-- sikhi.io / sikhiuni.com / punjabiuni.com stays keyed by email via SSO.
+-- SQLite treats NULLs as distinct under a UNIQUE index, so every legacy
+-- NULL-username row coexists under this happily.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+-- Registration is a PENDING RECORD, not a half-created user (migrations/
+-- 0012_username_registration.sql). The account row is only INSERTed once the
+-- emailed 6-digit code has been proven from the same browser that requested
+-- it (rsid lives only in an httpOnly cookie), so an unverified-and-therefore
+-- unusable account cannot exist here.
+CREATE TABLE IF NOT EXISTS pending_registrations (
+  rsid       TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  username   TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  attempts   INTEGER NOT NULL DEFAULT 0,
+  marketing  INTEGER NOT NULL DEFAULT 0,
+  expires_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_pending_reg_email ON pending_registrations(email);
+
+-- Password reset by 6-digit code + same-browser binding
+-- (migrations/0013_reset_codes.sql). A reset LINK is a bearer credential —
+-- it signs in whatever device opens the email, and anyone who can read the
+-- mailbox holds a working password change. A code is useless without the
+-- httpOnly psid cookie held by the browser that requested it.
+--
+-- password_reset_tokens (the old link table) is GONE (migrations/0014) — its
+-- reset-password.js grace-window branch was removed 2026-09-07, once an hour
+-- had comfortably passed since the deploy and every in-flight link had
+-- expired. A fresh DB never creates that table.
+CREATE TABLE IF NOT EXISTS password_reset_codes (
+  psid       TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  attempts   INTEGER NOT NULL DEFAULT 0,
+  verified   INTEGER NOT NULL DEFAULT 0,
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_pw_reset_codes_user ON password_reset_codes(user_id);
+
+-- Existing databases: run once to add the username column (2026-09):
+--   ALTER TABLE users ADD COLUMN username TEXT;
+--   (then the CREATE UNIQUE INDEX above, which IS re-runnable)
 -- Existing databases: run once to add the profile columns:
 --   ALTER TABLE users ADD COLUMN country TEXT;
 --   ALTER TABLE users ADD COLUMN languages TEXT;
+-- Existing databases: run once to add the marketing opt-in column:
+--   ALTER TABLE users ADD COLUMN marketing_optin INTEGER NOT NULL DEFAULT 0;
+--
+-- Set at signup from the form's consent checkbox, or seeded from the
+-- `marketingOptIn` claim on a sikhi.io SSO token the first time that person
+-- is provisioned here. NEVER overwritten on a later login -- a choice made
+-- on this site wins over the hub's echo of it.
+--
+-- Applying it live is a MANUAL step (see docs/DEPLOY.md), never part of a
+-- deploy. Confirm the Cloudflare account first, then run it:
+--   wrangler whoami
+--   npx wrangler d1 execute sikh-university --remote \
+--     --command "ALTER TABLE users ADD COLUMN marketing_optin INTEGER NOT NULL DEFAULT 0;"
+-- Code written against this column degrades rather than breaks if the ALTER
+-- hasn't been run: signup and SSO provision retry their INSERT without it and
+-- log, so a forgotten migration costs the opt-in value, not the account.
 
 CREATE TABLE IF NOT EXISTS magic_tokens (
   token TEXT PRIMARY KEY,
@@ -102,6 +176,9 @@ CREATE TABLE IF NOT EXISTS course_drafts (
 );
 CREATE INDEX IF NOT EXISTS idx_drafts_author ON course_drafts(author_id, updated_at);
 CREATE INDEX IF NOT EXISTS idx_drafts_status ON course_drafts(status, submitted_at);
+-- Looks up a course's most-recently-published draft (course-content.js, quiz.js) — hot path
+-- for every gated-course read (migrations/0009_perf_indexes.sql).
+CREATE INDEX IF NOT EXISTS idx_drafts_course ON course_drafts(course_id, status, updated_at);
 
 CREATE TABLE IF NOT EXISTS draft_lessons (
   draft_id TEXT NOT NULL, idx INTEGER NOT NULL,
@@ -142,6 +219,9 @@ CREATE TABLE IF NOT EXISTS course_teachers (
   course_id TEXT NOT NULL, user_id TEXT NOT NULL, assigned_at INTEGER NOT NULL,
   PRIMARY KEY (course_id, user_id)
 );
+-- isCourseTeacher() looks this up by user_id alone (PK is course_id-first) — hot path for
+-- every gated-course entitlement check (migrations/0009_perf_indexes.sql).
+CREATE INDEX IF NOT EXISTS idx_course_teachers_user ON course_teachers(user_id);
 
 -- A teacher/admin grade override that wins over the computed quiz score.
 CREATE TABLE IF NOT EXISTS grade_overrides (
@@ -183,10 +263,15 @@ CREATE TABLE IF NOT EXISTS cohorts (
   invite_code TEXT NOT NULL UNIQUE, owner_id TEXT NOT NULL, created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_cohorts_owner ON cohorts(owner_id);
+-- hasCohortAccess() joins cohorts to cohort_members by course_id (migrations/0009_perf_indexes.sql).
+CREATE INDEX IF NOT EXISTS idx_cohorts_course ON cohorts(course_id);
 CREATE TABLE IF NOT EXISTS cohort_members (
   cohort_id TEXT NOT NULL, user_id TEXT NOT NULL, joined_at INTEGER NOT NULL,
   PRIMARY KEY (cohort_id, user_id)
 );
+-- hasCohortAccess() looks this up by user_id alone (PK is cohort_id-first) — hot path for
+-- every gated-course entitlement check (migrations/0009_perf_indexes.sql).
+CREATE INDEX IF NOT EXISTS idx_cohort_members_user ON cohort_members(user_id);
 
 -- Feedback is also auto-created by functions/api/feedback.js on first write.
 CREATE TABLE IF NOT EXISTS feedback (

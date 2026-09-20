@@ -6,10 +6,10 @@
 ---
 <div id="pwa-install" class="fixed inset-x-0 bottom-0 z-[55] hidden px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] print:hidden" role="region" aria-label="Install Sikhi University" data-i18n-aria="install.aria.region" aria-live="polite">
   <div class="mx-auto flex max-w-md items-center gap-3 rounded-xl2 border border-line bg-surface/95 p-3 shadow-lift backdrop-blur">
-    <img src="/assets/icon-192.png" alt="" width="44" height="44" class="h-11 w-11 shrink-0 rounded-xl" />
+    <img src="/assets/icon-192.png" alt="" width="44" height="44" loading="lazy" class="h-11 w-11 shrink-0 rounded-xl" />
     <div class="min-w-0 flex-1">
       <p class="font-serif text-sm font-bold text-navy" data-i18n="install.title">Install Sikhi University</p>
-      <p id="pwa-install-msg" class="mt-0.5 font-sans text-xs leading-snug text-muted" data-i18n="install.msg">Add it to your home screen — full-screen, offline-ready, a tap away.</p>
+      <p id="pwa-install-msg" class="mt-0.5 font-sans text-xs leading-snug text-muted" data-i18n="install.msg">Add it to your home screen, full-screen, offline-ready, a tap away.</p>
     </div>
     <button id="pwa-install-go" class="btn btn-primary shrink-0 min-h-[44px] px-4 text-sm" data-i18n="install.button">Install</button>
     <button id="pwa-install-x" aria-label="Dismiss" data-i18n-aria="install.aria.dismiss" class="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-muted hover:bg-paper hover:text-navy">
@@ -49,7 +49,7 @@
       if (window.suToast) window.suToast('Installed. Find Sikhi University on your home screen.', 'ok');
     });
 
-    // iOS Safari: no programmatic install — guide the manual gesture instead.
+    // iOS Safari: no programmatic install, guide the manual gesture instead.
     var ua = navigator.userAgent || '';
     var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     var iosSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);

@@ -1,0 +1,80 @@
+{
+  "track": "ai-90-fanout-research",
+  "school": "ai",
+  "blurb": "A reading map over Fanout's free AI research course — the roadmap, the glossary, the resource shelf, and three free sample lessons from the 108-lesson path.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to build this reading map. No lesson text, video, lab code, or paper summary is reproduced here — every module is Sikhi University's own framing, and every card opens the real page at fanout.sh. The items below are Fanout's free public pages and sample lessons; the paid Pro curriculum (the remaining 105 of 108 lessons) is not included."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "map-the-path",
+      "title": "Mapping the AI research path",
+      "objective": "Get oriented in Fanout's twelve-module, 108-lesson AI research roadmap before spending a single free lesson credit.",
+      "teach": "Fanout's path runs from math fundamentals through PyTorch, transformers, reinforcement learning, LLMs from scratch, fine-tuning, and MLOps. Start with the overview and the sequenced tracks, then keep the glossary and the foundational-papers reading order open in a second tab — most of what follows will assume you already know what the terms mean.",
+      "labs": [
+        { "title": "Fanout AI Research Course & Roadmap", "provider": "Fanout", "href": "https://fanout.sh/ai", "cost": "free" },
+        { "title": "Curriculum Overview (108 lessons)", "provider": "Fanout", "href": "https://fanout.sh/ai/overview", "cost": "free" },
+        { "title": "Learning Tracks", "provider": "Fanout", "href": "https://fanout.sh/ai/tracks", "cost": "free" },
+        { "title": "New to AI? Start Here", "provider": "Fanout", "href": "https://fanout.sh/ai/newbies", "cost": "free" },
+        { "title": "AI Glossary (192 terms)", "provider": "Fanout", "href": "https://fanout.sh/ai/glossary", "cost": "free" },
+        { "title": "Foundational AI Papers, in Reading Order", "provider": "Fanout", "href": "https://fanout.sh/ai/papers", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "free-sample-lessons",
+      "title": "Three free sample lessons",
+      "objective": "Work through Fanout's own free preview lessons — a research-paper writeup, an MLOps pipeline, and a modern architecture walkthrough — to judge the teaching before deciding whether the paid path is worth it.",
+      "teach": "These three are Fanout's own selected free lessons out of 108 — everything else in the course sits behind a paid Pro plan. They are a fair sample of the course's range: writing up a real experiment, building a reproducible ML pipeline, and reading a current research architecture.",
+      "labs": [
+        { "title": "How do you turn an LLM experiment into a publishable AI research paper?", "provider": "Fanout", "href": "https://fanout.sh/ai/lessons/code-write-publish-ai-research-paper", "cost": "free" },
+        { "title": "How do you build a reproducible ML pipeline with DVC and AWS S3?", "provider": "Fanout", "href": "https://fanout.sh/ai/lessons/ml-pipeline-dvc-aws-s3", "cost": "free" },
+        { "title": "How does a Tiny Recursive Model reuse one network to revise an answer?", "provider": "Fanout", "href": "https://fanout.sh/ai/lessons/tiny-recursive-model-arc-agi", "cost": "free" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "resource-shelf",
+      "title": "The resource shelf",
+      "objective": "Use Fanout's curated resource pages as a second opinion alongside the AI School's own AISF phases — courses, books, GPU guidance, and a hardware buying guide, organised by subfield.",
+      "teach": "Every page here is free and permanently public, not a lesson preview. Read them the way you would a well-kept bibliography: the deep-learning, machine-learning and reinforcement-learning resource pages each point at courses and books outside Fanout entirely, and the GPU and hardware pages answer the 'what do I actually buy or rent' question the phase content doesn't.",
+      "labs": [
+        { "title": "Resource Library", "provider": "Fanout", "href": "https://fanout.sh/ai/resources", "cost": "free" },
+        { "title": "Deep Learning Resources", "provider": "Fanout", "href": "https://fanout.sh/ai/deep-learning", "cost": "free" },
+        { "title": "Machine Learning Resources", "provider": "Fanout", "href": "https://fanout.sh/ai/machine-learning", "cost": "free" },
+        { "title": "Reinforcement Learning Resources", "provider": "Fanout", "href": "https://fanout.sh/ai/reinforcement-learning", "cost": "free" },
+        { "title": "GPU Programming Resources", "provider": "Fanout", "href": "https://fanout.sh/ai/gpu", "cost": "free" },
+        { "title": "AI Hardware Guide", "provider": "Fanout", "href": "https://fanout.sh/ai/hardware", "cost": "free" },
+        { "title": "Practical Guides", "provider": "Fanout", "href": "https://fanout.sh/ai/guides", "cost": "free" },
+        { "title": "AI Research Tools", "provider": "Fanout", "href": "https://fanout.sh/ai/tools", "cost": "free" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "practice-and-community",
+      "title": "Practice and community",
+      "objective": "Drill interview-style problems, find a study community, and keep an eye on where the research-engineering jobs actually are.",
+      "teach": "None of this is lesson content — it's the surrounding infrastructure a self-taught researcher usually has to assemble themselves: a tagged interview-question bank, hands-on challenges, an active-only community directory, and a jobs feed. Claude Code for Research is worth a look even if you never touch Fanout's paid tier — it's a free guide to using a coding agent for literature review and experiment iteration.",
+      "labs": [
+        { "title": "ML Interview Questions", "provider": "Fanout", "href": "https://fanout.sh/ai/interviews", "cost": "free" },
+        { "title": "Hands-on Challenges", "provider": "Fanout", "href": "https://fanout.sh/ai/challenges", "cost": "free" },
+        { "title": "AI Communities Directory", "provider": "Fanout", "href": "https://fanout.sh/ai/community", "cost": "free" },
+        { "title": "AI Newsletters", "provider": "Fanout", "href": "https://fanout.sh/ai/newsletters", "cost": "free" },
+        { "title": "Miscellany", "provider": "Fanout", "href": "https://fanout.sh/ai/misc", "cost": "free" },
+        { "title": "ML System Design", "provider": "Fanout", "href": "https://fanout.sh/ai/system-design", "cost": "free" },
+        { "title": "Claude Code for Research", "provider": "Fanout", "href": "https://fanout.sh/ai/claude-code", "cost": "free" },
+        { "title": "AI Research Jobs", "provider": "Fanout", "href": "https://fanout.sh/ai/jobs", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Fanout Course Pricing", "provider": "Fanout", "href": "https://fanout.sh/pricing", "note": "The full 108-lesson path sits behind Fanout's paid Monthly, Quarterly, Annual, or limited Lifetime plans. Fanout also offers a verified student discount." }
+  ]
+}

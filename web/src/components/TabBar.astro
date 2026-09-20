@@ -2,25 +2,41 @@
 // Mobile app-shell bottom tab bar (<768px only). Glass-strong, safe-area
 // aware, active tab marked with a saffron indicator. Slides away while the
 // on-screen keyboard is open (visualViewport heuristic) so it never crowds a
-// form. Pure navigation — content is never gated on it.
+// form. Pure navigation, content is never gated on it.
+//
+// The "Departments" tab opens a quick sheet listing every school, so a phone
+// user reaches a departmental landing page in one tap. No-JS: it's still a
+// plain link to /departments.
 import Icon from './Icon.astro';
+import deptData from '../data/departments.json';
+const short = (name: string) =>
+  name.replace(/^Department(s)? of (the )?/, '').replace(/ Department$/, '').replace(/^School of /, '');
+const schools = (deptData as any).departments as { name: string; slug: string; accent: string }[];
+const wing = (deptData as any).wing as { name: string; href: string; accent: string };
+
 const tabs = [
   { href: '/', icon: 'home', label: 'Home', key: 'nav.home', m: '/' },
-  { href: '/catalog', icon: 'books', label: 'Courses', key: 'nav.courses', m: '/catalog' },
+  { href: '/departments', icon: 'books', label: 'Departments', key: 'nav.departments', m: '/departments', sheet: true },
   { href: '/santhiya', icon: 'music', label: 'Santhya', key: 'nav.santhya', m: '/santhiya' },
   { href: '/dashboard', icon: 'backpack', label: 'My Learning', key: 'nav.mylearning', m: '/dashboard' },
 ];
-// The static build's pathname carries the file suffix (/catalog.html) — strip
+// The static build's pathname carries the file suffix (/catalog.html), strip
 // it so tabs match the clean URLs they're served under.
 const raw = Astro.url.pathname.replace(/\.html$/, '');
 const path = raw === '/index' ? '/' : raw;
 const isActive = (m: string) =>
-  m === '/' ? path === '/' : path === m || path.startsWith(m + '/') || (m === '/catalog' && path.startsWith('/course/'));
+  m === '/'
+    ? path === '/'
+    : path === m ||
+      path.startsWith(m + '/') ||
+      (m === '/departments' && (path === '/catalog' || path.startsWith('/course/') || path.startsWith('/catalog/')));
 ---
 <nav aria-label="Quick navigation" class="su-tabbar glass-strong">
   {tabs.map((t) => (
     <a
       href={t.href}
+      data-dept-sheet={t.sheet ? '' : undefined}
+      aria-haspopup={t.sheet ? 'dialog' : undefined}
       aria-current={isActive(t.m) ? 'page' : undefined}
       class={`su-tab font-sans ${isActive(t.m) ? 'is-active text-saffron-deep' : 'text-ink/65'}`}
     >
@@ -30,9 +46,37 @@ const isActive = (m: string) =>
   ))}
 </nav>
 
+<!-- Departments quick sheet (mobile). Hidden until the Departments tab is tapped. -->
+<div id="su-dept-sheet" class="su-sheet" hidden>
+  <button type="button" class="su-sheet-scrim" aria-label="Close" data-sheet-close></button>
+  <div class="su-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="su-sheet-title">
+    <div class="su-sheet-grab" aria-hidden="true"></div>
+    <div class="su-sheet-head">
+      <h2 id="su-sheet-title" class="su-sheet-title" data-i18n="nav.departments">Departments</h2>
+      <a href="/departments" class="su-sheet-all">Full directory &rarr;</a>
+    </div>
+    <ul class="su-sheet-list">
+      {schools.map((d) => (
+        <li>
+          <a href={`/departments/${d.slug}`} style={`--accent:${d.accent}`}>
+            <span class="su-sheet-dot" aria-hidden="true"></span>
+            <span>{short(d.name)}</span>
+          </a>
+        </li>
+      ))}
+      <li>
+        <a href={wing.href} style={`--accent:${wing.accent}`}>
+          <span class="su-sheet-dot" aria-hidden="true"></span>
+          <span>{wing.name}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
 <style is:global>
   /* The component owns its own display (a utility class like md:hidden would
-     lose the cascade against this block) — phones only, never in print. */
+     lose the cascade against this block), phones only, never in print. */
   .su-tabbar {
     position: fixed;
     inset-inline: 0;
@@ -66,7 +110,7 @@ const isActive = (m: string) =>
     border-radius: 0 0 3px 3px;
     background: #f4b21a;
   }
-  /* Keep page content — and the a11y FAB — clear of the fixed bar. */
+  /* Keep page content, and the a11y FAB, clear of the fixed bar. */
   @media (max-width: 767px) {
     body { padding-bottom: calc(52px + env(safe-area-inset-bottom)); }
     #a11y-fab { bottom: calc(52px + env(safe-area-inset-bottom) + 0.75rem); }
@@ -74,6 +118,47 @@ const isActive = (m: string) =>
   }
   /* Zen reader and the a11y high-contrast certificate flows want a clean stage. */
   body.zen .su-tabbar { display: none; }
+
+  /* ── Departments quick sheet ─────────────────────────────────────────── */
+  /* Closed state = the [hidden] attribute (UA display:none); open/close motion
+     is driven by the data-open flag while the element is rendered. */
+  .su-sheet { position: fixed; inset: 0; z-index: 50; }
+  @media (min-width: 768px) { .su-sheet { display: none !important; } }
+  .su-sheet-scrim {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0;
+    background: rgb(8 12 20 / .5); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    opacity: 0; transition: opacity .22s ease;
+  }
+  .su-sheet[data-open] .su-sheet-scrim { opacity: 1; }
+  .su-sheet-panel {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: rgb(var(--c-paper)); color: rgb(var(--c-ink));
+    border-top-left-radius: 20px; border-top-right-radius: 20px;
+    border-top: 1px solid rgb(var(--c-line));
+    box-shadow: 0 -20px 60px rgb(8 12 20 / .3);
+    padding: 10px 18px calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(100%); transition: transform .28s var(--ease-out, cubic-bezier(.2,.7,.3,1));
+    max-height: 82vh; overflow-y: auto;
+  }
+  .su-sheet[data-open] .su-sheet-panel { transform: translateY(0); }
+  .su-sheet-grab { width: 40px; height: 4px; border-radius: 999px; background: rgb(var(--c-line)); margin: 4px auto 12px; }
+  .su-sheet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .su-sheet-title { font-family: "Source Serif 4", Georgia, serif; font-size: 1.15rem; font-weight: 800; color: rgb(var(--c-navy)); }
+  .su-sheet-all { font-family: var(--font-sans, system-ui); font-size: .8rem; font-weight: 700; color: rgb(var(--c-saffron-deep)); text-decoration: none; }
+  .su-sheet-list { list-style: none; margin: 6px 0 0; padding: 0; }
+  .su-sheet-list a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 8px; border-radius: 12px;
+    font-family: var(--font-sans, system-ui); font-size: .95rem; font-weight: 600;
+    color: rgb(var(--c-navy)); text-decoration: none;
+  }
+  .su-sheet-list a:active { background: rgb(var(--c-surface)); }
+  .su-sheet-dot { flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--accent, #16335c); }
+  .su-sheet-list li + li { border-top: 1px solid rgb(var(--c-line) / .6); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .su-sheet-scrim, .su-sheet-panel { transition: none; }
+  }
 </style>
 
 <script>
@@ -94,5 +179,45 @@ const isActive = (m: string) =>
       document.addEventListener('focusin', (e) => { if (isField(e.target)) bar.setAttribute('data-kb', ''); });
       document.addEventListener('focusout', () => bar.removeAttribute('data-kb'));
     }
+  })();
+
+  // Departments quick sheet: the Departments tab opens it instead of navigating.
+  // Progressive, with JS off it stays a plain link to /departments.
+  (function () {
+    const trigger = document.querySelector('[data-dept-sheet]') as HTMLAnchorElement | null;
+    const sheet = document.getElementById('su-dept-sheet');
+    if (!trigger || !sheet) return;
+    const panel = sheet.querySelector('.su-sheet-panel') as HTMLElement | null;
+
+    let lastFocus: HTMLElement | null = null;
+    const open = () => {
+      lastFocus = document.activeElement as HTMLElement;
+      sheet.hidden = false;
+      // next frame so the transform transition runs
+      requestAnimationFrame(() => sheet.setAttribute('data-open', ''));
+      trigger.setAttribute('aria-expanded', 'true');
+      document.addEventListener('keydown', onKey);
+      (panel?.querySelector('a') as HTMLElement | null)?.focus();
+    };
+    const close = () => {
+      sheet.removeAttribute('data-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('keydown', onKey);
+      const done = () => { sheet.hidden = true; panel?.removeEventListener('transitionend', done); };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) done();
+      else panel?.addEventListener('transitionend', done);
+      lastFocus?.focus();
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+
+    trigger.addEventListener('click', (e) => {
+      // only intercept on the mobile viewport where the sheet exists
+      if (!matchMedia('(max-width: 767px)').matches) return;
+      e.preventDefault();
+      sheet.hasAttribute('data-open') ? close() : open();
+    });
+    sheet.querySelector('[data-sheet-close]')?.addEventListener('click', close);
+    // selecting a school closes as it navigates
+    sheet.querySelectorAll('.su-sheet-list a, .su-sheet-all').forEach((a) => a.addEventListener('click', () => close()));
   })();
 </script>

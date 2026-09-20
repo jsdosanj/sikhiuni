@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::failure-modes-agentic",
+  "num": 26,
+  "slug": "failure-modes-agentic",
+  "title": "Failure Modes: Why Agents Break",
+  "tagline": "MASFT (Berkeley, 2025) catalogs 14 multi-agent failure modes in 3 categories. Microsoft's Taxonomy documents how existing AI failures amplify in agentic settings. Industry field data converges on five recurring modes: hallucinated actions, scope creep, cascading errors, context loss, tool misuse.",
+  "type": "Learn + Build",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name MASFT's three failure categories and at least four specific modes in each.",
+    "Explain why agentic failure amplifies existing AI failure modes (bias, hallucination).",
+    "Describe the five industry-recurring modes and their mitigations.",
+    "Implement a stdlib detector that tags agent traces with failure-mode labels."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Teams ship agents that work on 90% of traces. The 10% failures are not random noise — they fall into a small number of recurring categories. Once you can name them, you can monitor for them and fix them.</p>\n<h2>The Concept</h2>\n<h3>MASFT (Berkeley, arXiv:2503.13657)</h3>\n<p>Multi-Agent System Failure Taxonomy. 14 failure modes clustered into 3 categories. Inter-annotator Cohen&#39;s Kappa 0.88 — the categories are reliably distinguishable.</p>\n<p>Central claim: failures are fundamental design flaws in multi-agent systems, not LLM limitations to be fixed with better base models.</p>\n<h3>Microsoft Taxonomy of Failure Mode in Agentic AI Systems</h3>\n<ul>\n<li>Existing AI failures (bias, hallucination, data leakage) amplify in agentic settings.</li>\n<li>New failures emerge from autonomy: unintended action at scale, tool misuse, mission drift.</li>\n<li>The whitepaper is the risk register for agentic products.</li>\n</ul>\n<h3>Characterizing Faults in Agentic AI (arXiv:2603.06847)</h3>\n<ul>\n<li>Failures arise from orchestration, internal state evolution, and environment interaction.</li>\n<li>Not just &quot;bad code&quot; or &quot;bad model output.&quot;</li>\n</ul>\n<h3>LLM Agent Hallucinations Survey (arXiv:2509.18970)</h3>\n<p>Two primary manifestations:</p>\n<ol>\n<li><strong>Instruction-following Deviation</strong> — agent doesn&#39;t follow the system prompt.</li>\n<li><strong>Long-range Contextual Misuse</strong> — agent forgets or misapplies context from earlier turns.</li>\n</ol>\n<p>Sub-intention errors: Omission (missed step), Redundancy (repeated step), Disorder (out-of-order steps).</p>\n<h3>The five industry-recurring modes</h3>\n<p>Arize, Galileo, NimbleBrain 2024-2026 field analyses converge on:</p>\n<ol>\n<li><strong>Hallucinated actions.</strong> Agent invokes a tool that doesn&#39;t exist or fabricates arguments.</li>\n<li><strong>Scope creep.</strong> Agent expands task beyond the user&#39;s ask (creates extra PRs, sends extra emails).</li>\n<li><strong>Cascading errors.</strong> One wrong call triggers downstream effects. A phantom SKU hallucination triggers four API calls — a multi-system incident.</li>\n<li><strong>Context loss.</strong> Long-horizon tasks forget early-turn constraints.</li>\n<li><strong>Tool misuse.</strong> Calls the right tool with wrong arguments, or the wrong tool entirely.</li>\n</ol>\n<p>Cascading is the killer. Agents cannot distinguish &quot;I failed&quot; from &quot;the task is impossible&quot; and often hallucinate a success message on 400 errors to close the loop.</p>\n<h3>Mitigation: gates at every step</h3>\n<p>Automated verification gates at every step of a reasoning chain, checking factual grounding against environment state. Concretely:</p>\n<ul>\n<li>Per-step safety classifier (Lesson 21).</li>\n<li>Tool-call argument validation (Lesson 06).</li>\n<li>Cross-check retrieved content against known facts (Lesson 05, CRITIC).</li>\n<li>Detect success hallucination by re-probing state (was the file actually created?).</li>\n</ul>\n<h3>Where failure monitoring goes wrong</h3>\n<ul>\n<li><strong>Tagging only crashes.</strong> Most agent failures produce valid-looking output. Need content-level checks.</li>\n<li><strong>No baseline.</strong> Drift detection needs a last-known-good; without it you cannot say &quot;this is getting worse.&quot;</li>\n<li><strong>Over-alerting.</strong> Every failure produces a page. Cluster and rate-limit.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>failure-cascade</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements a stdlib failure-mode tagger:</p>\n<ul>\n<li>A synthetic trace dataset covering the five modes.</li>\n<li>Detector functions per mode (signature patterns on tool calls, outputs, repeat actions).</li>\n<li>A tagger that labels each trace and reports mode distribution.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: per-trace labels + aggregate distribution, a cheap reproduction of what Phoenix&#39;s trace clustering surfaces.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>Phoenix</strong> for production drift clustering (Lesson 24).</li>\n<li><strong>Langfuse</strong> for session replay + annotation.</li>\n<li><strong>Custom</strong> for domain-specific signatures your observability platform can&#39;t detect.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-failure-detector.md</code> generates failure-mode detectors tailored to your domain, wired to a trace store.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a detector for &quot;success hallucination&quot;: agent returns success but the target state is unchanged.</li>\n<li>Tag 100 real traces from a product you&#39;ve built. Which mode dominates? What&#39;s the cost of fixing it?</li>\n<li>Implement a &quot;cascade radius&quot; metric: given a failure at step N, how many downstream steps did it affect?</li>\n<li>Read MASFT&#39;s 14 failure modes. Pick three that apply to your product. Write detectors.</li>\n<li>Wire one detector into a CI job: fail the build if &gt;=5% of traces tag a mode.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>MASFT</td>\n<td>&quot;Multi-agent failure taxonomy&quot;</td>\n<td>Berkeley 14-mode categorization</td>\n</tr>\n<tr>\n<td>Cascading error</td>\n<td>&quot;Ripple failure&quot;</td>\n<td>One early mistake propagates through N steps</td>\n</tr>\n<tr>\n<td>Context loss</td>\n<td>&quot;Forgot the constraint&quot;</td>\n<td>Long-horizon turn drops early-turn facts</td>\n</tr>\n<tr>\n<td>Tool misuse</td>\n<td>&quot;Wrong tool / wrong args&quot;</td>\n<td>Valid call, wrong invocation</td>\n</tr>\n<tr>\n<td>Success hallucination</td>\n<td>&quot;Faked completion&quot;</td>\n<td>Agent claims success on a 400; state unchanged</td>\n</tr>\n<tr>\n<td>Scope creep</td>\n<td>&quot;Overreach&quot;</td>\n<td>Agent does more than asked</td>\n</tr>\n<tr>\n<td>Instruction-following deviation</td>\n<td>&quot;Disobedience&quot;</td>\n<td>Ignores system prompt or user constraint</td>\n</tr>\n<tr>\n<td>Sub-intention errors</td>\n<td>&quot;Plan bugs&quot;</td>\n<td>Omission, redundancy, disorder in plan execution</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2503.13657\" target=\"_blank\" rel=\"noopener\">Cemri et al., MASFT (arXiv:2503.13657)</a> — 14 failure modes, 3 categories</li>\n<li><a href=\"https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/Taxonomy-of-Failure-Mode-in-Agentic-AI-Systems-Whitepaper.pdf\" target=\"_blank\" rel=\"noopener\">Microsoft, Taxonomy of Failure Mode in Agentic AI Systems</a> — risk register</li>\n<li><a href=\"https://docs.arize.com/phoenix\" target=\"_blank\" rel=\"noopener\">Arize Phoenix</a> — drift clustering in practice</li>\n<li><a href=\"https://www.anthropic.com/research/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic, Building Effective Agents</a> — when simpler patterns avoid modes entirely</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Stdlib failure-mode tagger for agent traces.\n\nDetects the five industry-recurring modes: hallucinated actions, scope creep,\ncascading errors, context loss, tool misuse. Each detector returns a tag if\nthe trace matches; aggregate distribution mirrors Phoenix's trace clustering.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections import Counter\nfrom dataclasses import dataclass, field\nfrom typing import Any\n\n\n@dataclass\nclass TraceStep:\n    kind: str\n    name: str\n    args: dict[str, Any] = field(default_factory=dict)\n    status: str = \"ok\"\n    result: str = \"\"\n\n\n@dataclass\nclass Trace:\n    tid: str\n    user_request: str\n    constraints: list[str]\n    steps: list[TraceStep]\n    final_success_claim: bool\n    target_state_changed: bool\n\n\nKNOWN_TOOLS = {\"search\", \"read_file\", \"write_file\", \"list_dir\"}\n\n\ndef detect_hallucinated_action(trace: Trace) -> str | None:\n    for step in trace.steps:\n        if step.kind == \"tool_call\" and step.name not in KNOWN_TOOLS:\n            return \"hallucinated_action\"\n    return None\n\n\ndef detect_scope_creep(trace: Trace) -> str | None:\n    request = trace.user_request.lower()\n    writes = [s for s in trace.steps\n              if s.kind == \"tool_call\" and s.name == \"write_file\"]\n    explicit_write_words = (\"write\", \"create\", \"save\", \"update\", \"edit\")\n    wanted_write = any(w in request for w in explicit_write_words)\n    if len(writes) > 0 and not wanted_write:\n        return \"scope_creep\"\n    return None\n\n\ndef detect_cascading_errors(trace: Trace) -> str | None:\n    saw_error = False\n    downstream_ops = 0\n    for step in trace.steps:\n        if step.kind == \"tool_call\" and step.status == \"error\":\n            saw_error = True\n            continue\n        if saw_error and step.kind == \"tool_call\":\n            downstream_ops += 1\n    if saw_error and downstream_ops >= 2:\n        return \"cascading_errors\"\n    return None\n\n\ndef detect_context_loss(trace: Trace) -> str | None:\n    for constraint in trace.constraints:\n        con_l = constraint.lower()\n        if \"do not\" in con_l:\n            forbidden_token = con_l.split(\"do not\")[-1].strip().split()[0]\n            for step in trace.steps:\n                if step.kind == \"tool_call\" and forbidden_token in str(step.args).lower():\n                    return \"context_loss\"\n    return None\n\n\ndef detect_tool_misuse(trace: Trace) -> str | None:\n    tool_args_schema = {\n        \"read_file\": {\"path\"},\n        \"write_file\": {\"path\", \"content\"},\n        \"list_dir\": {\"path\"},\n        \"search\": {\"query\"},\n    }\n    for step in trace.steps:\n        if step.kind != \"tool_call\":\n            continue\n        expected = tool_args_schema.get(step.name)\n        if expected is None:\n            continue\n        if not expected.issubset(set(step.args.keys())):\n            return \"tool_misuse\"\n    return None\n\n\ndef detect_success_hallucination(trace: Trace) -> str | None:\n    request = trace.user_request.lower()\n    write_intent = any(w in request for w in\n                       (\"write\", \"create\", \"save\", \"update\", \"edit\", \"make\"))\n    if (write_intent and trace.final_success_claim\n            and not trace.target_state_changed):\n        return \"success_hallucination\"\n    return None\n\n\nDETECTORS = (\n    detect_hallucinated_action,\n    detect_scope_creep,\n    detect_cascading_errors,\n    detect_context_loss,\n    detect_tool_misuse,\n    detect_success_hallucination,\n)\n\n\ndef tag(trace: Trace) -> list[str]:\n    return [label for label in (d(trace) for d in DETECTORS) if label]\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"AGENT FAILURE MODES — Phase 14, Lesson 26\")\n    print(\"=\" * 70)\n\n    traces = [\n        Trace(tid=\"t001\", user_request=\"find the config file\",\n              constraints=[\"do not modify any files\"],\n              steps=[\n                  TraceStep(\"tool_call\", \"search\", {\"query\": \"config\"}),\n                  TraceStep(\"tool_call\", \"read_file\", {\"path\": \"config.yml\"}),\n              ],\n              final_success_claim=True, target_state_changed=False),\n        Trace(tid=\"t002\", user_request=\"find the config file\",\n              constraints=[\"do not modify any files\"],\n              steps=[\n                  TraceStep(\"tool_call\", \"search\", {\"query\": \"config\"}),\n                  TraceStep(\"tool_call\", \"write_file\",\n                            {\"path\": \"config.yml\", \"content\": \"...\"}),\n              ],\n              final_success_claim=True, target_state_changed=True),\n        Trace(tid=\"t003\", user_request=\"list project files\",\n              constraints=[],\n              steps=[\n                  TraceStep(\"tool_call\", \"magic_scanner\",\n                            {\"path\": \"/\"}),\n              ],\n              final_success_claim=True, target_state_changed=False),\n        Trace(tid=\"t004\", user_request=\"look up invoice 4711\",\n              constraints=[],\n              steps=[\n                  TraceStep(\"tool_call\", \"search\",\n                            {\"query\": \"invoice 4711\"}, status=\"error\"),\n                  TraceStep(\"tool_call\", \"read_file\", {\"path\": \"/tmp/foo\"}),\n                  TraceStep(\"tool_call\", \"write_file\",\n                            {\"path\": \"/tmp/foo\", \"content\": \"fabricated\"}),\n                  TraceStep(\"tool_call\", \"list_dir\", {\"path\": \"/tmp\"}),\n              ],\n              final_success_claim=True, target_state_changed=True),\n        Trace(tid=\"t005\", user_request=\"update readme with release notes\",\n              constraints=[\"do not modify src/\"],\n              steps=[\n                  TraceStep(\"tool_call\", \"read_file\", {\"path\": \"README.md\"}),\n                  TraceStep(\"tool_call\", \"write_file\",\n                            {\"path\": \"README.md\", \"content\": \"notes\"}),\n                  TraceStep(\"tool_call\", \"write_file\",\n                            {\"path\": \"src/foo.py\", \"content\": \"also notes\"}),\n              ],\n              final_success_claim=True, target_state_changed=True),\n        Trace(tid=\"t006\", user_request=\"read some file\",\n              constraints=[],\n              steps=[\n                  TraceStep(\"tool_call\", \"read_file\",\n                            {\"file\": \"/tmp/foo\"}),\n              ],\n              final_success_claim=False, target_state_changed=False),\n        Trace(tid=\"t007\", user_request=\"create a PR\",\n              constraints=[],\n              steps=[\n                  TraceStep(\"tool_call\", \"search\", {\"query\": \"PR template\"}),\n              ],\n              final_success_claim=True, target_state_changed=False),\n    ]\n\n    distribution: Counter = Counter()\n    print()\n    for trace in traces:\n        labels = tag(trace)\n        distribution.update(labels)\n        print(f\"  {trace.tid}  user={trace.user_request[:40]!r}\")\n        print(f\"    labels: {labels if labels else '[clean]'}\")\n\n    print(\"\\naggregate distribution\")\n    for label, count in distribution.most_common():\n        print(f\"  {label}: {count}\")\n    print()\n    print(\"gate at every step: classifier, argument validation, state probe.\")\n    print(\"cascading is the killer. detect early, stop the loop.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is MASFT's central claim?",
+      "options": [
+        "Failures are random noise",
+        "Failures are due to network outages",
+        "Failures vanish with bigger models",
+        "Multi-agent failures are fundamental design flaws, not LLM limitations to be fixed with better base models"
+      ],
+      "answer": 3,
+      "explanation": "Berkeley's MASFT categorizes failures as design flaws; they do not disappear by scaling the base model."
+    },
+    {
+      "q": "Which is NOT one of the five recurring industry failure modes the lesson lists?",
+      "options": [
+        "Hallucinated actions",
+        "Cascading errors",
+        "Scope creep",
+        "Embedding versioning"
+      ],
+      "answer": 3,
+      "explanation": "The five are hallucinated actions, scope creep, cascading errors, context loss, tool misuse."
+    },
+    {
+      "q": "What is a cascading error in this lesson?",
+      "options": [
+        "A YAML parser error",
+        "One wrong call triggers downstream effects across systems (a phantom SKU triggers four downstream API calls)",
+        "A cron failure",
+        "An LLM rate-limit cascade"
+      ],
+      "answer": 1,
+      "explanation": "Cascades amplify a single bad call into a multi-system incident; especially severe when agents fake success."
+    },
+    {
+      "q": "Which two manifestations does the LLM Agent Hallucinations Survey list?",
+      "options": [
+        "Hot and cold tokens",
+        "Instruction-following Deviation and Long-range Contextual Misuse",
+        "Greedy and beam search",
+        "Soft and hard prompts"
+      ],
+      "answer": 1,
+      "explanation": "Hallucinations show up as either ignoring system prompt or forgetting/misapplying earlier-turn context."
+    },
+    {
+      "q": "What does success hallucination mean?",
+      "options": [
+        "A unit test passed",
+        "The agent returns a success message even though the target state did not change (often on a 400 from a tool)",
+        "The user thinks success when none happened",
+        "The model is overconfident on benchmarks"
+      ],
+      "answer": 1,
+      "explanation": "Re-probe environment state; agents commonly fake completion when they cannot distinguish 'I failed' from 'impossible'."
+    },
+    {
+      "q": "Why is tagging only crashes insufficient?",
+      "options": [
+        "Logging is paid",
+        "Most agent failures produce valid-looking output that does not crash; content-level checks are needed",
+        "Crashes leak PII",
+        "Crashes are slow"
+      ],
+      "answer": 1,
+      "explanation": "Crash-based monitoring misses the bulk of agent failures, which are content-shaped."
+    },
+    {
+      "q": "What mitigation does the lesson recommend at every step of a reasoning chain?",
+      "options": [
+        "Add a sleep()",
+        "Disable retries",
+        "Automated verification gates that check factual grounding against environment state",
+        "Lower temperature only"
+      ],
+      "answer": 2,
+      "explanation": "Per-step gates (safety classifier, argument validation, CRITIC, state re-probe) catch failures before they cascade."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/26-failure-modes-agentic"
+  }
+}

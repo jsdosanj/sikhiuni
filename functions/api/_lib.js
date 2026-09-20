@@ -1,3 +1,4 @@
+import { schemaOnce } from "./_schema-once.js";
 // Shared helpers for Sikhi University Pages Functions. (_-prefixed → not a route.)
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -21,13 +22,29 @@ export function sessionCookie(id, maxAgeSec) {
 }
 
 // Resolve the logged-in user from the session cookie, or null.
+//
+// marketing_optin is selected here (not just in me.js) so every route that
+// calls getUser() gets the current opt-in value on the user object for free.
+// Wrapped: this runs on every authenticated request, so a DB that hasn't yet
+// had the column ALTERed onto it (a stale preview/local D1 the migration
+// hasn't reached) must not break login sitewide -- degrade to the plain
+// query and default the opt-in to 0 rather than throwing.
 export async function getUser(env, request) {
   const sid = readCookie(request, "su_session");
   if (!sid) return null;
-  const row = await env.DB.prepare(
-    "SELECT u.id, u.email, u.name, u.country, u.languages, u.role, s.mfa_ok FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?"
-  ).bind(sid, Date.now()).first();
-  return row || null;
+  try {
+    const row = await env.DB.prepare(
+      "SELECT u.id, u.email, u.name, u.country, u.languages, u.role, u.marketing_optin, s.mfa_ok FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?"
+    ).bind(sid, Date.now()).first();
+    return row || null;
+  } catch (e) {
+    const message = (e && e.message) || String(e);
+    if (!/marketing_optin|no such column/i.test(message)) throw e;
+    const row = await env.DB.prepare(
+      "SELECT u.id, u.email, u.name, u.country, u.languages, u.role, s.mfa_ok FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?"
+    ).bind(sid, Date.now()).first();
+    return row ? { ...row, marketing_optin: 0 } : null;
+  }
 }
 
 export function isAdminEmail(env, email) {
@@ -39,9 +56,9 @@ export function isAdminEmail(env, email) {
 // so logging a non-critical event can't break the action that triggered it.
 export async function logEvent(env, user, action, target, detail) {
   try {
-    await env.DB.prepare(
+    await schemaOnce(env.DB, "events", () => env.DB.prepare(
       "CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, ts INTEGER NOT NULL, user_id TEXT, role TEXT, action TEXT NOT NULL, target TEXT, detail TEXT)"
-    ).run();
+    ).run());
     await env.DB.prepare(
       "INSERT INTO events (id, ts, user_id, role, action, target, detail) VALUES (?,?,?,?,?,?,?)"
     ).bind(newId(), Date.now(), user ? user.id : null, user ? user.role : null, action, target || null, detail || null).run();
@@ -72,22 +89,25 @@ export async function parseBody(request) {
 }
 
 // Same as requireRole, plus an MFA gate once a user has enrolled. Policy:
-// - Not enrolled: admins are hard-blocked (must enroll before touching /api/admin/*);
-//   everyone else passes (grace period — enrollment becomes a precondition for
-//   specific high-trust actions like studio submission/uploads/profile publish,
-//   enforced by those handlers, not here).
-// - Enrolled: the current session must have completed the /mfa step (mfa_ok=1),
-//   regardless of role.
+// - Not enrolled: everyone passes, admins included. Enrollment is STRONGLY
+//   encouraged for admins but is no longer a login-time block on /api/admin/*
+//   (2026-09-10): the hard block made a newly-added admin email unable to do
+//   anything at all until they had set up an authenticator, and the previous
+//   `403 mfa_enrollment_required` gave the UI no way out of that. Enrollment
+//   stays a precondition for specific high-trust actions (studio submission,
+//   uploads, profile publish), enforced by those handlers, not here.
+//   TRADE-OFF, stated plainly: a stolen admin session cookie now reaches every
+//   /api/admin/* route with no second factor. Re-tightening this is a one-line
+//   revert of the removed `user.role === "admin"` branch.
+// - Enrolled: unchanged — the current session must have completed the /mfa step
+//   (mfa_ok=1), regardless of role. An admin who DOES enroll is as protected as
+//   they were before.
 export async function requireMfa(env, request, roles) {
   const { user, error } = await requireRole(env, request, roles);
   if (error) return { error };
   const row = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
   const enrolled = !!(row && row.enabled_at);
-  if (enrolled) {
-    if (user.mfa_ok !== 1) return { error: json({ error: "mfa_required" }, 403) };
-    return { user };
-  }
-  if (user.role === "admin") return { error: json({ error: "mfa_enrollment_required" }, 403) };
+  if (enrolled && user.mfa_ok !== 1) return { error: json({ error: "mfa_required" }, 403) };
   return { user };
 }
 

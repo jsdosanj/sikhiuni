@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::repo-memory-and-state",
+  "num": 34,
+  "slug": "repo-memory-and-state",
+  "title": "Repo Memory and Durable State",
+  "tagline": "Chat history is volatile. The repo is durable. The workbench stores agent state in versioned files so the next session, the next agent, and the next reviewer all read from the same source of truth.",
+  "type": "Build",
+  "languages": "Python (stdlib + `jsonschema` optional)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Define what belongs in repo memory and what belongs in chat history.",
+    "Author JSON Schemas for `agent_state.json` and `task_board.json`.",
+    "Build a state manager that loads, validates, mutates, and persists state atomically.",
+    "Use the schema to refuse bad writes before they corrupt the workbench."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>The agent finishes a session. The chat closes. The next session opens and asks where to start. The model says &quot;let me check the files,&quot; reads stale notes, and re-does work that was already complete. Or worse, it rewrites a finished file because no one told it the file was finished.</p>\n<p>The workbench fix is repo memory: state lives in JSON files in the repo, written under a schema, persisted atomically, diff-friendly in code review. Chat is a transient feed; the repo is the system of record.</p>\n<h2>The Concept</h2>\n<pre class=\"mermaid\">flowchart LR\n  Agent[Agent Loop] --&gt; Manager[StateManager]\n  Manager --&gt; Schema[agent_state.schema.json]\n  Schema --&gt; Validate{valid?}\n  Validate -- yes --&gt; Write[agent_state.json]\n  Validate -- no --&gt; Reject[refuse + raise]\n  Write --&gt; Manager</pre>\n<h3>What belongs in repo memory</h3>\n<table>\n<thead>\n<tr>\n<th>Belongs</th>\n<th>Does not belong</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Active task id</td>\n<td>Raw chat transcripts</td>\n</tr>\n<tr>\n<td>Touched files this session</td>\n<td>Token-level reasoning traces</td>\n</tr>\n<tr>\n<td>Assumptions the agent made</td>\n<td>&quot;The user seemed frustrated&quot;</td>\n</tr>\n<tr>\n<td>Open blockers</td>\n<td>Sampled completions</td>\n</tr>\n<tr>\n<td>Next action</td>\n<td>Vendor-specific model ids</td>\n</tr>\n</tbody></table>\n<p>The test is durability: would this be useful three months from now in a CI rerun? If yes, repo. If no, telemetry.</p>\n<h3>Schema-first state</h3>\n<p>JSON Schema is the contract. Without it, every agent invents new fields, every reviewer learns a new shape, and every CI script has to special-case past versions. With it, a bad write is a refused write.</p>\n<p>The schema covers:</p>\n<ul>\n<li>Required keys.</li>\n<li>Allowed <code>status</code> values.</li>\n<li>Forbidden values (e.g. <code>null</code> for arrays).</li>\n<li>Pattern constraints (task ids match <code>T-\\d{3,}</code>).</li>\n<li>Version field for migrations.</li>\n</ul>\n<h3>Atomic writes</h3>\n<p>State writes need to survive partial failures: write to a tempfile, fsync, rename over the target. The state file is the source of truth; a half-written one is worse than no file at all.</p>\n<h3>Migrations</h3>\n<p>When the schema changes, ship a migration script next to the schema bump. The state file carries a <code>schema_version</code> field; the manager refuses to load a file from a version it cannot migrate.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-state-persist</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements:</p>\n<ul>\n<li><code>agent_state.schema.json</code> and <code>task_board.schema.json</code>.</li>\n<li>A stdlib-only validator (subset of JSON Schema: required, type, enum, pattern, items).</li>\n<li><code>StateManager.load</code>, <code>StateManager.update</code>, <code>StateManager.commit</code> with atomic temp-and-rename writes.</li>\n<li>A demo that mutates state, persists, reloads, and proves the round-trip.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The script writes <code>workdir/agent_state.json</code> and <code>workdir/task_board.json</code>, mutates them across two turns, and prints the validated state at each step.</p>\n<h2>Production patterns in the wild</h2>\n<p>Four patterns turn the lesson&#39;s minimum into something a multi-agent monorepo can survive.</p>\n<p><strong>Atomic temp-and-rename is not optional.</strong> A March 2026 Hive project bug report documents the failure mode cleanly: <code>state.json</code> was written via <code>write_text()</code> and exceptions were caught and silenced. Partial writes left sessions resuming against corrupt state with no signal. The fix is always: <code>tempfile.mkstemp</code> in the same directory as the target, write, <code>fsync</code>, <code>os.replace</code> (atomic rename on POSIX and Windows). This lesson&#39;s <code>atomic_write</code> does exactly that.</p>\n<p><strong>Idempotency keys on every non-idempotent tool call.</strong> If an agent crashes after calling a tool but before checkpointing the result, recovery retries the tool call. Safe for reads; dangerous for emails, DB inserts, file uploads. The pattern: log every tool call ID before execution into a <code>pending_calls.jsonl</code>. On retry, check for the ID; if present, skip the call and use the cached result. Anthropic and LangChain both call this out in 2026 guidance; LangGraph&#39;s checkpointer persists pending writes for the same reason.</p>\n<p><strong>Separate large artifacts from state.</strong> Don&#39;t store CSVs, long transcripts, or generated files in <code>agent_state.json</code>. Save the artifact as a separate file (or upload to object storage) and keep only the path in state. Checkpoints stay small and fast; the artifacts grow independently.</p>\n<p><strong>Event sourcing for audit, snapshots for resume.</strong> Append to an event log (<code>state.events.jsonl</code>) on every mutation; periodically snapshot to <code>state.json</code>. Resume reads the snapshot, then replays any events after the snapshot&#39;s timestamp. This costs more disk but lets you replay agent decisions verbatim — essential when debugging long-horizon runs. The same shape Postgres uses internally for WAL.</p>\n<p><strong>Schema migrations or refuse to load.</strong> The <code>schema_version</code> integer is the contract. When the manager loads a file at an unknown version, it refuses to read. Ship a migration script next to the schema bump; <code>tools/migrate_state.py</code> runs idempotently on every startup.</p>\n<h2>Use It</h2>\n<p>In production:</p>\n<ul>\n<li><strong>LangGraph checkpointers.</strong> Same idea, different storage. The checkpointer persists graph state to SQLite, Postgres, or a custom backend. The schema this lesson teaches is what you reach for when the checkpointer dies and you need to read state by hand.</li>\n<li><strong>Letta memory blocks.</strong> Persistent blocks with structured schemas (Phase 14 · 08). Same discipline scoped to long-running personas.</li>\n<li><strong>OpenAI Agents SDK session store.</strong> Pluggable backends, schema-aware. The state file in this lesson is the local-file backend.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-state-schema.md</code> generates a project-specific JSON Schema pair (state + board), a Python <code>StateManager</code> wired to atomic writes, and a migration scaffold so the next schema bump does not break the workbench.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Add a <code>last_human_touch</code> timestamp. Refuse any agent write within five seconds of a human edit.</li>\n<li>Extend the validator to support <code>oneOf</code> so a task can be either a build task or a review task with different required fields.</li>\n<li>Add a <code>schema_version</code> field and write the migration from v1 to v2 (rename <code>blockers</code> to <code>risks</code>).</li>\n<li>Move the storage backend from a local file to SQLite. Keep the <code>StateManager</code> API identical.</li>\n<li>Run two agents against the same state file with a 50 ms write race. What goes wrong and how does the atomic rename save you?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Repo memory</td>\n<td>&quot;Notes file&quot;</td>\n<td>State stored in tracked files in the repo, under schema</td>\n</tr>\n<tr>\n<td>Schema-first</td>\n<td>&quot;Validate inputs&quot;</td>\n<td>Define the contract before the writer, refuse drift</td>\n</tr>\n<tr>\n<td>Atomic write</td>\n<td>&quot;Just rename&quot;</td>\n<td>Write to temp, fsync, rename, so partial failures cannot corrupt</td>\n</tr>\n<tr>\n<td>Migration</td>\n<td>&quot;Schema bump&quot;</td>\n<td>A script that turns vN state into v(N+1) state</td>\n</tr>\n<tr>\n<td>System of record</td>\n<td>&quot;Source of truth&quot;</td>\n<td>The artifact the workbench treats as authoritative</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://json-schema.org/specification.html\" target=\"_blank\" rel=\"noopener\">JSON Schema specification</a></li>\n<li><a href=\"https://langchain-ai.github.io/langgraph/concepts/persistence/\" target=\"_blank\" rel=\"noopener\">LangGraph checkpointers</a></li>\n<li><a href=\"https://docs.letta.com/concepts/memory\" target=\"_blank\" rel=\"noopener\">Letta memory blocks</a></li>\n<li><a href=\"https://fast.io/resources/ai-agent-state-checkpointing/\" target=\"_blank\" rel=\"noopener\">Fast.io, AI Agent State Checkpointing: A Practical Guide</a> — schema-first checkpointing with idempotency</li>\n<li><a href=\"https://fast.io/resources/ai-agent-workflow-state-persistence/\" target=\"_blank\" rel=\"noopener\">Fast.io, AI Agent Workflow State Persistence: Best Practices 2026</a> — concurrency control, TTL, event sourcing</li>\n<li><a href=\"https://github.com/aden-hive/hive/issues/6263\" target=\"_blank\" rel=\"noopener\">Hive Issue #6263 — non-atomic state.json writes silently ignored</a> — the failure mode in a real project</li>\n<li><a href=\"https://eunomia.dev/blog/2025/05/11/checkpointrestore-systems-evolution-techniques-and-applications-in-ai-agents/\" target=\"_blank\" rel=\"noopener\">eunomia, Checkpoint/Restore Systems: Evolution, Techniques, Applications</a> — CR primitives from OS history applied to agents</li>\n<li><a href=\"https://www.indium.tech/blog/7-state-persistence-strategies-ai-agents-2026/\" target=\"_blank\" rel=\"noopener\">Indium, 7 State Persistence Strategies for Long-Running AI Agents in 2026</a></li>\n<li><a href=\"https://learn.microsoft.com/en-us/agent-framework/agents/conversations/compaction\" target=\"_blank\" rel=\"noopener\">Microsoft Agent Framework, Compaction</a> — vendor checkpoint manager</li>\n<li>Phase 14 · 08 — memory blocks and sleep-time compute</li>\n<li>Phase 14 · 32 — the three-file minimum this lesson schematizes</li>\n<li>Phase 14 · 40 — handoff packets read from the same schema</li>\n</ul>\n",
+  "hasMermaid": true,
+  "code": {
+    "py": "\"\"\"Schema-first agent state with atomic writes.\n\nWrites JSON Schema files for `agent_state.json` and `task_board.json`,\nimplements a tiny stdlib validator that handles the subset we need\n(required, type, enum, pattern, items), and a StateManager with\ntemp-and-rename writes so a partial failure cannot corrupt the file.\n\nRun: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport os\nimport re\nimport tempfile\nfrom pathlib import Path\nfrom typing import Any\n\nHERE = Path(__file__).parent\nWORK = HERE / \"workdir\"\n\n\nSTATE_SCHEMA: dict[str, Any] = {\n    \"$id\": \"agent_state.schema.json\",\n    \"type\": \"object\",\n    \"required\": [\"schema_version\", \"active_task_id\", \"touched_files\", \"next_action\"],\n    \"properties\": {\n        \"schema_version\": {\"type\": \"integer\", \"enum\": [1]},\n        \"active_task_id\": {\"type\": [\"string\", \"null\"], \"pattern\": r\"^(T-\\d{3,}|)$\"},\n        \"touched_files\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"assumptions\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"blockers\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"next_action\": {\"type\": \"string\"},\n    },\n}\n\n\nBOARD_SCHEMA: dict[str, Any] = {\n    \"$id\": \"task_board.schema.json\",\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"id\", \"goal\", \"owner\", \"acceptance\", \"status\"],\n        \"properties\": {\n            \"id\": {\"type\": \"string\", \"pattern\": r\"^T-\\d{3,}$\"},\n            \"goal\": {\"type\": \"string\"},\n            \"owner\": {\"type\": \"string\", \"enum\": [\"builder\", \"reviewer\", \"human\"]},\n            \"acceptance\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n            \"status\": {\"type\": \"string\", \"enum\": [\"todo\", \"in_progress\", \"done\", \"blocked\"]},\n        },\n    },\n}\n\n\nclass SchemaError(Exception):\n    pass\n\n\ndef _check_type(value: Any, types: str | list[str]) -> bool:\n    type_list = [types] if isinstance(types, str) else types\n    for t in type_list:\n        if t == \"object\" and isinstance(value, dict):\n            return True\n        if t == \"array\" and isinstance(value, list):\n            return True\n        if t == \"string\" and isinstance(value, str):\n            return True\n        if t == \"integer\" and isinstance(value, int) and not isinstance(value, bool):\n            return True\n        if t == \"null\" and value is None:\n            return True\n    return False\n\n\ndef validate(value: Any, schema: dict[str, Any], path: str = \"$\") -> None:\n    if \"type\" in schema and not _check_type(value, schema[\"type\"]):\n        raise SchemaError(f\"{path}: expected {schema['type']}, got {type(value).__name__}\")\n    if \"enum\" in schema and value not in schema[\"enum\"]:\n        raise SchemaError(f\"{path}: {value!r} not in {schema['enum']}\")\n    if \"pattern\" in schema and isinstance(value, str) and not re.match(schema[\"pattern\"], value):\n        raise SchemaError(f\"{path}: {value!r} does not match /{schema['pattern']}/\")\n    if isinstance(value, dict):\n        for key in schema.get(\"required\", []):\n            if key not in value:\n                raise SchemaError(f\"{path}: missing required field {key!r}\")\n        properties = schema.get(\"properties\", {})\n        unexpected = sorted(set(value.keys()) - set(properties.keys()))\n        if unexpected:\n            raise SchemaError(f\"{path}: unexpected fields {unexpected}\")\n        for key, sub in properties.items():\n            if key in value:\n                validate(value[key], sub, f\"{path}.{key}\")\n    if isinstance(value, list) and \"items\" in schema:\n        for idx, item in enumerate(value):\n            validate(item, schema[\"items\"], f\"{path}[{idx}]\")\n\n\ndef atomic_write(path: Path, content: str) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    fd, tmp_name = tempfile.mkstemp(prefix=path.name + \".\", dir=path.parent)\n    try:\n        with os.fdopen(fd, \"w\") as fh:\n            fh.write(content)\n            fh.flush()\n            os.fsync(fh.fileno())\n        os.replace(tmp_name, path)\n    except Exception:\n        Path(tmp_name).unlink(missing_ok=True)\n        raise\n\n\nclass StateManager:\n    def __init__(self, state_path: Path, schema: dict[str, Any]):\n        self.state_path = state_path\n        self.schema = schema\n\n    def load(self) -> Any:\n        raw = json.loads(self.state_path.read_text())\n        validate(raw, self.schema)\n        return raw\n\n    def commit(self, state: Any) -> None:\n        validate(state, self.schema)\n        atomic_write(self.state_path, json.dumps(state, indent=2) + \"\\n\")\n\n\ndef main() -> None:\n    WORK.mkdir(exist_ok=True)\n    schema_dir = WORK / \"schemas\"\n    schema_dir.mkdir(exist_ok=True)\n    (schema_dir / \"agent_state.schema.json\").write_text(json.dumps(STATE_SCHEMA, indent=2) + \"\\n\")\n    (schema_dir / \"task_board.schema.json\").write_text(json.dumps(BOARD_SCHEMA, indent=2) + \"\\n\")\n\n    state_path = WORK / \"agent_state.json\"\n    board_path = WORK / \"task_board.json\"\n\n    mgr = StateManager(state_path, STATE_SCHEMA)\n    board_mgr = StateManager(board_path, BOARD_SCHEMA)\n\n    initial_state = {\n        \"schema_version\": 1,\n        \"active_task_id\": None,\n        \"touched_files\": [],\n        \"assumptions\": [],\n        \"blockers\": [],\n        \"next_action\": \"pick next task\",\n    }\n    initial_board = [\n        {\n            \"id\": \"T-001\",\n            \"goal\": \"validate /signup payloads\",\n            \"owner\": \"builder\",\n            \"acceptance\": [\"pytest -x test_app.py::test_signup_rejects_short_password\"],\n            \"status\": \"todo\",\n        }\n    ]\n    mgr.commit(initial_state)\n    board_mgr.commit(initial_board)\n\n    state = mgr.load()\n    board = board_mgr.load()\n    state[\"active_task_id\"] = board[0][\"id\"]\n    state[\"next_action\"] = \"read existing /signup handler\"\n    mgr.commit(state)\n\n    print(\"state:\", json.dumps(mgr.load(), indent=2))\n    print(\"board:\", json.dumps(board_mgr.load(), indent=2))\n\n    bad = dict(state)\n    bad[\"active_task_id\"] = \"T-bogus\"\n    try:\n        mgr.commit(bad)\n    except SchemaError as exc:\n        print(\"rejected bad write:\", exc)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the durability test that decides whether a piece of information belongs in repo memory?",
+      "options": [
+        "Whether the user marked it as important",
+        "Whether it would be useful three months from now in a CI rerun; if yes, repo; if no, telemetry",
+        "Whether it is JSON",
+        "Whether it fits in 4 kB"
+      ],
+      "answer": 1,
+      "explanation": "Repo memory is for durable, three-months-from-now-useful state; transient data is telemetry."
+    },
+    {
+      "q": "What schema field carries the agent's contract version?",
+      "options": [
+        "schema_version",
+        "model_id",
+        "session_uuid",
+        "build_hash"
+      ],
+      "answer": 0,
+      "explanation": "schema_version is the integer contract; the manager refuses to load from an unknown version."
+    },
+    {
+      "q": "How does atomic write work?",
+      "options": [
+        "tempfile.mkstemp in the same directory, write, fsync, os.replace (atomic rename) over the target",
+        "Append-only with a CRC",
+        "Encrypt and overwrite",
+        "Truncate-then-write to the target"
+      ],
+      "answer": 0,
+      "explanation": "Atomic rename on POSIX and Windows is what prevents partial-write corruption."
+    },
+    {
+      "q": "Why are idempotency keys required for non-idempotent tool calls?",
+      "options": [
+        "If the agent crashes after a tool call but before checkpointing the result, retry safely; log call ID before execution and skip the call on retry",
+        "To shorten output",
+        "For billing",
+        "To deduplicate logs"
+      ],
+      "answer": 0,
+      "explanation": "pending_calls.jsonl carries the call IDs; recovery checks and skips already-executed work."
+    },
+    {
+      "q": "Where should large artifacts (CSVs, long transcripts, generated files) live relative to state?",
+      "options": [
+        "Concatenated into one giant log",
+        "In environment variables",
+        "Inline in agent_state.json",
+        "As separate files (or object storage) with only the path kept in state, so checkpoints stay small and fast"
+      ],
+      "answer": 3,
+      "explanation": "Separate artifacts grow independently of state; checkpoints stay cheap to read and write."
+    },
+    {
+      "q": "What does event sourcing for audit + snapshots for resume buy you?",
+      "options": [
+        "Replay agent decisions verbatim by reading the snapshot then replaying events after it; same shape as Postgres WAL",
+        "Faster inference",
+        "Lower disk usage",
+        "Native voice support"
+      ],
+      "answer": 0,
+      "explanation": "Append to state.events.jsonl on every mutation; periodically snapshot to state.json; replay events after the snapshot timestamp."
+    },
+    {
+      "q": "What does the lesson say happens when schema_version mismatches?",
+      "options": [
+        "The manager silently upgrades",
+        "The state is deleted",
+        "The agent retries",
+        "The manager refuses to load until a migration script in tools/migrate_state.py runs"
+      ],
+      "answer": 3,
+      "explanation": "Schema migrations or refuse-to-load; never silent upgrade."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/34-repo-memory-and-state"
+  }
+}

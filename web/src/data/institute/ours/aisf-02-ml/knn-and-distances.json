@@ -1,0 +1,17 @@
+{
+  "_note": "Institute's own addition (C7) — a Python bench for this lesson, run in the browser via Pyodide. Never touched by a re-sync of imported/. CC BY-SA 4.0.",
+  "lab": {
+    "lang": "py",
+    "title": "knn.py — bench",
+    "prompt": "k-NN has no training step. To predict, you measure the distance from the new point to every stored point, take the <code>k</code> closest, and let them vote. Implement <code>euclidean(a, b)</code> — the straight-line distance between two equal-length lists of numbers — and <code>knn_predict(points, labels, query, k)</code> — the majority label among the <code>k</code> nearest points.",
+    "starter": "def euclidean(a, b):\n    # sum of squared differences, then square root\n    ...\n\n\ndef knn_predict(points, labels, query, k):\n    # distance from query to every point; take the k nearest; majority vote\n    ...\n\n\npts = [[0, 0], [1, 1], [0, 1], [8, 8], [9, 9], [8, 9]]\nlbls = [\"A\", \"A\", \"A\", \"B\", \"B\", \"B\"]\nprint(knn_predict(pts, lbls, [1, 0], 3))   # near the A cluster -> \"A\"\n",
+    "solution": "import math\nfrom collections import Counter\n\n\ndef euclidean(a, b):\n    return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))\n\n\ndef knn_predict(points, labels, query, k):\n    ranked = sorted(zip(points, labels), key=lambda pl: euclidean(pl[0], query))\n    top = [label for _, label in ranked[:k]]\n    return Counter(top).most_common(1)[0][0]\n\n\npts = [[0, 0], [1, 1], [0, 1], [8, 8], [9, 9], [8, 9]]\nlbls = [\"A\", \"A\", \"A\", \"B\", \"B\", \"B\"]\nprint(knn_predict(pts, lbls, [1, 0], 3))\n",
+    "checks": [
+      { "name": "euclidean([0,0],[3,4]) == 5", "hint": "sqrt of the sum of squared differences", "test": "abs(euclidean([0, 0], [3, 4]) - 5.0) < 1e-9" },
+      { "name": "distance from a point to itself is 0", "hint": "no difference -> distance 0", "test": "euclidean([2, 7, 1], [2, 7, 1]) == 0" },
+      { "name": "knn_predict picks the near cluster (A)", "hint": "sort by distance, take k, majority vote", "test": "knn_predict([[0,0],[1,1],[0,1],[8,8],[9,9],[8,9]], ['A','A','A','B','B','B'], [1, 0], 3) == 'A'" },
+      { "name": "knn_predict works for the far cluster (B) too", "hint": "a query near [8,8] should come back 'B'", "test": "knn_predict([[0,0],[1,1],[0,1],[8,8],[9,9],[8,9]], ['A','A','A','B','B','B'], [8, 7], 3) == 'B'" },
+      { "name": "k=1 returns the single nearest label", "hint": "with k=1 it is just the closest point's label", "test": "knn_predict([[0, 0], [10, 10]], ['near', 'far'], [1, 1], 1) == 'near'" }
+    ]
+  }
+}

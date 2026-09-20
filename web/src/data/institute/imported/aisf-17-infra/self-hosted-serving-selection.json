@@ -1,0 +1,94 @@
+{
+  "id": "aisf-17-infra::self-hosted-serving-selection",
+  "num": 28,
+  "slug": "self-hosted-serving-selection",
+  "title": "Self-Hosted Serving Selection — Matching Engine to Hardware and Scale",
+  "tagline": "Engine selection is a function of hardware, scale, and ecosystem — not a leaderboard read. Four engines dominate self-hosted inference in 2026: llama.cpp, Ollama, vLLM, SGLang, with TGI trailing in maintenance mode. **llama.cpp** is fastest on CPU — widest model support, full control over quantization and threading. **Ollama** is the dev-laptop one-command install, ~15-30% slower than llama.cpp (Go + CGo + HTTP serialization), 3x throughput gap under prod-like load. **TGI entered maintenance mode December 11, 2025** — only bug fixes, ~10% slower raw throughput than vLLM but historically top observability and HF-ecosystem integration. That maintenance status makes it a risky long-term bet — SGLang or vLLM are safer defaults for new projects. **vLLM** is the general-purpose production default — v0.15.1 (February 2026) adds PyTorch 2.10, RTX Blackwell SM120, H200 optimization. **SGLang** is the agentic multi-turn / prefix-heavy specialist — 400,000+ GPUs in production (xAI, LinkedIn, Cursor, Oracle, GCP, Azure, AWS). Hardware constraints: CPU-first → llama.cpp. AMD / non-NVIDIA → vLLM is the strongest-supported path (TRT-LLM is NVIDIA-locked). 2026 pipeline pattern: dev = Ollama, staging = llama.cpp, prod = vLLM or SGLang. The engines take different weight formats — GGUF for the llama.cpp family, HF safetensors for the GPU engines — so a format conversion may sit between stages.",
+  "type": "Learn",
+  "languages": "Python (stdlib, engine-decision tree walker)",
+  "time": "~45 minutes",
+  "objectives": [
+    "Pick an engine given hardware (CPU / AMD / NVIDIA Hopper / Blackwell), scale (1 user / 100 / 10,000), and workload (general chat / agent / long-context).",
+    "Name the 2026 TGI maintenance-mode status (December 11, 2025) and why it biases new projects toward vLLM or SGLang.",
+    "Describe the dev/staging/prod pipeline, including where a GGUF-to-safetensors format conversion sits between stages.",
+    "Explain why \"CPU-first\" points to llama.cpp and \"AMD\" excludes TRT-LLM."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Your team starts a new self-hosted LLM project. One engineer says Ollama, another says vLLM, a third says &quot;doesn&#39;t TGI just work out of the box?&quot; All three are right for different contexts. None is right for all.</p>\n<p>In 2026 the choice tree matters: hardware first, scale second, workload third. And one specific 2025 event — TGI entering maintenance mode December 11 — changes the default for new projects.</p>\n<h2>The Concept</h2>\n<h3>The five engines</h3>\n<table>\n<thead>\n<tr>\n<th>Engine</th>\n<th>Best for</th>\n<th>Notes</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>llama.cpp</strong></td>\n<td>CPU / edge / minimal deps / widest model support</td>\n<td>Fastest on CPU, full control</td>\n</tr>\n<tr>\n<td><strong>Ollama</strong></td>\n<td>Dev laptops, single user, one-command install</td>\n<td>15-30% slower than llama.cpp; 3x prod throughput gap</td>\n</tr>\n<tr>\n<td><strong>TGI</strong></td>\n<td>HF ecosystem, regulated industries</td>\n<td><strong>Maintenance mode Dec 11, 2025</strong></td>\n</tr>\n<tr>\n<td><strong>vLLM</strong></td>\n<td>General-purpose production, 100+ users</td>\n<td>Broad production default; v0.15.1 Feb 2026</td>\n</tr>\n<tr>\n<td><strong>SGLang</strong></td>\n<td>Agentic multi-turn, prefix-heavy workloads</td>\n<td>400,000+ GPUs in production</td>\n</tr>\n</tbody></table>\n<h3>Hardware-first decision</h3>\n<p><strong>CPU-first</strong> → llama.cpp. Ollama works too but is slower. No other engine is competitive on CPU.</p>\n<p><strong>AMD GPU</strong> → vLLM is the strongest-supported path (AMD ROCm support). SGLang also works. TRT-LLM is NVIDIA-locked, so it&#39;s out.</p>\n<p><strong>NVIDIA Hopper (H100 / H200)</strong> → vLLM or SGLang or TRT-LLM. All three top-tier.</p>\n<p><strong>NVIDIA Blackwell (B200 / GB200)</strong> → TRT-LLM is the throughput leader (Phase 17 · 07). vLLM and SGLang follow close.</p>\n<p><strong>Apple Silicon (M-series)</strong> → llama.cpp (Metal). Ollama wraps this.</p>\n<h3>Scale-second decision</h3>\n<p><strong>1 user / local dev</strong> → Ollama. One command, first-token in seconds.</p>\n<p><strong>10-100 users / small team</strong> → vLLM single-GPU.</p>\n<p><strong>100-10k users / production</strong> → vLLM production-stack (Phase 17 · 18) or SGLang.</p>\n<p><strong>10k+ users / enterprise</strong> → vLLM production-stack + disaggregated (Phase 17 · 17) + LMCache (Phase 17 · 18).</p>\n<h3>Workload-third decision</h3>\n<p><strong>General chat / Q&amp;A</strong> → vLLM wins on broad default.</p>\n<p><strong>Agentic multi-turn (tools, planning, memory)</strong> → SGLang&#39;s RadixAttention (Phase 17 · 06) dominates.</p>\n<p><strong>RAG with heavy prefix reuse</strong> → SGLang.</p>\n<p><strong>Code generation</strong> → vLLM fine; SGLang slightly better on cache.</p>\n<p><strong>Long context (128K+)</strong> → vLLM + chunked prefill; SGLang + tiered KV.</p>\n<h3>The TGI maintenance trap</h3>\n<p>Hugging Face TGI entered maintenance mode December 11, 2025 — only bug fixes going forward. Historically: top-tier observability, best-in-class HF-ecosystem integration (model cards, safety tools), slightly behind vLLM on raw throughput.</p>\n<p>For new projects in 2026: default away from TGI. Existing TGI deployments can continue but should migrate eventually. SGLang and vLLM are the safer defaults.</p>\n<h3>The pipeline pattern</h3>\n<p>Dev (Ollama) → staging (llama.cpp) → prod (vLLM). The engines take different weight formats — GGUF for the llama.cpp family, HF safetensors for the GPU engines — so a format conversion may sit between stages. Engineers iterate quickly on laptops; staging mirrors production quantization; prod is the serving target.</p>\n<h3>Ollama caveat</h3>\n<p>Ollama is great for dev. It is not great for shared production: Go HTTP serialization adds overhead, concurrency management is simpler than vLLM, OpenTelemetry support lags. Use Ollama where it shines — one user, one command — and switch to vLLM for shared.</p>\n<h3>Self-hosted vs managed is a separate decision</h3>\n<p>Phase 17 · 01 (managed hyperscalers), · 02 (inference platforms) cover managed. This lesson assumes you&#39;ve already decided to self-host. Reasons to self-host: data residency, custom fine-tune, total cost ownership at scale, domain model not available on hosted.</p>\n<h3>Numbers you should remember</h3>\n<ul>\n<li>TGI maintenance mode: December 11, 2025.</li>\n<li>vLLM v0.15.1: February 2026; PyTorch 2.10; Blackwell SM120 support.</li>\n<li>SGLang production footprint: 400,000+ GPUs.</li>\n<li>Ollama throughput gap vs llama.cpp: 15-30% slower; 3x under prod load.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>data-parallel</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> is a decision-tree walker: given hardware + scale + workload, picks an engine and explains why.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-engine-picker.md</code>. Given constraints, picks an engine and writes the migration plan.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run <code>code/main.py</code> with your hardware / scale / workload. Does the output match your intuition?</li>\n<li>Your infra is 12 H100s and 8 MI300X AMD. What engine? Why is TRT-LLM off the table?</li>\n<li>A team wants to use TGI in 2026 because &quot;it&#39;s what we know.&quot; Argue the migration case.</li>\n<li>Ollama dev to vLLM prod: what changes in quantization, configuration, and observability?</li>\n<li>RAG product with P99 prefix length 8K and high reuse across tenants. Pick an engine and stack it with Phase 17 · 11 + 18.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>llama.cpp</td>\n<td>&quot;the CPU one&quot;</td>\n<td>Widest model support, fastest on CPU</td>\n</tr>\n<tr>\n<td>Ollama</td>\n<td>&quot;the laptop one&quot;</td>\n<td>One-command install, dev-grade throughput</td>\n</tr>\n<tr>\n<td>TGI</td>\n<td>&quot;HF&#39;s serving&quot;</td>\n<td>Maintenance mode since Dec 2025</td>\n</tr>\n<tr>\n<td>vLLM</td>\n<td>&quot;the default&quot;</td>\n<td>Broad production baseline 2026</td>\n</tr>\n<tr>\n<td>SGLang</td>\n<td>&quot;the agentic one&quot;</td>\n<td>Prefix-heavy, RadixAttention</td>\n</tr>\n<tr>\n<td>TRT-LLM</td>\n<td>&quot;NVIDIA-locked&quot;</td>\n<td>Blackwell throughput leader, NVIDIA only</td>\n</tr>\n<tr>\n<td>GGUF</td>\n<td>&quot;llama.cpp format&quot;</td>\n<td>Bundled K-quant variants</td>\n</tr>\n<tr>\n<td>Production-stack</td>\n<td>&quot;vLLM K8s&quot;</td>\n<td>Phase 17 · 18 reference deployment</td>\n</tr>\n<tr>\n<td>Pipeline pattern</td>\n<td>&quot;dev→stage→prod&quot;</td>\n<td>Ollama → llama.cpp → vLLM; weight formats differ per engine</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://www.aimadetools.com/blog/vllm-vs-ollama-vs-llamacpp-vs-tgi/\" target=\"_blank\" rel=\"noopener\">AI Made Tools — vLLM vs Ollama vs llama.cpp vs TGI 2026</a></li>\n<li><a href=\"https://www.morphllm.com/comparisons/llama-cpp-vs-ollama\" target=\"_blank\" rel=\"noopener\">Morph — llama.cpp vs Ollama 2026</a></li>\n<li><a href=\"https://explore.n1n.ai/blog/llm-inference-engine-comparison-vllm-tgi-tensorrt-sglang-2026-03-13\" target=\"_blank\" rel=\"noopener\">n1n.ai — Comprehensive LLM Inference Engine Comparison</a></li>\n<li><a href=\"https://blog.premai.io/10-best-vllm-alternatives-for-llm-inference-in-production-2026/\" target=\"_blank\" rel=\"noopener\">PremAI — 10 Best vLLM Alternatives 2026</a></li>\n<li><a href=\"https://github.com/huggingface/text-generation-inference\" target=\"_blank\" rel=\"noopener\">TGI maintenance announcement</a> — release notes.</li>\n<li><a href=\"https://github.com/vllm-project/vllm/releases\" target=\"_blank\" rel=\"noopener\">vLLM v0.15.1 release notes</a></li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Self-hosted LLM engine decision-tree walker — stdlib Python.\n\nGiven hardware, scale, and workload, pick an engine with explanation.\n\"\"\"\n\nfrom __future__ import annotations\n\n\ndef pick_engine(hardware: str, scale: str, workload: str) -> dict:\n    reasons = []\n    engine = None\n\n    if hardware == \"CPU\":\n        engine = \"llama.cpp\"\n        reasons.append(\"hardware is CPU — only llama.cpp is competitive\")\n        if scale == \"single_user\":\n            reasons.append(\"single-user dev → Ollama wraps llama.cpp with one-command UX\")\n            engine = \"Ollama (llama.cpp under the hood)\"\n    elif hardware == \"Apple Silicon\":\n        engine = \"Ollama\" if scale == \"single_user\" else \"llama.cpp\"\n        reasons.append(\"Apple Silicon → Metal via llama.cpp (Ollama wraps)\")\n    elif hardware == \"AMD\":\n        engine = \"vLLM\"\n        reasons.append(\"AMD → vLLM ROCm support; TRT-LLM is NVIDIA-only\")\n        if \"agentic\" in workload.lower() or \"prefix\" in workload.lower():\n            engine = \"SGLang\"\n            reasons.append(\"agentic / prefix-heavy → SGLang RadixAttention\")\n    elif hardware == \"NVIDIA Hopper\":\n        if \"agentic\" in workload.lower() or \"prefix\" in workload.lower():\n            engine = \"SGLang\"\n            reasons.append(\"Hopper + agentic/prefix → SGLang is the specialist\")\n        elif scale == \"single_user\":\n            engine = \"Ollama\"\n            reasons.append(\"single-user on Hopper is a dev scenario → Ollama is enough\")\n        else:\n            engine = \"vLLM\"\n            reasons.append(\"Hopper production → vLLM is the broad default\")\n    elif hardware == \"NVIDIA Blackwell\":\n        engine = \"TRT-LLM\"\n        reasons.append(\"Blackwell + throughput priority → TRT-LLM leads on B200/GB200\")\n        if scale in (\"small_team\", \"production\") and \"agentic\" not in workload.lower():\n            reasons.append(\"vLLM Blackwell SM120 is a close second (v0.15.1 Feb 2026)\")\n\n    if scale == \"enterprise\":\n        reasons.append(\"10k+ users → stack with production-stack (Phase 17 · 18)\"\n                      \" + disaggregated (Phase 17 · 17) + cache-aware router (Phase 17 · 11)\")\n\n    reasons.append(\"TGI is in maintenance mode since Dec 11, 2025 — default AWAY from TGI for new projects\")\n\n    return {\n        \"hardware\": hardware,\n        \"scale\": scale,\n        \"workload\": workload,\n        \"engine\": engine,\n        \"reasons\": reasons,\n    }\n\n\nSCENARIOS = [\n    (\"CPU\",              \"single_user\",   \"chat\"),\n    (\"Apple Silicon\",    \"single_user\",   \"coding assistant\"),\n    (\"NVIDIA Hopper\",    \"production\",    \"general chat\"),\n    (\"NVIDIA Hopper\",    \"production\",    \"agentic multi-turn\"),\n    (\"NVIDIA Blackwell\", \"enterprise\",    \"MoE frontier serving\"),\n    (\"AMD\",              \"production\",    \"RAG with heavy prefix reuse\"),\n    (\"NVIDIA Hopper\",    \"small_team\",    \"long-context 128K\"),\n]\n\n\ndef main() -> None:\n    print(\"=\" * 80)\n    print(\"SELF-HOSTED ENGINE DECISION TREE — hardware / scale / workload\")\n    print(\"=\" * 80)\n    for hw, sc, wl in SCENARIOS:\n        d = pick_engine(hw, sc, wl)\n        print(f\"\\n[{hw}] [{sc}] [{wl}]\")\n        print(f\"  → engine: {d['engine']}\")\n        for r in d[\"reasons\"]:\n            print(f\"    · {r}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Which engine does the lesson pick as the dev-laptop one-command default?",
+      "options": [
+        "llama.cpp",
+        "vLLM",
+        "TGI",
+        "Ollama"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What 2025 event changes the default away from TGI for new projects?",
+      "options": [
+        "TGI entered maintenance mode on December 11, 2025 — only bug fixes going forward",
+        "TGI dropped CUDA support",
+        "TGI raised prices",
+        "TGI was acquired by Anthropic"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "Which hardware constraint forces llama.cpp and excludes vLLM / TRT-LLM?",
+      "options": [
+        "CPU only (no accelerator)",
+        "AMD MI300X",
+        "NVIDIA Hopper",
+        "Apple M4"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "Which engine does the lesson position for agentic multi-turn and prefix-heavy workloads thanks to RadixAttention?",
+      "options": [
+        "SGLang",
+        "Ollama",
+        "TGI",
+        "llama.cpp"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What dev-to-prod pipeline does the lesson recommend on the same GGUF or HF weights?",
+      "options": [
+        "TGI everywhere",
+        "Ollama in dev and Ollama in prod",
+        "Ollama in dev, llama.cpp in staging, vLLM (or SGLang for prefix-heavy) in prod",
+        "Only TRT-LLM, top to bottom"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "Why is Ollama discouraged for shared production?",
+      "options": [
+        "It cannot load GGUF",
+        "It only runs on Windows",
+        "It is closed source",
+        "Go HTTP serialization adds overhead, concurrency management is simpler than vLLM, and OpenTelemetry support lags"
+      ],
+      "answer": 3,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/17-infrastructure-and-production/28-self-hosted-serving-selection"
+  }
+}

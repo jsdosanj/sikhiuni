@@ -1,0 +1,118 @@
+{
+  "track": "aisf-08-genai",
+  "phaseDir": "08-generative-ai",
+  "blurb": "Create images, video, audio, 3D, and more.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-08-genai::generative-models-taxonomy-history",
+      "num": 1,
+      "slug": "generative-models-taxonomy-history",
+      "title": "Generative Models — Taxonomy & History",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::autoencoders-vae",
+      "num": 2,
+      "slug": "autoencoders-vae",
+      "title": "Autoencoders & Variational Autoencoders (VAE)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::gans-generator-discriminator",
+      "num": 3,
+      "slug": "gans-generator-discriminator",
+      "title": "GANs — Generator vs Discriminator",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::conditional-gans-pix2pix",
+      "num": 4,
+      "slug": "conditional-gans-pix2pix",
+      "title": "Conditional GANs & Pix2Pix",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::stylegan",
+      "num": 5,
+      "slug": "stylegan",
+      "title": "StyleGAN",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::diffusion-ddpm-from-scratch",
+      "num": 6,
+      "slug": "diffusion-ddpm-from-scratch",
+      "title": "Diffusion Models — DDPM from Scratch",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::latent-diffusion-stable-diffusion",
+      "num": 7,
+      "slug": "latent-diffusion-stable-diffusion",
+      "title": "Latent Diffusion & Stable Diffusion",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::controlnet-lora-conditioning",
+      "num": 8,
+      "slug": "controlnet-lora-conditioning",
+      "title": "ControlNet, LoRA & Conditioning",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::inpainting-outpainting-editing",
+      "num": 9,
+      "slug": "inpainting-outpainting-editing",
+      "title": "Inpainting, Outpainting & Image Editing",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::video-generation",
+      "num": 10,
+      "slug": "video-generation",
+      "title": "Video Generation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::audio-generation",
+      "num": 11,
+      "slug": "audio-generation",
+      "title": "Audio Generation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::3d-generation",
+      "num": 12,
+      "slug": "3d-generation",
+      "title": "3D Generation",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::flow-matching-rectified-flows",
+      "num": 13,
+      "slug": "flow-matching-rectified-flows",
+      "title": "Flow Matching & Rectified Flows",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::evaluation-fid-clip-score",
+      "num": 14,
+      "slug": "evaluation-fid-clip-score",
+      "title": "Evaluation — FID, CLIP Score, Human Preference",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-08-genai::visual-autoregressive-var",
+      "num": 19,
+      "slug": "visual-autoregressive-var",
+      "title": "Visual Autoregressive Modeling (VAR): Next-Scale Prediction",
+      "nQuiz": 0
+    }
+  ]
+}

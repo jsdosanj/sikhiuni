@@ -1,0 +1,125 @@
+{
+  "track": "aisf-07-transformers",
+  "phaseDir": "07-transformers-deep-dive",
+  "blurb": "The architecture that changed everything. Understand every layer.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-07-transformers::why-transformers",
+      "num": 1,
+      "slug": "why-transformers",
+      "title": "Why Transformers — The Problems with RNNs",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::self-attention-from-scratch",
+      "num": 2,
+      "slug": "self-attention-from-scratch",
+      "title": "Self-Attention from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-07-transformers::multi-head-attention",
+      "num": 3,
+      "slug": "multi-head-attention",
+      "title": "Multi-Head Attention",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::positional-encoding",
+      "num": 4,
+      "slug": "positional-encoding",
+      "title": "Positional Encoding — Sinusoidal, RoPE, ALiBi",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::full-transformer",
+      "num": 5,
+      "slug": "full-transformer",
+      "title": "The Full Transformer — Encoder + Decoder",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::bert-masked-language-modeling",
+      "num": 6,
+      "slug": "bert-masked-language-modeling",
+      "title": "BERT — Masked Language Modeling",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::gpt-causal-language-modeling",
+      "num": 7,
+      "slug": "gpt-causal-language-modeling",
+      "title": "GPT — Causal Language Modeling",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::t5-bart-encoder-decoder",
+      "num": 8,
+      "slug": "t5-bart-encoder-decoder",
+      "title": "T5, BART — Encoder-Decoder Models",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::vision-transformers",
+      "num": 9,
+      "slug": "vision-transformers",
+      "title": "Vision Transformers (ViT)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::audio-transformers-whisper",
+      "num": 10,
+      "slug": "audio-transformers-whisper",
+      "title": "Audio Transformers — Whisper Architecture",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::mixture-of-experts",
+      "num": 11,
+      "slug": "mixture-of-experts",
+      "title": "Mixture of Experts (MoE)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::kv-cache-flash-attention",
+      "num": 12,
+      "slug": "kv-cache-flash-attention",
+      "title": "KV Cache, Flash Attention & Inference Optimization",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::scaling-laws",
+      "num": 13,
+      "slug": "scaling-laws",
+      "title": "Scaling Laws",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::build-a-transformer-capstone",
+      "num": 14,
+      "slug": "build-a-transformer-capstone",
+      "title": "Build a Transformer from Scratch — The Capstone",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::attention-variants",
+      "num": 15,
+      "slug": "attention-variants",
+      "title": "Attention Variants — Sliding Window, Sparse, Differential",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-07-transformers::speculative-decoding",
+      "num": 16,
+      "slug": "speculative-decoding",
+      "title": "Speculative Decoding — Draft, Verify, Repeat",
+      "nQuiz": 0
+    }
+  ]
+}

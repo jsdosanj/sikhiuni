@@ -1,0 +1,17 @@
+{
+  "_note": "Institute's own addition (C7) — a hands-on bench for this lesson. Never touched by a re-sync of imported/. CC BY-SA 4.0.",
+  "lab": {
+    "lang": "js",
+    "title": "split.js — bench",
+    "prompt": "Before you train a model you split your data: some rows to learn from, the rest held back to test on. Write <code>splitTrainTest(rows, testFraction)</code> so it returns <code>{ train, test }</code> — the last <code>testFraction</code> of the rows go to <code>test</code>, the rest to <code>train</code>. Don't shuffle here; just slice.",
+    "starter": "// rows is an array; testFraction is like 0.2 (the last 20%)\nfunction splitTrainTest(rows, testFraction) {\n  // your code here\n}\n\nconst data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconsole.log(splitTrainTest(data, 0.2));\n",
+    "solution": "function splitTrainTest(rows, testFraction) {\n  const cut = Math.floor(rows.length * (1 - testFraction));\n  return { train: rows.slice(0, cut), test: rows.slice(cut) };\n}\n\nconst data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconsole.log(splitTrainTest(data, 0.2));\n",
+    "checks": [
+      { "name": "splitTrainTest is a function", "hint": "declare function splitTrainTest(rows, testFraction)", "test": "return typeof splitTrainTest === 'function';" },
+      { "name": "returns { train, test } arrays", "hint": "return an object with both keys as arrays", "test": "const r = splitTrainTest([1,2,3,4], 0.5); return Array.isArray(r.train) && Array.isArray(r.test);" },
+      { "name": "20% of 10 rows -> 8 train, 2 test", "hint": "cut at Math.floor(length * (1 - testFraction))", "test": "const r = splitTrainTest([1,2,3,4,5,6,7,8,9,10], 0.2); return r.train.length === 8 && r.test.length === 2;" },
+      { "name": "the test rows are the LAST ones", "hint": "test = rows.slice(cut)", "test": "const r = splitTrainTest([1,2,3,4,5,6,7,8,9,10], 0.2); return r.test[0] === 9 && r.test[1] === 10;" },
+      { "name": "no row is lost or duplicated", "hint": "train.length + test.length should equal rows.length", "test": "const r = splitTrainTest([1,2,3,4,5,6,7], 0.3); return r.train.length + r.test.length === 7;" }
+    ]
+  }
+}

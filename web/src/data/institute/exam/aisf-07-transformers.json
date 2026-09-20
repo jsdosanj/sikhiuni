@@ -1,0 +1,51 @@
+{
+  "track": "aisf-07-transformers",
+  "count": 5,
+  "questions": [
+    {
+      "q": "Why does vanilla self-attention scale the dot product by 1/sqrt(d_k)?",
+      "options": [
+        "To make the output values between 0 and 1",
+        "To normalize the query and key vectors to unit length",
+        "To prevent dot products from growing large in high dimensions, which would push softmax into regions with tiny gradients",
+        "To reduce the computational cost of the matrix multiplication"
+      ]
+    },
+    {
+      "q": "What are the three projections in self-attention?",
+      "options": [
+        "Encoder, decoder, and cross-attention",
+        "Query, key, and value -- each a learned linear projection of the same input",
+        "Embedding, position, and segment",
+        "Input, hidden, and output"
+      ]
+    },
+    {
+      "q": "In multi-head attention with 8 heads and d_model=512, what is the dimension of each head?",
+      "options": [
+        "512 -- each head sees the full dimension",
+        "64 -- d_model is split evenly across heads (512/8=64)",
+        "4096 -- each head expands the representation",
+        "8 -- one dimension per head"
+      ]
+    },
+    {
+      "q": "What does the causal mask in autoregressive attention prevent?",
+      "options": [
+        "It prevents each position from attending to future positions, ensuring the model can only use past context when predicting the next token",
+        "It prevents the model from attending to its own position",
+        "It prevents the model from attending to padding tokens",
+        "It prevents attention weights from becoming too large"
+      ]
+    },
+    {
+      "q": "Why does self-attention have O(n^2) complexity in sequence length n?",
+      "options": [
+        "Because the model has n layers stacked on top of each other",
+        "Because backpropagation through attention requires n^2 gradient computations",
+        "Because the feedforward layers after attention are quadratic",
+        "Because every token computes attention scores with every other token, producing an n x n attention matrix"
+      ]
+    }
+  ]
+}

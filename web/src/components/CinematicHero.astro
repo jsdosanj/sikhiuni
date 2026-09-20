@@ -1,0 +1,266 @@
+---
+// Cinematic scroll-scrubbed hero: a painterly mystic-sage film that scrubs
+// frame-by-frame as the visitor scrolls, with a wordmark + crest reveal beat
+// and a handoff into the existing site nav. Replaces the old static hero
+// header in index.astro; every section below it (Mission, "First of its
+// kind", generational appeal, stats) is untouched real content and stays.
+//
+// Assets are R2-backed, served through the existing /media/ Worker route.
+// That route only serves keys matching ^(santhya|audio|gurbani|media)/, so
+// everything here lives under an R2 key prefix of "media/hero/", hence the
+// doubled "/media/media/hero/..." URL below (first /media/ = the route,
+// second media/hero/ = the R2 key). Upload the contents of
+// r2-upload-staging/hero/ (repo-root-sibling, gitignored, not committed) to
+// the `sikh-university-media` R2 bucket under that same media/hero/ prefix
+// before this renders anything.
+const FRAME_COUNT = 213; // 213 frames @ 24fps, ~8.9s of source footage
+const BASE = "/media/media/hero";
+---
+
+<style>
+  /* Vintage College Dept is registered globally in public/fonts/fonts.css
+     (inlined by Base.astro on every page), no local @font-face needed here. */
+
+  #ch-stage{
+    position:relative;
+    height: 381vh;
+    background:#000;
+    /* cancel #main's nav-clearance padding so the film bleeds to the true
+       top, under the fixed (transparent) nav */
+    margin-top: calc(-65px - env(safe-area-inset-top));
+  }
+  #ch-pin{
+    position:sticky;
+    top:0;
+    height:100vh;
+    width:100%;
+    overflow:hidden;
+    background:#000;
+  }
+  #ch-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #ch-vignette{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(3,6,14,0.55) 100%),
+      linear-gradient(to bottom, rgba(4,8,17,0.75) 0%, rgba(4,8,17,0) 18%, rgba(4,8,17,0) 95%, #0b1e3a 100%);
+  }
+  #ch-grain{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:0.05;
+    mix-blend-mode:overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  #ch-wordmark, #ch-crest{
+    position:absolute;
+    top:50%;
+    left:50%;
+    z-index:6;
+    pointer-events:none;
+    transform: translate(-50%,-50%) scale(0.85);
+    opacity:0;
+    filter: drop-shadow(0 20px 70px rgba(0,0,0,0.75));
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.2,.8,.2,1);
+    will-change: opacity, transform;
+  }
+  #ch-wordmark{ width: clamp(340px, 46vw, 860px); }
+  #ch-crest{ width: clamp(220px, 26vw, 440px); }
+  #ch-wordmark.is-visible, #ch-crest.is-visible{
+    opacity:1;
+    transform: translate(-50%,-50%) scale(1);
+  }
+
+  #ch-scroll-cue{
+    position:absolute;
+    bottom: clamp(22px, 4vw, 44px);
+    left:50%;
+    transform: translateX(-50%);
+    z-index:6;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    color: #ffc83d;
+    font-size:0.68rem;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    opacity:0.85;
+    animation: ch-cue-float 2.6s ease-in-out infinite;
+  }
+  #ch-scroll-cue .line{
+    width:1px;
+    height:34px;
+    background: linear-gradient(to bottom, #ffc83d, transparent);
+  }
+  @keyframes ch-cue-float{
+    0%,100%{ transform: translate(-50%,0); opacity:0.85;}
+    50%{ transform: translate(-50%,8px); opacity:0.4;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #ch-scroll-cue{ animation:none; }
+  }
+</style>
+
+<div id="ch-stage">
+  <div id="ch-pin">
+    <canvas id="ch-canvas"></canvas>
+    <div id="ch-vignette"></div>
+    <div id="ch-grain"></div>
+
+    <img id="ch-crest" src={`${BASE}/crest-icon.png`} alt="Sikhi University crest" />
+    <img id="ch-wordmark" src={`${BASE}/wordmark-reveal.png`} alt="Sikhi University" />
+
+    <div id="ch-scroll-cue">
+      <span data-i18n="home.hero.scroll">Scroll</span>
+      <div class="line"></div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ FRAME_COUNT, BASE }}>
+(function(){
+  "use strict";
+
+  var FRAME_PATH = function(i){
+    return BASE + "/frames/frame_" + String(i).padStart(4, "0") + ".jpg";
+  };
+
+  var canvas = document.getElementById("ch-canvas");
+  var ctx = canvas.getContext("2d", { alpha: false });
+  var pin = document.getElementById("ch-pin");
+  var stage = document.getElementById("ch-stage");
+
+  var frames = new Array(FRAME_COUNT);
+  var loaded = new Array(FRAME_COUNT).fill(false);
+  var currentIndex = 0;
+  var targetIndex = 0;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var WINDOW_RADIUS = 18;
+  var failed = false;
+
+  // If the R2-hosted frame sequence isn't reachable (e.g. not yet uploaded),
+  // fail loudly instead of leaving a blank black 381vh stage: collapse the
+  // stage to nothing and reveal the site nav/content immediately.
+  function fallback(){
+    if (failed) return;
+    failed = true;
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
+    stage.style.height = "0";
+    stage.style.marginTop = "0";
+    pin.style.display = "none";
+  }
+
+  function resizeCanvas(){
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  function loadFrame(i){
+    if (i < 0 || i >= FRAME_COUNT || frames[i]) return;
+    var img = new Image();
+    img.decoding = "async";
+    img.onload = function(){ loaded[i] = true; };
+    img.onerror = function(){ if (i === 0) fallback(); };
+    img.src = FRAME_PATH(i + 1);
+    frames[i] = img;
+  }
+
+  function preloadWindow(center){
+    for (var d = -WINDOW_RADIUS; d <= WINDOW_RADIUS; d++) loadFrame(center + d);
+    // Evict decoded bitmaps outside the window (+ a small margin so the lerp
+    // catch-up in tick() doesn't thrash reload at the edge), otherwise all
+    // 213 frames stay decoded in memory for the life of the page.
+    var evictMargin = WINDOW_RADIUS + 6;
+    for (var i = 0; i < FRAME_COUNT; i++){
+      if (frames[i] && Math.abs(i - center) > evictMargin){
+        frames[i] = undefined;
+        loaded[i] = false;
+      }
+    }
+  }
+
+  function drawFrame(i){
+    i = Math.max(0, Math.min(FRAME_COUNT - 1, i));
+    var img = frames[i];
+    if (!img || !loaded[i]){
+      for (var d = 1; d < FRAME_COUNT; d++){
+        if (loaded[i - d]) { img = frames[i - d]; break; }
+        if (loaded[i + d]) { img = frames[i + d]; break; }
+      }
+    }
+    if (!img) return;
+    var cw = canvas.width, ch = canvas.height;
+    var iw = img.naturalWidth || 1920, ih = img.naturalHeight || 1080;
+    var scale = Math.max(cw / iw, ch / ih);
+    var dw = iw * scale, dh = ih * scale;
+    var dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  }
+
+  function getProgress(){
+    var rect = stage.getBoundingClientRect();
+    var total = stage.offsetHeight - window.innerHeight;
+    if (total <= 0) return 0;
+    var scrolled = -rect.top;
+    return Math.max(0, Math.min(1, scrolled / total));
+  }
+
+  var FILM_SECONDS = FRAME_COUNT / 24;
+  var T_CREST_IN = 2 / FILM_SECONDS;
+  var T_CREST_OUT = 5 / FILM_SECONDS;
+  var T_TITLE_OUT = 8 / FILM_SECONDS;
+  var crestEl = document.getElementById("ch-crest");
+  var wordmarkEl = document.getElementById("ch-wordmark");
+
+  function updateChrome(progress){
+    if (crestEl){
+      crestEl.classList.toggle("is-visible", progress >= T_CREST_IN && progress < T_CREST_OUT);
+    }
+    if (wordmarkEl){
+      wordmarkEl.classList.toggle("is-visible", progress >= T_CREST_OUT && progress < T_TITLE_OUT);
+    }
+  }
+
+  var raf = null;
+  function tick(){
+    raf = null;
+    var p = getProgress();
+    targetIndex = Math.round(p * (FRAME_COUNT - 1));
+    preloadWindow(targetIndex);
+    currentIndex += (targetIndex - currentIndex) * (reduceMotion ? 1 : 0.6);
+    if (Math.abs(targetIndex - currentIndex) < 0.5) currentIndex = targetIndex;
+    drawFrame(Math.round(currentIndex));
+    updateChrome(p);
+    if (Math.round(currentIndex) !== targetIndex) raf = requestAnimationFrame(tick);
+  }
+
+  function onScroll(){ if (!raf) raf = requestAnimationFrame(tick); }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+
+  loadFrame(0);
+  frames[0].onload = function(){
+    loaded[0] = true;
+    drawFrame(0);
+    preloadWindow(0);
+    tick();
+  };
+})();
+</script>

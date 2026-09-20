@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::nli-textual-entailment",
+  "num": 21,
+  "slug": "nli-textual-entailment",
+  "title": "Natural Language Inference — Textual Entailment",
+  "tagline": "\"t entails h\" means a human reading t would conclude h is true. NLI is the task of predicting entailment / contradiction / neutral. Boring on the surface, load-bearing in production.",
+  "type": "Learn",
+  "languages": "Python",
+  "time": "~60 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>You built a summarizer. It produced a summary. How do you know the summary does not contain a hallucination?</p>\n<p>You built a chatbot. It answered &quot;yes.&quot; How do you know the answer is supported by the retrieved passage?</p>\n<p>You need to classify 10,000 news articles by topic. You have no training labels. Can you reuse a model?</p>\n<p>All three problems reduce to Natural Language Inference. NLI asks: given a premise <code>t</code> and a hypothesis <code>h</code>, is <code>h</code> entailed by <code>t</code>, contradicted, or neutral (unrelated)?</p>\n<ul>\n<li><strong>Hallucination check:</strong> <code>t</code> = source document, <code>h</code> = summary claim. Not entailment = hallucination.</li>\n<li><strong>Grounded QA:</strong> <code>t</code> = retrieved passage, <code>h</code> = generated answer. Not entailment = fabrication.</li>\n<li><strong>Zero-shot classification:</strong> <code>t</code> = document, <code>h</code> = verbalized label (&quot;This is about sports&quot;). Entailment = predicted label.</li>\n</ul>\n<p>One task, three production uses. This is why every RAG evaluation framework ships an NLI model under the hood.</p>\n<h2>The Concept</h2>\n<figure class=\"i-lesson-fig\"><img src=\"/technology-figures/nli.svg\" alt=\"NLI: three-way classification, premise vs hypothesis\" loading=\"lazy\"><figcaption>NLI: three-way classification, premise vs hypothesis</figcaption></figure>\n<p><strong>The three labels.</strong></p>\n<ul>\n<li><strong>Entailment.</strong> <code>t</code> → <code>h</code>. &quot;The cat is on the mat&quot; entails &quot;There is a cat.&quot;</li>\n<li><strong>Contradiction.</strong> <code>t</code> → ¬<code>h</code>. &quot;The cat is on the mat&quot; contradicts &quot;There is no cat.&quot;</li>\n<li><strong>Neutral.</strong> No inference either way. &quot;The cat is on the mat&quot; is neutral to &quot;The cat is hungry.&quot;</li>\n</ul>\n<p><strong>Not logical entailment.</strong> NLI is <em>natural</em> language inference — what a typical human reader would infer, not strict logic. &quot;John walked his dog&quot; entails &quot;John has a dog&quot; in NLI, but strict first-order logic would only admit it if you axiomatize possession.</p>\n<p><strong>Datasets.</strong></p>\n<ul>\n<li><strong>SNLI</strong> (2015). 570k human-annotated pairs, image captions as premises. Narrow domain.</li>\n<li><strong>MultiNLI</strong> (2017). 433k pairs across 10 genres. The standard training corpus in 2026.</li>\n<li><strong>ANLI</strong> (2019). Adversarial NLI. Humans wrote examples specifically designed to break existing models. Harder.</li>\n<li><strong>DocNLI, ConTRoL</strong> (2020–21). Document-length premises. Tests multi-hop and long-range inference.</li>\n</ul>\n<p><strong>The architecture.</strong> A transformer encoder (BERT, RoBERTa, DeBERTa) reads <code>[CLS] premise [SEP] hypothesis [SEP]</code>. The <code>[CLS]</code> representation feeds a 3-way softmax. Train on MNLI, evaluate on held-out benchmarks, get 90%+ accuracy on in-distribution pairs.</p>\n<p><strong>Zero-shot via NLI.</strong> Given a document and candidate labels, turn each label into a hypothesis (&quot;This text is about sports&quot;). Compute entailment probability for each. Pick the max. This is the mechanism behind Hugging Face&#39;s <code>zero-shot-classification</code> pipeline.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>nli-router</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: run a pretrained NLI model</h3>\n<pre><code class=\"language-python\">from transformers import pipeline\n\nnli = pipeline(&quot;text-classification&quot;,\n               model=&quot;facebook/bart-large-mnli&quot;,\n               top_k=None)  # return all labels; replaces deprecated return_all_scores=True\n\npremise = &quot;The cat is sleeping on the couch.&quot;\nhypothesis = &quot;There is a cat in the room.&quot;\n\nresult = nli({&quot;text&quot;: premise, &quot;text_pair&quot;: hypothesis})[0]\nprint(result)\n# [{&#39;label&#39;: &#39;entailment&#39;, &#39;score&#39;: 0.97},\n#  {&#39;label&#39;: &#39;neutral&#39;, &#39;score&#39;: 0.02},\n#  {&#39;label&#39;: &#39;contradiction&#39;, &#39;score&#39;: 0.01}]\n</code></pre>\n<p>For production NLI, <code>facebook/bart-large-mnli</code> and <code>microsoft/deberta-v3-large-mnli</code> are the open defaults. DeBERTa-v3 tops leaderboards.</p>\n<h3>Step 2: zero-shot classification</h3>\n<pre><code class=\"language-python\">zs = pipeline(&quot;zero-shot-classification&quot;, model=&quot;facebook/bart-large-mnli&quot;)\n\ntext = &quot;The stock market rallied after the central bank cut interest rates.&quot;\nlabels = [&quot;finance&quot;, &quot;sports&quot;, &quot;politics&quot;, &quot;technology&quot;]\n\nresult = zs(text, candidate_labels=labels)\nprint(result)\n# {&#39;labels&#39;: [&#39;finance&#39;, &#39;politics&#39;, &#39;technology&#39;, &#39;sports&#39;],\n#  &#39;scores&#39;: [0.92, 0.05, 0.02, 0.01]}\n</code></pre>\n<p>The template is &quot;This example is about {label}.&quot; by default. Customize with <code>hypothesis_template</code>. No training data required. No fine-tuning. Works out of the box.</p>\n<h3>Step 3: faithfulness check for RAG</h3>\n<pre><code class=\"language-python\">def is_faithful(answer, context, threshold=0.5):\n    result = nli({&quot;text&quot;: context, &quot;text_pair&quot;: answer})[0]\n    entail = next(s for s in result if s[&quot;label&quot;] == &quot;entailment&quot;)\n    return entail[&quot;score&quot;] &gt; threshold\n</code></pre>\n<p>This is the core of RAGAS faithfulness. Split the generated answer into atomic claims. Check each claim against the retrieved context. Report the fraction that entail.</p>\n<h3>Step 4: hand-rolled NLI classifier (conceptual)</h3>\n<p>See <code>code/main.py</code> for a stdlib-only toy: premise and hypothesis are compared via lexical overlap + negation detection. Not competitive with transformer models — but it shows the shape of the task: two texts in, 3-way label out, loss = cross-entropy over <code>{entail, contradict, neutral}</code>.</p>\n<h2>Pitfalls</h2>\n<ul>\n<li><strong>Hypothesis-only shortcuts.</strong> Models can predict the label from the hypothesis alone at ~60% on SNLI because &quot;not&quot;, &quot;nobody&quot;, &quot;never&quot; correlate with contradiction. Strong baseline for detecting label leakage.</li>\n<li><strong>Lexical overlap heuristic.</strong> The subsequence heuristic (&quot;every subsequence is entailed&quot;) passes SNLI but fails HANS/ANLI. Use adversarial benchmarks.</li>\n<li><strong>Document-length degradation.</strong> Single-sentence NLI models drop 20+ F1 on document-length premises. Use DocNLI-trained models for long context.</li>\n<li><strong>Zero-shot template sensitivity.</strong> &quot;This example is about {label}&quot; vs &quot;{label}&quot; vs &quot;The topic is {label}&quot; can swing accuracy by 10+ points. Tune the template.</li>\n<li><strong>Domain mismatch.</strong> MNLI trains on general English. Legal, medical, and scientific text need domain-specific NLI models (e.g., SciNLI, MedNLI).</li>\n</ul>\n<h2>Use It</h2>\n<p>The 2026 stack:</p>\n<table>\n<thead>\n<tr>\n<th>Use case</th>\n<th>Model</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>General-purpose NLI</td>\n<td><code>microsoft/deberta-v3-large-mnli</code></td>\n</tr>\n<tr>\n<td>Fast / edge</td>\n<td><code>cross-encoder/nli-deberta-v3-base</code></td>\n</tr>\n<tr>\n<td>Zero-shot classification (lightweight)</td>\n<td><code>facebook/bart-large-mnli</code></td>\n</tr>\n<tr>\n<td>Document-level NLI</td>\n<td><code>MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli</code></td>\n</tr>\n<tr>\n<td>Multilingual</td>\n<td><code>MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli</code></td>\n</tr>\n<tr>\n<td>Hallucination detection in RAG</td>\n<td>NLI layer inside RAGAS / DeepEval</td>\n</tr>\n</tbody></table>\n<p>The 2026 meta-pattern: NLI is the duct tape of text understanding. Whenever you need &quot;does A support B?&quot; or &quot;does A contradict B?&quot; — reach for NLI before you reach for another LLM call.</p>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-nli-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: nli-picker\ndescription: Pick an NLI model, label template, and evaluation setup for a classification / faithfulness / zero-shot task.\nversion: 1.0.0\nphase: 5\nlesson: 21\ntags: [nlp, nli, zero-shot]\n---\n\nGiven a use case (faithfulness check, zero-shot classification, document-level inference), output:\n\n1. Model. Named NLI checkpoint. Reason tied to domain, length, language.\n2. Template (if zero-shot). Verbalization pattern. Example.\n3. Threshold. Entailment cutoff for the decision rule. Reason based on calibration.\n4. Evaluation. Accuracy on held-out labeled set, hypothesis-only baseline, adversarial subset.\n\nRefuse to ship zero-shot classification without a 100-example labeled sanity check. Refuse to use a sentence-level NLI model on document-length premises. Flag any claim that NLI solves hallucination — it reduces it; it does not eliminate it.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Run <code>facebook/bart-large-mnli</code> on 20 hand-crafted (premise, hypothesis, label) triples covering all three classes. Measure accuracy. Add adversarial &quot;subsequence heuristic&quot; traps (&quot;I did not eat the cake&quot; vs &quot;I ate the cake&quot;) and see if it breaks.</li>\n<li><strong>Medium.</strong> Compare the zero-shot template <code>&quot;This text is about {label}&quot;</code> against <code>&quot;The topic is {label}&quot;</code> and <code>&quot;{label}&quot;</code> on 100 AG News headlines. Report accuracy swing.</li>\n<li><strong>Hard.</strong> Build a RAG faithfulness checker: atomic-claim decomposition + NLI per claim. Evaluate on 50 RAG-generated answers with gold context. Measure false-positive and false-negative rates vs hand labels.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>NLI</td>\n<td>Natural Language Inference</td>\n<td>3-way classification of premise-hypothesis relationship.</td>\n</tr>\n<tr>\n<td>RTE</td>\n<td>Recognizing Textual Entailment</td>\n<td>Older name for NLI; same task.</td>\n</tr>\n<tr>\n<td>Entailment</td>\n<td>&quot;t implies h&quot;</td>\n<td>A typical reader would conclude h is true given t.</td>\n</tr>\n<tr>\n<td>Contradiction</td>\n<td>&quot;t rules out h&quot;</td>\n<td>A typical reader would conclude h is false given t.</td>\n</tr>\n<tr>\n<td>Neutral</td>\n<td>&quot;undecided&quot;</td>\n<td>No inference from t to h either way.</td>\n</tr>\n<tr>\n<td>Zero-shot classification</td>\n<td>NLI as classifier</td>\n<td>Verbalize labels as hypotheses, pick max entailment.</td>\n</tr>\n<tr>\n<td>Faithfulness</td>\n<td>Is the answer supported?</td>\n<td>NLI over (retrieved context, generated answer).</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/1508.05326\" target=\"_blank\" rel=\"noopener\">Bowman et al. (2015). A large annotated corpus for learning natural language inference</a> — SNLI.</li>\n<li><a href=\"https://arxiv.org/abs/1704.05426\" target=\"_blank\" rel=\"noopener\">Williams, Nangia, Bowman (2017). A Broad-Coverage Challenge Corpus for Sentence Understanding through Inference</a> — MultiNLI.</li>\n<li><a href=\"https://arxiv.org/abs/1910.14599\" target=\"_blank\" rel=\"noopener\">Nie et al. (2019). Adversarial NLI</a> — the ANLI benchmark.</li>\n<li><a href=\"https://arxiv.org/abs/1909.00161\" target=\"_blank\" rel=\"noopener\">Yin, Hay, Roth (2019). Benchmarking Zero-shot Text Classification</a> — NLI-as-classifier.</li>\n<li><a href=\"https://arxiv.org/abs/2006.03654\" target=\"_blank\" rel=\"noopener\">He et al. (2021). DeBERTa: Decoding-enhanced BERT with Disentangled Attention</a> — the 2026 NLI workhorse.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\nfrom collections import Counter\n\n\nNEGATIONS = {\"not\", \"no\", \"never\", \"nobody\", \"nothing\", \"neither\", \"nor\", \"none\", \"without\"}\nSTOP = {\"a\", \"an\", \"the\", \"is\", \"are\", \"was\", \"were\", \"be\", \"been\", \"being\",\n        \"of\", \"in\", \"on\", \"at\", \"to\", \"for\", \"with\", \"by\", \"as\", \"and\", \"or\", \"but\",\n        \"there\", \"this\", \"that\", \"these\", \"those\", \"it\", \"its\", \"i\", \"he\", \"she\", \"we\", \"they\",\n        \"do\", \"does\", \"did\", \"has\", \"have\", \"had\", \"will\", \"would\", \"could\", \"should\"}\n\n\ndef tokenize(text):\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\ndef content_words(tokens):\n    return [t for t in tokens if t not in STOP and t not in NEGATIONS]\n\n\ndef has_negation(tokens):\n    return any(t in NEGATIONS for t in tokens)\n\n\ndef lexical_overlap(prem_tokens, hyp_tokens):\n    p_content = content_words(prem_tokens)\n    h_content = content_words(hyp_tokens)\n    if not h_content:\n        return 0.0\n    p_set = set(p_content)\n    covered = sum(1 for t in h_content if t in p_set)\n    return covered / len(h_content)\n\n\ndef predict_nli(premise, hypothesis):\n    p_tokens = tokenize(premise)\n    h_tokens = tokenize(hypothesis)\n\n    overlap = lexical_overlap(p_tokens, h_tokens)\n    p_neg = has_negation(p_tokens)\n    h_neg = has_negation(h_tokens)\n\n    if overlap >= 0.5 and p_neg != h_neg:\n        return \"contradiction\", overlap\n    if overlap >= 0.5:\n        return \"entailment\", overlap\n    if overlap > 0 and p_neg != h_neg:\n        return \"contradiction\", overlap\n    return \"neutral\", overlap\n\n\ndef evaluate(examples):\n    correct = 0\n    confusion = Counter()\n    for premise, hypothesis, gold in examples:\n        pred, conf = predict_nli(premise, hypothesis)\n        ok = pred == gold\n        correct += int(ok)\n        confusion[(gold, pred)] += 1\n        tag = \"  OK\" if ok else \"MISS\"\n        print(f\"  [{tag}] gold={gold:<13} pred={pred:<13} conf={conf:.2f}\")\n        print(f\"         p: {premise}\")\n        print(f\"         h: {hypothesis}\")\n    return correct, len(examples), confusion\n\n\ndef main():\n    examples = [\n        (\"A cat is sleeping on the couch.\", \"There is a cat in the room.\", \"entailment\"),\n        (\"A cat is sleeping on the couch.\", \"There is no cat in the room.\", \"contradiction\"),\n        (\"A cat is sleeping on the couch.\", \"The dog chased the ball.\", \"neutral\"),\n        (\"John walked his dog in the park.\", \"John has a dog.\", \"entailment\"),\n        (\"John walked his dog in the park.\", \"John has no dog.\", \"contradiction\"),\n        (\"John walked his dog in the park.\", \"John lives in New York.\", \"neutral\"),\n        (\"The stock market rallied today.\", \"Stocks went up today.\", \"entailment\"),\n        (\"The stock market rallied today.\", \"Stocks did not move today.\", \"contradiction\"),\n        (\"The chef served a tasty meal.\", \"The chef prepared food.\", \"entailment\"),\n        (\"The chef served a tasty meal.\", \"The chef never cooked anything.\", \"contradiction\"),\n        (\"She finished the marathon in three hours.\", \"She ran a marathon.\", \"entailment\"),\n        (\"Birds were singing outside the window.\", \"The room was silent.\", \"neutral\"),\n    ]\n\n    print(\"=== toy NLI classifier (lexical overlap + negation) ===\")\n    print()\n    correct, total, confusion = evaluate(examples)\n    print()\n    print(f\"accuracy: {correct}/{total} ({100 * correct / total:.1f}%)\")\n    print()\n    print(\"confusion (gold -> pred):\")\n    for (gold, pred), count in sorted(confusion.items()):\n        print(f\"  {gold:<14} -> {pred:<14}  {count}\")\n    print()\n    print(\"note: this classifier exploits two shallow features.\")\n    print(\"production NLI uses DeBERTa-v3-MNLI at ~91% on MNLI-matched.\")\n    print(\"the shape of the task — (premise, hypothesis) -> label — stays identical.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What three labels does NLI assign to a (premise, hypothesis) pair?",
+      "options": [
+        "True / false / unknown",
+        "Cause / effect / unrelated",
+        "Entailment / contradiction / neutral",
+        "Positive / negative / neutral"
+      ],
+      "answer": 2,
+      "explanation": "NLI is a 3-way classification over entailment, contradiction, and neutral."
+    },
+    {
+      "q": "How is NLI used as a zero-shot text classifier?",
+      "options": [
+        "By prompting an LLM",
+        "Verbalize each candidate label as a hypothesis (e.g. 'This text is about sports') and pick the label with the highest entailment score",
+        "By computing TF-IDF",
+        "By averaging embeddings"
+      ],
+      "answer": 1,
+      "explanation": "NLI-as-classifier turns labels into hypotheses; the model picks the max-entailment label."
+    },
+    {
+      "q": "Why is NLI a faithfulness check for RAG outputs?",
+      "options": [
+        "It is cheap",
+        "Checking whether the retrieved context entails each answer claim is exactly the formulation NLI was trained on",
+        "It is multilingual",
+        "It uses tokenizers"
+      ],
+      "answer": 1,
+      "explanation": "Hallucination = answer claims not entailed by retrieved context; NLI directly measures entailment."
+    },
+    {
+      "q": "What does the hypothesis-only baseline expose?",
+      "options": [
+        "Tokenizer drift",
+        "Slow inference",
+        "Multilingual gaps",
+        "Datasets where the hypothesis alone (without the premise) is predictive of the label, signalling label leakage"
+      ],
+      "answer": 3,
+      "explanation": "A high hypothesis-only score on SNLI revealed annotation artifacts; useful for debugging your data."
+    },
+    {
+      "q": "Which NLI model family tops 2026 leaderboards as the standard workhorse?",
+      "options": [
+        "DeBERTa-v3 variants fine-tuned on MNLI/FEVER/ANLI",
+        "Plain Word2Vec",
+        "GPT-2",
+        "fastText"
+      ],
+      "answer": 0,
+      "explanation": "DeBERTa-v3 fine-tuned on MNLI and related corpora is the open NLI workhorse in 2026."
+    },
+    {
+      "q": "Why do sentence-level NLI models drop accuracy on document-length premises?",
+      "options": [
+        "They were trained on short premises and fail at multi-sentence and multi-hop inference; DocNLI-tuned models handle longer inputs",
+        "Larger inputs run slower",
+        "Cosine similarity decays",
+        "Documents trigger tokenizer drift"
+      ],
+      "answer": 0,
+      "explanation": "Training distribution mismatch: single-sentence NLI models lose 20+ F1 on document-length inputs."
+    },
+    {
+      "q": "Why can zero-shot accuracy swing 10+ points based on the hypothesis template?",
+      "options": [
+        "Templates change the label set",
+        "Models are sensitive to phrasing; e.g. 'This text is about {label}' vs '{label}' alone shifts entailment probabilities",
+        "Templates change tokenizer behavior",
+        "Templates affect model weights"
+      ],
+      "answer": 1,
+      "explanation": "Template wording materially shifts entailment scores; tune it on a small held-out set."
+    },
+    {
+      "q": "What is a safe limit to claim about NLI for hallucination detection?",
+      "options": [
+        "It reduces hallucination as a faithfulness signal but does not eliminate it; combine with retrieval recall and human review",
+        "It only works on English",
+        "It eliminates hallucination",
+        "It requires LLMs"
+      ],
+      "answer": 0,
+      "explanation": "NLI is a useful signal but not a complete solution; pair with retrieval metrics and human spot-checks."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/21-nli-textual-entailment"
+  }
+}

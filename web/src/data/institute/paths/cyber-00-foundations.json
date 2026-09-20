@@ -1,0 +1,89 @@
+{
+  "track": "cyber-00-foundations",
+  "school": "cyber",
+  "blurb": "Before red or blue: what a network actually does, how Linux answers to a shell, what the CIA triad buys you, and how to research a target you have never seen.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-09",
+  "adaptedFrom": {
+    "name": "Awesome Cyber Security University",
+    "href": "https://brootware.github.io/awesome-cyber-security-university/",
+    "license": "CC0-1.0",
+    "note": "Module sequencing follows the CC0 pre-security roadmap. Objectives, teaching notes, and framing are written by Sikhi University. No lab content is rehosted — every lab opens on the platform that runs it."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "how-the-work-is-done",
+      "title": "How security work is actually done",
+      "objective": "Describe what a penetration test, a red team engagement, and a blue team shift each involve, and say which one you want to try first.",
+      "teach": "Most people arrive at security with a picture drawn by television: one person, one dark room, one keyboard. The real discipline is closer to an audit than a heist — scoped, documented, and answerable to somebody. Start here so that every tool you meet later has a job you can name. If you cannot say who authorised the work and what the report will say, you are not doing security; you are trespassing.",
+      "labs": [
+        { "title": "Welcome", "provider": "TryHackMe", "href": "https://tryhackme.com/jr/welcome", "cost": "free · account" },
+        { "title": "Pentesting Fundamentals", "provider": "TryHackMe", "href": "https://tryhackme.com/room/pentestingfundamentals", "cost": "free · account" },
+        { "title": "Principles of Security", "provider": "TryHackMe", "href": "https://tryhackme.com/room/principlesofsecurity", "cost": "free · account" },
+        { "title": "Red Team Engagements", "provider": "TryHackMe", "href": "https://tryhackme.com/room/redteamengagements", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "the-shell",
+      "title": "The shell, and the machine underneath it",
+      "objective": "Move around a Linux filesystem, read and edit files, manage permissions and processes, and understand what a shell prompt is telling you.",
+      "teach": "Nearly every tool in this school is a program you type. The shell is not a hurdle in front of the interesting part — it is the interesting part, and fluency here is what separates someone following a walkthrough from someone doing the work. Three progressive rooms take you from `ls` to permissions, processes, and services. Do them in order and repeat the commands until they stop needing a reference.",
+      "labs": [
+        { "title": "Linux Fundamentals, Part 1", "provider": "TryHackMe", "href": "https://tryhackme.com/room/linuxfundamentalspart1", "cost": "free · account" },
+        { "title": "Linux Fundamentals, Part 2", "provider": "TryHackMe", "href": "https://tryhackme.com/room/linuxfundamentalspart2", "cost": "free · account" },
+        { "title": "Linux Fundamentals, Part 3", "provider": "TryHackMe", "href": "https://tryhackme.com/room/linuxfundamentalspart3", "cost": "free · account" },
+        { "title": "Practice Linux Commands", "provider": "LabEx", "href": "https://labex.io/courses/linux-basic-commands-practice-online", "cost": "free tier" }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "reaching-the-lab",
+      "title": "Reaching the lab safely",
+      "objective": "Connect to a training network over a VPN, and keep practice traffic isolated from the machine you do your banking on.",
+      "teach": "Every range in this school hands you a deliberately vulnerable machine. That is only safe while it stays on the far side of a tunnel and away from your home network. Learn the connection before you learn the attacks: a VPN profile, a virtual machine you can throw away, and the discipline of never pointing a tool at an address you were not given.",
+      "labs": [
+        { "title": "OpenVPN", "provider": "TryHackMe", "href": "https://tryhackme.com/room/openvpn", "cost": "free · account" },
+        { "title": "Hip Flask", "provider": "TryHackMe", "href": "https://tryhackme.com/room/hipflask", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "research",
+      "title": "Research: the skill nobody teaches",
+      "objective": "Take a service name and a version number and find, within minutes, whether it is vulnerable and what that means.",
+      "teach": "No practitioner remembers every vulnerability. What they have is a reliable route from an unfamiliar banner to a credible answer — advisories, changelogs, the CVE record, and someone's write-up. This module is deliberately early, because it is the skill that carries you through every module after it. Read search results the way you would read a citation: check the date, check who wrote it, and check whether it matches the version in front of you.",
+      "labs": [
+        { "title": "Intro to Researching", "provider": "TryHackMe", "href": "https://tryhackme.com/room/introtoresearch", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 5,
+      "slug": "open-sources",
+      "title": "What the open internet already knows",
+      "objective": "Use search operators, image and metadata inspection, and an internet-wide scanner to assemble a public profile of a target.",
+      "teach": "Open-source intelligence is the first phase of most real engagements and the last thing most organisations think to check. A photograph carries coordinates; a job advert names the firewall; an internet-wide scanner has already catalogued the exposed service. This module has an obvious second reading for us: the same techniques show what a gurdwara's website, or a student's own posts, are quietly publishing.",
+      "labs": [
+        { "title": "Google Dorking", "provider": "TryHackMe", "href": "https://tryhackme.com/room/googledorking", "cost": "free · account" },
+        { "title": "OhSINT", "provider": "TryHackMe", "href": "https://tryhackme.com/room/ohsint", "cost": "free · account" },
+        { "title": "Shodan.io", "provider": "TryHackMe", "href": "https://tryhackme.com/room/shodan", "cost": "free · account" }
+      ]
+    },
+    {
+      "num": 6,
+      "slug": "choosing-a-side",
+      "title": "Choosing a side — for now",
+      "objective": "Decide whether to take the defence path or the offence path next, knowing you will eventually want both.",
+      "teach": "The school splits here into blue and red. Blue is where most of the jobs are — a security operations centre, a forensics bench, an incident to run down before dawn. Red is where most of the beginners want to start, and it teaches you what blue is defending against. The honest advice: if you want employment, go blue first; if you want to stay awake, go red first; if you want to be good, come back and do the other one.",
+      "labs": [
+        { "title": "Blue Team — Defence & Response", "provider": "Sikhi University", "href": "/technology/track/01-blue-team-defence", "cost": "free" },
+        { "title": "Red Team — Offensive Security", "provider": "Sikhi University", "href": "/technology/track/02-red-team-offence", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "SANS free security resources", "provider": "SANS Institute", "href": "https://www.sans.org/security-resources/download", "note": "Posters, cheat sheets, and policy templates. Free to download, copyright SANS, licensed for non-commercial use — read them there, do not redistribute." },
+    { "title": "The ultimate list of SANS cheat sheets", "provider": "SANS Institute", "href": "https://www.sans.org/blog/the-ultimate-list-of-sans-cheat-sheets", "note": "The index worth bookmarking on day one." }
+  ]
+}

@@ -1,0 +1,591 @@
+{
+  "track": "aisf-03-deep-learning",
+  "count": 65,
+  "questions": [
+    {
+      "q": "What mathematical operation does a perceptron perform on its inputs before applying the activation function?",
+      "options": [
+        "Weighted sum plus bias",
+        "Eigenvalue decomposition",
+        "Matrix inversion",
+        "Fourier transform"
+      ]
+    },
+    {
+      "q": "What does 'linearly separable' mean for a classification problem?",
+      "options": [
+        "A single straight line (or hyperplane) can perfectly separate the classes",
+        "The data can be sorted in order",
+        "The features have a linear relationship with the label",
+        "The data has only two dimensions"
+      ]
+    },
+    {
+      "q": "Why does a single perceptron fail to learn the XOR function?",
+      "options": [
+        "The step function prevents gradient flow",
+        "XOR has too many inputs",
+        "The learning rate is too low",
+        "XOR is not linearly separable -- no single line can separate the classes"
+      ]
+    },
+    {
+      "q": "In the perceptron learning rule, what happens when the prediction matches the target?",
+      "options": [
+        "Nothing changes -- error is zero so the update is zero",
+        "The learning rate is halved",
+        "Weights are set to zero",
+        "Weights are doubled"
+      ]
+    },
+    {
+      "q": "How is XOR solved using multiple perceptrons?",
+      "options": [
+        "By adding more inputs to a single perceptron",
+        "By removing the bias term",
+        "By using a larger learning rate on a single perceptron",
+        "By combining OR, NAND, and AND perceptrons in two layers"
+      ]
+    },
+    {
+      "q": "What is the purpose of a hidden layer in a multi-layer network?",
+      "options": [
+        "To transform inputs into new feature representations that enable nonlinear decision boundaries",
+        "To apply the loss function",
+        "To reduce the number of parameters",
+        "To store the training data"
+      ]
+    },
+    {
+      "q": "What does the forward pass do in a neural network?",
+      "options": [
+        "Computes gradients for backpropagation",
+        "Shuffles the training data",
+        "Updates the weights using gradients",
+        "Pushes input through each layer to produce an output"
+      ]
+    },
+    {
+      "q": "For a layer with 3 neurons receiving input from 2 neurons, what is the shape of the weight matrix?",
+      "options": [
+        "(2, 3)",
+        "(3, 2)",
+        "(2, 2)",
+        "(3, 3)"
+      ]
+    },
+    {
+      "q": "What does the Universal Approximation Theorem guarantee?",
+      "options": [
+        "Neural networks can solve any computational problem",
+        "A single hidden layer with enough neurons can approximate any continuous function",
+        "Deeper networks always outperform shallow ones",
+        "Any network can be trained in polynomial time"
+      ]
+    },
+    {
+      "q": "Why does the sigmoid activation function make learning possible, unlike the step function used in perceptrons?",
+      "options": [
+        "Sigmoid outputs larger values",
+        "Sigmoid is faster to compute",
+        "Sigmoid is smooth and differentiable everywhere, so gradients exist for backpropagation",
+        "Sigmoid outputs negative values"
+      ]
+    },
+    {
+      "q": "What is the chain rule in the context of neural networks?",
+      "options": [
+        "A technique for batching data",
+        "A method for initializing weights",
+        "A rule for chaining layers together",
+        "If y = f(g(x)), then dy/dx = f'(g(x)) * g'(x) -- multiply derivatives along the path"
+      ]
+    },
+    {
+      "q": "Why is backpropagation more efficient than computing each gradient independently?",
+      "options": [
+        "It uses less memory",
+        "It computes all gradients in a single backward pass instead of one forward pass per parameter",
+        "It only works on small networks",
+        "It avoids using the chain rule"
+      ]
+    },
+    {
+      "q": "In the backward pass, why do we use '+=' instead of '=' when accumulating gradients?",
+      "options": [
+        "It's a Python convention",
+        "A value might be used in multiple operations, so its gradient is the sum of gradients from all paths",
+        "It makes the code run faster",
+        "It prevents overflow"
+      ]
+    },
+    {
+      "q": "What causes the vanishing gradient problem in deep sigmoid networks?",
+      "options": [
+        "The loss function is poorly chosen",
+        "The network has too many parameters",
+        "The learning rate is too small",
+        "Sigmoid's derivative has a maximum of 0.25, so gradients shrink exponentially through layers"
+      ]
+    },
+    {
+      "q": "Why does topological sort matter in the backward pass?",
+      "options": [
+        "It reduces memory usage",
+        "It speeds up the forward pass",
+        "It ensures each node's gradient is fully accumulated before propagating to its children",
+        "It makes the code cleaner"
+      ]
+    },
+    {
+      "q": "Why can't you build a useful deep network using only linear layers (no activation functions)?",
+      "options": [
+        "Stacking linear layers collapses to a single linear transformation, giving no benefit from depth",
+        "Linear layers are too slow",
+        "Linear layers can't handle batched data",
+        "Linear layers don't have biases"
+      ]
+    },
+    {
+      "q": "What is the output range of the ReLU activation function?",
+      "options": [
+        "(-infinity, infinity)",
+        "[0, infinity)",
+        "(0, 1)",
+        "(-1, 1)"
+      ]
+    },
+    {
+      "q": "What is the 'dead neuron' problem in ReLU networks?",
+      "options": [
+        "Neurons with zero bias",
+        "Neurons that compute too slowly",
+        "Neurons whose input is permanently negative, producing zero output and zero gradient forever",
+        "Neurons that produce NaN values"
+      ]
+    },
+    {
+      "q": "Which activation function is the default for hidden layers in modern transformers like GPT and BERT?",
+      "options": [
+        "Sigmoid",
+        "Tanh",
+        "GELU",
+        "ReLU"
+      ]
+    },
+    {
+      "q": "Why is softmax used only in the output layer and never in hidden layers?",
+      "options": [
+        "It only works with two classes",
+        "It causes exploding gradients",
+        "It converts a vector into a probability distribution (values sum to 1), which is needed for classification output but not for intermediate representations",
+        "It's too slow for hidden layers"
+      ]
+    },
+    {
+      "q": "What does the loss function represent in neural network training?",
+      "options": [
+        "The learning rate schedule",
+        "A differentiable measure of how wrong the model's predictions are, which the optimizer minimizes",
+        "The number of incorrect predictions",
+        "The size of the training dataset"
+      ]
+    },
+    {
+      "q": "Why is cross-entropy preferred over MSE for classification tasks?",
+      "options": [
+        "Cross-entropy punishes confident wrong predictions exponentially via -log(p), while MSE gives weak gradients near 0 and 1",
+        "Cross-entropy doesn't require labels",
+        "MSE only works for regression",
+        "Cross-entropy is faster to compute"
+      ]
+    },
+    {
+      "q": "What happens if you use MSE loss for binary classification?",
+      "options": [
+        "Gradients explode",
+        "Training diverges immediately",
+        "The model trains normally",
+        "The model can minimize loss by predicting 0.5 for everything, achieving MSE=0.25 without learning"
+      ]
+    },
+    {
+      "q": "What does label smoothing do and why is it useful?",
+      "options": [
+        "It smooths the learning rate schedule",
+        "It replaces hard 0/1 targets with soft values like 0.1/0.9, preventing overconfident predictions and improving generalization",
+        "It removes noisy labels from the dataset",
+        "It applies a moving average to the loss"
+      ]
+    },
+    {
+      "q": "In contrastive loss (InfoNCE), what role does the temperature parameter play?",
+      "options": [
+        "It controls how sharp the similarity distribution is -- lower temperature means harder separation between positives and negatives",
+        "It sets the number of negative samples",
+        "It controls the learning rate",
+        "It determines the embedding dimension"
+      ]
+    },
+    {
+      "q": "What problem does momentum solve in gradient descent?",
+      "options": [
+        "It prevents overfitting",
+        "It eliminates the need for a learning rate",
+        "It reduces memory usage",
+        "It dampens oscillation by accumulating past gradients, accelerating movement in consistent directions"
+      ]
+    },
+    {
+      "q": "What is the key difference between Adam and AdamW?",
+      "options": [
+        "AdamW uses a higher learning rate",
+        "AdamW only works with transformers",
+        "AdamW applies weight decay directly to weights instead of through the gradient, giving proper regularization",
+        "AdamW doesn't use momentum"
+      ]
+    },
+    {
+      "q": "Why does Adam use bias correction in early training steps?",
+      "options": [
+        "To prevent overfitting",
+        "The moment estimates are initialized to zero, so early values are biased toward zero; correction compensates for this cold start",
+        "To clip large gradients",
+        "To speed up convergence"
+      ]
+    },
+    {
+      "q": "What are the standard default hyperparameters for Adam?",
+      "options": [
+        "lr=0.0001, beta1=0.8, beta2=0.9",
+        "lr=0.01, beta1=0.99, beta2=0.99",
+        "lr=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8",
+        "lr=0.1, beta1=0.5, beta2=0.5"
+      ]
+    },
+    {
+      "q": "Which optimizer is the modern default for training transformers and LLMs?",
+      "options": [
+        "SGD with momentum",
+        "RMSProp",
+        "AdamW",
+        "Vanilla SGD"
+      ]
+    },
+    {
+      "q": "What is overfitting in neural networks?",
+      "options": [
+        "The model is too small to learn the data",
+        "The model trains too slowly",
+        "The model memorizes training data instead of learning generalizable patterns, showing a large gap between train and test accuracy",
+        "The loss function is wrong"
+      ]
+    },
+    {
+      "q": "How does dropout regularize a neural network?",
+      "options": [
+        "It removes the worst-performing neurons permanently",
+        "It reduces the learning rate",
+        "It randomly zeroes neurons during training, forcing the network to learn redundant representations",
+        "It removes outliers from the training data"
+      ]
+    },
+    {
+      "q": "Why do transformers use LayerNorm instead of BatchNorm?",
+      "options": [
+        "BatchNorm causes gradient explosion",
+        "LayerNorm was invented more recently",
+        "LayerNorm is faster to compute",
+        "LayerNorm normalizes across features per sample (batch-independent), which works with variable sequence lengths and small batch sizes"
+      ]
+    },
+    {
+      "q": "What is the key difference between RMSNorm and LayerNorm?",
+      "options": [
+        "RMSNorm uses batch statistics",
+        "RMSNorm only works on CNNs",
+        "RMSNorm skips the mean subtraction, only dividing by the root mean square, giving ~10% speedup with equal accuracy",
+        "RMSNorm adds learnable parameters"
+      ]
+    },
+    {
+      "q": "Why is it critical to call model.eval() before running inference in PyTorch?",
+      "options": [
+        "It speeds up computation",
+        "It enables gradient computation",
+        "It disables dropout and switches BatchNorm to use running statistics instead of batch statistics, giving deterministic outputs",
+        "It frees GPU memory"
+      ]
+    },
+    {
+      "q": "What happens if you initialize all weights in a neural network to zero?",
+      "options": [
+        "The network diverges",
+        "Zero init is the recommended default",
+        "The network trains normally but slowly",
+        "All neurons compute identical outputs and receive identical gradients, so the network has only 1 effective neuron per layer"
+      ]
+    },
+    {
+      "q": "Why does the scale of random weight initialization matter?",
+      "options": [
+        "Scale only matters for the output layer",
+        "If variance is too high, activations explode; if too low, activations vanish -- both prevent training",
+        "Larger weights train faster",
+        "It doesn't matter as long as weights are nonzero"
+      ]
+    },
+    {
+      "q": "What is the formula for Kaiming/He initialization variance?",
+      "options": [
+        "Var(w) = 1/fan_in",
+        "Var(w) = 2/fan_in",
+        "Var(w) = 1/(fan_in + fan_out)",
+        "Var(w) = 2/(fan_in + fan_out)"
+      ]
+    },
+    {
+      "q": "When should you use Xavier/Glorot initialization instead of Kaiming/He?",
+      "options": [
+        "When using Adam optimizer",
+        "When training on small datasets",
+        "When using sigmoid or tanh activations, which don't zero half the outputs like ReLU",
+        "Always -- Xavier is universally better"
+      ]
+    },
+    {
+      "q": "Why does GPT-2 scale residual layer weights by 1/sqrt(2N)?",
+      "options": [
+        "To improve tokenization",
+        "To speed up training",
+        "Each residual addition increases variance, so scaling prevents the accumulated signal from growing unbounded through N layers",
+        "To reduce the number of parameters"
+      ]
+    },
+    {
+      "q": "Why is a constant learning rate usually suboptimal for training neural networks?",
+      "options": [
+        "It uses too much memory",
+        "It's either too high for late training (causes oscillation) or too low for early training (wastes compute)",
+        "Constant learning rates cause overfitting",
+        "They only work with SGD"
+      ]
+    },
+    {
+      "q": "What is the purpose of learning rate warmup?",
+      "options": [
+        "To let adaptive optimizer statistics (momentum, variance) stabilize before taking large steps",
+        "To prevent overfitting",
+        "To increase the batch size gradually",
+        "To initialize weights properly"
+      ]
+    },
+    {
+      "q": "What learning rate schedule do Llama 3, GPT-3, and most modern LLMs use?",
+      "options": [
+        "Constant learning rate",
+        "Step decay every 30 epochs",
+        "Exponential decay",
+        "Linear warmup followed by cosine decay"
+      ]
+    },
+    {
+      "q": "What makes the 1cycle policy different from other schedules?",
+      "options": [
+        "It requires no hyperparameter tuning",
+        "It only works with SGD",
+        "It uses a constant learning rate",
+        "It ramps the learning rate UP in the first half of training, then back down -- the high LR phase acts as regularization"
+      ]
+    },
+    {
+      "q": "If training loss suddenly spikes and diverges, what is the most likely learning rate issue?",
+      "options": [
+        "Learning rate is too low",
+        "Learning rate is too high, causing the optimizer to overshoot the minimum",
+        "The warmup period is too long",
+        "The schedule decays too slowly"
+      ]
+    },
+    {
+      "q": "What three responsibilities does the Module abstraction have in a deep learning framework?",
+      "options": [
+        "Load data, preprocess data, augment data",
+        "forward() for computation, backward() for gradients, parameters() for trainable weights",
+        "Compile, optimize, deploy",
+        "Tokenize, embed, decode"
+      ]
+    },
+    {
+      "q": "Why does Sequential process modules in reverse order during the backward pass?",
+      "options": [
+        "Reverse order uses less memory",
+        "Gradients flow from the loss backward through the network, so the last layer computes gradients first",
+        "It prevents gradient explosion",
+        "It's arbitrary -- either direction works"
+      ]
+    },
+    {
+      "q": "Why is optimizer.zero_grad() a separate call instead of being done automatically?",
+      "options": [
+        "It allows gradient accumulation across multiple batches before taking a single optimizer step",
+        "It makes debugging easier",
+        "It saves memory",
+        "It's a PyTorch design mistake"
+      ]
+    },
+    {
+      "q": "What is the correct order of operations in a training loop?",
+      "options": [
+        "backward, forward, zero_grad, step",
+        "forward, loss, zero_grad, backward, step",
+        "forward, zero_grad, backward, loss, step",
+        "zero_grad, forward, loss, backward, step"
+      ]
+    },
+    {
+      "q": "What is the role of the DataLoader in the framework?",
+      "options": [
+        "It splits data into batches and optionally shuffles between epochs for mini-batch gradient descent",
+        "It computes the loss function",
+        "It initializes the weights",
+        "It trains the model"
+      ]
+    },
+    {
+      "q": "What is autograd in PyTorch?",
+      "options": [
+        "A model compression tool",
+        "An automatic differentiation engine that records operations and computes gradients without manual backward implementations",
+        "A hyperparameter tuning framework",
+        "A data loading library"
+      ]
+    },
+    {
+      "q": "What does torch.no_grad() do and when should you use it?",
+      "options": [
+        "It prevents overfitting",
+        "It enables GPU acceleration",
+        "It disables gradient tracking for inference, saving memory and computation when you don't need to train",
+        "It freezes all model weights"
+      ]
+    },
+    {
+      "q": "What does nn.Linear(784, 256) create in PyTorch?",
+      "options": [
+        "A batch normalization layer",
+        "A ReLU activation layer",
+        "A dropout layer with p=784/256",
+        "A fully connected layer with a (256, 784) weight matrix and a (256,) bias vector"
+      ]
+    },
+    {
+      "q": "Which PyTorch method computes gradients for all parameters in the computational graph?",
+      "options": [
+        "optimizer.step()",
+        "loss.backward()",
+        "model.forward()",
+        "optimizer.zero_grad()"
+      ]
+    },
+    {
+      "q": "Why is PyTorch's training loop significantly faster than the pure-Python mini framework?",
+      "options": [
+        "PyTorch uses smaller data types",
+        "PyTorch uses a different algorithm",
+        "PyTorch skips the backward pass",
+        "PyTorch runs operations as optimized C++/CUDA kernels on GPU, while pure Python loops are interpreted one operation at a time"
+      ]
+    },
+    {
+      "q": "What is the fundamental design difference between PyTorch and JAX?",
+      "options": [
+        "PyTorch is faster",
+        "PyTorch mutates tensors eagerly while JAX compiles pure functions without side effects",
+        "PyTorch doesn't support automatic differentiation",
+        "JAX doesn't support GPUs"
+      ]
+    },
+    {
+      "q": "What does jax.jit do?",
+      "options": [
+        "It adds dropout regularization",
+        "It compiles a Python function into optimized XLA code that runs much faster than interpreted Python",
+        "It computes gradients",
+        "It initializes model weights"
+      ]
+    },
+    {
+      "q": "What does jax.vmap do?",
+      "options": [
+        "Computes second-order gradients",
+        "Manages GPU memory",
+        "Validates model architecture",
+        "Vectorizes a function to run over a batch dimension without writing explicit loops"
+      ]
+    },
+    {
+      "q": "How does JAX handle model state (weights) differently than PyTorch?",
+      "options": [
+        "JAX requires explicit state passing -- weights are function arguments, not mutable object attributes",
+        "JAX and PyTorch handle state identically",
+        "JAX doesn't support trainable weights",
+        "JAX stores weights on CPU only"
+      ]
+    },
+    {
+      "q": "When would you choose JAX over PyTorch?",
+      "options": [
+        "When you need the largest ecosystem of pretrained models",
+        "For deployment on mobile devices",
+        "For quick prototyping of small models",
+        "When training at massive scale on TPU pods, where compilation and functional transforms provide significant speedups"
+      ]
+    },
+    {
+      "q": "Why is neural network debugging harder than traditional software debugging?",
+      "options": [
+        "There are no debugging tools for neural networks",
+        "Networks can produce wrong outputs without any error messages or crashes -- the code runs but the results are silently incorrect",
+        "Neural networks use different programming languages",
+        "Neural networks can't be tested"
+      ]
+    },
+    {
+      "q": "What is the 'overfit one batch' debugging technique?",
+      "options": [
+        "Training on the full dataset until it overfits",
+        "Overfitting the validation set",
+        "Using a very large batch size",
+        "Training on a single small batch until the loss reaches near-zero, verifying the model can memorize at least a few examples"
+      ]
+    },
+    {
+      "q": "Your loss is NaN after a few training steps. What is the most likely cause?",
+      "options": [
+        "The model has too few parameters",
+        "The activation function is wrong",
+        "Exploding gradients or numerical overflow, often from a learning rate that's too high or missing gradient clipping",
+        "The dataset is too small"
+      ]
+    },
+    {
+      "q": "Your training loss decreases but validation loss stays flat from the start. What does this indicate?",
+      "options": [
+        "The model is learning training data patterns but they don't generalize -- likely a data pipeline issue (train/val data mismatch) or severe overfitting",
+        "The learning rate is too low",
+        "The model needs more layers",
+        "The model is overfitting"
+      ]
+    },
+    {
+      "q": "What should you check first when your loss curve is completely flat (loss doesn't decrease at all)?",
+      "options": [
+        "Try a different architecture",
+        "Switch to a different optimizer",
+        "Verify gradients are nonzero, the learning rate is high enough, and the loss function actually depends on the model's predictions",
+        "Add more training data"
+      ]
+    }
+  ]
+}

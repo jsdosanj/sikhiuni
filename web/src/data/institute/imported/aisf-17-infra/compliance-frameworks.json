@@ -1,0 +1,94 @@
+{
+  "id": "aisf-17-infra::compliance-frameworks",
+  "num": 26,
+  "slug": "compliance-frameworks",
+  "title": "Compliance — SOC 2, HIPAA, GDPR, PCI-DSS, EU AI Act, ISO 42001",
+  "tagline": "Multi-framework coverage is table stakes for 2026 enterprise deals. **EU AI Act**: in force since August 1, 2024. Most high-risk requirements enforce August 2, 2026. Fines up to €15M or 3% global annual turnover for high-risk-system obligations (Art. 99(4)); up to €35M or 7% for prohibited AI practices (Art. 99(3)). Applies globally if serving EU users. **Colorado AI Act**: effective June 30, 2026 (delayed from February 2026 by SB25B-004) — impact assessments for high-risk systems, right to appeal AI decisions. Virginia similar for credit/employment/housing/education. **SOC 2 Type II**: de facto B2B AI requirement (Type II, not Type I, for fintech). **GDPR**: largest documented AI-specific fine is €30.5M against Clearview AI (Dutch DPA, Sept 2024); Italy's Garante issued €15M against OpenAI in Dec 2024 (later overturned on appeal in March 2026). Real-time PII redaction at inference is the defensible standard; post-processing cleanup is not enough. **HIPAA**: healthcare bound — cannot send PHI to external AI services without BAA. **PCI-DSS**: AI-interaction-layer coverage requires configuration + contractual agreements, not automatic. **ISO 42001**: emerging AI governance standard, growing procurement requirement alongside ISO 27001. Reference profile: OpenAI maintains SOC 2 Type 2, ISO/IEC 27001:2022, ISO/IEC 27701:2019, GDPR/CCPA/HIPAA (BAA)/FERPA, PCI-DSS for ChatGPT payment components. Cross-framework mapping reduces audit fatigue: access controls map across ISO 27001 A.5.15-5.18, GDPR Art. 32, HIPAA §164.312(a).",
+  "type": "Learn",
+  "languages": "(Python optional — compliance is policy + process, not code)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Enumerate the seven 2026 frameworks relevant to LLM products and match each to a customer segment.",
+    "Cite the EU AI Act enforcement timeline (in force August 2024; high-risk enforcement August 2026) and the two-tier fine ceiling (€15M / 3% for high-risk obligations, €35M / 7% for prohibited practices).",
+    "Explain why post-processing PII cleanup is not enough for GDPR and name real-time inference-layer redaction as the defensible standard.",
+    "Describe cross-framework control mapping (e.g., access control maps to ISO 27001 A.5.15-5.18 + GDPR Art. 32 + HIPAA §164.312(a))."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>An enterprise customer&#39;s procurement asks for SOC 2 Type II, GDPR, HIPAA BAA, ISO 27001, and &quot;EU AI Act compliance statement.&quot; Your team has SOC 2 Type I. You&#39;re six months from Type II and haven&#39;t started GDPR Article 30 records.</p>\n<p>Multi-framework coverage is not an LLM problem — it&#39;s an enterprise-SaaS problem, with LLM-specific overlays. Procurement teams in 2026 want a matrix with a row per framework and a column per control, not a PDF.</p>\n<h2>The Concept</h2>\n<h3>The seven frameworks</h3>\n<table>\n<thead>\n<tr>\n<th>Framework</th>\n<th>Scope</th>\n<th>LLM-specific requirement</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>SOC 2 Type II</td>\n<td>B2B SaaS baseline</td>\n<td>Process controls audited over 6-12 months</td>\n</tr>\n<tr>\n<td>HIPAA</td>\n<td>US healthcare</td>\n<td>BAA required; PHI cannot leave infrastructure without signed agreement</td>\n</tr>\n<tr>\n<td>GDPR</td>\n<td>EU users</td>\n<td>Real-time PII redaction; data subject rights; Article 30 records</td>\n</tr>\n<tr>\n<td>PCI-DSS</td>\n<td>Payment data</td>\n<td>Configuration + contracts for AI touching payment</td>\n</tr>\n<tr>\n<td>EU AI Act</td>\n<td>Serving EU users</td>\n<td>Risk tier classification; high-risk systems: conformity assessment, documentation, logging</td>\n</tr>\n<tr>\n<td>Colorado AI Act</td>\n<td>Serving CO residents</td>\n<td>Impact assessments; right to appeal</td>\n</tr>\n<tr>\n<td>ISO 42001</td>\n<td>AI governance</td>\n<td>Emerging; pairs with ISO 27001</td>\n</tr>\n</tbody></table>\n<h3>EU AI Act timeline</h3>\n<ul>\n<li>August 1, 2024: in force.</li>\n<li>February 2, 2025: prohibited-AI practices enforced.</li>\n<li>August 2, 2026: high-risk systems enforced (conformity assessment, documentation, logging).</li>\n<li>August 2027: high-risk systems in products under harmonized legislation.</li>\n</ul>\n<p>Risk tiers: Unacceptable (banned), High-risk (conformity + logging), Limited-risk (transparency), Minimal-risk (no constraint). Most B2B LLM SaaS is limited-risk; high-risk kicks in for employment, credit, education, law enforcement, migration, essential services.</p>\n<p>Fines (Article 99): up to €15M or 3% global annual turnover for breaches of high-risk-system obligations (Art. 99(4)); up to €35M or 7% for prohibited AI practices (Art. 99(3)); whichever higher applies.</p>\n<h3>GDPR — real-time redaction is the standard</h3>\n<p>Post-processing cleanup (redact PII after the LLM sees it) is not a defensible posture — the model already saw the data. Real-time inference-layer redaction is the 2026 standard:</p>\n<ul>\n<li>Entity recognition before the LLM call.</li>\n<li>Consistent tokenization (Mesh approach) preserves semantics.</li>\n<li>Store only redacted prompts + consented opt-in raw.</li>\n</ul>\n<p>Recent enforcement: €30.5M against Clearview AI (Dutch DPA, Sept 2024) is the largest documented AI-specific GDPR fine to date; €15M against OpenAI (Italy&#39;s Garante, Dec 2024) is the largest LLM-specific fine, though it was overturned on appeal in March 2026 and the ruling remains under further review. Post-processing claims have failed at audit.</p>\n<h3>HIPAA — BAA is not optional</h3>\n<p>You cannot send PHI to external AI services without a signed Business Associate Agreement. All three hyperscaler LLM platforms (Bedrock, Azure OpenAI, Vertex) offer BAAs. OpenAI direct API offers BAA. Anthropic direct API offers BAA. Confirm before sending PHI.</p>\n<h3>SOC 2 Type II</h3>\n<p>Type I: controls designed and documented.\nType II: controls operate effectively over 6-12 months.</p>\n<p>B2B procurement in 2026 defaults to Type II. Type I is a starter; Type II is the gate.</p>\n<p>Common audit drivers: access logs (who saw what), change management (how was it deployed), risk assessments (quarterly), incident response (tested?). Audit log from Phase 17 · 25 is directly reusable.</p>\n<h3>Cross-framework mapping</h3>\n<p>One access control policy satisfies multiple framework controls:</p>\n<table>\n<thead>\n<tr>\n<th>Control</th>\n<th>Frameworks</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Access logging</td>\n<td>ISO 27001 A.5.15-5.18, GDPR Art. 32, HIPAA §164.312(a)</td>\n</tr>\n<tr>\n<td>Change management</td>\n<td>ISO 27001 A.8.32, PCI DSS Req. 6, HIPAA breach-notification scope</td>\n</tr>\n<tr>\n<td>Encryption in transit</td>\n<td>ISO 27001 A.8.24, GDPR Art. 32, HIPAA §164.312(e)</td>\n</tr>\n<tr>\n<td>Secrets management</td>\n<td>ISO 27001 A.8.19, PCI DSS Req. 8, SOC 2 CC6.1</td>\n</tr>\n</tbody></table>\n<p>Compliance tools (Drata, Vanta, Secureframe) automate this mapping. Worth the cost at scale.</p>\n<h3>ISO 42001 — emerging</h3>\n<p>Published late 2023. Growing procurement requirement alongside ISO 27001. Framework for AI governance including risk management, data quality, transparency, human oversight.</p>\n<h3>OpenAI&#39;s reference profile</h3>\n<p>OpenAI maintains SOC 2 Type 2, ISO/IEC 27001:2022, ISO/IEC 27701:2019, GDPR/CCPA/HIPAA (BAA)/FERPA, PCI-DSS for ChatGPT payment components. That is roughly the enterprise table stakes in 2026.</p>\n<h3>Numbers you should remember</h3>\n<ul>\n<li>EU AI Act fines: up to €15M / 3% (high-risk obligations, Art. 99(4)); up to €35M / 7% (prohibited practices, Art. 99(3)).</li>\n<li>EU AI Act high-risk enforcement: August 2, 2026.</li>\n<li>Largest documented AI-specific GDPR fine: €30.5M, Clearview AI (Dutch DPA, Sept 2024).</li>\n<li>Largest LLM-specific GDPR fine: €15M, OpenAI (Italy&#39;s Garante, Dec 2024; overturned on appeal March 2026).</li>\n<li>SOC 2 Type II window: 6-12 months of operated controls.</li>\n<li>Colorado AI Act effective date: June 30, 2026 (delayed from February 2026 by SB25B-004).</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>i4-control-matrix</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> is a compliance-mapping spreadsheet in Python — given a control, lists frameworks it satisfies.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-compliance-matrix.md</code>. Given customer segment and geography, specifies required frameworks and controls.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Your first enterprise customer requires SOC 2 Type II, HIPAA BAA, EU AI Act statement. What is the minimum viable compliance posture to win the deal?</li>\n<li>Classify three hypothetical LLM products under EU AI Act risk tiers. What changes at high-risk?</li>\n<li>You accidentally sent PHI to a provider without BAA. Walk through the incident response.</li>\n<li>Argue whether ISO 42001 is &quot;necessary in 2026&quot; for a mid-market AI vendor.</li>\n<li>Map your LLM audit log fields (Phase 17 · 25) to at least three framework controls.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>SOC 2 Type II</td>\n<td>&quot;audited controls&quot;</td>\n<td>Controls operating over 6-12 months, independently attested</td>\n</tr>\n<tr>\n<td>HIPAA BAA</td>\n<td>&quot;healthcare contract&quot;</td>\n<td>Business Associate Agreement; required for PHI</td>\n</tr>\n<tr>\n<td>GDPR</td>\n<td>&quot;EU privacy&quot;</td>\n<td>Real-time PII redaction is the defensible 2026 standard</td>\n</tr>\n<tr>\n<td>EU AI Act</td>\n<td>&quot;EU AI rules&quot;</td>\n<td>High-risk enforcement August 2026; €15M / 3% (high-risk obligations) — €35M / 7% (prohibited practices)</td>\n</tr>\n<tr>\n<td>Colorado AI Act</td>\n<td>&quot;US AI state law&quot;</td>\n<td>June 30, 2026 effective (delayed by SB25B-004); impact assessments</td>\n</tr>\n<tr>\n<td>ISO 42001</td>\n<td>&quot;AI governance&quot;</td>\n<td>Emerging framework for AI risk + transparency</td>\n</tr>\n<tr>\n<td>ISO 27001</td>\n<td>&quot;security ISMS&quot;</td>\n<td>Information Security Management System baseline</td>\n</tr>\n<tr>\n<td>Conformity assessment</td>\n<td>&quot;EU AI doc package&quot;</td>\n<td>High-risk requirement: docs, testing, logging</td>\n</tr>\n<tr>\n<td>Cross-framework mapping</td>\n<td>&quot;one control, many frames&quot;</td>\n<td>Single policy satisfies multiple framework controls</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://openai.com/security-and-privacy/\" target=\"_blank\" rel=\"noopener\">OpenAI Security and Privacy</a> — reference compliance profile.</li>\n<li><a href=\"https://guardion.ai/blog/llm-compliance-guide-iso-42001-eu-ai-act-soc2-gdpr-2026\" target=\"_blank\" rel=\"noopener\">GuardionAI — LLM Compliance 2026: ISO 42001, EU AI Act, SOC 2, GDPR</a></li>\n<li><a href=\"https://www.dsalta.com/resources/ai-compliance/soc-2-type-2-audit-guide-2026-10-ai-powered-controls-every-saas-team-needs\" target=\"_blank\" rel=\"noopener\">Dsalta — SOC 2 Type 2 Audit Guide 2026: 10 AI Controls</a></li>\n<li><a href=\"https://eur-lex.europa.eu/eli/reg/2024/1689/oj\" target=\"_blank\" rel=\"noopener\">EU AI Act official text</a> — primary source.</li>\n<li><a href=\"https://leg.colorado.gov/bills/sb24-205\" target=\"_blank\" rel=\"noopener\">Colorado AI Act</a> — primary source.</li>\n<li><a href=\"https://www.iso.org/standard/81230.html\" target=\"_blank\" rel=\"noopener\">ISO/IEC 42001:2023</a> — AI management system standard.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Cross-framework compliance mapping — stdlib Python.\n\nGiven a control, print the frameworks it satisfies. Given a customer profile\n(geography + segment), print the required frameworks.\n\"\"\"\n\nfrom __future__ import annotations\n\n\nCONTROL_MAP = {\n    \"access logging\": [\"ISO 27001 A.5.15-5.18\", \"GDPR Art. 32\", \"HIPAA §164.312(a)\", \"SOC 2 CC6\"],\n    \"change management\": [\"ISO 27001 A.8.32\", \"PCI DSS Req. 6\", \"HIPAA breach-notification\", \"SOC 2 CC8\"],\n    \"encryption in transit\": [\"ISO 27001 A.8.24\", \"GDPR Art. 32\", \"HIPAA §164.312(e)\", \"PCI DSS Req. 4\"],\n    \"secrets management\": [\"ISO 27001 A.8.19\", \"PCI DSS Req. 8\", \"SOC 2 CC6.1\"],\n    \"PII redaction (inference-time)\": [\"GDPR Art. 25\", \"EU AI Act Art. 10\", \"HIPAA §164.514\"],\n    \"audit log retention\": [\"SOC 2 CC7\", \"HIPAA §164.312(b)\", \"ISO 27001 A.8.15\"],\n    \"conformity assessment\": [\"EU AI Act Art. 43 (high-risk)\"],\n    \"impact assessment\": [\"Colorado AI Act SB24-205\", \"EU AI Act Art. 27\"],\n    \"data subject rights\": [\"GDPR Ch. III\", \"CCPA\"],\n    \"BAA signed\": [\"HIPAA §164.504(e)\"],\n}\n\n\nPROFILE_MAP = {\n    (\"US\", \"B2B SaaS\"):             [\"SOC 2 Type II\", \"ISO 27001\", \"ISO 42001\"],\n    (\"US\", \"healthcare\"):           [\"SOC 2 Type II\", \"HIPAA\", \"ISO 27001\"],\n    (\"US\", \"fintech\"):              [\"SOC 2 Type II\", \"PCI-DSS\", \"ISO 27001\"],\n    (\"EU\", \"B2B SaaS\"):             [\"GDPR\", \"SOC 2 Type II\", \"ISO 27001\", \"EU AI Act\"],\n    (\"EU\", \"healthcare\"):           [\"GDPR\", \"SOC 2 Type II\", \"HIPAA (global)\", \"EU AI Act\"],\n    (\"Global\", \"enterprise\"):       [\"SOC 2 Type II\", \"ISO 27001\", \"ISO 42001\", \"GDPR\", \"HIPAA\", \"EU AI Act\"],\n    (\"US-CO\", \"B2B SaaS\"):          [\"SOC 2 Type II\", \"Colorado AI Act\", \"ISO 27001\"],\n}\n\n\ndef main() -> None:\n    print(\"=\" * 80)\n    print(\"COMPLIANCE CONTROL MAP — one control, many frameworks\")\n    print(\"=\" * 80)\n    for control, frameworks in CONTROL_MAP.items():\n        print(f\"\\n{control}\")\n        for f in frameworks:\n            print(f\"  → {f}\")\n\n    print(\"\\n\" + \"=\" * 80)\n    print(\"CUSTOMER PROFILE MAP — required frameworks per geography + segment\")\n    print(\"=\" * 80)\n    for (geo, segment), frameworks in PROFILE_MAP.items():\n        print(f\"\\n{geo} · {segment}\")\n        for f in frameworks:\n            print(f\"  · {f}\")\n\n    print(\"\\nNote: EU AI Act high-risk enforcement August 2, 2026.\")\n    print(\"Fines up to €35M or 7% global annual turnover.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "When does EU AI Act enforcement for high-risk systems begin?",
+      "options": [
+        "Already fully enforced in 2024",
+        "August 2, 2026",
+        "February 2, 2025",
+        "January 1, 2030"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Which two-tier fine ceiling does the EU AI Act define?",
+      "options": [
+        "Up to €100K for any violation",
+        "Up to €15M or 3% global annual turnover for high-risk-system obligations (Art. 99(4)); up to €35M or 7% for prohibited AI practices (Art. 99(3))",
+        "Up to €1M flat for any violation",
+        "No financial penalties, only takedown orders"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Why is post-processing PII cleanup not a defensible GDPR posture?",
+      "options": [
+        "The model already saw the data, so real-time inference-layer redaction (before the LLM call) is the defensible 2026 standard",
+        "GDPR forbids redaction entirely",
+        "It is too slow at scale",
+        "Post-processing is identical to real-time"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What is the practical difference between SOC 2 Type I and Type II?",
+      "options": [
+        "Type I requires HIPAA BAA",
+        "Type I is more rigorous than Type II",
+        "Type I attests controls designed and documented; Type II attests controls operating effectively over 6-12 months",
+        "Type II is for startups only"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What does cross-framework control mapping aim to deliver?",
+      "options": [
+        "Eliminating audits",
+        "Replacing all frameworks with ISO 42001",
+        "One control policy that satisfies multiple framework requirements (e.g. access logging maps to ISO 27001 A.5.15-5.18, GDPR Art. 32, HIPAA §164.312(a))",
+        "More distinct controls per framework"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What does the lesson recommend for HIPAA + LLM workloads?",
+      "options": [
+        "Use only on-prem models, never managed",
+        "Ship PHI to any provider; BAA is optional",
+        "HIPAA does not apply to LLMs",
+        "Never send PHI to an external AI service without a signed BAA; all three hyperscalers and major LLM API providers offer BAAs"
+      ],
+      "answer": 3,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/17-infrastructure-and-production/26-compliance-frameworks"
+  }
+}

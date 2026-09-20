@@ -206,11 +206,11 @@ describe("POST /api/quiz — gated course grading", () => {
     expect(body.passed).toBe(true);
   });
 
-  it("a cohort member submitting the wrong answer -> not passed", async () => {
+  it("a cohort member submitting the wrong answer -> not passed, no score leaked", async () => {
     const res = await quizPost({ request: asReq("member1", { courseId: GATED_COURSE, answers: [0] }, "http://x/api/quiz"), env });
     const body = await res.json();
     expect(body.passed).toBe(false);
-    expect(body.score).toBe(0);
+    expect(body.score).toBeUndefined();
   });
 
   it("the course's own teacher can also grade (entitled via isCourseTeacher, not cohort membership)", async () => {

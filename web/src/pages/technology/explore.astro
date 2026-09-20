@@ -1,0 +1,214 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+import { explore, gurmukhiHtml } from '../../lib/institute';
+
+// Per-booth chrome. Each stand deliberately breaks the Institute's design
+// system to read like its source (DESIGN-INSTITUTE.md §college-fair), no
+// logos, no scraped screenshots, just type + colour.
+const MARKS: Record<string, string> = {
+  freecodecamp: '{ }',
+  'class-central': '///',
+  'libre-academy': '[ ]',
+  sans: '###',
+  niccs: 'K12',
+  'cert-prep': '(*)',
+  'google-skills': '::.',
+};
+---
+<Base
+  title="Explore free courses, Institute of Technology"
+  description="When you have outgrown the Institute's own courses, or want a wider on-ramp: free coding curricula, course directories, vendor training, and the security reference shelves, freeCodeCamp, Class Central, Libre.academy, SANS, NICCS · CISA, Google Skills."
+  institute
+>
+  <InstituteRail />
+
+  <section class="i-wrap i-exp-head">
+    <span class="i-label">/technology/explore</span>
+    <h1>The college fair</h1>
+    <p class="i-prose">The Institute's own courses come first, you finish those and earn its certificate. This hall is for after: when you want breadth, a different teaching style, an interactive challenge platform, or the reference shelf the security profession actually keeps open. Each stand links straight out.</p>
+  </section>
+
+  <section class="i-wrap i-fair">
+    {explore.map((b) => (
+      <a class={`i-booth i-booth-${b.id}`} href={b.href} target="_blank" rel="noopener">
+        <span class="i-booth-mark" aria-hidden="true">{MARKS[b.id] ?? '↗'}</span>
+        <div>
+          <strong class="i-booth-name">{b.title}</strong>
+          <span class="i-booth-blurb" set:html={gurmukhiHtml(b.blurb)} />
+          {b.id === 'freecodecamp' && (
+            <span class="i-booth-fine">
+              Lecture companions and links to the freeCodeCamp&reg; curriculum. Sikhi University is not affiliated with, sponsored by, or endorsed by freeCodeCamp.org. Certifications are issued by freeCodeCamp. Curriculum content is CC&nbsp;BY-SA&nbsp;4.0.
+            </span>
+          )}
+          {b.id === 'class-central' && (
+            <span class="i-booth-fine">
+              A course-discovery aggregator. &ldquo;Class Central&rdquo; is a trademark of Class Central SL, used here nominatively to name the service &mdash; no affiliation or endorsement is claimed. Course listings, ratings, and editorial content are Class Central&rsquo;s own.
+            </span>
+          )}
+          {b.id === 'sans' && (
+            <span class="i-booth-fine">
+              SANS courseware and reference material is copyright the Escal Institute of Advanced Technologies, Inc., free to download and licensed for non-commercial use &mdash; it is not openly licensed, so this stand links out and rehosts nothing. &ldquo;SANS&rdquo; is their trademark, used nominatively. Sikhi University is not affiliated with, sponsored by, or endorsed by SANS.
+            </span>
+          )}
+          {b.id === 'niccs' && (
+            <span class="i-booth-fine">
+              NICCS and CISA pages are US Government works in the public domain (17&nbsp;U.S.C. &sect;&nbsp;105); the K-12 curriculum and cyber range are CYBER.ORG&rsquo;s own and free to educators under CYBER.ORG&rsquo;s terms. Nothing is rehosted and no agency seal or logo is used. Sikhi University is not affiliated with, sponsored by, or endorsed by CISA, DHS, NICCS, or CYBER.ORG.
+            </span>
+          )}
+          {b.id === 'google-skills' && (
+            <span class="i-booth-fine">
+              Formerly Cloud Skills Boost, formerly Qwiklabs. Labs and skill badges are free with an account; the Google Cloud career certificates are a paid Google subscription, which we neither resell nor discount. Badges and certificates are issued by Google alone. &ldquo;Google&rdquo; and &ldquo;Google Cloud&rdquo; are trademarks of Google&nbsp;LLC, used nominatively; Sikhi University is not affiliated with, sponsored by, or endorsed by Google.
+            </span>
+          )}
+          {b.id === 'cert-prep' && (
+            <span class="i-booth-fine">
+              A Dosanjh Labs project, from the same team as Sikhi University &mdash; a sibling site, not a third party. PMP is a registered mark of the Project Management Institute, CISM of ISACA, and Security+ of CompTIA; neither Sikhi University nor Dosanjh Labs is affiliated with, sponsored by, or endorsed by any of them, and the certifications are awarded by those bodies alone.
+            </span>
+          )}
+          {b.id === 'libre-academy' && (
+            <span class="i-booth-fine">
+              The Libre.academy app is open source (MIT). Its course packs are each adapted from a separate book &mdash; several under CC&nbsp;BY-NC or BY-NC-ND (Eloquent JavaScript, You Don&rsquo;t Know JS Yet, Pro Git, JavaScript.info, Automate the Boring Stuff). We honour those non-commercial / no-derivatives terms, so this stand links out and never rehosts a pack.
+            </span>
+          )}
+        </div>
+        <span class="i-booth-go">open &nearr;</span>
+      </a>
+    ))}
+  </section>
+
+  <section class="i-wrap i-exp-foot">
+    <p class="i-prose">
+      Learning Claude specifically? <a href="/technology/claude">/technology/claude</a> maps the
+      Institute's own guide and dojo alongside Anthropic's free Academy.
+    </p>
+    <p class="i-prose">
+      Building something open yourself? The <a href="/technology/atlas">Open Source Atlas</a> is
+      ~12,500 projects, each with a line on what it could do for the Panth.
+    </p>
+    <p class="i-prose">
+      Want books, curated link directories, or a paid course with a deadline? See
+      <a href="/technology/resources">more resources</a>.
+    </p>
+    <p class="i-prose" style="font-size:13px;color:var(--i-muted)">
+      Full attribution and licences: <a href="/technology/licenses">/technology/licenses</a>.
+    </p>
+  </section>
+
+  <style>
+    .i-exp-head { padding: 40px 24px 8px; }
+    .i-exp-head h1 { margin: 6px 0 10px; font-size: clamp(24px, 4vw, 34px); }
+    .i-exp-head p { max-width: 62ch; }
+
+    .i-fair { display: grid; gap: 18px; padding: 24px; }
+    .i-booth {
+      display: grid; grid-template-columns: 48px 1fr auto; gap: 16px; align-items: start;
+      padding: 22px 24px; border-radius: 8px; text-decoration: none;
+      border: 1px solid var(--i-line);
+    }
+    .i-booth-mark { font-size: 20px; font-family: "JetBrains Mono", monospace; }
+    .i-booth-name { display: block; font-size: 17px; margin-bottom: 4px; }
+    .i-booth-blurb { display: block; font-size: 14px; line-height: 1.55; }
+    .i-booth-fine { display: block; margin-top: 10px; font-size: 12px; line-height: 1.5; }
+    .i-booth-go { align-self: center; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
+
+    /* Each stand deliberately breaks the Institute's system to look like its source
+       (DESIGN-INSTITUTE.md §college-fair). No logos, no scraped screenshots. */
+    .i-booth-freecodecamp {
+      background: #0a0a23; border-color: #1b1b46;
+      font-family: Lato, "Helvetica Neue", system-ui, sans-serif;
+      color: #d4d4e8;
+    }
+    .i-booth-freecodecamp .i-booth-mark { color: #99c9ff; }
+    .i-booth-freecodecamp .i-booth-name { color: #fff; font-weight: 700; }
+    .i-booth-freecodecamp .i-booth-fine { color: #8a8ab8; }
+    .i-booth-freecodecamp .i-booth-go { color: #02be8c; }
+    .i-booth-freecodecamp:hover { border-color: #02be8c; }
+
+    /* Class Central: their clean light card, indigo + coral. */
+    .i-booth-class-central {
+      background: #ffffff; border-color: #e3ddf3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #4a4560;
+    }
+    .i-booth-class-central .i-booth-mark { color: #5f37be; letter-spacing: -0.05em; }
+    .i-booth-class-central .i-booth-name { color: #1c1633; font-weight: 700; }
+    .i-booth-class-central .i-booth-fine { color: #8a8399; }
+    .i-booth-class-central .i-booth-go { color: #e64b5f; font-weight: 600; }
+    .i-booth-class-central:hover { border-color: #5f37be; }
+
+    /* Libre.academy: near-black, halftone dots, burnt orange, mono display. */
+    .i-booth-libre-academy {
+      background-color: #0c0b0a; border-color: #2b2723;
+      background-image: radial-gradient(#1e1b17 1px, transparent 1.4px);
+      background-size: 9px 9px;
+      font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+      color: #a89684;
+    }
+    .i-booth-libre-academy .i-booth-mark { color: #e0734d; }
+    .i-booth-libre-academy .i-booth-name {
+      color: #f0e6db; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; font-size: 15px;
+    }
+    .i-booth-libre-academy .i-booth-fine { color: #7c6f61; }
+    .i-booth-libre-academy .i-booth-go { color: #e0734d; }
+    .i-booth-libre-academy:hover { border-color: #e0734d; }
+
+    /* SANS: deep navy, their red accent, a poster-grid mark. */
+    .i-booth-sans {
+      background: #10203a; border-color: #1e3358;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #b9c6da;
+    }
+    .i-booth-sans .i-booth-mark { color: #ef6461; letter-spacing: -0.06em; }
+    .i-booth-sans .i-booth-name { color: #ffffff; font-weight: 700; }
+    .i-booth-sans .i-booth-fine { color: #8496b0; }
+    .i-booth-sans .i-booth-go { color: #ef6461; font-weight: 600; }
+    .i-booth-sans:hover { border-color: #ef6461; }
+
+    /* NICCS · CISA: a federal-site light card, Public Sans feel, agency navy. */
+    .i-booth-niccs {
+      background: #f4f7fb; border-color: #ccd8e6;
+      font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #33455c;
+    }
+    .i-booth-niccs .i-booth-mark { color: #005288; font-weight: 700; letter-spacing: -0.02em; }
+    .i-booth-niccs .i-booth-name { color: #0b2239; font-weight: 700; }
+    .i-booth-niccs .i-booth-fine { color: #56657d; }
+    .i-booth-niccs .i-booth-go { color: #b21e35; font-weight: 600; }
+    .i-booth-niccs:hover { border-color: #005288; }
+
+    /* Cert Prep: a sibling site, so it wears the family's navy + saffron
+       rather than mimicking someone else's brand. */
+    .i-booth-cert-prep {
+      background: #0b1e3a; border-color: #1c3457;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      color: #c2cfe4;
+    }
+    .i-booth-cert-prep .i-booth-mark { color: #e0a33c; letter-spacing: -0.04em; }
+    .i-booth-cert-prep .i-booth-name { color: #ffffff; font-weight: 700; }
+    .i-booth-cert-prep .i-booth-fine { color: #8b9cb8; }
+    .i-booth-cert-prep .i-booth-go { color: #e0a33c; font-weight: 600; }
+    .i-booth-cert-prep:hover { border-color: #e0a33c; }
+
+    /* Google Skills: their light card, the four brand hues as type colour only. */
+    .i-booth-google-skills {
+      background: #ffffff; border-color: #dadce0;
+      font-family: "Google Sans", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: #444746;
+    }
+    .i-booth-google-skills .i-booth-mark { color: #1967d2; letter-spacing: -0.04em; }
+    .i-booth-google-skills .i-booth-name { color: #202124; font-weight: 700; }
+    .i-booth-google-skills .i-booth-fine { color: #5f6368; }
+    .i-booth-google-skills .i-booth-go { color: #188038; font-weight: 600; }
+    .i-booth-google-skills:hover { border-color: #1967d2; }
+
+    .i-exp-foot { padding: 16px 24px 72px; }
+    .i-exp-foot p { max-width: 62ch; }
+
+    @media (max-width: 600px) {
+      .i-booth { grid-template-columns: 1fr; }
+      .i-booth-go { justify-self: start; }
+    }
+  </style>
+</Base>

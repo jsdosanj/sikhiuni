@@ -1,0 +1,2094 @@
+{
+  "track": "aisf-05-nlp",
+  "count": 232,
+  "questions": [
+    {
+      "q": "Why does a language model need preprocessing before training?",
+      "options": [
+        "Models read strings directly",
+        "Preprocessing improves GPU utilization",
+        "Models consume discrete integer tokens, not raw text",
+        "Preprocessing is required only for languages without whitespace"
+      ]
+    },
+    {
+      "q": "Which preprocessing operation is rule-based suffix stripping?",
+      "options": [
+        "POS tagging",
+        "Stemming",
+        "Lemmatization",
+        "Tokenization"
+      ]
+    },
+    {
+      "q": "What does the Porter stemmer step 1a return for the word 'ponies'?",
+      "options": [
+        "poni",
+        "ponies",
+        "pony",
+        "ponie"
+      ]
+    },
+    {
+      "q": "Why does lemmatization usually need a POS tag?",
+      "options": [
+        "Unicode handling",
+        "Grammatical context disambiguates forms like 'better' (ADJ) versus 'better' (VERB)",
+        "To reduce memory usage",
+        "Speed"
+      ]
+    },
+    {
+      "q": "When translating NLTK Penn Treebank POS tags to WordNet tags, what does a tag starting with 'V' map to?",
+      "options": [
+        "'r' (adverb)",
+        "'a' (adjective)",
+        "'v' (verb)",
+        "'n' (noun)"
+      ]
+    },
+    {
+      "q": "What is 'training/inference mismatch' in NLP preprocessing?",
+      "options": [
+        "A GPU memory issue",
+        "Training and serving apply different preprocessing, so the model sees an unfamiliar distribution at inference",
+        "Mixing tokenizer libraries within a notebook",
+        "Different batch sizes between train and test"
+      ]
+    },
+    {
+      "q": "Which tool would you reach for in a transformer pipeline instead of classical preprocessing?",
+      "options": [
+        "NLTK word_tokenize",
+        "The model's own tokenizer (e.g. via tokenizers / transformers)",
+        "spaCy en_core_web_sm",
+        "A regex tokenizer"
+      ]
+    },
+    {
+      "q": "Why pin NLTK and spaCy versions in requirements?",
+      "options": [
+        "Newer versions are slower",
+        "Older versions support more languages",
+        "Tokenizer and lemmatizer behavior shifts between minor releases, silently changing training distribution",
+        "License compatibility"
+      ]
+    },
+    {
+      "q": "What does Bag of Words throw away?",
+      "options": [
+        "Punctuation",
+        "Token order",
+        "Vocabulary size",
+        "Document length"
+      ]
+    },
+    {
+      "q": "Why scale TF by an IDF factor?",
+      "options": [
+        "To normalize document length",
+        "Words that appear in every document carry little discriminative signal and should be downweighted",
+        "To remove punctuation",
+        "To accelerate training"
+      ]
+    },
+    {
+      "q": "In the smoothed IDF formula log((N+1)/(df+1)) + 1, what does the trailing +1 ensure?",
+      "options": [
+        "Numerical stability for large N",
+        "Compatibility with raw counts",
+        "A word that appears in every document still has IDF 1 instead of 0",
+        "Faster computation"
+      ]
+    },
+    {
+      "q": "Why L2-normalize TF-IDF rows before cosine similarity?",
+      "options": [
+        "To convert sparse vectors to dense",
+        "Longer documents would otherwise dominate similarity scores; normalization puts all docs on the unit hypersphere",
+        "To remove zero entries",
+        "To compress the vocabulary"
+      ]
+    },
+    {
+      "q": "Which TfidfVectorizer setting is risky to enable for sentiment analysis?",
+      "options": [
+        "sublinear_tf=True",
+        "ngram_range=(1, 2)",
+        "min_df=2",
+        "stop_words='english'"
+      ]
+    },
+    {
+      "q": "Which task does TF-IDF still win in 2026?",
+      "options": [
+        "Machine translation",
+        "Open-ended dialogue",
+        "Image captioning",
+        "Spam detection, log anomaly flagging, and low-latency narrow classification"
+      ]
+    },
+    {
+      "q": "Why does TF-IDF fail on the pair 'The movie was not good' vs 'The movie was excellent'?",
+      "options": [
+        "TF-IDF requires bigrams to work",
+        "Both documents share most tokens; bag-of-words has no notion of negation or word order",
+        "TF-IDF cannot handle stopwords",
+        "Embeddings overlap is too high"
+      ]
+    },
+    {
+      "q": "What is the TF-IDF weighted embedding hybrid?",
+      "options": [
+        "Concatenating BoW and dense embeddings",
+        "Running PCA on TF-IDF then re-embedding",
+        "Using TF-IDF weights as a pooling weight over per-token embeddings before averaging",
+        "Training BERT on TF-IDF features"
+      ]
+    },
+    {
+      "q": "What is the distributional hypothesis?",
+      "options": [
+        "All words can be embedded in 300 dimensions",
+        "Frequent words carry the most meaning",
+        "You shall know a word by the company it keeps",
+        "Words are uniformly distributed across documents"
+      ]
+    },
+    {
+      "q": "Why is plain softmax over the vocabulary impractical in Word2Vec?",
+      "options": [
+        "Softmax cannot model probabilities",
+        "Softmax has no gradient",
+        "Computing softmax over 100k+ vocabulary terms is prohibitively expensive per training step",
+        "It causes vanishing gradients"
+      ]
+    },
+    {
+      "q": "What is the difference between skip-gram and CBOW?",
+      "options": [
+        "Skip-gram predicts context words from the center; CBOW predicts the center from context",
+        "Skip-gram predicts the center word from context; CBOW does the reverse",
+        "Skip-gram trains a deep network; CBOW is shallow",
+        "Skip-gram uses bigrams; CBOW uses unigrams"
+      ]
+    },
+    {
+      "q": "In negative sampling, what is the objective for the positive pair (center, context)?",
+      "options": [
+        "Minimize their dot product",
+        "Force them to be orthogonal",
+        "Maximize sigmoid(W[center] dot W'[context]) so it is close to 1",
+        "Decorrelate the vectors"
+      ]
+    },
+    {
+      "q": "After training Word2Vec, which weight matrix becomes the word embeddings?",
+      "options": [
+        "A separate post-training projection",
+        "Both, multiplied together",
+        "The hidden-to-output W' matrix",
+        "The input-to-hidden W matrix (center-word table)"
+      ]
+    },
+    {
+      "q": "Why does Word2Vec fail on polysemy (e.g. 'bank')?",
+      "options": [
+        "Negative sampling drops rare meanings",
+        "It ignores rare words",
+        "The window size is too small",
+        "It assigns one static vector per word, so 'river bank' and 'financial bank' share the same vector"
+      ]
+    },
+    {
+      "q": "When would you still reach for Word2Vec over a transformer in 2026?",
+      "options": [
+        "When dialog quality matters",
+        "When you need contextual disambiguation",
+        "Lightweight, on-device, domain-specific retrieval where a single row lookup is the latency budget",
+        "When inputs are very long"
+      ]
+    },
+    {
+      "q": "What enables the famous analogy 'king - man + woman ~ queen'?",
+      "options": [
+        "Skip-gram trains on royal vocabularies",
+        "Vector arithmetic captures linear directions like 'royal' that transfer across genders",
+        "The model encodes royalty as a flag bit",
+        "Cosine similarity is invariant to gender"
+      ]
+    },
+    {
+      "q": "What did GloVe contribute over Word2Vec?",
+      "options": [
+        "A deeper neural network",
+        "Subword n-gram embeddings",
+        "Direct factorization of the word-word co-occurrence matrix with a weighted loss",
+        "Byte-level tokenization"
+      ]
+    },
+    {
+      "q": "What problem does FastText solve that Word2Vec and GloVe do not?",
+      "options": [
+        "Reducing training cost",
+        "Multilingual transfer",
+        "Polysemy disambiguation",
+        "Producing vectors for unseen words by composing character n-grams"
+      ]
+    },
+    {
+      "q": "In GloVe, what role does the weighting function f(x) = (x/x_max)^alpha play?",
+      "options": [
+        "Selects negative samples",
+        "Normalizes vectors to unit length",
+        "Initializes weights randomly",
+        "Downweights extremely frequent pairs so they do not dominate the loss"
+      ]
+    },
+    {
+      "q": "How does the BPE merge step pick which pair to combine next?",
+      "options": [
+        "A random pair",
+        "The lexicographically first pair",
+        "The most frequent adjacent token pair across the corpus",
+        "The pair with highest IDF"
+      ]
+    },
+    {
+      "q": "Why does GPT-2 use byte-level BPE?",
+      "options": [
+        "The base vocabulary of 256 bytes covers any input, eliminating out-of-vocabulary entirely",
+        "Bytes train faster than characters",
+        "Bytes preserve casing implicitly",
+        "Byte BPE skips merge training"
+      ]
+    },
+    {
+      "q": "Which tokenizer should you use when fine-tuning a pretrained transformer?",
+      "options": [
+        "Always byte-level BPE",
+        "Always SentencePiece",
+        "Whichever has the largest vocabulary",
+        "The exact tokenizer the model shipped with; mismatch breaks the embeddings"
+      ]
+    },
+    {
+      "q": "When would you pick FastText over GloVe for pretrained word vectors?",
+      "options": [
+        "When you need a 50d model",
+        "When latency is tightest",
+        "When the corpus is very small",
+        "For morphologically rich languages or domains with frequent neologisms and misspellings"
+      ]
+    },
+    {
+      "q": "What unit forms the base of WordPiece, BPE, and SentencePiece vocabularies?",
+      "options": [
+        "Sentences",
+        "Whole words",
+        "Paragraphs",
+        "Subword pieces (characters, n-grams, or learned merges) below the word level"
+      ]
+    },
+    {
+      "q": "Why is 'The food was not great' a hard case for naive BoW classifiers?",
+      "options": [
+        "It has no punctuation",
+        "It mixes English and French",
+        "It contains too few tokens",
+        "Negation flips meaning, but bag of words discards the link between 'not' and 'great'"
+      ]
+    },
+    {
+      "q": "What two steps make up classical sentiment analysis?",
+      "options": [
+        "Translate, then classify",
+        "Represent (vectorize text) and classify (linear model on the vector)",
+        "Search, then rank",
+        "Embed, then cluster"
+      ]
+    },
+    {
+      "q": "Why does Naive Bayes work despite its 'naive' independence assumption?",
+      "options": [
+        "Laplace smoothing fixes dependence",
+        "The assumption is actually true for text",
+        "Naive Bayes secretly learns interactions",
+        "With sparse text features and moderate data the classifier mostly cares which side each word leans toward, not exact joint probabilities"
+      ]
+    },
+    {
+      "q": "Why include 'NOT_' prefixed tokens during preprocessing?",
+      "options": [
+        "To stem the words",
+        "To shrink the vocabulary",
+        "To normalize case",
+        "To turn 'good' versus 'NOT_good' into separate features that the classifier can weight oppositely"
+      ]
+    },
+    {
+      "q": "Why is removing stopwords risky for sentiment analysis?",
+      "options": [
+        "Stopword removal breaks tokenization",
+        "It increases sparsity",
+        "Stopword lists are too long",
+        "Negation words ('not', 'no', 'never') are usually treated as stopwords but carry sentiment signal"
+      ]
+    },
+    {
+      "q": "Which metric should you report when sentiment classes are imbalanced?",
+      "options": [
+        "Accuracy alone",
+        "Macro-F1 (mean of per-class F1s, equal-weighted)",
+        "Mean squared error",
+        "Micro-F1 only"
+      ]
+    },
+    {
+      "q": "When should you skip classical models and reach for a transformer for sentiment?",
+      "options": [
+        "When you have under 100 examples",
+        "Sarcasm detection, long shifting documents, aspect-based sentiment, or low-resource languages",
+        "When latency is critical",
+        "When you need explainability"
+      ]
+    },
+    {
+      "q": "Why is L2 regularization important for logistic regression on text?",
+      "options": [
+        "Speeds up matrix inversion",
+        "Avoids ReLU dead units",
+        "Sparse high-dimensional text features otherwise let the model memorize training examples",
+        "Required to compute gradients"
+      ]
+    },
+    {
+      "q": "What is BIO tagging?",
+      "options": [
+        "A tree representation of entities",
+        "A binary entity vs non-entity scheme",
+        "Per-token labels: B-TYPE for entity start, I-TYPE for inside, O for outside",
+        "A tokenization style"
+      ]
+    },
+    {
+      "q": "Why are rule-based gazetteers brittle in production NER?",
+      "options": [
+        "They are slow",
+        "They cannot handle multi-token entities",
+        "They have zero coverage on new entities and cannot disambiguate (e.g. Apple fruit vs company)",
+        "They require GPUs"
+      ]
+    },
+    {
+      "q": "What is the key advantage of a CRF over an HMM for NER?",
+      "options": [
+        "CRFs avoid the Viterbi algorithm",
+        "CRFs are discriminative and can mix arbitrary features (shape, capitalization, neighbors)",
+        "CRFs are faster",
+        "CRFs never need training data"
+      ]
+    },
+    {
+      "q": "In a BiLSTM-CRF architecture, what role does the CRF layer play?",
+      "options": [
+        "Performs tokenization",
+        "Replaces embeddings",
+        "Pretrains the LSTM",
+        "Enforces valid BIO tag sequences by modeling tag-to-tag transitions on top of LSTM emissions"
+      ]
+    },
+    {
+      "q": "Why must NER be evaluated with entity-level F1, not token-level F1?",
+      "options": [
+        "Predicted spans must match true spans exactly; token-level F1 overstates accuracy by counting partial matches",
+        "Entity-level F1 is required by HuggingFace",
+        "Token-level F1 cannot handle BIO",
+        "Entity-level F1 is easier to compute"
+      ]
+    },
+    {
+      "q": "What does aggregation_strategy='simple' do in the HuggingFace NER pipeline?",
+      "options": [
+        "Returns only the most confident entity",
+        "Merges contiguous B-X and I-X tokens into a single span",
+        "Lowercases the output",
+        "Skips tokenization"
+      ]
+    },
+    {
+      "q": "Why does standard BIO fail on nested entities?",
+      "options": [
+        "BIO is a flat per-token scheme and cannot express two overlapping spans of different types",
+        "BIO requires a transformer",
+        "BIO cannot represent multi-token entities",
+        "BIO drops the type label"
+      ]
+    },
+    {
+      "q": "When does classical NER (CRF or BiLSTM-CRF) still beat an LLM in 2026?",
+      "options": [
+        "On open-domain narrative",
+        "On nested entities",
+        "Whenever the input is in English",
+        "Under tight latency budgets, abundant labels, stable ontologies, or non-generative regulatory constraints"
+      ]
+    },
+    {
+      "q": "What is the goal of POS tagging?",
+      "options": [
+        "Translate the sentence",
+        "Detect sentiment",
+        "Extract named entities",
+        "Assign a grammatical category (noun, verb, etc.) to each token"
+      ]
+    },
+    {
+      "q": "Which tagset is the default for cross-lingual work?",
+      "options": [
+        "Penn Treebank",
+        "CoNLL-2003",
+        "Stanford Dependencies",
+        "Universal Dependencies"
+      ]
+    },
+    {
+      "q": "What does a bigram HMM POS tagger model?",
+      "options": [
+        "Dependency parses",
+        "P(tags) only",
+        "P(tag | previous tag) transitions plus P(word | tag) emissions, decoded with Viterbi",
+        "Embedding similarities"
+      ]
+    },
+    {
+      "q": "What does the Viterbi algorithm compute for an HMM tagger?",
+      "options": [
+        "The transition matrix",
+        "The marginal probability of each tag",
+        "The forward probabilities only",
+        "The single highest-probability tag sequence via dynamic programming over the tag lattice"
+      ]
+    },
+    {
+      "q": "What does dependency parsing produce?",
+      "options": [
+        "A constituency tree of NP/VP/PP labels",
+        "A tree where each word has one head word and a labeled grammatical relation",
+        "A coreference chain",
+        "A flat BIO sequence"
+      ]
+    },
+    {
+      "q": "Why is the accuracy ceiling on PTB POS tagging around 97-98%?",
+      "options": [
+        "Models cannot exceed 98% in any task",
+        "Universal Dependencies caps at 98%",
+        "Human annotators only agree about 97% of the time, so models above ~98% may be overfitting test data",
+        "Hardware limitations"
+      ]
+    },
+    {
+      "q": "Why does POS tagging still matter in 2026 LLM pipelines?",
+      "options": [
+        "Required for tokenization",
+        "Lemmatization, aspect-based sentiment, query decomposition, structured-output validation, and cross-lingual transfer all still consume POS or dependency parses",
+        "Replaces transformers",
+        "LLMs cannot run without it"
+      ]
+    },
+    {
+      "q": "Which library should you reach for in most production POS / parse tasks?",
+      "options": [
+        "scikit-learn",
+        "spaCy (or stanza/trankit for top accuracy or wider language coverage)",
+        "NumPy",
+        "Roll your own parser"
+      ]
+    },
+    {
+      "q": "What is a 1D convolutional filter of width 3 over word embeddings effectively learning?",
+      "options": [
+        "A learnable bigram detector",
+        "A learnable trigram (n-gram) detector",
+        "A position embedding",
+        "A unigram count"
+      ]
+    },
+    {
+      "q": "Why does an LSTM use a cell state with mostly additive interactions?",
+      "options": [
+        "Faster softmax",
+        "To avoid matrix inversion",
+        "Additive flow lets gradients propagate through long sequences without vanishing or exploding",
+        "It saves memory"
+      ]
+    },
+    {
+      "q": "Why does TextCNN use global max-pooling after the convolutional layer?",
+      "options": [
+        "To reduce vocabulary",
+        "Max-pool gives a fixed-size, position-invariant representation by selecting the strongest activation per filter",
+        "To enable backpropagation",
+        "To remove embeddings"
+      ]
+    },
+    {
+      "q": "What is the main advantage of a bidirectional RNN over a one-way RNN for sequence labeling?",
+      "options": [
+        "Cheaper memory",
+        "Avoids embeddings",
+        "Each token's representation sees both left and right context, which is essential for tagging",
+        "Faster training"
+      ]
+    },
+    {
+      "q": "Why does max-pooling over an LSTM's outputs often beat using just the last hidden state for classification?",
+      "options": [
+        "Max-pool removes capitalization",
+        "Last-state pool ignores padding",
+        "Max-pool is differentiable; last-state is not",
+        "Information at the end of a long sequence tends to dominate the last state, hiding earlier evidence"
+      ]
+    },
+    {
+      "q": "Which limitation of LSTM/RNN encoder-decoders motivated attention?",
+      "options": [
+        "They require subword tokenizers",
+        "The decoder sees only a fixed-size encoder state, losing detail on long inputs; recurrence also serializes training",
+        "They cannot embed tokens",
+        "They cannot use embeddings"
+      ]
+    },
+    {
+      "q": "When does a TextCNN or BiLSTM still beat a transformer in 2026?",
+      "options": [
+        "Whenever the dataset is multilingual",
+        "Edge / on-device, streaming token-by-token inputs, or tiny-data baselines",
+        "When latency requirements are extremely loose",
+        "On image inputs"
+      ]
+    },
+    {
+      "q": "What is the vanishing gradient problem in plain RNNs?",
+      "options": [
+        "Inputs become zero",
+        "Repeated multiplication by recurrent weights smaller than 1 makes gradients toward early steps shrink toward zero",
+        "Loss becomes negative",
+        "Embedding matrix becomes singular"
+      ]
+    },
+    {
+      "q": "What is the role of the encoder in a 2014-style seq2seq model?",
+      "options": [
+        "Generates target tokens",
+        "Performs beam search",
+        "Computes attention weights",
+        "Reads the source and produces a fixed-size context vector summarizing it"
+      ]
+    },
+    {
+      "q": "What is teacher forcing during seq2seq training?",
+      "options": [
+        "Manually labeling each decoder step",
+        "Adding a teacher network during inference",
+        "Doubling the batch size",
+        "Feeding the ground-truth previous token (instead of the model's prediction) as decoder input"
+      ]
+    },
+    {
+      "q": "Why does fixed context-vector seq2seq accuracy fall as input length grows?",
+      "options": [
+        "Cross-entropy diverges",
+        "Padding tokens accumulate",
+        "Vocabulary becomes too large",
+        "All information about the source must fit in a single fixed-size encoder hidden state, which loses detail on long inputs"
+      ]
+    },
+    {
+      "q": "What is exposure bias?",
+      "options": [
+        "Bias from class imbalance",
+        "Bias in encoder embeddings",
+        "Annotator disagreement",
+        "The train/inference gap from training on ground-truth tokens but generating from the model's own predictions at inference"
+      ]
+    },
+    {
+      "q": "Why does beam search often outperform greedy decoding for generation?",
+      "options": [
+        "Beam search is faster",
+        "Beam search keeps the top-k partial sequences alive at each step instead of irrevocably committing to one token",
+        "Beam search avoids exposure bias",
+        "Beam search lowers the loss"
+      ]
+    },
+    {
+      "q": "Which architectural family replaced RNN seq2seq for general generation tasks?",
+      "options": [
+        "Naive Bayes",
+        "Graph neural networks",
+        "1D CNNs",
+        "Transformer encoder-decoder models (BART, T5, mBART, NLLB)"
+      ]
+    },
+    {
+      "q": "What does scheduled sampling do?",
+      "options": [
+        "Adds random noise to embeddings",
+        "Anneals the teacher-forcing ratio downward during training so the model learns to recover from its own predictions",
+        "Reorders the training set",
+        "Schedules learning-rate decay"
+      ]
+    },
+    {
+      "q": "Why does greedy decoding alone often fail for user-facing generation?",
+      "options": [
+        "It always picks <EOS> first",
+        "It cannot use embeddings",
+        "Greedy can repeat or loop and cannot backtrack from a locally good but globally poor token choice",
+        "It requires more memory"
+      ]
+    },
+    {
+      "q": "What problem in seq2seq did Bahdanau attention solve?",
+      "options": [
+        "Tokenization mismatch",
+        "Beam search latency",
+        "The fixed-size context-vector bottleneck where the decoder only saw the encoder's final state",
+        "Vanishing gradients in encoders"
+      ]
+    },
+    {
+      "q": "What is the attention context vector at decoder step t?",
+      "options": [
+        "The encoder's final hidden state",
+        "The decoder's input embedding",
+        "A random projection",
+        "A weighted average of encoder hidden states where the weights come from a query-key score"
+      ]
+    },
+    {
+      "q": "In Bahdanau (additive) attention, what role does the vector v_a play?",
+      "options": [
+        "It encodes positions",
+        "It biases the softmax",
+        "It controls dropout",
+        "It is the projection that turns the attention-dim hidden combination into a scalar score per encoder position"
+      ]
+    },
+    {
+      "q": "In Luong's 'dot' attention variant, what constraint must hold?",
+      "options": [
+        "Beam search is required",
+        "Decoder state and encoder state must share the same dimensionality (d_s == d_h)",
+        "Softmax must be log-space",
+        "The encoder must be bidirectional"
+      ]
+    },
+    {
+      "q": "Which Q/K/V mapping describes classical (Bahdanau/Luong) attention?",
+      "options": [
+        "Q from encoder, K and V from decoder",
+        "Q, K, V are three independent learned projections of the source",
+        "Q = decoder state; K and V = encoder states (same tensor)",
+        "Q is random, K and V are learned"
+      ]
+    },
+    {
+      "q": "Why is reporting raw attention weights as 'explanation' considered fragile?",
+      "options": [
+        "Research (e.g. Jain and Wallace, 2019) showed attention distributions can be permuted without changing predictions on some tasks",
+        "Attention weights are not differentiable",
+        "Attention weights leak labels",
+        "They are too small to plot"
+      ]
+    },
+    {
+      "q": "Which step bridges Bahdanau attention to transformer self-attention?",
+      "options": [
+        "Querying a sequence against itself with separately learned Q, K, and V projections, run in parallel heads",
+        "Dropping beam search",
+        "Replacing softmax with sigmoid",
+        "Adding more RNN layers"
+      ]
+    },
+    {
+      "q": "What is one practical use case for masking in attention?",
+      "options": [
+        "Replacing dropout",
+        "Encoding positions",
+        "Setting attention weight for padding tokens to zero so they do not contribute to the context vector",
+        "Reducing model size"
+      ]
+    },
+    {
+      "q": "What does BLEU measure?",
+      "options": [
+        "N-gram precision (typically 1-4) between hypothesis and reference, with a brevity penalty",
+        "Embedding cosine similarity",
+        "Language identification accuracy",
+        "Character-level F-score"
+      ]
+    },
+    {
+      "q": "Why use sacrebleu instead of rolling your own BLEU?",
+      "options": [
+        "It runs on GPU",
+        "It is more accurate",
+        "It normalizes tokenization so scores are comparable across papers and runs",
+        "It supports streaming"
+      ]
+    },
+    {
+      "q": "Which NLLB-specific setting controls the target language during decoding?",
+      "options": [
+        "src_lang",
+        "forced_bos_token_id set to the target language code's token id",
+        "num_beams",
+        "length_penalty"
+      ]
+    },
+    {
+      "q": "Which metric family is the 2026 default for production MT quality where labeled data exists?",
+      "options": [
+        "Token edit distance",
+        "Latency",
+        "BLEU alone",
+        "Learned metrics such as COMET (and BERTScore/BLEURT) trained on human judgment"
+      ]
+    },
+    {
+      "q": "When does chrF tend to be more informative than BLEU?",
+      "options": [
+        "For morphologically rich languages where character-level matches catch inflectional variants BLEU misses",
+        "When using beam search",
+        "On very short sentences",
+        "Whenever a reference exists"
+      ]
+    },
+    {
+      "q": "What is off-target generation in multilingual MT?",
+      "options": [
+        "Output that drops named entities",
+        "The model decodes into the wrong target language (e.g. NLLB outputting Spanish when French was requested)",
+        "Output that is too short",
+        "Output that misses punctuation"
+      ]
+    },
+    {
+      "q": "Why does fine-tuning on a few thousand high-quality domain pairs often beat much larger noisy web data?",
+      "options": [
+        "Quality and domain match dominate volume; noisy parallel data introduces drift and hallucination",
+        "Smaller datasets train faster",
+        "Web data is illegal to use",
+        "Larger data overflows GPU memory"
+      ]
+    },
+    {
+      "q": "When is an LLM (e.g. GPT-4) likely to outperform a specialized MT model in 2026?",
+      "options": [
+        "Latency-critical browser translation",
+        "Idiomatic content, long context, stylistic adaptation via prompting, or content requiring tone control",
+        "Highest throughput batch translation",
+        "Small-language pairs with millions of parallel sentences"
+      ]
+    },
+    {
+      "q": "What is the key behavioral difference between extractive and abstractive summarization?",
+      "options": [
+        "Extractive is multilingual only",
+        "Extractive returns sentences verbatim from the source; abstractive generates new text and can hallucinate",
+        "Extractive uses TF-IDF; abstractive uses Word2Vec",
+        "Extractive is slower than abstractive"
+      ]
+    },
+    {
+      "q": "What does ROUGE measure?",
+      "options": [
+        "Token-level perplexity",
+        "Embedding similarity",
+        "N-gram and longest-common-subsequence overlap between system and reference summaries",
+        "Reading time"
+      ]
+    },
+    {
+      "q": "How does TextRank score sentences in extractive summarization?",
+      "options": [
+        "By running a PageRank-style iteration over a graph where edges are sentence-similarity weights",
+        "By embedding cosine to the question",
+        "By comparing to a reference summary",
+        "By raw word count"
+      ]
+    },
+    {
+      "q": "Why enable stemming when computing ROUGE?",
+      "options": [
+        "Without stemming, 'running' and 'run' count as different tokens and ROUGE undercounts true overlap",
+        "Stemming normalizes case",
+        "Stemming is required by the rouge-score package",
+        "To speed up ROUGE"
+      ]
+    },
+    {
+      "q": "Which 2026 metric is purpose-built to detect summary hallucinations via NLI entailment?",
+      "options": [
+        "Faithfulness checks (e.g. FactCC or RAGAS faithfulness) using NLI between source and summary claims",
+        "BLEU",
+        "chrF",
+        "ROUGE-L"
+      ]
+    },
+    {
+      "q": "Why is extractive summarization preferred for compliance-adjacent content?",
+      "options": [
+        "Extractive supports longer outputs",
+        "Outputs are lifted verbatim from the source, eliminating the abstractive hallucination class",
+        "It is faster",
+        "ROUGE scores are higher"
+      ]
+    },
+    {
+      "q": "Which of these is an abstractive hallucination type to monitor for?",
+      "options": [
+        "Long sentences",
+        "Entity swap (e.g. 'John Smith' rendered as 'John Brown'), number drift, polarity flip, or fact invention",
+        "Punctuation drift",
+        "Stopword removal"
+      ]
+    },
+    {
+      "q": "When would you reach for a Pegasus checkpoint over BART-large-CNN?",
+      "options": [
+        "When evaluating BLEU",
+        "When you need extractive output",
+        "For domains like scientific abstracts where Pegasus's gap-sentence pretraining objective is a closer fit",
+        "When the input is short"
+      ]
+    },
+    {
+      "q": "What does extractive QA predict?",
+      "options": [
+        "Start and end token indices of the answer span within a given passage",
+        "A retrieved passage ID",
+        "A generated natural-language answer",
+        "A confidence score only"
+      ]
+    },
+    {
+      "q": "What two components define a basic RAG pipeline?",
+      "options": [
+        "Tokenizer and POS tagger",
+        "An encoder and a decoder trained jointly",
+        "A reranker and a translator",
+        "A retriever (find relevant passages) and a reader (extract or generate the answer)"
+      ]
+    },
+    {
+      "q": "On SQuAD, what does Exact Match (EM) measure?",
+      "options": [
+        "Token-level F1",
+        "Whether the prediction matches the reference exactly after normalization (lowercase, strip punctuation, remove articles)",
+        "Edit distance",
+        "Per-word overlap"
+      ]
+    },
+    {
+      "q": "What does deepset/roberta-base-squad2 add over a SQuAD 1.1 model?",
+      "options": [
+        "Bigger context window",
+        "Multilingual support",
+        "Cross-lingual retrieval",
+        "Training on unanswerable questions so the model can predict a null answer"
+      ]
+    },
+    {
+      "q": "Which RAGAS dimension targets hallucinations specifically?",
+      "options": [
+        "Context precision",
+        "Answer relevance",
+        "Faithfulness, measured by NLI entailment between answer claims and retrieved context",
+        "Context recall"
+      ]
+    },
+    {
+      "q": "Why should you measure retrieval recall before evaluating reader accuracy?",
+      "options": [
+        "Reader latency depends on it",
+        "If the correct passage is not in the top-k, the reader cannot succeed regardless of how good it is",
+        "Recall determines ROUGE",
+        "Required by transformers"
+      ]
+    },
+    {
+      "q": "Which prompt pattern reduces hallucinations in RAG generation?",
+      "options": [
+        "Removing the question",
+        "Including more passages",
+        "Asking the model to be creative",
+        "Telling the model to answer only from the provided context and to reply 'I don't know' when the context is insufficient"
+      ]
+    },
+    {
+      "q": "When is extractive QA still preferred over generative RAG in 2026?",
+      "options": [
+        "Regulated domains (legal, medical, audit) where literal quotation from authoritative sources is required",
+        "Open-domain trivia",
+        "Conversational QA",
+        "Multilingual support"
+      ]
+    },
+    {
+      "q": "What does BM25 score a document on?",
+      "options": [
+        "Term frequency, IDF, and document-length-normalized presence of query terms",
+        "Edit distance to the query",
+        "Embedding cosine to the query",
+        "PageRank over the corpus"
+      ]
+    },
+    {
+      "q": "What is the main weakness of dense-only retrieval that BM25 catches?",
+      "options": [
+        "Multilingual queries",
+        "Latency",
+        "Exact keyword and identifier matches (product codes, error strings, named entities) that semantic embeddings can miss",
+        "Long documents"
+      ]
+    },
+    {
+      "q": "Why does Reciprocal Rank Fusion (RRF) ignore raw scores from each retriever?",
+      "options": [
+        "BM25 and dense scores live in different scales; using only rank positions makes the fusion robust to calibration",
+        "Speeds up sorting",
+        "RRF requires probabilities",
+        "Raw scores are illegal to use"
+      ]
+    },
+    {
+      "q": "Why run a cross-encoder reranker only on the top-30 fused results?",
+      "options": [
+        "Cross-encoders are slow per pair; amortizing them on a small candidate pool gives high accuracy with acceptable latency",
+        "Rerankers reduce recall",
+        "Cross-encoders are required at every step",
+        "Top-30 is required by FAISS"
+      ]
+    },
+    {
+      "q": "Which metric is most important to optimize for RAG retrievers?",
+      "options": [
+        "Throughput",
+        "Recall@k, since the reader cannot answer if the correct passage is missing from the top-k",
+        "BLEU",
+        "Latency"
+      ]
+    },
+    {
+      "q": "Where do most production RAG failures originate, per 2026 industry experience?",
+      "options": [
+        "Ingestion and chunking, not the model; bad context defeats good readers",
+        "Prompt verbosity",
+        "Reranker tuning",
+        "The LLM choice"
+      ]
+    },
+    {
+      "q": "What is the 'parent-doc' retrieval pattern?",
+      "options": [
+        "Pick the longest document",
+        "Use parent doc embeddings only",
+        "Retrieve small child chunks for precision, then expand to the parent block when multiple children from the same parent appear, preserving context",
+        "Embed only parent documents"
+      ]
+    },
+    {
+      "q": "When should you ship three-way retrieval (BM25 + dense + SPLADE)?",
+      "options": [
+        "Always",
+        "When infrastructure supports learned-sparse indexes and queries mix proper nouns with semantic intent",
+        "Only on under 1000 documents",
+        "Only for English-only corpora"
+      ]
+    },
+    {
+      "q": "What does LDA assume about each document?",
+      "options": [
+        "Each document belongs to exactly one topic",
+        "Documents are sentences",
+        "Each document is a mixture of topics; each topic is a distribution over words",
+        "Documents are independent of topics"
+      ]
+    },
+    {
+      "q": "What does BERTopic use to form topic clusters?",
+      "options": [
+        "Run BM25 followed by k-means",
+        "Encode docs with a sentence transformer, reduce dimensionality with UMAP, then cluster with HDBSCAN",
+        "Train an LSTM end-to-end",
+        "Direct softmax over the vocabulary"
+      ]
+    },
+    {
+      "q": "Why does scikit-learn's LDA expect raw counts (CountVectorizer), not TF-IDF?",
+      "options": [
+        "LDA cannot handle floats",
+        "LDA's probabilistic model is defined over integer term counts; TF-IDF distorts the underlying distribution",
+        "Memory limits",
+        "TF-IDF is too slow"
+      ]
+    },
+    {
+      "q": "What does HDBSCAN's -1 label mean in a BERTopic output?",
+      "options": [
+        "Stopword cluster",
+        "An outlier cluster of documents the density-based algorithm could not confidently assign",
+        "A reserved category",
+        "Top topic"
+      ]
+    },
+    {
+      "q": "Which coherence metric is the common default for topic-model evaluation?",
+      "options": [
+        "BLEU",
+        "c_v coherence via NPMI over sliding windows of top topic words",
+        "Accuracy",
+        "Perplexity only"
+      ]
+    },
+    {
+      "q": "When is LDA usually a better fit than BERTopic?",
+      "options": [
+        "When embeddings are noisy",
+        "When you need a single topic per document",
+        "Long documents where mixed-membership topic distributions are useful and embeddings would truncate input",
+        "On short tweets"
+      ]
+    },
+    {
+      "q": "Why does BERTopic typically win on short text (tweets, headlines)?",
+      "options": [
+        "Short text has fewer topics",
+        "It supports more languages",
+        "Semantic similarity in embedding space captures meaning where bag-of-words counts are too sparse",
+        "It is faster"
+      ]
+    },
+    {
+      "q": "What is a common LDA failure mode for which you should monitor topics?",
+      "options": [
+        "Topics that match labeled categories perfectly",
+        "Topics with too few documents",
+        "Junk topics that absorb stopwords or extremely frequent terms",
+        "Document mixtures that sum to 1"
+      ]
+    },
+    {
+      "q": "What does an n-gram language model estimate?",
+      "options": [
+        "Document embeddings",
+        "Edit distance between words",
+        "P(next word | previous n-1 words) from count statistics",
+        "P(label | document)"
+      ]
+    },
+    {
+      "q": "What problem does smoothing solve in n-gram models?",
+      "options": [
+        "Numerical precision",
+        "Zero-probability assignment to n-grams unseen in training, which collapses sentence likelihoods to zero",
+        "Memory usage",
+        "Tokenization mismatch"
+      ]
+    },
+    {
+      "q": "What insight makes Kneser-Ney smoothing better than naive absolute discounting?",
+      "options": [
+        "It uses bigger n",
+        "It uses TF-IDF",
+        "It uses gradient descent",
+        "It estimates the lower-order distribution with continuation probability (number of distinct contexts a word appears in) instead of raw frequency"
+      ]
+    },
+    {
+      "q": "What does perplexity measure?",
+      "options": [
+        "Number of distinct n-grams",
+        "exp of the average negative log-likelihood per token on a held-out test set; lower is better",
+        "Cross-entropy of labels",
+        "Throughput of generation"
+      ]
+    },
+    {
+      "q": "Why must train and test sets use identical tokenization when comparing perplexity numbers?",
+      "options": [
+        "To avoid OOV",
+        "Perplexity depends on the tokenization scheme; mismatched tokenizers produce noncomparable scores",
+        "Required by gradient descent",
+        "To control batch size"
+      ]
+    },
+    {
+      "q": "Why do generated trigram-LM sentences feel locally fluent but globally incoherent?",
+      "options": [
+        "Local trigram context guides each next word but the model has no long-range memory beyond n-1 tokens",
+        "They drop punctuation",
+        "They use Laplace smoothing",
+        "Beam search fails"
+      ]
+    },
+    {
+      "q": "Where do n-gram models still ship in production in 2026?",
+      "options": [
+        "Multilingual translation",
+        "Summarization",
+        "Open-domain chatbots",
+        "Latency-critical paths like speech recognition rescoring and on-device autocomplete via libraries such as KenLM"
+      ]
+    },
+    {
+      "q": "Why is computing an n-gram baseline before declaring a neural LM 'good' still recommended?",
+      "options": [
+        "It speeds up training",
+        "Required by ROUGE",
+        "It removes OOV",
+        "If a transformer LM does not beat a tuned Kneser-Ney baseline by a wide margin on the same tokenization, something is off in the training pipeline"
+      ]
+    },
+    {
+      "q": "What does a slot-filling state machine do in a rule-based chatbot?",
+      "options": [
+        "Picks the most fluent reply",
+        "Embeds the user message",
+        "Tracks which required parameters (date, destination, amount) are still missing and asks for them in sequence",
+        "Detects sarcasm"
+      ]
+    },
+    {
+      "q": "Why is retrieval-based chat resistant to hallucination?",
+      "options": [
+        "It uses BM25",
+        "It uses embeddings",
+        "It rejects all queries",
+        "It returns a canned response from a curated set rather than generating new text"
+      ]
+    },
+    {
+      "q": "What defines an LLM agent loop versus a single-shot LLM call?",
+      "options": [
+        "A controller that interleaves LLM calls with tool invocations until the model returns a final answer or the step budget is hit",
+        "Use of softmax",
+        "Use of greedy decoding",
+        "Bigger context window"
+      ]
+    },
+    {
+      "q": "Why is hybrid routing (rules + retrieval + LLM agent) the 2026 production default?",
+      "options": [
+        "It avoids embeddings",
+        "No single architecture handles every request well; rules cover destructive actions, retrieval covers FAQ, agents handle ambiguous open-ended queries",
+        "It is cheaper to maintain",
+        "It removes the need for evaluation"
+      ]
+    },
+    {
+      "q": "What is prompt injection?",
+      "options": [
+        "A type of tokenizer attack",
+        "User-supplied (direct) or document-supplied (indirect) text that tries to override the system prompt or hijack the agent's behavior",
+        "A SQL injection variant only",
+        "Injecting tokens into embeddings"
+      ]
+    },
+    {
+      "q": "Which OWASP Top 10 (LLM Apps 2025) risk is ranked LLM01?",
+      "options": [
+        "SQL injection",
+        "Broken access control",
+        "Insecure deserialization",
+        "Prompt injection (direct and indirect)"
+      ]
+    },
+    {
+      "q": "What mitigation pattern reduces indirect prompt injection by separating planning from execution?",
+      "options": [
+        "Plan-Verify-Execute: the agent plans first, verifies each action against the plan, then executes — preventing tool outputs from injecting new unplanned actions",
+        "Shorter context",
+        "Lower temperature",
+        "Bigger model"
+      ]
+    },
+    {
+      "q": "Why must destructive actions (payments, deletions) route through a structured flow even in an LLM-agent system?",
+      "options": [
+        "Tools cannot be called",
+        "Beam search is unsafe",
+        "Confident fabrication, prompt injection, and scope creep mean the LLM cannot be the sole authority for irreversible side effects",
+        "LLMs are slow"
+      ]
+    },
+    {
+      "q": "What does zero-shot cross-lingual transfer mean?",
+      "options": [
+        "Translating without a translation model",
+        "Tokenizing with zero merges",
+        "Fine-tune a multilingual model on one source language and evaluate on a different language with no target-language labels",
+        "Training with zero examples"
+      ]
+    },
+    {
+      "q": "Which model family ships as the standard 100-language cross-lingual baseline?",
+      "options": [
+        "GPT-2",
+        "GloVe",
+        "DistilBERT",
+        "XLM-R (e.g. XLM-RoBERTa-base, 270M)"
+      ]
+    },
+    {
+      "q": "Why does English-as-source not always give the best transfer for a non-English target?",
+      "options": [
+        "English has too little data",
+        "Language similarity (typology, script, morphology) predicts transfer quality; a closer high-resource source can outperform English",
+        "English uses BPE",
+        "English is too short"
+      ]
+    },
+    {
+      "q": "What is the 'fertility tax' for low-resource languages?",
+      "options": [
+        "Smaller models train slower",
+        "Tokenizers cannot handle Unicode",
+        "BPE refuses to train",
+        "Low-resource text tokenizes into more subwords per word than English, consuming context window, latency, and capacity"
+      ]
+    },
+    {
+      "q": "Why is per-language evaluation required, not aggregated accuracy?",
+      "options": [
+        "Aggregates run faster",
+        "Aggregates only work on classification",
+        "Aggregates ignore tokenization",
+        "Aggregate numbers hide long-tail languages where a multilingual model can be far worse than its mean suggests"
+      ]
+    },
+    {
+      "q": "Why is fine-tuning learning rate critical when adapting a multilingual model with few-shot data?",
+      "options": [
+        "High LR can collapse the multilingual alignment and effectively reduce the model to English-only",
+        "Lower LR wastes GPU",
+        "It changes the vocabulary",
+        "Required by tokenizers"
+      ]
+    },
+    {
+      "q": "Which mitigation directly addresses tokenizer fertility for long-tail scripts?",
+      "options": [
+        "Skip stopwords",
+        "Use byte-fallback (SentencePiece byte_fallback=True) or a tokenizer with broader script coverage (e.g. XLM-V)",
+        "More training epochs",
+        "Lower batch size"
+      ]
+    },
+    {
+      "q": "When is a monolingual model from scratch worth trying instead of a multilingual one?",
+      "options": [
+        "Only for translation",
+        "Whenever the tokenizer is BPE",
+        "Always for English",
+        "When the target language has enough data to train a monolingual model that beats the multilingual baseline; test before assuming"
+      ]
+    },
+    {
+      "q": "What does subword tokenization buy you over word-level vocabularies?",
+      "options": [
+        "Faster training",
+        "Smaller models",
+        "Better embeddings",
+        "Rare words decompose into known subword pieces, eliminating OOV while keeping vocabulary bounded"
+      ]
+    },
+    {
+      "q": "Why does GPT-2 use byte-level BPE rather than character-level BPE?",
+      "options": [
+        "Required by transformers",
+        "A 256-byte base vocabulary covers any UTF-8 input, guaranteeing no [UNK] tokens",
+        "Bytes are smaller",
+        "Byte BPE skips merges"
+      ]
+    },
+    {
+      "q": "How does the Unigram tokenizer build its vocabulary?",
+      "options": [
+        "Greedy frequent-pair merging",
+        "Random sampling",
+        "Start from a large candidate set, iteratively prune tokens whose removal least hurts corpus log-likelihood",
+        "Greedy IDF weighting"
+      ]
+    },
+    {
+      "q": "What distinguishes WordPiece's merge criterion from BPE's?",
+      "options": [
+        "WordPiece uses bytes",
+        "WordPiece skips merges",
+        "WordPiece is unsupervised",
+        "WordPiece merges pairs that maximize training-corpus likelihood, while BPE merges the most frequent pair"
+      ]
+    },
+    {
+      "q": "Which tool trains a tokenizer directly on raw multilingual Unicode text?",
+      "options": [
+        "spaCy",
+        "tiktoken",
+        "tokenizers-lite",
+        "SentencePiece (encodes whitespace as a special marker and trains BPE or Unigram)"
+      ]
+    },
+    {
+      "q": "Why must production CI hash-check the deployed tokenizer.json?",
+      "options": [
+        "Tokenizer drift produces different token IDs from those the model was trained on, silently corrupting outputs",
+        "To compress storage",
+        "It reduces vocabulary size",
+        "Required by Hugging Face"
+      ]
+    },
+    {
+      "q": "What is a common reason a single emoji takes many tokens?",
+      "options": [
+        "Emojis are stop characters",
+        "Emojis are reserved",
+        "Multi-codepoint emojis encode into multiple UTF-8 bytes; without dedicated tokens each byte is its own subword",
+        "Emojis are stored as floats"
+      ]
+    },
+    {
+      "q": "What heuristic guides vocabulary size for a new monolingual transformer?",
+      "options": [
+        "Match training corpus size",
+        "Roughly 32k for models under 1B parameters; 50-100k for 1-10B; 200k+ for multilingual or frontier models",
+        "Always 1M",
+        "Always 8000"
+      ]
+    },
+    {
+      "q": "Why is prompt-only 'return JSON' not enough for production?",
+      "options": [
+        "Prompts are too long",
+        "Prompting cannot describe schemas",
+        "JSON is too verbose",
+        "Frontier models comply most of the time but not always; the small fraction of malformed outputs breaks downstream parsers"
+      ]
+    },
+    {
+      "q": "What does constrained decoding modify at each generation step?",
+      "options": [
+        "The logit vector, masking tokens that would invalidate the target grammar so only valid continuations can be sampled",
+        "The training loss",
+        "The tokenizer",
+        "The KV cache"
+      ]
+    },
+    {
+      "q": "Why might constrained decoding be faster than free generation?",
+      "options": [
+        "The model is smaller",
+        "It avoids softmax entirely",
+        "It skips backprop",
+        "Forced scaffold tokens (e.g. '{\"name\": \"') can be emitted directly without sampling, and the valid-token search space shrinks"
+      ]
+    },
+    {
+      "q": "Which schema design choice prevents premature commitment by the model?",
+      "options": [
+        "Put 'answer' first",
+        "Place reasoning fields before the answer/decision field so the model thinks before committing",
+        "Use shorter keys",
+        "Use snake_case"
+      ]
+    },
+    {
+      "q": "What is the limitation of FSM-based constrained decoding tools like Outlines?",
+      "options": [
+        "They only support enums",
+        "They lock you to OpenAI",
+        "Recursive schemas have to be flattened; truly recursive structures need CFG-based engines such as XGrammar",
+        "They are not deterministic"
+      ]
+    },
+    {
+      "q": "Why is Instructor described as not modifying logits?",
+      "options": [
+        "Instructor formats the schema into the prompt and parses/retries the output; logit masking happens server-side or not at all",
+        "It edits the prompt",
+        "It uses gradient updates",
+        "Required by Anthropic"
+      ]
+    },
+    {
+      "q": "What problem can a strict regex like date='YYYY-MM-DD' introduce?",
+      "options": [
+        "It breaks JSON parsing",
+        "It removes any escape hatch for unknown values, so the model fabricates a date instead of returning null/sentinel",
+        "It requires CFG support",
+        "Regex is slow"
+      ]
+    },
+    {
+      "q": "When should you reach for vLLM guided decoding vs a vendor structured-output API?",
+      "options": [
+        "Only with byte-level BPE",
+        "Always vendor",
+        "Self-hosted inference where you control the model and want logit-level guarantees without retries",
+        "Only for tiny schemas"
+      ]
+    },
+    {
+      "q": "What three labels does NLI assign to a (premise, hypothesis) pair?",
+      "options": [
+        "True / false / unknown",
+        "Cause / effect / unrelated",
+        "Entailment / contradiction / neutral",
+        "Positive / negative / neutral"
+      ]
+    },
+    {
+      "q": "How is NLI used as a zero-shot text classifier?",
+      "options": [
+        "By prompting an LLM",
+        "Verbalize each candidate label as a hypothesis (e.g. 'This text is about sports') and pick the label with the highest entailment score",
+        "By computing TF-IDF",
+        "By averaging embeddings"
+      ]
+    },
+    {
+      "q": "Why is NLI a faithfulness check for RAG outputs?",
+      "options": [
+        "It is cheap",
+        "Checking whether the retrieved context entails each answer claim is exactly the formulation NLI was trained on",
+        "It is multilingual",
+        "It uses tokenizers"
+      ]
+    },
+    {
+      "q": "What does the hypothesis-only baseline expose?",
+      "options": [
+        "Tokenizer drift",
+        "Slow inference",
+        "Multilingual gaps",
+        "Datasets where the hypothesis alone (without the premise) is predictive of the label, signalling label leakage"
+      ]
+    },
+    {
+      "q": "Which NLI model family tops 2026 leaderboards as the standard workhorse?",
+      "options": [
+        "DeBERTa-v3 variants fine-tuned on MNLI/FEVER/ANLI",
+        "Plain Word2Vec",
+        "GPT-2",
+        "fastText"
+      ]
+    },
+    {
+      "q": "Why do sentence-level NLI models drop accuracy on document-length premises?",
+      "options": [
+        "They were trained on short premises and fail at multi-sentence and multi-hop inference; DocNLI-tuned models handle longer inputs",
+        "Larger inputs run slower",
+        "Cosine similarity decays",
+        "Documents trigger tokenizer drift"
+      ]
+    },
+    {
+      "q": "Why can zero-shot accuracy swing 10+ points based on the hypothesis template?",
+      "options": [
+        "Templates change the label set",
+        "Models are sensitive to phrasing; e.g. 'This text is about {label}' vs '{label}' alone shifts entailment probabilities",
+        "Templates change tokenizer behavior",
+        "Templates affect model weights"
+      ]
+    },
+    {
+      "q": "What is a safe limit to claim about NLI for hallucination detection?",
+      "options": [
+        "It reduces hallucination as a faithfulness signal but does not eliminate it; combine with retrieval recall and human review",
+        "It only works on English",
+        "It eliminates hallucination",
+        "It requires LLMs"
+      ]
+    },
+    {
+      "q": "What is a dense embedding?",
+      "options": [
+        "One fixed-size vector per text where cosine similarity ranks passages by semantic proximity",
+        "A token-level alignment matrix",
+        "A sparse weight per vocab token",
+        "A graph over documents"
+      ]
+    },
+    {
+      "q": "What does Matryoshka Representation Learning enable?",
+      "options": [
+        "Faster softmax",
+        "Multilingual training",
+        "Cross-encoder rescoring",
+        "Truncating a trained embedding to its first N dimensions and getting a still-useful smaller embedding"
+      ]
+    },
+    {
+      "q": "How do multi-vector (ColBERT) embeddings score query-doc pairs?",
+      "options": [
+        "Cosine of mean-pooled token vectors",
+        "Cross-entropy",
+        "MaxSim: for each query token find the most similar document token, then sum the maxima",
+        "Earth-mover's distance"
+      ]
+    },
+    {
+      "q": "What does BGE-M3 output simultaneously?",
+      "options": [
+        "Only a sparse vector",
+        "Only a dense vector",
+        "Dense, sparse, and multi-vector (colbert) representations from one model in a single inference",
+        "Only a colbert vector"
+      ]
+    },
+    {
+      "q": "Why must you re-normalize a Matryoshka-truncated vector before cosine similarity?",
+      "options": [
+        "Truncation changes the vector norm; without re-normalizing, dot product no longer equals cosine",
+        "Cosine ignores normalization",
+        "Truncation breaks training",
+        "Required by FAISS only"
+      ]
+    },
+    {
+      "q": "Why do BGE models often need a query-side prefix string?",
+      "options": [
+        "To compress queries",
+        "Prefixes change tokenizer behavior",
+        "Required by FAISS",
+        "BGE was trained with an explicit query prompt; omitting it costs 3-5 points recall"
+      ]
+    },
+    {
+      "q": "Why is MTEB necessary but not sufficient for picking an embedding model?",
+      "options": [
+        "MTEB only covers English",
+        "MTEB rewards bigger models",
+        "MTEB ignores latency",
+        "Leaderboard ranks are average across many tasks; your specific domain may differ, so always benchmark on your data"
+      ]
+    },
+    {
+      "q": "When should you add SPLADE sparse retrieval alongside dense embeddings?",
+      "options": [
+        "On small corpora only",
+        "Whenever the encoder is multilingual",
+        "When queries are keyword-heavy or contain identifiers/codes that dense embeddings blur",
+        "Whenever Matryoshka is used"
+      ]
+    },
+    {
+      "q": "Why is chunking strategy as important as the embedding model in RAG?",
+      "options": [
+        "Chunking shrinks the model",
+        "Smaller chunks train faster",
+        "Chunking is required by FAISS",
+        "Chunk boundaries determine whether the answer is even retrievable; bad chunks defeat any embedding"
+      ]
+    },
+    {
+      "q": "What does LangChain's RecursiveCharacterTextSplitter try in order?",
+      "options": [
+        "Try splitting on paragraph breaks, then newlines, then sentence boundaries, then spaces",
+        "Split on token IDs",
+        "Split on whitespace only",
+        "Always split on character N"
+      ]
+    },
+    {
+      "q": "Why does the parent-document pattern improve answer quality?",
+      "options": [
+        "It removes embeddings",
+        "Children give precise retrieval; returning the larger parent block preserves the surrounding context the reader needs",
+        "It avoids tokenization",
+        "It uses fewer GPU cycles"
+      ]
+    },
+    {
+      "q": "What does Anthropic's 'contextual retrieval' add to each chunk before indexing?",
+      "options": [
+        "An LLM-generated 50-100 word summary placing the chunk in the document's overall context",
+        "Random noise",
+        "A POS tag",
+        "A language code"
+      ]
+    },
+    {
+      "q": "Which 2026 finding contradicts the conventional wisdom about chunk overlap?",
+      "options": [
+        "Overlap should be 50%",
+        "Overlap is required for BM25",
+        "Overlap improves contextual retrieval only",
+        "Empirical 2026 benchmarks show overlap often provides zero measurable benefit while doubling index cost"
+      ]
+    },
+    {
+      "q": "Which chunk size does NVIDIA's 2026 benchmark associate with factoid queries?",
+      "options": [
+        "Roughly 256-512 tokens",
+        "2048-4096 tokens",
+        "8192 tokens",
+        "64 tokens"
+      ]
+    },
+    {
+      "q": "Why is a min-token floor important when using semantic chunking?",
+      "options": [
+        "Without a floor, semantic chunking can produce tiny 40-token fragments that hurt retrieval",
+        "Required by BERT",
+        "Floors prevent overlap",
+        "Floors speed up inference"
+      ]
+    },
+    {
+      "q": "What does 'late chunking' do differently from traditional chunking?",
+      "options": [
+        "Chunks after retrieval",
+        "Embeds the whole document at the token level first, then pools token embeddings into chunk vectors to preserve cross-chunk context",
+        "Skips chunking entirely",
+        "Uses BM25 instead"
+      ]
+    },
+    {
+      "q": "What is the goal of coreference resolution?",
+      "options": [
+        "Cluster all mentions (named, nominal, pronominal) that refer to the same real-world entity",
+        "Extract relations",
+        "Tag parts of speech",
+        "Translate pronouns to nouns"
+      ]
+    },
+    {
+      "q": "Which type of expression is a 'nominal' mention?",
+      "options": [
+        "A verb",
+        "A pronoun like 'she'",
+        "A proper noun only",
+        "A noun phrase such as 'the CEO' or 'the company'"
+      ]
+    },
+    {
+      "q": "What is the modern (Lee et al., 2017) coref architecture?",
+      "options": [
+        "Rule-based syntactic parsing only",
+        "Decision trees",
+        "End-to-end span-based: enumerate spans, score mentions, then score antecedent probabilities and cluster greedily",
+        "BM25 retrieval"
+      ]
+    },
+    {
+      "q": "What does CoNLL F1 average?",
+      "options": [
+        "MUC, B-cubed, and CEAF-phi4 F1 scores",
+        "Precision and recall",
+        "F1 across languages",
+        "Token and span F1"
+      ]
+    },
+    {
+      "q": "What is bridging anaphora?",
+      "options": [
+        "An implicit reference like 'the wheels' implying the wheels of a previously mentioned car",
+        "A mistranslation",
+        "A pronoun before its referent",
+        "A pronoun without an antecedent"
+      ]
+    },
+    {
+      "q": "Why is LLM-only coref unreliable on long documents?",
+      "options": [
+        "Coref requires a CFG",
+        "LLMs cannot read text",
+        "Tokenizers fail",
+        "Single-call LLMs over-merge or silently drop mentions across 50+ paragraphs; require sliding-window plus merge"
+      ]
+    },
+    {
+      "q": "Why merge coref clusters into NER results before downstream tasks?",
+      "options": [
+        "Required by Wikidata",
+        "So downstream tasks see one entity per cluster rather than one per surface mention, dramatically improving coverage",
+        "Lower latency",
+        "To increase token count"
+      ]
+    },
+    {
+      "q": "Why are hard-coded gender rules a fragility in coref systems?",
+      "options": [
+        "They break on non-binary referents, organizations, and animals; learned scoring is more robust",
+        "They cannot use POS tags",
+        "They require GPU",
+        "They run too fast"
+      ]
+    },
+    {
+      "q": "What does entity linking add on top of NER?",
+      "options": [
+        "Sentiment polarity",
+        "Part-of-speech tags",
+        "It maps each detected mention to a unique entry in a knowledge base (Wikidata, Wikipedia, or a domain KB)",
+        "Translations"
+      ]
+    },
+    {
+      "q": "What are the two main subtasks in entity linking?",
+      "options": [
+        "Candidate generation (shortlist of plausible KB entries) and disambiguation (pick the right one given context)",
+        "Embedding and clustering",
+        "POS tagging and lemmatization",
+        "Tokenization and parsing"
+      ]
+    },
+    {
+      "q": "Why must mention recall be reported alongside disambiguation accuracy?",
+      "options": [
+        "Disambiguation cannot recover from missing candidates; the pipeline is bounded by candidate-generation recall",
+        "Mention recall is mandatory by GDPR",
+        "Recall is required by spaCy",
+        "Recall replaces precision"
+      ]
+    },
+    {
+      "q": "How does GENRE perform entity linking?",
+      "options": [
+        "Decodes the entity's canonical name token-by-token under constrained decoding over a trie of valid KB ids",
+        "By computing TF-IDF",
+        "By BM25",
+        "By PageRank"
+      ]
+    },
+    {
+      "q": "What is NIL handling in entity linking?",
+      "options": [
+        "Skipping every mention",
+        "Returning the entire candidate list",
+        "Lowercasing the input",
+        "Predicting a 'not in KB' label when no candidate is a real match (emerging entities, obscure people)"
+      ]
+    },
+    {
+      "q": "Why does popularity bias hurt entity linking in specialized domains?",
+      "options": [
+        "Models trained on web data over-predict frequent entities (e.g. basketball Jordan over the ML researcher Michael I. Jordan)",
+        "Popularity helps recall",
+        "It biases toward older entities only",
+        "Popularity removes NIL"
+      ]
+    },
+    {
+      "q": "What is a safe LLM-EL pattern in 2026?",
+      "options": [
+        "Just prompt 'find the entity'",
+        "Skip candidate generation",
+        "Free-form generation",
+        "Provide a candidate list and use constrained JSON output that the LLM can only choose from valid KB ids"
+      ]
+    },
+    {
+      "q": "Why must NER mention boundaries be exact for entity linking to work?",
+      "options": [
+        "Boundary errors propagate: 'Bank of America' clipped to 'Bank' surfaces wrong candidates and tanks EL recall",
+        "Boundaries break Wikipedia lookups",
+        "Boundary precision only affects NER metrics, not entity-linking candidate quality",
+        "Boundaries change tokenization"
+      ]
+    },
+    {
+      "q": "What is the atomic unit of a knowledge graph?",
+      "options": [
+        "A token",
+        "A POS tag",
+        "A (subject, relation, object) triple",
+        "A sentence"
+      ]
+    },
+    {
+      "q": "What does AEVS stand for in 2026 relation extraction?",
+      "options": [
+        "Aggregated Entity-Value Schema",
+        "Async Entity Validation Service",
+        "Auto-Encoder Vector Search",
+        "Anchor-Extraction-Verification-Supplement: anchor spans, extract triples, verify against source, supplement coverage"
+      ]
+    },
+    {
+      "q": "Why must each triple carry source provenance (doc id + span)?",
+      "options": [
+        "Provenance is required by SPARQL",
+        "It speeds up extraction",
+        "Provenance changes the ontology",
+        "Provenance lets you audit triples and reject hallucinations whose spans do not match the source text"
+      ]
+    },
+    {
+      "q": "What does canonicalization of relations do?",
+      "options": [
+        "Adds embeddings",
+        "Removes triples",
+        "Maps surface verb phrases (e.g. 'was born in', 'is a native of') onto a fixed property id so the graph is queryable",
+        "Translates the document"
+      ]
+    },
+    {
+      "q": "Why does relation extraction usually need coreference resolution first?",
+      "options": [
+        "Pronouns like 'he founded Apple' must be resolved to a named entity before triple extraction",
+        "Coref normalizes case",
+        "Coref provides positions",
+        "Coref adds embeddings"
+      ]
+    },
+    {
+      "q": "Which choice trades open IE recall for graph queryability?",
+      "options": [
+        "Random sampling of triples",
+        "Embedding-only graphs",
+        "Mapping open-IE relations onto a closed ontology (e.g. Wikidata properties) before merging into the KG",
+        "Skipping NER"
+      ]
+    },
+    {
+      "q": "Why do many production KGs use temporal qualifiers (start/end time)?",
+      "options": [
+        "Required by RDF",
+        "To remove NIL entities",
+        "Faster SPARQL",
+        "Many relations are time-bounded (employer, spouse, role); qualifiers prevent 'forever true' claims that go stale"
+      ]
+    },
+    {
+      "q": "What is REBEL?",
+      "options": [
+        "A tokenizer",
+        "A coreference model",
+        "A seq2seq relation extractor that outputs triples already in Wikidata property ids",
+        "A vector database"
+      ]
+    },
+    {
+      "q": "Why are Exact Match and token-F1 insufficient for evaluating modern LLM outputs?",
+      "options": [
+        "They are not differentiable",
+        "They miss semantic equivalence; 'June 29th, 2007' vs 'June 29, 2007' scores 0 EM despite being correct",
+        "They require GPUs",
+        "They are too slow"
+      ]
+    },
+    {
+      "q": "What does the RAGAS faithfulness metric measure?",
+      "options": [
+        "Latency",
+        "Tokens per second",
+        "Whether each claim in the answer is entailed by the retrieved context, via NLI",
+        "Retrieval recall"
+      ]
+    },
+    {
+      "q": "Why is judge-model calibration against human labels required before trusting scores?",
+      "options": [
+        "Required by the GDPR",
+        "If Spearman correlation between judge and human labels is too low (e.g. below 0.7), the score is noise rather than signal",
+        "Calibration speeds up the judge",
+        "Calibration is a tokenization issue"
+      ]
+    },
+    {
+      "q": "What is self-evaluation bias in LLM-as-judge setups?",
+      "options": [
+        "Judges run faster on cached outputs",
+        "Judges ignore system prompts",
+        "Lower latency",
+        "Using the same LLM family to generate and judge inflates scores by 10-20% versus an independent judge"
+      ]
+    },
+    {
+      "q": "What does G-Eval specifically add over a naive 'score 0-1' prompt?",
+      "options": [
+        "Bigger context",
+        "An explicit chain-of-thought rubric with named evaluation steps, which yields more stable scores",
+        "Multilingual scoring",
+        "Lower cost"
+      ]
+    },
+    {
+      "q": "Why is reporting only the aggregate mean score dangerous?",
+      "options": [
+        "Aggregates need GPU",
+        "Aggregates ignore the judge",
+        "Aggregates are too large",
+        "An 0.85 mean can hide 5% catastrophic failures; always inspect the bottom quantile"
+      ]
+    },
+    {
+      "q": "Why pin the judge model + version in CI?",
+      "options": [
+        "Required by Anthropic",
+        "Upgrading the judge changes every metric; longitudinal comparison breaks without a frozen judge",
+        "Tokenizer drift",
+        "Lower cost"
+      ]
+    },
+    {
+      "q": "Where does DeepEval fit relative to RAGAS?",
+      "options": [
+        "Replaces RAGAS entirely",
+        "DeepEval is a tokenizer",
+        "DeepEval is pytest-for-LLMs (CI gates, G-Eval, hallucination metrics); RAGAS specializes in reference-free RAG monitoring",
+        "DeepEval is hosted only"
+      ]
+    },
+    {
+      "q": "What does the original NIAH benchmark measure?",
+      "options": [
+        "Whether the model can retrieve a planted fact at controlled depths across a long context",
+        "Tokenizer fertility",
+        "Embedding cosine drift",
+        "Multi-hop reasoning only"
+      ]
+    },
+    {
+      "q": "Why is the advertised context window often very different from the usable context?",
+      "options": [
+        "Embeddings overflow",
+        "Tokenizers truncate",
+        "Attention degrades with length and task; spec-sheet maximums rarely hold under multi-hop or reasoning loads",
+        "Beam search slows"
+      ]
+    },
+    {
+      "q": "What does RULER add over NIAH?",
+      "options": [
+        "Per-token logprobs",
+        "Translation tasks",
+        "Faster inference",
+        "Thirteen task types across retrieval, multi-hop tracing, aggregation, and QA at multiple context lengths"
+      ]
+    },
+    {
+      "q": "What is the 'lost in the middle' effect?",
+      "options": [
+        "Models under-attend to content placed in the middle of long inputs; depth=0.5 often performs worse than depth=0 or 1",
+        "Models lose punctuation",
+        "Models forget the first token",
+        "Models reorder tokens"
+      ]
+    },
+    {
+      "q": "Why must NIAH-only evaluation be supplemented with multi-hop tests?",
+      "options": [
+        "NIAH lacks ground truth",
+        "Frontier models can ace single-needle retrieval but still fail multi-hop variable-tracing or aggregation tasks",
+        "Multi-hop is faster",
+        "NIAH cannot run on long context"
+      ]
+    },
+    {
+      "q": "What does NoLiMa stress?",
+      "options": [
+        "Tokenization",
+        "Needles that share no literal tokens with the query, so retrieval requires a semantic reasoning step",
+        "Latency",
+        "Streaming output"
+      ]
+    },
+    {
+      "q": "What two numbers should a long-context spec sheet report?",
+      "options": [
+        "GPU memory and latency only",
+        "Tokens per second only",
+        "Only the advertised max",
+        "Effective retrieval length (e.g. 90% NIAH pass) and effective reasoning length (e.g. 70% multi-hop pass)"
+      ]
+    },
+    {
+      "q": "Why measure time-to-first-token at long context lengths?",
+      "options": [
+        "Required by RAG",
+        "Beam search depends on it",
+        "1M-token prefills can take tens of seconds; accuracy alone hides product-impacting latency",
+        "Tokenization is slow"
+      ]
+    },
+    {
+      "q": "What does dialogue state tracking maintain across turns?",
+      "options": [
+        "A free-text history only",
+        "A POS-tagged transcript",
+        "An embedding of the conversation",
+        "A slot-value dictionary representing the user's current goal, updated after every turn"
+      ]
+    },
+    {
+      "q": "What does Joint Goal Accuracy (JGA) measure?",
+      "options": [
+        "Fraction of turns where every slot is exactly correct (all-or-nothing)",
+        "Cosine similarity",
+        "Latency per turn",
+        "Average slot accuracy"
+      ]
+    },
+    {
+      "q": "Why does regenerating the whole state from history each turn handle user corrections naturally?",
+      "options": [
+        "It uses fewer tokens",
+        "It runs on GPU",
+        "It avoids embeddings",
+        "Reading the full history lets the model re-derive the final state including 'actually...' corrections without explicit rollback logic"
+      ]
+    },
+    {
+      "q": "Which 2026 pattern gives a guaranteed-valid slot dict in 5 lines of code?",
+      "options": [
+        "Hand-written regex",
+        "LLM + Instructor + Pydantic schema with constrained or validated output",
+        "TF-IDF classifier",
+        "BM25 retrieval"
+      ]
+    },
+    {
+      "q": "Why version your DST schema?",
+      "options": [
+        "Adding new slots post-hoc invalidates older training data and breaks longitudinal evaluation",
+        "Reduce token count",
+        "Required by JSON",
+        "Speed gains"
+      ]
+    },
+    {
+      "q": "Why must DST for compliance-sensitive domains include a rule-based check alongside LLM extraction?",
+      "options": [
+        "LLMs are slower",
+        "Rules avoid embeddings",
+        "LLM-only DST can mis-extract destructive parameters (amount, account, date); a rules layer enforces deterministic constraints",
+        "Rules are multilingual"
+      ]
+    },
+    {
+      "q": "What is the cost concern with regenerating state on every turn via LLM?",
+      "options": [
+        "Embedding drift",
+        "More embeddings",
+        "Re-reading the full history each turn yields O(n^2) total token usage; cap or summarize older turns",
+        "Cosine costs"
+      ]
+    },
+    {
+      "q": "Why are explicit confirmation flows required before destructive backend actions?",
+      "options": [
+        "Confirmation increases JGA",
+        "Even good DST has nonzero slot-error rates; a deterministic confirmation prevents wrong-account or wrong-amount actions",
+        "Required by tokenizers",
+        "Latency"
+      ]
+    }
+  ]
+}

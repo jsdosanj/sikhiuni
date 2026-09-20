@@ -1,0 +1,315 @@
+{
+  "engine": "repl",
+  "headerLabel": "claude — learn-ai-coding dojo",
+  "modelLabel": "claude (learn-ai-coding demo)",
+  "welcomeTitle": "Welcome — this is Claude Code's real command set",
+  "welcomeLines": [
+    "/help lists the built-ins, grouped by workflow · every command below is documented, not invented",
+    "cwd: ~/ai · try /skills or /agents to start"
+  ],
+  "footnote": "synced to the public Claude Code documentation: commands, skills, sub-agents, memory, permissions, mcp",
+  "demoList": ["/help", "/init", "/skills", "/permissions", "/mcp", "/plan", "/agents", "/batch", "/code-review", "/rewind"],
+  "getClaudeCode": "https://claude.com/product/claude-code",
+  "commands": [
+    { "cmd": "/help", "desc": "show help and available commands", "steps": [
+      { "k": "h1", "t": "Claude Code — an agentic coding tool, right in your terminal", "gap": 220 },
+      { "k": "dim", "t": "type / any time to see every command · type / + letters to filter", "gap": 110 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "SETUP — first session in a repo", "ind": 0, "gap": 150 },
+      { "k": "kv", "kd": "/init", "t": "generate a starter CLAUDE.md", "ind": 24, "gap": 85 },
+      { "k": "kv", "kd": "/memory", "t": "edit CLAUDE.md, manage auto-memory", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/mcp", "t": "connect external tools and data", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/permissions", "t": "decide what runs without asking", "ind": 24, "gap": 80 },
+      { "k": "blank", "gap": 90 },
+      { "k": "h1", "t": "DAILY WORKFLOW", "ind": 0, "gap": 140 },
+      { "k": "kv", "kd": "/plan", "t": "design before you build", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/model", "t": "switch model, save as default", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/compact", "t": "free context, keep the essentials", "ind": 24, "gap": 80 },
+      { "k": "blank", "gap": 90 },
+      { "k": "h1", "t": "PARALLEL WORK", "ind": 0, "gap": 140 },
+      { "k": "kv", "kd": "/agents", "t": "create + delegate to subagents", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/batch", "t": "fan a big change out across worktrees", "ind": 24, "gap": 80 },
+      { "k": "blank", "gap": 90 },
+      { "k": "h1", "t": "BEFORE YOU SHIP", "ind": 0, "gap": 140 },
+      { "k": "kv", "kd": "/code-review", "t": "find bugs + cleanups in your diff", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/security-review", "t": "check the diff for vulnerabilities", "ind": 24, "gap": 80 },
+      { "k": "blank", "gap": 90 },
+      { "k": "h1", "t": "WHEN SOMETHING BREAKS", "ind": 0, "gap": 140 },
+      { "k": "kv", "kd": "/rewind", "t": "roll code + chat back to a checkpoint", "ind": 24, "gap": 80 },
+      { "k": "kv", "kd": "/doctor", "t": "diagnose install + config issues", "ind": 24, "gap": 80 },
+      { "k": "blank", "gap": 110 },
+      { "k": "tip", "t": "write your own commands too — a folder in .claude/skills/ becomes /your-name", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/init", "desc": "generate a starter CLAUDE.md for this repo", "steps": [
+      { "k": "spin", "t": "reading the repo — structure, conventions, tooling …", "dur": 950, "done": "project understood", "gap": 240 },
+      { "k": "add", "t": "created CLAUDE.md", "gap": 220 },
+      { "k": "blank", "gap": 90 },
+      { "k": "h1", "t": "# CLAUDE.md", "ind": 24, "gap": 130 },
+      { "k": "li", "t": "stack: Next.js 15, TypeScript, Tailwind, Cloudflare Workers", "ind": 24, "gap": 110 },
+      { "k": "li", "t": "test: npm test · build: npm run cf:build", "ind": 24, "gap": 110 },
+      { "k": "li", "t": "never fabricate an API — say \"I don't know\" honestly", "ind": 24, "gap": 110 },
+      { "k": "blank", "gap": 110 },
+      { "k": "tip", "t": "CLAUDE.md loads every session — teach Claude your repo once, it remembers", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/memory", "desc": "edit CLAUDE.md, manage auto-memory", "steps": [
+      { "k": "file", "t": "~/.claude/CLAUDE.md   — your personal rules, every project", "gap": 240 },
+      { "k": "file", "t": "./CLAUDE.md           — this repo's rules, shared with your team", "gap": 160 },
+      { "k": "file", "t": "./CLAUDE.local.md     — your own notes for this repo, gitignored", "gap": 160 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "auto-memory: Claude writes its OWN notes as it learns — no manual effort", "gap": 120 },
+      { "k": "li", "t": "a fix Claude got right once, a build quirk, a preference you stated — remembered", "gap": 120 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "CLAUDE.md is what YOU write; auto-memory is what Claude writes for itself", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "The power here is compounding: every correction you'd otherwise repeat, every build quirk Claude would otherwise re-discover, gets written down once and never re-explained. A team that checks CLAUDE.md into git gives every new session — and every teammate — the same accumulated context from day one.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/mcp", "desc": "connect Claude to your other tools", "steps": [
+      { "k": "h1", "t": "MCP — Model Context Protocol, an open standard for AI-tool connections", "gap": 220 },
+      { "k": "li", "t": "an MCP server gives Claude Code access to a real tool — Jira, GitHub, Postgres, Figma", "gap": 140 },
+      { "k": "li", "t": "connect once, then just ask in plain language — no more copy-pasting data into chat", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "out", "t": "\"Add the feature from JIRA-4521 and open a PR on GitHub\" — MCP makes this literal", "gap": 170 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "hundreds of MCP servers exist already — connect one before building your own", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "Before MCP, giving Claude context meant copy-pasting it in. After connecting a server once, you ask in plain language and Claude reaches the real system directly — hundreds of servers already exist for common tools, so the first move is almost always to connect one rather than build one.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/permissions", "desc": "decide what Claude may do without asking", "steps": [
+      { "k": "h1", "t": "permission rules — allow, ask, or deny, per tool", "gap": 220 },
+      { "k": "kv", "kd": "allow", "t": "Claude uses this tool without stopping to ask", "gap": 100 },
+      { "k": "kv", "kd": "ask", "t": "Claude always prompts you first, every time", "gap": 100 },
+      { "k": "kv", "kd": "deny", "t": "the tool is refused — or removed from context entirely", "gap": 100 },
+      { "k": "blank", "gap": 100 },
+      { "k": "out", "t": "\"Bash(npm test *)\" allowed · \"Bash(git push *)\" always asks", "gap": 160 },
+      { "k": "blank", "gap": 90 },
+      { "k": "li", "t": "deny always wins — a broader deny rule beats a narrower allow rule", "gap": 120 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "rules can be checked into git — a whole team inherits the same guardrails", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "This is what makes autonomy safe to grant. Once you trust `npm test` and reading any file, Claude stops interrupting you for them — but `git push` still asks, and `.env` is unreadable no matter what. Rules committed to git mean an entire team inherits the same guardrails instead of each developer re-approving the same commands one at a time.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/skills", "desc": "your own commands, taught once", "steps": [
+      { "k": "h1", "t": "a skill is a folder with a SKILL.md — Claude adds it to its toolkit", "gap": 220 },
+      { "k": "li", "t": "write it once for a task you keep re-explaining: a deploy checklist, a review procedure", "gap": 130 },
+      { "k": "li", "t": "invoke it directly with /your-skill-name, or Claude reaches for it automatically", "gap": 130 },
+      { "k": "li", "t": "only loads into context when actually used — unlike CLAUDE.md, it costs nothing idle", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "kv", "kd": "/debug", "t": "bundled — troubleshoots the current session", "gap": 90 },
+      { "k": "kv", "kd": "/code-review", "t": "bundled — finds bugs + cleanups in your diff", "gap": 90 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": ".claude/commands/deploy.md and .claude/skills/deploy/SKILL.md both create /deploy", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "Skills only load into context when actually used — unlike CLAUDE.md, a library of 50 skills costs nothing until one is needed. You can write down every procedure you have (deploys, migrations, incident response) without any of it competing for context space on an unrelated task. They're shareable too — package one into a plugin and an entire org inherits the same procedure.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/plan", "desc": "design before you build", "steps": [
+      { "k": "dim", "t": "plan mode: Claude reads and explores, but won't edit your source files yet", "gap": 220 },
+      { "k": "li", "t": "use it before a large or risky change — get a reviewable plan first", "gap": 130 },
+      { "k": "li", "t": "you approve the plan, THEN Claude implements it", "gap": 110 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "planning up front costs a few minutes; an unplanned rewrite can cost hours", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "The value scales with the size of the change: a five-minute plan review catches a wrong assumption before it becomes two hours of code built on it. It turns \"big scary refactor\" into \"a plan I can read, edit, and approve\" — much easier to trust than a diff that appears all at once.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/model", "desc": "switch model, save as your default", "steps": [
+      { "k": "dim", "t": "select the model you pair with:", "gap": 220 },
+      { "k": "sel", "t": "Fable 5           — most intelligent, generally available", "on": true, "gap": 160 },
+      { "k": "sel", "t": "Sonnet 5          — fast, strong daily driver", "gap": 110 },
+      { "k": "sel", "t": "Opus 4.8          — deep reasoning, harder problems", "gap": 110 },
+      { "k": "sel", "t": "Haiku 4.5         — fastest, cheapest", "gap": 110 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "/model swaps mid-task — your context and history survive the swap", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/effort", "desc": "trade speed for depth of reasoning", "steps": [
+      { "k": "dim", "t": "levels: low · medium · high · xhigh · max", "gap": 220 },
+      { "k": "li", "t": "low/medium — quick, cheap answers for small mechanical tasks", "gap": 130 },
+      { "k": "li", "t": "high/xhigh — more thorough reasoning for genuinely hard problems", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "takes effect immediately, without waiting for the current response to finish", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/context", "desc": "visualize what is filling your context window", "steps": [
+      { "k": "out", "t": "a colored grid — CLAUDE.md, tool results, conversation history, each a block", "gap": 180 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "shows optimization suggestions for context-heavy tools and memory bloat", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "check this before a long session gets sluggish, not after", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/compact", "desc": "summarize the conversation to free context", "steps": [
+      { "k": "spin", "t": "summarizing the conversation …", "dur": 950, "done": "41 messages -> 1 summary — the essentials kept", "gap": 240 },
+      { "k": "dim", "t": "context: 84% -> 12%", "gap": 180 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "compact often on long sessions — a clear context window reasons better", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/btw", "desc": "ask a quick side question, off the record", "steps": [
+      { "k": "out", "t": "/btw what does this regex actually match?", "gap": 200 },
+      { "k": "blank", "gap": 90 },
+      { "k": "li", "t": "answers without adding to the conversation history — no context cost", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "good for a curiosity question mid-task that isn't part of the actual work", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/agents", "desc": "delegate side-tasks to a subagent", "steps": [
+      { "k": "dim", "t": "a subagent runs in its own context window, then reports back a summary", "gap": 220 },
+      { "k": "li", "t": "use one when a side task would flood your main chat with logs or file contents", "gap": 130 },
+      { "k": "li", "t": "give it a narrow tool set and a focused system prompt — specialise it", "gap": 120 },
+      { "k": "li", "t": "route cheap side-work to a faster, cheaper model to control cost", "gap": 120 },
+      { "k": "blank", "gap": 100 },
+      { "k": "kv", "kd": "Explore", "t": "bundled — broad read-only codebase search", "gap": 90 },
+      { "k": "kv", "kd": "Plan", "t": "bundled — designs an implementation plan", "gap": 90 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "ask Claude to \"create a subagent for X\" — it writes the .claude/agents/ file for you", "gap": 140 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "This is the difference between a session that degrades after an hour of exploration and one that stays sharp for a full day of work: side research, log-diving, and file-trawling happen somewhere else, and only the conclusion comes back. Route a subagent to a cheaper, faster model for mechanical work, and run many in parallel — turning one conversation into a small team.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/batch", "desc": "decompose a large change across parallel worktrees", "steps": [
+      { "k": "spin", "t": "researching the codebase, decomposing the work …", "dur": 900, "done": "18 independent units found", "gap": 260 },
+      { "k": "li", "t": "presents a plan first — approve before anything runs", "gap": 130 },
+      { "k": "li", "t": "each unit gets its own background subagent, in its own git worktree", "gap": 130 },
+      { "k": "ok", "t": "each subagent implements, tests, and opens its own pull request", "gap": 220 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "example: \"/batch migrate src/ from Solid to React\" — a whole migration, unattended", "gap": 150 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "This is how you stop being the bottleneck on your own codebase. A migration touching 30 files doesn't have to happen one file at a time in one conversation — it can fan out into 30 isolated subagents, each testing and opening its own PR, while you review the results instead of writing them.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/background", "desc": "detach a session to keep running unattended", "steps": [
+      { "k": "dim", "t": "frees your terminal — the session keeps working in the background", "gap": 220 },
+      { "k": "li", "t": "monitor it with claude agents; reattach any time", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "alias: /bg — good for a long task you don't need to watch line by line", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/fork", "desc": "spawn a background copy without switching away", "steps": [
+      { "k": "dim", "t": "a forked subagent inherits the full conversation, works on a side directive", "gap": 220 },
+      { "k": "li", "t": "you keep going in the main conversation; the fork's result returns when done", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "compare: /branch switches YOU into a copy; /fork sends the copy off on its own", "gap": 150 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/diff", "desc": "see exactly what changed", "steps": [
+      { "k": "out", "t": "an interactive diff viewer — uncommitted changes and per-turn diffs", "gap": 200 },
+      { "k": "li", "t": "left/right arrows switch between the full diff and individual Claude turns", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "reviewing turn-by-turn shows you exactly which change did what", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/code-review", "desc": "review the current diff for bugs + cleanups", "steps": [
+      { "k": "spin", "t": "reading the working tree …", "dur": 900, "done": "diff loaded — 3 files · +118 -42", "gap": 240 },
+      { "k": "ok", "t": "auth.ts — clean · one responsibility, well-named", "gap": 220 },
+      { "k": "warn", "t": "handler.ts:14 — function does 6 unrelated things, consider splitting", "gap": 180 },
+      { "k": "ok", "t": "schema.json — no vulnerable dependency versions", "gap": 180 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "pass --fix to apply the findings, --comment to post them on a GitHub PR", "gap": 120 },
+      { "k": "tip", "t": "/code-review ultra runs a deep multi-agent review in the cloud", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/security-review", "desc": "check the diff for vulnerabilities", "steps": [
+      { "k": "spin", "t": "scanning pending changes for security issues …", "dur": 900, "done": "1 finding", "gap": 260 },
+      { "k": "warn", "t": "api/upload.ts:22 — file path built from user input, unvalidated", "gap": 220 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "looks for injection, auth issues, and data exposure specifically", "gap": 120 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "run this on anything touching auth, file paths, or user input before merging", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/simplify", "desc": "cleanup-only review, applies fixes directly", "steps": [
+      { "k": "dim", "t": "four review agents run in parallel: reuse, simplification, efficiency, abstraction level", "gap": 240 },
+      { "k": "li", "t": "doesn't hunt for bugs — that's /code-review's job", "gap": 120 },
+      { "k": "ok", "t": "applies the cleanup fixes directly, no separate approval step", "gap": 220 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "run /code-review first for correctness, /simplify after for polish", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/clear", "desc": "start fresh, keeping project memory", "steps": [
+      { "k": "out", "t": "fresh start — ਸਹਿਜ (clean scrollback, clear mind)", "gap": 240 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "the previous conversation stays available in /resume", "gap": 130 },
+      { "k": "li", "t": "CLAUDE.md and auto-memory carry over — you're not starting from zero", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "use /compact instead if you want to keep the SAME conversation, just lighter", "gap": 150 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/resume", "desc": "return to a past conversation", "steps": [
+      { "k": "out", "t": "opens a picker of past sessions, or resume by name / ID directly", "gap": 210 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "background sessions show up marked \"bg\" in the picker", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "alias: /continue", "gap": 110 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/branch", "desc": "try a different direction without losing your place", "steps": [
+      { "k": "dim", "t": "creates a branch of the CURRENT conversation, right where you are", "gap": 220 },
+      { "k": "li", "t": "switches you into the branch; the original stays intact", "gap": 130 },
+      { "k": "li", "t": "return to the original any time with /resume", "gap": 120 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "good for \"what if I tried it this other way\" without losing the first attempt", "gap": 150 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/rename", "desc": "label the current session", "steps": [
+      { "k": "out", "t": "renames the session and shows the name on the prompt bar", "gap": 200 },
+      { "k": "blank", "gap": 90 },
+      { "k": "li", "t": "without a name, auto-generates one from the conversation so far", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "makes a long-running session easy to find later in /resume", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/rewind", "desc": "roll code + conversation back to a checkpoint", "steps": [
+      { "k": "dim", "t": "rewinds code AND conversation together, to a point you pick", "gap": 220 },
+      { "k": "li", "t": "or just summarize from a selected message onward", "gap": 120 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "aliases: /checkpoint, /undo — the safety net for a change that went wrong", "gap": 150 },
+      { "k": "blank", "gap": 100 },
+      { "k": "h1", "t": "why it matters", "gap": 130 },
+      { "k": "out", "t": "It turns every risky change into a reversible one. You don't need to be certain before you let Claude try something — if the direction is wrong, you roll back to before it started and try again, at the cost of a few minutes instead of a `git reset` archaeology session.", "gap": 160 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/doctor", "desc": "diagnose install + config issues", "steps": [
+      { "k": "spin", "t": "checking installation and settings …", "dur": 800, "done": "1 issue found", "gap": 240 },
+      { "k": "warn", "t": "a plugin failed to load — stale cache detected", "gap": 220 },
+      { "k": "blank", "gap": 100 },
+      { "k": "li", "t": "press f to have Claude fix any reported issue directly", "gap": 130 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "first stop when something about Claude Code itself seems broken", "gap": 140 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/debug", "desc": "capture logs to troubleshoot the current session", "steps": [
+      { "k": "dim", "t": "starts capturing debug logs from this point forward", "gap": 220 },
+      { "k": "li", "t": "describe the issue and Claude reads the session debug log to investigate", "gap": 130 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "a bundled skill — for THIS session's behavior, not the install itself (use /doctor for that)", "gap": 150 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/feedback", "desc": "report a bug with session context attached", "steps": [
+      { "k": "out", "t": "submits feedback with the relevant session context already attached", "gap": 210 },
+      { "k": "blank", "gap": 90 },
+      { "k": "tip", "t": "aliases: /bug, /share", "gap": 110 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/usage", "desc": "session cost, plan limits — alias /cost, /stats", "steps": [
+      { "k": "kv", "kd": "session", "t": "108,000 tokens · $0.13", "gap": 200 },
+      { "k": "kv", "kd": "plan", "t": "usage this period, breakdown by skill/subagent/MCP", "gap": 100 },
+      { "k": "blank", "gap": 100 },
+      { "k": "tip", "t": "rules in CLAUDE.md are cheap — re-explaining them every session is not", "gap": 130 },
+      { "k": "blank", "gap": 80 }
+    ] },
+    { "cmd": "/clear-scrollback", "desc": "empty the visible scrollback · begin again", "special": "clear" }
+  ]
+}

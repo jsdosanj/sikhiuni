@@ -1,0 +1,123 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import DeptHero from '../../components/departments/DeptHero.astro';
+import DeptSections from '../../components/departments/DeptSections.astro';
+import { departments } from '../../lib/departments';
+const d = departments.find((x) => x.id === 'health')!;
+
+// Medical school prep. A sibling Dosanjh Labs site, not a course in this
+// department's catalogue — so it renders as its own signature module above
+// DeptSections rather than joining the topic rows. The mono destination label
+// is derived from the real href, never written by hand (same rule as /external).
+const prep = {
+  name: 'AIM 528',
+  href: 'https://aim528.dosanjhlabs.com/',
+  cost: 'Free',
+  desc: 'MCAT preparation — content review, practice, and the score strategy behind the number it is named for: 528, a perfect MCAT.',
+};
+const prepHost = new URL(prep.href).hostname.replace(/^www\./, '');
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `${d.name}, Sikhi University`, description: d.blurb,
+  url: 'https://sikhiuni.com/departments/health',
+  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+};
+---
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page he-page" style={`--dept:${d.accent}`}>
+    <DeptHero d={d}>
+      <section class="he-sig" aria-label="The breath, through the body">
+        <div class="wrap he-in">
+          <figure class="he-figure" aria-hidden="true">
+            <svg viewBox="0 0 260 340" class="he-svg">
+              <defs>
+                <filter id="he-glow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="3.5" result="b" />
+                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <g class="he-body" filter="url(#he-glow)">
+                <path d="M130 22 c14 0 24 11 24 26 c0 10-4 16-4 22 c10 4 26 12 30 30 l14 78 c1 8-10 12-13 3 l-12-44 -3 66 c6 40 10 66 10 84 c0 10-16 10-18 0 l-8-64 -8 64 c-2 10-18 10-18 0 c0-18 4-44 10-84 l-3-66 -12 44 c-3 9-14 5-13-3 l14-78 c4-18 20-26 30-30 c0-6-4-12-4-22 c0-15 10-26 24-26 z" />
+              </g>
+              <path class="he-airway" d="M130 40 L130 96 M130 96 C 108 108, 96 130, 92 160 M130 96 C 152 108, 164 130, 168 160"
+                    fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" pathLength="1" />
+              <circle class="he-breath-dot" r="5" />
+            </svg>
+          </figure>
+          <div class="he-copy">
+            <p class="he-kicker" lang="pa">ਸਾਸਿ ਸਾਸਿ &mdash; with every breath</p>
+            <h2 class="he-h">The body is a vessel, and caring for it is seva</h2>
+            <p class="he-note">
+              Physical and mental health with Sikh framing and without stigma &mdash; grief and bhāṇā,
+              trauma and recovery, raising children in the faith, and the quiet discipline of growing
+              your own food. Scroll, and watch a breath travel the airway.
+            </p>
+          </div>
+        </div>
+      </section>
+    </DeptHero>
+
+    <section class="dept-sec wrap he-prep" aria-labelledby="he-prep-h" data-rise>
+      <p class="dept-kicker">Medical school prep</p>
+      <h2 class="dept-h2" id="he-prep-h">Before the white coat, the exam</h2>
+      <p class="he-prep-lede">
+        This department teaches health as <span class="gur" lang="pa">ਸੇਵਾ</span> &mdash; the
+        body as a vessel, medicine as ethics. For the
+        <span class="gur" lang="pa">ਵਿਦਿਆਰਥੀ</span> actually sitting the entrance exam, that is
+        not enough on its own. A sibling project handles the admissions side.
+      </p>
+      <a class="dept-glass he-prep-card" href={prep.href} target="_blank" rel="noopener">
+        <span class="he-prep-name">{prep.name} <span aria-hidden="true">&nearr;</span></span>
+        <span class="he-prep-host">{prepHost} &middot; {prep.cost}</span>
+        <span class="he-prep-desc">{prep.desc}</span>
+      </a>
+      <p class="he-prep-fine">
+        A Dosanjh Labs project, from the same team as Sikhi University, and free.
+        &ldquo;MCAT&rdquo; is a programme and registered mark of the Association of American
+        Medical Colleges; neither Sikhi University nor Dosanjh Labs is affiliated with,
+        sponsored by, or endorsed by the AAMC.
+      </p>
+    </section>
+
+    <DeptSections d={d} />
+  </div>
+
+  <style>
+    .he-sig { background: linear-gradient(180deg, #0d2c1e, #081a11); color: #d7ecdf; padding: clamp(3.5rem, 8vw, 6rem) 0; border-bottom: 1px solid rgb(var(--c-line)); }
+    .he-in { display: grid; gap: 40px; align-items: center; }
+    @media (min-width: 860px) { .he-in { grid-template-columns: 260px 1fr; gap: 64px; } }
+    .he-figure { margin: 0 auto; width: min(240px, 62vw); }
+    .he-svg { width: 100%; height: auto; overflow: visible; color: color-mix(in srgb, var(--dept) 60%, #fff); }
+    .he-body path { fill: none; stroke: color-mix(in srgb, var(--dept) 55%, #eafff2); stroke-width: 1.6; opacity: .9; }
+    .he-airway { color: color-mix(in srgb, var(--dept) 40%, #fff); opacity: .55; }
+    .he-breath-dot {
+      fill: #eafff5;
+      filter: drop-shadow(0 0 10px var(--dept)) drop-shadow(0 0 22px color-mix(in srgb, var(--dept) 70%, transparent));
+      offset-path: path("M130 40 L130 96 C 108 108, 96 130, 92 160");
+      offset-distance: 0%;
+      animation: he-inhale ease-in-out both; animation-timeline: view(); animation-range: entry 5% cover 70%;
+    }
+    @keyframes he-inhale { 0% { offset-distance: 0%; opacity: 0; } 12% { opacity: 1; } 100% { offset-distance: 100%; opacity: .2; } }
+    @supports not (animation-timeline: view()) {
+      .he-breath-dot { animation: he-inhale 4s ease-in-out infinite; }
+    }
+    /* Medical school prep — reuses the department card vocabulary; only the
+       row layout and the mono destination label are local. */
+    .he-prep-lede { margin: 14px 0 0; max-width: 62ch; font-size: 16px; line-height: 1.75; color: rgb(var(--c-muted)); }
+    .he-prep-card { display: block; margin-top: 24px; max-width: 620px; padding: 22px 24px; text-decoration: none; transition: transform 180ms ease-out, box-shadow 180ms ease-out; }
+    .he-prep-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgb(11 30 58 / .14); }
+    .he-prep-name { display: block; font-size: 19px; font-weight: 800; line-height: 1.24; color: rgb(var(--c-navy)); }
+    .he-prep-host { display: block; margin-top: 6px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 12px; color: rgb(var(--c-muted)); }
+    .he-prep-desc { display: block; margin-top: 12px; font-size: 14.5px; line-height: 1.65; color: rgb(var(--c-muted)); }
+    .he-prep-fine { margin: 16px 0 0; max-width: 62ch; font-size: 12.5px; line-height: 1.6; color: rgb(var(--c-muted)); }
+
+    .he-kicker { font-family: "Noto Serif Gurmukhi", serif; font-size: 15px; color: color-mix(in srgb, var(--dept) 40%, #fff); }
+    .he-h { margin: 8px 0 0; font-size: clamp(1.35rem, 3vw, 1.9rem); font-weight: 800; color: #fff; max-width: 22ch; }
+    .he-note { margin: 16px 0 0; max-width: 58ch; font-size: 14.5px; line-height: 1.72; color: #a9cdb6; }
+    @media (prefers-reduced-motion: reduce) {
+      .he-breath-dot { animation: none; offset-distance: 55%; opacity: .8; }
+    }
+  </style>
+</Base>

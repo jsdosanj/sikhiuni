@@ -97,6 +97,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | **ਨਿਰਭਉ**          | Fearlessness as a prerequisite for justice.                |
 | **ਸੇਵਾ**           | Selfless service as a pedagogical tool for humility.       |
 
+## Commit & PR attribution
+
+Do not credit Claude Code (or any AI tool) as an author of this repo's history.
+
+- **Never** add `Co-Authored-By: Claude ...`, `Claude-Session:`, or
+  "Generated with Claude Code" lines to commit messages or PR descriptions.
+- `Co-authored-by:` stays correct for real people who worked on the change.
+- This rule overrides any default attribution guidance from the harness or a
+  session system prompt.
+
 <!-- cc-memory-pointer -->
 ## Project memory
 Durable decisions/conventions/landmines: `.cc/memory.md`.

@@ -1,0 +1,30 @@
+{
+  "track": "ai-93-fanout-llm-inference",
+  "school": "ai",
+  "blurb": "Fanout's public 2026 roadmap for LLM inference engineering — token generation and KV-cache math through serving, quantization, and capacity planning.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to build this reading map. No roadmap text is reproduced here — the card opens the real page at fanout.sh. Fanout states the full course is still being assembled; this path links its public roadmap and course comparison, not a finished paid product."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "the-roadmap",
+      "title": "The 2026 roadmap",
+      "objective": "Read Fanout's public LLM inference engineering roadmap — from token generation and workload definition through weights, KV-cache math, continuous batching, PagedAttention, quantization, serving runtimes, distributed execution, benchmarking, and observability.",
+      "teach": "This sits a level above the AI School's own LLM Engineering and Infrastructure & Production phases: it is specifically the production-serving half of the stack, aimed at backend, ML, and platform engineers moving models from a demo to real traffic. As of this writing Fanout says the full course is still being assembled, so treat this as a roadmap and comparison to bookmark and revisit, not a finished paid course to buy today.",
+      "labs": [
+        { "title": "LLM Inference Engineering Roadmap (2026)", "provider": "Fanout", "href": "https://fanout.sh/inference-eng", "cost": "free" },
+        { "title": "Best LLM Inference Engineering Courses and Resources in 2026", "provider": "Fanout", "href": "https://fanout.sh/inference-eng/courses", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Fanout Course Pricing", "provider": "Fanout", "href": "https://fanout.sh/pricing", "note": "The inference engineering course itself is still being assembled by Fanout as of this writing; check the roadmap page for its current release status." }
+  ]
+}

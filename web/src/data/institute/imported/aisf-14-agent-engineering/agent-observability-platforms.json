@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::agent-observability-platforms",
+  "num": 24,
+  "slug": "agent-observability-platforms",
+  "title": "Agent Observability: Langfuse, Phoenix, Opik",
+  "tagline": "Three open-source agent observability platforms dominate 2026. Langfuse (MIT) — 6M+ installs/month, tracing + prompt management + evals + session replay. Arize Phoenix (Elastic 2.0) — deep agent-specific evals, RAG relevancy, OpenInference auto-instrumentation. Comet Opik (Apache 2.0) — automated prompt optimization, guardrails, LLM-judge hallucination detection.",
+  "type": "Learn",
+  "languages": "Python (stdlib)",
+  "time": "~45 minutes",
+  "objectives": [
+    "Name the three top open-source agent observability platforms and their licenses.",
+    "Distinguish what each one is strongest at: Langfuse (prompt mgmt + sessions), Phoenix (RAG + auto-instrumentation), Opik (optimization + guardrails).",
+    "Explain why 89% of organizations report having agent observability in place by 2026.",
+    "Implement a stdlib trace-to-dashboard pipeline with LLM-judge evaluation."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>OTel GenAI (Lesson 23) gives you the schema. You still need the platform that ingests spans, runs evaluations, stores prompt versions, and surfaces regressions. The three contenders each emphasize different parts of the lifecycle.</p>\n<h2>The Concept</h2>\n<h3>Langfuse (MIT)</h3>\n<ul>\n<li>6M+ SDK installs/month, 19k+ GitHub stars.</li>\n<li>Features: tracing, prompt management with versioning + playground, evaluations (LLM-as-judge, user feedback, custom), session replays.</li>\n<li>June 2025: formerly commercial modules (LLM-as-a-judge, annotation queues, prompt experiments, Playground) open-sourced under MIT.</li>\n<li>Strongest for: end-to-end observability with tight prompt-management loop.</li>\n</ul>\n<h3>Arize Phoenix (Elastic License 2.0)</h3>\n<ul>\n<li>Deeper agent-specific evaluation: trace clustering, anomaly detection, retrieval relevancy for RAG.</li>\n<li>Native OpenInference auto-instrumentation.</li>\n<li>Pairs with managed Arize AX for production.</li>\n<li>No prompt versioning — positioned as a drift/behavioral-regression tool alongside broader platforms.</li>\n<li>Strongest for: RAG relevancy, behavioral drift, anomaly detection.</li>\n</ul>\n<h3>Comet Opik (Apache 2.0)</h3>\n<ul>\n<li>Automated prompt optimization through A/B experiments.</li>\n<li>Guardrails (PII redaction, topical constraints).</li>\n<li>LLM-judge hallucination detection.</li>\n<li>Benchmark from Comet&#39;s own measurement: Opik logs + evals in 23.44s vs Langfuse 327.15s (~14x gap) — take vendor benchmarks as directional.</li>\n<li>Strongest for: optimization loop, automated experimentation, guardrail enforcement.</li>\n</ul>\n<h3>Industry data</h3>\n<p>Per Maxim (2026 field analysis): 89% of organizations have agent observability in place; quality issues are the top production barrier (32% of respondents cite them).</p>\n<h3>Picking one</h3>\n<table>\n<thead>\n<tr>\n<th>Need</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>All-in-one with prompt management</td>\n<td>Langfuse</td>\n</tr>\n<tr>\n<td>Deep RAG evaluation + drift</td>\n<td>Phoenix</td>\n</tr>\n<tr>\n<td>Automated optimization + guardrails</td>\n<td>Opik</td>\n</tr>\n<tr>\n<td>Open licensing, no ELv2</td>\n<td>Langfuse (MIT) or Opik (Apache 2.0)</td>\n</tr>\n<tr>\n<td>Datadog / New Relic integration</td>\n<td>Any — they all export OTel</td>\n</tr>\n</tbody></table>\n<h3>Where this pattern goes wrong</h3>\n<ul>\n<li><strong>No eval strategy.</strong> Tracing without evaluation is just expensive logging.</li>\n<li><strong>Self-rolled LLM-judge without grounding.</strong> CRITIC pattern (Lesson 05) applies — judges need external tools for factual verification.</li>\n<li><strong>Prompt versions not tied to traces.</strong> When prod regresses, you cannot bisect to the prompt that caused it.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>wb-trace-ingest</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements a stdlib trace collector + LLM-judge evaluator:</p>\n<ul>\n<li>Ingest GenAI-shaped spans.</li>\n<li>Group by session, tag failed runs (guardrail trips, low-confidence evals).</li>\n<li>A scripted LLM-judge that scores agent responses on a rubric.</li>\n<li>A dashboard-like summary: failure rate, top failure reasons, eval score distribution.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>Output: per-session eval scores and failure categorization matching what Langfuse/Phoenix/Opik would show.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>Langfuse</strong> self-hosted or cloud; wire via OTel or their SDK.</li>\n<li><strong>Arize Phoenix</strong> self-hosted; auto-instrument OpenInference.</li>\n<li><strong>Comet Opik</strong> self-hosted or cloud; automated optimization loop.</li>\n<li><strong>Datadog LLM Observability</strong> for mixed ops+ML teams that already run Datadog.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-obs-platform-wiring.md</code> picks a platform and wires traces + evals + prompt versions into an existing agent.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Export a week of OTel traces to Langfuse cloud (free tier). Which sessions failed? Why?</li>\n<li>Write an LLM-judge rubric for your domain (factual correctness, tone, scope adherence). Test on 50 traces.</li>\n<li>Compare Langfuse prompt versioning against Phoenix&#39;s trace clustering. Which tells you what broke faster?</li>\n<li>Read Opik&#39;s guardrail docs. Wire a PII redaction guardrail to one of your agent runs.</li>\n<li>Benchmark the three on your corpus. Ignore vendor-published numbers; measure your own.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Tracing</td>\n<td>&quot;Spans collector&quot;</td>\n<td>Ingest OTel / SDK spans; index by session</td>\n</tr>\n<tr>\n<td>Prompt management</td>\n<td>&quot;Prompt CMS&quot;</td>\n<td>Versioned prompts tied to traces</td>\n</tr>\n<tr>\n<td>LLM-as-judge</td>\n<td>&quot;Automated eval&quot;</td>\n<td>Separate LLM scores agent output against a rubric</td>\n</tr>\n<tr>\n<td>Session replay</td>\n<td>&quot;Trace playback&quot;</td>\n<td>Step through past runs for debugging</td>\n</tr>\n<tr>\n<td>RAG relevancy</td>\n<td>&quot;Retrieval quality&quot;</td>\n<td>Does the retrieved context match the query</td>\n</tr>\n<tr>\n<td>Trace clustering</td>\n<td>&quot;Behavioral grouping&quot;</td>\n<td>Cluster similar runs for drift detection</td>\n</tr>\n<tr>\n<td>Guardrail enforcement</td>\n<td>&quot;Policy at log time&quot;</td>\n<td>PII/toxicity/scope checks on logged content</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://langfuse.com/\" target=\"_blank\" rel=\"noopener\">Langfuse docs</a> — tracing, evals, prompt mgmt</li>\n<li><a href=\"https://docs.arize.com/phoenix\" target=\"_blank\" rel=\"noopener\">Arize Phoenix docs</a> — auto-instrumentation, drift</li>\n<li><a href=\"https://www.comet.com/site/products/opik/\" target=\"_blank\" rel=\"noopener\">Comet Opik</a> — optimization + guardrails</li>\n<li><a href=\"https://opentelemetry.io/docs/specs/semconv/gen-ai/\" target=\"_blank\" rel=\"noopener\">OpenTelemetry GenAI semantic conventions</a> — the schema all three consume</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Stdlib trace collector + LLM-judge evaluator.\n\nMirrors what Langfuse / Phoenix / Opik do with richer UIs: ingest spans,\ngroup by session, score with an LLM judge, surface failure categories.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections import Counter\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass SpanEvent:\n    trace_id: str\n    session_id: str\n    name: str\n    status: str = \"ok\"\n    attributes: dict[str, Any] = field(default_factory=dict)\n\n\n@dataclass\nclass SessionSummary:\n    session_id: str\n    trace_count: int\n    error_count: int\n    eval_score_mean: float\n    failure_reasons: Counter\n\n\nclass TraceCollector:\n    def __init__(self) -> None:\n        self.spans: list[SpanEvent] = []\n\n    def ingest(self, span: SpanEvent) -> None:\n        self.spans.append(span)\n\n    def by_session(self) -> dict[str, list[SpanEvent]]:\n        result: dict[str, list[SpanEvent]] = {}\n        for span in self.spans:\n            result.setdefault(span.session_id, []).append(span)\n        return result\n\n\ndef scripted_llm_judge(session_spans: list[SpanEvent]) -> tuple[float, str]:\n    errors = sum(1 for s in session_spans if s.status == \"error\")\n    has_tool = any(s.name.startswith(\"tool_call\") for s in session_spans)\n    has_final = any(s.attributes.get(\"gen_ai.output.reference_id\")\n                    for s in session_spans)\n    tokens_over = any(s.attributes.get(\"tokens\", 0) > 2000 for s in session_spans)\n    score = 1.0\n    if errors:\n        score -= 0.4\n    if not has_final:\n        score -= 0.3\n    if not has_tool:\n        score -= 0.1\n    if tokens_over:\n        score -= 0.1\n    score = max(0.0, score)\n    if score >= 0.8:\n        verdict = \"PASS\"\n    elif score >= 0.5:\n        verdict = \"WARN\"\n    else:\n        verdict = \"FAIL\"\n    return score, verdict\n\n\ndef categorize_failures(session_spans: list[SpanEvent]) -> Counter:\n    reasons: Counter = Counter()\n    for span in session_spans:\n        if span.status != \"error\":\n            continue\n        reason = span.attributes.get(\"error.reason\", \"unknown\")\n        reasons[reason] += 1\n    return reasons\n\n\ndef summarize(collector: TraceCollector) -> list[SessionSummary]:\n    summaries: list[SessionSummary] = []\n    for session_id, spans in collector.by_session().items():\n        score, _ = scripted_llm_judge(spans)\n        summaries.append(SessionSummary(\n            session_id=session_id,\n            trace_count=len(spans),\n            error_count=sum(1 for s in spans if s.status == \"error\"),\n            eval_score_mean=score,\n            failure_reasons=categorize_failures(spans),\n        ))\n    summaries.sort(key=lambda s: s.eval_score_mean)\n    return summaries\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"AGENT OBSERVABILITY PLATFORMS — Phase 14, Lesson 24\")\n    print(\"=\" * 70)\n\n    collector = TraceCollector()\n\n    ok_spans = [\n        SpanEvent(\"t001\", \"s001\", \"invoke_agent\",\n                  attributes={\"gen_ai.provider.name\": \"anthropic\"}),\n        SpanEvent(\"t001\", \"s001\", \"chat\",\n                  attributes={\"gen_ai.output.reference_id\": \"c001\",\n                              \"tokens\": 800}),\n        SpanEvent(\"t001\", \"s001\", \"tool_call search_tool\",\n                  attributes={\"gen_ai.tool.name\": \"search_tool\"}),\n        SpanEvent(\"t001\", \"s001\", \"chat\",\n                  attributes={\"gen_ai.output.reference_id\": \"c002\",\n                              \"tokens\": 400}),\n    ]\n    err_spans = [\n        SpanEvent(\"t002\", \"s002\", \"invoke_agent\",\n                  attributes={\"gen_ai.provider.name\": \"anthropic\"}),\n        SpanEvent(\"t002\", \"s002\", \"chat\", status=\"error\",\n                  attributes={\"error.reason\": \"rate_limited\",\n                              \"tokens\": 0}),\n    ]\n    slow_spans = [\n        SpanEvent(\"t003\", \"s003\", \"invoke_agent\",\n                  attributes={\"gen_ai.provider.name\": \"openai\"}),\n        SpanEvent(\"t003\", \"s003\", \"chat\",\n                  attributes={\"gen_ai.output.reference_id\": \"c003\",\n                              \"tokens\": 2500}),\n    ]\n\n    for span in ok_spans + err_spans + slow_spans:\n        collector.ingest(span)\n\n    print(\"\\nsummary per session (what Langfuse/Phoenix/Opik show)\")\n    for summary in summarize(collector):\n        score, verdict = scripted_llm_judge(collector.by_session()[summary.session_id])\n        print(f\"  {summary.session_id}  verdict={verdict}  score={score:.2f}  \"\n              f\"spans={summary.trace_count}  errors={summary.error_count}\")\n        if summary.failure_reasons:\n            for reason, count in summary.failure_reasons.most_common():\n                print(f\"    failure: {reason} x{count}\")\n\n    total_errors = sum(s.error_count for s in summarize(collector))\n    total_sessions = len(collector.by_session())\n    print(f\"\\naggregate: {total_errors} errors across {total_sessions} sessions\")\n    print()\n    print(\"Langfuse: prompt versions tied to traces.\")\n    print(\"Phoenix: RAG relevancy + drift/clustering.\")\n    print(\"Opik: optimization + guardrail enforcement.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What license does Langfuse ship under after the June 2025 open-sourcing of formerly commercial modules?",
+      "options": [
+        "Apache 2.0",
+        "GPLv3",
+        "Elastic License 2.0",
+        "MIT"
+      ],
+      "answer": 3,
+      "explanation": "Langfuse is MIT, including LLM-as-a-judge, annotation queues, prompt experiments, and Playground after June 2025."
+    },
+    {
+      "q": "What is Arize Phoenix strongest at according to the lesson?",
+      "options": [
+        "Deep agent-specific evaluation: trace clustering, anomaly detection, RAG retrieval relevancy, OpenInference auto-instrumentation",
+        "Automated optimization loop",
+        "Prompt versioning",
+        "Static analysis of code"
+      ],
+      "answer": 0,
+      "explanation": "Phoenix focuses on behavioral drift and RAG evaluation with OpenInference auto-instrumentation."
+    },
+    {
+      "q": "Which platform pairs automated prompt optimization with guardrails (PII redaction, topical constraints) and LLM-judge hallucination detection?",
+      "options": [
+        "Langfuse",
+        "Phoenix",
+        "Jaeger",
+        "Opik"
+      ],
+      "answer": 3,
+      "explanation": "Opik centers on the optimization + guardrail loop."
+    },
+    {
+      "q": "Which platform does the lesson recommend for an all-in-one with prompt management?",
+      "options": [
+        "Opik",
+        "Datadog APM",
+        "Phoenix",
+        "Langfuse"
+      ],
+      "answer": 3,
+      "explanation": "Langfuse covers tracing + prompt management + evals + session replay end-to-end."
+    },
+    {
+      "q": "What does the lesson say about vendor-published platform benchmarks?",
+      "options": [
+        "They are definitive",
+        "Take them as directional; measure your own corpus",
+        "Only Opik's are reliable",
+        "They are forbidden by OpenTelemetry"
+      ],
+      "answer": 1,
+      "explanation": "Even the cited 14x gap between Opik and Langfuse should be measured on your own data before deciding."
+    },
+    {
+      "q": "Why is tracing without evaluation considered expensive logging?",
+      "options": [
+        "Providers charge for spans",
+        "You see runs but you do not score them, so regressions are invisible and bisection is impossible",
+        "Disk costs more than CPU",
+        "Spans cannot be replayed"
+      ],
+      "answer": 1,
+      "explanation": "Evals are what turn traces into actionable quality signals."
+    },
+    {
+      "q": "What is the lesson's warning about self-rolled LLM-judges?",
+      "options": [
+        "CRITIC applies: judges need external grounding for factual verification or they rubber-stamp",
+        "They must run on GPUs",
+        "They are forbidden by Apache 2.0",
+        "They only work in TypeScript"
+      ],
+      "answer": 0,
+      "explanation": "Without external tool-grounded verification, LLM-judges drift toward rubber-stamping (CRITIC, Lesson 5)."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/24-agent-observability-platforms"
+  }
+}

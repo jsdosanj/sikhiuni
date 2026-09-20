@@ -1,0 +1,167 @@
+{
+  "track": "aisf-01-math",
+  "phaseDir": "01-math-foundations",
+  "blurb": "The intuition behind every AI algorithm, through code, not textbooks.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-01-math::linear-algebra-intuition",
+      "num": 1,
+      "slug": "linear-algebra-intuition",
+      "title": "Linear Algebra Intuition",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::vectors-matrices-operations",
+      "num": 2,
+      "slug": "vectors-matrices-operations",
+      "title": "Vectors, Matrices & Operations",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::matrix-transformations",
+      "num": 3,
+      "slug": "matrix-transformations",
+      "title": "Matrix Transformations",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::calculus-for-ml",
+      "num": 4,
+      "slug": "calculus-for-ml",
+      "title": "Calculus for Machine Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::chain-rule-and-autodiff",
+      "num": 5,
+      "slug": "chain-rule-and-autodiff",
+      "title": "Chain Rule & Automatic Differentiation",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::probability-and-distributions",
+      "num": 6,
+      "slug": "probability-and-distributions",
+      "title": "Probability and Distributions",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::bayes-theorem",
+      "num": 7,
+      "slug": "bayes-theorem",
+      "title": "Bayes' Theorem",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::optimization",
+      "num": 8,
+      "slug": "optimization",
+      "title": "Optimization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::information-theory",
+      "num": 9,
+      "slug": "information-theory",
+      "title": "Information Theory",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::dimensionality-reduction",
+      "num": 10,
+      "slug": "dimensionality-reduction",
+      "title": "Dimensionality Reduction",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::singular-value-decomposition",
+      "num": 11,
+      "slug": "singular-value-decomposition",
+      "title": "Singular Value Decomposition",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::tensor-operations",
+      "num": 12,
+      "slug": "tensor-operations",
+      "title": "Tensor Operations",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::numerical-stability",
+      "num": 13,
+      "slug": "numerical-stability",
+      "title": "Numerical Stability",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::norms-and-distances",
+      "num": 14,
+      "slug": "norms-and-distances",
+      "title": "Norms and Distances",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::statistics-for-ml",
+      "num": 15,
+      "slug": "statistics-for-ml",
+      "title": "Statistics for Machine Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::sampling-methods",
+      "num": 16,
+      "slug": "sampling-methods",
+      "title": "Sampling Methods",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::linear-systems",
+      "num": 17,
+      "slug": "linear-systems",
+      "title": "Linear Systems",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::convex-optimization",
+      "num": 18,
+      "slug": "convex-optimization",
+      "title": "Convex Optimization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::complex-numbers",
+      "num": 19,
+      "slug": "complex-numbers",
+      "title": "Complex Numbers for AI",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::fourier-transform",
+      "num": 20,
+      "slug": "fourier-transform",
+      "title": "The Fourier Transform",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::graph-theory",
+      "num": 21,
+      "slug": "graph-theory",
+      "title": "Graph Theory for Machine Learning",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-01-math::stochastic-processes",
+      "num": 22,
+      "slug": "stochastic-processes",
+      "title": "Stochastic Processes",
+      "nQuiz": 5
+    }
+  ]
+}

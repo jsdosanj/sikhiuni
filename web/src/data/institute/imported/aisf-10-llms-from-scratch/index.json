@@ -1,0 +1,181 @@
+{
+  "track": "aisf-10-llms-from-scratch",
+  "phaseDir": "10-llms-from-scratch",
+  "blurb": "Build, train, and understand large language models.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-10-llms-from-scratch::tokenizers",
+      "num": 1,
+      "slug": "tokenizers",
+      "title": "Tokenizers: BPE, WordPiece, SentencePiece",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::building-a-tokenizer",
+      "num": 2,
+      "slug": "building-a-tokenizer",
+      "title": "Building a Tokenizer from Scratch",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::data-pipelines",
+      "num": 3,
+      "slug": "data-pipelines",
+      "title": "Data Pipelines for Pre-Training",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::pre-training-mini-gpt",
+      "num": 4,
+      "slug": "pre-training-mini-gpt",
+      "title": "Pre-Training a Mini GPT (124M Parameters)",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::scaling-distributed",
+      "num": 5,
+      "slug": "scaling-distributed",
+      "title": "Scaling: Distributed Training, FSDP, DeepSpeed",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::instruction-tuning-sft",
+      "num": 6,
+      "slug": "instruction-tuning-sft",
+      "title": "Instruction Tuning (SFT)",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::rlhf",
+      "num": 7,
+      "slug": "rlhf",
+      "title": "RLHF: Reward Model + PPO",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::dpo",
+      "num": 8,
+      "slug": "dpo",
+      "title": "DPO: Direct Preference Optimization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::constitutional-ai-self-improvement",
+      "num": 9,
+      "slug": "constitutional-ai-self-improvement",
+      "title": "Constitutional AI and Self-Improvement",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::evaluation",
+      "num": 10,
+      "slug": "evaluation",
+      "title": "Evaluation: Benchmarks, Evals, LM Harness",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::quantization",
+      "num": 11,
+      "slug": "quantization",
+      "title": "Quantization: Making Models Fit",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::inference-optimization",
+      "num": 12,
+      "slug": "inference-optimization",
+      "title": "Inference Optimization",
+      "nQuiz": 5
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::building-complete-llm-pipeline",
+      "num": 13,
+      "slug": "building-complete-llm-pipeline",
+      "title": "Building a Complete LLM Pipeline",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::open-models-architecture-walkthroughs",
+      "num": 14,
+      "slug": "open-models-architecture-walkthroughs",
+      "title": "Open Models: Architecture Walkthroughs",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::speculative-decoding-eagle3",
+      "num": 15,
+      "slug": "speculative-decoding-eagle3",
+      "title": "Speculative Decoding and EAGLE-3",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::differential-attention-v2",
+      "num": 16,
+      "slug": "differential-attention-v2",
+      "title": "Differential Attention (V2)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::native-sparse-attention",
+      "num": 17,
+      "slug": "native-sparse-attention",
+      "title": "Native Sparse Attention (DeepSeek NSA)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::multi-token-prediction",
+      "num": 18,
+      "slug": "multi-token-prediction",
+      "title": "Multi-Token Prediction (MTP)",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::dualpipe-parallelism",
+      "num": 19,
+      "slug": "dualpipe-parallelism",
+      "title": "DualPipe Parallelism",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::deepseek-v3-walkthrough",
+      "num": 20,
+      "slug": "deepseek-v3-walkthrough",
+      "title": "DeepSeek-V3 Architecture Walkthrough",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::jamba-hybrid-ssm-transformer",
+      "num": 21,
+      "slug": "jamba-hybrid-ssm-transformer",
+      "title": "Jamba — Hybrid SSM-Transformer",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::async-hogwild-inference",
+      "num": 22,
+      "slug": "async-hogwild-inference",
+      "title": "Async and Hogwild! Inference",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::speculative-decoding",
+      "num": 25,
+      "slug": "speculative-decoding",
+      "title": "Speculative Decoding and EAGLE",
+      "nQuiz": 0
+    },
+    {
+      "id": "aisf-10-llms-from-scratch::gradient-checkpointing",
+      "num": 34,
+      "slug": "gradient-checkpointing",
+      "title": "Gradient Checkpointing and Activation Recomputation",
+      "nQuiz": 0
+    }
+  ]
+}

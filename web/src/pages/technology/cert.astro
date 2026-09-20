@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import InstituteRail from '../../components/institute/InstituteRail.astro';
+---
+<Base
+  title="Certificate, Institute of Technology"
+  description="Your Sikhi University · Institute of Technology certificate of completion."
+  institute
+  noindex
+>
+  <InstituteRail />
+
+  <section class="i-wrap" style="padding:40px 24px 80px">
+    <span class="i-label">/technology/cert</span>
+    <div id="i-cert-app" style="margin-top:14px">
+      <p class="i-mono" style="color:var(--i-muted)">Loading…</p>
+    </div>
+  </section>
+
+  <script>
+    import { initInstituteCert } from '../../lib/institute/cert';
+    initInstituteCert();
+  </script>
+</Base>

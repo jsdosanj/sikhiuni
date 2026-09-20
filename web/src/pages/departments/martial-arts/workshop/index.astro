@@ -1,0 +1,56 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import '../../../../styles/departments.css';
+import { departments } from '../../../../lib/departments';
+import { workshops } from '../../../../data/workshops';
+const dept = departments.find((x) => x.id === 'martial-arts')!;
+---
+<Base
+  title="Workshops, Department of Martial Arts"
+  description="Hands-on 'how it is actually made' references from the Department of Martial Arts. First: the Wootz Workshop, the real metallurgy behind Sikh shastar."
+  ambient="none"
+>
+  <div class="dept-page wkx-page" style={`--dept:${dept.accent}`}>
+    <section class="wrap wkx">
+      <a class="wkx-back" href="/departments/martial-arts">&larr; {dept.name}</a>
+      <h1 class="wkx-h1">Workshops</h1>
+      <p class="wkx-lead">
+        Field records for how a thing is actually made, the recipe, the numbers, the tradeoffs.
+        Migrated and kept current from the sister project, <a href="https://sikhi.io" target="_blank" rel="noopener">Sikhi.io</a>.
+      </p>
+
+      <div class="wkx-grid">
+        {workshops.map((w) => (
+          <a class="wkx-card" href={`/departments/martial-arts/workshop/${w.slug}`}>
+            <span class="wkx-kicker">{w.kicker}</span>
+            <strong class="wkx-card-t">{w.title}</strong>
+            <span class="wkx-card-b">{w.standfirst}</span>
+            <span class="wkx-go">{w.modules.length} modules &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .wkx-page { background: rgb(var(--c-paper)); }
+    .wkx { padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 10vw, 7rem); }
+    .wkx-back { font-family: var(--font-sans, system-ui); font-size: 12px; color: rgb(var(--c-muted)); text-decoration: none; }
+    .wkx-back:hover { color: var(--dept); }
+    .wkx-h1 { margin: 14px 0 0; font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; color: rgb(var(--c-navy)); }
+    .wkx-lead { margin: 14px 0 0; max-width: 62ch; font-size: 15px; line-height: 1.75; color: rgb(var(--c-muted)); }
+    .wkx-lead a { color: var(--dept); text-decoration: underline; text-underline-offset: 2px; }
+    .wkx-grid { display: grid; gap: 16px; margin-top: 34px; }
+    @media (min-width: 720px) { .wkx-grid { grid-template-columns: repeat(2, 1fr); } }
+    .wkx-card {
+      display: flex; flex-direction: column; gap: 10px; padding: 26px; text-decoration: none;
+      border: 1px solid rgb(var(--c-line)); border-left: 4px solid var(--dept); border-radius: 6px;
+      background: rgb(var(--c-surface)); transition: transform .2s var(--ease-out, ease), box-shadow .2s;
+    }
+    .wkx-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgb(20 22 26 / .12); }
+    .wkx-kicker { font-family: var(--font-sans, system-ui); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--dept); }
+    .wkx-card-t { font-family: "Source Serif 4", Georgia, serif; font-weight: 800; font-size: 20px; color: rgb(var(--c-navy)); }
+    .wkx-card-b { font-size: 13.5px; line-height: 1.6; color: rgb(var(--c-muted)); }
+    .wkx-go { margin-top: auto; font-family: var(--font-sans, system-ui); font-size: 12px; font-weight: 800; color: var(--dept); }
+  </style>
+</Base>

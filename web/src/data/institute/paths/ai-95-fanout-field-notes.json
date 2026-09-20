@@ -1,0 +1,48 @@
+{
+  "track": "ai-95-fanout-field-notes",
+  "school": "ai",
+  "blurb": "Fanout's daily paper calendar, its foundational-papers reading order, and its free field notes on AI, systems, and inference engineering.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Courses published by",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to link this material. No paper summary, blog text, or roadmap diagram is reproduced here — every card opens the real page at fanout.sh."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "daily-papers",
+      "title": "Daily papers",
+      "objective": "Build a paper-reading habit using Fanout's dated calendar and reading-order map, starting with three foundational papers already explained there.",
+      "teach": "A new paper goes up daily with a short learning note pitched at why it matters and what to look for, not a full summary — you still have to read the paper. The foundational-papers page is the free map; Fanout's own guided explanations of each one are Pro.",
+      "labs": [
+        { "title": "Daily Paper Calendar", "provider": "Fanout", "href": "https://fanout.sh/daily", "cost": "free" },
+        { "title": "Foundational Papers by Track, in Reading Order", "provider": "Fanout", "href": "https://fanout.sh/papers", "cost": "free" },
+        { "title": "Attention Is All You Need", "provider": "Fanout", "href": "https://fanout.sh/daily/2026-07-19-attention-is-all-you-need", "cost": "free" },
+        { "title": "Adam: A Method for Stochastic Optimization", "provider": "Fanout", "href": "https://fanout.sh/daily/2026-07-06-adam", "cost": "free" },
+        { "title": "The PageRank Citation Ranking: Bringing Order to the Web", "provider": "Fanout", "href": "https://fanout.sh/daily/2026-08-11-pagerank", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "field-notes-and-community",
+      "title": "Field notes and community",
+      "objective": "Follow Fanout's technical blog and knowledge map, and see the current state of its open-source robotics curriculum preview.",
+      "teach": "The blog is where the numbers-driven writing lives — KV-cache formulas, quantization tradeoffs, consistent hashing — each post a self-contained worked calculation rather than a course lesson. Open Robotics is, like the inference engineering course, a public preview of a course Fanout is still building; check its current state before assuming it is finished.",
+      "labs": [
+        { "title": "Fanout Blog: AI, Systems and ML Engineering", "provider": "Fanout", "href": "https://fanout.sh/blog", "cost": "free" },
+        { "title": "Knowledge Topography", "provider": "Fanout", "href": "https://fanout.sh/knowledge-graph", "cost": "free" },
+        { "title": "Study With Me", "provider": "Fanout", "href": "https://fanout.sh/study-with-me", "cost": "free" },
+        { "title": "AI, System Design & ML Math Roadmaps", "provider": "Fanout", "href": "https://fanout.sh/roadmap", "cost": "free" },
+        { "title": "Tools for Technical Work", "provider": "Fanout", "href": "https://fanout.sh/tools", "cost": "free" },
+        { "title": "Open Robotics", "provider": "Fanout", "href": "https://fanout.sh/open-robotics", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": [
+    { "title": "Fanout Course Pricing", "provider": "Fanout", "href": "https://fanout.sh/pricing", "note": "Daily papers, the blog, and Labs are free indefinitely; the structured courses they support are Fanout's paid product." }
+  ]
+}

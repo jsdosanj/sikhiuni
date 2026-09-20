@@ -1,6 +1,11 @@
 /* Sikhi University (Astro) service worker — offline app shell + course data.
    Redirect-safe: never returns a redirected response (Safari rejects those for navigations). */
-var CACHE = 'su-web-v26'; // packs moved to their own unversioned cache (see PACKS_CACHE below) — this bump is the last one that can ever touch offline course data
+// __BUILD__ is replaced with a hash of the built assets by scripts/stamp-sw.mjs
+// (from master, kept on merge -- a real fix, not a redesign-vs-master content
+// decision: the old hand-bumped 'su-web-v26' hadn't changed in months, which
+// meant returning visitors could be stuck on a stale app shell indefinitely.
+// Same failure mode as the crest's stale-SW debugging session earlier today.)
+var CACHE = 'su-web-v29-__BUILD__';
 // Offline course packs live in their OWN unversioned cache, separate from the
 // app-shell CACHE above. The activate handler purges every cache key except
 // CACHE on every version bump (below) — before this split, that purge was
@@ -18,7 +23,7 @@ self.addEventListener('install', function (e) {
 // Worker's 301 internally, so the address bar never moves). On a legacy host,
 // unregister and drop caches so the next navigation hits the network and the
 // 301 performs a real, visible move to sikhiuni.com.
-var LEGACY_HOSTS = ['sikh-university.dosanjhlabs.com', 'sikh-university.jasvant-dosanjh.workers.dev'];
+var LEGACY_HOSTS = ['sikh-university.com', 'www.sikh-university.com', 'sikh-university.dosanjhlabs.com', 'sikh-university.jasvant-dosanjh.workers.dev'];
 var IS_LEGACY = LEGACY_HOSTS.indexOf(self.location.hostname) !== -1;
 
 self.addEventListener('activate', function (e) {
@@ -44,6 +49,7 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url); if (url.origin !== location.origin) return;
   if (url.pathname.indexOf('/api/') === 0) return; // never touch APIs
   if (url.pathname.indexOf('/media/') === 0) return; // audio streams direct (range requests); don't cache
+  if (url.pathname.indexOf('/data/institute/atlas/') === 0) return; // large (~4 MB), rarely changes — a stuck cache here is worse than a fetch
 
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).then(function (res) {
@@ -54,7 +60,14 @@ self.addEventListener('fetch', function (e) {
   }
 
   if (url.pathname.indexOf('courses.json') !== -1 || url.pathname.indexOf('professors.json') !== -1 || url.pathname.indexOf('/data/') === 0) {
-    e.respondWith(fetch(req).then(function (res) { if (cacheable(res)) { var cp = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); } return res; }).catch(function () { return caches.match(req); }));
+    // network-first, cache fallback. If the network fails AND nothing is cached,
+    // fall through to a plain fetch so the page gets a real rejection to handle —
+    // never resolve to undefined (that surfaces as a silent "unavailable").
+    e.respondWith(
+      fetch(req)
+        .then(function (res) { if (cacheable(res)) { var cp = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); } return res; })
+        .catch(function () { return caches.match(req).then(function (h) { return h || fetch(req); }); }),
+    );
     return;
   }
 

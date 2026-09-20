@@ -1,0 +1,120 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import DeptHero from '../../components/departments/DeptHero.astro';
+import DeptSections from '../../components/departments/DeptSections.astro';
+import { departments } from '../../lib/departments';
+const d = departments.find((x) => x.id === 'language')!;
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `${d.name}, Sikhi University`, description: d.blurb,
+  url: 'https://sikhiuni.com/departments/language',
+  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+};
+// Gurmukhi vowel signs + a few classical roots, the phonetic scaffolding the
+// school teaches first. Each "materialises" from scattered ink on scroll.
+const glyphs = [
+  ['ਅ', 'a'], ['ਆ', 'ā'], ['ਇ', 'i'], ['ਈ', 'ī'], ['ਉ', 'u'], ['ਊ', 'ū'],
+  ['ਏ', 'e'], ['ਐ', 'ai'], ['ਓ', 'o'], ['ਔ', 'au'], ['ੰ', 'ṃ'], ['ੱ', '˘'],
+];
+---
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page lang-page" style={`--dept:${d.accent}`}>
+    <DeptHero d={d}>
+      <section class="lg-sig" aria-label="The sounds the script carries">
+        <span class="lg-field" aria-hidden="true">{Array.from({ length: 26 }).map((_, i) => <i style={`--x:${(i * 37) % 97}%;--y:${(i * 53) % 88}%;--d:${(i * 0.7).toFixed(1)}s;--dur:${(11 + (i % 6)).toFixed(0)}s`}></i>)}</span>
+        <div class="wrap lg-in">
+          <p class="lg-kicker">Before it is grammar, Gurbāṇī is sound</p>
+          <h2 class="lg-h">Every sign on the page is an instruction for the voice</h2>
+          <div class="lg-grid" lang="pa" role="list" aria-label="Gurmukhi vowel signs">
+            {glyphs.map(([g, r], i) => (
+              <span class="lg-glyph" role="listitem" style={`--i:${i}`}>
+                <span class="lg-ch">{g}</span>
+                <span class="lg-rom">{r}</span>
+              </span>
+            ))}
+          </div>
+          <p class="lg-note">
+            The school begins here, the lagāṇ-mātrā and the uchaaran that fix the meaning, then moves to
+            the grammar, the registers (Sant Bhāṣā, Braj, Persian), and the reference shelf that lets a
+            reader check their own work.
+          </p>
+        </div>
+      </section>
+    </DeptHero>
+    <DeptSections d={d} />
+  </div>
+
+  <style>
+    .lg-sig {
+      position: relative; overflow: hidden;
+      background: radial-gradient(130% 100% at 82% -10%, #2b2f7a, #1a1c47 55%, #0f1030);
+      color: #dfe1f4; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line));
+    }
+    /* a slow field of drifting ink motes, the "particles" the scripts form from */
+    .lg-field { position: absolute; inset: 0; pointer-events: none; }
+    .lg-field i {
+      position: absolute; left: var(--x); top: var(--y);
+      width: 3px; height: 3px; border-radius: 50%;
+      background: color-mix(in srgb, #cfd3ff 70%, var(--dept));
+      box-shadow: 0 0 8px color-mix(in srgb, var(--dept) 60%, transparent);
+      opacity: 0; animation: lg-drift var(--dur, 12s) ease-in-out infinite;
+      animation-delay: calc(var(--d, 0s) * -1);
+    }
+    @keyframes lg-drift {
+      0%, 100% { opacity: 0; transform: translate3d(0,0,0); }
+      20% { opacity: .55; }
+      50% { opacity: .3; transform: translate3d(14px, -18px, 0); }
+      80% { opacity: .5; }
+    }
+    .lg-in { position: relative; z-index: 1; }
+    .lg-kicker { font-family: var(--font-sans, system-ui); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--dept) 30%, #fff); }
+    .lg-h { margin: 8px 0 0; font-size: clamp(1.35rem, 3vw, 1.95rem); font-weight: 800; color: #fff; max-width: 24ch; }
+
+    .lg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 14px; margin: 30px 0 0; max-width: 720px; }
+    .lg-glyph {
+      display: grid; place-items: center; gap: 4px; padding: 16px 8px 12px; border-radius: 14px;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      /* materialise: dispersed ink -> sharp glowing glyph, on scroll */
+      opacity: 0; filter: blur(14px); transform: translateY(16px) scale(.9);
+      animation: lg-form both linear;
+      animation-timeline: view();
+      animation-range: entry 4% cover 46%;
+      animation-delay: calc(var(--i) * -0.04s);
+    }
+    @keyframes lg-form {
+      to { opacity: 1; filter: blur(0); transform: none; }
+    }
+    @supports not (animation-timeline: view()) {
+      .lg-glyph { animation: lg-form-fb .9s ease-out both; animation-delay: calc(var(--i) * 0.05s); }
+      @keyframes lg-form-fb { from { opacity: 0; filter: blur(14px); transform: translateY(16px) scale(.9); } to { opacity: 1; filter: blur(0); transform: none; } }
+    }
+    .lg-ch {
+      font-family: "Noto Serif Gurmukhi", "Noto Sans Gurmukhi", serif; font-size: 30px; line-height: 1; color: #eef0ff;
+      text-shadow: 0 0 22px color-mix(in srgb, var(--dept) 60%, transparent), 0 0 4px rgba(226,231,255,.7);
+    }
+    .lg-rom { font-family: var(--font-sans, system-ui); font-size: 11px; letter-spacing: .04em; color: #a9ade0; }
+
+    .lg-note { margin: 26px 0 0; max-width: 60ch; font-size: 14.5px; line-height: 1.72; color: #a9ade0; }
+
+    /* glassmorphism curriculum accordions, scoped to this school */
+    .lang-page :global(.dax-item) {
+      background: color-mix(in srgb, rgb(var(--c-surface)) 78%, transparent);
+      -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3);
+      border-color: color-mix(in srgb, var(--dept) 22%, rgb(var(--c-line)));
+    }
+    .lang-page :global(.dax-item[open]) {
+      box-shadow: 0 14px 40px color-mix(in srgb, var(--dept) 22%, transparent);
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .lang-page :global(.dax-item) { background: rgb(var(--c-surface)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lg-field { display: none; }
+      .lg-glyph { opacity: 1; filter: none; transform: none; animation: none; }
+    }
+  </style>
+</Base>

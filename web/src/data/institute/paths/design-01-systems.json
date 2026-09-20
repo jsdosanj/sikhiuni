@@ -1,0 +1,150 @@
+{
+  "track": "design-01-systems",
+  "school": "design",
+  "blurb": "A design system is what stops a hundred screens drifting into a hundred styles. This path builds one from the bottom up — tokens, then components, then the governance that keeps it honest — reading Material 3 as a worked example and Google's HTML/CSS guide as the implementation half.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-10",
+  "creditLabel": "Set texts published by",
+  "adaptedFrom": {
+    "name": "Material Design 3 and the Google HTML/CSS Style Guide",
+    "href": "https://m3.material.io/",
+    "license": "Material Design guidance: link-out only · Google HTML/CSS Style Guide: CC-BY-3.0",
+    "note": "Two Google sources under two different terms, and the difference is deliberate. The Google style guides are published under CC BY 3.0, so the HTML/CSS guide may be reproduced with attribution — module 4 quotes none of it anyway, because sending you to the source is more useful. Material Design's guidance site is Google product documentation and is not openly licensed, so it is read on Google's site and never rehosted; the Material components code is separately open-source under Apache 2.0 and is linked as code, not copied here. No Google logo, product screenshot or Material icon is used. \"Google\" and \"Material Design\" are trademarks of Google LLC, used nominatively; Sikhi University is not affiliated with, sponsored by, or endorsed by Google."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "tokens",
+      "title": "Tokens: naming a decision so it can change",
+      "objective": "Convert a screen's hardcoded values into a token layer, and rename every token so it says its role rather than its value.",
+      "teach": "A design token is a named decision. That is the whole idea, and almost every benefit follows from the naming rather than from any tooling. Consider the difference between `#0B3D91` and `color.brand.primary`, and then the difference between both of those and `color.action.background`. The first is a value: change it and you must find every copy. The second is a brand fact: better, but it still tells you nothing about where it may be used. The third is a role, and roles are what let a system survive a redesign — when the brand colour changes, or a dark theme arrives, or an increased-contrast mode is added, the role stays true and only its resolution changes. This is the same indirection module 3 of Interface Foundations described for text styles, generalised: say what a thing *is for*, let the system decide what it currently *is*. Material 3's colour system is the most thoroughly worked-out public example — it derives a full set of roles from a small number of source colours, and produces matched light and dark schemes from them, so read it as a case study in role naming even if you never ship a Material app. The exercise: take one screen you have built, list every literal colour, spacing and radius in it, and replace each with a role name. The screen should look identical afterwards. If you cannot name a value's role, that is the finding — you had a decision you never actually made.",
+      "labs": [
+        {
+          "title": "Material 3 — design tokens",
+          "provider": "Google",
+          "href": "https://m3.material.io/foundations/design-tokens/overview",
+          "cost": "free"
+        },
+        {
+          "title": "Material 3 — the colour system and roles",
+          "provider": "Google",
+          "href": "https://m3.material.io/styles/color/system/overview",
+          "cost": "free"
+        },
+        {
+          "title": "Design Tokens Community Group format specification",
+          "provider": "W3C Community Group",
+          "href": "https://www.designtokens.org/",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "components",
+      "title": "Components, variants, and knowing when to stop",
+      "objective": "Specify one component completely — every state, every variant, and the cases it explicitly refuses to handle.",
+      "teach": "The failure mode of component libraries is not too few components; it is components with forty properties that nobody can use correctly. A component earns its API by being specified in states, not in options. Take a button: default, hover, focus-visible, pressed, disabled, loading, and each of those in every variant you support — and if you have not drawn all of them, you have not designed a button, you have drawn a picture of one. Focus-visible is the one teams forget, and it is the one keyboard users navigate entirely by. Disabled is the one designers hate, because a control at 38% opacity almost never passes contrast, which is a real argument for hiding unavailable actions or explaining why they are unavailable rather than greying them out and hoping. Variants are where systems bloat. Every new variant is a decision you are handing back to the person using the component, and the point of the system was to make decisions once. The useful question before adding one is: what would break if this case just used the existing variant? Often nothing would, and the request was a preference. Material 3's component pages are worth reading closely for how much they specify per component and how little they leave open — that ratio is the actual craft.",
+      "labs": [
+        {
+          "title": "Material 3 — components",
+          "provider": "Google",
+          "href": "https://m3.material.io/components",
+          "cost": "free"
+        },
+        {
+          "title": "Material 3 — interaction states",
+          "provider": "Google",
+          "href": "https://m3.material.io/foundations/interaction/states/overview",
+          "cost": "free"
+        },
+        {
+          "title": "ARIA Authoring Practices — component behaviour patterns",
+          "provider": "W3C",
+          "href": "https://www.w3.org/WAI/ARIA/apg/patterns/",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "slug": "adapting",
+      "title": "One system, many screens",
+      "objective": "Take a single component and specify how it behaves from a small phone to a desktop window, without branching into two designs.",
+      "teach": "Adaptive layout is where design systems either prove themselves or quietly become two systems maintained by one team. The trap is the breakpoint mindset: design a phone version, design a desktop version, switch between them at 768 pixels, and now every future change costs double and the tablet is wrong. The alternative is to specify behaviour rather than states — this list becomes a grid when it has room for two columns of a readable measure; this navigation moves from a bottom bar to a side rail when the pointer is likely a cursor rather than a thumb. Both of those are rules about available space and input, and both produce sensible results at sizes nobody tested. Material's window size classes and Apple's size classes are two vocabularies for the same insight, which is that the meaningful question is not \"how many pixels\" but \"what kind of space is this and what is the user holding\". Note the input half explicitly: a 44-point target exists because of fingertips, and shrinking it on desktop is legitimate, whereas shrinking it on a touchscreen tablet because the screen is large is a bug that will look fine in review and fail in a user's hands.",
+      "labs": [
+        {
+          "title": "Material 3 — applying layout across window sizes",
+          "provider": "Google",
+          "href": "https://m3.material.io/foundations/layout/applying-layout/window-size-classes",
+          "cost": "free"
+        },
+        {
+          "title": "Material 3 — adaptive design overview",
+          "provider": "Google",
+          "href": "https://m3.material.io/foundations/adaptive-design/overview",
+          "cost": "free"
+        },
+        {
+          "title": "MDN — CSS container queries",
+          "provider": "Mozilla",
+          "href": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries",
+          "cost": "free"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "slug": "implementation",
+      "title": "The implementation half",
+      "objective": "Write the markup and CSS for one component so that its structure carries meaning and its styles are not fighting the system.",
+      "teach": "A design system that exists only in a design tool is a mood board with a version number. The implementation is where it becomes real, and where most of the value leaks out. Google's HTML/CSS style guide is short and worth reading in full for two habits in particular. The first is that markup should carry meaning: an element chosen for what it *is* — a button, a heading, a list — gives you keyboard behaviour, screen-reader semantics and browser defaults for free, whereas a div styled to look like a button gives you a support ticket from every assistive-technology user. The second is that presentation belongs in CSS and structure in HTML, which sounds like a truism until you notice how much of a typical codebase encodes layout decisions in element nesting. Then there is naming, which is the same problem as module 1 wearing different clothes: class names that describe appearance (`.blue-box`) go stale the moment the design changes, and names that describe role (`.alert`) survive it. Whatever methodology you adopt for that — BEM, utility classes, CSS modules — pick one and hold to it, for exactly the reason the Engineering Craft path gives about style guides: the value is that the argument is over.",
+      "labs": [
+        {
+          "title": "Google HTML/CSS Style Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/htmlcssguide.html",
+          "cost": "free"
+        },
+        {
+          "title": "Google JavaScript Style Guide",
+          "provider": "Google",
+          "href": "https://google.github.io/styleguide/jsguide.html",
+          "cost": "free"
+        },
+        {
+          "title": "MDN — HTML elements reference",
+          "provider": "Mozilla",
+          "href": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element",
+          "cost": "free"
+        }
+      ]
+    }
+  ],
+  "bench": [
+    {
+      "title": "Material Design 3",
+      "provider": "Google",
+      "href": "https://m3.material.io/",
+      "note": "The full guidance site. Read it as a worked example of a system that had to survive being applied to every Google product on every platform — the constraints that produced it are visible in almost every decision."
+    },
+    {
+      "title": "Material Components — source code",
+      "provider": "Google",
+      "href": "https://github.com/material-components",
+      "note": "The implementations, open-source under Apache 2.0. Reading a component's source next to its guidance page is the fastest way to see how much specification a real component needs."
+    },
+    {
+      "title": "Material Theme Builder",
+      "provider": "Google",
+      "href": "https://material-foundation.github.io/material-theme-builder/",
+      "note": "Generates a full Material colour-role set from a source colour, with matched light and dark schemes. Useful for module 1 even if you are not shipping Material — it makes role-based colour concrete in about a minute."
+    },
+    {
+      "title": "Google Fonts",
+      "provider": "Google",
+      "href": "https://fonts.google.com/",
+      "note": "Open-licensed typefaces, most under the SIL Open Font License, which permits use and embedding including commercially. Check each family's licence on its own page — they are not all identical."
+    }
+  ]
+}

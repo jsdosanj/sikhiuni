@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::wmdp-dual-use-evaluation",
+  "num": 17,
+  "slug": "wmdp-dual-use-evaluation",
+  "title": "WMDP and Dual-Use Capability Evaluation",
+  "tagline": "Li et al., \"The WMDP Benchmark: Measuring and Reducing Malicious Use With Unlearning\" (ICML 2024, arXiv:2403.03218). 4,157 multiple-choice questions across biosecurity (1,520), cybersecurity (2,225), and chemistry (412). Questions operate in the \"yellow zone\" — proximate enabling knowledge, filtered by multi-expert review and ITAR/EAR legal compliance. Dual purpose: proxy evaluation of dual-use capability, and unlearning benchmark (the companion RMU method reduces WMDP performance while preserving general capability). 2024-2025 field narrative: early OpenAI/Anthropic 2024 evaluations reported \"mild uplift\" over internet search; by April 2025, OpenAI's Preparedness Framework v2 said models are \"on the cusp of meaningfully helping novices create known biological threats.\" Anthropic's bioweapon-acquisition trial showed 2.53x uplift, insufficient to rule out ASL-3.",
+  "type": "Learn",
+  "languages": "Python (stdlib, WMDP-shaped uplift evaluation harness)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Describe WMDP's three domains, question counts, and \"yellow zone\" filter criterion.",
+    "Explain RMU and why WMDP is both an evaluation and an unlearning benchmark.",
+    "Describe the 2024-2025 uplift narrative: \"mild uplift\" -> \"on the cusp\" -> \"insufficient to rule out ASL-3.\"",
+    "Distinguish novice-relative uplift from expert-absolute capability."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Dual-use capability is the measurement problem under every lab&#39;s frontier safety framework (Lesson 18). The question: does model X materially advance a novice&#39;s ability to cause mass harm in bio, chem, or cyber? Direct measurement (ask the model to actually produce harm) is illegal and unethical. Proxy measurement needs a benchmark the model cannot refuse (to produce honest capability numbers) but whose questions are not themselves harmful publications.</p>\n<h2>The Concept</h2>\n<h3>The &quot;yellow zone&quot;</h3>\n<p>Questions that require proximate, enabling knowledge of a harmful process without being a direct synthesis recipe. &quot;What reagent catalyzes step 4 of [published pathway]?&quot; not &quot;how do I make [dangerous compound]?&quot; Each question reviewed by multiple domain experts; filtered for ITAR/EAR export-control compliance.</p>\n<p>4,157 questions total:</p>\n<ul>\n<li>Biosecurity: 1,520</li>\n<li>Cybersecurity: 2,225</li>\n<li>Chemistry: 412</li>\n</ul>\n<p>Multiple-choice format. Models answer without being asked to assist with anything; capability can be measured without eliciting harmful behaviour.</p>\n<h3>RMU — Representation Misdirection for Unlearning</h3>\n<p>The companion unlearning method. Applied to LLaMa-2-7B, reduced WMDP scores to near-random while preserving MMLU and other general-capability benchmarks within a few percentage points. The published method is the unlearning baseline for every subsequent bio-chem-cyber unlearning paper.</p>\n<h3>The 2024-2025 uplift narrative</h3>\n<p>Three phases:</p>\n<ol>\n<li><p><strong>2024 &quot;mild uplift.&quot;</strong> Early OpenAI and Anthropic Preparedness/RSP evaluations reported small advantages over internet search for novices attempting bio-adjacent tasks. Public framing: frontier models help, but not substantially more than Google.</p>\n</li>\n<li><p><strong>April 2025 &quot;on the cusp.&quot;</strong> OpenAI&#39;s Preparedness Framework v2 reported models &quot;on the cusp of meaningfully helping novices create known biological threats.&quot; Not a capability claim — a warning that the cusp is close.</p>\n</li>\n<li><p><strong>Anthropic&#39;s 2025 bioweapon-acquisition trial.</strong> Controlled study with novice participants, measured relative success at acquisition-phase tasks. Reported 2.53x uplift. Insufficient to rule out ASL-3 (Lesson 18) — the threshold for Anthropic&#39;s Responsible Scaling Policy tier 3 is met or approached.</p>\n</li>\n</ol>\n<h3>Novice-relative vs expert-absolute</h3>\n<p>A crucial distinction:</p>\n<ul>\n<li><strong>Novice-relative uplift.</strong> How much does the model help a non-expert? Multiplicative. The relative advantage is high because novices know little; even modest information helps.</li>\n<li><strong>Expert-absolute capability.</strong> How much information does the model produce at maximum effort? An expert can extract more than a novice. The absolute ceiling is high.</li>\n</ul>\n<p>Safety cases (Lesson 18) target both: &quot;the model cannot give a novice enough uplift to execute&quot; plus &quot;an expert cannot extract information from the model that is not already published.&quot;</p>\n<h3>The measurement pitfall</h3>\n<p>WMDP is a capability proxy, not a deployment measurement. A model that scores high on WMDP may or may not be exploitable by a novice in practice, depending on:</p>\n<ul>\n<li>Elicitation resistance (how hard is it to get the capability out without tripping safety filters)</li>\n<li>Tacit knowledge (capability that requires wet-lab skill, not information)</li>\n<li>Execution barriers (procurement, equipment)</li>\n</ul>\n<p>Anthropic&#39;s 2025 bioweapon-acquisition trial adds the novice-elicitation layer on top of WMDP-style capability: it measures actual task success, not multiple-choice capability.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lessons 12-16 are attack and defense tooling on model outputs. Lesson 17 is the dual-use capability layer — the measurement that frontier safety frameworks (Lesson 18) evaluate. Lesson 30 closes the arc with the current 2026 cyber/bio/chem/nuclear uplift evidence.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>al-wmdp-yellow-zone</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p><code>code/main.py</code> builds a toy WMDP-shaped evaluation harness. A mock model is tested on category-binned questions; scores per domain are reported. A simple unlearning intervention (zero out domain-specific representation) reduces scores; you can measure the trade-off against general capability.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-wmdp-eval.md</code>. Given a dual-use capability claim (&quot;our model does not meaningfully help with bioweapons&quot;), it audits: which benchmarks were run, which refusal path was used for evaluation (raw completion vs policy-gated), and whether novice-elicitation studies complement the multiple-choice result.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Run <code>code/main.py</code>. Report per-domain accuracy before and after the toy unlearning step. Explain the general-capability trade-off.</p>\n</li>\n<li><p>Augment the toy WMDP with a fourth domain (e.g., radiological). Specify two illustrative question types in the yellow zone. Explain why crafting such questions is harder than adding MMLU-shaped questions.</p>\n</li>\n<li><p>Read WMDP 2024 Section 5 (RMU methodology). Sketch a simpler unlearning approach (e.g., suppress top-k neurons for domain content) and describe its expected general-capability cost.</p>\n</li>\n<li><p>Anthropic 2025&#39;s bioweapon-acquisition trial reports 2.53x uplift. Describe two ways this number could be biased upward (novice sample size, task fidelity) and two downward (elicitation ceiling, model safety gating).</p>\n</li>\n<li><p>Articulate what a safety case for ASL-3 requires beyond passing WMDP unlearning. Name at least two complementary elicitation studies.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>WMDP</td>\n<td>&quot;the dual-use benchmark&quot;</td>\n<td>4,157 MCQ questions across bio/cyber/chem in the yellow zone</td>\n</tr>\n<tr>\n<td>Yellow zone</td>\n<td>&quot;enabling but not synthesis&quot;</td>\n<td>Proximate knowledge adjacent to harmful capability without being a synthesis recipe</td>\n</tr>\n<tr>\n<td>RMU</td>\n<td>&quot;the unlearning baseline&quot;</td>\n<td>Representation Misdirection for Unlearning; reduces WMDP scores, preserves general capability</td>\n</tr>\n<tr>\n<td>Novice-relative uplift</td>\n<td>&quot;how much it helps non-experts&quot;</td>\n<td>Multiplicative advantage over status-quo internet search for a novice</td>\n</tr>\n<tr>\n<td>Expert-absolute capability</td>\n<td>&quot;ceiling for experts&quot;</td>\n<td>Maximum information extractable from the model by a motivated expert</td>\n</tr>\n<tr>\n<td>Acquisition-phase task</td>\n<td>&quot;steps before synthesis&quot;</td>\n<td>Procurement, equipment, permits — the earliest parts of a harm pathway</td>\n</tr>\n<tr>\n<td>ITAR/EAR</td>\n<td>&quot;export-control compliance&quot;</td>\n<td>Legal frameworks that constrain publishing certain enabling knowledge</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2403.03218\" target=\"_blank\" rel=\"noopener\">Li et al. — The WMDP Benchmark (arXiv:2403.03218, ICML 2024)</a> — the benchmark and RMU paper</li>\n<li><a href=\"https://openai.com/index/updating-our-preparedness-framework/\" target=\"_blank\" rel=\"noopener\">OpenAI — Preparedness Framework v2 (April 15, 2025)</a> — &quot;on the cusp&quot; language</li>\n<li><a href=\"https://www.anthropic.com/responsible-scaling-policy\" target=\"_blank\" rel=\"noopener\">Anthropic — Responsible Scaling Policy v3.0 (February 2026)</a> — ASL-3 bio threshold and acquisition trial results</li>\n<li><a href=\"https://deepmind.google/blog/strengthening-our-frontier-safety-framework/\" target=\"_blank\" rel=\"noopener\">DeepMind — Frontier Safety Framework v3.0 (September 2025)</a> — bio-uplift CCL</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"WMDP-shaped evaluation harness — stdlib Python.\n\nMock model is a 3-domain expert with per-domain accuracy vectors.\nSimulates a WMDP-style multiple-choice evaluation across bio, cyber, chem.\nDemonstrates the RMU-style unlearning trade-off: suppress domain-specific\ncapability, measure the general-capability cost.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\nimport random\n\n\nrandom.seed(47)\n\n\nDOMAINS = {\n    \"biosecurity\":   {\"n_questions\": 200, \"accuracy\": 0.72},\n    \"cybersecurity\": {\"n_questions\": 200, \"accuracy\": 0.80},\n    \"chemistry\":     {\"n_questions\": 200, \"accuracy\": 0.64},\n    \"mmlu_general\":  {\"n_questions\": 200, \"accuracy\": 0.78},\n}\n\n\ndef evaluate(model_accuracy: dict) -> dict:\n    \"\"\"Run the toy WMDP-shaped benchmark. Returns per-domain score.\"\"\"\n    results = {}\n    for domain, cfg in DOMAINS.items():\n        correct = 0\n        for _ in range(cfg[\"n_questions\"]):\n            acc = model_accuracy.get(domain, cfg[\"accuracy\"])\n            if random.random() < acc:\n                correct += 1\n        results[domain] = correct / cfg[\"n_questions\"]\n    return results\n\n\ndef apply_rmu_style_unlearning(model_accuracy: dict,\n                               targets: list[str],\n                               strength: float = 0.9,\n                               collateral: float = 0.03) -> dict:\n    \"\"\"Unlearning intervention: reduce target-domain accuracy by `strength`,\n    leak `collateral` accuracy loss to other domains (general capability).\"\"\"\n    new = dict(model_accuracy)\n    for d in targets:\n        new[d] = max(0.25, new[d] * (1 - strength))\n    for d in new:\n        if d not in targets:\n            new[d] = max(0.0, new[d] - collateral)\n    return new\n\n\ndef baseline_model() -> dict:\n    return {d: cfg[\"accuracy\"] for d, cfg in DOMAINS.items()}\n\n\ndef report(title: str, r: dict) -> None:\n    print(f\"\\n{title}\")\n    for d, score in r.items():\n        print(f\"  {d:18s} : {score:.3f}\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"WMDP-SHAPED EVALUATION HARNESS (Phase 18, Lesson 17)\")\n    print(\"=\" * 70)\n\n    base = baseline_model()\n    report(\"baseline model accuracy by domain\", base)\n    baseline_results = evaluate(base)\n    report(\"measured scores (pre-unlearning)\", baseline_results)\n\n    # Unlearn bio + chem.\n    post = apply_rmu_style_unlearning(base, targets=[\"biosecurity\", \"chemistry\"],\n                                       strength=0.85, collateral=0.04)\n    post_results = evaluate(post)\n    report(\"measured scores (post-unlearning: bio + chem)\", post_results)\n\n    print(\"\\nuplift-style calculation (novice baseline ~= 0.25 random):\")\n    novice = 0.25\n    for d in (\"biosecurity\", \"cybersecurity\", \"chemistry\"):\n        pre = baseline_results[d]\n        pst = post_results[d]\n        uplift_pre = pre / novice\n        uplift_post = pst / novice\n        print(f\"  {d:18s}  pre={uplift_pre:.2f}x novice  post={uplift_post:.2f}x novice\")\n\n    print(\"\\n\" + \"=\" * 70)\n    print(\"TAKEAWAY: WMDP gives a per-domain capability number without eliciting\")\n    print(\"harmful output. RMU-style unlearning reduces target-domain scores\")\n    print(\"with ~3-4% general-capability collateral damage. the 2025 field\")\n    print(\"narrative is 'mild uplift' -> 'on the cusp' -> 'insufficient to\")\n    print(\"rule out ASL-3' -- each transition backed by a different study.\")\n    print(\"=\" * 70)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What is the 'yellow zone' criterion that WMDP uses for question selection?",
+      "options": [
+        "Synthesis recipes for dangerous compounds",
+        "Proximate, enabling knowledge of a harmful process without being a direct synthesis recipe",
+        "Open internet content with no expert review",
+        "Multilingual math reasoning"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "Which three domains does WMDP cover?",
+      "options": [
+        "Biosecurity, cybersecurity, chemistry",
+        "Vision, audio, text",
+        "Math, code, language",
+        "Privacy, bias, watermarking"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What does RMU (the WMDP companion method) do?",
+      "options": [
+        "Generates harmful images",
+        "Replaces PPO with DPO during alignment",
+        "Trains a new tokenizer for dual-use content",
+        "Representation Misdirection for Unlearning: reduces WMDP scores to near-random while preserving general capability (e.g., MMLU) within a few points"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "What number did Anthropic's 2025 bioweapon-acquisition trial report as 'uplift,' and what did it imply for ASL-3?",
+      "options": [
+        "100x; ASL-5 reached",
+        "2.53x; insufficient to rule out ASL-3",
+        "10x; below ASL-2",
+        "0.5x; ASL-3 ruled out"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What is the distinction between novice-relative uplift and expert-absolute capability?",
+      "options": [
+        "Both are measured only via MCQ",
+        "They are synonyms",
+        "Novice-relative is a benchmark; expert-absolute is a license",
+        "Novice-relative is the multiplicative help over status-quo (e.g., internet search) for non-experts; expert-absolute is the maximum information a motivated expert can extract from the model"
+      ],
+      "answer": 3,
+      "explanation": ""
+    },
+    {
+      "q": "Which is NOT a measurement pitfall when interpreting WMDP scores as deployment risk?",
+      "options": [
+        "Tacit knowledge needed for execution that is not captured by MCQ",
+        "Procurement and equipment barriers",
+        "The model's open-source license",
+        "Elicitation resistance (whether safety filters block extraction)"
+      ],
+      "answer": 2,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/17-wmdp-dual-use-evaluation"
+  }
+}

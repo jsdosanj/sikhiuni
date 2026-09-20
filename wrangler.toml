@@ -27,6 +27,14 @@ command = "cd web && npm install && npm run build && rm -f dist/assets/data/cour
 [assets]
 directory = "./web/dist"
 binding = "ASSETS"
+# /technology/* routes through the Worker first so it can augment the asset
+# layer's own (hash-hardened) CSP for the code lab — 'wasm-unsafe-eval' + the
+# Pyodide CDN in script-src/connect-src, and frame-src 'self' for the sandboxed
+# preview iframe. Everything else the site forbids stays forbidden. Every other
+# path is still served straight from the edge (Worker skipped). The legacy
+# /institute prefix stays in the list so the Worker runs to 301 it to
+# /technology (the wing was renamed 2026-08).
+run_worker_first = ["/technology", "/technology/*", "/institute", "/institute/*", "/_lab/*"]
 
 [[d1_databases]]
 binding = "DB"
@@ -81,3 +89,15 @@ head_sampling_rate = 1
 # checkRateLimit). The Cloudflare experimental `ratelimit` unsafe-binding was removed
 # because it silently failed open in testing (never blocked). Limits stay generous (the
 # mission serves camps and gurdwaras behind shared NATs) and the limiter fails open on error.
+
+# Family credential verification: source accounts are queried, never copied.
+
+[[d1_databases]]
+binding = "FAMILY_SIKHI_DB"
+database_name = "sikhi-accounts"
+database_id = "e198e71f-a7d5-4d11-b22f-6fec5ec2be29"
+
+[[d1_databases]]
+binding = "FAMILY_PUNJABI_DB"
+database_name = "punjabiuni-db"
+database_id = "420d6e84-6e84-482b-981a-7482cd316375"

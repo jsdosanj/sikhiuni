@@ -1,0 +1,333 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/departments.css';
+import Icon from '../../components/Icon.astro';
+import { departments } from '../../lib/departments';
+const d = departments.find((x) => x.id === 'martial-arts')!;
+const curriculum = d.curriculum ?? [];
+const ld = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
+  name: `${d.name}, Sikhi University`, description: d.blurb,
+  url: 'https://sikhiuni.com/departments/martial-arts',
+  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+};
+const stances = ['Guard', 'Do lāna, the spill', 'Angle cut', 'Khaṭ Aṅg, animal form', 'Dev Aṅg, divine form'];
+---
+<Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <div class="dept-page ma-page" style={`--dept:${d.accent}`}>
+    <!-- Bespoke hero: this department has no course catalogue yet, so it does not
+         use the shared DeptHero (which shows course-count chips). -->
+    <header class="dept-hero dept-grain ma-hero">
+      <div class="dept-hero-scrim" aria-hidden="true"></div>
+      <a class="dept-back wrap" href="/departments">Sikhi University &middot; Departments</a>
+      <div class="dept-hero-in wrap">
+        <p class="dept-eyebrow">School within Sikhi University</p>
+        <h1 class="dept-h1">{d.name}</h1>
+        <p class="dept-tagline">{d.tagline}</p>
+        <p class="dept-stance">{d.stance}</p>
+        <div class="dept-hero-meta">
+          <span class="dept-chip"><b>{curriculum.length}</b> parts</span>
+          <span class="dept-chip">Sourced reading room</span>
+          <span class="dept-chip">Courses in development</span>
+        </div>
+        <a class="dept-hero-cta" href="#curriculum">
+          Read the tradition
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        </a>
+      </div>
+    </header>
+
+    <!-- Signature: polished Damascus steel + a raking light that sweeps on scroll -->
+    <section class="ma-sig" aria-label="The steel">
+      <span class="ma-warrior" aria-hidden="true">
+        <svg viewBox="0 0 140 200" preserveAspectRatio="xMidYMax meet">
+          <path d="M64 20c8 0 13 6 13 14 0 6-3 10-3 13 6 3 12 9 13 17l3 22-8 2-3-16-2 34 20 42-7 4-18-36-5 30 8 22-8 3-9-24 2-30-10 18-7-4 11-22 1-24-7 3-4 15-8-2 4-22c1-8 7-14 13-17-1-3-3-6-3-12 0-8 5-14 13-14z"/>
+          <path d="M78 47l44-26 4 6-44 27z" opacity="0.85"/>
+        </svg>
+      </span>
+      <span class="ma-blade" aria-hidden="true"><span class="ma-glint"></span></span>
+      <div class="wrap ma-in">
+        <p class="ma-kicker" lang="pa">ਸੰਤ-ਸਿਪਾਹੀ, the saint and the soldier, in one body</p>
+        <h2 class="ma-h">Power from movement, not muscle. Steel that took a lifetime to fold.</h2>
+        <div class="ma-stances" role="list">
+          {stances.map((s, i) => (
+            <span class="ma-stance" role="listitem" style={`--i:${i}`}>{s}</span>
+          ))}
+        </div>
+        <p class="ma-note">
+          The system rests on three principles, locomotion, angling, and power drawn from the sinking of
+          body mass through a technique. Scroll, and the light moves down the blade the way a cut travels.
+        </p>
+      </div>
+    </section>
+
+    <!-- The contested-framing caveat, stated up front -->
+    {d.caveat && (
+      <section class="ma-caveat wrap" aria-label="A note on sourcing">
+        <div class="ma-caveat-box">
+          <span class="ma-caveat-mark"><Icon name="scales" class="h-5 w-5" /></span>
+          <p>{d.caveat}</p>
+        </div>
+      </section>
+    )}
+
+    <!-- What this department is -->
+    <section class="ma-sec wrap" data-rise>
+      <p class="dept-kicker">What this department is</p>
+      <h2 class="dept-h2">Three lines of work</h2>
+      <div class="dept-pillars">
+        {d.pillars.map((p, i) => (
+          <div class="dept-glass dept-pillar" data-rise>
+            <span class="dept-pillar-n">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Curriculum, as metallic-edged accordions -->
+    <section id="curriculum" class="ma-sec wrap" data-rise>
+      <p class="dept-kicker">The tradition, in four parts</p>
+      <h2 class="dept-h2">Drawn from the Baba Darbara Singh Akhara</h2>
+      <p class="dept-lead">Each part below is set down as the akhara tells it. Open one to read the detail.</p>
+      <div class="dax" data-accordion>
+        {curriculum.map((t, i) => (
+          <details class="dax-item" id={`part-${t.id}`} open={i === 0}>
+            <summary class="dax-sum">
+              <span class="dax-ic"><Icon name={t.icon} class="h-5 w-5" /></span>
+              <span class="dax-t">{t.name}</span>
+              <span class="dax-chev" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </summary>
+            <div class="dax-panel">
+              <div class="ma-part">
+                <p class="ma-part-sum">{t.summary}</p>
+                {t.sections.map((s) => (
+                  <div class="ma-block">
+                    <h3>{s.heading}</h3>
+                    {s.body.map((para) => <p>{para}</p>)}
+                    {s.list && (
+                      <dl class="ma-defs">
+                        {s.list.map((it) => (
+                          <div><dt>{it.term}</dt><dd>{it.detail}</dd></div>
+                        ))}
+                      </dl>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- The metallurgy, the Wootz Workshop -->
+    <section class="ma-sec wrap" data-rise>
+      <p class="dept-kicker">The metallurgy</p>
+      <a class="ma-workshop" href="/departments/martial-arts/workshop/wootz">
+        <span class="ma-workshop-b">
+          <strong>The Wootz Workshop</strong>
+          <span>The real metallurgy behind the shastar, one melt of one material, and the numbers are the whole story. Seven modules: the recipe, the composition, the heat treatment, how it holds up against modern steel.</span>
+        </span>
+        <span class="ma-workshop-go" aria-hidden="true">Open the workshop &rarr;</span>
+      </a>
+    </section>
+
+    <!-- Sources + book -->
+    <section class="ma-sec wrap" data-rise>
+      <p class="dept-kicker">Where this comes from</p>
+      <h2 class="dept-h2">Sources</h2>
+      <ul class="ma-sources">
+        {(d.sources ?? []).map((s) => (
+          <li><a href={s.url} target="_blank" rel="noopener">{s.label} &nearr;</a></li>
+        ))}
+      </ul>
+      {d.book && (
+        <div class="ma-book">
+          <div>
+            <p class="ma-book-ey">The tradition's own book</p>
+            <p class="ma-book-t">{d.book.title}</p>
+            <p class="ma-book-a">{d.book.authors}</p>
+            <p class="ma-book-n">{d.book.note}</p>
+          </div>
+          <a class="ma-book-cta" href={d.book.url} target="_blank" rel="noopener">On Amazon &nearr;</a>
+        </div>
+      )}
+    </section>
+
+    <section class="dept-close dept-grain">
+      <h2>Bani, bana, and shastar, held together</h2>
+      <p>Formal courses in the martial history of the Khalsa are being written with the scholar board. Until then, this is a place to read the living tradition in its own words.</p>
+      <div class="dept-close-actions">
+        <a class="dept-btn dept-btn-solid" href="/departments/history">The Department of History &rarr;</a>
+        <a class="dept-btn dept-btn-ghost" href="/departments">All departments &rarr;</a>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .ma-page { --steel: #c9ced6; }
+    .ma-hero { background: var(--school-header-bg); }
+
+    .ma-sig {
+      position: relative; overflow: hidden;
+      background: radial-gradient(120% 100% at 78% -10%, #23262b, #131417 55%, #0a0b0d);
+      color: #d9dde3; padding: clamp(3.5rem, 9vw, 6.5rem) 0; border-bottom: 1px solid rgb(var(--c-line));
+    }
+    .ma-warrior {
+      position: absolute; right: 4%; bottom: 0; width: min(280px, 44vw); opacity: .16; pointer-events: none;
+      animation: ma-sway 7s ease-in-out infinite alternate;
+    }
+    .ma-warrior svg { width: 100%; height: auto; fill: #e8ebef; }
+    @keyframes ma-sway { from { transform: translateY(6px) rotate(-1.2deg); } to { transform: translateY(0) rotate(1.4deg); } }
+
+    /* a long Damascus blade with a watered-steel pattern + a raking glint */
+    .ma-blade {
+      position: absolute; left: -6%; top: 12%; width: 84%; height: 46px;
+      transform: rotate(-9deg); pointer-events: none; border-radius: 4px; overflow: hidden;
+      background:
+        repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 3px, transparent 3px 7px),
+        repeating-linear-gradient(75deg, rgba(0,0,0,.22) 0 4px, transparent 4px 9px),
+        linear-gradient(180deg, #eef1f4 0%, #9aa1ab 42%, #545a63 55%, #2b2f35 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.5);
+      opacity: .5;
+    }
+    .ma-glint {
+      position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.9) 48%, rgba(255,255,255,.35) 52%, transparent 60%);
+      transform: translateX(-120%);
+      animation: ma-rake both linear; animation-timeline: view(); animation-range: entry 0% cover 70%;
+    }
+    @keyframes ma-rake { to { transform: translateX(120%); } }
+    @supports not (animation-timeline: view()) { .ma-glint { animation: ma-rake 3.2s ease-in-out infinite; } }
+
+    .ma-in { position: relative; z-index: 1; }
+    .ma-kicker { font-family: "Noto Serif Gurmukhi", serif; font-size: 14px; color: color-mix(in srgb, var(--dept) 45%, #fff); }
+    .ma-h { margin: 10px 0 0; font-size: clamp(1.35rem, 3vw, 1.95rem); font-weight: 800; color: #fff; max-width: 30ch; }
+    .ma-stances { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .ma-stance {
+      padding: 8px 14px; border-radius: 3px;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(201,206,214,.28);
+      border-left: 3px solid var(--dept);
+      font-family: var(--font-sans, system-ui); font-size: 12.5px; color: #cfd4db;
+      opacity: 0; transform: translateX(-8px); animation: ma-in .5s var(--ease-out, ease) forwards;
+      animation-delay: calc(.15s + var(--i) * .12s);
+    }
+    @keyframes ma-in { to { opacity: 1; transform: none; } }
+    .ma-note { margin: 22px 0 0; max-width: 60ch; font-size: 14.5px; line-height: 1.72; color: #a7adb6; }
+
+    /* caveat */
+    .ma-caveat { padding-block: clamp(2rem, 5vw, 3rem) 0; }
+    .ma-caveat-box {
+      display: flex; gap: 16px; padding: 20px 22px; border-radius: 12px;
+      background: color-mix(in srgb, var(--dept) 7%, rgb(var(--c-surface)));
+      border: 1px solid color-mix(in srgb, var(--dept) 35%, rgb(var(--c-line)));
+      border-left: 4px solid var(--dept);
+    }
+    .ma-caveat-mark { flex: none; color: var(--dept); }
+    .ma-caveat-box p { margin: 0; font-size: 13.5px; line-height: 1.7; color: rgb(var(--c-muted)); }
+
+    .ma-sec { padding-block: clamp(4rem, 9vw, 6.5rem); }
+    .ma-sec + .ma-sec { border-top: 1px solid rgb(var(--c-line)); }
+
+    /* metallic-edged accordions */
+    .ma-page .dax-item {
+      border-radius: 4px; border-color: #b9bec7;
+      background:
+        linear-gradient(90deg, var(--dept) 0 4px, transparent 4px),
+        linear-gradient(180deg, rgb(var(--c-surface)), color-mix(in srgb, #8a9099 6%, rgb(var(--c-surface))));
+      box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 10px 26px rgb(20 22 26 / .12);
+    }
+    .ma-page .dax-item[open] { border-color: var(--dept); box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 16px 40px rgb(20 22 26 / .2); }
+    .ma-page .dax-t { font-family: "Source Serif 4", Georgia, serif; }
+    .ma-page .dax-ic { background: color-mix(in srgb, var(--dept) 12%, transparent); color: var(--dept); border-radius: 3px; }
+
+    .ma-part { padding: 4px 20px 22px; }
+    .ma-part-sum { margin: 0 0 4px; font-size: 14px; font-style: italic; color: rgb(var(--c-muted)); }
+    .ma-block { margin-top: 22px; }
+    .ma-block h3 { font-size: 15px; font-weight: 800; color: rgb(var(--c-navy)); }
+    .ma-block p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; color: rgb(var(--c-ink)); max-width: 68ch; }
+    .ma-defs { margin: 14px 0 0; display: grid; gap: 8px; }
+    .ma-defs > div { display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 14px; padding: 10px 0; border-top: 1px solid rgb(var(--c-line)); }
+    .ma-defs dt { font-family: var(--font-sans, system-ui); font-weight: 800; font-size: 12.5px; color: var(--dept); }
+    .ma-defs dd { margin: 0; font-size: 13px; line-height: 1.6; color: rgb(var(--c-muted)); }
+    @media (max-width: 560px) { .ma-defs > div { grid-template-columns: 1fr; gap: 3px; } }
+
+    .ma-workshop {
+      margin-top: 20px; display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: center; justify-content: space-between;
+      padding: 26px; border-radius: 6px; text-decoration: none;
+      border: 1px solid rgb(var(--c-line)); border-left: 4px solid var(--dept);
+      background:
+        radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--dept) 9%, transparent), transparent 60%),
+        rgb(var(--c-surface));
+      transition: transform .2s var(--ease-out, ease), box-shadow .2s, border-color .2s;
+    }
+    .ma-workshop:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgb(20 22 26 / .14); border-color: var(--dept-45); }
+    .ma-workshop-b strong { display: block; font-family: "Source Serif 4", Georgia, serif; font-size: 19px; font-weight: 800; color: rgb(var(--c-navy)); }
+    .ma-workshop-b span { display: block; margin-top: 8px; max-width: 62ch; font-size: 13.5px; line-height: 1.65; color: rgb(var(--c-muted)); }
+    .ma-workshop-go { flex: none; font-family: var(--font-sans, system-ui); font-size: 12.5px; font-weight: 800; color: var(--dept); }
+
+    .ma-sources { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 10px; }
+    .ma-sources a { font-family: var(--font-sans, system-ui); font-size: 13.5px; color: var(--dept); text-decoration: none; }
+    .ma-sources a:hover { text-decoration: underline; }
+    .ma-book {
+      margin-top: 30px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center; justify-content: space-between;
+      padding: 24px; border-radius: 12px; background: rgb(var(--c-surface)); border: 1px solid rgb(var(--c-line));
+    }
+    .ma-book-ey { font-family: var(--font-sans, system-ui); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--dept); }
+    .ma-book-t { margin-top: 6px; font-size: 17px; font-weight: 800; color: rgb(var(--c-navy)); }
+    .ma-book-a { margin-top: 3px; font-size: 13px; color: rgb(var(--c-muted)); }
+    .ma-book-n { margin-top: 8px; max-width: 52ch; font-size: 13px; line-height: 1.6; color: rgb(var(--c-muted)); }
+    .ma-book-cta { flex: none; padding: 11px 20px; border-radius: 999px; background: var(--dept); color: #fff; font-family: var(--font-sans, system-ui); font-weight: 700; font-size: 13.5px; text-decoration: none; }
+    .ma-book-cta:hover { filter: brightness(1.08); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ma-warrior, .ma-glint { animation: none; }
+      .ma-stance { opacity: 1; transform: none; animation: none; }
+    }
+  </style>
+
+  <script>
+    // Metallic accordion, smooth open/close + single-open on wide screens.
+    // Mirrors DeptAccordion.astro; falls back to native <details>.
+    (function () {
+      document.querySelectorAll('.ma-page [data-accordion]').forEach((group) => {
+        const items = Array.from(group.querySelectorAll('.dax-item')) as HTMLDetailsElement[];
+        const single = () => matchMedia('(min-width: 1024px)').matches;
+        const panelOf = (el: Element) => el.querySelector('.dax-panel') as HTMLElement | null;
+        const setMax = (el: Element, px: string) => { const p = panelOf(el); if (p) p.style.maxHeight = px; };
+        group.classList.add('armed');
+        items.forEach((el) => setMax(el, el.open ? (panelOf(el)!.scrollHeight + 'px') : '0px'));
+        items.forEach((el) => {
+          const sum = el.querySelector('.dax-sum')!;
+          sum.addEventListener('click', (e) => {
+            e.preventDefault();
+            const willOpen = !el.open;
+            if (willOpen && single()) items.forEach((o) => { if (o !== el && o.open) { o.open = false; setMax(o, '0px'); } });
+            el.open = willOpen;
+            requestAnimationFrame(() => setMax(el, willOpen ? (panelOf(el)!.scrollHeight + 'px') : '0px'));
+          });
+        });
+        let t = 0;
+        addEventListener('resize', () => {
+          clearTimeout(t);
+          t = window.setTimeout(() => items.forEach((el) => { if (el.open) setMax(el, panelOf(el)!.scrollHeight + 'px'); }), 150);
+        }, { passive: true });
+      });
+
+      // scroll-reveal for [data-rise]
+      const page = document.querySelector('.ma-page');
+      if (page && !matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+        page.classList.add('revealed');
+        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        page.querySelectorAll('[data-rise]').forEach((el) => io.observe(el));
+      } else {
+        page?.classList.add('revealed');
+      }
+    })();
+  </script>
+</Base>

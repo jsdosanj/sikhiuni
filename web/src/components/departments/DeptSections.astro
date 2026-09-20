@@ -1,0 +1,163 @@
+---
+import { stageName } from '../../lib/stages';
+// The shared "body" of every department landing page, consistent, premium
+// sections below each page's bespoke hero. Uniqueness lives in the hero + the
+// per-department signature module each page renders above this.
+import DeptAccordion from './DeptAccordion.astro';
+import { departmentTopics, coursesInDepartment, type Department } from '../../lib/departments';
+import { paths, published, profBio, profSlug, profInitials, avatarColor } from '../../lib/data';
+
+interface Props { d: Department }
+const { d } = Astro.props;
+
+const courses = coursesInDepartment(d);
+const topicRows = departmentTopics(d);
+
+const byId = Object.fromEntries(published.map((c) => [c.id, c]));
+const featured = d.featured.map((id) => byId[id]).filter(Boolean);
+
+const INSTITUTIONAL = new Set(['Sikhi University', 'Sikh Archive']);
+const facultyCounts = new Map<string, number>();
+for (const c of courses) {
+  if (INSTITUTIONAL.has(c.professor)) continue;
+  facultyCounts.set(c.professor, (facultyCounts.get(c.professor) ?? 0) + 1);
+}
+const faculty = [...facultyCounts.entries()]
+  .filter(([name]) => profBio(name))
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6)
+  .map(([name, n]) => ({ name, n }));
+
+const relatedPaths = paths
+  .filter((p) => !p.id.startsWith('topic-'))
+  .map((p) => {
+    const inDept = p.courseIds.filter((id) => courses.some((c) => c.id === id)).length;
+    return { p, ratio: p.courseIds.length ? inDept / p.courseIds.length : 0, inDept };
+  })
+  .filter((x) => x.ratio >= 0.5 && x.inDept >= 2)
+  .sort((a, b) => b.ratio - a.ratio)
+  .slice(0, 4)
+  .map((x) => x.p);
+---
+<div class="dept-body">
+  <!-- What you'll study -->
+  <section class="dept-sec wrap" data-rise>
+    <p class="dept-kicker">What you'll study</p>
+    <h2 class="dept-h2">Three lines of work</h2>
+    <div class="dept-pillars">
+      {d.pillars.map((p, i) => (
+        <div class="dept-glass dept-pillar" data-rise>
+          <span class="dept-pillar-n">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{p.title}</h3>
+          <p>{p.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Signature courses -->
+  {featured.length > 0 && (
+    <section class="dept-sec wrap" data-rise>
+      <p class="dept-kicker">Signature courses</p>
+      <h2 class="dept-h2">Where to begin</h2>
+      <p class="dept-lead">Three courses that show the range of the department, an opening, a deep reading, a graduate seminar.</p>
+      <div class="dept-featured" data-spotlight>
+        {featured.map((c, i) => (
+          <a class="dept-feat" href={`/course/${c.id}`} data-rise>
+            <span class="dept-feat-badge">{['Foundations', 'Deep reading', 'Graduate'][i] || `${stageName(c.level)}`}</span>
+            <span class="dept-feat-title">{c.title}</span>
+            <span class="dept-feat-meta">{stageName(c.level)} &middot; {c.professor}</span>
+            <span class="dept-feat-sum">{c.summary}</span>
+            <span class="dept-feat-go">Open the course &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Faculty -->
+  {faculty.length > 0 && (
+    <section class="dept-sec wrap" data-rise>
+      <p class="dept-kicker">Faculty &amp; sources</p>
+      <h2 class="dept-h2">Taught from the authorities</h2>
+      <p class="dept-lead">Courses here are attributed to, and drawn from, the scholars whose work is definitive in the field.</p>
+      <div class="dept-faculty">
+        {faculty.map((f) => (
+          <a class="dept-prof" href={`/professor/${profSlug(f.name)}`} data-rise>
+            <span class="dept-prof-av" style={`background:${avatarColor(f.name)}`}>{profInitials(f.name)}</span>
+            <span class="dept-prof-b">
+              <strong>{f.name}</strong>
+              <span class="bio">{(profBio(f.name).split('. ')[0] || '') + '.'}</span>
+              <span class="n">{f.n} course{f.n === 1 ? '' : 's'} in this department</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Guided journeys -->
+  {relatedPaths.length > 0 && (
+    <section class="dept-sec wrap" data-rise>
+      <p class="dept-kicker">Guided journeys</p>
+      <h2 class="dept-h2">Follow a path, not a pile</h2>
+      <p class="dept-lead">A path runs foundations &rarr; advanced; finishing one course lights up the next.</p>
+      <ul class="dept-journeys">
+        {relatedPaths.map((p) => (
+          <li data-rise>
+            <a href={`/catalog#${p.id}`}>
+              <span class="jn">{p.name}</span>
+              <span class="jb">{p.blurb}</span>
+              <span class="jc">{p.courseIds.length} courses &rarr;</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <!-- Full curriculum, as accordions -->
+  <section id="catalogue" class="dept-sec wrap" data-rise>
+    <p class="dept-kicker">The department curriculum</p>
+    <h2 class="dept-h2">{courses.length} courses, {topicRows.length} subject{topicRows.length === 1 ? '' : 's'}</h2>
+    <p class="dept-lead">Open a subject to see its courses, foundations through graduate.</p>
+    <DeptAccordion d={d} />
+  </section>
+
+  <!-- Closing band -->
+  <section class="dept-close dept-grain">
+    <h2>Start where your question is</h2>
+    <p>You do not need a background, an application, or a fee. Pick a course and begin, the department is here whenever you want to go deeper.</p>
+    <div class="dept-close-actions">
+      <a class="dept-btn dept-btn-solid" href="#catalogue">Browse the {courses.length} courses</a>
+      <a class="dept-btn dept-btn-ghost" href="/departments">All departments &rarr;</a>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Arm the scroll-reveal + card spotlight for department pages. CSS handles
+  // the reduced-motion case (everything visible, no transitions).
+  (function () {
+    const page = document.querySelector('.dept-page');
+    if (!page) return;
+    const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (rm || !('IntersectionObserver' in window)) { page.classList.add('revealed'); return; }
+    page.classList.add('revealed');
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    page.querySelectorAll('[data-rise]').forEach((el) => io.observe(el));
+
+    // pointer spotlight on the signature-course cards
+    page.querySelectorAll('[data-spotlight] .dept-feat').forEach((card) => {
+      card.addEventListener('pointermove', (ev) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${ev.clientX - r.left}px`);
+        card.style.setProperty('--my', `${ev.clientY - r.top}px`);
+      });
+    });
+  })();
+</script>

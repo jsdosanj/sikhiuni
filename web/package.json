@@ -10,10 +10,15 @@
     "verify-gurbani": "node scripts/verify-gurbani.mjs",
     "check-i18n": "node ../scripts/i18n-extract.mjs",
     "build-dataset": "node scripts/build-dataset.mjs",
-    "build": "npm run sync-data && npm run build-index && npm run verify-gurbani && npm run check-i18n && npm run build-dataset && astro build && node scripts/build-csp.mjs && node ../test/no-reveal-on-content.mjs && node ../test/contrast-glass.mjs",
+    "sync-institute": "node scripts/sync-institute.mjs",
+    "validate-institute": "node scripts/validate-institute.mjs",
+    "build-institute-quiz-keys": "node scripts/build-institute-quiz-keys.mjs",
+    "sync-aisf": "node scripts/sync-aisf.mjs",
+    "build": "npm run sync-data && npm run build-institute-quiz-keys && npm run sync-institute && npm run build-index && npm run verify-gurbani && npm run check-i18n && npm run build-dataset && npm run validate-institute && astro build && node scripts/stamp-sw.mjs && node scripts/build-csp.mjs && node ../test/no-reveal-on-content.mjs && node ../test/contrast-glass.mjs",
     "preview": "astro preview",
     "build-public-data": "python3 ../scripts/build_public_data.py",
-    "deploy-data": "npm run build-public-data && wrangler r2 object put sikh-university-media/courses.json --file ../site/assets/data/courses.public.json --remote --config ../wrangler.toml"
+    "deploy-data": "npm run build-public-data && wrangler r2 object put sikh-university-media/courses.json --file ../site/assets/data/courses.public.json --remote --config ../wrangler.toml",
+    "deploy-institute": "echo 'Wave 4+: push public/data/institute/lessons + atlas to R2 (institute/ prefix) \u2014 no-op until lesson bodies exist'"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
@@ -24,5 +29,8 @@
   },
   "overrides": {
     "esbuild": "^0.28.1"
+  },
+  "devDependencies": {
+    "marked": "^14.1.4"
   }
 }

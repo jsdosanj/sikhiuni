@@ -1,0 +1,287 @@
+{
+  "engine": "terminal",
+  "headerLabel": "sikh-code — ~/code",
+  "unitLabel": "Topic",
+  "brandLine1": "ਨਾਨਕ ਨਾਮ ਚੜ੍ਹਦੀ ਕਲਾ",
+  "brandLine2": "ਤੇਰੇ ਭਾਣੇ ਸਰਬੱਤ ਦਾ ਭਲਾ",
+  "brandCaption": "ever-rising spirits through the Name — and well-being for all",
+  "bootSteps": [
+    { "k": "dim", "t": "sikh-code terminal — v1.0.0 · beginner crash course", "gap": 260 },
+    { "k": "cmd", "t": "whoami", "gap": 420 },
+    { "k": "out", "t": "a first-time coder", "gap": 220 },
+    { "k": "cmd", "t": "sikh-code doctor", "gap": 520 },
+    { "k": "ok", "t": "curiosity   detected · plenty of it", "gap": 300 },
+    { "k": "ok", "t": "patience    flowing · one line at a time", "gap": 180 },
+    { "k": "warn", "t": "fear-of-syntax   found in cache — scheduling removal", "gap": 220 },
+    { "k": "blank", "gap": 160 }
+  ],
+  "files": [
+    {
+      "name": "01-variables.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 1 · Variables",
+      "outline": [["◇", "let vs const", "#E3C377"], ["\"", "string / number / boolean", "#79C98C"]],
+      "raw": [
+        [["c", "// -- 01-variables.js -----------------------------------"]],
+        [["c", "// a variable is a labelled box that holds a value"]],
+        [],
+        [["k", "let"], ["t", " name = "], ["s", "\"Nanak\""], ["p", ";"], ["c", "          // a string — text, in quotes"]],
+        [["k", "let"], ["t", " age = "], ["n", "556"], ["p", ";"], ["c", "                  // a number — no quotes"]],
+        [["k", "let"], ["t", " awake = "], ["t", "true"], ["p", ";"], ["c", "               // a boolean — true or false"]],
+        [],
+        [["k", "const"], ["t", " foundingYear = "], ["n", "1469"], ["p", ";"], ["c", "     // const — this can never be reassigned"]],
+        [["t", "age = "], ["n", "557"], ["p", ";"], ["c", "                          // let CAN be reassigned — this is fine"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 01-variables.js", "gap": 300 },
+        { "k": "ok", "t": "name = \"Nanak\" · age = 557 · awake = true", "gap": 300 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "3": "`let` declares a variable that CAN change later — this one holds a string (text, in quotes)",
+        "4": "a number — no quotes needed",
+        "5": "a boolean — only ever `true` or `false`",
+        "7": "`const` declares a variable that can NEVER be reassigned — prefer it by default, use `let` only when you need to change the value"
+      }
+    },
+    {
+      "name": "02-strings.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 2 · Strings",
+      "outline": [["\"", "template literals", "#79C98C"], ["ƒ", ".length / .toUpperCase()", "#8FB8E8"]],
+      "raw": [
+        [["c", "// -- 02-strings.js -------------------------------------"]],
+        [["c", "// strings are text — template literals let you drop in variables"]],
+        [],
+        [["k", "const"], ["t", " greeting = "], ["s", "\"Sat Sri Akal\""], ["p", ";"]],
+        [["k", "const"], ["t", " name = "], ["s", "\"Simran\""], ["p", ";"]],
+        [],
+        [["k", "const"], ["t", " line = "], ["g", "`${greeting}, ${name}!`"], ["p", ";"], ["c", "  // a template literal"]],
+        [],
+        [["f", "console"], ["p", "."], ["f", "log"], ["p", "("], ["t", "line"], ["p", ");"], ["c", "                // \"Sat Sri Akal, Simran!\""]],
+        [["f", "console"], ["p", "."], ["f", "log"], ["p", "("], ["t", "name"], ["p", "."], ["f", "length"], ["p", ");"], ["c", "        // 6 — how many characters"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 02-strings.js", "gap": 300 },
+        { "k": "out", "t": "Sat Sri Akal, Simran!", "gap": 260 },
+        { "k": "out", "t": "6", "gap": 220 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "6": "backticks (`) make a template literal — `${ }` drops a variable straight into the text",
+        "8": "calling the function — this is where the template literal actually gets built and printed",
+        "9": "`.length` is a property every string has — how many characters it contains"
+      }
+    },
+    {
+      "name": "03-conditionals.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 3 · Conditionals",
+      "outline": [["?", "if / else", "#F0A044"], ["=", "=== vs ==", "#8FB8E8"]],
+      "raw": [
+        [["c", "// -- 03-conditionals.js --------------------------------"]],
+        [["c", "// code that branches, based on a question"]],
+        [],
+        [["k", "const"], ["t", " age = "], ["n", "20"], ["p", ";"]],
+        [],
+        [["k", "if"], ["t", " ("], ["t", "age"], ["t", " >= "], ["n", "18"], ["p", ") {"]],
+        [["t", "  "], ["f", "console"], ["p", "."], ["f", "log"], ["p", "("], ["s", "\"adult\""], ["p", ");"]],
+        [["p", "} "], ["k", "else"], ["t", " {"]],
+        [["t", "  "], ["f", "console"], ["p", "."], ["f", "log"], ["p", "("], ["s", "\"minor\""], ["p", ");"]],
+        [["p", "}"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 03-conditionals.js", "gap": 300 },
+        { "k": "out", "t": "adult", "gap": 260 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "5": "`if (...)` — the code inside `{ }` only runs when the question in parentheses is true",
+        "7": "`else` — runs instead, whenever the `if` question was false",
+        "3": "`>=`, `===`, `&&`, `||`, `!` are the questions code can ask — always prefer `===` (exact equality) over `==`"
+      }
+    },
+    {
+      "name": "04-loops.sh", "glyph": "#!", "gc": "#79C98C", "lang": "Topic 4 · Loops",
+      "outline": [["#", "a shell script", "#79C98C"], ["↻", "for … in … do", "#8FB8E8"], ["$", "a loop variable", "#E3C377"]],
+      "raw": [
+        [["c", "#!/usr/bin/env bash"]],
+        [["c", "# four-pillars.sh — a for-loop over a list of files"]],
+        [],
+        [["c", "# a comment: everything after # is ignored by the shell"]],
+        [["k", "for"], ["t", " soul "], ["k", "in"], ["t", " "], ["s", "./sangat/*"], ["p", "; "], ["k", "do"], ["c", "      # loop over every file in ./sangat"]],
+        [["t", "  "], ["f", "echo"], ["t", " "], ["s", "\"serving $soul\""], ["c", "                # $soul is the loop variable"]],
+        [["k", "done"]],
+        [],
+        [["f", "echo"], ["t", " "], ["s", "\"loop complete — nobody left hungry.\""]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "./04-loops.sh", "gap": 300 },
+        { "k": "out", "t": "serving ./sangat/roti.txt", "gap": 220 },
+        { "k": "out", "t": "serving ./sangat/dal.txt", "gap": 180 },
+        { "k": "out", "t": "serving ./sangat/chai.txt", "gap": 180 },
+        { "k": "ok", "t": "loop complete — nobody left hungry.", "gap": 260 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "3": "a comment — anything after `#` is ignored by the shell; it's a note for the next human",
+        "4": "`for x in list; do` — a loop. Repeats once for every item the list matches. `while` repeats until a condition goes false instead",
+        "5": "`$soul` is the loop variable — a new file name, each time through the loop"
+      }
+    },
+    {
+      "name": "05-functions.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 5 · Functions",
+      "outline": [["ƒ", "simran(heart)", "#8FB8E8"], ["↩", "return", "#F0A044"], ["↻", "while", "#79C98C"]],
+      "raw": [
+        [["c", "// -- 05-functions.js -----------------------------------"]],
+        [["c", "// a function, a variable, and a while-loop, in one file"]],
+        [],
+        [["k", "const"], ["t", " "], ["f", "breath"], ["p", " = { "], ["t", "in"], ["p", ": "], ["s", "\"inhale\""], ["p", ", "], ["t", "out"], ["p", ": "], ["s", "\"exhale\""], ["p", " };"], ["c", "   // a variable holding an object"]],
+        [],
+        [["k", "async"], ["t", " "], ["k", "function"], ["t", " "], ["f", "simran"], ["p", "("], ["t", "heart"], ["p", ") {"], ["c", "        // a function, taking one parameter"]],
+        [["t", "  "], ["k", "while"], ["t", " "], ["p", "("], ["t", "heart"], ["p", "."], ["f", "beats"], ["p", "()) {"], ["c", "            // loop — runs while true"]],
+        [["t", "    "], ["k", "await"], ["t", " "], ["f", "inhale"], ["p", "("], ["t", "breath"], ["p", "."], ["t", "in"], ["p", ");"]],
+        [["t", "    "], ["k", "await"], ["t", " "], ["f", "exhale"], ["p", "("], ["t", "breath"], ["p", "."], ["t", "out"], ["p", ");"]],
+        [["t", "    heart"], ["p", "."], ["t", "stillness"], ["p", " += "], ["n", "1"], ["p", ";"], ["c", "           // += adds 1 each loop"]],
+        [["t", "  }"]],
+        [["t", "  "], ["k", "return"], ["t", " heart"], ["p", ";"], ["c", "                     // hand the result back"]],
+        [["p", "}"]],
+        [],
+        [["f", "simran"], ["p", "("], ["t", "seeker"], ["p", "."], ["t", "heart"], ["p", ");"], ["c", "                // \"calling\" the function"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 05-functions.js", "gap": 300 },
+        { "k": "spin", "t": "running function simran(heart) …", "dur": 950, "done": "loop finished — while condition became false", "gap": 340 },
+        { "k": "ok", "t": "heart.stillness -> 1, 2, 3, 4 …   (the variable changed on every loop)", "gap": 300 },
+        { "k": "out", "t": "returned: { stillness: 12 }", "gap": 300 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "3": "a variable — `const` stores a value under a name; this one can't be reassigned later",
+        "5": "`function` names a reusable block of steps — `heart` is its parameter, the input it needs",
+        "6": "`while` — a loop. Everything indented under it repeats for as long as the condition stays true",
+        "9": "`+=` updates a variable — adds 1 to `heart.stillness`, once per trip through the loop",
+        "11": "`return` hands a value back to whoever called the function",
+        "14": "calling the function — this is the line where `simran()` actually runs"
+      }
+    },
+    {
+      "name": "06-arrays-objects.json", "glyph": "{}", "gc": "#8FB8E8", "lang": "Topic 6 · Arrays & Objects",
+      "outline": [["{}", "an object — key: value pairs", "#8FB8E8"], ["[]", "an array — an ordered list", "#8FB8E8"]],
+      "raw": [
+        [["p", "{"]],
+        [["t", "  "], ["f", "\"name\""], ["p", ": "], ["s", "\"gursikh\""], ["p", ","], ["c", "            // a string value"]],
+        [["t", "  "], ["f", "\"version\""], ["p", ": "], ["s", "\"1.0.0\""], ["p", ","], ["c", "           // also a string (semver)"]],
+        [["t", "  "], ["f", "\"stillPracticing\""], ["p", ": "], ["t", "true"], ["p", ","], ["c", "   // a boolean — not a string, no quotes"]],
+        [["t", "  "], ["f", "\"virtues\""], ["p", ": ["], ["c", "                  // an array — an ordered list"]],
+        [["t", "    "], ["s", "\"sat\""], ["p", ", "], ["s", "\"santokh\""], ["p", ", "], ["s", "\"daya\""], ["p", ","]],
+        [["t", "    "], ["s", "\"nimrata\""], ["p", ", "], ["s", "\"pyar\""]],
+        [["t", "  ]"]],
+        [["p", "}"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node -e \"console.log(require('./06-arrays-objects.json').virtues.length)\"", "gap": 300 },
+        { "k": "spin", "t": "reading the file …", "dur": 700, "done": "parsed — 1 object, 1 array of 5 strings", "gap": 300 },
+        { "k": "out", "t": "5", "gap": 260 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "0": "an object — `{ }` bundles related values under one name; read one with `guru.name` or `guru[\"name\"]`",
+        "1": "a string value — text, always wrapped in quotes",
+        "3": "a boolean — `true` or `false`, written with no quotes at all",
+        "4": "an array — an ordered list of values, held inside `[ ]`. `virtues[0]` reads the FIRST item — counting starts at 0"
+      }
+    },
+    {
+      "name": "07-arrays-in-action.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 7 · Arrays in action — .map, try/catch",
+      "outline": [["[]", "an array of objects", "#8FB8E8"], ["ƒ", ".map — transform every item", "#8FB8E8"], ["!", "try / catch", "#E86A6A"]],
+      "raw": [
+        [["c", "// -- 07-arrays-in-action.js ----------------------------"]],
+        [["c", "// an array of objects, .map, and error handling together"]],
+        [],
+        [["k", "const"], ["t", " sangat = ["], ["c", "                        // an array of objects"]],
+        [["t", "  { "], ["f", "name"], ["p", ": "], ["s", "\"Simran\""], ["p", ", "], ["f", "seva"], ["p", ": "], ["n", "12"], ["p", " },"]],
+        [["t", "  { "], ["f", "name"], ["p", ": "], ["s", "\"Amrit\""], ["p", ", "], ["f", "seva"], ["p", ": "], ["n", "7"], ["p", " },"]],
+        [["t", "];"]],
+        [],
+        [["k", "function"], ["t", " "], ["f", "greetAll"], ["p", "("], ["t", "people"], ["p", ") {"]],
+        [["t", "  "], ["k", "try"], ["t", " {"], ["c", "                                    // code that might fail"]],
+        [["t", "    "], ["k", "return"], ["t", " people."], ["f", "map"], ["p", "("], ["t", "p"], ["p", " => "], ["g", "`Sat Sri Akal, ${p.name}`"], ["p", ");"], ["c", " // .map builds a new array"]],
+        [["t", "  } "], ["k", "catch"], ["t", " ("], ["t", "err"], ["p", ") {"], ["c", "                        // only runs if try fails"]],
+        [["t", "    "], ["k", "return"], ["t", " []"], ["p", ";"]],
+        [["t", "  }"]],
+        [["p", "}"]],
+        [],
+        [["f", "greetAll"], ["p", "("], ["t", "sangat"], ["p", ");"], ["c", "                        // [\"Sat Sri Akal, Simran\", ...]"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 07-arrays-in-action.js", "gap": 300 },
+        { "k": "spin", "t": "running greetAll(sangat) …", "dur": 850, "done": "no errors — try block succeeded", "gap": 320 },
+        { "k": "ok", "t": "[\"Sat Sri Akal, Simran\", \"Sat Sri Akal, Amrit\"]", "gap": 300 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "3": "an array of objects — `[` starts the list, each `{ }` is one bundled object",
+        "8": "a function — `greetAll` takes one parameter, `people`",
+        "9": "`try` — run code that might fail, without crashing the whole program if it does",
+        "10": "`.map` — loop over every item and build a NEW array from the results. `.filter` / `.find` work the same way",
+        "11": "`catch` — only runs if something inside `try` threw an error",
+        "15": "calling the function — this is where `greetAll()` actually runs, on the `sangat` array"
+      }
+    },
+    {
+      "name": "08-classes-async.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 8 · Classes & async/await",
+      "outline": [["◇", "class — a blueprint", "#8FB8E8"], ["ƒ", "constructor", "#F0A044"], ["↻", "async / await", "#79C98C"]],
+      "raw": [
+        [["c", "// -- 08-classes-async.js -------------------------------"]],
+        [["c", "// a class (a blueprint), and an async method on it"]],
+        [],
+        [["k", "class"], ["t", " "], ["f", "Seeker"], ["t", " {"]],
+        [["t", "  "], ["f", "constructor"], ["p", "("], ["t", "name"], ["p", ") {"], ["c", "            // runs once, when created"]],
+        [["t", "    "], ["k", "this"], ["p", "."], ["t", "name"], ["t", " = "], ["t", "name"], ["p", ";"]],
+        [["t", "  }"]],
+        [],
+        [["t", "  "], ["k", "async"], ["t", " "], ["f", "readAng"], ["p", "("], ["t", "n"], ["p", ") {"], ["c", "          // an async method"]],
+        [["t", "    "], ["k", "const"], ["t", " res = "], ["k", "await"], ["t", " "], ["f", "fetch"], ["p", "("], ["g", "`/api/sggs/${n}`"], ["p", ");"]],
+        [["t", "    "], ["k", "return"], ["t", " res."], ["f", "json"], ["p", "();"]],
+        [["t", "  }"]],
+        [["p", "}"]],
+        [],
+        [["k", "const"], ["t", " seeker = "], ["k", "new"], ["t", " "], ["f", "Seeker"], ["p", "("], ["s", "\"Simran\""], ["p", ");"], ["c", "     // an instance"]],
+        [["k", "await"], ["t", " seeker."], ["f", "readAng"], ["p", "("], ["n", "1"], ["p", ");"], ["c", "                     // calling the async method"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 08-classes-async.js", "gap": 300 },
+        { "k": "spin", "t": "awaiting seeker.readAng(1) …", "dur": 900, "done": "fetch resolved — ang 1 loaded", "gap": 340 },
+        { "k": "ok", "t": "new Seeker(\"Simran\") created · 1 async call completed", "gap": 300 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "3": "`class` — a blueprint for objects that share the same shape and behaviour",
+        "4": "`constructor` runs once, the moment an object is created with `new`",
+        "8": "`async` marks this method as one that can `await` slow things (a file, a network request) without freezing the program",
+        "9": "`await` — pause here until `fetch` resolves, then continue with the result. A \"Promise\" is JS's name for \"a value that will arrive later\"",
+        "13": "`new Seeker(...)` creates one \"instance\" — one specific object built from the class blueprint"
+      }
+    },
+    {
+      "name": "09-comments.js", "glyph": "JS", "gc": "#E8C15A", "lang": "Topic 9 · Comments",
+      "outline": [["/", "line comments", "#8FB8E8"], ["*", "block comments", "#8FB8E8"]],
+      "raw": [
+        [["c", "// -- 09-comments.js ------------------------------------"]],
+        [["c", "// this is a line comment — everything after // is ignored"]],
+        [],
+        [["c", "/* this is a"]],
+        [["c", "   block comment —"]],
+        [["c", "   can span many lines */"]],
+        [],
+        [["c", "// good comments explain WHY, not what — the code already says what"]],
+        [["k", "const"], ["t", " delay = "], ["n", "300"], ["p", ";"], ["c", " // ms — tuned to match the typing animation, not arbitrary"]]
+      ],
+      "runSteps": [
+        { "k": "cmd", "t": "node 09-comments.js", "gap": 300 },
+        { "k": "ok", "t": "no output — comments are invisible to the computer, on purpose", "gap": 320 },
+        { "k": "blank", "gap": 140 }
+      ],
+      "lineNotes": {
+        "1": "`//` starts a line comment — the rest of that line is ignored by the computer",
+        "3": "`/* ... */` is a block comment — it can span multiple lines",
+        "7": "a comment that just repeats the code is noise — delete it. Explain the WHY, not the what"
+      }
+    }
+  ]
+}

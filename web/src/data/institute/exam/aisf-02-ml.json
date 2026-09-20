@@ -1,0 +1,816 @@
+{
+  "track": "aisf-02-ml",
+  "count": 90,
+  "questions": [
+    {
+      "q": "In supervised learning, what does the model receive during training?",
+      "options": [
+        "Input-output pairs where the correct answer is provided",
+        "A set of rules written by a human expert",
+        "A reward signal for each action taken",
+        "Only input data with no labels"
+      ]
+    },
+    {
+      "q": "What is the purpose of splitting data into training and test sets?",
+      "options": [
+        "To have backup data in case the training data is lost",
+        "To evaluate whether the model generalizes to data it has never seen during training",
+        "To make training faster by using less data",
+        "To balance the classes in the dataset"
+      ]
+    },
+    {
+      "q": "A model gets 98% accuracy on training data but 55% on test data. What is this an example of?",
+      "options": [
+        "Data drift: the test distribution changed",
+        "Underfitting: the model is too simple",
+        "Overfitting: the model memorized training noise instead of learning general patterns",
+        "Good generalization: the model learned the true patterns"
+      ]
+    },
+    {
+      "q": "An e-commerce site wants to group customers into segments based on purchase behavior without any predefined labels. Which type of ML is this?",
+      "options": [
+        "Unsupervised learning (clustering)",
+        "Supervised learning (regression)",
+        "Supervised learning (classification)",
+        "Reinforcement learning"
+      ]
+    },
+    {
+      "q": "Which scenario is NOT a good use case for machine learning?",
+      "options": [
+        "Detecting fraudulent transactions in a stream of millions of payments",
+        "Predicting customer churn from historical behavior data",
+        "Classifying images of skin lesions as benign or malignant",
+        "Converting temperatures from Celsius to Fahrenheit"
+      ]
+    },
+    {
+      "q": "What does the learning rate control in gradient descent?",
+      "options": [
+        "The number of features used by the model",
+        "The size of each parameter update step",
+        "The ratio of training to test data",
+        "How many epochs the model trains for"
+      ]
+    },
+    {
+      "q": "What does R-squared = 0 mean for a regression model?",
+      "options": [
+        "The model has negative error",
+        "The model has not been trained yet",
+        "The model is no better than always predicting the mean of the target",
+        "The model makes perfect predictions"
+      ]
+    },
+    {
+      "q": "Why is feature scaling important for gradient descent in multiple linear regression?",
+      "options": [
+        "It guarantees the model will find the global minimum",
+        "It reduces the number of features needed",
+        "It prevents the cost surface from being elongated, allowing faster convergence",
+        "It makes the model more interpretable"
+      ]
+    },
+    {
+      "q": "The normal equation gives optimal weights directly. Why would you prefer gradient descent instead?",
+      "options": [
+        "Gradient descent requires less memory than storing the data",
+        "Gradient descent always gives more accurate results",
+        "The normal equation does not work for linear regression",
+        "Matrix inversion in the normal equation is O(n^3) in features, which is too slow for thousands of features"
+      ]
+    },
+    {
+      "q": "A degree-10 polynomial regression model fits training data perfectly (R^2 = 1.0) but has R^2 = 0.3 on test data. What should you do?",
+      "options": [
+        "Increase the polynomial degree to 20 for even better training fit",
+        "Collect less training data so the model cannot memorize",
+        "Reduce model complexity (lower degree) or add regularization (Ridge) to prevent overfitting",
+        "Remove the test set and report training R^2 only"
+      ]
+    },
+    {
+      "q": "What is the range of the sigmoid function's output?",
+      "options": [
+        "0 to 1 (exclusive)",
+        "-1 to 1",
+        "Negative infinity to positive infinity",
+        "0 to positive infinity"
+      ]
+    },
+    {
+      "q": "Why is logistic regression called 'regression' even though it is used for classification?",
+      "options": [
+        "It minimizes mean squared error like linear regression",
+        "It predicts continuous values that are then rounded",
+        "The name comes from the logistic (sigmoid) function it uses, not from regression analysis",
+        "It was originally designed for regression and later adapted"
+      ]
+    },
+    {
+      "q": "Why is binary cross-entropy used instead of MSE for logistic regression?",
+      "options": [
+        "MSE can only be used with linear models",
+        "Cross-entropy works only when the dataset is balanced",
+        "Cross-entropy is faster to compute",
+        "MSE with sigmoid creates a non-convex cost surface with local minima, while cross-entropy is convex"
+      ]
+    },
+    {
+      "q": "A spam filter has precision = 0.95 and recall = 0.60. What does this mean in practical terms?",
+      "options": [
+        "60% of flagged emails are spam, and 95% of all spam is caught",
+        "When it flags an email as spam, it is correct 95% of the time, but it only catches 60% of actual spam",
+        "95% of all emails are correctly classified, and 60% of spam is caught",
+        "The model is 95% accurate on the test set and 60% on the training set"
+      ]
+    },
+    {
+      "q": "In softmax regression for 4 classes, what is true about the output probabilities?",
+      "options": [
+        "Only the top-2 classes receive nonzero probabilities",
+        "The outputs are raw scores, not probabilities",
+        "The four output probabilities sum to 1, and the class with the highest probability is the prediction",
+        "Each class gets an independent probability between 0 and 1"
+      ]
+    },
+    {
+      "q": "What does Gini impurity measure at a decision tree node?",
+      "options": [
+        "The total number of samples at the node",
+        "The probability of misclassifying a randomly chosen sample given the class distribution at that node",
+        "The correlation between features",
+        "The depth of the node in the tree"
+      ]
+    },
+    {
+      "q": "What is the main advantage of tree-based models over neural networks for tabular data?",
+      "options": [
+        "Trees train faster on GPU hardware",
+        "Trees handle mixed feature types, require less preprocessing, and are more interpretable",
+        "Trees can process images and text natively",
+        "Trees always have lower bias than neural networks"
+      ]
+    },
+    {
+      "q": "Why does a random forest use both bootstrap sampling AND random feature subsets at each split?",
+      "options": [
+        "To reduce the depth of individual trees",
+        "To ensure each tree sees every data point at least once",
+        "To speed up training by reducing the dataset size",
+        "To create diverse, decorrelated trees so that averaging reduces variance without increasing bias"
+      ]
+    },
+    {
+      "q": "A node contains 8 dogs and 2 cats. What is its Gini impurity?",
+      "options": [
+        "0.20",
+        "0.50",
+        "0.32",
+        "0.0"
+      ]
+    },
+    {
+      "q": "MDI (Mean Decrease in Impurity) feature importance is biased toward which type of feature?",
+      "options": [
+        "Binary features with only two values",
+        "Features with low variance",
+        "High-cardinality features with many possible split points",
+        "Features that are highly correlated with the target"
+      ]
+    },
+    {
+      "q": "What are support vectors in an SVM?",
+      "options": [
+        "All data points in the training set",
+        "The feature vectors after kernel transformation",
+        "The weight vectors learned during training",
+        "The training points closest to the decision boundary that determine the hyperplane"
+      ]
+    },
+    {
+      "q": "What does the SVM maximize when finding the decision boundary?",
+      "options": [
+        "The complexity of the decision boundary",
+        "The margin -- the distance between the decision boundary and the nearest points of each class",
+        "The total distance from all points to the boundary",
+        "The number of correctly classified training points"
+      ]
+    },
+    {
+      "q": "What happens when you increase the C parameter in an SVM?",
+      "options": [
+        "The margin gets narrower, fewer misclassifications are tolerated, and the model may overfit",
+        "The number of support vectors always increases",
+        "The margin gets wider and more misclassifications are allowed",
+        "The kernel function changes from linear to RBF"
+      ]
+    },
+    {
+      "q": "How does the kernel trick enable SVMs to learn nonlinear boundaries?",
+      "options": [
+        "It replaces the SVM with a neural network",
+        "It computes dot products in a high-dimensional space without explicitly mapping data to that space",
+        "It removes outliers from the dataset before training",
+        "It adds polynomial features to the input data directly"
+      ]
+    },
+    {
+      "q": "Hinge loss is zero when y * f(x) >= 1. What does this mean in terms of classification?",
+      "options": [
+        "The point is a noise sample that should be ignored",
+        "The point is misclassified",
+        "The point is exactly on the decision boundary",
+        "The point is correctly classified and lies outside the margin"
+      ]
+    },
+    {
+      "q": "KNN is called a 'lazy learner.' What does that mean?",
+      "options": [
+        "It converges slowly during training",
+        "It uses a simplified version of the loss function",
+        "It does no computation at training time and computes everything at prediction time",
+        "It only works on small datasets"
+      ]
+    },
+    {
+      "q": "Why is feature scaling critical for KNN?",
+      "options": [
+        "KNN cannot handle negative numbers without scaling",
+        "KNN uses gradient descent which requires normalized inputs",
+        "Feature scaling reduces the number of neighbors needed",
+        "Distance calculations are dominated by features with larger ranges, making scaling necessary for fair comparisons"
+      ]
+    },
+    {
+      "q": "In 100 dimensions with uniform random points, what happens to the ratio of max distance to min distance?",
+      "options": [
+        "It increases dramatically, making neighbors more distinct",
+        "It approaches 1, making all points nearly equidistant from each other",
+        "It stays the same as in 2 dimensions",
+        "It becomes negative due to numerical overflow"
+      ]
+    },
+    {
+      "q": "Which distance metric is most appropriate for comparing text documents represented as TF-IDF vectors?",
+      "options": [
+        "Chebyshev distance",
+        "Cosine distance",
+        "L2 (Euclidean) distance",
+        "L1 (Manhattan) distance"
+      ]
+    },
+    {
+      "q": "What happens to the KNN decision boundary as K increases from 1 to N (the full dataset size)?",
+      "options": [
+        "The boundary becomes more complex and detailed",
+        "The boundary stays the same regardless of K",
+        "The boundary becomes circular",
+        "The boundary smooths out, eventually predicting the majority class for every point"
+      ]
+    },
+    {
+      "q": "What distinguishes unsupervised learning from supervised learning?",
+      "options": [
+        "Unsupervised learning has no labeled outputs -- the algorithm finds structure on its own",
+        "Unsupervised learning always produces better results",
+        "Unsupervised learning uses more data",
+        "Unsupervised learning only works with text data"
+      ]
+    },
+    {
+      "q": "What does K-Means require you to specify before training?",
+      "options": [
+        "The number of clusters K",
+        "The exact cluster centers",
+        "The distance metric to use",
+        "The labels for each data point"
+      ]
+    },
+    {
+      "q": "K-Means fails on two interlocking half-moon shapes but DBSCAN succeeds. Why?",
+      "options": [
+        "DBSCAN always outperforms K-Means on every dataset",
+        "DBSCAN uses more data than K-Means",
+        "DBSCAN finds clusters based on density, so it can discover arbitrary shapes, while K-Means assumes spherical clusters",
+        "K-Means cannot handle 2D data"
+      ]
+    },
+    {
+      "q": "What is the silhouette score measuring?",
+      "options": [
+        "The total number of clusters found",
+        "How similar each point is to its own cluster compared to the nearest other cluster",
+        "The speed of the clustering algorithm",
+        "The percentage of outliers in the data"
+      ]
+    },
+    {
+      "q": "How does a Gaussian Mixture Model differ from K-Means in its cluster assignments?",
+      "options": [
+        "GMM uses hard assignments where each point belongs to exactly one cluster",
+        "GMM gives soft (probabilistic) assignments where each point has a probability of belonging to each cluster",
+        "GMM only works with one-dimensional data",
+        "GMM does not use centroids at all"
+      ]
+    },
+    {
+      "q": "Why is feature engineering often more impactful than choosing a fancier algorithm?",
+      "options": [
+        "Feature engineering makes the code run faster",
+        "Feature engineering eliminates the need for a test set",
+        "Fancy algorithms cannot process raw data",
+        "Good features expose patterns to the model that raw data hides, making even simple models effective"
+      ]
+    },
+    {
+      "q": "What is one-hot encoding?",
+      "options": [
+        "Replacing each category with its frequency in the dataset",
+        "Creating one binary column per category, with exactly one column set to 1 per row",
+        "Encoding the target variable as a probability",
+        "Converting all features to values between 0 and 1"
+      ]
+    },
+    {
+      "q": "What is the data leakage risk with target encoding?",
+      "options": [
+        "It makes the model too slow to train",
+        "It replaces categories with the mean target value, which can leak information from the test set if not computed on training data only",
+        "It only works with binary targets",
+        "It creates too many features"
+      ]
+    },
+    {
+      "q": "TF-IDF weights a word by its inverse document frequency. What is the effect?",
+      "options": [
+        "All words get equal weight regardless of frequency",
+        "Rare, distinctive words get higher weight while common words get lower weight",
+        "Only the most frequent word in each document is kept",
+        "Common words like 'the' get high weight because they appear frequently"
+      ]
+    },
+    {
+      "q": "You have two features with correlation 0.98. Why might you remove one?",
+      "options": [
+        "Highly correlated features always cause the model to crash",
+        "They are redundant -- both carry nearly the same information, and keeping both increases overfitting risk without adding signal",
+        "Correlated features make the data non-stationary",
+        "Correlation above 0.5 means the features are measuring different things"
+      ]
+    },
+    {
+      "q": "Why should you never tune hyperparameters based on test set performance?",
+      "options": [
+        "The test set is too small for reliable estimates",
+        "Adjusting the model based on test results effectively trains on the test set, making reported performance meaningless",
+        "Hyperparameters cannot be changed after training",
+        "The test set always has different features than the training set"
+      ]
+    },
+    {
+      "q": "A dataset has 95% negative and 5% positive samples. A model predicts 'negative' for every sample. What is its accuracy?",
+      "options": [
+        "0%",
+        "95%",
+        "50%",
+        "5%"
+      ]
+    },
+    {
+      "q": "In K-fold cross-validation with K=5, how many times is each data point used for validation?",
+      "options": [
+        "Exactly once",
+        "5 times",
+        "It depends on the random seed",
+        "Never -- all data is used for training"
+      ]
+    },
+    {
+      "q": "A learning curve shows training score = 0.95 and validation score = 0.60 that does not improve with more data. What should you try?",
+      "options": [
+        "Increase the learning rate",
+        "Use a simpler model or add regularization to reduce variance (overfitting)",
+        "Remove the validation set to give the model more training data",
+        "Collect more training data"
+      ]
+    },
+    {
+      "q": "AUC-ROC = 0.5 for a binary classifier. What does this indicate?",
+      "options": [
+        "The model perfectly separates the two classes",
+        "The model performs no better than random guessing at ranking positives above negatives",
+        "The model has 50% accuracy",
+        "The model has equal precision and recall"
+      ]
+    },
+    {
+      "q": "A linear model is used to fit a clearly curved (quadratic) relationship. Which error component dominates?",
+      "options": [
+        "Bias: the model is too rigid to capture the true nonlinear pattern",
+        "Variance: the model changes too much with different training data",
+        "Irreducible noise: the data is too noisy",
+        "None: the model should fit perfectly"
+      ]
+    },
+    {
+      "q": "The bias-variance decomposition of expected error has three terms. Which one cannot be reduced by any model?",
+      "options": [
+        "All three can be reduced to zero",
+        "Variance",
+        "Irreducible noise (sigma squared)",
+        "Bias squared"
+      ]
+    },
+    {
+      "q": "Adding L2 regularization to a model increases bias and decreases variance. Why is this useful?",
+      "options": [
+        "The reduction in variance can outweigh the increase in bias, lowering total error",
+        "It makes the model faster to train",
+        "L2 regularization eliminates irreducible noise",
+        "It always improves both training and test accuracy"
+      ]
+    },
+    {
+      "q": "A model has training error = 2% and test error = 25%. What is the most likely diagnosis?",
+      "options": [
+        "High irreducible noise: the data is too noisy",
+        "High bias (underfitting): the model is too simple",
+        "High variance (overfitting): the model memorized training data and fails to generalize",
+        "The model is perfectly calibrated"
+      ]
+    },
+    {
+      "q": "You train the same model architecture on 50 different random training subsets and observe that predictions vary wildly between them. What does this indicate?",
+      "options": [
+        "High irreducible noise: the target variable is random",
+        "High bias: the model consistently misses the true pattern",
+        "The learning rate is too high",
+        "High variance: the model is sensitive to which specific training data it sees"
+      ]
+    },
+    {
+      "q": "Why does combining multiple weak classifiers into an ensemble improve accuracy?",
+      "options": [
+        "Weak classifiers are always faster than strong classifiers",
+        "Each weak classifier memorizes a different part of the test set",
+        "Ensembles always use more training data than single models",
+        "If the classifiers make different errors, majority voting cancels out individual mistakes"
+      ]
+    },
+    {
+      "q": "What is the main difference between bagging and boosting?",
+      "options": [
+        "Bagging requires labeled data; boosting works unsupervised",
+        "Bagging trains models in parallel on random subsets; boosting trains models sequentially, focusing on previous errors",
+        "Bagging reduces bias; boosting reduces variance",
+        "Bagging uses deep neural networks; boosting uses decision trees"
+      ]
+    },
+    {
+      "q": "In AdaBoost, what happens to the sample weight of a misclassified training point after each round?",
+      "options": [
+        "It increases, so the next weak learner focuses more on this hard example",
+        "It decreases, so the next learner ignores it",
+        "It stays the same",
+        "It is removed from the training set"
+      ]
+    },
+    {
+      "q": "A random forest with 100 trees has the same test accuracy as 200 trees. Adding more trees to 500 also shows no improvement. Why?",
+      "options": [
+        "After enough trees, variance reduction plateaus and adding more trees provides diminishing returns without increasing overfitting",
+        "500 trees is the maximum allowed",
+        "The trees are all identical so adding more has no effect",
+        "The random forest is underfitting and needs a different algorithm"
+      ]
+    },
+    {
+      "q": "Gradient boosting fits each new tree to what quantity?",
+      "options": [
+        "The predictions of the previous tree",
+        "The original target values",
+        "Random subsets of features",
+        "The residuals (errors) of the current ensemble's predictions"
+      ]
+    },
+    {
+      "q": "What is the difference between a parameter and a hyperparameter?",
+      "options": [
+        "There is no difference; they are synonyms",
+        "Parameters are learned during training (weights, biases); hyperparameters are set before training starts (learning rate, max depth)",
+        "Parameters apply to neural networks only; hyperparameters apply to tree models",
+        "Parameters are set by the user; hyperparameters are learned during training"
+      ]
+    },
+    {
+      "q": "Grid search over 4 hyperparameters with 5 values each requires how many evaluations?",
+      "options": [
+        "625",
+        "20",
+        "4",
+        "25"
+      ]
+    },
+    {
+      "q": "Why does random search often outperform grid search with the same evaluation budget?",
+      "options": [
+        "Random search always finds the global optimum",
+        "Most hyperparameters have low effective dimensionality, so random search covers the important ones more densely",
+        "Grid search cannot handle continuous hyperparameters",
+        "Random search uses a better optimization algorithm"
+      ]
+    },
+    {
+      "q": "In Bayesian optimization, what does the acquisition function balance?",
+      "options": [
+        "Bias and variance in the surrogate model",
+        "Training speed and model accuracy",
+        "The number of features and the number of samples",
+        "Exploitation (searching near known good points) and exploration (searching uncertain regions)"
+      ]
+    },
+    {
+      "q": "You tune hyperparameters using the test set and report the best test performance. What is wrong with this approach?",
+      "options": [
+        "Nothing -- this is standard practice",
+        "The test set should be used for training, not tuning",
+        "Hyperparameters should only be integers",
+        "You overfitted to the test set; the reported performance is optimistic and will not generalize"
+      ]
+    },
+    {
+      "q": "What is data leakage in the context of ML pipelines?",
+      "options": [
+        "Features being dropped during encoding",
+        "The model being too slow to process the data",
+        "Information from the test set or future data contaminating the training process",
+        "Data being accidentally deleted during preprocessing"
+      ]
+    },
+    {
+      "q": "Why is fitting a scaler on the full dataset before splitting into train/test considered leaky?",
+      "options": [
+        "The scaler's statistics (mean, std) include test data, so the model indirectly sees test information during training",
+        "Scaling changes the data distribution",
+        "Scaling should only be done on the test set",
+        "Fitting the scaler takes too long on large datasets"
+      ]
+    },
+    {
+      "q": "In sklearn, what is the difference between calling fit_transform and transform on a pipeline step?",
+      "options": [
+        "They are identical -- both fit and transform",
+        "fit_transform learns parameters from the data and applies the transform; transform only applies previously learned parameters",
+        "transform is for training data; fit_transform is for test data",
+        "fit_transform is slower but more accurate"
+      ]
+    },
+    {
+      "q": "Why is a ColumnTransformer necessary for real-world datasets?",
+      "options": [
+        "It makes the pipeline run in parallel on multiple CPUs",
+        "It converts all columns to the same data type",
+        "It applies different preprocessing steps to numeric and categorical columns within the same pipeline",
+        "It removes columns with missing values automatically"
+      ]
+    },
+    {
+      "q": "A production model receives a categorical value it never saw during training ('new_category'). What should the pipeline handle?",
+      "options": [
+        "Convert the unknown category to the number zero",
+        "Handle unknown categories gracefully, e.g., by using an 'unknown' bucket or the global mean in target encoding",
+        "Ignore the row entirely and return no prediction",
+        "Retrain the entire model from scratch"
+      ]
+    },
+    {
+      "q": "What is the 'naive' assumption in Naive Bayes?",
+      "options": [
+        "The prior probability of each class is equal",
+        "All features are conditionally independent given the class label",
+        "The data is normally distributed",
+        "The model has no parameters to learn"
+      ]
+    },
+    {
+      "q": "What does Laplace smoothing prevent in Naive Bayes?",
+      "options": [
+        "Zero probabilities for words never seen in a class during training",
+        "Class imbalance in the dataset",
+        "Slow training on high-dimensional data",
+        "Overfitting to large datasets"
+      ]
+    },
+    {
+      "q": "The naive independence assumption is clearly wrong for text. Why does Naive Bayes still classify well?",
+      "options": [
+        "It only works on very small vocabularies where independence holds",
+        "It only works when features are truly independent",
+        "Modern implementations secretly remove the independence assumption",
+        "Classification only needs correct class rankings, not correct probability estimates, and the assumption introduces stable errors that affect all classes similarly"
+      ]
+    },
+    {
+      "q": "When should you use Multinomial NB versus Gaussian NB?",
+      "options": [
+        "Multinomial for word count/frequency features, Gaussian for continuous real-valued features",
+        "They are interchangeable -- always use whichever is faster",
+        "Multinomial for binary data, Gaussian for multi-class problems",
+        "Multinomial for regression, Gaussian for classification"
+      ]
+    },
+    {
+      "q": "An email contains 'free' twice and 'money' once. In Multinomial NB with log probabilities, how is the spam score computed?",
+      "options": [
+        "P(spam) * P(free|spam) * P(money|spam)",
+        "log P(spam) * 2 * log P(free|spam)",
+        "log P(spam) + log P(free|spam) + log P(money|spam)",
+        "log P(spam) + 2 * log P(free|spam) + 1 * log P(money|spam)"
+      ]
+    },
+    {
+      "q": "Why is a random train/test split invalid for time series data?",
+      "options": [
+        "Time series data cannot be split at all",
+        "Random splits only work for classification problems",
+        "Random splits leak future information into the training set, allowing the model to cheat",
+        "Random splits make the dataset too small"
+      ]
+    },
+    {
+      "q": "What does it mean for a time series to be stationary?",
+      "options": [
+        "It always trends upward",
+        "Its statistical properties (mean, variance, autocorrelation) do not change over time",
+        "The values never change over time",
+        "It has no seasonal patterns"
+      ]
+    },
+    {
+      "q": "What is the purpose of differencing a time series?",
+      "options": [
+        "To normalize the values between 0 and 1",
+        "To convert regression into classification",
+        "To increase the number of data points",
+        "To remove trend and make the series stationary by modeling changes between consecutive values"
+      ]
+    },
+    {
+      "q": "Lag features convert a time series into a supervised learning problem. What is a lag-3 feature for predicting y[t]?",
+      "options": [
+        "The value 3 time steps ago: y[t-3]",
+        "The difference between the current value and 3 steps ahead",
+        "The 3rd derivative of the series",
+        "The average of the next 3 values: (y[t+1] + y[t+2] + y[t+3]) / 3"
+      ]
+    },
+    {
+      "q": "Walk-forward validation splits time data into expanding or sliding windows. Why is this better than K-fold CV for time series?",
+      "options": [
+        "Walk-forward is faster to compute",
+        "K-fold CV cannot be used on numeric data",
+        "Walk-forward uses more data for training",
+        "Walk-forward respects temporal order, training only on past data and testing on future data, preventing lookahead bias"
+      ]
+    },
+    {
+      "q": "Why is anomaly detection typically framed as an unsupervised problem rather than classification?",
+      "options": [
+        "Supervised classification is always less accurate",
+        "Labeled anomalies are extremely rare, and novel anomaly types differ from previously seen ones",
+        "Anomaly detection only works on time series data",
+        "Anomaly detection does not require any data"
+      ]
+    },
+    {
+      "q": "A temperature of 90F is normal in summer but anomalous in winter. What type of anomaly is this?",
+      "options": [
+        "Point anomaly",
+        "Contextual anomaly",
+        "Statistical anomaly",
+        "Collective anomaly"
+      ]
+    },
+    {
+      "q": "The Z-score method flags points more than 3 standard deviations from the mean. When does this approach fail?",
+      "options": [
+        "When there are exactly 3 anomalies in the dataset",
+        "When the data is perfectly normally distributed",
+        "When the features are standardized",
+        "When the data is multimodal, skewed, or when outliers in the training data inflate the mean and std"
+      ]
+    },
+    {
+      "q": "How does Isolation Forest detect anomalies differently from distance-based methods?",
+      "options": [
+        "It isolates points using random splits; anomalies require fewer splits to isolate because they are few and different",
+        "It only works on text data",
+        "It uses neural networks instead of trees",
+        "It computes distances to every other point in the dataset"
+      ]
+    },
+    {
+      "q": "You build both an unsupervised anomaly detector and a supervised fraud classifier. When should you prefer the unsupervised approach?",
+      "options": [
+        "When you need to detect novel fraud patterns that differ from historical labeled examples",
+        "When you have millions of labeled fraud examples",
+        "When you only care about precision, not recall",
+        "Always -- unsupervised is always better for anomaly detection"
+      ]
+    },
+    {
+      "q": "A fraud detection dataset has 99.9% legitimate transactions and 0.1% fraud. A model predicts 'legitimate' for every transaction. What is its accuracy?",
+      "options": [
+        "99.9%",
+        "0.1%",
+        "50%",
+        "100%"
+      ]
+    },
+    {
+      "q": "Which metric would correctly identify the always-predict-negative model as useless?",
+      "options": [
+        "Accuracy (99.9%)",
+        "True negative rate (100%)",
+        "Recall (0%) or F1 score (0%)",
+        "Specificity (100%)"
+      ]
+    },
+    {
+      "q": "How does SMOTE generate synthetic minority samples?",
+      "options": [
+        "By flipping the labels of majority class samples",
+        "By interpolating between a minority sample and one of its K nearest minority neighbors",
+        "By randomly generating points anywhere in the feature space",
+        "By duplicating existing minority samples exactly"
+      ]
+    },
+    {
+      "q": "You lower the classification threshold from 0.5 to 0.3 on an imbalanced dataset. What happens to precision and recall?",
+      "options": [
+        "Both precision and recall increase",
+        "Precision increases but recall decreases",
+        "Recall increases (more positives caught) but precision decreases (more false positives)",
+        "Neither changes -- threshold only affects speed"
+      ]
+    },
+    {
+      "q": "Why is AUPRC (Area Under Precision-Recall Curve) more informative than AUC-ROC for highly imbalanced datasets?",
+      "options": [
+        "AUC-ROC cannot be computed for imbalanced data",
+        "AUPRC does not require a threshold",
+        "AUPRC is always higher than AUC-ROC",
+        "A random classifier has AUPRC equal to the positive class rate (e.g., 0.001), making improvements visible, while AUC-ROC starts at 0.5 regardless of imbalance"
+      ]
+    },
+    {
+      "q": "Why can adding more features actually make a model perform worse?",
+      "options": [
+        "Models have a hard limit on the number of features they can accept",
+        "More features always improve model accuracy",
+        "More features make the model run out of memory",
+        "Irrelevant features add noise, increase overfitting risk, and dilute the signal from useful features"
+      ]
+    },
+    {
+      "q": "What is the key difference between filter and wrapper feature selection methods?",
+      "options": [
+        "Filter methods score features using statistics without a model; wrapper methods train a model to evaluate feature subsets",
+        "Filter methods are always more accurate than wrapper methods",
+        "Wrapper methods can only select one feature at a time",
+        "Filter methods use a model to evaluate features; wrapper methods use statistics"
+      ]
+    },
+    {
+      "q": "Mutual information can detect relationships that Pearson correlation cannot. What kind?",
+      "options": [
+        "Relationships that require more than 1000 data points",
+        "Nonlinear relationships such as quadratic or periodic dependencies",
+        "Linear relationships between continuous features",
+        "Relationships between categorical features only"
+      ]
+    },
+    {
+      "q": "L1 (Lasso) regularization performs feature selection as part of training. How?",
+      "options": [
+        "It removes features with low variance before training starts",
+        "It ranks features by correlation with the target",
+        "It drives the weights of irrelevant features to exactly zero, effectively eliminating them from the model",
+        "It trains separate models for each feature"
+      ]
+    },
+    {
+      "q": "RFE removes the least important feature and retrains. Why is this better than just removing all low-importance features at once?",
+      "options": [
+        "It is not better -- removing all at once is always preferred",
+        "Feature importances change as features are removed, so iterative removal accounts for interactions between features",
+        "Removing one at a time is only necessary for neural networks",
+        "RFE uses a different importance metric than single-step removal"
+      ]
+    }
+  ]
+}

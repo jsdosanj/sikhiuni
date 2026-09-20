@@ -1,0 +1,1266 @@
+{
+  "track": "aisf-04-vision",
+  "count": 140,
+  "questions": [
+    {
+      "q": "A file on disk is decoded into a NumPy array with shape (224, 224, 3) and dtype uint8. What does each number represent?",
+      "options": [
+        "A floating-point brightness value ready to feed to a convolutional network",
+        "A sample of light intensity at one grid position, quantized to one of 256 levels per channel",
+        "One photon count per detector, normalized to the full dynamic range of the sensor",
+        "The probability that a pixel is that colour, between 0 and 1"
+      ]
+    },
+    {
+      "q": "You load an image with Pillow and get an array of shape (480, 640, 3). You pass it as a batched tensor (1, 480, 640, 3) to a PyTorch Conv2d with in_channels=3. What happens?",
+      "options": [
+        "PyTorch raises a RuntimeError: Conv2d expects NCHW, sees 480 channels where the weight expects 3, and refuses to run",
+        "Accuracy drops by a few percent but inference still works",
+        "Nothing — PyTorch auto-detects the layout",
+        "The first conv layer treats height as the channel axis, producing meaningless feature maps"
+      ]
+    },
+    {
+      "q": "Why do ImageNet pretrained models expect inputs standardized with mean=[0.485, 0.456, 0.406] and std=[0.229, 0.224, 0.225]?",
+      "options": [
+        "They are required by the ReLU activation function",
+        "Those are the RGB values of an average natural scene",
+        "They make the input strictly zero-mean unit-variance for any image",
+        "Those are the per-channel mean and standard deviation of the ImageNet training set in [0, 1] space, so subtracting them centers the distribution the model was trained on"
+      ]
+    },
+    {
+      "q": "You resize a segmentation mask (integer class IDs 0..20) from 500x500 to 224x224. Which interpolation method is correct?",
+      "options": [
+        "Bicubic — it preserves sharpness",
+        "Bilinear — it smooths the class boundaries",
+        "Nearest neighbour — it preserves valid integer class IDs instead of inventing fractional ones",
+        "Lanczos — highest quality"
+      ]
+    },
+    {
+      "q": "RGB grayscale conversion uses weights 0.299 R + 0.587 G + 0.114 B rather than 0.333 R + 0.333 G + 0.333 B. Why?",
+      "options": [
+        "Because green photons carry more energy than red or blue photons",
+        "Because human vision is most sensitive to green and least sensitive to blue, so the weighted sum matches perceived luminance",
+        "To match the behaviour of the Bayer filter on camera sensors",
+        "To compensate for JPEG compression artifacts in each channel"
+      ]
+    },
+    {
+      "q": "You feed a 224x224 RGB image to a conv with kernel_size=3, stride=1, padding=0. What is the output spatial size?",
+      "options": [
+        "222x222",
+        "224x224",
+        "74x74",
+        "112x112"
+      ]
+    },
+    {
+      "q": "A conv layer has in_channels=3, out_channels=64, kernel_size=3, with bias. How many learnable parameters?",
+      "options": [
+        "576",
+        "1,792",
+        "1,728",
+        "192"
+      ]
+    },
+    {
+      "q": "Why do modern CNNs prefer stacks of 3x3 convolutions over a single 5x5 or 7x7 conv?",
+      "options": [
+        "3x3 is the only kernel size that supports padding",
+        "Large kernels overflow GPU registers",
+        "3x3 convolutions are hardware-accelerated; larger ones are not",
+        "Two 3x3 convs cover the same 5x5 receptive field with fewer parameters (2 * 9 vs 25) and add an extra non-linearity between them"
+      ]
+    },
+    {
+      "q": "What does the im2col transformation actually do?",
+      "options": [
+        "It concatenates all images in a batch into a single 2D matrix",
+        "It extracts every kernel-sized receptive window from the input and stacks them as columns so that convolution becomes a single matrix multiply",
+        "It converts float32 pixels to int8 for faster arithmetic",
+        "It compresses the image to fit in GPU cache"
+      ]
+    },
+    {
+      "q": "You stack four 3x3 convolutions (all stride 1, no pooling). What is the receptive field of a neuron in the final layer?",
+      "options": [
+        "3x3 — each conv is 3x3",
+        "5x5 — two convs give 5x5 and depth does not help",
+        "9x9 — every conv adds 2 on each side: 1 + 4*(3-1) = 9",
+        "15x15 — every conv triples the receptive field"
+      ]
+    },
+    {
+      "q": "What single architectural idea did AlexNet (2012) introduce that made training deep CNNs practical on GPUs?",
+      "options": [
+        "Residual connections",
+        "Depthwise separable convolutions",
+        "Replacing tanh with ReLU, which does not saturate and speeds convergence by roughly 6x",
+        "Batch normalization"
+      ]
+    },
+    {
+      "q": "Why did VGG prefer stacks of 3x3 convolutions over a single larger kernel?",
+      "options": [
+        "Two 3x3 convs cover the same 5x5 receptive field with fewer parameters (18C^2 vs 25C^2) and one extra ReLU between them",
+        "3x3 convs are rotation-invariant; 5x5 is not",
+        "Smaller kernels run faster on CPU",
+        "Larger kernels cannot be trained with SGD"
+      ]
+    },
+    {
+      "q": "ResNet introduced residual connections as y = F(x) + x. What problem does this solve?",
+      "options": [
+        "Vanishing activations in layers with ReLU",
+        "Memory consumption during backprop",
+        "The degradation problem — past ~20 plain conv layers, training loss starts getting worse because the optimizer struggles to learn an identity mapping through many non-linear layers",
+        "Overfitting in the classifier head"
+      ]
+    },
+    {
+      "q": "In a ResNet BasicBlock with in_channels=64, out_channels=128, stride=2, what is the role of the shortcut branch?",
+      "options": [
+        "It is a placeholder that is removed at inference time",
+        "It is a max-pool that halves the spatial dimension",
+        "It is always identity; the main branch handles the shape change",
+        "It is a 1x1 conv with stride 2 that matches the output channels and spatial size of the main branch so the two can be added"
+      ]
+    },
+    {
+      "q": "ResNet-18 has ~11.7M parameters and matches or beats VGG-16 (138M params) on ImageNet. What does this imply about VGG?",
+      "options": [
+        "VGG's kernels were too small to learn good features",
+        "VGG was trained with a worse optimizer",
+        "Most of VGG's parameters are wasted in the fully connected head and the redundant depth past the point where residual connections would let each layer contribute",
+        "VGG's accuracy on ImageNet has been measured incorrectly"
+      ]
+    },
+    {
+      "q": "Your model outputs raw logits of shape (N, C). You write `loss = cross_entropy(softmax(logits), y)`. What goes wrong?",
+      "options": [
+        "cross_entropy re-applies softmax inside, so you end up computing softmax(softmax(logits)), producing nearly-uniform probabilities and useless gradients",
+        "Nothing — that is the correct API",
+        "cross_entropy raises a ValueError about the shape",
+        "Accuracy drops by exactly 1/C"
+      ]
+    },
+    {
+      "q": "You evaluate a 10-class classifier and get 92% accuracy. Class 0 has 9,000 examples; classes 1-9 share 1,000 examples (roughly 111 each, 10,000 total). What does the headline number hide?",
+      "options": [
+        "The model could be predicting class 0 for every input and still score 90% (9000/10000); the remaining 2% could come from any other class. Per-class precision/recall tells you what is really happening",
+        "Nothing — accuracy is accuracy",
+        "The model is definitely over-fitting",
+        "The validation loss is wrong"
+      ]
+    },
+    {
+      "q": "Mixup replaces one-hot labels with interpolated soft targets like lambda * y_i + (1-lambda) * y_j. Why does this help generalisation?",
+      "options": [
+        "It doubles the effective batch size",
+        "It guarantees zero train loss",
+        "It lets you train with a larger learning rate",
+        "The model is forced to produce smooth predictions between classes instead of memorising hard one-hot targets, which improves both calibration and test accuracy"
+      ]
+    },
+    {
+      "q": "You swap `RandomCrop(32, padding=4, padding_mode='zeros')` for `padding_mode='reflect'` on CIFAR-10. Why is reflect better here?",
+      "options": [
+        "Zero padding creates hard black borders that the model learns to depend on; reflect pad mirrors the edge pixels so augmented crops look like natural photographs",
+        "Reflect pad is required by batch normalization",
+        "Reflect pad changes the output size",
+        "Reflect pad is faster"
+      ]
+    },
+    {
+      "q": "You train a classifier and the confusion matrix shows most errors are class 3 predicted as class 5 and class 5 predicted as class 3. What is the single most impactful next step?",
+      "options": [
+        "Increase batch size",
+        "Switch from SGD to Adam",
+        "Look at a sample of class-3 and class-5 images that confuse the model; the two classes may be genuinely ambiguous, mislabelled, or visually similar in a way that calls for a targeted augmentation or a re-labelled training set",
+        "Add more training data across all classes equally"
+      ]
+    },
+    {
+      "q": "You have 500 labelled images for a new task close to the ImageNet distribution. Which regime makes the most sense?",
+      "options": [
+        "Fine-tune every layer with the same large LR",
+        "Ignore pretrained weights; small datasets work best with small models",
+        "Freeze an ImageNet-pretrained backbone and train only a new linear head",
+        "Train a ResNet-50 from scratch"
+      ]
+    },
+    {
+      "q": "Why do early conv layers of an ImageNet-pretrained network transfer well to medical images even though ImageNet contains no X-rays?",
+      "options": [
+        "ImageNet secretly contains medical data",
+        "Transfer only works when domains match",
+        "PyTorch re-initialises early layers automatically",
+        "Early layers encode generic visual primitives — edges, orientations, contrast — that are shared across almost any visual domain; only late layers specialise to ImageNet categories"
+      ]
+    },
+    {
+      "q": "When fine-tuning end-to-end with discriminative learning rates, why should early layers get a smaller LR than late layers?",
+      "options": [
+        "A smaller LR in the early layers speeds up training",
+        "Early layers have fewer parameters",
+        "Early layers encode general features you want to preserve; late layers encode task-specific features that must move; a smaller LR on early layers prevents feature drift and catastrophic forgetting",
+        "PyTorch requires layer-wise LR for correctness"
+      ]
+    },
+    {
+      "q": "You fine-tune a ResNet on a 10-class medical dataset of 800 grayscale images (replicated to 3 channels). Accuracy is 10% (random chance for 10 classes). What is the most likely cause?",
+      "options": [
+        "ResNet cannot handle grayscale input",
+        "BatchNorm running statistics are from ImageNet RGB photos and badly mismatch the grayscale-medical distribution, so the first few BN layers produce noise that propagates forward",
+        "800 images is simply too few for any transfer learning",
+        "You used the wrong loss function"
+      ]
+    },
+    {
+      "q": "You compare two runs: (a) linear probe on frozen ImageNet backbone, 82% accuracy; (b) end-to-end fine-tune, 78% accuracy. What should you conclude?",
+      "options": [
+        "Fine-tuning is not helpful; ship the linear probe",
+        "A fine-tune that ends below the linear probe is almost always a training bug — LR too high, BN mishandled, or scheduler/optimizer misconfigured; diagnose before concluding anything about transfer",
+        "The dataset is too large",
+        "Pretrained weights are bad"
+      ]
+    },
+    {
+      "q": "A YOLO detector with grid 13x13, 3 anchors per cell, and 20 classes produces a head output of shape (N, 13, 13, 3, 25). Why is the last dimension 25?",
+      "options": [
+        "It is padding to the next power of 2",
+        "25 is the number of classes in COCO",
+        "4 box coords + 1 bias + 20 classes",
+        "4 box coords + 1 objectness + 20 classes = 5 + C"
+      ]
+    },
+    {
+      "q": "Why does YOLO predict tx, ty through a sigmoid before adding the grid cell?",
+      "options": [
+        "Sigmoid is required by the convolution",
+        "To prevent NaN during training",
+        "To normalise them to [0, 1] so the centre stays inside the cell and cannot escape to a neighbouring cell's territory",
+        "To make the box larger"
+      ]
+    },
+    {
+      "q": "Your detector predicts 15 boxes around a single object after the head. You apply NMS with iou_threshold=0.45 and get back 1 box. What did NMS do?",
+      "options": [
+        "It averaged all 15 predictions",
+        "It sorted the 15 boxes by score, kept the highest-scoring, and deleted every box whose IoU with it exceeded 0.45; the other 14 all overlapped the winner above the threshold so one remained",
+        "It picked a random survivor",
+        "It merged the boxes geometrically"
+      ]
+    },
+    {
+      "q": "Your model has mAP@0.5 = 0.75 but mAP@0.5:0.95 = 0.32. What is the most accurate interpretation?",
+      "options": [
+        "The dataset has too many classes",
+        "The model finds the right objects but its boxes are not tightly localised — fine at IoU 0.5, fail at IoU 0.7+",
+        "The model is broken; mAP@0.5 must equal mAP@0.5:0.95",
+        "The inference threshold is too high"
+      ]
+    },
+    {
+      "q": "YOLO loss weights lambda_coord=5.0 and lambda_noobj=0.5 roughly mirror the original paper. What do these ratios encode?",
+      "options": [
+        "The fact that most cells have no object, so the no-object cells must be downweighted or they would dominate the total loss; and the fact that box regression is a smaller-scale loss than cross-entropy, so it needs upweighting to produce comparable gradients",
+        "GPU memory trade-offs",
+        "The number of anchors per cell",
+        "Random choices the authors never justified"
+      ]
+    },
+    {
+      "q": "Why does U-Net need skip connections between the encoder and decoder?",
+      "options": [
+        "Because transposed convolutions require extra inputs",
+        "To match PyTorch shape conventions",
+        "The encoder compresses spatial detail to gain context; the decoder cannot reconstruct sharp boundaries without access to the encoder's high-resolution feature maps, and skips supply exactly that",
+        "To speed up training"
+      ]
+    },
+    {
+      "q": "A segmentation task has 99% background pixels and 1% tumour pixels. You train with plain cross-entropy and reach 99% pixel accuracy. What happened?",
+      "options": [
+        "The loss function was implemented incorrectly",
+        "The model converged",
+        "The model learned to predict background for every pixel; pixel accuracy is dominated by the majority class and ignores the class you actually care about",
+        "The optimizer failed"
+      ]
+    },
+    {
+      "q": "Which task type separates individual cars of the same class from each other?",
+      "options": [
+        "Both produce the same output",
+        "Semantic segmentation",
+        "Instance segmentation",
+        "Neither — that requires a detection model instead"
+      ]
+    },
+    {
+      "q": "You swap U-Net's bilinear upsample + 3x3 conv for a ConvTranspose2d with kernel_size=2, stride=2 and see checkerboard artifacts in the output. Why?",
+      "options": [
+        "Transposed conv is broken in PyTorch",
+        "The learning rate was too low",
+        "When kernel_size is not evenly divisible by stride, output pixels receive unequal contributions from input pixels, producing a periodic pattern in the output that looks like a checkerboard",
+        "Batch norm has to be added before transposed conv"
+      ]
+    },
+    {
+      "q": "You report mIoU = 0.78 on a 10-class segmentation task. Why should you also publish per-class IoU?",
+      "options": [
+        "Mean IoU hides individual class failures; a mIoU of 0.78 is consistent with eight classes at 0.9 and two at 0.3, which is a very different deployment story than all classes near 0.78",
+        "Per-class IoU is required by PyTorch",
+        "It is only needed for medical imaging",
+        "Per-class IoU is always higher than mIoU"
+      ]
+    },
+    {
+      "q": "Why did Mask R-CNN replace RoIPool with RoIAlign?",
+      "options": [
+        "RoIPool rounds box coordinates to integers at multiple steps, misaligning the feature map from the input pixels by up to a feature-map pixel; RoIAlign uses bilinear sampling with no rounding, preserving localisation",
+        "RoIPool was a copyright issue",
+        "RoIPool only works on CPU",
+        "RoIAlign is faster on GPUs"
+      ]
+    },
+    {
+      "q": "Mask R-CNN's mask head outputs a 28x28 mask per class per proposal. Why per class?",
+      "options": [
+        "The paper required it",
+        "Binary masks overflow in a single channel",
+        "Decoupling mask prediction from classification: the mask head only has to learn the shape for each class separately, so the classifier's decision does not affect which mask is produced, only which channel is read at inference",
+        "Because binary masks need per-class channels for backprop"
+      ]
+    },
+    {
+      "q": "torchvision's Mask R-CNN prediction dict has `labels` that start at 1, not 0. Why?",
+      "options": [
+        "torchvision uses 1-based indexing throughout",
+        "Class 0 is reserved for background; user classes are always 1-based so the classifier head can treat background as a real class with its own logits and gradients",
+        "Training data determined it",
+        "Legacy bug"
+      ]
+    },
+    {
+      "q": "You fine-tune Mask R-CNN on a 500-image dataset and val mAP plateaus while train loss keeps dropping. What is the first thing to try?",
+      "options": [
+        "Add more epochs",
+        "Use a higher learning rate",
+        "Switch to segmentation U-Net",
+        "Freeze the backbone and FPN so the model only fine-tunes the RPN and heads; 500 images is too few to update 23M backbone parameters without overfitting"
+      ]
+    },
+    {
+      "q": "The FPN inside Mask R-CNN has four levels (P2, P3, P4, P5) at strides 4, 8, 16, 32. Why not just use one level?",
+      "options": [
+        "To reduce parameter count",
+        "Four levels is arbitrary",
+        "Objects in natural images span a range of scales; routing each proposal to the FPN level matching its size gives the head a feature map with the right receptive field for that object, which is strictly better than always using one scale",
+        "To use more GPU memory"
+      ]
+    },
+    {
+      "q": "Why does GAN training use the non-saturating generator loss -log(D(G(z))) instead of log(1 - D(G(z)))?",
+      "options": [
+        "They are mathematically different and produce better equilibria",
+        "It is required by PyTorch",
+        "It speeds up the discriminator",
+        "Early in training D(G(z)) is near zero, so log(1 - D(G(z))) has vanishing gradient; -log(D(G(z))) has large gradient there so G receives a useful signal"
+      ]
+    },
+    {
+      "q": "DCGAN's rules say to use strided convolutions instead of pooling. Why?",
+      "options": [
+        "Pooling is non-learnable and throws away information the generator might need; strided convs let the network learn its own downsampling, which empirically produces sharper generated images",
+        "Pooling is incompatible with batch norm",
+        "Pooling is slower on GPUs",
+        "Pooling breaks gradient flow"
+      ]
+    },
+    {
+      "q": "You train a GAN and notice G produces almost identical samples regardless of the input noise. Which failure is this?",
+      "options": [
+        "Oscillation",
+        "Vanishing gradients",
+        "Mode collapse — G has found a narrow region of the data distribution that consistently fools D and has no incentive to explore; fixes include spectral norm, minibatch discrimination, or a larger batch",
+        "The dataset is too small"
+      ]
+    },
+    {
+      "q": "Why do DCGAN training scripts use Adam with betas=(0.5, 0.999) instead of the default (0.9, 0.999)?",
+      "options": [
+        "It is a typo propagated through tutorials",
+        "A lower beta1 reduces momentum; in an adversarial game, heavy momentum keeps each optimizer in the wrong direction too long when the other network's behaviour changes, which causes instability",
+        "The default is broken",
+        "Adam is only supported with beta1=0.5 on CUDA"
+      ]
+    },
+    {
+      "q": "A colleague reports a GAN with D loss near zero and G loss increasing over training. What is happening and how do you fix it?",
+      "options": [
+        "The generator is correctly overfitting",
+        "Nothing — this is the equilibrium",
+        "The discriminator has become too strong and drives G's gradient to zero; fixes include a smaller D, spectral norm, label smoothing on real labels (0.9 instead of 1.0), or switching to WGAN-GP",
+        "Both nets are improving correctly"
+      ]
+    },
+    {
+      "q": "Why can diffusion training pick any timestep t directly instead of simulating the forward Markov chain step by step?",
+      "options": [
+        "It is an approximation that ignores the intermediate steps",
+        "It is required by PyTorch's autograd",
+        "Because the composition of many Gaussian additions still yields a Gaussian, giving a closed-form q(x_t|x_0) = N(sqrt(alpha_bar_t) x_0, (1 - alpha_bar_t) I) that you can sample in one step",
+        "Because x_t is independent of x_0"
+      ]
+    },
+    {
+      "q": "What does a DDPM's neural network actually predict?",
+      "options": [
+        "The next image x_{t-1} directly",
+        "The class label of the input",
+        "The noise epsilon that was added at step t, from which x_{t-1}'s mean is derived analytically",
+        "The signal-to-noise ratio"
+      ]
+    },
+    {
+      "q": "Why does DDIM achieve similar sample quality to DDPM with ~20x fewer steps?",
+      "options": [
+        "DDIM generates smaller images",
+        "DDIM reformulates sampling as a deterministic ODE whose trajectory can be discretised with far fewer steps while hitting nearly the same endpoint; no retraining required",
+        "DDIM uses a faster model architecture",
+        "DDIM changes the training objective"
+      ]
+    },
+    {
+      "q": "You plot `alpha_bar_t` for a linear beta schedule with T=1000 and see it drops to near-zero by t=600. Why does this matter?",
+      "options": [
+        "It does not matter",
+        "alpha_bar_t must be zero at the end",
+        "PyTorch requires a linear schedule",
+        "The last 40% of timesteps add almost no signal; training those timesteps teaches the network to denoise noise that is already approximately N(0, I), which wastes capacity. Cosine or sigmoid schedules fix this by spreading the noise injection more evenly"
+      ]
+    },
+    {
+      "q": "Why does time conditioning get added to the U-Net via a sinusoidal embedding instead of a one-hot timestep?",
+      "options": [
+        "One-hot would violate the chain rule",
+        "One-hot vectors are too large",
+        "A sinusoidal embedding is smooth in t, which lets the network interpolate between timesteps it has not seen exactly and encodes scale information the architecture can use additively at multiple depths",
+        "Sinusoidal is required by BatchNorm"
+      ]
+    },
+    {
+      "q": "Why does Stable Diffusion run its DDPM in a 4x64x64 latent space rather than directly on 3x512x512 pixel images?",
+      "options": [
+        "To make inference deterministic",
+        "Latents are easier to visualise",
+        "Latents are the native output of GPUs",
+        "Training and sampling on 16,384 latent values instead of 786,432 pixels is roughly 48x cheaper; a pretrained VAE handles the image <-> latent conversion, and the diffusion model only has to model the structured latent manifold"
+      ]
+    },
+    {
+      "q": "What does classifier-free guidance (CFG) do at inference?",
+      "options": [
+        "Runs two separate models and averages them",
+        "Adds a classifier head to the model at test time",
+        "Uses one model trained to predict both conditional eps_cond and unconditional eps_uncond noise, then combines them as eps = eps_uncond + w*(eps_cond - eps_uncond) to amplify prompt adherence",
+        "Uses a larger scheduler"
+      ]
+    },
+    {
+      "q": "You swap SD's default scheduler for DPM-Solver++ 2M Karras and reduce num_inference_steps from 50 to 20. What is the expected result?",
+      "options": [
+        "You must also retrain the model",
+        "Comparable quality in roughly half the time; DPM-Solver++ is a second-order ODE integrator that converges in fewer steps than DDIM for the same sample quality",
+        "Worse quality and longer runtime",
+        "Numerical instability"
+      ]
+    },
+    {
+      "q": "Why is LoRA fine-tuning popular for Stable Diffusion instead of full fine-tuning?",
+      "options": [
+        "LoRA produces better images by default",
+        "LoRA keeps the 860M base U-Net frozen and inserts tiny rank-decomposition matrices into attention layers, so a fine-tune trains in minutes on consumer hardware, produces 10-50 MB adapters, and can be swapped or mixed at inference",
+        "LoRA is required by diffusers",
+        "LoRA prevents overfitting entirely"
+      ]
+    },
+    {
+      "q": "You generate the same prompt with guidance_scale=15 and see oversaturated colours and burned-in artefacts. What is going on?",
+      "options": [
+        "CFG amplifies the conditional direction; past a threshold around 9-12 the amplification pushes predictions outside the manifold the VAE can decode cleanly, producing visual artefacts. Drop guidance to 7-9 for balanced results",
+        "The seed is wrong",
+        "The model is broken",
+        "The VAE needs retraining"
+      ]
+    },
+    {
+      "q": "Why does a 2D+pool video model fail on the Something-Something V2 dataset?",
+      "options": [
+        "The model architecture is incompatible",
+        "The images are too small",
+        "There are too many classes",
+        "The dataset's labels are defined by motion direction ('pushing something from left to right'), not appearance; order-invariant average pooling over per-frame features cannot distinguish motion direction"
+      ]
+    },
+    {
+      "q": "What is I3D's inflation trick?",
+      "options": [
+        "A scheduler for learning rates",
+        "A method for compressing videos",
+        "A way to pretrain on more images",
+        "Take a 2D CNN's pretrained kernels, copy each along a new time axis (dividing by kernel_T to preserve activation scale), and use them to initialise a 3D CNN — giving the 3D model strong weights without 3D pretraining"
+      ]
+    },
+    {
+      "q": "A (2+1)D factorised convolution splits a 3D conv into which two operations?",
+      "options": [
+        "A spatial 1x3x3 conv followed by a temporal 3x1x1 conv, with a BN+ReLU in between to add a non-linearity that full 3D convs do not have",
+        "Two 3D convs with different strides",
+        "One temporal conv followed by one depthwise conv",
+        "A grouped conv and a 1x1 conv"
+      ]
+    },
+    {
+      "q": "In a video transformer, what does 'divided attention' mean?",
+      "options": [
+        "Attention that skips some layers",
+        "Attention over half the tokens",
+        "Each transformer block has two attention modules: one over tokens at the same spatial position across time (temporal attention), then one over tokens at the same timestep across space (spatial attention) — breaking the O((T*H*W)^2) full attention into O(T^2) + O((H*W)^2)",
+        "Attention applied only during training"
+      ]
+    },
+    {
+      "q": "Your Kinetics-400 model reports 76% clip accuracy and 82% video accuracy. What does the gap tell you?",
+      "options": [
+        "The test set is too small",
+        "The model is broken",
+        "Per-clip predictions are noisy; averaging predictions across multiple sampled clips per video (test-time augmentation) stabilises the result. A large gap suggests the model's features are sensitive to which 8-frame window was sampled, and longer clips or stronger spatial augmentation during training would shrink the gap",
+        "Clip accuracy is always lower than video accuracy by definition"
+      ]
+    },
+    {
+      "q": "Why cannot a plain CNN process a point cloud directly?",
+      "options": [
+        "Point clouds require quaternions",
+        "A CNN assumes input pixels arranged on a regular grid with neighbourhood structure; a point cloud is an unordered set of points in R^3 with no grid and variable size, violating both assumptions",
+        "CNNs only work on grayscale",
+        "Point clouds are too large"
+      ]
+    },
+    {
+      "q": "What trick makes PointNet permutation-invariant over the input points?",
+      "options": [
+        "Sorting the points before the forward pass",
+        "Batch normalisation",
+        "A special loss function",
+        "A shared MLP applied to every point independently, followed by a symmetric aggregation (max pool or sum); since the aggregation ignores point order, the whole network's output is order-invariant"
+      ]
+    },
+    {
+      "q": "A vanilla NeRF MLP fed with raw (x, y, z) coordinates produces blurry results. What fixes it?",
+      "options": [
+        "Adding more training data",
+        "Switching to a CNN",
+        "Positional encoding: project coordinates into Fourier features (sin/cos of 2^l * pi * x for multiple l) before the MLP; this lets the low-frequency-biased MLP represent high-frequency details",
+        "Using 16-bit precision"
+      ]
+    },
+    {
+      "q": "How is a NeRF rendered pixel computed?",
+      "options": [
+        "By casting a ray from the camera through the pixel, sampling N points along the ray, querying the MLP at each point for (density, colour), and compositing the samples with a volumetric rendering equation that accumulates alpha-weighted colours along the ray",
+        "By running a convolution over a depth map",
+        "By looking up a precomputed voxel grid",
+        "As the output of the final MLP layer"
+      ]
+    },
+    {
+      "q": "Why has 3D Gaussian splatting largely replaced NeRF in production?",
+      "options": [
+        "NeRFs were shown to be mathematically incorrect",
+        "It is an explicit representation (millions of 3D Gaussians with opacity and colour) that renders in real time via rasterisation instead of MLP queries on sampled rays; training is minutes instead of hours, rendering is 100x faster, and quality is comparable",
+        "Gaussians are more compressible",
+        "It produces higher-quality images"
+      ]
+    },
+    {
+      "q": "How does a ViT turn an image into a sequence of tokens?",
+      "options": [
+        "Applies a conv with kernel_size = stride = patch_size to split the image into non-overlapping patches and linearly project each to a token embedding in one operation",
+        "Flattens the entire image into one vector",
+        "Runs a CNN first and uses its feature map as tokens",
+        "Sorts pixel intensities"
+      ]
+    },
+    {
+      "q": "What is the [CLS] token in ViT and why is it needed?",
+      "options": [
+        "A placeholder for missing data",
+        "A special pixel value",
+        "A dropout mask",
+        "A learned vector prepended to the token sequence; after N transformer layers its output aggregates the whole image and feeds the classifier head"
+      ]
+    },
+    {
+      "q": "Why did the original ViT paper need JFT-300M pretraining to beat ResNet, and why does DeiT not?",
+      "options": [
+        "DeiT uses different attention",
+        "The ViT paper was wrong",
+        "ViT has weaker inductive biases than CNNs; without enough data it overfits. DeiT showed that with strong augmentation (RandAugment, Mixup, CutMix), stochastic depth, and optionally CNN distillation, ViTs train fine on ImageNet-1k alone",
+        "ViT is broken without JFT-300M"
+      ]
+    },
+    {
+      "q": "Pre-LayerNorm (`x = x + sublayer(LN(x))`) vs post-LayerNorm (`x = LN(x + sublayer(x))`) — which is used in modern transformers and why?",
+      "options": [
+        "Post-LN; it is simpler",
+        "Neither; modern transformers skip LayerNorm",
+        "Pre-LN; it trains deeper networks stably without learning-rate warmup and avoids the gradient instabilities that post-LN suffers past about 6 layers",
+        "They are identical"
+      ]
+    },
+    {
+      "q": "Swin Transformer introduces windowed attention. What problem does it solve?",
+      "options": [
+        "BatchNorm not supported",
+        "Overfitting to texture",
+        "Vanishing gradients",
+        "Full attention has O((H*W)^2) cost; Swin restricts attention to local windows of 7x7 patches, reducing cost to O(H*W * window^2). Alternating blocks shift the window by half its size so information eventually mixes across the image"
+      ]
+    },
+    {
+      "q": "You benchmark a model and report 'average 12ms per image on a 4090'. What is missing?",
+      "options": [
+        "The dataset name",
+        "The model size",
+        "Nothing; that is a complete benchmark",
+        "Percentiles (p50/p95/p99), warmup discipline, and CUDA synchronisation; a mean alone hides tail latency and may measure kernel dispatch instead of kernel execution"
+      ]
+    },
+    {
+      "q": "FLOPs and on-device latency do not correlate perfectly. Why?",
+      "options": [
+        "Different operations have different hardware friendliness; depthwise convolutions may have lower FLOPs but are memory-bound on GPUs, while dense convolutions use Tensor Cores efficiently. Memory bandwidth, kernel launch overhead, and cache behaviour also shape latency beyond raw FLOPs",
+        "FLOPs counters are broken",
+        "FLOPs ignore batch size",
+        "PyTorch counts FLOPs incorrectly"
+      ]
+    },
+    {
+      "q": "Post-training static INT8 quantisation typically loses how much accuracy on ImageNet-class vision models?",
+      "options": [
+        "Always 0; it is lossless",
+        "20+ points; unusable",
+        "5-10 percentage points",
+        "0.1-1 percentage points when properly calibrated; batch-norm-fused conv models are particularly well-behaved under INT8"
+      ]
+    },
+    {
+      "q": "Your mobile app needs a vision model under 10MB with sub-10ms latency. Which backbone do you pick?",
+      "options": [
+        "ResNet-50",
+        "ConvNeXt-Large",
+        "ViT-Base",
+        "MobileNetV3-Small or EfficientNet-Lite-B0 quantised to INT8; both target this budget and compile cleanly to TFLite / Core ML"
+      ]
+    },
+    {
+      "q": "You export a PyTorch model to ONNX with opset 17 and it fails with 'Unsupported operator'. What are the most likely causes?",
+      "options": [
+        "The model has too many parameters",
+        "The input shape is wrong",
+        "The ONNX library is outdated",
+        "(1) A custom op that has no ONNX mapping; (2) a non-deterministic control-flow path that tracing cannot capture; (3) a tensor-scalar interaction that is implicit in Python but has no ONNX equivalent. Fixes: replace the op, use `torch.jit.script` for control flow, or upgrade opset"
+      ]
+    },
+    {
+      "q": "Why do production vision pipelines use Pydantic models (or equivalent) at every stage boundary?",
+      "options": [
+        "Pydantic is faster than dict access",
+        "It helps with GPU allocation",
+        "Pydantic is required by FastAPI",
+        "Typed schemas catch interface mismatches at the boundary; a detector returning (cx, cy, w, h) when the downstream expects (x1, y1, x2, y2) fails loudly with a validation error instead of silently producing empty crops"
+      ]
+    },
+    {
+      "q": "On a CPU-only vision pipeline, which stage is most often the biggest latency block?",
+      "options": [
+        "Reading the HTTP request body",
+        "Image preprocessing (JPEG decode, colour conversion, resize); it is CPU-bound and often dominates when no GPU is involved or when the GPU model is small",
+        "Writing the JSON response",
+        "The detector's final NMS"
+      ]
+    },
+    {
+      "q": "The pipeline classifier crashes when a detection has box size 3x4 pixels. What is the correct fix?",
+      "options": [
+        "Increase batch size",
+        "Retrain the classifier on smaller images",
+        "Set a min_crop threshold (e.g. 16 or 32 pixels) and skip classification for detections smaller than that; log the skip and include the detection in the response without a classification field",
+        "Add a global try/except and return empty classifications"
+      ]
+    },
+    {
+      "q": "You add batching to the classifier (wait up to 10 ms, batch all pending crops, one GPU forward). What is the expected effect?",
+      "options": [
+        "Latency strictly decreases",
+        "No effect",
+        "Throughput increases significantly, per-request latency increases by up to the batching window (~10ms) plus a smaller amount from larger tensor ops; the right answer depends on whether the service is throughput-bound or latency-bound",
+        "Throughput decreases because of the wait"
+      ]
+    },
+    {
+      "q": "Your pipeline response is a 500 error when a user uploads a corrupted JPEG. How should you fix it?",
+      "options": [
+        "Ignore it; the user will retry",
+        "Catch image-decode failures early in preprocessing, return a 400 with a specific error code like 'image_decode_failed' so the client can retry with a different file instead of a 500 that implies server error",
+        "Always return 200 with an empty result",
+        "Move decoding to the classifier"
+      ]
+    },
+    {
+      "q": "Why does SimCLR need batch sizes of 512-8192 while supervised ImageNet training works with batch 256?",
+      "options": [
+        "Each sample needs many negative examples to produce a useful contrastive signal; the batch itself is the pool of negatives. Small batches starve the InfoNCE loss of negatives and training collapses or stalls",
+        "Batch norm requires it",
+        "Contrastive loss divides by batch size",
+        "SimCLR is slower"
+      ]
+    },
+    {
+      "q": "What prevents DINO from collapsing to a constant output?",
+      "options": [
+        "Large batch size",
+        "The momentum schedule",
+        "Strong augmentation alone",
+        "A combination of centring (subtract per-dimension EMA mean from the teacher output) and sharpening (low teacher temperature); centring stops one dimension from dominating, sharpening stops the output collapsing to uniform"
+      ]
+    },
+    {
+      "q": "MAE masks 75% of patches. BERT masks 15% of tokens. Why the difference?",
+      "options": [
+        "75% is arbitrary",
+        "BERT requires 15% by design",
+        "Image patches have low entropy — neighbours are highly correlated — so masking only 15% would be trivially solvable by local extrapolation. Masking 75% forces the encoder to learn global semantic features to reconstruct the missing patches",
+        "Text tokens are larger than image patches"
+      ]
+    },
+    {
+      "q": "After self-supervised pretraining, the 'linear probe' evaluation trains only what?",
+      "options": [
+        "A full MLP classifier head",
+        "The entire encoder",
+        "The positional embedding",
+        "A single linear classifier on top of the frozen encoder features; this isolates feature quality from fine-tuning dynamics"
+      ]
+    },
+    {
+      "q": "Why does MAE use an asymmetric encoder-decoder design (big encoder on 25% visible patches, small decoder on all tokens)?",
+      "options": [
+        "The decoder needs its own backbone",
+        "Memory constraints",
+        "Masked tokens confuse self-attention",
+        "The encoder never processes mask tokens; a small decoder only handles reconstruction. This makes encoder FLOPs proportional to visible patches (1/4 of full input) and lets pretraining run 3x faster than naive designs that process all tokens through the full encoder"
+      ]
+    },
+    {
+      "q": "CLIP's contrastive loss is symmetric (image-to-text + text-to-image). Why both directions?",
+      "options": [
+        "Numerical stability",
+        "Symmetry is required by PyTorch",
+        "Because loss must sum to zero",
+        "You want both queries to work at inference: text-to-image retrieval and image-to-text retrieval. Training only one direction makes the other direction's accuracy drop significantly"
+      ]
+    },
+    {
+      "q": "Zero-shot classification with CLIP works by... ?",
+      "options": [
+        "Encoding prompts like 'a photo of a dog' for each candidate class, encoding the test image, and taking argmax of cosine similarities between the image embedding and all class text embeddings",
+        "Searching a database of labelled examples",
+        "Fine-tuning the image encoder on the class",
+        "Running a classifier head trained on ImageNet"
+      ]
+    },
+    {
+      "q": "SigLIP replaces CLIP's softmax with a sigmoid loss per pair. What benefit does that give?",
+      "options": [
+        "Better accuracy on COCO only",
+        "Faster GPU kernels",
+        "Lower memory use",
+        "The sigmoid loss is per-pair, so it does not depend on the batch as a normalisation denominator. SigLIP trains well at smaller batch sizes where CLIP's softmax loss starves for negatives"
+      ]
+    },
+    {
+      "q": "A practitioner reports 88% zero-shot top-1 on CIFAR-10 with CLIP ViT-B/32 and 90% with the same model using 80 prompt templates per class. Why does template averaging help?",
+      "options": [
+        "It reduces variance in logit_scale",
+        "It doubles the dataset",
+        "80 is the magic number for CLIP",
+        "Different templates activate different aspects of the text encoder's learned distribution; averaging smooths the class embedding over the manifold of plausible natural-language descriptions of the class, producing a more robust centroid"
+      ]
+    },
+    {
+      "q": "Why do modern VLMs (LLaVA, Qwen-VL, InternVL) use a CLIP-family vision encoder instead of a supervised ImageNet ResNet?",
+      "options": [
+        "ResNets cannot see colour",
+        "CLIP features are aligned with natural language, so the LLM can reason about them with less adaptation; supervised ImageNet features were never trained against captions and need heavy projection layers to bridge to text",
+        "It is a licensing requirement",
+        "CLIP encoders are faster"
+      ]
+    },
+    {
+      "q": "Why does OCR use CTC loss instead of plain cross-entropy?",
+      "options": [
+        "CTC is required by PyTorch",
+        "OCR maps a fixed-length feature sequence to a variable-length character sequence without per-timestep alignment; CTC loss marginalises over all alignments that reduce to the target after removing repeats and blanks, so you can train without character-level timing labels",
+        "Cross-entropy overflows for long sequences",
+        "CTC is faster"
+      ]
+    },
+    {
+      "q": "In CTC decoding, what does the blank token do?",
+      "options": [
+        "Indicates end of sequence",
+        "Pads the sequence to a fixed length",
+        "Masks noisy regions",
+        "Separates adjacent identical characters so that outputs like 'hello' with a double L can be produced by the model emitting 'h e l _ l o' — without the blank, 'l l' would collapse to one 'l'"
+      ]
+    },
+    {
+      "q": "Why is greedy CTC decoding sometimes better than beam search on simple datasets?",
+      "options": [
+        "Greedy is easier to implement",
+        "Beam search requires a language model",
+        "Greedy is always better",
+        "When the model is confident at every step (clean handwriting, printed fonts), greedy's argmax is usually the beam winner; beam search adds latency with no accuracy gain. On noisy or ambiguous inputs, beam search helps"
+      ]
+    },
+    {
+      "q": "Donut skips explicit text detection and character recognition. How?",
+      "options": [
+        "It is a ViT encoder + text decoder trained to produce the final output string (often JSON) directly from the image; the model learns both localisation and recognition implicitly through the training objective",
+        "It preprocesses images with a CNN text detector",
+        "It is limited to document categories with fixed layouts",
+        "It uses an external OCR engine internally"
+      ]
+    },
+    {
+      "q": "For extracting `invoice_total` from receipts, which approach is typically best in 2026?",
+      "options": [
+        "Only classical OCR is reliable enough",
+        "A separate CNN for each field",
+        "Fine-tuned Donut or a VLM on a small labelled set of the target receipts; both handle layout and semantic extraction in one model and generalise across receipt variants better than pipeline-based approaches",
+        "A hand-crafted regex on Tesseract output"
+      ]
+    },
+    {
+      "q": "For a visual search product where queries are text and gallery items are images, which backbone do you pick first?",
+      "options": [
+        "A CLIP or SigLIP model — they learn a shared text-image embedding space so cosine similarity between text query and image gallery is meaningful out of the box",
+        "A supervised ResNet-50",
+        "A handcrafted ORB descriptor",
+        "A self-supervised DINOv2 model"
+      ]
+    },
+    {
+      "q": "What does 'semi-hard mining' mean in triplet-loss training?",
+      "options": [
+        "For each anchor, select a negative that is further than the positive but still within the margin; easy negatives contribute no gradient and hardest negatives can destabilise training, so semi-hard is the sweet spot",
+        "Mining cryptocurrency for training examples",
+        "Using only the hardest possible negatives",
+        "Picking random triplets"
+      ]
+    },
+    {
+      "q": "Your retrieval system reports recall@10 = 0.95 but recall@1 = 0.42. What should you conclude?",
+      "options": [
+        "The model is overfitting",
+        "Data is leaking from gallery to queries",
+        "The evaluation is broken",
+        "The embedding space has the correct structure — relevant items are usually in the top 10 — but ranking within the top 10 is noisy; a re-ranking model (cross-encoder, second-stage scorer) or longer metric-learning fine-tune will fix recall@1 without damaging recall@10"
+      ]
+    },
+    {
+      "q": "Cosine similarity on unnormalised embeddings is not cosine similarity — what goes wrong?",
+      "options": [
+        "The matmul overflows",
+        "It mixes direction with magnitude; cos(a, b) is only correct when both vectors are L2-normalised. On unnormalised embeddings, large-norm items dominate regardless of direction, skewing ranks toward vectors with big magnitudes",
+        "PyTorch raises an error",
+        "Nothing, it is fine"
+      ]
+    },
+    {
+      "q": "Between instance-level retrieval (find this exact car) and category-level retrieval (find cars), which requires metric-learning fine-tuning?",
+      "options": [
+        "Instance-level. Off-the-shelf DINOv2 and CLIP embeddings discriminate between categories well but not between visually similar instances of the same category. A triplet or contrastive fine-tune on (same instance, different instance) pairs tightens the embedding around each instance",
+        "Both require the same amount of fine-tuning",
+        "Category-level",
+        "Neither"
+      ]
+    },
+    {
+      "q": "Why do pose models regress heatmaps instead of (x, y) coordinates directly?",
+      "options": [
+        "Heatmaps are cheaper to compute",
+        "Coordinate regression produces NaN",
+        "Heatmaps are required by the COCO metric",
+        "The spatial structure of a conv feature map aligns with spatial output; a Gaussian heatmap target provides a smooth loss landscape that tolerates small localisation errors, whereas direct coordinate regression is brittle and loses spatial context"
+      ]
+    },
+    {
+      "q": "Top-down pose estimation vs bottom-up: which scales better with crowd size, and why?",
+      "options": [
+        "They scale equally",
+        "Top-down never scales",
+        "Bottom-up, because it does one forward pass over the whole image then groups keypoints, so runtime is constant in the number of people",
+        "Top-down, because each person uses a separate fast model"
+      ]
+    },
+    {
+      "q": "What are Part Affinity Fields?",
+      "options": [
+        "A data augmentation technique",
+        "A type of loss function",
+        "A scheduling algorithm",
+        "2-channel unit-vector fields that encode the direction from one keypoint to another; integrating the PAF along a candidate line tells you whether two keypoints belong to the same instance, enabling bottom-up association without per-person detection"
+      ]
+    },
+    {
+      "q": "Why does sub-pixel refinement around the argmax meaningfully lift keypoint accuracy?",
+      "options": [
+        "It prevents overfitting",
+        "It normalises the output",
+        "Integer argmax rounds to the nearest grid cell; fitting a local parabola or using the offset dx = 0.25*(heatmap[y,x+1] - heatmap[y,x-1]) recovers the continuous peak position, often halving the L2 error for cleanly predicted keypoints",
+        "It smooths the heatmap"
+      ]
+    },
+    {
+      "q": "OKS (Object Keypoint Similarity) is the pose-estimation analogue of what object-detection metric?",
+      "options": [
+        "Cross-entropy loss",
+        "Inference latency",
+        "IoU — both measure geometric match between prediction and ground truth, with OKS using keypoint distances weighted by each keypoint's annotation variance; COCO reports mAP@OKS 0.5:0.95 for pose",
+        "Classification accuracy"
+      ]
+    },
+    {
+      "q": "Why did 3D Gaussian Splatting largely replace NeRF as the production default for photorealistic scene reconstruction by 2026?",
+      "options": [
+        "NeRF was retracted from the research record",
+        "3DGS is explicit (no MLP per pixel): rendering is GPU rasterisation at 100+ fps, training takes minutes instead of hours, scenes are editable, and Khronos + OpenUSD both standardised it in 2026",
+        "Gaussian Splatting produces higher image quality than NeRF in every case",
+        "PyTorch stopped supporting NeRF operators"
+      ]
+    },
+    {
+      "q": "A 3D Gaussian in a scene carries position, rotation, scale, opacity, and what additional representation to handle view-dependent colour (like specular highlights)?",
+      "options": [
+        "A second RGB texture",
+        "A small MLP per Gaussian",
+        "Spherical harmonics coefficients: up to degree 3 gives 16 coefficients per colour channel, evaluated against the viewing direction at render time",
+        "A light probe cubemap"
+      ]
+    },
+    {
+      "q": "During 3DGS training, densification includes 'clone' and 'split' operations. What triggers each?",
+      "options": [
+        "Nothing — Gaussians are fixed after initialisation",
+        "High gradient magnitude with small scale triggers clone (more local detail needed); high gradient with large scale triggers split (one Gaussian too smooth to fit the region). Opacity-below-threshold triggers pruning",
+        "Time since last checkpoint",
+        "Random sampling during every epoch"
+      ]
+    },
+    {
+      "q": "The colour equation for one pixel in both NeRF and 3DGS is `C = sum_i alpha_i * T_i * c_i` where `T_i = prod_{j<i}(1 - alpha_j)`. What does this shared equation say about the two methods?",
+      "options": [
+        "NeRF is strictly better",
+        "Both integrate the same volumetric rendering equation; the difference is only in the representation (implicit MLP samples vs explicit sparse Gaussians) and the rendering procedure (ray marching vs rasterisation) — which is why their image quality is comparable",
+        "They are mathematically identical in every way",
+        "3DGS is strictly better"
+      ]
+    },
+    {
+      "q": "You want to ship a 3DGS scene across Unreal Engine, Vision Pro, Blender, and a Three.js web viewer in 2026. Which export format is the safest bet?",
+      "options": [
+        "A custom binary blob per viewer",
+        "PNG strips of the 3D Gaussians",
+        "Raw `.ply` alone",
+        "glTF with the `KHR_gaussian_splatting` extension (Khronos RC Feb 2026) and/or OpenUSD 26.03 with `UsdVolParticleField3DGaussianSplat`; these are the two ratified/standardised formats in 2026"
+      ]
+    },
+    {
+      "q": "Why did 2024+ SOTA text-to-image models (SD3, FLUX, Z-Image) replace the U-Net denoiser with a Diffusion Transformer (DiT)?",
+      "options": [
+        "U-Net is not supported on GPUs anymore",
+        "DiT scales more predictably than U-Net (same scaling-law regime as LLMs), handles long-range spatial dependencies better for prompt-accurate generation, and pairs naturally with text encoders via cross or joint attention",
+        "Transformers are easier to write",
+        "DiT has fewer parameters"
+      ]
+    },
+    {
+      "q": "Rectified flow trains the model to predict velocity `v = epsilon - x_0` along a straight-line interpolation between data and noise. Why does this enable 20-step sampling instead of 1000?",
+      "options": [
+        "It requires a bigger model",
+        "The learned ODE is closer to a straight line than DDPM's curved SDE, so few-step Euler integration produces accurate samples; combined with distillation you get 1-4 step variants like FLUX schnell",
+        "Euler is strictly better than DDIM",
+        "It does not; rectified flow also needs 1000 steps"
+      ]
+    },
+    {
+      "q": "MMDiT (SD3) uses two sets of weights, one for text tokens and one for image tokens, that share a single joint attention layer. Why?",
+      "options": [
+        "To save memory",
+        "Text and image embeddings are conceptually different distributions; separate weights let each modality process its own representation while the joint attention lets them interact; the result is better text-image alignment and prompt following than a single shared stream",
+        "It is a legacy design",
+        "Only image tokens actually go through the attention"
+      ]
+    },
+    {
+      "q": "What does AdaLN-Zero mean in a DiT block, and why does it help?",
+      "options": [
+        "A LayerNorm that is only applied 50% of the time",
+        "Adaptive LayerNorm whose modulation MLP is initialised to zero so the block starts as identity; training then learns the scale/shift/gate, which stabilises very deep diffusion transformers",
+        "A layer norm with zero epsilon",
+        "A LayerNorm with zero mean"
+      ]
+    },
+    {
+      "q": "FLUX.1-schnell can produce an image in 4 steps. Which technique lets it do that?",
+      "options": [
+        "Lower precision weights",
+        "Smaller parameter count",
+        "Distillation — schnell is trained from a slow many-step teacher using adversarial / consistency-style objectives so that 1-4 denoising steps match the teacher's 20-30 step output",
+        "A different base architecture than FLUX.1-dev"
+      ]
+    },
+    {
+      "q": "What is Promptable Concept Segmentation (PCS), introduced by SAM 3?",
+      "options": [
+        "A multi-step chain of a detector followed by SAM",
+        "Segmenting all instances of a concept described by a short noun phrase or image exemplar in a single forward pass, returning masks plus unique instance IDs",
+        "A visual prompt (point/box) segmentation like classic SAM",
+        "A tracking-only mode"
+      ]
+    },
+    {
+      "q": "Why keep a decoupled detector + SAM 2 pipeline (Grounded SAM 2) in 2026 if SAM 3 already does text-prompted segmentation?",
+      "options": [
+        "SAM 3 is only available in the cloud",
+        "Grounded SAM 2 is always more accurate",
+        "Modularity — you can swap in different open-vocabulary detectors (DINO-X, Florence-2, Grounding DINO 1.5) for different domains, license constraints, or threshold behaviour; SAM 3's architecture is monolithic",
+        "SAM 3 does not support video"
+      ]
+    },
+    {
+      "q": "SAM 3's presence head produces what?",
+      "options": [
+        "A scalar probability that the queried concept exists in the image, decoupled from localisation; lets the model say 'not present' cleanly and reduces false positives on absent concepts",
+        "The list of candidate bounding boxes",
+        "A tracking memory bank",
+        "The final mask"
+      ]
+    },
+    {
+      "q": "SAM 3.1 Object Multiplex (March 2026) introduced a shared-memory mechanism for tracking. What does it replace?",
+      "options": [
+        "Per-instance separate memory banks; Multiplex collapses them into one shared memory with per-instance queries so tracking N objects runs substantially faster while keeping accuracy",
+        "The whole presence head",
+        "SAM 2 altogether",
+        "The ViT backbone"
+      ]
+    },
+    {
+      "q": "You need real-time open-vocabulary DETECTION (boxes only, no masks) on an edge device. Which 2026 model family is the right choice?",
+      "options": [
+        "A custom CLIP + detector chain",
+        "SAM 3",
+        "Grounded SAM 2",
+        "YOLO-World (and related real-time open-vocab detectors); SAM 3 produces masks and is heavier, while YOLO-World is designed specifically for boxes at high fps on edge hardware"
+      ]
+    },
+    {
+      "q": "In the ViT-MLP-LLM VLM pattern, which component is most commonly trained while the others are kept frozen during alignment?",
+      "options": [
+        "All components are always trained together",
+        "The vision encoder",
+        "The LLM",
+        "The projector (the 2-4 layer MLP between ViT and LLM) — it maps vision tokens into the LLM's embedding space and carries most of the cross-modal alignment signal"
+      ]
+    },
+    {
+      "q": "DeepStack (used in Qwen3-VL) does what?",
+      "options": [
+        "Doubles the depth of the LLM",
+        "Uses only the deepest ViT layer's features",
+        "Stacks features from multiple ViT depths before projection, so the LLM sees both high-level semantics (deep layers) and fine-grained spatial detail (shallow layers)",
+        "Is a specific quantisation scheme"
+      ]
+    },
+    {
+      "q": "A production VLM shows high text confidence but the generated text describes objects not present in the image. Which metric captures this failure?",
+      "options": [
+        "Token generation latency",
+        "Accuracy on MMMU",
+        "Cross-Modal Error Rate (CMER) — fraction of outputs where text confidence is high but image-text cosine similarity (via a CLIP-family checker) is low; ~12% typical on uncurated web data",
+        "Perplexity"
+      ]
+    },
+    {
+      "q": "Why do modern VLMs use SigLIP or custom vision encoders rather than a supervised ImageNet ResNet as the backbone?",
+      "options": [
+        "SigLIP has more parameters",
+        "ResNets cannot produce tokens",
+        "SigLIP is faster",
+        "CLIP/SigLIP-style encoders are trained jointly with text, so their output space is already approximately aligned with language; the projector then has to do much less work and the model reasons better about visual-textual concepts"
+      ]
+    },
+    {
+      "q": "Qwen3-VL-235B-A22B achieves top scores on OSWorld. What is OSWorld, and what does this imply?",
+      "options": [
+        "An agent benchmark where the model operates desktop GUIs — identifies buttons, reads UI state, emits actions; Qwen3-VL's top scores imply VLMs are now viable visual agents for GUI automation",
+        "A pose-estimation benchmark",
+        "A synthetic benchmark",
+        "A video QA benchmark"
+      ]
+    },
+    {
+      "q": "What is the main difference between relative depth and metric depth?",
+      "options": [
+        "Relative depth gives only ordered distances without real-world units; metric depth gives distances in metres and requires the model to have learnt absolute scale from training data",
+        "Metric depth uses grayscale output; relative uses colour",
+        "Relative depth is always lower resolution",
+        "There is no difference"
+      ]
+    },
+    {
+      "q": "Depth Anything V3 uses a frozen DINOv2 encoder plus a DPT-style decoder. Why freeze the encoder?",
+      "options": [
+        "DINOv2 would otherwise learn bad features",
+        "Freezing is a legal requirement",
+        "Compute savings at training time only",
+        "DINOv2's self-supervised features already encode scene structure, texture gradients, and object semantics that correlate with depth; freezing them lets the decoder train with a small head on limited depth-supervised data while keeping the encoder's strong generalisation"
+      ]
+    },
+    {
+      "q": "To lift a pixel (u, v) with predicted depth d to 3D, you use X = (u - cx) * d / fx, Y = (v - cy) * d / fy, Z = d. What are fx, fy, cx, cy?",
+      "options": [
+        "Training loss weights",
+        "Normalisation constants",
+        "Pinhole camera intrinsics — focal lengths and principal point in pixels, from EXIF metadata or camera calibration",
+        "Weights learned by the depth decoder"
+      ]
+    },
+    {
+      "q": "When evaluating a relative-depth model (MiDaS, Depth Anything), why do you apply scale-and-shift alignment before computing AbsRel?",
+      "options": [
+        "Relative-depth predictions have arbitrary scale and offset; aligning them to ground truth via least-squares fit of a * pred + b = target gives a fair measurement of the ordering quality that relative models are actually trained to produce",
+        "To inflate the metric score",
+        "Pytorch cannot compute AbsRel without alignment",
+        "To enable GPU inference"
+      ]
+    },
+    {
+      "q": "Your Depth Anything prediction on a glass-fronted reception desk reports believable but clearly wrong depth for the glass region. Why?",
+      "options": [
+        "Your image resolution is wrong",
+        "The model is broken",
+        "The model was trained without glass data",
+        "Glass, mirrors, and highly reflective surfaces break the monocular cues the model relies on; the network sees the texture / content behind the glass and reports a plausible depth consistent with that, not the real glass surface distance"
+      ]
+    },
+    {
+      "q": "What does the Hungarian algorithm do in tracking-by-detection?",
+      "options": [
+        "It trains the detector",
+        "It predicts future trajectories",
+        "It filters out low-confidence detections",
+        "It solves the minimum-cost one-to-one assignment between tracks and detections — typically using 1 - IoU as cost — to match each track to at most one detection and vice versa"
+      ]
+    },
+    {
+      "q": "ByteTrack's distinguishing contribution is what?",
+      "options": [
+        "A new backbone",
+        "An appearance embedding",
+        "A new Kalman filter",
+        "A second-stage association that tries to match leftover tracks to low-confidence detections, recovering short occlusions and IDs that standard trackers would lose by dropping those detections"
+      ]
+    },
+    {
+      "q": "How does SAM 2's memory-based tracker avoid explicit Hungarian-style association?",
+      "options": [
+        "It stores per-instance spatio-temporal features in a memory bank; on each new frame, cross-attention between memory and current features directly produces the mask of the same instance, with association implicit in the attention operation",
+        "It runs SORT internally",
+        "It uses a Kalman filter",
+        "It requires hand-labelled IDs per frame"
+      ]
+    },
+    {
+      "q": "For surveillance video where keeping each person's ID consistent is the primary requirement, which metric should you report?",
+      "options": [
+        "IDF1 — the harmonic mean of ID precision and recall; measures identity preservation over time rather than per-frame detection accuracy",
+        "Top-1 accuracy",
+        "MOTA",
+        "FID"
+      ]
+    },
+    {
+      "q": "SAM 3.1 Object Multiplex (March 2026) introduces shared memory across many tracked instances. What does that enable?",
+      "options": [
+        "Efficient multi-object tracking — one shared memory bank with per-instance query tokens replaces N separate memory banks, so cost scales sub-linearly in number of instances and concert-crowd-sized scenes become tractable",
+        "A new training objective",
+        "Lower accuracy",
+        "Cloud-only inference"
+      ]
+    },
+    {
+      "q": "What architectural difference distinguishes an action-conditioned world model (Genie 3) from a pure video generation model (Sora 2)?",
+      "options": [
+        "Only the training datasets differ",
+        "World models only work on 3D scenes",
+        "Pure video generators condition on a prompt at t=0 and roll out; action-conditioned world models take a latent or explicit action per frame so the user can steer the rollout mid-generation",
+        "Action-conditioned models are smaller"
+      ]
+    },
+    {
+      "q": "Divided attention in a video transformer means what?",
+      "options": [
+        "Half the tokens are masked",
+        "Attention is split across GPUs",
+        "Each block does a temporal attention (same spatial position, across frames) followed by a spatial attention (same frame, across positions); this factorises cost from O((T*H*W)^2) into O((H*W)*T^2) + O(T*(H*W)^2) — dramatically cheaper than the joint product",
+        "Only half the layers run attention"
+      ]
+    },
+    {
+      "q": "Sora 2's 2026 release advertised better physical plausibility. Which specific failure modes did this target?",
+      "options": [
+        "Weight, balance, object permanence, cause-and-effect — the model now handles dropped objects, characters colliding, and 'failures on purpose' (a missed jump) more believably than Sora 1",
+        "Video length",
+        "Text rendering inside images",
+        "Colour balance and contrast"
+      ]
+    },
+    {
+      "q": "In the emerging robotics stack (VLM + video generation + inverse dynamics), what does the inverse dynamics model do?",
+      "options": [
+        "It takes a pair (current observation, desired next observation from the video model) and outputs the low-level motor action that would connect them; this closes the loop between imagined rollouts and actual actuation",
+        "It labels training data",
+        "It generates the next frame",
+        "It trains the VLM"
+      ]
+    },
+    {
+      "q": "Autonomous-driving teams use world models (Cosmos-Drive, Gaia-2, DrivingWorld) to replace what cost?",
+      "options": [
+        "Vehicle depreciation",
+        "Actual fleet insurance",
+        "Expensive real-world data collection for rare or dangerous corner cases (pedestrian jaywalks, icy roads, unusual vehicles); synthesised driving video provides on-demand training and evaluation data for those scenarios",
+        "Road tolls"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,633 @@
+/* ============================================================================
+   Sikhi University · Institute of Technology — scoped design system.
+   Companion to DESIGN.md; full spec in DESIGN-INSTITUTE.md (v1.0, D1–D10 locked).
+
+   EVERY rule here is scoped under `body[data-institute]` so this file is inert
+   on the rest of sikhiuni. Base.astro sets that attribute + inlines
+   institute-fonts.css when a page passes `institute`.
+
+   Theme: dark is the primary voice (the lab at night); a "lights-on" light
+   theme also ships (D3+D7). The site's pre-paint script already stamps
+   `data-theme` on <html>, so the media-query / [data-theme] guards below
+   Just Work with the existing toggle.
+   ========================================================================== */
+
+body[data-institute] {
+  /* --- dark (primary) --- */
+  --i-ground: #090d18;
+  --i-ground-deep: #06090f;
+  --i-surface: #111826;
+  --i-surface-2: #0c121e;
+  --i-line: #253049;
+  --i-line-soft: #1a2236;
+  --i-ink: #e8e5db;
+  --i-ink-dim: #a7afc2;
+  --i-muted: #79839a;
+  --i-filament: #e6a93c;
+  --i-filament-dim: #8a6a2c;
+  --i-signal: #58e0c8;
+  --i-fail: #e96a70;
+  --i-plum: #b48ae0;
+  --i-grid-op: 0.26;
+
+  --i-r-sm: 3px;
+  --i-r-md: 5px;
+  --i-r-lg: 6px;
+
+  color-scheme: dark;
+}
+
+/* --- light ("lights on"): OS-light and not explicitly dark --- */
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) body[data-institute] {
+    --i-ground: #f4f2ec;
+    --i-ground-deep: #eeebe2;
+    --i-surface: #ffffff;
+    --i-surface-2: #eeebe2;
+    --i-line: #d8d3c6;
+    --i-line-soft: #e6e2d6;
+    --i-ink: #1c2333;
+    --i-ink-dim: #4a5468;
+    --i-muted: #6b7488;
+    --i-filament: #b27a16;
+    --i-filament-dim: #c9a465;
+    --i-signal: #0e9c86;
+    --i-fail: #c0343b;
+    --i-plum: #7c3fb0;
+    --i-grid-op: 0.15;
+    color-scheme: light;
+  }
+}
+/* --- light: explicit toggle wins in both directions --- */
+html[data-theme="light"] body[data-institute] {
+  --i-ground: #f4f2ec;
+  --i-ground-deep: #eeebe2;
+  --i-surface: #ffffff;
+  --i-surface-2: #eeebe2;
+  --i-line: #d8d3c6;
+  --i-line-soft: #e6e2d6;
+  --i-ink: #1c2333;
+  --i-ink-dim: #4a5468;
+  --i-muted: #6b7488;
+  --i-filament: #b27a16;
+  --i-filament-dim: #c9a465;
+  --i-signal: #0e9c86;
+  --i-fail: #c0343b;
+  --i-plum: #7c3fb0;
+  --i-grid-op: 0.15;
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------------------
+   Page ground + the faint bench-grid texture (≤0.3 opacity, top-masked,
+   never behind reading text — hard rule §5·5).
+   --------------------------------------------------------------------------- */
+body[data-institute] {
+  background: var(--i-ground);
+  color: var(--i-ink);
+  font-family: "Source Serif 4", Georgia, "Noto Serif Gurmukhi", serif;
+}
+/* The ambient grid sits BEHIND the page rather than the page being pushed in
+   front of it. It used to be z-index:0 with `body[data-institute] > *` lifting
+   every body child to z-index:1 — but that selector is (0,1,1) and beat both
+   Tailwind's `.fixed` (0,1,0) and every overlay's own `position: fixed`, so on
+   /technology/* it silently un-fixed and flattened the site nav (z-40 -> 1,
+   burying the Departments mega-menu under the page), the mobile tab bar
+   (fixed -> relative, dropping it into the document flow), the command palette
+   (z-[80]), the toast rail (z-[60]) and the install prompt (z-[55]). html
+   carries no background, so body's background propagates to the canvas and a
+   negative-z pseudo-element still paints above it — the grid looks identical
+   and nothing has to be lifted over it. */
+body[data-institute]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--i-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--i-line-soft) 1px, transparent 1px);
+  background-size: 46px 46px;
+  opacity: var(--i-grid-op);
+  -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 74%);
+  mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 74%);
+}
+
+/* ---------------------------------------------------------------------------
+   Type roles
+   --------------------------------------------------------------------------- */
+body[data-institute] .i-mono,
+body[data-institute] .i-label,
+body[data-institute] code,
+body[data-institute] kbd {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-feature-settings: "tnum" 1;
+}
+body[data-institute] h1,
+body[data-institute] h2,
+body[data-institute] h3,
+body[data-institute] .i-disp {
+  font-family: "Chakra Petch", "JetBrains Mono", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  color: var(--i-ink);
+}
+body[data-institute] h1 { font-weight: 700; }
+body[data-institute] .i-label {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--i-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Layout primitives
+   --------------------------------------------------------------------------- */
+body[data-institute] .i-wrap {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+/* The persistent return rail — crest + wordmark + quiet "← Sikhi University" */
+body[data-institute] .i-rail {
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 3.25rem); /* clears the shared .su-nav */
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 24px;
+  background: color-mix(in srgb, var(--i-ground-deep) 88%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--i-line);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+}
+body[data-institute] .i-rail .i-crest { color: var(--i-filament); font-size: 14px; }
+body[data-institute] .i-rail .i-wm { letter-spacing: 0.12em; text-transform: uppercase; color: var(--i-ink-dim); }
+body[data-institute] .i-rail .i-wm b { color: var(--i-filament); font-weight: 700; }
+body[data-institute] .i-rail .i-back {
+  margin-left: auto;
+  color: var(--i-ink-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--i-line);
+  padding-bottom: 2px;
+}
+body[data-institute] .i-rail .i-back:hover { color: var(--i-filament); border-color: var(--i-filament); }
+
+/* Instrument panel — hairline box + monospace corner-label. No colored
+   left-border (hard rule §5·5). */
+body[data-institute] .i-panel {
+  background: var(--i-surface);
+  border: 1px solid var(--i-line);
+  border-radius: var(--i-r-md);
+  padding: 18px;
+}
+body[data-institute] .i-panel > .i-corner {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--i-muted);
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+body[data-institute] .i-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: var(--i-r-sm);
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 150ms var(--ease-out, ease), border-color 150ms;
+}
+body[data-institute] .i-btn-primary { background: var(--i-filament); color: #201603; font-weight: 700; }
+body[data-institute] .i-btn-primary:hover { filter: brightness(1.06); }
+body[data-institute] .i-btn-ghost { background: transparent; color: var(--i-ink); border-color: var(--i-line); }
+body[data-institute] .i-btn-ghost:hover { border-color: var(--i-ink-dim); }
+body[data-institute] .i-btn-run { background: transparent; color: var(--i-signal); border-color: color-mix(in srgb, var(--i-signal) 50%, transparent); }
+
+/* Prose (lesson body stays serif — the blend, D4) */
+body[data-institute] .i-prose { color: var(--i-ink-dim); max-width: 68ch; line-height: 1.65; }
+body[data-institute] .i-prose strong { color: var(--i-ink); }
+/* Content links carry the university's gold thread. --signal (cyan) is
+   reserved for "live / running / correct" (D2): the code lab, the dojos, a
+   passing check. Scoped to <main> so the shared nav + footer keep their own
+   site-wide dark-theme treatment. */
+body[data-institute] main a { color: var(--i-filament); }
+
+/* Empty-state block */
+body[data-institute] .i-empty {
+  border: 1px dashed var(--i-line);
+  border-radius: var(--i-r-lg);
+  padding: 40px 28px;
+  text-align: center;
+  color: var(--i-ink-dim);
+}
+
+/* Focus ring in the signal colour (a11y §5·5) */
+body[data-institute] :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--i-signal);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   The shared nav (.su-nav) sits on a dark navy ground already; on institute
+   pages nudge its active accent from saffron to the filament and let the
+   crest wordmark carry an "Institute" sub-label via the rail below it.
+   --------------------------------------------------------------------------- */
+body[data-institute] .su-nav .su-nav-link[aria-current="page"] { border-color: var(--i-filament); }
+
+/* Reduced motion: the threshold power-on + typing resolve instantly (§5·5). */
+@media (prefers-reduced-motion: reduce) {
+  body[data-institute] .i-powerline,
+  body[data-institute] .i-caret { animation: none !important; }
+}
+
+/* ============================================================================
+   The Code Lab (components/institute/CodeLab.astro). Desktop: editor left,
+   output right. Mobile (< 760px, D5): editor on top, Preview + Console as
+   collapsible <details>, Run fixed to the bottom.
+   ========================================================================== */
+body[data-institute] .i-lab {
+  border: 1px solid var(--i-line);
+  border-radius: var(--i-r-lg);
+  overflow: hidden;
+  background: var(--i-surface-2);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12.5px;
+  margin: 20px 0;
+}
+body[data-institute] .i-lab-top {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--i-surface);
+  border-bottom: 1px solid var(--i-line);
+  color: var(--i-muted); font-size: 11px; letter-spacing: 0.08em;
+}
+body[data-institute] .i-lab-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--i-line); flex: none; }
+body[data-institute] .i-lab-label { text-transform: lowercase; }
+body[data-institute] .i-lab-actions { margin-left: auto; display: flex; gap: 8px; }
+body[data-institute] .i-lab-actions button {
+  font: inherit; font-size: 10.5px; letter-spacing: 0.06em;
+  background: transparent; color: var(--i-ink-dim);
+  border: 1px solid var(--i-line); border-radius: var(--i-r-sm);
+  padding: 3px 8px; cursor: pointer;
+}
+body[data-institute] .i-lab-actions button:hover { color: var(--i-signal); border-color: var(--i-signal); }
+
+body[data-institute] .i-lab-grid { display: grid; grid-template-columns: 1.05fr 1fr; min-height: 240px; }
+body[data-institute] .i-lab-editorwrap { display: block; border-right: 1px solid var(--i-line); }
+body[data-institute] .i-lab-code {
+  display: block; width: 100%; height: 100%; min-height: 240px;
+  resize: vertical; border: 0; outline: none;
+  background: var(--i-surface-2); color: var(--i-ink);
+  font: inherit; line-height: 1.75; tab-size: 2;
+  padding: 14px; white-space: pre;
+}
+body[data-institute] .i-lab-code:focus { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--i-signal) 45%, transparent); }
+
+body[data-institute] .i-lab-out { display: flex; flex-direction: column; min-width: 0; }
+body[data-institute] .i-lab-panel { border-bottom: 1px solid var(--i-line); }
+body[data-institute] .i-lab-panel:last-child { border-bottom: 0; }
+body[data-institute] .i-lab-panel > summary {
+  cursor: pointer; padding: 7px 12px; list-style: none;
+  color: var(--i-muted); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: var(--i-surface);
+}
+body[data-institute] .i-lab-panel > summary::-webkit-details-marker { display: none; }
+body[data-institute] .i-lab-preview { width: 100%; height: 200px; border: 0; background: #fff; display: block; }
+body[data-institute] .i-lab-console {
+  min-height: 90px; max-height: 220px; overflow: auto;
+  padding: 10px 12px; background: var(--i-ground-deep); line-height: 1.7;
+}
+body[data-institute] .i-lab-cline { white-space: pre-wrap; word-break: break-word; }
+body[data-institute] .i-lab-log { color: var(--i-ink-dim); }
+body[data-institute] .i-lab-warn { color: var(--i-filament); }
+body[data-institute] .i-lab-error { color: var(--i-fail); }
+
+body[data-institute] .i-lab-checkswrap { padding: 10px 12px; background: var(--i-surface); border-top: 1px solid var(--i-line); }
+body[data-institute] .i-lab-checks-title { display: block; color: var(--i-muted); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+body[data-institute] .i-lab-crow { line-height: 1.9; display: flex; align-items: baseline; gap: 8px; }
+/* Pass / fail marks — CSS-drawn (no unicode glyph; DESIGN.md emoji-ban gate). */
+body[data-institute] .i-lab-mark {
+  position: relative; flex: none; display: inline-block;
+  width: 11px; height: 11px; align-self: center;
+}
+body[data-institute] .i-lab-tick::before {
+  content: ""; position: absolute; left: 1px; top: 0;
+  width: 5px; height: 9px;
+  border: solid var(--i-signal); border-width: 0 2px 2px 0;
+  transform: rotate(40deg);
+}
+body[data-institute] .i-lab-cross::before,
+body[data-institute] .i-lab-cross::after {
+  content: ""; position: absolute; left: 4px; top: 0;
+  width: 2px; height: 11px; background: var(--i-fail);
+}
+body[data-institute] .i-lab-cross::before { transform: rotate(45deg); }
+body[data-institute] .i-lab-cross::after { transform: rotate(-45deg); }
+body[data-institute] .i-lab-hint { color: var(--i-muted); }
+body[data-institute] .i-lab-running, body[data-institute] .i-lab-done { color: var(--i-signal); }
+body[data-institute] .i-lab-done { display: block; margin-top: 6px; }
+
+body[data-institute] .i-lab-run { margin: 0; border-radius: 0; width: 100%; justify-content: center; }
+
+@media (max-width: 760px) {
+  body[data-institute] .i-lab-grid { grid-template-columns: 1fr; }
+  body[data-institute] .i-lab-editorwrap { border-right: 0; border-bottom: 1px solid var(--i-line); }
+  body[data-institute] .i-lab-code { min-height: 200px; }
+  body[data-institute] .i-lab-run {
+    position: sticky; bottom: 0; z-index: 5;
+    box-shadow: 0 -6px 16px color-mix(in srgb, var(--i-ground) 70%, transparent);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Phase exam (Wave 6). The question set is injected by lib/institute/exam.ts,
+   so these are global under body[data-institute] — an Astro-scoped block on
+   the page cannot reach dynamically-inserted nodes.
+   --------------------------------------------------------------------------- */
+body[data-institute] .i-exam-form { margin-top: 4px; }
+body[data-institute] .i-exam-q {
+  border: 1px solid var(--i-line); border-radius: var(--i-r-md);
+  padding: 14px 16px; margin: 0 0 12px;
+}
+body[data-institute] .i-exam-q legend {
+  font-family: "Chakra Petch", sans-serif; font-weight: 600;
+  color: var(--i-ink); padding: 0 6px;
+}
+body[data-institute] .i-exam-q label {
+  display: block; padding: 5px 0; color: var(--i-ink-dim); cursor: pointer;
+}
+body[data-institute] .i-exam-q input { margin-right: 8px; accent-color: var(--i-signal); }
+body[data-institute] .i-exam-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+body[data-institute] .i-exam-result { margin-top: 14px; }
+body[data-institute] .i-exam-result.pass { color: var(--i-signal); }
+body[data-institute] .i-exam-result.fail { color: var(--i-fail); }
+body[data-institute] .i-exam-result a { color: inherit; text-decoration: underline; }
+
+/* ---------------------------------------------------------------------------
+   Certificate (D10). Distinct dark face, same drawn seal + same /verify spine
+   as the main /cert. Card + inner rule stay dark in print/PDF on purpose —
+   a dark diploma is the point.
+   --------------------------------------------------------------------------- */
+body[data-institute] .i-cert-msg { max-width: 560px; margin-top: 8px; }
+body[data-institute] .i-cert-note {
+  max-width: 720px; margin: 0 auto 16px; padding: 10px 14px;
+  border: 1px solid var(--i-line-soft); border-left: 2px solid var(--i-filament-dim);
+  border-radius: var(--i-r-sm); font-size: 13px; color: var(--i-ink-dim);
+}
+body[data-institute] .i-clink { color: var(--i-filament); text-decoration: underline; }
+
+body[data-institute] .i-cert-card {
+  max-width: 720px; margin: 0 auto;
+  background: var(--i-ground-deep);
+  border: 1px solid var(--i-line);
+  padding: 10px;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+body[data-institute] .i-cert-inner {
+  border: 1px solid var(--i-filament-dim);
+  padding: 44px 40px 34px; text-align: center;
+}
+body[data-institute] .i-cert-emblem { color: var(--i-filament); display: flex; justify-content: center; }
+body[data-institute] .i-cert-emblem svg { width: 40px; height: 40px; }
+body[data-institute] .i-cert-wordmark {
+  margin-top: 10px; font-family: "Chakra Petch", sans-serif; font-weight: 700;
+  font-size: 24px; letter-spacing: 0.03em; color: var(--i-ink);
+}
+body[data-institute] .i-cert-subline {
+  margin-top: 4px; font-family: "JetBrains Mono", monospace; font-size: 10.5px;
+  letter-spacing: 0.34em; text-transform: uppercase; color: var(--i-filament);
+}
+body[data-institute] .i-cert-kind {
+  margin-top: 16px; font-family: "JetBrains Mono", monospace; font-size: 10px;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--i-muted);
+}
+body[data-institute] .i-cert-certifies { margin-top: 30px; font-size: 13px; color: var(--i-muted); }
+body[data-institute] .i-cert-name {
+  margin-top: 10px; font-family: "Chakra Petch", sans-serif; font-weight: 500;
+  font-size: 30px; line-height: 1.2; color: var(--i-ink);
+}
+body[data-institute] .i-cert-rule { width: 160px; height: 1px; background: var(--i-filament); margin: 12px auto 0; }
+body[data-institute] .i-cert-has { margin-top: 22px; font-size: 13px; color: var(--i-muted); }
+body[data-institute] .i-cert-course {
+  margin-top: 8px; font-family: "Chakra Petch", sans-serif; font-weight: 600;
+  font-size: 19px; line-height: 1.4; color: var(--i-ink);
+}
+body[data-institute] .i-cert-meta {
+  margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 0.04em; color: var(--i-muted);
+}
+body[data-institute] .i-cert-foot {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--i-line);
+  text-align: left;
+}
+body[data-institute] .i-cert-foot-l { font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--i-muted); line-height: 1.6; }
+body[data-institute] .i-cert-vid { margin-top: 4px; }
+body[data-institute] .i-cert-vid strong { color: var(--i-ink-dim); }
+body[data-institute] .i-cert-seal { flex: none; text-align: center; color: var(--i-filament); }
+body[data-institute] .i-cert-seal svg { width: 34px; height: 34px; }
+body[data-institute] .i-cert-sealed {
+  margin-top: 2px; font-family: "JetBrains Mono", monospace; font-size: 8.5px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+}
+body[data-institute] .i-cert-verify {
+  margin-top: 14px; font-family: "JetBrains Mono", monospace; font-size: 10px;
+  color: var(--i-muted); letter-spacing: 0.02em;
+}
+body[data-institute] .i-cert-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+
+@media print {
+  body[data-institute] nav, body[data-institute] footer,
+  body[data-institute] .i-rail, body[data-institute] .noprint { display: none !important; }
+}
+
+/* ===========================================================================
+   Sikh Code dojos (Wave 3b) — the IDE-that-types-itself (terminal.ts) and the
+   CLI REPL (repl.ts). Always the sikhi.io dark terminal look regardless of
+   theme (DESIGN-INSTITUTE: "the ground + mono we blend to"); literal hex here
+   is deliberate. All scoped under body[data-institute] .i-dojo.
+   =========================================================================== */
+@keyframes i-dojo-blink { 0%, 52% { opacity: 1; } 53%, 100% { opacity: 0; } }
+@keyframes i-dojo-fadeup { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+body[data-institute] .i-dojo {
+  height: 100%; display: grid; color: #E9E4D4; background: #070B14;
+  font-family: "JetBrains Mono", "Noto Sans Gurmukhi", ui-monospace, monospace;
+  font-size: 13px; border-radius: 12px; overflow: hidden; overscroll-behavior: none;
+}
+body[data-institute] .i-dojo-term { grid-template-rows: 42px 1fr 26px; }
+body[data-institute] .i-dojo-repl { grid-template-rows: 42px 1fr auto 28px; }
+
+body[data-institute] .i-dojo-titlebar {
+  position: relative; display: flex; align-items: center; gap: 8px;
+  background: #0C1120; border-bottom: 1px solid #1B2438; padding: 0 16px;
+}
+body[data-institute] .i-dojo-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+body[data-institute] .i-dojo-title {
+  position: absolute; left: 0; right: 0; text-align: center;
+  font-size: 12px; color: #8B96B2; pointer-events: none;
+}
+
+body[data-institute] .i-dojo-body { display: grid; grid-template-columns: 240px 1fr; min-height: 0; }
+body[data-institute] .i-dojo-explorer {
+  background: #0A0F1C; border-right: 1px solid #1B2438;
+  display: flex; flex-direction: column; min-height: 0; overflow-y: auto;
+}
+body[data-institute] .i-dojo-exp-h { padding: 12px 16px 6px; font-size: 10px; letter-spacing: 0.16em; color: #5A6890; }
+body[data-institute] .i-dojo-outline-h { border-top: 1px solid #131A2C; margin-top: 12px; }
+body[data-institute] .i-dojo-exp-root { padding: 4px 16px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #B9C2D8; }
+body[data-institute] .i-dojo-file {
+  display: block; width: 100%; text-align: left; border: 0; background: transparent;
+  padding: 5px 16px 5px 26px; cursor: pointer; color: #8B96B2; font: inherit; font-size: 12.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body[data-institute] .i-dojo-file:hover { color: #E9E4D4; background: rgba(240,160,68,0.06); }
+body[data-institute] .i-dojo-file span { margin-right: 8px; font-size: 10px; font-weight: 700; }
+body[data-institute] .i-dojo-exp-maya { padding: 5px 16px 5px 26px; color: #3E4A6E; font-size: 12.5px; }
+body[data-institute] .i-dojo-exp-maya span { font-style: italic; color: #333F60; font-size: 10.5px; }
+body[data-institute] .i-dojo-outline { padding: 2px 0 8px; }
+body[data-institute] .i-dojo-outline div { padding: 4px 16px 4px 26px; font-size: 12px; color: #8B96B2; }
+body[data-institute] .i-dojo-outline div span { margin-right: 9px; font-size: 11px; }
+body[data-institute] .i-dojo-brand { margin-top: auto; padding: 14px 16px 16px; border-top: 1px solid #131A2C; font-size: 12px; line-height: 1.7; }
+
+body[data-institute] .i-dojo-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #0D1322; }
+body[data-institute] .i-dojo-tabs { display: flex; background: #0A0F1C; border-bottom: 1px solid #1B2438; height: 38px; overflow-x: auto; }
+body[data-institute] .i-dojo-tab {
+  display: flex; align-items: center; gap: 9px; padding: 0 18px; flex-shrink: 0; white-space: nowrap;
+  border: 0; border-right: 1px solid #131A2C; background: transparent; color: #66739A; font: inherit; font-size: 12.5px;
+  cursor: pointer; box-shadow: inset 0 2px 0 transparent;
+}
+body[data-institute] .i-dojo-tab span { font-size: 10px; font-weight: 700; }
+body[data-institute] .i-dojo-tab.active { background: #0D1322; color: #E9E4D4; box-shadow: inset 0 2px 0 #F0A044; }
+body[data-institute] .i-dojo-breadcrumb {
+  display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 14px;
+  font-size: 11.5px; color: #5A6890; border-bottom: 1px solid #10182A;
+}
+body[data-institute] .i-dojo-counter { color: #66739A; }
+body[data-institute] .i-dojo-nav { border: 0; background: transparent; color: #8B96B2; cursor: pointer; font: inherit; padding: 0 2px; }
+body[data-institute] .i-dojo-nav:hover { color: #E9E4D4; }
+body[data-institute] .i-dojo-status { margin-left: auto; white-space: nowrap; }
+
+body[data-institute] .i-dojo-teach {
+  display: flex; align-items: center; gap: 10px; padding: 10px 18px;
+  font-size: 13.5px; color: #FFE9BE; background: rgba(240,160,68,0.07);
+  border-bottom: 1px solid rgba(240,160,68,0.2); animation: i-dojo-fadeup 0.25s ease;
+}
+body[data-institute] .i-dojo-teach-lbl { text-transform: uppercase; letter-spacing: 0.12em; font-size: 9.5px; color: #F0A044; flex: none; }
+
+body[data-institute] .i-dojo-editor { flex: 1; position: relative; min-height: 0; }
+body[data-institute] .i-dojo-watermark {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 170px; color: rgba(240,160,68,0.05); pointer-events: none; user-select: none;
+  font-family: "Noto Sans Gurmukhi", "JetBrains Mono", monospace;
+}
+body[data-institute] .i-dojo-ed-body { position: absolute; inset: 0; overflow: auto; padding: 14px 96px 48px 0; }
+body[data-institute] .i-dojo-ln { display: flex; min-height: 21px; line-height: 21px; }
+body[data-institute] .i-dojo-ln.active { background: rgba(240,160,68,0.045); }
+body[data-institute] .i-dojo-ln-n { width: 58px; flex: none; text-align: right; padding-right: 20px; font-size: 12px; color: #39456B; user-select: none; }
+body[data-institute] .i-dojo-ln.active .i-dojo-ln-n { color: #F0A044; }
+body[data-institute] .i-dojo-ln-c { white-space: pre; font-size: 13.5px; }
+body[data-institute] .i-dojo-minimap {
+  position: absolute; top: 10px; right: 12px; bottom: 10px; width: 66px; padding: 7px 9px;
+  background: rgba(9,13,24,0.6); border: 1px solid #131A2C; border-radius: 6px; overflow: hidden; pointer-events: none;
+}
+body[data-institute] .i-dojo-minimap span { display: block; height: 3px; margin-bottom: 2px; border-radius: 1px; }
+
+body[data-institute] .i-dojo-termpane { height: 296px; display: flex; flex-direction: column; border-top: 1px solid #1B2438; background: #080D18; min-height: 0; }
+body[data-institute] .i-dojo-term-h { display: flex; align-items: center; height: 36px; padding: 0 14px; gap: 18px; border-bottom: 1px solid #10182A; }
+body[data-institute] .i-dojo-term-tab { font-size: 10.5px; letter-spacing: 0.14em; color: #E9E4D4; border-bottom: 2px solid #F0A044; padding: 9px 0 7px; }
+body[data-institute] .i-dojo-term-lbl { font-size: 10.5px; letter-spacing: 0.14em; color: #5A6890; }
+body[data-institute] .i-dojo-term-btn {
+  margin-left: auto; width: 26px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid #1B2438; border-radius: 5px; color: #8B96B2; background: transparent; cursor: pointer; font: inherit; font-size: 10px;
+}
+body[data-institute] .i-dojo-term-btn + .i-dojo-term-btn { margin-left: 6px; }
+body[data-institute] .i-dojo-term-body { flex: 1; overflow: auto; padding: 12px 18px 16px; min-height: 0; }
+
+body[data-institute] .i-dojo-row { display: flex; align-items: baseline; gap: 10px; min-height: 20px; line-height: 20px; animation: i-dojo-fadeup 0.16s ease; }
+body[data-institute] .i-dojo-g { width: 14px; flex: none; text-align: center; white-space: pre; }
+body[data-institute] .i-dojo-kv { width: 118px; flex: none; color: #F0A044; font-weight: 600; white-space: pre; }
+body[data-institute] .i-dojo-tx { white-space: pre-wrap; }
+body[data-institute] .i-dojo-bar { display: inline-block; width: 190px; height: 8px; border-radius: 4px; background: #141C30; overflow: hidden; }
+body[data-institute] .i-dojo-bar span { display: block; height: 100%; background: linear-gradient(90deg,#C87828,#FFB454); border-radius: 4px; }
+body[data-institute] .i-dojo-bar-t { color: #8B96B2; font-size: 11.5px; }
+
+body[data-institute] .i-dojo-statusbar { display: flex; align-items: center; background: #0C1120; border-top: 1px solid #1B2438; font-size: 11px; color: #8B96B2; }
+body[data-institute] .i-dojo-sb-gur { display: flex; align-items: center; align-self: stretch; padding: 0 12px; background: #F0A044; color: #0A0E1A; font-weight: 700; font-size: 12px; }
+body[data-institute] .i-dojo-sb-play { margin-left: auto; padding: 0 12px; color: #F0A044; }
+
+body[data-institute] .i-dojo-cur {
+  display: inline-block; width: 8px; height: 14px; vertical-align: text-bottom;
+  background: #FFB454; box-shadow: 0 0 10px rgba(255,180,84,0.5);
+  animation: i-dojo-blink 1.05s step-end infinite;
+}
+
+/* --- REPL --- */
+body[data-institute] .i-dojo-scroll { position: relative; min-height: 0; overflow: auto; padding: 24px 0 20px; }
+body[data-institute] .i-dojo-scroll-in { width: min(860px, 100%); margin: 0 auto; padding: 0 26px; }
+body[data-institute] .i-dojo-welcome {
+  border: 1px solid #2A3550; border-radius: 8px; padding: 14px 18px; margin-bottom: 8px;
+  background: rgba(12,17,32,0.55); max-width: 660px;
+}
+body[data-institute] .i-dojo-welcome-h { display: flex; gap: 10px; align-items: baseline; font-weight: 500; }
+body[data-institute] .i-dojo-welcome-l { font-size: 12px; color: #8B96B2; padding-left: 24px; margin-top: 5px; }
+body[data-institute] .i-dojo-footnote { font-size: 11px; color: #3E4A6E; font-style: italic; margin-bottom: 18px; }
+
+body[data-institute] .i-dojo-inputbar { position: relative; border-top: 1px solid #141C30; background: #0A0F1C; padding: 10px 0 8px; }
+body[data-institute] .i-dojo-menu {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  width: min(620px, calc(100% - 52px)); margin-bottom: 10px; background: #0C1120;
+  border: 1px solid #2A3550; border-radius: 8px; padding: 6px; box-shadow: 0 16px 48px rgba(0,0,0,0.55); z-index: 5;
+}
+body[data-institute] .i-dojo-menu-h { padding: 4px 10px 6px; font-size: 10px; letter-spacing: 0.14em; color: #5A6890; }
+body[data-institute] .i-dojo-menu-i {
+  display: flex; gap: 14px; align-items: baseline; width: 100%; text-align: left;
+  padding: 6px 10px; border: 0; border-radius: 5px; background: transparent; color: #F0A044; font: inherit; font-weight: 600; cursor: pointer;
+}
+body[data-institute] .i-dojo-menu-i.sel { background: rgba(240,160,68,0.1); }
+body[data-institute] .i-dojo-menu-d { color: #8B96B2; font-size: 12px; font-weight: 400; }
+body[data-institute] .i-dojo-chips { display: flex; gap: 8px; padding-bottom: 9px; flex-wrap: wrap; }
+body[data-institute] .i-dojo-chip { padding: 3px 11px; border: 1px solid #1B2438; border-radius: 999px; font-size: 11px; color: #8B96B2; background: transparent; cursor: pointer; font: inherit; }
+body[data-institute] .i-dojo-chip:hover { color: #E9E4D4; }
+body[data-institute] .i-dojo-inputrow {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  border: 1px solid #1B2438; border-radius: 8px; padding: 10px 14px; background: #0C1120; cursor: text;
+}
+body[data-institute] .i-dojo-ghost { white-space: pre; color: #E9E4D4; }
+body[data-institute] .i-dojo-placeholder { color: #3E4A6E; }
+body[data-institute] .i-dojo-input { position: absolute; inset: 0; width: 100%; opacity: 0; border: 0; outline: 0; background: transparent; font: inherit; cursor: text; }
+
+body[data-institute] .i-dojo-repl-sb { padding: 0 4px; color: #5A6890; }
+body[data-institute] .i-dojo-repl-sb .i-dojo-sb-gur { font-size: 12px; }
+body[data-institute] .i-dojo-sb-hint { padding: 0 12px; }
+body[data-institute] .i-dojo-sb-spacer { flex: 1; }
+body[data-institute] .i-dojo-sb-model, body[data-institute] .i-dojo-sb-ctx { padding: 0 10px; }
+body[data-institute] .i-dojo-sb-demo { padding: 0 12px; color: #F0A044; }
+body[data-institute] .i-dojo-sb-demo.off { color: #5A6890; }
+
+@media (max-width: 760px) {
+  body[data-institute] .i-dojo-body { grid-template-columns: 1fr; }
+  body[data-institute] .i-dojo-explorer { display: none; }
+  body[data-institute] .i-dojo-termpane { height: 168px; }
+  body[data-institute] .i-dojo-ed-body { padding: 10px 12px 24px 0; }
+  body[data-institute] .i-dojo-minimap { display: none; }
+  body[data-institute] .i-dojo-ln-n { width: 34px; padding-right: 10px; font-size: 10.5px; }
+  body[data-institute] .i-dojo-ln-c { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-institute] .i-dojo-cur { animation: none; }
+  body[data-institute] .i-dojo-row, body[data-institute] .i-dojo-teach { animation: none; }
+}

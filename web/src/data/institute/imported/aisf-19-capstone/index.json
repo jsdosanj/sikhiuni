@@ -1,0 +1,608 @@
+{
+  "track": "aisf-19-capstone",
+  "phaseDir": "19-capstone-projects",
+  "blurb": "Prove everything you learned. Build portfolio-grade systems.",
+  "license": "MIT",
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1"
+  },
+  "generated": "2026-08-29",
+  "lessons": [
+    {
+      "id": "aisf-19-capstone::terminal-native-coding-agent",
+      "num": 1,
+      "slug": "terminal-native-coding-agent",
+      "title": "Capstone 01 — Terminal-Native Coding Agent",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::rag-over-codebase",
+      "num": 2,
+      "slug": "rag-over-codebase",
+      "title": "Capstone 02 — RAG over Codebase (Cross-Repo Semantic Search)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::realtime-voice-assistant",
+      "num": 3,
+      "slug": "realtime-voice-assistant",
+      "title": "Capstone 03 — Real-Time Voice Assistant (ASR to LLM to TTS)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::multimodal-document-qa",
+      "num": 4,
+      "slug": "multimodal-document-qa",
+      "title": "Capstone 04 — Multimodal Document QA (Vision-First PDF, Tables, Charts)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::autonomous-research-agent",
+      "num": 5,
+      "slug": "autonomous-research-agent",
+      "title": "Capstone 05 — Autonomous Research Agent (AI-Scientist Class)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::devops-troubleshooting-agent",
+      "num": 6,
+      "slug": "devops-troubleshooting-agent",
+      "title": "Capstone 06 — DevOps Troubleshooting Agent for Kubernetes",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-fine-tuning-pipeline",
+      "num": 7,
+      "slug": "end-to-end-fine-tuning-pipeline",
+      "title": "Capstone 07 — End-to-End Fine-Tuning Pipeline (Data to SFT to DPO to Serve)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::production-rag-chatbot",
+      "num": 8,
+      "slug": "production-rag-chatbot",
+      "title": "Capstone 08 — Production RAG Chatbot for a Regulated Vertical",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::code-migration-agent",
+      "num": 9,
+      "slug": "code-migration-agent",
+      "title": "Capstone 09 — Code Migration Agent (Repo-Level Language / Runtime Upgrade)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::multi-agent-software-team",
+      "num": 10,
+      "slug": "multi-agent-software-team",
+      "title": "Capstone 10 — Multi-Agent Software Engineering Team",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::llm-observability-dashboard",
+      "num": 11,
+      "slug": "llm-observability-dashboard",
+      "title": "Capstone 11 — LLM Observability & Eval Dashboard",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::video-understanding-pipeline",
+      "num": 12,
+      "slug": "video-understanding-pipeline",
+      "title": "Capstone 12 — Video Understanding Pipeline (Scene, QA, Search)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::mcp-server-with-registry",
+      "num": 13,
+      "slug": "mcp-server-with-registry",
+      "title": "Capstone 13: Stateless MCP Server with Registry and Governance",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::speculative-decoding-server",
+      "num": 14,
+      "slug": "speculative-decoding-server",
+      "title": "Capstone 14 — Speculative-Decoding Inference Server",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::constitutional-safety-harness",
+      "num": 15,
+      "slug": "constitutional-safety-harness",
+      "title": "Capstone 15 — Constitutional Safety Harness + Red-Team Range",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::github-issue-to-pr-agent",
+      "num": 16,
+      "slug": "github-issue-to-pr-agent",
+      "title": "Capstone 16 — GitHub Issue-to-PR Autonomous Agent",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::personal-ai-tutor",
+      "num": 17,
+      "slug": "personal-ai-tutor",
+      "title": "Capstone 17 — Personal AI Tutor (Adaptive, Multimodal, with Memory)",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::agent-harness-loop-contract",
+      "num": 20,
+      "slug": "agent-harness-loop-contract",
+      "title": "Agent Harness Loop Contract",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::tool-registry-schema-validation",
+      "num": 21,
+      "slug": "tool-registry-schema-validation",
+      "title": "Tool Registry with Schema Validation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::jsonrpc-stdio-transport",
+      "num": 22,
+      "slug": "jsonrpc-stdio-transport",
+      "title": "JSON-RPC 2.0 Over Newline-Delimited Stdio",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::function-call-dispatcher",
+      "num": 23,
+      "slug": "function-call-dispatcher",
+      "title": "Function Call Dispatcher",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::plan-execute-control-flow",
+      "num": 24,
+      "slug": "plan-execute-control-flow",
+      "title": "Plan-Execute Control Flow",
+      "nQuiz": 7
+    },
+    {
+      "id": "aisf-19-capstone::verification-gates-observation-budget",
+      "num": 25,
+      "slug": "verification-gates-observation-budget",
+      "title": "Capstone Lesson 25: Verification Gates and the Observation Budget",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::sandbox-runner-denylist",
+      "num": 26,
+      "slug": "sandbox-runner-denylist",
+      "title": "Capstone Lesson 26: Sandbox Runner with Denylist and Path Jail",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::eval-harness-fixture-tasks",
+      "num": 27,
+      "slug": "eval-harness-fixture-tasks",
+      "title": "Capstone Lesson 27: Eval Harness with Fixture Tasks",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::observability-otel-traces",
+      "num": 28,
+      "slug": "observability-otel-traces",
+      "title": "Capstone Lesson 28: Observability with OTel GenAI Spans and Prometheus Metrics",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-coding-task-demo",
+      "num": 29,
+      "slug": "end-to-end-coding-task-demo",
+      "title": "Capstone Lesson 29: End-to-End Coding Agent on the Harness",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::bpe-tokenizer-from-scratch",
+      "num": 30,
+      "slug": "bpe-tokenizer-from-scratch",
+      "title": "BPE Tokenizer From Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::tokenized-dataset-sliding-window",
+      "num": 31,
+      "slug": "tokenized-dataset-sliding-window",
+      "title": "Tokenized Dataset with Sliding Window",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::token-positional-embeddings",
+      "num": 32,
+      "slug": "token-positional-embeddings",
+      "title": "Token and Positional Embeddings",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::multihead-self-attention",
+      "num": 33,
+      "slug": "multihead-self-attention",
+      "title": "Multi-Head Self-Attention",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::transformer-block",
+      "num": 34,
+      "slug": "transformer-block",
+      "title": "Transformer Block from Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::gpt-model-assembly",
+      "num": 35,
+      "slug": "gpt-model-assembly",
+      "title": "GPT Model Assembly",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::training-loop-eval",
+      "num": 36,
+      "slug": "training-loop-eval",
+      "title": "Training Loop and Evaluation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::loading-pretrained-weights",
+      "num": 37,
+      "slug": "loading-pretrained-weights",
+      "title": "Loading Pretrained Weights",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::classifier-finetuning",
+      "num": 38,
+      "slug": "classifier-finetuning",
+      "title": "Capstone Lesson 38: Classifier Fine-Tuning by Head Swap",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::instruction-tuning-sft",
+      "num": 39,
+      "slug": "instruction-tuning-sft",
+      "title": "Capstone Lesson 39: Instruction Tuning by Supervised Fine-Tuning",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::dpo-from-scratch",
+      "num": 40,
+      "slug": "dpo-from-scratch",
+      "title": "Capstone Lesson 40: Direct Preference Optimization from Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::eval-pipeline",
+      "num": 41,
+      "slug": "eval-pipeline",
+      "title": "Capstone Lesson 41: Full Evaluation Pipeline",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::large-corpus-downloader",
+      "num": 42,
+      "slug": "large-corpus-downloader",
+      "title": "Large Corpus Downloader",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::hdf5-tokenized-corpus",
+      "num": 43,
+      "slug": "hdf5-tokenized-corpus",
+      "title": "HDF5 Tokenized Corpus",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::cosine-lr-warmup",
+      "num": 44,
+      "slug": "cosine-lr-warmup",
+      "title": "Cosine LR with Linear Warmup",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::gradient-clipping-amp",
+      "num": 45,
+      "slug": "gradient-clipping-amp",
+      "title": "Gradient Clipping and Mixed Precision",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::gradient-accumulation",
+      "num": 46,
+      "slug": "gradient-accumulation",
+      "title": "Gradient Accumulation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::checkpoint-save-resume",
+      "num": 47,
+      "slug": "checkpoint-save-resume",
+      "title": "Checkpoint Save and Resume",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::distributed-fsdp-ddp",
+      "num": 48,
+      "slug": "distributed-fsdp-ddp",
+      "title": "Distributed Data Parallel and FSDP from Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::lm-eval-harness",
+      "num": 49,
+      "slug": "lm-eval-harness",
+      "title": "Language Model Evaluation Harness",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::hypothesis-generator",
+      "num": 50,
+      "slug": "hypothesis-generator",
+      "title": "Hypothesis Generator",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::literature-retrieval",
+      "num": 51,
+      "slug": "literature-retrieval",
+      "title": "Literature Retrieval",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::experiment-runner",
+      "num": 52,
+      "slug": "experiment-runner",
+      "title": "Experiment Runner",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::result-evaluator",
+      "num": 53,
+      "slug": "result-evaluator",
+      "title": "Result Evaluator",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::paper-writer",
+      "num": 54,
+      "slug": "paper-writer",
+      "title": "Paper Writer",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::critic-loop",
+      "num": 55,
+      "slug": "critic-loop",
+      "title": "Critic Loop",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::iteration-scheduler",
+      "num": 56,
+      "slug": "iteration-scheduler",
+      "title": "Iteration Scheduler",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-research-demo",
+      "num": 57,
+      "slug": "end-to-end-research-demo",
+      "title": "End-to-End Research Demo",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::vision-encoder-patches",
+      "num": 58,
+      "slug": "vision-encoder-patches",
+      "title": "Vision Encoder Patches",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::vit-transformer",
+      "num": 59,
+      "slug": "vit-transformer",
+      "title": "Vision Transformer Encoder",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::projection-layer-modality-align",
+      "num": 60,
+      "slug": "projection-layer-modality-align",
+      "title": "Projection Layer for Modality Alignment",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::cross-attention-fusion",
+      "num": 61,
+      "slug": "cross-attention-fusion",
+      "title": "Cross-Attention Fusion",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::vision-language-pretraining",
+      "num": 62,
+      "slug": "vision-language-pretraining",
+      "title": "Vision-Language Pretraining",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::multimodal-eval",
+      "num": 63,
+      "slug": "multimodal-eval",
+      "title": "Multimodal Evaluation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::chunking-strategies-advanced",
+      "num": 64,
+      "slug": "chunking-strategies-advanced",
+      "title": "Chunking Strategies, Compared",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::hybrid-retrieval-bm25-dense",
+      "num": 65,
+      "slug": "hybrid-retrieval-bm25-dense",
+      "title": "Hybrid Retrieval with BM25 and Dense Embeddings",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::reranker-cross-encoder",
+      "num": 66,
+      "slug": "reranker-cross-encoder",
+      "title": "Cross-Encoder Reranker",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::query-rewriting-hyde",
+      "num": 67,
+      "slug": "query-rewriting-hyde",
+      "title": "Query Rewriting: HyDE, Multi-Query, and Decomposition",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::rag-eval-precision-recall",
+      "num": 68,
+      "slug": "rag-eval-precision-recall",
+      "title": "RAG Evaluation: Precision, Recall, MRR, nDCG, Faithfulness, Answer Relevance",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-rag-system",
+      "num": 69,
+      "slug": "end-to-end-rag-system",
+      "title": "End-to-End RAG System",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::task-spec-format",
+      "num": 70,
+      "slug": "task-spec-format",
+      "title": "Task Spec Format",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::classical-metrics",
+      "num": 71,
+      "slug": "classical-metrics",
+      "title": "Classical Metrics",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::code-exec-metric",
+      "num": 72,
+      "slug": "code-exec-metric",
+      "title": "Code Exec Metric",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::perplexity-calibration",
+      "num": 73,
+      "slug": "perplexity-calibration",
+      "title": "Perplexity and Calibration",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::leaderboard-aggregation",
+      "num": 74,
+      "slug": "leaderboard-aggregation",
+      "title": "Leaderboard Aggregation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-eval-runner",
+      "num": 75,
+      "slug": "end-to-end-eval-runner",
+      "title": "End-to-End Eval Runner",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::collective-ops-from-scratch",
+      "num": 76,
+      "slug": "collective-ops-from-scratch",
+      "title": "Collective Ops From Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::data-parallel-ddp",
+      "num": 77,
+      "slug": "data-parallel-ddp",
+      "title": "Data Parallel DDP From Scratch",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::zero-parameter-sharding",
+      "num": 78,
+      "slug": "zero-parameter-sharding",
+      "title": "ZeRO Optimizer State Sharding",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::pipeline-parallel",
+      "num": 79,
+      "slug": "pipeline-parallel",
+      "title": "Pipeline Parallel and Bubble Analysis",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::checkpoint-sharded-resume",
+      "num": 80,
+      "slug": "checkpoint-sharded-resume",
+      "title": "Sharded Checkpoint and Atomic Resume",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-distributed-train",
+      "num": 81,
+      "slug": "end-to-end-distributed-train",
+      "title": "End-to-End Distributed Training",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::jailbreak-taxonomy",
+      "num": 82,
+      "slug": "jailbreak-taxonomy",
+      "title": "Capstone 82 — Jailbreak Taxonomy",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::prompt-injection-detector",
+      "num": 83,
+      "slug": "prompt-injection-detector",
+      "title": "Capstone 83 — Prompt Injection Detector",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::refusal-evaluation",
+      "num": 84,
+      "slug": "refusal-evaluation",
+      "title": "Capstone 84 — Refusal Evaluation",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::content-classifier-integration",
+      "num": 85,
+      "slug": "content-classifier-integration",
+      "title": "Capstone 85 — Content Classifier Integration",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::constitutional-rules-engine",
+      "num": 86,
+      "slug": "constitutional-rules-engine",
+      "title": "Capstone 86 — Constitutional Rules Engine",
+      "nQuiz": 6
+    },
+    {
+      "id": "aisf-19-capstone::end-to-end-safety-gate",
+      "num": 87,
+      "slug": "end-to-end-safety-gate",
+      "title": "Capstone 87 — End-to-End Safety Gate",
+      "nQuiz": 6
+    }
+  ]
+}

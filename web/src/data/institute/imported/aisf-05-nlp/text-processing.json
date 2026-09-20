@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::text-processing",
+  "num": 1,
+  "slug": "text-processing",
+  "title": "Text Processing — Tokenization, Stemming, Lemmatization",
+  "tagline": "Language is continuous. Models are discrete. Preprocessing is the bridge.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~45 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>A model cannot read &quot;The cats were running.&quot; It reads integers.</p>\n<p>Every NLP system opens with the same three questions. Where does a word start. What is the root of the word. How do we treat &quot;run&quot;, &quot;running&quot;, &quot;ran&quot; as the same thing when it helps, and as different things when it doesn&#39;t.</p>\n<p>Get tokenization wrong and the model learns from garbage. If your tokenizer treats <code>don&#39;t</code> as one token but <code>do n&#39;t</code> as two, the training distribution splits. If your stemmer collapses <code>organization</code> and <code>organ</code> to the same stem, topic modeling dies. If your lemmatizer needs part-of-speech context but you don&#39;t pass it, verbs get treated as nouns.</p>\n<p>This lesson builds the three preprocessing steps from scratch, then shows how NLTK and spaCy do the same work so you can see the tradeoffs.</p>\n<h2>The Concept</h2>\n<p>Three operations. Each has a job and a failure mode.</p>\n<p><strong>Tokenization</strong> splits a string into tokens. &quot;Token&quot; is deliberately vague because the right granularity depends on the task. Word-level for classical NLP. Subword for transformers. Character for languages without whitespace.</p>\n<p><strong>Stemming</strong> chops suffixes with rules. Fast, aggressive, dumb. <code>running -&gt; run</code>. <code>organization -&gt; organ</code>. That second one is the failure mode.</p>\n<p><strong>Lemmatization</strong> reduces a word to its dictionary form using grammar knowledge. Slower, accurate, needs a lookup table or morphological analyzer. <code>ran -&gt; run</code> (needs to know &quot;ran&quot; is past tense of &quot;run&quot;). <code>better -&gt; good</code> (needs to know comparative forms).</p>\n<p>Rule of thumb. Stem when speed matters and you can tolerate noise (search indexing, rough classification). Lemmatize when meaning matters (question answering, semantic search, anything the user will read).</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>edit-distance</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>Step 1: a regex word tokenizer</h3>\n<p>The simplest useful tokenizer splits on non-alphanumeric characters while keeping punctuation as its own tokens. Not perfect, not final, but it runs in one line.</p>\n<pre><code class=\"language-python\">import re\n\ndef tokenize(text):\n    return re.findall(r&quot;[A-Za-z]+(?:&#39;[A-Za-z]+)?|[0-9]+|[^\\sA-Za-z0-9]&quot;, text)\n</code></pre>\n<p>Three patterns in order of precedence. Words with optional inner apostrophe (<code>don&#39;t</code>, <code>it&#39;s</code>). Pure numbers. Any single non-whitespace non-alphanumeric character as a standalone token (punctuation).</p>\n<pre><code class=\"language-python\">&gt;&gt;&gt; tokenize(&quot;The cats weren&#39;t running at 3pm.&quot;)\n[&#39;The&#39;, &#39;cats&#39;, &quot;weren&#39;t&quot;, &#39;running&#39;, &#39;at&#39;, &#39;3&#39;, &#39;pm&#39;, &#39;.&#39;]\n</code></pre>\n<p>Failure modes to notice. <code>3pm</code> splits to <code>[&#39;3&#39;, &#39;pm&#39;]</code> because we alternated between letter runs and digit runs. Good enough for most tasks. URLs, emails, hashtags all break. For production, add patterns before the general ones.</p>\n<h3>Step 2: a Porter stemmer (step 1a only)</h3>\n<p>The full Porter algorithm has five phases of rules. Step 1a alone covers the most frequent English suffixes and teaches the pattern.</p>\n<pre><code class=\"language-python\">def stem_step_1a(word):\n    if word.endswith(&quot;sses&quot;):\n        return word[:-2]\n    if word.endswith(&quot;ies&quot;):\n        return word[:-2]\n    if word.endswith(&quot;ss&quot;):\n        return word\n    if word.endswith(&quot;s&quot;) and len(word) &gt; 1:\n        return word[:-1]\n    return word\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; [stem_step_1a(w) for w in [&quot;caresses&quot;, &quot;ponies&quot;, &quot;caress&quot;, &quot;cats&quot;]]\n[&#39;caress&#39;, &#39;poni&#39;, &#39;caress&#39;, &#39;cat&#39;]\n</code></pre>\n<p>Read the rules top-down. The <code>ies -&gt; i</code> rule is why <code>ponies -&gt; poni</code>, not <code>pony</code>. Real Porter has step 1b that would fix it. Rules compete. Earlier rules win. The order matters more than any single rule.</p>\n<h3>Step 3: a lookup-based lemmatizer</h3>\n<p>Lemmatization proper needs morphology. A tractable teaching version uses a small lemma table and a fallback.</p>\n<pre><code class=\"language-python\">LEMMA_TABLE = {\n    (&quot;running&quot;, &quot;VERB&quot;): &quot;run&quot;,\n    (&quot;ran&quot;, &quot;VERB&quot;): &quot;run&quot;,\n    (&quot;runs&quot;, &quot;VERB&quot;): &quot;run&quot;,\n    (&quot;better&quot;, &quot;ADJ&quot;): &quot;good&quot;,\n    (&quot;best&quot;, &quot;ADJ&quot;): &quot;good&quot;,\n    (&quot;cats&quot;, &quot;NOUN&quot;): &quot;cat&quot;,\n    (&quot;cat&quot;, &quot;NOUN&quot;): &quot;cat&quot;,\n    (&quot;were&quot;, &quot;VERB&quot;): &quot;be&quot;,\n    (&quot;was&quot;, &quot;VERB&quot;): &quot;be&quot;,\n    (&quot;is&quot;, &quot;VERB&quot;): &quot;be&quot;,\n}\n\ndef lemmatize(word, pos):\n    key = (word.lower(), pos)\n    if key in LEMMA_TABLE:\n        return LEMMA_TABLE[key]\n    if pos == &quot;VERB&quot; and word.endswith(&quot;ing&quot;):\n        return word[:-3]\n    if pos == &quot;NOUN&quot; and word.endswith(&quot;s&quot;):\n        return word[:-1]\n    return word.lower()\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; lemmatize(&quot;running&quot;, &quot;VERB&quot;)\n&#39;run&#39;\n&gt;&gt;&gt; lemmatize(&quot;cats&quot;, &quot;NOUN&quot;)\n&#39;cat&#39;\n&gt;&gt;&gt; lemmatize(&quot;better&quot;, &quot;ADJ&quot;)\n&#39;good&#39;\n&gt;&gt;&gt; lemmatize(&quot;watched&quot;, &quot;VERB&quot;)\n&#39;watched&#39;\n</code></pre>\n<p>The last case is the key teaching moment. <code>watched</code> is not in our table and our fallback only handles <code>ing</code>. Real lemmatization covers <code>ed</code>, irregular verbs, comparative adjectives, plurals with sound changes (<code>children -&gt; child</code>). This is why production systems use WordNet, spaCy&#39;s morphologizer, or a full morphological analyzer.</p>\n<h3>Step 4: pipe them together</h3>\n<pre><code class=\"language-python\">def preprocess(text, pos_tagger=None):\n    tokens = tokenize(text)\n    stems = [stem_step_1a(t.lower()) for t in tokens]\n    tags = pos_tagger(tokens) if pos_tagger else [(t, &quot;NOUN&quot;) for t in tokens]\n    lemmas = [lemmatize(word, pos) for word, pos in tags]\n    return {&quot;tokens&quot;: tokens, &quot;stems&quot;: stems, &quot;lemmas&quot;: lemmas}\n</code></pre>\n<p>The missing piece is a POS tagger. Phase 5 · 07 (POS Tagging) builds one. For now, default everything to <code>NOUN</code> and acknowledge the limitation.</p>\n<h2>Use It</h2>\n<p>NLTK and spaCy ship the production versions. A few lines each.</p>\n<h3>NLTK</h3>\n<pre><code class=\"language-python\">import nltk\nnltk.download(&quot;punkt_tab&quot;)\nnltk.download(&quot;wordnet&quot;)\nnltk.download(&quot;averaged_perceptron_tagger_eng&quot;)\n\nfrom nltk.tokenize import word_tokenize\nfrom nltk.stem import PorterStemmer, WordNetLemmatizer\nfrom nltk import pos_tag\n\ntext = &quot;The cats were running.&quot;\ntokens = word_tokenize(text)\nstems = [PorterStemmer().stem(t) for t in tokens]\nlemmatizer = WordNetLemmatizer()\ntagged = pos_tag(tokens)\n\n\ndef nltk_pos_to_wordnet(tag):\n    if tag.startswith(&quot;V&quot;):\n        return &quot;v&quot;\n    if tag.startswith(&quot;J&quot;):\n        return &quot;a&quot;\n    if tag.startswith(&quot;R&quot;):\n        return &quot;r&quot;\n    return &quot;n&quot;\n\n\nlemmas = [lemmatizer.lemmatize(t, nltk_pos_to_wordnet(tag)) for t, tag in tagged]\n</code></pre>\n<p><code>word_tokenize</code> handles contractions, Unicode, edge cases your regex misses. <code>PorterStemmer</code> runs all five phases. <code>WordNetLemmatizer</code> needs the POS tag translated from NLTK&#39;s Penn Treebank scheme to WordNet&#39;s abbreviation set. The translation wiring above is the bit most tutorials skip.</p>\n<h3>spaCy</h3>\n<pre><code class=\"language-python\">import spacy\n\nnlp = spacy.load(&quot;en_core_web_sm&quot;)\ndoc = nlp(&quot;The cats were running.&quot;)\n\nfor token in doc:\n    print(token.text, token.lemma_, token.pos_)\n</code></pre>\n<pre><code>The      the     DET\ncats     cat     NOUN\nwere     be      AUX\nrunning  run     VERB\n.        .       PUNCT\n</code></pre>\n<p>spaCy hides the whole pipeline behind <code>nlp(text)</code>. Tokenization, POS tagging, and lemmatization all run. Faster than NLTK at scale. More accurate out of the box. The tradeoff is that you cannot easily swap individual components.</p>\n<h3>When to pick which</h3>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Teaching, research, swapping components</td>\n<td>NLTK</td>\n</tr>\n<tr>\n<td>Production, multi-language, speed matters</td>\n<td>spaCy</td>\n</tr>\n<tr>\n<td>Transformer pipeline (you&#39;ll tokenize with the model&#39;s tokenizer anyway)</td>\n<td>Use <code>tokenizers</code> / <code>transformers</code> and skip classical preprocessing</td>\n</tr>\n</tbody></table>\n<h3>The two failure modes nobody warns you about</h3>\n<p>Most tutorials teach the algorithms and stop. Two things will bite a real preprocessing pipeline, and they are almost never covered.</p>\n<p><strong>Reproducibility drift.</strong> NLTK and spaCy change tokenization and lemmatizer behavior between versions. What produced <code>[&#39;do&#39;, &quot;n&#39;t&quot;]</code> in spaCy 2.x may produce <code>[&quot;don&#39;t&quot;]</code> in 3.x. Your model was trained on one distribution. Inference now runs on a different one. Accuracy quietly degrades and nobody knows why. Pin library versions in <code>requirements.txt</code>. Write a preprocessing regression test that freezes expected tokenization of 20 sample sentences. Run it on every upgrade.</p>\n<p><strong>Training / inference mismatch.</strong> Train with aggressive preprocessing (lowercase, stopword removal, stemming), deploy on raw user input, watch performance crater. This is the single most common production NLP failure. If you preprocess during training, you must run the identical function during inference. Ship preprocessing as a function inside the model package, not as a notebook cell the serving team rewrites.</p>\n<h2>Ship It</h2>\n<p>A reusable prompt that helps engineers pick a preprocessing strategy without reading three textbooks.</p>\n<p>Save as <code>outputs/prompt-preprocessing-advisor.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: preprocessing-advisor\ndescription: Recommends a tokenization, stemming, and lemmatization setup for an NLP task.\nphase: 5\nlesson: 01\n---\n\nYou advise on classical NLP preprocessing. Given a task description, you output:\n\n1. Tokenization choice (regex, NLTK word_tokenize, spaCy, or transformer tokenizer). Explain why.\n2. Whether to stem, lemmatize, both, or neither. Explain why.\n3. Specific library calls. Name the functions. Quote the POS-tag translation if NLTK is involved.\n4. One failure mode the user should test for.\n\nRefuse to recommend stemming for user-visible text. Refuse to recommend lemmatization without POS tags. Flag non-English input as needing a different pipeline.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Extend <code>tokenize</code> to keep URLs as single tokens. Test: <code>tokenize(&quot;Visit https://example.com today.&quot;)</code> should produce one URL token.</li>\n<li><strong>Medium.</strong> Implement Porter step 1b. If a word contains a vowel and ends in <code>ed</code> or <code>ing</code>, remove it. Handle the double-consonant rule (<code>hopping -&gt; hop</code>, not <code>hopp</code>).</li>\n<li><strong>Hard.</strong> Build a lemmatizer that uses WordNet as a lookup table but falls back to your Porter stemmer when WordNet has no entry. Measure accuracy on a tagged corpus against plain WordNet and plain Porter.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Token</td>\n<td>A word</td>\n<td>Whatever unit the model consumes. Can be word, subword, character, or byte.</td>\n</tr>\n<tr>\n<td>Stem</td>\n<td>Root of a word</td>\n<td>Result of rule-based suffix stripping. Not always a real word.</td>\n</tr>\n<tr>\n<td>Lemma</td>\n<td>Dictionary form</td>\n<td>The form you&#39;d look up. Requires grammatical context to compute correctly.</td>\n</tr>\n<tr>\n<td>POS tag</td>\n<td>Part of speech</td>\n<td>Category like NOUN, VERB, ADJ. Needed to lemmatize accurately.</td>\n</tr>\n<tr>\n<td>Morphology</td>\n<td>Word shape rules</td>\n<td>How a word changes form based on tense, number, case. Lemmatization depends on it.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://tartarus.org/martin/PorterStemmer/def.txt\" target=\"_blank\" rel=\"noopener\">Porter, M. F. (1980). An algorithm for suffix stripping</a> — the original paper, five pages, still the clearest explanation.</li>\n<li><a href=\"https://spacy.io/usage/linguistic-features\" target=\"_blank\" rel=\"noopener\">spaCy 101 — linguistic features</a> — how a real pipeline is wired.</li>\n<li><a href=\"https://www.nltk.org/book/ch03.html\" target=\"_blank\" rel=\"noopener\">NLTK book, chapter 3</a> — tokenization edge cases you haven&#39;t thought of yet.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "import re\n\n\nWORD_RE = re.compile(r\"[A-Za-z]+(?:'[A-Za-z]+)?|[0-9]+|[^\\sA-Za-z0-9]\")\n\n\ndef tokenize(text):\n    return WORD_RE.findall(text)\n\n\ndef stem_step_1a(word):\n    if word.endswith(\"sses\"):\n        return word[:-2]\n    if word.endswith(\"ies\"):\n        return word[:-2]\n    if word.endswith(\"ss\"):\n        return word\n    if word.endswith(\"s\") and len(word) > 1:\n        return word[:-1]\n    return word\n\n\nLEMMA_TABLE = {\n    (\"running\", \"VERB\"): \"run\",\n    (\"ran\", \"VERB\"): \"run\",\n    (\"runs\", \"VERB\"): \"run\",\n    (\"better\", \"ADJ\"): \"good\",\n    (\"best\", \"ADJ\"): \"good\",\n    (\"cats\", \"NOUN\"): \"cat\",\n    (\"cat\", \"NOUN\"): \"cat\",\n    (\"were\", \"VERB\"): \"be\",\n    (\"was\", \"VERB\"): \"be\",\n    (\"is\", \"VERB\"): \"be\",\n}\n\n\ndef lemmatize(word, pos):\n    key = (word.lower(), pos)\n    if key in LEMMA_TABLE:\n        return LEMMA_TABLE[key]\n    if pos == \"VERB\" and word.endswith(\"ing\"):\n        return word[:-3]\n    if pos == \"NOUN\" and word.endswith(\"s\"):\n        return word[:-1]\n    return word.lower()\n\n\ndef preprocess(text, pos_tagger=None):\n    tokens = tokenize(text)\n    stems = [stem_step_1a(t.lower()) for t in tokens]\n    tags = pos_tagger(tokens) if pos_tagger else [(t, \"NOUN\") for t in tokens]\n    lemmas = [lemmatize(word, pos) for word, pos in tags]\n    return {\"tokens\": tokens, \"stems\": stems, \"lemmas\": lemmas}\n\n\ndef demo_pos_tagger(tokens):\n    verbs = {\"running\", \"ran\", \"runs\", \"were\", \"was\", \"is\", \"watched\"}\n    adjs = {\"better\", \"best\"}\n    out = []\n    for t in tokens:\n        low = t.lower()\n        if low in verbs:\n            out.append((t, \"VERB\"))\n        elif low in adjs:\n            out.append((t, \"ADJ\"))\n        else:\n            out.append((t, \"NOUN\"))\n    return out\n\n\ndef main():\n    text = \"The cats were running at 3pm.\"\n    result = preprocess(text, pos_tagger=demo_pos_tagger)\n    print(f\"input:  {text}\")\n    print(f\"tokens: {result['tokens']}\")\n    print(f\"stems:  {result['stems']}\")\n    print(f\"lemmas: {result['lemmas']}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Why does a language model need preprocessing before training?",
+      "options": [
+        "Models read strings directly",
+        "Preprocessing improves GPU utilization",
+        "Models consume discrete integer tokens, not raw text",
+        "Preprocessing is required only for languages without whitespace"
+      ],
+      "answer": 2,
+      "explanation": "Models operate on integer token IDs; preprocessing bridges continuous language to discrete inputs."
+    },
+    {
+      "q": "Which preprocessing operation is rule-based suffix stripping?",
+      "options": [
+        "POS tagging",
+        "Stemming",
+        "Lemmatization",
+        "Tokenization"
+      ],
+      "answer": 1,
+      "explanation": "Stemming chops suffixes with rules; it is fast but can be wrong."
+    },
+    {
+      "q": "What does the Porter stemmer step 1a return for the word 'ponies'?",
+      "options": [
+        "poni",
+        "ponies",
+        "pony",
+        "ponie"
+      ],
+      "answer": 0,
+      "explanation": "The 'ies' rule replaces the suffix with 'i', producing 'poni'; step 1b in real Porter cleans it up."
+    },
+    {
+      "q": "Why does lemmatization usually need a POS tag?",
+      "options": [
+        "Unicode handling",
+        "Grammatical context disambiguates forms like 'better' (ADJ) versus 'better' (VERB)",
+        "To reduce memory usage",
+        "Speed"
+      ],
+      "answer": 1,
+      "explanation": "Lemmas depend on grammatical role; without the tag the lookup is ambiguous."
+    },
+    {
+      "q": "When translating NLTK Penn Treebank POS tags to WordNet tags, what does a tag starting with 'V' map to?",
+      "options": [
+        "'r' (adverb)",
+        "'a' (adjective)",
+        "'v' (verb)",
+        "'n' (noun)"
+      ],
+      "answer": 2,
+      "explanation": "Verb-prefixed Penn Treebank tags map to WordNet 'v'."
+    },
+    {
+      "q": "What is 'training/inference mismatch' in NLP preprocessing?",
+      "options": [
+        "A GPU memory issue",
+        "Training and serving apply different preprocessing, so the model sees an unfamiliar distribution at inference",
+        "Mixing tokenizer libraries within a notebook",
+        "Different batch sizes between train and test"
+      ],
+      "answer": 1,
+      "explanation": "Different preprocessing at training vs inference is the most common production NLP failure."
+    },
+    {
+      "q": "Which tool would you reach for in a transformer pipeline instead of classical preprocessing?",
+      "options": [
+        "NLTK word_tokenize",
+        "The model's own tokenizer (e.g. via tokenizers / transformers)",
+        "spaCy en_core_web_sm",
+        "A regex tokenizer"
+      ],
+      "answer": 1,
+      "explanation": "Transformer models ship a paired tokenizer; classical preprocessing is bypassed."
+    },
+    {
+      "q": "Why pin NLTK and spaCy versions in requirements?",
+      "options": [
+        "Newer versions are slower",
+        "Older versions support more languages",
+        "Tokenizer and lemmatizer behavior shifts between minor releases, silently changing training distribution",
+        "License compatibility"
+      ],
+      "answer": 2,
+      "explanation": "Library upgrades can change tokenization output, drifting from the training distribution."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/01-text-processing"
+  }
+}

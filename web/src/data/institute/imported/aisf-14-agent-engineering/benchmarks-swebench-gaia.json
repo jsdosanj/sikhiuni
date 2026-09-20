@@ -1,0 +1,106 @@
+{
+  "id": "aisf-14-agent-engineering::benchmarks-swebench-gaia",
+  "num": 19,
+  "slug": "benchmarks-swebench-gaia",
+  "title": "Benchmarks: SWE-bench, GAIA, AgentBench",
+  "tagline": "Three benchmarks anchor agent evaluation in 2026. SWE-bench tests code patching. GAIA tests generalist tool use. AgentBench tests multi-environment reasoning. Know their composition, their contamination story, and what they do not measure.",
+  "type": "Learn",
+  "languages": "Python (stdlib)",
+  "time": "~60 minutes",
+  "objectives": [
+    "Name SWE-bench's test harness (FAIL_TO_PASS) and explain why it gates on unit tests.",
+    "Explain why SWE-bench Verified (OpenAI, 500 tasks) exists and what it removes.",
+    "Describe GAIA's design: simple for humans, hard for AI; three difficulty levels.",
+    "Name AgentBench's eight environments and its primary blocker for open-source LLMs.",
+    "Summarize the SWE-bench+ contamination finding and its implications."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Leaderboards tell you which model wins on one benchmark. They do not tell you:</p>\n<ul>\n<li>Whether the benchmark is contaminated (solutions in training data, test leakage).</li>\n<li>Whether the benchmark measures what you care about (code vs browsing vs generalist).</li>\n<li>Whether the evaluator is robust (AST matching, state checks, human review).</li>\n</ul>\n<p>Know the three anchoring benchmarks and their failure modes before you quote a number.</p>\n<h2>The Concept</h2>\n<h3>SWE-bench (Jimenez et al., ICLR 2024 oral)</h3>\n<ul>\n<li>2,294 real GitHub issues from 12 popular Python repos.</li>\n<li>Agent gets: the codebase at the pre-fix commit + natural-language issue description.</li>\n<li>Agent produces: a patch.</li>\n<li>Evaluator: apply patch, run the repo&#39;s test suite. The patch must flip FAIL_TO_PASS tests (previously failing, now passing) without breaking PASS_TO_PASS tests.</li>\n</ul>\n<p>SWE-agent (Yang et al., 2024) hit 12.5% at release by emphasizing agent-computer interfaces (file editor commands, search syntax the model understands).</p>\n<h3>SWE-bench Verified</h3>\n<p>OpenAI, Aug 2024. Human-curated 500-task subset. Removes ambiguous issues, unreliable tests, and tasks where the fix was unclear. Primary benchmark for &quot;does your agent ship real patches?&quot;</p>\n<h3>Contamination</h3>\n<ul>\n<li>Over 94% of SWE-bench issues predate most model cutoffs.</li>\n<li><strong>SWE-bench+</strong> found 32.67% of successful patches leaked solutions in the issue text (model saw the fix in the description), and 31.08% were suspicious due to weak test coverage.</li>\n<li>Verified is cleaner but not contamination-free.</li>\n</ul>\n<p>Practical implication: a model that scores 50% on SWE-bench may score 35% on SWE-bench+. Always report both if you claim SWE-bench performance.</p>\n<h3>GAIA (Mialon et al., Nov 2023)</h3>\n<ul>\n<li>466 questions; 300 retained for the private leaderboard at huggingface.co/gaia-benchmark.</li>\n<li>Design philosophy: &quot;conceptually simple for humans (92%) but hard for AI (GPT-4 with plugins: 15%).&quot;</li>\n<li>Tests reasoning, multi-modality, web, tool use.</li>\n<li>Three difficulty levels; Level 3 requires long tool chains across modalities.</li>\n</ul>\n<p>GAIA is what you run to measure &quot;generalist capability.&quot; Do not confuse with code-specific benchmarks.</p>\n<h3>AgentBench (Liu et al., ICLR 2024)</h3>\n<ul>\n<li>8 environments across code (Bash, DB, KG), games (Alfworld, LTP), web (WebShop, Mind2Web), and open-ended generation.</li>\n<li>Multi-turn, ~4k-13k turns per split.</li>\n<li>Primary finding: long-term reasoning, decision-making, and instruction following are the blockers for OSS LLMs catching up to commercial.</li>\n</ul>\n<h3>What these do not measure</h3>\n<ul>\n<li>Real-world operational cost (tokens, wall-clock).</li>\n<li>Safety behavior in adversarial conditions.</li>\n<li>Performance on your domain (use your own evals, Lesson 30).</li>\n<li>Tail failures (benchmarks average; production operators care about the worst 1%).</li>\n</ul>\n<h3>Where benchmarking goes wrong</h3>\n<ul>\n<li><strong>Single-number fixation.</strong> SWE-bench 50% tells you less than the P50/P75/P95 cost + step distribution.</li>\n<li><strong>Contaminated claims.</strong> Reporting SWE-bench without mentioning Verified or SWE-bench+ is misleading.</li>\n<li><strong>Benchmark-as-development-target.</strong> Optimizing for the benchmark diverges from production usefulness.</li>\n</ul>\n<p class=\"i-lesson-figure\"><em>Diagram <code>ae-swebench-gate</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements a toy SWE-bench-like harness:</p>\n<ul>\n<li>Synthetic bug-fix tasks (3 tasks).</li>\n<li>A scripted &quot;agent&quot; that proposes patches.</li>\n<li>A test runner that checks FAIL_TO_PASS (bug now fixed) and PASS_TO_PASS (nothing broken).</li>\n<li>A GAIA-style difficulty classifier based on question decomposition depth.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The output shows resolution rate per task + per difficulty and makes the evaluator rules concrete.</p>\n<h2>Use It</h2>\n<ul>\n<li><strong>SWE-bench Verified</strong> for code agents. Always report Verified scores.</li>\n<li><strong>GAIA</strong> for generalist agents. Use the private leaderboard split.</li>\n<li><strong>AgentBench</strong> for multi-environment comparison.</li>\n<li><strong>Custom evals</strong> (Lesson 30) for your product&#39;s actual shape.</li>\n</ul>\n<h2>Ship It</h2>\n<p><code>outputs/skill-benchmark-harness.md</code> builds a SWE-bench-style harness for any codebase-task pair with FAIL_TO_PASS / PASS_TO_PASS gating.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Port the toy harness to run on a real repo (pick one of yours). Write 3 FAIL_TO_PASS tests for known bugs.</li>\n<li>Add a step-count metric. On your 3 tasks, how many agent steps per resolution?</li>\n<li>Read the SWE-bench+ paper. Implement a solution-leakage check (pattern-match the issue text against the diff).</li>\n<li>Download a GAIA question from the public split. Trace what a GPT-4-class agent would do. What tools does it need?</li>\n<li>Read AgentBench&#39;s per-environment breakdown. Which environment mirrors your product surface? What does &quot;SOTA&quot; look like there?</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>SWE-bench</td>\n<td>&quot;Code agent benchmark&quot;</td>\n<td>2,294 GitHub issues; patch must flip FAIL_TO_PASS tests</td>\n</tr>\n<tr>\n<td>SWE-bench Verified</td>\n<td>&quot;Clean SWE-bench&quot;</td>\n<td>500 human-curated tasks, OpenAI</td>\n</tr>\n<tr>\n<td>FAIL_TO_PASS</td>\n<td>&quot;Fix gate&quot;</td>\n<td>Tests previously failing that must pass after the patch</td>\n</tr>\n<tr>\n<td>PASS_TO_PASS</td>\n<td>&quot;No-regression gate&quot;</td>\n<td>Tests that were passing and must still pass</td>\n</tr>\n<tr>\n<td>GAIA</td>\n<td>&quot;Generalist benchmark&quot;</td>\n<td>466 human-easy / AI-hard multi-tool questions</td>\n</tr>\n<tr>\n<td>AgentBench</td>\n<td>&quot;Multi-env benchmark&quot;</td>\n<td>8 environments; long-horizon multi-turn</td>\n</tr>\n<tr>\n<td>Contamination</td>\n<td>&quot;Training-set leak&quot;</td>\n<td>Benchmark tasks present in model training</td>\n</tr>\n<tr>\n<td>SWE-bench+</td>\n<td>&quot;Contamination audit&quot;</td>\n<td>32.67% solution leakage found in successful SWE-bench patches</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2310.06770\" target=\"_blank\" rel=\"noopener\">Jimenez et al., SWE-bench (arXiv:2310.06770)</a> — the original benchmark</li>\n<li><a href=\"https://openai.com/index/introducing-swe-bench-verified/\" target=\"_blank\" rel=\"noopener\">OpenAI, SWE-bench Verified</a> — the curated subset</li>\n<li><a href=\"https://arxiv.org/abs/2311.12983\" target=\"_blank\" rel=\"noopener\">Mialon et al., GAIA (arXiv:2311.12983)</a> — generalist benchmark</li>\n<li><a href=\"https://arxiv.org/abs/2308.03688\" target=\"_blank\" rel=\"noopener\">Liu et al., AgentBench (arXiv:2308.03688)</a> — multi-environment suite</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy SWE-bench-style harness plus a GAIA-style difficulty classifier.\n\nSWE-bench: bug-fix tasks with FAIL_TO_PASS and PASS_TO_PASS gates.\nGAIA: simple-for-humans, hard-for-AI questions scored by decomposition depth.\nBoth are synthetic; the point is to make the evaluator rules concrete.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable\n\n\n@dataclass\nclass Task:\n    tid: str\n    description: str\n    state_before: dict[str, int]\n    patch: Callable[[dict[str, int]], dict[str, int]]\n    fail_to_pass: list[tuple[str, Callable[[dict[str, int]], bool]]]\n    pass_to_pass: list[tuple[str, Callable[[dict[str, int]], bool]]]\n\n\n@dataclass\nclass TaskResult:\n    tid: str\n    ftp_passed: int\n    ftp_total: int\n    ptp_passed: int\n    ptp_total: int\n    resolved: bool\n\n\ndef run_task(task: Task) -> TaskResult:\n    state = dict(task.state_before)\n    ftp_pre = sum(1 for _, check in task.fail_to_pass if check(state))\n    ptp_pre = sum(1 for _, check in task.pass_to_pass if check(state))\n\n    new_state = task.patch(dict(state))\n\n    ftp_post = sum(1 for _, check in task.fail_to_pass if check(new_state))\n    ptp_post = sum(1 for _, check in task.pass_to_pass if check(new_state))\n\n    ftp_fixed = ftp_post - ftp_pre\n    ptp_broke = ptp_pre - ptp_post\n    resolved = (ftp_post == len(task.fail_to_pass)) and (ptp_broke == 0)\n\n    return TaskResult(\n        tid=task.tid,\n        ftp_passed=ftp_post, ftp_total=len(task.fail_to_pass),\n        ptp_passed=ptp_post, ptp_total=len(task.pass_to_pass),\n        resolved=resolved,\n    )\n\n\ndef gaia_level(question: str) -> int:\n    steps = sum(1 for w in question.lower().split()\n                if w in {\"then\", \"after\", \"finally\", \"next\", \"and\"}) + 1\n    modalities = sum(word in question.lower() for word in\n                     (\"image\", \"video\", \"audio\", \"pdf\", \"chart\", \"graph\"))\n    tools = sum(word in question.lower() for word in\n                (\"search\", \"look up\", \"find\", \"visit\", \"extract\"))\n    score = steps + modalities + tools\n    if score <= 2:\n        return 1\n    if score <= 5:\n        return 2\n    return 3\n\n\ndef swe_demo() -> None:\n    print(\"-\" * 70)\n    print(\"SWE-bench-style harness (FAIL_TO_PASS + PASS_TO_PASS)\")\n    print(\"-\" * 70)\n\n    tasks = [\n        Task(\n            tid=\"t001\",\n            description=\"fix off-by-one in counter\",\n            state_before={\"counter\": 0, \"multiplier\": 2},\n            patch=lambda s: {**s, \"counter\": s[\"counter\"] + 1},\n            fail_to_pass=[(\"counter > 0\", lambda s: s[\"counter\"] > 0)],\n            pass_to_pass=[(\"multiplier unchanged\", lambda s: s[\"multiplier\"] == 2)],\n        ),\n        Task(\n            tid=\"t002\",\n            description=\"fix multiplier regression\",\n            state_before={\"counter\": 1, \"multiplier\": 0},\n            patch=lambda s: {**s, \"multiplier\": 2},\n            fail_to_pass=[(\"multiplier > 0\", lambda s: s[\"multiplier\"] > 0)],\n            pass_to_pass=[(\"counter unchanged\", lambda s: s[\"counter\"] == 1)],\n        ),\n        Task(\n            tid=\"t003\",\n            description=\"agent overreaches and breaks a passing test\",\n            state_before={\"counter\": 1, \"multiplier\": 2, \"flag\": True},\n            patch=lambda s: {**s, \"counter\": 2, \"flag\": False},\n            fail_to_pass=[(\"counter > 1\", lambda s: s[\"counter\"] > 1)],\n            pass_to_pass=[(\"flag stays true\", lambda s: s[\"flag\"]),\n                          (\"multiplier unchanged\", lambda s: s[\"multiplier\"] == 2)],\n        ),\n    ]\n\n    resolved_count = 0\n    for task in tasks:\n        result = run_task(task)\n        print(f\"  {result.tid}: {task.description}\")\n        print(f\"    FAIL_TO_PASS: {result.ftp_passed}/{result.ftp_total}\")\n        print(f\"    PASS_TO_PASS: {result.ptp_passed}/{result.ptp_total}\")\n        print(f\"    resolved:     {result.resolved}\")\n        if result.resolved:\n            resolved_count += 1\n    print(f\"\\nresolution rate: {resolved_count}/{len(tasks)}\")\n\n\ndef gaia_demo() -> None:\n    print(\"\\n\" + \"-\" * 70)\n    print(\"GAIA-style difficulty classifier\")\n    print(\"-\" * 70)\n    questions = [\n        \"What is the capital of France?\",\n        \"Search for the Wikipedia article on ReAct and extract the first author.\",\n        \"Visit the arXiv listing for ReAct, find the GitHub linked in the PDF, \"\n        \"then count the open issues with label 'bug' and return the ratio \"\n        \"of bugs to total issues as a decimal.\",\n    ]\n    for q in questions:\n        level = gaia_level(q)\n        print(f\"  [Level {level}] {q[:70]}\")\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"BENCHMARKS: SWE-bench, GAIA — Phase 14, Lesson 19\")\n    print(\"=\" * 70)\n    swe_demo()\n    gaia_demo()\n    print()\n    print(\"SWE-bench: patch-based, unit-test-gated. Verified removes ambiguity.\")\n    print(\"GAIA: depth + modalities + tools -> difficulty level.\")\n    print(\"report both your benchmark score AND the Verified/+-audited score.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What does SWE-bench's evaluator check on a candidate patch?",
+      "options": [
+        "Patch length under 200 lines",
+        "Previously failing tests now pass (FAIL_TO_PASS) and previously passing tests still pass (PASS_TO_PASS)",
+        "BLEU score against the reference fix",
+        "Patch passes a separate LLM judge"
+      ],
+      "answer": 1,
+      "explanation": "The harness gates on test transitions: bug-revealing tests must flip while regression tests must stay green."
+    },
+    {
+      "q": "Why does SWE-bench Verified exist?",
+      "options": [
+        "It includes more languages",
+        "It runs faster",
+        "OpenAI's 500-task human-curated subset removes ambiguous issues and unreliable tests",
+        "It uses a different patch format"
+      ],
+      "answer": 2,
+      "explanation": "Verified is the cleaner subset for credible reporting."
+    },
+    {
+      "q": "What did SWE-bench+ find about successful patches?",
+      "options": [
+        "32.67% leaked solution text in the issue and 31.08% had suspiciously weak test coverage",
+        "Patches always exceeded 1000 lines",
+        "There is no contamination",
+        "All patches were memorized"
+      ],
+      "answer": 0,
+      "explanation": "SWE-bench+ flagged solution leakage and weak coverage on a large fraction of successful patches."
+    },
+    {
+      "q": "What is GAIA's design philosophy?",
+      "options": [
+        "Hard for humans, easy for AI",
+        "Pure benchmark of vector retrieval",
+        "Only single-turn questions",
+        "Conceptually simple for humans (about 92%) but hard for AI (early GPT-4 with plugins: about 15%)"
+      ],
+      "answer": 3,
+      "explanation": "GAIA is intentionally easy-for-humans, hard-for-AI, testing reasoning + tools + modality."
+    },
+    {
+      "q": "Which is NOT one of AgentBench's environment categories?",
+      "options": [
+        "Games (Alfworld, LTP)",
+        "Web (WebShop, Mind2Web)",
+        "Gradient (RL, IRL)",
+        "Code (Bash, DB, KG)"
+      ],
+      "answer": 2,
+      "explanation": "AgentBench covers code, games, web, and open-ended generation. There is no gradient category."
+    },
+    {
+      "q": "What does the lesson identify as the wrong way to report SWE-bench numbers?",
+      "options": [
+        "Reporting per-repo breakdowns",
+        "Reporting one aggregate number without mentioning Verified or SWE-bench+ context",
+        "Reporting step counts",
+        "Reporting wall-clock"
+      ],
+      "answer": 1,
+      "explanation": "Single-number fixation hides contamination and cost; always report Verified and per-distribution context."
+    },
+    {
+      "q": "Which dimension do these benchmarks NOT measure?",
+      "options": [
+        "Test transitions",
+        "Step counts",
+        "Per-task success",
+        "Real-world operational cost (tokens, wall-clock), adversarial safety, and your own domain"
+      ],
+      "answer": 3,
+      "explanation": "Benchmarks aggregate; they do not capture cost, adversarial robustness, or your domain."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/19-benchmarks-swebench-gaia"
+  }
+}

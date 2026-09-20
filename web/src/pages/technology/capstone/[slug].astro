@@ -1,0 +1,147 @@
+---
+import Base from '../../../layouts/Base.astro';
+import InstituteRail from '../../../components/institute/InstituteRail.astro';
+import { phases, professors } from '../../../lib/institute';
+import capstone from '../../../data/institute/capstone/briefs.json';
+
+export function getStaticPaths() {
+  return capstone.briefs.map((b) => ({ params: { slug: b.slug }, props: { b } }));
+}
+const { b } = Astro.props;
+const prof = professors['sikh-code'];
+const phaseFor = (slug: string) => phases.find((p) => p.slug === slug);
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'LearningResource',
+  name: `${b.title}, Build for the Panth`,
+  description: b.oneLine,
+  learningResourceType: 'Project',
+  educationalLevel: 400,
+  isAccessibleForFree: true,
+  inLanguage: 'en',
+  provider: { '@type': 'EducationalOrganization', name: 'Sikhi University · Institute of Technology' },
+  isPartOf: { '@type': 'Course', name: 'Build for the Panth' },
+};
+---
+<Base
+  title={`${b.title}, Build for the Panth`}
+  description={`A Build for the Panth capstone brief: ${b.oneLine} Scope, suggested stack, data sources, and what shipped looks like.`}
+  institute
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} slot="head" />
+  <InstituteRail />
+
+  <header class="i-chead">
+    <div class="i-wrap">
+      <a class="i-mono i-ccrumb" href="/technology/track/build-for-the-panth">&larr; Build for the Panth</a>
+      <span class="i-label i-mono">capstone brief &middot; CC BY-SA 4.0</span>
+      <h1>{b.title}</h1>
+      <p class="i-prose i-clede">{b.oneLine}</p>
+    </div>
+  </header>
+
+  <div class="i-cwrap">
+    <section class="i-cblock i-cseva">
+      <span class="i-label">why this is seva</span>
+      <p class="i-prose">{b.seva}</p>
+      <p class="i-mono i-cserves"><span>serves</span> {b.serves}</p>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">the problem today</span>
+      <p class="i-prose">{b.problem}</p>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">the smallest useful version, build this first</span>
+      <ul class="i-clist">{b.mvp.map((x) => <li class="i-prose">{x}</li>)}</ul>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">stretch goals, only after the MVP is in someone's hands</span>
+      <ul class="i-clist i-cdim">{b.stretch.map((x) => <li class="i-prose">{x}</li>)}</ul>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">suggested stack</span>
+      <p class="i-prose">{b.stack}</p>
+      <p class="i-cphases">
+        <span class="i-mono">draws on</span>
+        {b.phases.map((slug) => {
+          const p = phaseFor(slug);
+          return p
+            ? <a class="i-cpill" href={`/technology/track/${p.slug}`}>Phase {String(p.num).padStart(2, '0')} &middot; {p.title}</a>
+            : null;
+        })}
+      </p>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">data &amp; sources</span>
+      <ul class="i-clist">{b.data.map((x) => <li class="i-prose">{x}</li>)}</ul>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">what shipped looks like</span>
+      <ul class="i-clist i-cdone">{b.done.map((x) => <li class="i-prose">{x}</li>)}</ul>
+    </section>
+
+    <section class="i-cblock">
+      <span class="i-label">a starting point</span>
+      <p class="i-prose" style="font-size:13.5px;color:var(--i-muted)">A scaffold, not a solution, the shape of a repo you fill in. Names are language-agnostic on purpose.</p>
+      <pre class="i-cstarter"><code>{b.starter}</code></pre>
+    </section>
+
+    <section class="i-cblock i-cclose">
+      <p class="i-prose">
+        This capstone has no exam and no separate certificate, the phase certificates are the
+        credential. What it asks for is a README and a working thing a sangat can open. When it's
+        live, show it to the people it's for.
+      </p>
+      <p class="i-prose" style="font-size:13px;color:var(--i-muted)">
+        {capstone.licenseNote}
+      </p>
+      <p style="margin-top:16px"><a class="i-btn i-btn-ghost" href="/technology/track/build-for-the-panth">&larr; All five briefs</a></p>
+    </section>
+  </div>
+
+  <style>
+    .i-chead { border-bottom: 1px solid var(--i-line); padding: 32px 0 30px; background: var(--i-ground-deep); }
+    .i-ccrumb { display: block; width: fit-content; color: var(--i-ink-dim); text-decoration: none; font-size: 12px; margin-bottom: 12px; }
+    .i-ccrumb:hover { color: var(--i-filament); }
+    .i-chead h1 { margin: 8px 0 0; font-size: clamp(24px, 4vw, 34px); }
+    .i-clede { margin-top: 12px; font-size: 17px; max-width: 56ch; }
+
+    .i-cwrap { max-width: 760px; margin: 0 auto; padding: 8px 24px 80px; }
+    .i-cblock { padding: 26px 0; border-bottom: 1px solid var(--i-line-soft); }
+    .i-cblock:last-child { border-bottom: 0; }
+    .i-cblock > .i-label { display: block; margin-bottom: 10px; }
+    .i-cseva .i-prose { font-size: 15.5px; }
+    .i-cserves { margin: 12px 0 0; font-size: 12px; color: var(--i-ink-dim); }
+    .i-cserves span { color: var(--i-muted); text-transform: uppercase; letter-spacing: 0.14em; margin-right: 8px; }
+
+    .i-clist { margin: 0; padding-left: 20px; }
+    .i-clist li { margin: 7px 0; line-height: 1.6; }
+    .i-cdim li { color: var(--i-muted); }
+    .i-cdone li::marker { color: var(--i-signal); }
+
+    .i-cphases { margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .i-cphases > .i-mono { font-size: 11px; color: var(--i-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+    .i-cpill {
+      font-family: "JetBrains Mono", monospace; font-size: 11.5px;
+      border: 1px solid var(--i-line); border-radius: var(--i-r-sm);
+      padding: 4px 9px; text-decoration: none; color: var(--i-ink-dim);
+    }
+    .i-cpill:hover { border-color: color-mix(in srgb, var(--i-signal) 45%, var(--i-line)); color: var(--i-filament); }
+
+    .i-cstarter {
+      margin: 12px 0 0; background: var(--i-surface-2); border: 1px solid var(--i-line);
+      border-radius: var(--i-r-md); padding: 16px 18px; overflow-x: auto;
+      font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.65; color: var(--i-ink-dim);
+      white-space: pre;
+    }
+    .i-cclose { padding-top: 26px; }
+  </style>
+</Base>

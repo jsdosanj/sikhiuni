@@ -1,0 +1,105 @@
+{
+  "id": "aisf-14-agent-engineering::tree-of-thoughts-lats",
+  "num": 4,
+  "slug": "tree-of-thoughts-lats",
+  "title": "Tree of Thoughts and LATS: Deliberate Search",
+  "tagline": "A single chain-of-thought trajectory has no room to backtrack. ToT (Yao et al., 2023) turns reasoning into a tree with self-evaluation on each node. LATS (Zhou et al., 2024) unifies ToT with ReAct and Reflexion under Monte Carlo Tree Search. Game of 24 goes from 4% (CoT) to 74% (ToT); LATS hits 92.7% pass@1 on HumanEval.",
+  "type": "Build",
+  "languages": "Python (stdlib)",
+  "time": "~75 minutes",
+  "objectives": [
+    "Frame reasoning as search: nodes are \"thoughts,\" edges are \"expansions,\" value is \"how promising.\"",
+    "Implement a stdlib ToT-style BFS tree search with self-evaluation scoring.",
+    "Extend to a toy LATS MCTS loop with select / expand / simulate / backpropagate.",
+    "Decide when search is worth the token multiplier (Game of 24, code generation) and when a single trajectory is enough (simple Q&A)."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Chain-of-thought is a linear walk. If the first step is wrong, every subsequent step works on a bad premise. On Game of 24 (use four digits with + − × ÷ to make 24), GPT-4 CoT hits 4% accuracy. The model picks the wrong subexpression early and cannot recover.</p>\n<p>What reasoning needs is the ability to propose multiple candidates, evaluate them, pick the promising ones, and backtrack when dead ends appear. That is search. Tree of Thoughts and LATS are the two canonical formulations.</p>\n<h2>The Concept</h2>\n<h3>Tree of Thoughts (Yao et al., NeurIPS 2023)</h3>\n<p>Each node is a coherent intermediate step (&quot;a thought&quot;). Each node can expand to K child thoughts. The LLM self-evaluates each node with a scoring prompt. Search explores the tree — BFS, DFS, or beam.</p>\n<pre><code>                     (root: &quot;find 24 from 4 6 4 1&quot;)\n                    /               |            \\\n           (&quot;6 - 4 = 2&quot;)    (&quot;4 + 1 = 5&quot;)    (&quot;4 * 6 = 24&quot;)  &lt;- Score: HIGH\n              /   \\              |                  |\n          ...    ...          ...                finish\n</code></pre>\n<p>Self-evaluation is the load-bearing piece. The paper shows three variants: <code>sure / likely / impossible</code> classification, <code>1..10</code> numeric score, and vote among candidates. All three beat CoT substantially on Game of 24 (4% -&gt; 74% with GPT-4).</p>\n<h3>LATS (Zhou et al., ICML 2024)</h3>\n<p>LATS unifies ToT, ReAct, and Reflexion under MCTS. The LLM plays three roles:</p>\n<ul>\n<li><strong>Policy</strong>: propose candidate next actions (ReAct-style).</li>\n<li><strong>Value function</strong>: score a partial trajectory (ToT-style self-eval).</li>\n<li><strong>Self-reflector</strong>: on failure, write a natural-language reflection (Reflexion-style) and use it to reseed future rollouts.</li>\n</ul>\n<p>Environment feedback (observations) mixes into the value function so the search is informed by real tool results, not just model opinions. Results at paper time: HumanEval pass@1 92.7% with GPT-4 (SOTA), WebShop average 75.9 with GPT-3.5 (approaching gradient-based fine-tuning).</p>\n<h3>MCTS, minimally</h3>\n<p>Four phases per iteration:</p>\n<ol>\n<li><strong>Select</strong> — walk from root to a leaf using UCT (upper confidence bound for trees).</li>\n<li><strong>Expand</strong> — generate K children via the policy.</li>\n<li><strong>Simulate</strong> — rollout from a child using the policy, score the leaf with the value function (or environment reward).</li>\n<li><strong>Backpropagate</strong> — update visit counts and value estimates up the path.</li>\n</ol>\n<p>UCT formula: <code>Q(s, a) + c * sqrt(ln N(s) / N(s, a))</code>. First term is exploitation; second is exploration. Tune <code>c</code> per task.</p>\n<h3>The cost reality</h3>\n<p>Search explodes tokens. ToT on Game of 24 uses 100–1000x the tokens of CoT. LATS is similar. This is not free; reserve search for:</p>\n<ul>\n<li>Tasks where a single trajectory is demonstrably insufficient (Game of 24, complex code).</li>\n<li>Tasks where wall-clock is less important than correctness.</li>\n<li>Tasks with a cheap, reliable value function (unit tests for code, explicit target for math).</li>\n</ul>\n<p>If your task has a single right answer and a noisy evaluator, search often makes things worse — it finds a &quot;good-scoring&quot; wrong answer.</p>\n<h3>2026 positioning</h3>\n<p>Most production agents do not run LATS. They run ReAct with tool-grounded verification (CRITIC, Lesson 05). Search shows up in specialized niches:</p>\n<ul>\n<li>Coding agents that run tests as the value function (HumanEval-style).</li>\n<li>Deep-research agents that explore multiple query paths.</li>\n<li>Planning-heavy workflows inside LangGraph subgraphs.</li>\n</ul>\n<p>AlphaEvolve (Lesson 11) is the 2025 extreme: evolutionary search over code, machine-checkable fitness, frontier gains (first 4x4 matmul improvement in 56 years).</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>tree-of-thoughts</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<p><code>code/main.py</code> implements:</p>\n<ul>\n<li>A tiny ToT BFS on a stylized &quot;pick arithmetic ops&quot; task.</li>\n<li>A toy LATS MCTS loop on the same task (Select / Expand / Simulate / Backpropagate) with UCT selection.</li>\n<li>A value function that composes a symbolic score plus a self-eval score.</li>\n</ul>\n<p>Run it:</p>\n<pre><code>python3 code/main.py\n</code></pre>\n<p>The trace shows ToT expanding three candidates per node with BFS, compared to LATS converging on the best rollout via MCTS. Token counts printed for both.</p>\n<h2>Use It</h2>\n<p>LangGraph ships ToT-style exploration as subgraph patterns; the LangChain team&#39;s blog on LATS (May 2024) is the reference tutorial. LlamaIndex ships a <code>TreeOfThoughts</code> agent. For most 2026 production agents this pattern lives behind an <code>if task_complexity &gt; threshold: use_search()</code> gate — see the evaluator-optimizer pattern in Lesson 05.</p>\n<h2>Ship It</h2>\n<p><code>outputs/skill-search-policy.md</code> selects between linear ReAct, ToT, LATS, and evolutionary search given task shape, budget, and evaluator fidelity.</p>\n<h2>Exercises</h2>\n<ol>\n<li>Run the toy LATS with UCT c=0.1 vs c=2.0. What changes in the trace?</li>\n<li>Swap the value function for a noisier scorer (add random jitter). Does MCTS still find the best leaf? What is the minimum signal-to-noise it tolerates?</li>\n<li>Implement beam-search ToT (keep top-k at each level) and compare to BFS. Which is better on a tight token budget?</li>\n<li>Read LATS Section 5.1. Reproduce the HumanEval trajectory count: how many rollouts does it take to hit the reported pass@1?</li>\n<li>Read the LATS paper&#39;s discussion on &quot;when LATS helps less.&quot; Write a one-paragraph decision rule mapping task shape to search strategy.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Tree of Thoughts</td>\n<td>&quot;Branching CoT&quot;</td>\n<td>Yao et al. — tree of thought nodes with self-evaluation</td>\n</tr>\n<tr>\n<td>LATS</td>\n<td>&quot;MCTS for LLMs&quot;</td>\n<td>Zhou et al. — unifies ToT + ReAct + Reflexion under MCTS</td>\n</tr>\n<tr>\n<td>UCT</td>\n<td>&quot;Upper confidence bound&quot;</td>\n<td>Select formula balancing exploitation (Q) and exploration (ln N / n)</td>\n</tr>\n<tr>\n<td>Value function</td>\n<td>&quot;How good is this state&quot;</td>\n<td>Prompted LLM score or environment reward; feeds backprop</td>\n</tr>\n<tr>\n<td>Policy</td>\n<td>&quot;Action proposer&quot;</td>\n<td>ReAct-style generator; emits candidate next thoughts/actions</td>\n</tr>\n<tr>\n<td>Rollout</td>\n<td>&quot;Simulated trajectory&quot;</td>\n<td>Walk from a node to a leaf using policy, score with value</td>\n</tr>\n<tr>\n<td>Backpropagate</td>\n<td>&quot;Update ancestors&quot;</td>\n<td>Push the leaf&#39;s reward up the path, updating visit counts and Q</td>\n</tr>\n<tr>\n<td>Search cost</td>\n<td>&quot;Token explosion&quot;</td>\n<td>100-1000x CoT on Game of 24; budget before you adopt</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://arxiv.org/abs/2305.10601\" target=\"_blank\" rel=\"noopener\">Yao et al., Tree of Thoughts (arXiv:2305.10601)</a> — the canonical paper</li>\n<li><a href=\"https://arxiv.org/abs/2310.04406\" target=\"_blank\" rel=\"noopener\">Zhou et al., LATS (arXiv:2310.04406)</a> — MCTS with Reflexion feedback</li>\n<li><a href=\"https://docs.langchain.com/oss/python/langgraph/overview\" target=\"_blank\" rel=\"noopener\">LangGraph overview</a> — subgraph patterns for search</li>\n<li><a href=\"https://arxiv.org/abs/2506.13131\" target=\"_blank\" rel=\"noopener\">AlphaEvolve (arXiv:2506.13131)</a> — evolutionary search with programmatic evaluators</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Toy Tree-of-Thoughts BFS and LATS MCTS on a stylized arithmetic search.\n\nTask: given integers [4, 6, 4, 1], find an expression using +, -, *, / that\nevaluates to 24. This mirrors the Game of 24 benchmark from Yao et al.\n\nToT is a BFS with a prompted value function. LATS is MCTS over the same\nsearch space with UCT selection.\n\nStdlib only; no LLM. Value function is symbolic (distance from 24).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport itertools\nimport math\nimport random\nfrom dataclasses import dataclass, field\n\n\nNUMBERS = [4, 6, 4, 1]\nTARGET = 24\nOPS = [\"+\", \"-\", \"*\", \"/\"]\n\n\n@dataclass\nclass Node:\n    state: tuple[float, ...]\n    trace: list[str]\n    visits: int = 0\n    value_sum: float = 0.0\n    children: list[\"Node\"] = field(default_factory=list)\n\n    @property\n    def q(self) -> float:\n        return self.value_sum / self.visits if self.visits else 0.0\n\n\ndef evaluate(a: float, op: str, b: float) -> float | None:\n    if op == \"+\":\n        return a + b\n    if op == \"-\":\n        return a - b\n    if op == \"*\":\n        return a * b\n    if op == \"/\":\n        return a / b if b != 0 else None\n    return None\n\n\ndef expand(node: Node) -> list[Node]:\n    children: list[Node] = []\n    state = node.state\n    if len(state) < 2:\n        return children\n    for i, j in itertools.combinations(range(len(state)), 2):\n        for op in OPS:\n            a, b = state[i], state[j]\n            v = evaluate(a, op, b)\n            if v is None:\n                continue\n            remaining = [s for k, s in enumerate(state) if k not in (i, j)]\n            new_state = tuple(sorted(remaining + [v], reverse=True))\n            step = f\"{a}{op}{b}={v}\"\n            children.append(Node(state=new_state, trace=node.trace + [step]))\n    return children\n\n\ndef value(node: Node) -> float:\n    if len(node.state) == 1:\n        result = node.state[0]\n        return 1.0 if abs(result - TARGET) < 1e-6 else -abs(result - TARGET) / 100.0\n    best_distance = min(abs(v - TARGET) for v in node.state)\n    return -best_distance / 100.0\n\n\ndef tot_bfs(root: Node, max_expansions_per_level: int = 8,\n            max_depth: int = 3) -> tuple[Node | None, int]:\n    frontier = [root]\n    expansions = 0\n    for _ in range(max_depth):\n        scored: list[tuple[float, Node]] = []\n        for node in frontier:\n            for child in expand(node):\n                expansions += 1\n                scored.append((value(child), child))\n                if value(child) > 0.99:\n                    return child, expansions\n        scored.sort(key=lambda p: p[0], reverse=True)\n        frontier = [n for _, n in scored[:max_expansions_per_level]]\n    best = max(frontier, key=value) if frontier else None\n    return best, expansions\n\n\ndef uct(parent: Node, child: Node, c: float = 1.4) -> float:\n    if child.visits == 0:\n        return float(\"inf\")\n    return child.q + c * math.sqrt(math.log(parent.visits) / child.visits)\n\n\ndef select(node: Node) -> Node:\n    while node.children:\n        node = max(node.children, key=lambda ch: uct(node, ch))\n    return node\n\n\ndef simulate(node: Node, depth: int, rng: random.Random) -> float:\n    current = node\n    for _ in range(depth):\n        options = expand(current)\n        if not options:\n            break\n        current = rng.choice(options)\n    return value(current)\n\n\ndef backprop(path: list[Node], reward: float) -> None:\n    for n in path:\n        n.visits += 1\n        n.value_sum += reward\n\n\ndef mcts(root: Node, iterations: int, rng: random.Random) -> tuple[Node, int]:\n    expansions = 0\n    for _ in range(iterations):\n        path = [root]\n        cur = root\n        while cur.children:\n            cur = max(cur.children, key=lambda ch: uct(cur, ch))\n            path.append(cur)\n        if cur.visits > 0 and len(cur.state) > 1:\n            cur.children = expand(cur)\n            expansions += len(cur.children)\n            if cur.children:\n                cur = cur.children[0]\n                path.append(cur)\n        reward = simulate(cur, depth=max(0, 3 - len(cur.trace)), rng=rng)\n        backprop(path, reward)\n    best_leaf = max(_all_leaves(root), key=value, default=root)\n    return best_leaf, expansions\n\n\ndef _all_leaves(node: Node) -> list[Node]:\n    if not node.children:\n        return [node]\n    out: list[Node] = []\n    for ch in node.children:\n        out.extend(_all_leaves(ch))\n    return out\n\n\ndef main() -> None:\n    print(\"=\" * 70)\n    print(\"TREE OF THOUGHTS + LATS — Phase 14, Lesson 04\")\n    print(\"=\" * 70)\n    print(f\"numbers: {NUMBERS}  target: {TARGET}\")\n\n    root_tot = Node(state=tuple(sorted(NUMBERS, reverse=True)), trace=[])\n    best_tot, n_tot = tot_bfs(root_tot)\n    print(\"\\nToT BFS\")\n    print(\"-\" * 60)\n    if best_tot is not None:\n        print(f\"  best trace: {best_tot.trace}\")\n        print(f\"  final state: {best_tot.state}  value: {value(best_tot):.3f}\")\n    print(f\"  expansions: {n_tot}\")\n\n    rng = random.Random(7)\n    root_lats = Node(state=tuple(sorted(NUMBERS, reverse=True)), trace=[])\n    root_lats.children = expand(root_lats)\n    for ch in root_lats.children:\n        ch.visits = 0\n    best_lats, n_lats = mcts(root_lats, iterations=80, rng=rng)\n    print(\"\\nLATS MCTS\")\n    print(\"-\" * 60)\n    print(f\"  best trace: {best_lats.trace}\")\n    print(f\"  final state: {best_lats.state}  value: {value(best_lats):.3f}\")\n    print(f\"  node expansions: {n_lats}\")\n\n    print()\n    print(\"Paper headlines (for reference):\")\n    print(\"  ToT Game-of-24:  GPT-4 CoT 4%  -> ToT 74%\")\n    print(\"  LATS HumanEval:  pass@1 92.7% with GPT-4 (SOTA at paper time)\")\n    print(\"  Cost: ToT uses 100-1000x the tokens of CoT. Use with intent.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "Why does chain-of-thought struggle on Game of 24?",
+      "options": [
+        "A linear walk cannot backtrack when an early step is wrong, so later steps compound the error",
+        "CoT requires a calculator tool that GPT-4 lacks",
+        "The model cannot multiply integers",
+        "The prompt is too short"
+      ],
+      "answer": 0,
+      "explanation": "Without branching, a wrong early subexpression poisons the rest of the chain; the paper measures only 4 percent for CoT."
+    },
+    {
+      "q": "What is a node in a Tree of Thoughts search?",
+      "options": [
+        "A tool registered with the runtime",
+        "A weight update during fine-tuning",
+        "A token produced by the model",
+        "A coherent intermediate step or thought, with K possible child expansions"
+      ],
+      "answer": 3,
+      "explanation": "ToT treats reasoning as a tree where each node is an intermediate thought that can expand into K children."
+    },
+    {
+      "q": "Which of these three is NOT one of LATS's roles for the LLM?",
+      "options": [
+        "Self-reflector that writes reflections on failure",
+        "Optimizer that updates model weights between rollouts",
+        "Value function that scores partial trajectories",
+        "Policy that proposes next actions"
+      ],
+      "answer": 1,
+      "explanation": "LATS is gradient-free; the three LLM roles are policy, value, and self-reflector. There are no weight updates."
+    },
+    {
+      "q": "Name the four MCTS phases the lesson lists.",
+      "options": [
+        "Sample, Score, Sort, Submit",
+        "Plan, Execute, Reflect, Stop",
+        "Select, Expand, Simulate, Backpropagate",
+        "Search, Synthesize, Synthesize-Again, Stop"
+      ],
+      "answer": 2,
+      "explanation": "MCTS proceeds in select, expand, simulate, backpropagate per iteration."
+    },
+    {
+      "q": "In UCT, what is the role of the exploration constant c?",
+      "options": [
+        "It scales the value estimate Q",
+        "It sets the maximum tree depth",
+        "It controls the number of rollouts",
+        "It weights the exploration term sqrt(ln N / n) against the exploitation term Q"
+      ],
+      "answer": 3,
+      "explanation": "c balances exploitation (Q) against the exploration term; tune per task."
+    },
+    {
+      "q": "When is search actively harmful compared to a single trajectory?",
+      "options": [
+        "Whenever tokens are cheap",
+        "When the task is code generation",
+        "When the task involves multiple correct answers",
+        "When the evaluator is noisy and there is a single right answer, so the search converges on a good-scoring wrong answer"
+      ],
+      "answer": 3,
+      "explanation": "A noisy value function plus a single correct answer is exactly when search overfits to the noise."
+    },
+    {
+      "q": "Roughly how much more token usage should you budget for ToT on Game of 24 compared with CoT?",
+      "options": [
+        "100x to 1000x",
+        "Less than CoT because of pruning",
+        "About 2x",
+        "About 10x"
+      ],
+      "answer": 0,
+      "explanation": "The lesson cites 100-1000x token cost for ToT on Game of 24 versus CoT."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/14-agent-engineering/04-tree-of-thoughts-lats"
+  }
+}

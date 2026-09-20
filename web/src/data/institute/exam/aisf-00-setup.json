@@ -1,0 +1,546 @@
+{
+  "track": "aisf-00-setup",
+  "count": 60,
+  "questions": [
+    {
+      "q": "Why do AI projects need a separate virtual environment?",
+      "options": [
+        "Python requires virtual environments to import packages",
+        "They isolate dependencies so different projects don't conflict",
+        "Virtual environments make code run faster",
+        "Virtual environments provide GPU access"
+      ]
+    },
+    {
+      "q": "What does CUDA provide for AI workloads?",
+      "options": [
+        "Parallel computing on NVIDIA GPUs for matrix operations",
+        "A Python package manager for ML libraries",
+        "A web framework for deploying models",
+        "A container runtime for model serving"
+      ]
+    },
+    {
+      "q": "In the four-layer environment stack, which layer must be installed first?",
+      "options": [
+        "Language Runtimes (Python, Node.js)",
+        "System Foundation (OS, shell, GPU drivers)",
+        "Package Managers (pip, npm, cargo)",
+        "AI/ML Libraries (PyTorch, JAX)"
+      ]
+    },
+    {
+      "q": "What is the purpose of uv in a Python AI project?",
+      "options": [
+        "A GPU monitoring tool",
+        "A neural network visualization library",
+        "An ultra-fast Python package installer and resolver",
+        "A CUDA compiler for custom kernels"
+      ]
+    },
+    {
+      "q": "How do you verify that PyTorch can access your GPU?",
+      "options": [
+        "python -c 'import gpu'",
+        "import torch; print(torch.cuda.is_available())",
+        "import torch; print(torch.__version__)",
+        "nvidia-smi --query"
+      ]
+    },
+    {
+      "q": "What does 'version control' primarily help you do?",
+      "options": [
+        "Automatically fix bugs in your code",
+        "Speed up code execution",
+        "Track changes to files over time and collaborate with others",
+        "Compress files to save disk space"
+      ]
+    },
+    {
+      "q": "What is a 'repository' in the context of software development?",
+      "options": [
+        "A package manager for installing libraries",
+        "A collection of files and their complete change history managed by version control",
+        "A database for storing user data",
+        "A cloud storage service like Google Drive"
+      ]
+    },
+    {
+      "q": "What is the correct sequence for saving and backing up your work in git?",
+      "options": [
+        "git push, git add, git commit",
+        "git clone, git add, git push",
+        "git add, git commit, git push",
+        "git commit, git add, git push"
+      ]
+    },
+    {
+      "q": "What does 'git checkout -b experiment/new-optimizer' do?",
+      "options": [
+        "Creates a new branch named experiment/new-optimizer and switches to it",
+        "Deletes the branch experiment/new-optimizer",
+        "Downloads a branch from GitHub called experiment/new-optimizer",
+        "Reverts all files to match the experiment/new-optimizer branch"
+      ]
+    },
+    {
+      "q": "Why should you add '.pt', '.pth', and '.safetensors' to your .gitignore?",
+      "options": [
+        "They are model checkpoint files that are too large for git and can be re-generated",
+        "Git cannot track binary files of any kind",
+        "They are Python test files that should not be committed",
+        "They contain sensitive API keys"
+      ]
+    },
+    {
+      "q": "Why is a GPU faster than a CPU for training neural networks?",
+      "options": [
+        "GPUs have higher clock speeds than CPUs",
+        "GPUs can perform thousands of parallel matrix operations simultaneously",
+        "GPUs use a more efficient programming language",
+        "GPUs have more RAM than CPUs"
+      ]
+    },
+    {
+      "q": "What does VRAM refer to?",
+      "options": [
+        "The total RAM available across all devices",
+        "A type of CPU cache memory",
+        "Video RAM on the GPU, separate from system RAM",
+        "Virtual RAM used by the operating system for swap space"
+      ]
+    },
+    {
+      "q": "What command verifies that your NVIDIA GPU is detected and shows its current status?",
+      "options": [
+        "torch.cuda.list_devices()",
+        "nvidia-smi",
+        "lspci | grep gpu",
+        "gpu --status"
+      ]
+    },
+    {
+      "q": "When benchmarking GPU vs CPU matrix multiplication, why must you call torch.cuda.synchronize() before measuring GPU time?",
+      "options": [
+        "To transfer data from CPU to GPU memory",
+        "To ensure all GPU operations have completed before stopping the timer",
+        "To free unused GPU memory",
+        "To reset the GPU clock speed to its base frequency"
+      ]
+    },
+    {
+      "q": "Using the fp16 rule of thumb, approximately how many parameters can fit in 24 GB of VRAM?",
+      "options": [
+        "6 billion parameters",
+        "24 billion parameters",
+        "12 billion parameters",
+        "48 billion parameters"
+      ]
+    },
+    {
+      "q": "What is an API key used for when calling an LLM service?",
+      "options": [
+        "Encrypting the data sent to the server",
+        "Authenticating your identity and authorizing requests",
+        "Compressing requests to reduce bandwidth",
+        "Selecting which programming language the server uses"
+      ]
+    },
+    {
+      "q": "Why should API keys never be hardcoded directly in source code?",
+      "options": [
+        "Python cannot read string literals longer than 50 characters",
+        "API providers block keys that appear in source files",
+        "Hardcoded keys make the code run slower",
+        "They can be accidentally committed to git and exposed publicly"
+      ]
+    },
+    {
+      "q": "What is the recommended way to store API keys for local development?",
+      "options": [
+        "In a .env file that is listed in .gitignore",
+        "In the README.md for easy access",
+        "In a Python variable at the top of your script",
+        "In the requirements.txt alongside package versions"
+      ]
+    },
+    {
+      "q": "In the raw HTTP API call to Anthropic, which header carries the API key?",
+      "options": [
+        "Authorization: Bearer sk-ant-...",
+        "Content-Type: application/json",
+        "anthropic-version: 2023-06-01",
+        "x-api-key: sk-ant-..."
+      ]
+    },
+    {
+      "q": "What happens when you exceed an API's rate limit?",
+      "options": [
+        "Your request is queued and processed later automatically",
+        "The server returns an error (typically HTTP 429) and you must wait before retrying",
+        "Your API key is permanently revoked",
+        "The API silently drops your request with no response"
+      ]
+    },
+    {
+      "q": "What is a Jupyter notebook?",
+      "options": [
+        "An interactive document that mixes executable code cells with markdown text and inline outputs",
+        "A package manager for Python libraries",
+        "A version control system for data science projects",
+        "A text editor for writing Python scripts"
+      ]
+    },
+    {
+      "q": "What does the Jupyter kernel do?",
+      "options": [
+        "Runs the code in cells and keeps variables in memory between executions",
+        "Connects the notebook to GitHub for version control",
+        "Manages file storage for the notebook",
+        "Formats markdown cells into HTML"
+      ]
+    },
+    {
+      "q": "What is the difference between %timeit and %%time magic commands?",
+      "options": [
+        "There is no difference, they are aliases",
+        "%timeit runs code many times and averages, %%time runs code once",
+        "%timeit measures wall time, %%time measures CPU time",
+        "%timeit works on single lines, %%time works on the whole notebook"
+      ]
+    },
+    {
+      "q": "What is the most common cause of a notebook working on your machine but failing when someone runs it top to bottom?",
+      "options": [
+        "Missing the %matplotlib inline magic command",
+        "Using too many markdown cells",
+        "Out-of-order cell execution creating hidden dependencies on execution order",
+        "Using a different Python version"
+      ]
+    },
+    {
+      "q": "When should you move code from a notebook into a .py script?",
+      "options": [
+        "Never -- notebooks are always better for AI work",
+        "Only when you need to run on a GPU",
+        "As soon as you write more than 10 lines of code",
+        "When the code is a reusable utility, training pipeline, or production code"
+      ]
+    },
+    {
+      "q": "What problem do virtual environments solve?",
+      "options": [
+        "They provide a graphical interface for managing Python scripts",
+        "They isolate project dependencies so different projects can use different package versions",
+        "They automatically update packages to the latest versions",
+        "They make Python code run faster by optimizing the interpreter"
+      ]
+    },
+    {
+      "q": "What is a lockfile in the context of Python dependency management?",
+      "options": [
+        "A file that locks the Python interpreter version",
+        "A file that encrypts your project dependencies",
+        "A file that prevents other users from editing your code",
+        "A file that pins every package to an exact version for reproducible installs"
+      ]
+    },
+    {
+      "q": "How can you verify that your pip and python commands are using the virtual environment and not the system Python?",
+      "options": [
+        "Run 'python --check-env' to verify",
+        "Run 'pip --version' and check the version number",
+        "Run 'which python' and confirm it shows .venv/bin/python, not /usr/bin/python",
+        "Check if the terminal background color has changed"
+      ]
+    },
+    {
+      "q": "Why is mixing pip and conda in the same environment problematic?",
+      "options": [
+        "Pip packages are incompatible with conda's Python interpreter",
+        "Pip installs can break conda's dependency tracking, causing hard-to-debug conflicts",
+        "It doubles the disk space used by every package",
+        "Conda cannot install packages that pip has already installed"
+      ]
+    },
+    {
+      "q": "Your PyTorch code reports 'CUDA not available' despite having an NVIDIA GPU. What is the most likely cause?",
+      "options": [
+        "PyTorch was installed with a CUDA version incompatible with your GPU driver",
+        "Your GPU does not support CUDA",
+        "You forgot to import the torch.cuda module",
+        "Virtual environments cannot access GPU hardware"
+      ]
+    },
+    {
+      "q": "What is the primary difference between a Docker container and a virtual machine?",
+      "options": [
+        "There is no practical difference",
+        "Containers are slower but more secure than VMs",
+        "Containers share the host OS kernel while VMs run their own full OS",
+        "Containers can only run Linux while VMs support any OS"
+      ]
+    },
+    {
+      "q": "What is a Dockerfile?",
+      "options": [
+        "A configuration file for the Docker daemon",
+        "A set of instructions for building a Docker image layer by layer",
+        "A file that lists running containers",
+        "A log file that records container activity"
+      ]
+    },
+    {
+      "q": "Why are volume mounts critical for AI development with Docker?",
+      "options": [
+        "Volumes allow multiple containers to share the same GPU",
+        "Volumes make containers run faster by using host disk speed",
+        "Volumes are required for Python packages to install correctly",
+        "Volumes persist data (models, datasets, code) across container rebuilds so you don't re-download gigabytes each time"
+      ]
+    },
+    {
+      "q": "What does the NVIDIA Container Toolkit enable?",
+      "options": [
+        "Installing CUDA drivers inside the container",
+        "Running NVIDIA GPU containers on AMD hardware",
+        "Exposing host GPUs to Docker containers via the --gpus flag",
+        "Compiling CUDA code during the Docker build process"
+      ]
+    },
+    {
+      "q": "In a Docker Compose file for AI, how does the 'ai-dev' service reach the 'qdrant' vector database?",
+      "options": [
+        "By mounting a shared volume between the two containers",
+        "By using the service name 'qdrant' as the hostname, since Compose creates a shared network",
+        "By configuring a VPN between the containers",
+        "By using the host machine's IP address and port"
+      ]
+    },
+    {
+      "q": "What is a Language Server Protocol (LSP)?",
+      "options": [
+        "A protocol for transferring files between editors",
+        "A compression format for source code files",
+        "A network protocol for remote pair programming",
+        "A standard for editors to receive type info, completions, and diagnostics from a language-specific server"
+      ]
+    },
+    {
+      "q": "Why is format-on-save useful for team projects?",
+      "options": [
+        "It ensures consistent code style across all contributors without manual formatting",
+        "It compresses the code for faster git operations",
+        "It reduces file sizes by removing whitespace",
+        "It catches runtime bugs before the code is executed"
+      ]
+    },
+    {
+      "q": "Which VS Code extension enables editing code on a remote GPU machine as if it were local?",
+      "options": [
+        "Pylance",
+        "Debugpy",
+        "GitLens",
+        "Remote SSH"
+      ]
+    },
+    {
+      "q": "Why should 'notebook.output.scrolling' be enabled in VS Code settings for AI work?",
+      "options": [
+        "It enables smooth scrolling animations in the editor",
+        "It allows scrolling between notebook cells with the mouse wheel",
+        "It enables horizontal scrolling for wide dataframes",
+        "It prevents training loop output (thousands of lines) from exploding the output panel"
+      ]
+    },
+    {
+      "q": "What does setting 'python.analysis.typeCheckingMode' to 'basic' in VS Code accomplish?",
+      "options": [
+        "It enables syntax highlighting for Python files",
+        "It formats Python code according to PEP 8 standards",
+        "It enables Python 3.12 language features",
+        "It catches wrong argument types and tensor shape mismatches before running the code"
+      ]
+    },
+    {
+      "q": "Why is it important to have separate train, validation, and test splits in machine learning?",
+      "options": [
+        "To ensure each split uses a different file format",
+        "To make the dataset smaller so training is faster",
+        "To distribute data across multiple GPUs",
+        "To evaluate model performance on unseen data and prevent overfitting"
+      ]
+    },
+    {
+      "q": "What is the Hugging Face Hub primarily used for in AI/ML workflows?",
+      "options": [
+        "Managing Python virtual environments",
+        "Version controlling source code like GitHub",
+        "Running GPU training jobs in the cloud",
+        "Hosting and sharing datasets, models, and ML artifacts"
+      ]
+    },
+    {
+      "q": "What advantage does the Parquet format have over CSV for storing ML datasets?",
+      "options": [
+        "Parquet supports more data types than CSV",
+        "Parquet files are human-readable in any text editor",
+        "Parquet uses columnar storage for smaller file sizes and faster read speeds",
+        "Parquet files can be edited in spreadsheet applications"
+      ]
+    },
+    {
+      "q": "What does 'streaming=True' do when loading a dataset with the Hugging Face datasets library?",
+      "options": [
+        "Converts the dataset to a streaming video format",
+        "Enables real-time updates as new data is added to the Hub",
+        "Loads data row by row without downloading the full dataset to disk",
+        "Downloads the dataset faster using parallel connections"
+      ]
+    },
+    {
+      "q": "When should you use DVC (Data Version Control) instead of just .gitignore for large files?",
+      "options": [
+        "When you need to reproduce exact experiments across machines with versioned data",
+        "When you only have CSV files in your project",
+        "When your dataset is smaller than 1 MB",
+        "When you are working alone on a personal project"
+      ]
+    },
+    {
+      "q": "What does the pipe operator '|' do in a shell command?",
+      "options": [
+        "Runs two commands in parallel",
+        "Combines two files into one",
+        "Sends the standard output of one command as standard input to the next",
+        "Saves the output of a command to a file"
+      ]
+    },
+    {
+      "q": "What happens to a running process when you close the terminal that started it?",
+      "options": [
+        "The process pauses until you open a new terminal",
+        "The process continues running in the background",
+        "The process receives a hangup signal (SIGHUP) and typically terminates",
+        "The process automatically migrates to a system service"
+      ]
+    },
+    {
+      "q": "What is the key advantage of tmux over using 'nohup command &' for long-running training jobs?",
+      "options": [
+        "tmux automatically restarts failed processes",
+        "tmux uses less CPU than nohup",
+        "tmux lets you detach, reattach, and see live output with multiple panes",
+        "tmux compresses the process output to save disk space"
+      ]
+    },
+    {
+      "q": "What does 'python train.py > output.log 2>&1' accomplish?",
+      "options": [
+        "Runs train.py and saves only errors to output.log",
+        "Runs train.py with double the memory allocation",
+        "Runs train.py twice and logs the second run",
+        "Runs train.py and redirects both standard output and standard error to output.log"
+      ]
+    },
+    {
+      "q": "Which command lets you access a remote Jupyter notebook running on port 8888 of a GPU box from your local browser?",
+      "options": [
+        "ssh -L 8888:localhost:8888 user@gpu-box",
+        "ssh user@gpu-box --forward-port 8888",
+        "scp -P 8888 user@gpu-box:~/notebook.ipynb",
+        "rsync -avz user@gpu-box:8888 localhost:8888"
+      ]
+    },
+    {
+      "q": "What does the '~' symbol represent in a Linux file path?",
+      "options": [
+        "The root directory of the file system",
+        "The temporary files directory",
+        "The current user's home directory",
+        "The directory where system programs are installed"
+      ]
+    },
+    {
+      "q": "What is the purpose of 'sudo' before a command?",
+      "options": [
+        "It runs the command with root (administrator) privileges",
+        "It runs the command in a sandboxed environment",
+        "It speeds up the command execution",
+        "It logs the command output to a system file"
+      ]
+    },
+    {
+      "q": "You get 'Permission denied' when trying to run a shell script. What command fixes this?",
+      "options": [
+        "chown root script.sh",
+        "mv script.sh /usr/bin/",
+        "chmod +x script.sh",
+        "sudo rm script.sh"
+      ]
+    },
+    {
+      "q": "On a remote GPU box, your training data fills the disk. Which command shows the largest directories consuming space?",
+      "options": [
+        "ls -la /",
+        "cat /proc/meminfo",
+        "du -h --max-depth=1 / | sort -hr | head -20",
+        "free -h"
+      ]
+    },
+    {
+      "q": "What is a key difference between the macOS and Linux versions of 'sed -i'?",
+      "options": [
+        "Linux sed is faster than macOS sed",
+        "Linux sed does not support regular expressions",
+        "macOS sed cannot modify files in place",
+        "macOS sed requires an empty string argument after -i ('sed -i \"\"'), while Linux does not"
+      ]
+    },
+    {
+      "q": "What makes debugging AI/ML code fundamentally different from debugging a typical web application?",
+      "options": [
+        "AI code always requires a GPU to debug",
+        "AI code uses different programming languages",
+        "AI bugs often don't crash -- they silently produce incorrect results with no error messages",
+        "AI code cannot be debugged with standard tools like print statements"
+      ]
+    },
+    {
+      "q": "What does a profiler measure?",
+      "options": [
+        "How much time and memory each part of the code consumes",
+        "How many bugs exist in the codebase",
+        "Whether the code produces correct output",
+        "The code coverage of unit tests"
+      ]
+    },
+    {
+      "q": "Your model achieves 99% accuracy on the test set. What AI-specific bug should you suspect first?",
+      "options": [
+        "The batch size is too large",
+        "Data leakage -- test samples may have leaked into the training set",
+        "The learning rate is too high",
+        "The model has too many parameters"
+      ]
+    },
+    {
+      "q": "What is the most common finding when profiling a training loop's time breakdown?",
+      "options": [
+        "GPU memory allocation is the bottleneck",
+        "The backward pass takes 90% of the time",
+        "Data loading takes more time than the forward and backward passes combined",
+        "Writing logs takes the most time"
+      ]
+    },
+    {
+      "q": "You see NaN loss at step 500. Which approach will help you find the root cause?",
+      "options": [
+        "Switch from Adam to SGD optimizer",
+        "Restart training from scratch with a different random seed",
+        "Increase the batch size to stabilize gradients",
+        "Use detect_nan to check for NaN/Inf in gradients and add breakpoint() at the failure point"
+      ]
+    }
+  ]
+}

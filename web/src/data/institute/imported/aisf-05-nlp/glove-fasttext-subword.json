@@ -1,0 +1,111 @@
+{
+  "id": "aisf-05-nlp::glove-fasttext-subword",
+  "num": 4,
+  "slug": "glove-fasttext-subword",
+  "title": "GloVe, FastText, and Subword Embeddings",
+  "tagline": "Word2Vec trained one embedding per word. GloVe factorized the co-occurrence matrix. FastText embedded the pieces. BPE bridged to transformers.",
+  "type": "Build",
+  "languages": "Python",
+  "time": "~45 minutes",
+  "objectives": [],
+  "prose_html": "<h2>The Problem</h2>\n<p>Word2Vec left two open questions.</p>\n<p>First, there was a parallel line of research that factorized the co-occurrence matrix directly (LSA, HAL) rather than doing online skip-gram updates. Was Word2Vec&#39;s iterative approach fundamentally better, or was the difference an artifact of how the two methods handled counts? <strong>GloVe</strong> answered that: matrix factorization with a thoughtfully chosen loss matches or beats Word2Vec, and costs less to train.</p>\n<p>Second, neither method had a story for words it had never seen. <code>Zoomer-approved</code>, <code>dogecoin</code>, any proper noun coined last week, every inflected form of a rare root. <strong>FastText</strong> fixed this by embedding character n-grams: a word is the sum of its parts, including morphemes, so even out-of-vocabulary words get a sensible vector.</p>\n<p>Third, once transformers arrived, the question shifted again. Word-level vocabularies cap out around a million entries; real language is more open than that. <strong>Byte-pair encoding (BPE)</strong> and its relatives solved this by learning a vocabulary of frequent subword units that covers everything. Every modern tokenizer for every modern LLM is a subword tokenizer.</p>\n<p>This lesson walks all three, then explains which to reach for when.</p>\n<h2>The Concept</h2>\n<p><strong>GloVe (Global Vectors).</strong> Build the word-word co-occurrence matrix <code>X</code> where <code>X[i][j]</code> is how often word <code>j</code> appears in the context of word <code>i</code>. Train vectors such that <code>v_i · v_j + b_i + b_j ≈ log(X[i][j])</code>. Weight the loss so frequent pairs do not dominate. Done.</p>\n<p><strong>FastText.</strong> A word is the sum of its character n-grams plus the word itself. <code>where</code> becomes <code>&lt;wh, whe, her, ere, re&gt;, &lt;where&gt;</code>. The word vector is the sum of those component vectors. Train as Word2Vec. Benefit: unseen words (<code>whereupon</code>) compose from known n-grams.</p>\n<p><strong>BPE (Byte-Pair Encoding).</strong> Start with a vocabulary of individual bytes (or characters). Count every adjacent pair in the corpus. Merge the most frequent pair into a new token. Repeat for <code>k</code> iterations. Result: a vocabulary of <code>k + 256</code> tokens where frequent sequences (<code>ing</code>, <code>tion</code>, <code>the</code>) are single tokens and rare words are broken into familiar pieces. Every sentence tokenizes into something.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>n5-subword-merge</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Build It</h2>\n<h3>GloVe: factorize the co-occurrence matrix</h3>\n<pre><code class=\"language-python\">import numpy as np\nfrom collections import Counter\n\n\ndef build_cooccurrence(docs, window=5):\n    pair_counts = Counter()\n    vocab = {}\n    for doc in docs:\n        for token in doc:\n            if token not in vocab:\n                vocab[token] = len(vocab)\n    for doc in docs:\n        indexed = [vocab[t] for t in doc]\n        for i, center in enumerate(indexed):\n            for j in range(max(0, i - window), min(len(indexed), i + window + 1)):\n                if i != j:\n                    distance = abs(i - j)\n                    pair_counts[(center, indexed[j])] += 1.0 / distance\n    return vocab, pair_counts\n\n\ndef glove_train(vocab, pair_counts, dim=16, epochs=100, lr=0.05, x_max=100, alpha=0.75, seed=0):\n    n = len(vocab)\n    rng = np.random.default_rng(seed)\n    W = rng.normal(0, 0.1, size=(n, dim))\n    W_tilde = rng.normal(0, 0.1, size=(n, dim))\n    b = np.zeros(n)\n    b_tilde = np.zeros(n)\n\n    for epoch in range(epochs):\n        for (i, j), x_ij in pair_counts.items():\n            weight = (x_ij / x_max) ** alpha if x_ij &lt; x_max else 1.0\n            diff = W[i] @ W_tilde[j] + b[i] + b_tilde[j] - np.log(x_ij)\n            coef = weight * diff\n\n            grad_W_i = coef * W_tilde[j]\n            grad_W_tilde_j = coef * W[i]\n            W[i] -= lr * grad_W_i\n            W_tilde[j] -= lr * grad_W_tilde_j\n            b[i] -= lr * coef\n            b_tilde[j] -= lr * coef\n\n    return W + W_tilde\n</code></pre>\n<p>Two moving pieces worth naming. The weighting function <code>f(x) = (x/x_max)^alpha</code> downweights very frequent pairs (like <code>(the, and)</code>) so they do not dominate the loss. The final embedding is the sum of <code>W</code> (center) and <code>W_tilde</code> (context) tables. Summing both is a published trick that tends to outperform using just one.</p>\n<h3>FastText: subword-aware embeddings</h3>\n<pre><code class=\"language-python\">def char_ngrams(word, n_min=3, n_max=6):\n    wrapped = f&quot;&lt;{word}&gt;&quot;\n    grams = {wrapped}\n    for n in range(n_min, n_max + 1):\n        for i in range(len(wrapped) - n + 1):\n            grams.add(wrapped[i:i + n])\n    return grams\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; char_ngrams(&quot;where&quot;)\n{&#39;&lt;where&gt;&#39;, &#39;&lt;wh&#39;, &#39;whe&#39;, &#39;her&#39;, &#39;ere&#39;, &#39;re&gt;&#39;, &#39;&lt;whe&#39;, &#39;wher&#39;, &#39;here&#39;, &#39;ere&gt;&#39;, &#39;&lt;wher&#39;, &#39;where&#39;, &#39;here&gt;&#39;}\n</code></pre>\n<p>Each word is represented by its set of n-grams (typically 3 to 6 characters). The word embedding is the sum of its n-gram embeddings. For skip-gram training, plug this in where Word2Vec used a single vector.</p>\n<pre><code class=\"language-python\">def fasttext_vector(word, ngram_table):\n    grams = char_ngrams(word)\n    vecs = [ngram_table[g] for g in grams if g in ngram_table]\n    if not vecs:\n        return None\n    return np.sum(vecs, axis=0)\n</code></pre>\n<p>For an unseen word, you still get a vector as long as some of its n-grams are known. <code>whereupon</code> shares <code>&lt;wh</code>, <code>her</code>, <code>ere</code>, and <code>&lt;where</code> with <code>where</code>, so the two land near each other.</p>\n<h3>BPE: learned subword vocabulary</h3>\n<pre><code class=\"language-python\">def learn_bpe(corpus, k_merges):\n    vocab = Counter()\n    for word, freq in corpus.items():\n        tokens = tuple(word) + (&quot;&lt;/w&gt;&quot;,)\n        vocab[tokens] = freq\n\n    merges = []\n    for _ in range(k_merges):\n        pair_freq = Counter()\n        for tokens, freq in vocab.items():\n            for a, b in zip(tokens, tokens[1:]):\n                pair_freq[(a, b)] += freq\n        if not pair_freq:\n            break\n        best = pair_freq.most_common(1)[0][0]\n        merges.append(best)\n\n        new_vocab = Counter()\n        for tokens, freq in vocab.items():\n            new_tokens = []\n            i = 0\n            while i &lt; len(tokens):\n                if i + 1 &lt; len(tokens) and (tokens[i], tokens[i + 1]) == best:\n                    new_tokens.append(tokens[i] + tokens[i + 1])\n                    i += 2\n                else:\n                    new_tokens.append(tokens[i])\n                    i += 1\n            new_vocab[tuple(new_tokens)] = freq\n        vocab = new_vocab\n    return merges\n\n\ndef apply_bpe(word, merges):\n    tokens = list(word) + [&quot;&lt;/w&gt;&quot;]\n    for a, b in merges:\n        new_tokens = []\n        i = 0\n        while i &lt; len(tokens):\n            if i + 1 &lt; len(tokens) and tokens[i] == a and tokens[i + 1] == b:\n                new_tokens.append(a + b)\n                i += 2\n            else:\n                new_tokens.append(tokens[i])\n                i += 1\n        tokens = new_tokens\n    return tokens\n</code></pre>\n<pre><code class=\"language-python\">&gt;&gt;&gt; corpus = Counter({&quot;low&quot;: 5, &quot;lower&quot;: 2, &quot;newest&quot;: 6, &quot;widest&quot;: 3})\n&gt;&gt;&gt; merges = learn_bpe(corpus, k_merges=10)\n&gt;&gt;&gt; apply_bpe(&quot;lowest&quot;, merges)\n[&#39;low&#39;, &#39;est&lt;/w&gt;&#39;]\n</code></pre>\n<p>First iteration merges the most common adjacent pair. After enough iterations, frequent substrings (<code>low</code>, <code>est</code>, <code>tion</code>) become single tokens and rare words break cleanly.</p>\n<p>The real GPT / BERT / T5 tokenizers learn 30k-100k merges. Result: any text tokenizes into a bounded-length sequence of known IDs, no OOV ever.</p>\n<h2>Use It</h2>\n<p>In practice, you rarely train any of these yourself. You load pre-trained checkpoints.</p>\n<pre><code class=\"language-python\">import fasttext.util\nfasttext.util.download_model(&quot;en&quot;, if_exists=&quot;ignore&quot;)\nft = fasttext.load_model(&quot;cc.en.300.bin&quot;)\nprint(ft.get_word_vector(&quot;whereupon&quot;).shape)\nprint(ft.get_word_vector(&quot;zoomerapproved&quot;).shape)\n</code></pre>\n<p>For BPE-style subword tokenization in the transformer era:</p>\n<pre><code class=\"language-python\">from transformers import AutoTokenizer\n\ntok = AutoTokenizer.from_pretrained(&quot;gpt2&quot;)\nprint(tok.tokenize(&quot;unbelievably tokenized&quot;))\n</code></pre>\n<pre><code>[&#39;un&#39;, &#39;bel&#39;, &#39;iev&#39;, &#39;ably&#39;, &#39;Ġtoken&#39;, &#39;ized&#39;]\n</code></pre>\n<p>The <code>Ġ</code> prefix marks word boundaries (a GPT-2 convention). Every modern tokenizer is a BPE variant, WordPiece (BERT), or SentencePiece (T5, LLaMA).</p>\n<h3>When to pick which</h3>\n<table>\n<thead>\n<tr>\n<th>Situation</th>\n<th>Pick</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Pretrained general-purpose word vectors, no OOV tolerance needed</td>\n<td>GloVe 300d</td>\n</tr>\n<tr>\n<td>Pretrained general-purpose word vectors, must handle misspellings / neologisms / morphologically rich languages</td>\n<td>FastText</td>\n</tr>\n<tr>\n<td>Anything going into a transformer (training or inference)</td>\n<td>Whatever tokenizer the model shipped with. Never swap.</td>\n</tr>\n<tr>\n<td>Training your own language model from scratch</td>\n<td>Train a BPE or SentencePiece tokenizer on your corpus first</td>\n</tr>\n<tr>\n<td>Production text classification with a linear model</td>\n<td>Still TF-IDF. Lesson 02.</td>\n</tr>\n</tbody></table>\n<h2>Ship It</h2>\n<p>Save as <code>outputs/skill-embeddings-picker.md</code>:</p>\n<pre><code class=\"language-markdown\">---\nname: tokenizer-picker\ndescription: Pick a tokenization approach for a new language model or text pipeline.\nversion: 1.0.0\nphase: 5\nlesson: 04\ntags: [nlp, tokenization, embeddings]\n---\n\nGiven a task and dataset description, you output:\n\n1. Tokenization strategy (word-level, BPE, WordPiece, SentencePiece, byte-level). One-sentence reason.\n2. Vocabulary size target (e.g., 32k for an English-only LM, 64k-100k for multilingual).\n3. Library call with the exact training command. Name the library. Quote the arguments.\n4. One reproducibility pitfall. Tokenizer-model mismatch is the single most common silent production bug; call out which pair must be used together.\n\nRefuse to recommend training a custom tokenizer when the user is fine-tuning a pretrained LLM. Refuse to recommend word-level tokenization for any model targeting production inference. Flag non-English / multi-script corpora as needing SentencePiece with byte fallback.\n</code></pre>\n<h2>Exercises</h2>\n<ol>\n<li><strong>Easy.</strong> Run <code>char_ngrams(&quot;playing&quot;)</code> and <code>char_ngrams(&quot;played&quot;)</code>. Compute the Jaccard overlap of the two n-gram sets. You should see substantial shared pieces (<code>pla</code>, <code>lay</code>, <code>play</code>), which is why FastText transfers well across morphological variants.</li>\n<li><strong>Medium.</strong> Extend <code>learn_bpe</code> to track vocabulary growth. Plot tokens-per-corpus-character as a function of number of merges. You should see rapid compression at first, asymptoting near ~2-3 chars per token.</li>\n<li><strong>Hard.</strong> Train a 1k-merge BPE on Shakespeare&#39;s complete works. Compare tokenization of common words vs. rare proper nouns. Measure average tokens per word before and after. Write up what surprised you.</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Co-occurrence matrix</td>\n<td>Word-word frequency table</td>\n<td><code>X[i][j]</code> = how often word <code>j</code> appears in a window around word <code>i</code>.</td>\n</tr>\n<tr>\n<td>Subword</td>\n<td>Piece of a word</td>\n<td>A character n-gram (FastText) or learned token (BPE/WordPiece/SentencePiece).</td>\n</tr>\n<tr>\n<td>BPE</td>\n<td>Byte-pair encoding</td>\n<td>Iterative merging of most-frequent adjacent pairs until vocabulary hits target size.</td>\n</tr>\n<tr>\n<td>OOV</td>\n<td>Out of vocabulary</td>\n<td>Word the model has never seen. Word2Vec/GloVe fail. FastText and BPE handle it.</td>\n</tr>\n<tr>\n<td>Byte-level BPE</td>\n<td>BPE on raw bytes</td>\n<td>GPT-2&#39;s scheme. Vocabulary starts with 256 bytes, so nothing is ever OOV.</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://nlp.stanford.edu/pubs/glove.pdf\" target=\"_blank\" rel=\"noopener\">Pennington, Socher, Manning (2014). GloVe: Global Vectors for Word Representation</a> — the GloVe paper, seven pages, still the best derivation of the loss.</li>\n<li><a href=\"https://arxiv.org/abs/1607.04606\" target=\"_blank\" rel=\"noopener\">Bojanowski et al. (2017). Enriching Word Vectors with Subword Information</a> — FastText.</li>\n<li><a href=\"https://arxiv.org/abs/1508.07909\" target=\"_blank\" rel=\"noopener\">Sennrich, Haddow, Birch (2016). Neural Machine Translation of Rare Words with Subword Units</a> — the paper that introduced BPE to modern NLP.</li>\n<li><a href=\"https://huggingface.co/docs/transformers/tokenizer_summary\" target=\"_blank\" rel=\"noopener\">Hugging Face tokenizer summary</a> — how BPE, WordPiece, and SentencePiece actually differ in practice.</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "from collections import Counter\n\n\ndef char_ngrams(word, n_min=3, n_max=6):\n    wrapped = f\"<{word}>\"\n    grams = {wrapped}\n    for n in range(n_min, n_max + 1):\n        for i in range(len(wrapped) - n + 1):\n            grams.add(wrapped[i:i + n])\n    return grams\n\n\ndef learn_bpe(corpus, k_merges):\n    vocab = {}\n    for word, freq in corpus.items():\n        tokens = tuple(word) + (\"</w>\",)\n        vocab[tokens] = freq\n\n    merges = []\n    for _ in range(k_merges):\n        pair_freq = Counter()\n        for tokens, freq in vocab.items():\n            for a, b in zip(tokens, tokens[1:]):\n                pair_freq[(a, b)] += freq\n        if not pair_freq:\n            break\n        best = pair_freq.most_common(1)[0][0]\n        merges.append(best)\n\n        new_vocab = {}\n        for tokens, freq in vocab.items():\n            new_tokens = []\n            i = 0\n            while i < len(tokens):\n                if i + 1 < len(tokens) and (tokens[i], tokens[i + 1]) == best:\n                    new_tokens.append(tokens[i] + tokens[i + 1])\n                    i += 2\n                else:\n                    new_tokens.append(tokens[i])\n                    i += 1\n            new_vocab[tuple(new_tokens)] = freq\n        vocab = new_vocab\n    return merges\n\n\ndef apply_bpe(word, merges):\n    tokens = list(word) + [\"</w>\"]\n    for a, b in merges:\n        new_tokens = []\n        i = 0\n        while i < len(tokens):\n            if i + 1 < len(tokens) and tokens[i] == a and tokens[i + 1] == b:\n                new_tokens.append(a + b)\n                i += 2\n            else:\n                new_tokens.append(tokens[i])\n                i += 1\n        tokens = new_tokens\n    return tokens\n\n\ndef main():\n    print(\"=== FastText n-grams ===\")\n    for word in [\"where\", \"whereupon\"]:\n        grams = sorted(char_ngrams(word))\n        print(f\"{word:12s} {len(grams)} grams, e.g., {grams[:5]}\")\n    shared = char_ngrams(\"where\") & char_ngrams(\"whereupon\")\n    print(f\"shared n-grams between where / whereupon: {len(shared)}\")\n    print()\n\n    print(\"=== BPE on toy corpus ===\")\n    corpus = Counter({\n        \"low\": 5, \"lower\": 2, \"newest\": 6, \"widest\": 3,\n        \"lowest\": 4, \"newer\": 2,\n    })\n    merges = learn_bpe(corpus, k_merges=10)\n    print(f\"learned {len(merges)} merges:\")\n    for a, b in merges:\n        print(f\"  {a!r} + {b!r} -> {a + b!r}\")\n    print()\n\n    for test in [\"lowest\", \"slowest\", \"lower\", \"newish\"]:\n        tokens = apply_bpe(test, merges)\n        print(f\"{test:10s} -> {tokens}\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "What did GloVe contribute over Word2Vec?",
+      "options": [
+        "A deeper neural network",
+        "Subword n-gram embeddings",
+        "Direct factorization of the word-word co-occurrence matrix with a weighted loss",
+        "Byte-level tokenization"
+      ],
+      "answer": 2,
+      "explanation": "GloVe factorizes the global co-occurrence matrix with a thoughtfully weighted log-loss."
+    },
+    {
+      "q": "What problem does FastText solve that Word2Vec and GloVe do not?",
+      "options": [
+        "Reducing training cost",
+        "Multilingual transfer",
+        "Polysemy disambiguation",
+        "Producing vectors for unseen words by composing character n-grams"
+      ],
+      "answer": 3,
+      "explanation": "FastText composes a word vector from its subword n-grams, so OOV words still get a sensible vector."
+    },
+    {
+      "q": "In GloVe, what role does the weighting function f(x) = (x/x_max)^alpha play?",
+      "options": [
+        "Selects negative samples",
+        "Normalizes vectors to unit length",
+        "Initializes weights randomly",
+        "Downweights extremely frequent pairs so they do not dominate the loss"
+      ],
+      "answer": 3,
+      "explanation": "The weighting prevents ubiquitous co-occurrences like (the, and) from dominating training."
+    },
+    {
+      "q": "How does the BPE merge step pick which pair to combine next?",
+      "options": [
+        "A random pair",
+        "The lexicographically first pair",
+        "The most frequent adjacent token pair across the corpus",
+        "The pair with highest IDF"
+      ],
+      "answer": 2,
+      "explanation": "BPE iteratively merges the most frequent adjacent pair."
+    },
+    {
+      "q": "Why does GPT-2 use byte-level BPE?",
+      "options": [
+        "The base vocabulary of 256 bytes covers any input, eliminating out-of-vocabulary entirely",
+        "Bytes train faster than characters",
+        "Bytes preserve casing implicitly",
+        "Byte BPE skips merge training"
+      ],
+      "answer": 0,
+      "explanation": "Starting from 256 bytes means every UTF-8 string tokenizes; nothing is OOV."
+    },
+    {
+      "q": "Which tokenizer should you use when fine-tuning a pretrained transformer?",
+      "options": [
+        "Always byte-level BPE",
+        "Always SentencePiece",
+        "Whichever has the largest vocabulary",
+        "The exact tokenizer the model shipped with; mismatch breaks the embeddings"
+      ],
+      "answer": 3,
+      "explanation": "Tokenizer-model mismatch silently corrupts inputs; always pair the shipped tokenizer with its model."
+    },
+    {
+      "q": "When would you pick FastText over GloVe for pretrained word vectors?",
+      "options": [
+        "When you need a 50d model",
+        "When latency is tightest",
+        "When the corpus is very small",
+        "For morphologically rich languages or domains with frequent neologisms and misspellings"
+      ],
+      "answer": 3,
+      "explanation": "FastText's subword composition handles inflections, neologisms, and misspellings that GloVe cannot."
+    },
+    {
+      "q": "What unit forms the base of WordPiece, BPE, and SentencePiece vocabularies?",
+      "options": [
+        "Sentences",
+        "Whole words",
+        "Paragraphs",
+        "Subword pieces (characters, n-grams, or learned merges) below the word level"
+      ],
+      "answer": 3,
+      "explanation": "All three are subword tokenizers; they differ in how merges or pieces are learned, not in being subword."
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/05-nlp-foundations-to-advanced/04-glove-fasttext-subword"
+  }
+}

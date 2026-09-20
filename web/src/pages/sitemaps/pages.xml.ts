@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { siteBase, urlsetXml } from '../../lib/sitemap';
+import deptData from '../../data/departments.json';
+import { workshops } from '../../data/workshops';
 
 // Static content pages. Priority reflects how central a page is to the site;
 // admin/auth/utility routes (login, dashboard, admin, verify, etc.) are
@@ -7,6 +9,7 @@ import { siteBase, urlsetXml } from '../../lib/sitemap';
 const STATIC_PATHS: [string, string][] = [
   ['/', '1.0'],
   ['/catalog', '0.9'],
+  ['/departments', '0.9'],
   ['/programs', '0.8'],
   ['/professors', '0.7'],
   ['/about', '0.7'],
@@ -28,8 +31,22 @@ const HOME_IMAGES = [
   { loc: '/assets/og-image.png', title: 'Sikhi University — free, open learning in Sikhi' },
 ];
 
+const DEPT_PATHS: [string, string][] = (deptData as any).departments.map(
+  (d: { slug: string }) => [`/departments/${d.slug}`, '0.8'],
+);
+
+// The Wootz Workshop and any siblings live under the Department of Martial Arts.
+const WORKSHOP_PATHS: [string, string][] = [
+  ['/departments/martial-arts/workshop', '0.6'],
+  ...workshops.map((w): [string, string] => [`/departments/martial-arts/workshop/${w.slug}`, '0.6']),
+];
+
 export const GET: APIRoute = ({ site }) =>
   urlsetXml(
     siteBase(site),
-    STATIC_PATHS.map(([path, priority]) => ({ path, priority, images: path === '/' ? HOME_IMAGES : undefined })),
+    [...STATIC_PATHS, ...DEPT_PATHS, ...WORKSHOP_PATHS].map(([path, priority]) => ({
+      path,
+      priority,
+      images: path === '/' ? HOME_IMAGES : undefined,
+    })),
   );

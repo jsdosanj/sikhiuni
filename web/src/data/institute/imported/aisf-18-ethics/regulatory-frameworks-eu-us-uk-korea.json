@@ -1,0 +1,94 @@
+{
+  "id": "aisf-18-ethics::regulatory-frameworks-eu-us-uk-korea",
+  "num": 24,
+  "slug": "regulatory-frameworks-eu-us-uk-korea",
+  "title": "Regulatory Frameworks — EU, US, UK, Korea",
+  "tagline": "Four primary regulatory regimes define the 2026 AI governance landscape. EU AI Act (in force 1 August 2024) — prohibited practices and AI literacy from 2 February 2025; GPAI obligations from 2 August 2025; full applicability and Article 50 transparency 2 August 2026; legacy GPAI and embedded high-risk systems 2 August 2027; penalties up to 15M EUR or 3% of global turnover. GPAI Code of Practice (10 July 2025): three chapters — Transparency, Copyright, Safety and Security — 12 commitments; enforcement begins August 2026. UK AISI -> AI Security Institute (February 2025): rename signals narrower scope. US AISI -> CAISI (June 2025): Center for AI Standards and Innovation under NIST; shift toward pro-growth posture. Korean AI Framework Act (passed December 2024, effective January 2026): Article 12 establishes AISI under MSIT; mandates local representatives for foreign AI companies, risk assessment, safety measures for high-impact and generative AI.",
+  "type": "Learn",
+  "languages": "none",
+  "time": "~75 minutes",
+  "objectives": [
+    "Describe the EU AI Act risk tiers (prohibited, high-risk, general-purpose, limited-risk) and the August 2025 / August 2026 / August 2027 timeline.",
+    "Describe the three chapters of the GPAI Code of Practice and which providers each binds.",
+    "Describe the 2025 rebrands: UK AISI -> AI Security Institute; US AISI -> CAISI; what each rebrand implies about policy direction.",
+    "State the core provision of Korea's AI Framework Act."
+  ],
+  "prose_html": "<h2>The Problem</h2>\n<p>Lab frameworks (Lesson 18) are voluntary. Regulatory frameworks are compulsory. The 2024-2026 period saw the first wave of comprehensive AI regulation enter force. Deployers must map technical controls to regulatory obligations; the mapping differs by jurisdiction.</p>\n<h2>The Concept</h2>\n<h3>EU AI Act</h3>\n<p><strong>In force 1 August 2024.</strong> Risk-tier structure:</p>\n<ul>\n<li><strong>Prohibited practices</strong> (Article 5). Social scoring, real-time remote biometric identification in public (with law-enforcement exceptions), exploitative manipulation of vulnerable groups. Applied 2 February 2025.</li>\n<li><strong>High-risk systems</strong> (Annex III). Employment, education, credit, law enforcement, justice, migration. Require conformity assessment, risk management, logging, transparency.</li>\n<li><strong>General-Purpose AI (GPAI) models</strong>. Applied 2 August 2025. All GPAI providers have obligations; systemic-risk GPAI (&gt;1e25 FLOP training compute) have additional obligations.</li>\n<li><strong>Limited-risk systems</strong>. Transparency obligations under Article 50 (AI-generated content labelling). Applied 2 August 2026.</li>\n</ul>\n<p>Timeline:</p>\n<ul>\n<li>2 Feb 2025: prohibited practices + AI literacy.</li>\n<li>2 Aug 2025: GPAI + governance.</li>\n<li>2 Aug 2026: full applicability + Article 50 transparency + penalties up to 15M EUR / 3% global turnover.</li>\n<li>2 Aug 2027: legacy GPAI + embedded high-risk.</li>\n</ul>\n<p>Commission proposed adjusting the high-risk timeline to 16 months in late 2025.</p>\n<h3>GPAI Code of Practice</h3>\n<p>Published 10 July 2025. Three chapters:</p>\n<ul>\n<li><strong>Transparency.</strong> All GPAI providers.</li>\n<li><strong>Copyright.</strong> All GPAI providers.</li>\n<li><strong>Safety and Security.</strong> Systemic-risk GPAI providers (estimated 5-15 companies).</li>\n</ul>\n<p>12 commitments total. A Signatory Taskforce chaired by the AI Office manages implementation. Enforcement begins 2 August 2026; until then, good-faith compliance is accepted.</p>\n<h3>Transparency Code for Article 50</h3>\n<p>First draft 17 December 2025. Second draft March 2026. Final version June 2026. Covers AI-generated content labelling including deepfakes — the regulatory layer that requires Lesson 23&#39;s watermarking technology.</p>\n<h3>UK AI Security Institute (February 2025)</h3>\n<p>Renamed from AI Safety Institute. The rebrand narrows scope: drops algorithmic bias and free-speech framings; focuses on frontier capability security. Open-sourced the Inspect evaluation tool (May 2024). Collaborates with Redwood (Lesson 10) on control safety cases.</p>\n<h3>US CAISI (June 2025)</h3>\n<p>Trump administration transforms NIST&#39;s AI Safety Institute into the Center for AI Standards and Innovation. Shift toward &quot;pro-growth AI policies&quot; per VP Vance&#39;s Paris AI Action Summit remarks. Reduced emphasis on pre-deployment evaluation; emphasis on standards and innovation support. Domestic counterweight to EU AI Act&#39;s regulatory posture.</p>\n<h3>Korean AI Framework Act</h3>\n<p>Passed December 2024. Enacted January 2025. Effective January 2026. Consolidates 19 separate AI bills.</p>\n<p>Article 12 establishes an AISI under the Ministry of Science and ICT (MSIT). Mandates:</p>\n<ul>\n<li>Local representatives for foreign AI companies operating in Korea.</li>\n<li>Risk assessment for &quot;high-impact&quot; AI systems.</li>\n<li>Safety measures for generative AI and high-impact AI.</li>\n</ul>\n<p>First Asian jurisdiction with a comprehensive horizontal AI regulation.</p>\n<h3>Cross-jurisdiction dynamics</h3>\n<ul>\n<li>EU: strict, risk-tiered, heavy penalties. Benchmark for privacy-adjacent regulation.</li>\n<li>US: innovation-favouring, decentralized, states (e.g., California AB 2013 — Lesson 27) fill federal gaps.</li>\n<li>UK: narrow security focus, strong evaluation infrastructure.</li>\n<li>Korea: MSIT-led, foreign-provider-focused.</li>\n</ul>\n<p>Competing regulatory philosophies. Deployers in multiple jurisdictions have to comply with the strictest, which in 2026 is typically the EU AI Act.</p>\n<h3>Where this fits in Phase 18</h3>\n<p>Lesson 18 is lab-voluntary governance; Lesson 24 is regulatory; Lesson 25 is an emerging class of CVEs for AI systems; Lessons 26-27 cover documentation (cards) and training-data governance.</p>\n<p class=\"i-lesson-figure\"><em>Diagram <code>an-eu-act-timeline</code> — see the interactive version in the <a href=\"https://aiengineeringfromscratch.com\" target=\"_blank\" rel=\"noopener\">source lesson</a>.</em></p>\n<h2>Use It</h2>\n<p>No code. Read the EU AI Act primary sources: the regulation text, the GPAI Code of Practice, the UK AISI Inspect framework. Map your deployment to the applicable obligations for each jurisdiction.</p>\n<h2>Ship It</h2>\n<p>This lesson produces <code>outputs/skill-regulatory-map.md</code>. Given a deployment description, it maps the applicable jurisdictions, the tier classifications in each, the per-jurisdiction obligations, and the deadline structure.</p>\n<h2>Exercises</h2>\n<ol>\n<li><p>Read the EU AI Act (regulation 2024/1689) and the GPAI Code of Practice (10 July 2025). Identify three obligations that apply to every GPAI provider and three that apply only to systemic-risk GPAI.</p>\n</li>\n<li><p>A deployment is made by a US company, runs on EU infrastructure, and serves Korean users. Which three jurisdictions&#39; rules apply, and which rule binds on each substantive question?</p>\n</li>\n<li><p>The UK AI Security Institute&#39;s rename narrows scope. Argue for and against the narrower framing. Identify the policy assumption each position depends on.</p>\n</li>\n<li><p>CAISI&#39;s &quot;pro-growth&quot; framing is a departure from the 2022-2024 AI safety institute model. Identify two measurable policy shifts that would follow from this framing.</p>\n</li>\n<li><p>Korea&#39;s AI Framework Act requires local representatives for foreign providers. Describe the operational implications for a Bay Area company serving Korean users.</p>\n</li>\n</ol>\n<h2>Key Terms</h2>\n<table>\n<thead>\n<tr>\n<th>Term</th>\n<th>What people say</th>\n<th>What it actually means</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>EU AI Act</td>\n<td>&quot;the regulation&quot;</td>\n<td>Risk-tier-based horizontal AI regulation; in force Aug 2024</td>\n</tr>\n<tr>\n<td>GPAI</td>\n<td>&quot;general-purpose AI&quot;</td>\n<td>Large foundation models; systemic-risk subset has additional obligations</td>\n</tr>\n<tr>\n<td>Article 50</td>\n<td>&quot;transparency obligations&quot;</td>\n<td>AI-generated content labelling; applies Aug 2026</td>\n</tr>\n<tr>\n<td>UK AISI</td>\n<td>&quot;AI Security Institute&quot;</td>\n<td>Renamed Feb 2025; narrower frontier-security focus</td>\n</tr>\n<tr>\n<td>CAISI</td>\n<td>&quot;US center for AI standards&quot;</td>\n<td>Renamed Jun 2025 from AI Safety Institute; pro-growth posture</td>\n</tr>\n<tr>\n<td>Korean AI Framework Act</td>\n<td>&quot;MSIT horizontal regulation&quot;</td>\n<td>First Asian comprehensive AI law; effective Jan 2026</td>\n</tr>\n<tr>\n<td>Systemic-risk GPAI</td>\n<td>&quot;the 1e25 FLOP threshold&quot;</td>\n<td>Additional obligations tier; estimated 5-15 companies bound</td>\n</tr>\n</tbody></table>\n<h2>Further Reading</h2>\n<ul>\n<li><a href=\"https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai\" target=\"_blank\" rel=\"noopener\">EU AI Act text (Regulation 2024/1689)</a> — the regulation and timeline</li>\n<li><a href=\"https://digital-strategy.ec.europa.eu/en/library/final-version-general-purpose-ai-code-practice\" target=\"_blank\" rel=\"noopener\">GPAI Code of Practice (10 July 2025)</a> — three-chapter code</li>\n<li><a href=\"https://www.gov.uk/government/organisations/ai-security-institute\" target=\"_blank\" rel=\"noopener\">UK AI Security Institute (renamed Feb 2025)</a> — official page</li>\n<li><a href=\"https://cset.georgetown.edu/publication/south-korea-ai-law-2025/\" target=\"_blank\" rel=\"noopener\">CSET — South Korea AI Framework Act Analysis (2025)</a> — Korean framework analysis</li>\n</ul>\n",
+  "hasMermaid": false,
+  "code": {
+    "py": "\"\"\"Regulatory framework timeline printer — stdlib Python.\n\nPrints a unified timeline of the EU AI Act, GPAI Code of Practice, Transparency\nCode, UK AISI rebrand, US CAISI rebrand, and Korean AI Framework Act milestones.\n\nReference-only; primary sources cited in docs/en.md.\n\nUsage: python3 code/main.py\n\"\"\"\n\nfrom __future__ import annotations\n\n\nTIMELINE = [\n    (\"2024-08-01\", \"EU AI Act enters into force\"),\n    (\"2024-12-00\", \"Korean AI Framework Act passed by National Assembly\"),\n    (\"2025-01-00\", \"Korean AI Framework Act enacted (effective Jan 2026)\"),\n    (\"2025-02-02\", \"EU AI Act: prohibited practices and AI literacy apply\"),\n    (\"2025-02-00\", \"UK AISI renamed -> AI Security Institute\"),\n    (\"2025-06-00\", \"US AISI renamed -> CAISI (Center for AI Standards and Innovation)\"),\n    (\"2025-07-10\", \"GPAI Code of Practice published (3 chapters, 12 commitments)\"),\n    (\"2025-08-02\", \"EU AI Act: GPAI + governance obligations apply\"),\n    (\"2025-12-17\", \"Transparency Code for Article 50 first draft\"),\n    (\"2026-01-00\", \"Korean AI Framework Act effective\"),\n    (\"2026-03-00\", \"Transparency Code second draft\"),\n    (\"2026-06-00\", \"Transparency Code final version\"),\n    (\"2026-08-02\", \"EU AI Act: full applicability + Article 50 transparency + penalties\"),\n    (\"2027-08-02\", \"EU AI Act: legacy GPAI + embedded high-risk systems\"),\n]\n\n\ndef main() -> None:\n    print(\"=\" * 78)\n    print(\"AI REGULATORY TIMELINE (Phase 18, Lesson 24)\")\n    print(\"=\" * 78)\n    for date, event in TIMELINE:\n        print(f\"  {date}  {event}\")\n    print(\"\\n\" + \"=\" * 78)\n    print(\"TAKEAWAY: EU AI Act sets the global bar. full enforcement August 2026.\")\n    print(\"UK narrowed to frontier security. US pivoted pro-growth. Korea is the\")\n    print(\"first Asian comprehensive framework. deployers in multiple jurisdictions\")\n    print(\"comply with the strictest, which is usually the EU.\")\n    print(\"=\" * 78)\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "quiz": [
+    {
+      "q": "When did the EU AI Act enter into force, and what category applied first?",
+      "options": [
+        "August 2025; all categories applied at once",
+        "January 2024; high-risk systems applied that day",
+        "August 2024; prohibited practices and AI literacy applied 2 February 2025",
+        "August 2026; only GPAI applied at force-date"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What is the maximum monetary penalty under the EU AI Act applicable from 2 August 2026?",
+      "options": [
+        "Up to 5M EUR or 1% of global turnover",
+        "Up to 1M EUR or 0.1% of global turnover",
+        "Up to 15M EUR or 3% of global turnover",
+        "Unlimited"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "Which three chapters make up the GPAI Code of Practice (10 July 2025)?",
+      "options": [
+        "Capability, Control, Compliance",
+        "Transparency, Copyright, Safety and Security",
+        "Privacy, Bias, Watermarking",
+        "Training, Inference, Deployment"
+      ],
+      "answer": 1,
+      "explanation": ""
+    },
+    {
+      "q": "What does the February 2025 UK AISI rebrand to 'AI Security Institute' signal?",
+      "options": [
+        "A narrower scope focused on frontier-capability security, dropping algorithmic bias and free-speech framings",
+        "Closure of UK frontier evaluation",
+        "Merger with the EU AI Office",
+        "Expansion into algorithmic bias"
+      ],
+      "answer": 0,
+      "explanation": ""
+    },
+    {
+      "q": "What does the US CAISI rebrand (June 2025) signal in policy direction?",
+      "options": [
+        "Mandatory open-source release of frontier models",
+        "Merger with FDA",
+        "A shift toward 'pro-growth AI policies,' with emphasis on standards and innovation support and reduced emphasis on pre-deployment evaluation",
+        "Stricter pre-deployment safety evaluation"
+      ],
+      "answer": 2,
+      "explanation": ""
+    },
+    {
+      "q": "What is the headline obligation in Korea's AI Framework Act (effective January 2026)?",
+      "options": [
+        "Identical adoption of the EU AI Act",
+        "Total prohibition of foreign AI providers",
+        "Mandatory open-weights for all generative models",
+        "Article 12 establishes an AISI under MSIT and mandates local representatives, risk assessment, and safety measures for high-impact and generative AI"
+      ],
+      "answer": 3,
+      "explanation": ""
+    }
+  ],
+  "source": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "commit": "39ea8a1",
+    "path": "phases/18-ethics-safety-alignment/24-regulatory-frameworks-eu-us-uk-korea"
+  }
+}

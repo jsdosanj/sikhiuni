@@ -1,0 +1,3 @@
+{
+  "blurb": "Some work should run without a human watching every step — a nightly archive backup, a monitor that flags a broken link in a Gurbani resource, a pipeline that re-transcribes new recordings as they arrive. Doing that safely, with the right guardrails and human check-ins, is this phase."
+}
