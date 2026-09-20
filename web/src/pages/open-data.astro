@@ -5,14 +5,14 @@ import { readFileSync, existsSync } from 'node:fs';
 
 // Read the manifest that web/scripts/build-dataset.mjs writes before `astro build`
 // (build-time import, same pattern as web/src/lib/verification.ts). Absent in
-// `astro dev`, where the data-build scripts don't run, fall back to zeros rather
+// `astro dev`, where the data-build scripts don't run — fall back to zeros rather
 // than crash the dev server.
 let dataset: any = null;
 try {
   if (existsSync('./public/data/dataset.json')) {
     dataset = JSON.parse(readFileSync('./public/data/dataset.json', 'utf-8'));
   }
-} catch { /* absent in dev, page still renders */ }
+} catch { /* absent in dev — page still renders */ }
 
 import { SITE } from '../lib/site';
 const stats = dataset?.stats || { courses: 0, publishedCourses: 0, quotesVerified: 0, coursesSealed: 0 };
@@ -53,7 +53,7 @@ const jsonLd = {
 // panel (bg-brand, the same fixed-navy token band.navy already uses) --
 // same citation text.
 ---
-<Base title="Open data, Sikhi University" description="The Sikhi University course catalogue metadata and Gurbani-verification report, published openly under CC BY 4.0, the canonical scripture text itself is never rehosted, only referenced via BaniDB." ambient="study">
+<Base title="Open data — Sikhi University" description="The Sikhi University course catalogue metadata and Gurbani-verification report, published openly under CC BY 4.0 — the canonical scripture text itself is never rehosted, only referenced via BaniDB." ambient="study">
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
@@ -64,7 +64,7 @@ const jsonLd = {
       <span>Open data · CC BY 4.0</span>
     </p>
     <h1 class="text-display-sm mt-3 text-navy">The catalogue and the verification report, openly licensed</h1>
-    <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted">Sikhi University publishes the <em>structure</em> of its catalogue, course titles, topics, levels, professors, summaries, outcomes, lesson titles, and the Gurbani-quote verification report described on the <a class="underline" href="/integrity">content-integrity page</a>, as a machine-readable, openly-licensed dataset. Researchers, other Sikhi projects, and search tools are welcome to reuse it.</p>
+    <p class="mt-4 max-w-[66ch] font-sans text-lg leading-relaxed text-muted">Sikhi University publishes the <em>structure</em> of its catalogue — course titles, topics, levels, professors, summaries, outcomes, lesson titles — and the Gurbani-quote verification report described on the <a class="underline" href="/integrity">content-integrity page</a>, as a machine-readable, openly-licensed dataset. Researchers, other Sikhi projects, and search tools are welcome to reuse it.</p>
 
     <div class="mt-9 grid gap-x-8 gap-y-5 border-t-2 border-navy pt-5 sm:grid-cols-2 lg:grid-cols-4">
       <div class="stat-mono"><span data-no-i18n>{stats.courses.toLocaleString()}</span><span>Courses catalogued</span></div>
@@ -78,12 +78,12 @@ const jsonLd = {
     <div class="mt-12">
       <h2 class="rule-navy pb-2 text-xl font-bold text-navy">What's in the dataset</h2>
       <ul class="mt-3.5 grid gap-2.5 text-muted">
-        <li><strong class="text-ink">Catalogue metadata.</strong> Titles, topics, levels, professors, summaries, learning outcomes, and lesson titles for every course, not the lesson prose or quiz content itself.</li>
-        <li><strong class="text-ink">The verification report.</strong> Per-course counts of quoted Gurbani checked against the canonical snapshot, verified, mismatched, or not yet covered, plus totals.</li>
+        <li><strong class="text-ink">Catalogue metadata.</strong> Titles, topics, levels, professors, summaries, learning outcomes, and lesson titles for every course — not the lesson prose or quiz content itself.</li>
+        <li><strong class="text-ink">The verification report.</strong> Per-course counts of quoted Gurbani checked against the canonical snapshot — verified, mismatched, or not yet covered — plus totals.</li>
       </ul>
     </div>
 
-    <!-- Files (isopendata's ledger, the same 4 real downloads, ruled instead of card-gridded) -->
+    <!-- Files (isopendata's ledger — the same 4 real downloads, ruled instead of card-gridded) -->
     <div class="mt-12">
       <h2 class="rule-navy pb-2 text-xl font-bold text-navy">Download</h2>
       <div class="mt-1">
@@ -107,7 +107,7 @@ const jsonLd = {
         </a>
         <a class="row-ruled hover:bg-surface" href="/data/dataset.json" download>
           <span class="flex-none font-mono text-[13px] text-navy" data-no-i18n>/data/dataset.json</span>
-          <span class="min-w-[180px] flex-1 basis-[220px] text-[15px] text-ink">The manifest, license, sources, and links to the files above.</span>
+          <span class="min-w-[180px] flex-1 basis-[220px] text-[15px] text-ink">The manifest — license, sources, and links to the files above.</span>
           <span class="flex-none font-mono text-[11px] text-muted" data-no-i18n>JSON</span>
           <Icon name="download" class="h-4 w-4 shrink-0 text-saffron-deep" />
         </a>
@@ -116,8 +116,8 @@ const jsonLd = {
 
     <!-- Pointer, not a mirror -->
     <div class="mt-9 max-w-[74ch] border border-saffron bg-saffron-soft px-6 py-5">
-      <p class="font-mono text-[10.5px] uppercase tracking-[.18em] text-saffron-deep">What is not covered, a pointer, not a mirror</p>
-      <p class="mt-2.5 font-sans text-[16px] leading-relaxed text-ink"><strong>Not included: scripture text.</strong> No Gurbani text is rehosted in this dataset. The canonical Sri Guru Granth Sahib Ji text lives at <a class="underline" href="https://www.banidb.com" target="_blank" rel="noopener">BaniDB</a>, and the dataset only ever points there, it never copies the text out.</p>
+      <p class="font-mono text-[10.5px] uppercase tracking-[.18em] text-saffron-deep">What is not covered — a pointer, not a mirror</p>
+      <p class="mt-2.5 font-sans text-[16px] leading-relaxed text-ink"><strong>Not included: scripture text.</strong> No Gurbani text is rehosted in this dataset. The canonical Sri Guru Granth Sahib Ji text lives at <a class="underline" href="https://www.banidb.com" target="_blank" rel="noopener">BaniDB</a>, and the dataset only ever points there — it never copies the text out.</p>
     </div>
 
     <!-- Sources -->
@@ -145,7 +145,7 @@ const jsonLd = {
     <!-- License & citation -->
     <div class="mt-12">
       <h2 class="rule-navy pb-2 text-xl font-bold text-navy">License &amp; citation</h2>
-      <p class="mt-3.5 text-muted">The catalogue metadata and verification report are published under <a class="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 (CC BY 4.0)</a>, reuse, adapt, and redistribute freely, with attribution.</p>
+      <p class="mt-3.5 text-muted">The catalogue metadata and verification report are published under <a class="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 (CC BY 4.0)</a> — reuse, adapt, and redistribute freely, with attribution.</p>
       <p class="mt-4 font-sans text-sm font-semibold text-ink">Suggested citation</p>
       <div class="mt-2 max-w-[78ch] bg-brand p-5">
         <code class="font-mono text-[13.5px] leading-relaxed text-white" data-no-i18n>{CITATION}</code>

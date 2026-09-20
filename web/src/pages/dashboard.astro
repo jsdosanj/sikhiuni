@@ -1,42 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
-import LearningStudio from '../components/LearningStudio.astro';
-import LearningLibrary from '../components/LearningLibrary.astro';
-import { published } from '../lib/data';
-import '../styles/dashboard.css';
-import { FAMILY_TILES, FAMILY_BLURB } from '../lib/family-links';
-const section = Astro.props.section || 'studio';
-const titles = {studio:'Your learning studio', focus:'Time to focus', learning:'Your learning journey', profile:'Make yourself at home', library:'Your connected course workspace'};
-const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time','/dashboard/focus'],['learning','↗ My learning','/dashboard/learning'],['library','▤ Notes & references','/dashboard/library'],['catalog','⊞ Explore courses','/catalog'],['profile','◎ My profile','/dashboard/profile']];
 ---
-<Base title="My Learning, Sikhi University" description="Your progress, certificates, streak and badges at Sikhi University." ambient="none" bodyClass="su-dashboard" noindex={true}>
+<Base title="My Learning — Sikhi University" description="Your progress, certificates, streak and badges at Sikhi University." ambient="study" noindex={true}>
   <section class="wrap py-10 sm:py-12">
-    <div class="dashboard-banner"><div><p class="desk-label">SIKHI UNIVERSITY / MY CAMPUS</p><h1>{titles[section]}</h1><p>A space to learn, practise and make it your own.</p></div><img class="dashboard-logo-light" src="/assets/brand/silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /><img class="dashboard-logo-dark" src="/assets/brand/menu-silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /></div>
-    <nav class="dashboard-rail" aria-label="Dashboard sections">{links.map(([key,label,href]) => <a href={href} aria-current={key === section ? 'page' : undefined}>{label}</a>)}</nav>
-    {section === 'studio' && <LearningStudio />}
-    {section === 'library' && <LearningLibrary />}
-    {section === 'focus' && <>
-    <div class="desk-tools">
-      <section class="desk-focus" aria-labelledby="focus-title">
-        <div><p class="desk-label">A little time. A little further.</p><h2 id="focus-title">Make room to learn.</h2><p>One focused session is a good place to start.</p></div>
-        <div class="focus-controls"><label for="focus-course">Study focus</label><select id="focus-course"><option value="">Independent study</option>{published.map(c=><option value={c.id}>{c.title}</option>)}</select><label for="focus-duration">Session length</label><select id="focus-duration"><option value="5">5 minutes</option><option value="15" selected>15 minutes</option><option value="25">25 minutes</option></select><output id="focus-clock" aria-label="Time remaining">15:00</output><div><button id="focus-toggle" type="button">Start focus</button><button id="focus-reset" type="button">Reset</button></div><p id="focus-status" role="status">Your timer is saved as you move between pages.</p></div>
-      </section>
-      <section class="desk-daily" aria-labelledby="daily-title"><p class="desk-label">Your daily three</p><h2 id="daily-title">Small steps count.</h2><p>A personal checklist, saved on this device.</p><label><input type="checkbox" data-daily="learn" /> Learn something new</label><label><input type="checkbox" data-daily="practise" /> Practise what you know</label><label><input type="checkbox" data-daily="reflect" /> Pause and reflect</label><p id="daily-status" role="status"></p></section>
-    </div>
-    <nav class="desk-shortcuts" aria-label="Learning shortcuts"><a href="/santhiya"><span>01 / Listen &amp; read</span><strong>Open Santhya ↗</strong></a><a href="/baal-updesh#flashcards"><span>02 / Make it stick</span><strong>Review flashcards ↗</strong></a><a href="/muharni"><span>03 / Find your sound</span><strong>Practise pronunciation ↗</strong></a><a href="/technology"><span>04 / Build &amp; experiment</span><strong>Enter the tech institute ↗</strong></a></nav>
-    </>}
-    {(section === 'learning' || section === 'profile') && <>
     <div id="bar"></div>
     <!--
       Static skeleton (isdashboard, prototype lines 385-427). `#dash` is
       wholesale-replaced by the account/progress script below the instant it
-      resolves (unchanged behaviour, see the script's `root.innerHTML =`
+      resolves (unchanged behaviour — see the script's `root.innerHTML =`
       assignments); this is what a visitor or crawler sees before/without
       that JS. Nothing here is invented data (Decision 12 / task 15
       acceptance): the three stat labels below ("Points", "Day streak",
       "Courses complete") are the exact literal labels the script itself
-      renders in `renderStudent()`'s `stat(...)` calls, grep either file for
-      them and they match, every numeral is the placeholder "-" this file
+      renders in `renderStudent()`'s `stat(...)` calls — grep either file for
+      them and they match — every numeral is the placeholder "—" this file
       already uses elsewhere for missing data (see `fmtRel`), and the
       "Continue where you stopped" band and "Enrolled" ledger are shimmer
       placeholders for the real "Continue where you stopped"/"Enrolled"
@@ -49,9 +26,9 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           <h1 class="text-display-sm mt-3 text-navy" data-i18n="dash.loading">Loading your learning…</h1>
         </div>
         <div class="flex flex-none gap-8 pb-1" aria-hidden="true">
-          <div class="stat-mono"><span>-</span><span>Points</span></div>
-          <div class="stat-mono"><span>-</span><span>Day streak</span></div>
-          <div class="stat-mono"><span>-</span><span>Courses complete</span></div>
+          <div class="stat-mono"><span>—</span><span>Points</span></div>
+          <div class="stat-mono"><span>—</span><span>Day streak</span></div>
+          <div class="stat-mono"><span>—</span><span>Courses complete</span></div>
         </div>
       </div>
 
@@ -72,30 +49,24 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
       </div>
     </div>
 
-    </>}
-    <div class="mt-14" data-testid="family-tiles">
-      <p class="eyebrow text-saffron-deep">Your sikhi.io family</p>
-      <p class="mt-2 max-w-xl font-sans text-sm text-muted">{FAMILY_BLURB}</p>
-      <div class="mt-4 grid gap-3 sm:grid-cols-2">
-        {FAMILY_TILES.map((tile) => (
-          <a
-            href={tile.href}
-            data-testid={`family-tile-${tile.id}`}
-            class="group block rounded-xl2 border border-line bg-surface p-5 transition-colors hover:border-saffron"
-          >
-            <div class="flex items-baseline justify-between gap-3">
-              <span class="font-semibold text-navy group-hover:text-saffron-deep">{tile.name}</span>
-              <span class="font-mono text-[10.5px] uppercase tracking-[.16em] text-muted">{tile.note}</span>
-            </div>
-            <p class="mt-2 font-sans text-sm text-muted">{tile.blurb}</p>
-          </a>
-        ))}
+    <!--
+      "Today's ang" (task 15 spec): dashboard.astro has no existing
+      daily-shabad/ang-of-the-day hook to reuse (grepped — none of
+      `#daily-shabad`/`#ds-line`/`#ds-cite`/`#ds-link` exist in this file),
+      so per spec this links straight into the reader rather than adding a
+      new corpus fetch. Lives outside `#dash` — it needs no account data, so
+      it isn't wiped when the script above replaces `#dash`'s contents.
+    -->
+    <div class="mt-10 max-w-lg">
+      <p class="eyebrow text-saffron-deep" data-i18n="dash.ang.eyebrow">Today's ang</p>
+      <div class="rule-navy mt-1 pt-4">
+        <p class="font-sans text-sm text-muted" data-i18n="dash.ang.body">Read along, ang by ang, with Santhya audio.</p>
+        <a class="mt-3 inline-block font-mono text-[11px] tracking-[.06em] text-saffron-deep underline" href="/santhiya" data-i18n="dash.ang.cta">Open in the reader →</a>
       </div>
     </div>
   </section>
   <script>
     import { iconSvg } from '../lib/icons';
-    import { stageName } from '../lib/stages';
     import { initRings } from '../lib/motion';
     import { support as pushSupport, serverKey as pushServerKey, isSubscribed as pushIsSubscribed, enable as pushEnable, disable as pushDisable } from '../lib/push';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -103,24 +74,15 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
     const set = (k, v) => { try { localStorage.setItem('su_v1_' + k, JSON.stringify(v)); } catch {} };
     const passed = (id) => !!get('passed_' + id, false);
     function progress(c) { if (!c.nLessons) return 0; const d = get('done_' + c.id, {}); let n = 0; for (const k in d) if (d[k]) n++; return Math.round((n / c.nLessons) * 100); }
-    // Real, server-backed streak (real mouse/keyboard/scroll/touch engagement
-    // time, tracked by /scripts/activity-tracker.js and persisted via
-    // /api/activity/*), set by the Promise.all below once that fetch
-    // resolves. `activityStats` stays null until then; the old localStorage-
-    // derived calculation is kept ONLY as the fallback for that brief window
-    // (or if the fetch ever fails) so the page never shows a jarring "0" flash.
-    let activityStats = null;
-    function localStreakFallback() { const a = get('activity', []); if (!a.length) return 0; const s = {}; a.forEach((d) => (s[d] = 1)); const key = (dt) => dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate(); let d = new Date(); if (!s[key(d)]) { d.setDate(d.getDate() - 1); if (!s[key(d)]) return 0; } let n = 0; while (s[key(d)]) { n++; d.setDate(d.getDate() - 1); } return n; }
-    function streak() { return activityStats ? activityStats.streak : localStreakFallback(); }
+    function streak() { const a = get('activity', []); if (!a.length) return 0; const s = {}; a.forEach((d) => (s[d] = 1)); const key = (dt) => dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate(); let d = new Date(); if (!s[key(d)]) { d.setDate(d.getDate() - 1); if (!s[key(d)]) return 0; } let n = 0; while (s[key(d)]) { n++; d.setDate(d.getDate() - 1); } return n; }
 
-    const fmtRel = (ts) => { if (!ts) return '-'; const s = (Date.now() - ts) / 1000; if (s < 86400) return 'today'; const d = Math.floor(s / 86400); if (d < 7) return d + 'd ago'; if (d < 30) return Math.floor(d / 7) + 'w ago'; return Math.floor(d / 30) + 'mo ago'; };
+    const fmtRel = (ts) => { if (!ts) return '—'; const s = (Date.now() - ts) / 1000; if (s < 86400) return 'today'; const d = Math.floor(s / 86400); if (d < 7) return d + 'd ago'; if (d < 30) return Math.floor(d / 7) + 'w ago'; return Math.floor(d / 30) + 'mo ago'; };
     const grade = (s) => s >= 90 ? 'A' : s >= 80 ? 'B' : s >= 70 ? 'C' : s >= 60 ? 'D' : 'F';
     const api = (p, o) => fetch(p, { credentials: 'same-origin', headers: o ? { 'content-type': 'application/json' } : undefined, ...(o || {}) }).then((r) => (r.ok ? r.json() : { user: null, error: true })).catch(() => ({ user: null, error: true }));
-    // Profile allowlists, keep in sync with functions/api/_profile-options.js.
+    // Profile allowlists — keep in sync with functions/api/_profile-options.js.
     const COUNTRIES = ['Afghanistan','Albania','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahrain','Bangladesh','Belgium','Bhutan','Bolivia','Bosnia and Herzegovina','Brazil','Brunei','Bulgaria','Cambodia','Cameroon','Canada','Chile','China','Colombia','Croatia','Cyprus','Czechia','Denmark','Ecuador','Egypt','Estonia','Ethiopia','Fiji','Finland','France','Georgia','Germany','Ghana','Greece','Guatemala','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Libya','Lithuania','Luxembourg','Malaysia','Maldives','Malta','Mauritius','Mexico','Moldova','Mongolia','Morocco','Myanmar','Nepal','Netherlands','New Zealand','Nigeria','North Macedonia','Norway','Oman','Pakistan','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saudi Arabia','Serbia','Singapore','Slovakia','Slovenia','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Syria','Taiwan','Tanzania','Thailand','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe','Other'];
     const LANGUAGES = ['Punjabi','English','Hindi','Urdu','Gurmukhi','Shahmukhi','Bengali','Tamil','Telugu','Marathi','Gujarati','Kannada','Malayalam','Sindhi','Pashto','Farsi','Arabic','Spanish','French','German','Portuguese','Italian','Dutch','Russian','Mandarin','Cantonese','Japanese','Korean','Thai','Vietnamese','Indonesian','Malay','Swahili','Turkish','Other'];
-    if (document.getElementById('dash')) Promise.all([api('/api/me'), fetch('/data/index.json').then((r) => r.json()), api('/api/progress'), api('/api/enrollments'), api('/api/activity/stats'), fetch('/data/institute/manifest.json').then((r) => r.ok ? r.json() : null).catch(() => null)]).then(([me, data, prog, enrollRes, activityRes, institute]) => {
-      if (activityRes && !activityRes.error) activityStats = activityRes;
+    Promise.all([api('/api/me'), fetch('/data/index.json').then((r) => r.json()), api('/api/progress'), api('/api/enrollments')]).then(([me, data, prog, enrollRes]) => {
       // Server is the source of truth for grades: merge it into the local cache before rendering.
       if (prog && prog.progress) prog.progress.forEach((row) => {
         if (row.passed_score != null) { set('score_' + row.course_id, row.passed_score); if (row.passed_score >= 80) set('passed_' + row.course_id, row.passed_score); }
@@ -133,13 +95,13 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
       const registeredPrograms = new Set(enr.filter((e) => e.kind === 'program').map((e) => e.target_id));
       const isAdmin = !!(user && user.role === 'admin');
       // isTeacher covers role==='teacher' AND a course_teachers assignment held by a
-      // user of any other role (an admin, or even a learner given co-teacher access) -
+      // user of any other role (an admin, or even a learner given co-teacher access) —
       // see functions/api/_lib.js's isCourseTeacher. Either one gets the real (non-demo)
       // Student/Teacher switch below, not just admins.
       const isTeacherReal = !!(user && user.isTeacher);
       const qs = new URLSearchParams(location.search);
-      const demo = qs.get('demo'); // ?demo=student|teacher, a sample dashboard with illustrative data
-      const viewParam = qs.get('view'); // ?view=student|teacher, this account's OWN real data, rendered as that role
+      const demo = qs.get('demo'); // ?demo=student|teacher — a sample dashboard with illustrative data
+      const viewParam = qs.get('view'); // ?view=student|teacher — this account's OWN real data, rendered as that role
       const viewAs = (isAdmin && (demo === 'student' || demo === 'teacher')) ? demo
         : ((isAdmin || isTeacherReal) && (viewParam === 'student' || viewParam === 'teacher')) ? viewParam
         : (user && user.role === 'teacher' ? 'teacher' : 'student');
@@ -148,78 +110,49 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
 
       if (isAdmin || isTeacherReal) {
         const link = (label, v, on) => `<a href="/dashboard${v ? '?view=' + v : ''}" class="rounded-lg px-3 py-1.5 font-sans text-sm ${on ? 'bg-brand text-white' : 'border border-line hover:border-saffron'}">${label}</a>`;
-        bar.innerHTML = `<div class="glass mb-6 flex flex-wrap items-center gap-2 p-3">
+        bar.innerHTML = `<div class="mb-6 flex flex-wrap items-center gap-2 rounded-xl2 border border-line bg-surface p-3">
           <span class="font-sans text-sm font-semibold text-navy">View as:</span>
           ${link('Student', 'student', !demo && viewAs === 'student')}
           ${link('Teacher', 'teacher', !demo && viewAs === 'teacher')}
           ${isAdmin ? '<a href="/admin" class="ml-auto rounded-lg px-3 py-1.5 font-sans text-sm border border-line hover:border-saffron">← Admin dashboard</a>' : ''}
-        </div>` + (demo ? `<div class="mb-6 rounded-xl2 border-l-4 border-saffron bg-saffron-soft/40 p-3 font-sans text-sm">Demo mode, a sample <strong>${esc(demo)}</strong> dashboard for testing. The figures shown are illustrative.</div>` : '');
+        </div>` + (demo ? `<div class="mb-6 rounded-xl2 border-l-4 border-saffron bg-saffron-soft/40 p-3 font-sans text-sm">Demo mode — a sample <strong>${esc(demo)}</strong> dashboard for testing. The figures shown are illustrative.</div>` : '');
       }
 
       const tn = (t) => (data.topics.find((x) => x.id === t) || {}).name || t;
-
-      // The Institute of Technology writes to the SAME `progress` table as the
-      // catalogue (see /api/institute-exam and /api/progress), so a student who
-      // passed a phase exam already had a row here — this page just never had a
-      // course object to hang it on and silently dropped it. Its tracks are
-      // mapped onto the shape the rest of this view expects, so completed /
-      // started / grades / certificates all treat a track like any course.
-      // `href` and `certHref` exist because the two live at different routes.
-      const trackSlug = (t) => ((t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id);
-      const schoolName = (id) => ((institute && institute.schools || []).find((x) => x.id === id) || {}).title || 'Institute of Technology';
-      const instituteCourses = ((institute && institute.tracks) || [])
-        .filter((t) => t.status === 'published')
-        .map((t) => ({
-          id: t.id,
-          title: t.title,
-          topic: schoolName(t.school),
-          level: t.level,
-          status: 'published',
-          nLessons: t.lessonCount || t.moduleCount || t.topicCount || t.projectCount || 0,
-          href: `/technology/track/${trackSlug(t)}`,
-          certHref: `/technology/cert?track=${encodeURIComponent(trackSlug(t))}`,
-          institute: true,
-        }));
-
-      const pub = data.courses
-        .filter((c) => c.status === 'published')
-        .map((c) => ({ ...c, href: `/course/${c.id}`, certHref: `/cert?course=${c.id}` }))
-        .concat(instituteCourses);
+      const pub = data.courses.filter((c) => c.status === 'published');
 
       // Tabs: My Learning | Profile. Any signed-in user can edit their account.
       function renderLearning() { if (viewAs === 'teacher') renderTeacher(); else renderStudent(); }
-      let view = (user && (location.hash === '#profile' || location.pathname.includes('/dashboard/profile'))) ? 'profile' : 'learning';
+      let view = (user && location.hash === '#profile') ? 'profile' : 'learning';
       function drawView() {
         const nav = document.getElementById('dash-tabs');
-        if (nav) Array.from(nav.children).forEach((b) => { const on = b.dataset.v === view; b.className = 'px-4 py-2 font-sans text-sm border-b-2 transition-colors ' + (on ? 'border-saffron text-navy font-semibold' : 'border-transparent text-muted hover:border-line hover:text-navy'); });
-        if (!user && location.pathname.includes('/dashboard/profile')) { root.innerHTML = '<div class="card"><h2>Make your learning yours.</h2><p>Sign in to manage your profile and keep your account details up to date.</p><a class="btn btn-primary mt-4" href="/login?return=/dashboard/profile">Sign in</a></div>'; } else if (view === 'profile') renderProfile(); else renderLearning();
+        if (nav) Array.from(nav.children).forEach((b) => { const on = b.dataset.v === view; b.className = 'px-4 py-2 font-sans text-sm border-b-2 ' + (on ? 'border-saffron text-navy font-semibold' : 'border-transparent text-muted'); });
+        if (view === 'profile') renderProfile(); else renderLearning();
       }
       if (user) {
         const nav = document.createElement('div');
         nav.id = 'dash-tabs';
         nav.className = 'mb-6 flex gap-1 border-b border-line';
-        nav.innerHTML = [['learning', 'My Learning'], ['profile', 'Profile']].map(([k, l]) => `<button data-v="${k}" class="px-4 py-2 font-sans text-sm border-b-2 transition-colors border-transparent text-muted hover:border-line hover:text-navy">${l}</button>`).join('');
+        nav.innerHTML = [['learning', 'My Learning'], ['profile', 'Profile']].map(([k, l]) => `<button data-v="${k}" class="px-4 py-2 font-sans text-sm border-b-2 border-transparent text-muted">${l}</button>`).join('');
         bar.appendChild(nav);
-        nav.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { location.href = b.dataset.v === 'profile' ? '/dashboard/profile' : '/dashboard/learning'; }));
+        nav.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { view = b.dataset.v; location.hash = view === 'profile' ? '#profile' : ''; drawView(); }));
       }
-      window.addEventListener('hashchange', () => { if(user && location.hash === '#profile') { view='profile'; drawView(); root.scrollIntoView({block:'start'}); } });
       drawView();
       return;
 
       function renderProfile() {
         const cur = user || {};
         const curLangs = new Set(((cur.languages || '') + '').split(',').map((s) => s.trim()).filter(Boolean));
-        const countryOpts = ['<option value="">- Select country -</option>'].concat(COUNTRIES.map((c) => `<option value="${esc(c)}" ${cur.country === c ? 'selected' : ''}>${esc(c)}</option>`)).join('');
+        const countryOpts = ['<option value="">— Select country —</option>'].concat(COUNTRIES.map((c) => `<option value="${esc(c)}" ${cur.country === c ? 'selected' : ''}>${esc(c)}</option>`)).join('');
         const langChecks = LANGUAGES.map((l) => `<label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 py-1 font-sans text-xs has-[:checked]:border-saffron has-[:checked]:bg-saffron-soft/40"><input type="checkbox" value="${esc(l)}" ${curLangs.has(l) ? 'checked' : ''} class="pf-lang" /> ${esc(l)}</label>`).join('');
         root.innerHTML = `
-          <p class="eyebrow text-saffron-deep">Account</p>
-          <h1 class="text-display-sm font-bold">Profile</h1>
-          <p class="mt-2 font-sans text-sm text-muted">Update your account details. Please don't include sensitive personal information, see our <a class="underline" href="/legal">Terms &amp; Privacy</a>.</p>
+          <h1 class="text-3xl font-bold">Profile</h1>
+          <p class="mt-2 font-sans text-sm text-muted">Update your account details. Please don't include sensitive personal information — see our <a class="underline" href="/legal">Terms &amp; Privacy</a>.</p>
           <div id="pf-msg" class="mt-4"></div>
           <div class="mt-6 max-w-xl space-y-5">
             <label class="block"><span class="font-sans text-sm font-semibold">Sign-in email</span>
               <input type="email" value="${esc(cur.email || '')}" disabled class="mt-1 w-full rounded-xl border border-line bg-paper px-4 py-2.5 font-sans text-muted" />
-              <span class="font-sans text-xs text-muted">Your sign-in address, it can't be changed here.</span>
+              <span class="font-sans text-xs text-muted">Your magic-link sign-in address — it can't be changed here.</span>
             </label>
             <label class="block"><span class="font-sans text-sm font-semibold">Full name</span>
               <input id="pf-name" type="text" maxlength="80" value="${esc(cur.name || '')}" placeholder="Your full name" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none" />
@@ -231,12 +164,6 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             <div><span class="font-sans text-sm font-semibold">Languages</span>
               <div class="mt-2 flex flex-wrap gap-2">${langChecks}</div>
             </div>
-            <label class="flex items-start gap-2.5 rounded-xl border border-line bg-paper px-4 py-3">
-              <input id="pf-marketing" type="checkbox" ${cur.marketingOptin ? 'checked' : ''} class="mt-0.5" />
-              <span class="font-sans text-sm">Email me about new courses and features.
-                <span class="block text-xs text-muted">Off by default. You can change your mind here at any time.</span>
-              </span>
-            </label>
             <button id="pf-save" class="btn btn-primary">Save profile</button>
           </div>
           ${(cur.role === 'teacher' || cur.role === 'admin') ? `
@@ -256,7 +183,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             <div id="pf-del-confirm" class="mt-4 hidden rounded-xl2 border-l-4 border-danger bg-surface p-4">
               <p class="font-sans text-sm">This permanently erases your profile, progress, enrolments, certificates, ratings and posts. <strong>It cannot be undone.</strong> Type <strong>DELETE</strong> to confirm.</p>
               <div class="mt-3 flex flex-wrap items-center gap-2">
-                <input id="pf-del-input" type="text" placeholder="DELETE" class="rounded-lg border border-line bg-surface px-3 py-2 font-sans focus:border-saffron focus:outline-none" />
+                <input id="pf-del-input" type="text" placeholder="DELETE" class="rounded-lg border border-line bg-surface px-3 py-2 font-sans" />
                 <button id="pf-del-go" class="btn border border-danger/40 text-danger hover:bg-danger/10">Permanently delete</button>
                 <button id="pf-del-cancel" class="btn">Cancel</button>
               </div>
@@ -281,13 +208,11 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           const name = document.getElementById('pf-name').value.trim();
           const country = document.getElementById('pf-country').value;
           const languages = Array.from(document.querySelectorAll('.pf-lang:checked')).map((c) => c.value);
-          const marketingOptin = document.getElementById('pf-marketing').checked;
-          api('/api/me', { method: 'POST', body: JSON.stringify({ name, country, languages, marketingOptin }) }).then((res) => {
+          api('/api/me', { method: 'POST', body: JSON.stringify({ name, country, languages }) }).then((res) => {
             btn.disabled = false; btn.textContent = 'Save profile';
             const msg = document.getElementById('pf-msg');
             if (res && res.user) {
               user.name = res.user.name; user.country = res.user.country; user.languages = res.user.languages;
-              user.marketingOptin = res.user.marketingOptin;
               const p = get('profile', {}); p.name = res.user.name || ''; set('profile', p); // keep cert.astro in sync
               if (msg) msg.innerHTML = '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm"><strong>Saved.</strong> Your profile is up to date.</div>';
             } else if (msg) {
@@ -316,10 +241,10 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           const body = document.getElementById('tp-body');
           if (!body) return;
           body.innerHTML = `
-            ${p.is_public ? `<a class="pill bg-ok/20 text-ok" href="/teacher/${esc(p.slug)}" target="_blank">Live at /teacher/${esc(p.slug)} →</a>` : p.publish_requested_at ? '<span class="pill bg-paper text-muted">Publish requested, awaiting admin approval</span>' : ''}
-            <label class="block"><span class="font-sans text-sm font-semibold">Display name</span><input id="tp-name" value="${esc(p.display_name || cur.name || '')}" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none" /></label>
-            <label class="block"><span class="font-sans text-sm font-semibold">Bio</span><textarea id="tp-bio" rows="4" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none">${esc(p.bio || '')}</textarea></label>
-            <label class="block"><span class="font-sans text-sm font-semibold">Credentials</span><textarea id="tp-credentials" rows="2" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none">${esc(p.credentials || '')}</textarea></label>
+            ${p.is_public ? `<a class="pill bg-ok/20 text-ok" href="/teacher/${esc(p.slug)}" target="_blank">Live at /teacher/${esc(p.slug)} →</a>` : p.publish_requested_at ? '<span class="pill bg-paper text-muted">Publish requested — awaiting admin approval</span>' : ''}
+            <label class="block"><span class="font-sans text-sm font-semibold">Display name</span><input id="tp-name" value="${esc(p.display_name || cur.name || '')}" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans" /></label>
+            <label class="block"><span class="font-sans text-sm font-semibold">Bio</span><textarea id="tp-bio" rows="4" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans">${esc(p.bio || '')}</textarea></label>
+            <label class="block"><span class="font-sans text-sm font-semibold">Credentials</span><textarea id="tp-credentials" rows="2" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans">${esc(p.credentials || '')}</textarea></label>
             <div><span class="font-sans text-sm font-semibold">Teaching areas</span><div class="mt-2 flex flex-wrap gap-2">${areas.map((a) => `<label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 py-1 font-sans text-xs has-[:checked]:border-saffron has-[:checked]:bg-saffron-soft/40"><input type="checkbox" value="${esc(a)}" ${curAreas.has(a) ? 'checked' : ''} class="tp-area" /> ${esc(a)}</label>`).join('')}</div></div>
             <div><span class="font-sans text-sm font-semibold">Languages you teach in</span><div class="mt-2 flex flex-wrap gap-2">${languages.map((l) => `<label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 py-1 font-sans text-xs has-[:checked]:border-saffron has-[:checked]:bg-saffron-soft/40"><input type="checkbox" value="${esc(l)}" ${curLangs.has(l) ? 'checked' : ''} class="tp-lang" /> ${esc(l)}</label>`).join('')}</div></div>
             <label class="block"><span class="font-sans text-sm font-semibold">Photo</span><input id="tp-photo" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block font-sans text-sm" /><span class="font-sans text-xs text-muted">Uploads for admin review before it appears publicly.</span></label>
@@ -346,7 +271,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             api('/api/teacher/profile', { method: 'POST', body: JSON.stringify({ ...collect(), requestPublish: true }) }).then((r) => {
               const msg = document.getElementById('tp-msg');
               if (r && r.error === 'mfa_enrollment_required_to_publish') msg.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">Set up two-factor authentication before requesting publish. <a class="underline" href="/mfa">Set it up →</a></div>';
-              else if (r && r.profile) { msg.innerHTML = '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Publish requested, an admin will review it.</div>'; loadTeacherProfile(); }
+              else if (r && r.profile) { msg.innerHTML = '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Publish requested — an admin will review it.</div>'; loadTeacherProfile(); }
               else msg.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">Could not submit.</div>';
             });
           });
@@ -355,7 +280,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             const file = photoInput.files[0]; if (!file) return;
             fetch('/api/upload', { method: 'POST', credentials: 'same-origin', headers: { 'x-upload-kind': 'photo', 'x-upload-context': 'profile', 'content-type': file.type }, body: file })
               .then((r) => r.json().then((dd) => ({ ok: r.ok, d: dd })))
-              .then((r) => { document.getElementById('tp-msg').innerHTML = r.ok ? '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Photo uploaded, awaiting admin approval.</div>' : `<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">${esc((r.d && r.d.error) || 'Upload failed.')}</div>`; });
+              .then((r) => { document.getElementById('tp-msg').innerHTML = r.ok ? '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Photo uploaded — awaiting admin approval.</div>' : `<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">${esc((r.d && r.d.error) || 'Upload failed.')}</div>`; });
           });
         });
       }
@@ -369,18 +294,18 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
         const st = streak();
         let topicMaster = false;
         data.topics.forEach((t) => { const inT = pub.filter((c) => c.topic === t.id); if (inT.length && inT.every((c) => passed(c.id))) topicMaster = true; });
-        // Academic standing badges, based on completing all courses at each level tier
+        // Academic standing badges — based on completing all courses at each level tier
         const lvl = (min, max) => pub.filter((c) => c.level >= min && c.level < max);
         const lvl1 = lvl(100, 200), lvl2 = lvl(200, 300), lvl3 = lvl(300, 400), lvl4 = lvl(400, 500), lvl5 = lvl(500, 600);
         const allPassed = (cs) => cs.length > 0 && cs.every((c) => passed(c.id));
         const levelProg = (cs) => `${cs.filter((c) => passed(c.id)).length}/${cs.length}`;
         const badges = [
           ['First Step', 'sprout', lessonsDone >= 1, 'Complete your first lesson'],
-          ['Discover', 'backpack', allPassed(lvl1), 'Pass all Discover courses'],
-          ['Explore', 'book', allPassed(lvl2), 'Pass all Explore courses'],
-          ['Practise', 'microscope', allPassed(lvl3), 'Pass all Practise courses'],
-          ['Deepen', 'medal', allPassed(lvl4), 'Pass all Deepen courses'],
-          ['Research', 'pillar', allPassed(lvl5), 'Pass all Research courses'],
+          ['Freshman', 'backpack', allPassed(lvl1), 'Pass all 100-level courses'],
+          ['Sophomore', 'book', allPassed(lvl2), 'Pass all 200-level courses'],
+          ['Junior', 'microscope', allPassed(lvl3), 'Pass all 300-level courses'],
+          ['Senior', 'medal', allPassed(lvl4), 'Pass all 400-level courses'],
+          ['Graduate', 'pillar', allPassed(lvl5), 'Pass all 500-level courses'],
           ['Dedicated', 'books', completed.length >= 25, 'Pass 25 courses'],
           ['Scholar', 'medal', completed.length >= 100, 'Pass 100 courses'],
           ['Vidhvaan', 'crown', completed.length >= 250, 'Pass 250 courses'],
@@ -400,68 +325,60 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           if (mode === 'started') {
             // "Continue where you stopped" resume band (isdashboard, prototype
             // lines 399-406) mapped onto the real in-progress courses this
-            // page already computes, no new "which lesson is next" logic
+            // page already computes — no new "which lesson is next" logic
             // invented, just the existing `started`/`progress()` data
             // re-templated as flat navy resume cards.
             return `<div class="mt-10"><p class="eyebrow text-saffron-deep">${esc(title)}</p><div class="mt-4 flex flex-col gap-4 sm:flex-row sm:overflow-x-auto sm:snap-x sm:pb-2">${list.map((c) => {
               const p = progress(c);
-              return `<a href="${c.href}" class="band-navy relative block rounded-[3px] p-5 transition hover:-translate-y-1 sm:w-72 sm:shrink-0 sm:snap-start"><div class="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-white/70"><span>${esc(tn(c.topic))}</span><span>· ${stageName(c.level)}</span></div><h3 class="mt-2 text-lg font-bold text-white">${esc(c.title)}</h3><div class="mt-4 flex items-center gap-2"><span class="h-[3px] flex-1 bg-white/25"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="font-mono text-[11px] text-white/70">${p}%</span></div></a>`;
+              return `<a href="/course/${c.id}" class="band-navy relative block rounded-[3px] p-5 transition hover:-translate-y-1 sm:w-72 sm:shrink-0 sm:snap-start"><div class="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-white/70"><span>${esc(tn(c.topic))}</span><span>· ${c.level} level</span></div><h3 class="mt-2 text-lg font-bold text-white">${esc(c.title)}</h3><div class="mt-4 flex items-center gap-2"><span class="h-[3px] flex-1 bg-white/25"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="font-mono text-[11px] text-white/70">${p}%</span></div></a>`;
             }).join('')}</div></div>`;
           }
           return `<h3 class="mt-10 text-xl font-bold">${title}</h3><div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:grid-cols-4">${list.map((c) => {
             const p = progress(c);
-            const extra = mode === 'completed' ? `<a class="btn btn-primary mt-3" href="${c.certHref}">View certificate →</a>`
+            const extra = mode === 'completed' ? `<a class="btn btn-primary mt-3" href="/cert?course=${c.id}">View certificate →</a>`
               : mode === 'started' ? `<div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-paper"><div class="h-full bg-saffron" style="width:${p}%"></div></div><div class="font-sans text-xs text-muted mt-1">${p}% complete</div>` : '';
-            return `<article class="card hover:border-saffron"><div class="flex flex-wrap gap-2 font-sans text-xs text-muted"><span class="pill bg-paper text-navy">${esc(tn(c.topic))}</span><span class="pill bg-paper text-muted">${stageName(c.level)}</span></div><h3 class="mt-1 text-lg font-bold text-navy"><a href="${c.href}">${esc(c.title)}</a></h3>${extra}</article>`;
+            return `<a href="/course/${c.id}" class="card"><div class="flex flex-wrap gap-2 font-sans text-xs text-muted"><span class="pill bg-paper text-navy">${esc(tn(c.topic))}</span><span class="pill bg-paper text-muted">${c.level} level</span></div><h3 class="mt-1 text-lg font-bold text-navy">${esc(c.title)}</h3>${extra}</a>`;
           }).join('')}</div>`;
         }
         const graded = pub.filter((c) => passed(c.id) || progress(c) > 0 || get('score_' + c.id, null) != null);
         // "Enrolled" ledger (isdashboard, prototype lines 410-415): the same
         // graded-courses data the old "My grades" <table> showed (title,
-        // progress %, test score, status), re-templated as ruled rows per
+        // progress %, test score, status) — re-templated as ruled rows per
         // task 15 spec, nothing added or dropped.
-        const gradesHtml = graded.length ? `<div class="mt-10"><p class="eyebrow text-saffron-deep">Enrolled</p><div class="rule-navy mt-1">${graded.map((c) => { const sc = get('score_' + c.id, null); const p = progress(c); const ok = passed(c.id); const statusLabel = ok ? 'Passed' : (p > 0 || sc != null ? 'In progress' : '-'); const statusCls = ok ? 'text-ok border-ok' : 'text-muted border-line'; return `<a href="${c.href}" class="row-ruled hover:bg-surface"><span class="min-w-0 flex-1 truncate font-semibold text-navy">${esc(c.title)}</span><span class="flex w-36 flex-none items-center gap-2"><span class="h-[3px] flex-1 bg-line"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="w-9 shrink-0 text-right font-mono text-[11px] text-muted">${p}%</span></span><span class="w-12 shrink-0 text-right font-mono text-[11px] text-muted">${sc != null ? sc + '%' : '-'}</span><span class="chip-status flex-none ${statusCls}">${statusLabel}</span></a>`; }).join('')}</div></div>` : '';
+        const gradesHtml = graded.length ? `<div class="mt-10"><p class="eyebrow text-saffron-deep">Enrolled</p><div class="rule-navy mt-1">${graded.map((c) => { const sc = get('score_' + c.id, null); const p = progress(c); const ok = passed(c.id); const statusLabel = ok ? 'Passed' : (p > 0 || sc != null ? 'In progress' : '—'); const statusCls = ok ? 'text-ok border-ok' : 'text-muted border-line'; return `<a href="/course/${c.id}" class="row-ruled hover:bg-surface"><span class="min-w-0 flex-1 truncate font-semibold text-navy">${esc(c.title)}</span><span class="flex w-36 flex-none items-center gap-2"><span class="h-[3px] flex-1 bg-line"><span class="block h-[3px] bg-saffron" style="width:${p}%"></span></span><span class="w-9 shrink-0 text-right font-mono text-[11px] text-muted">${p}%</span></span><span class="w-12 shrink-0 text-right font-mono text-[11px] text-muted">${sc != null ? sc + '%' : '—'}</span><span class="chip-status flex-none ${statusCls}">${statusLabel}</span></a>`; }).join('')}</div></div>` : '';
         let applyCta = '';
         if (user && user.role === 'learner' && get('signup_intent', '') === 'teacher') applyCta = `<div class="mt-4 rounded-xl2 border-l-4 border-saffron bg-saffron-soft/40 p-4 font-sans text-sm">You signed up to teach. <a class="underline font-semibold" href="/teach">Complete your teacher application →</a></div>`;
         root.innerHTML = `
           <p class="eyebrow text-saffron-deep">Sat Sri Akal</p>
-          <h2 class="text-display-sm mt-3 text-navy">${name ? 'Welcome back, ' + esc(name) : 'Your learning record'}</h2>
+          <h1 class="text-display-sm mt-3 text-navy">${name ? 'Welcome back, ' + esc(name) : 'My Learning'}</h1>
           ${applyCta}
           <div id="ann-feed"></div>
-          ${user ? `<p class="mt-3 font-sans text-sm text-muted">Set your name, country and languages in the <a class="underline" href="#profile" id="go-profile">Profile</a> tab, your name appears on certificates.</p>` : ''}
-          <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">${stat(points, 'Points')}${stat(st, 'Day streak', { icon: 'fire' })}${stat(completed.length, 'Courses complete')}${stat(lessonsDone, 'Lessons done')}</div>
-          ${!completed.length && !started.length ? `<div class="glass mt-8 p-8 text-center"><div class="flex flex-col items-center gap-3"><span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-paper text-saffron-deep">${iconSvg('sprout', 'h-7 w-7')}</span><p class="font-serif text-lg font-bold text-navy">Your journey begins here.</p><p class="max-w-sm font-sans text-sm text-muted">Start a course and your progress, streak and certificates will appear on this page.</p><div class="mt-1 flex flex-wrap justify-center gap-3"><a class="btn btn-primary" href="/catalog">Browse the catalogue</a>${!user ? '<a class="btn" href="/login">Sign in to save progress</a>' : ''}</div></div></div>` : ''}
+          ${user ? `<p class="mt-3 font-sans text-sm text-muted">Set your name, country and languages in the <a class="underline" href="#profile" id="go-profile">Profile</a> tab — your name appears on certificates.</p>` : ''}
+          <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">${stat(points, 'Points')}${stat(st, 'Day streak', { icon: 'fire' })}${stat(completed.length, 'Courses complete', { ring: pub.length ? Math.round(completed.length / pub.length * 100) : 0 })}${stat(lessonsDone, 'Lessons done', { ring: (() => { const tot = pub.reduce((a, c) => a + (c.nLessons || 0), 0); return tot ? Math.round(lessonsDone / tot * 100) : 0; })() })}</div>
           <a href="/baal-updesh#flashcards" class="mt-6 flex items-center gap-4 rounded-xl2 border border-line bg-surface p-4 shadow-card transition hover:border-saffron"><span class="text-saffron-deep">${iconSvg('cards', 'h-8 w-8')}</span><span><span class="block font-bold text-navy">Review flashcards</span><span class="block font-sans text-sm text-muted">Lock in Gurmukhi terms and the most-used words of Gurbani with spaced repetition.</span></span><span class="ml-auto font-sans text-sm text-saffron-deep">Study →</span></a>
-          <div id="remind-card" hidden class="rounded-[3px] border border-line bg-surface mt-3 flex flex-wrap items-center gap-4 p-4"><span class="text-saffron-deep">${iconSvg('clock', 'h-8 w-8')}</span><span class="min-w-0 flex-1"><span class="block font-bold text-navy">Remind me to keep learning</span><span id="remind-body" class="block font-sans text-sm text-muted">One gentle notification a day, a few minutes of seva to yourself.</span></span><button id="remind-btn" class="btn shrink-0">Enable</button></div>
-          ${section('Pick up your next chapter', started, 'started')}
-          <details class="desk-achievements"><summary>Your milestone collection <span>${badges.filter(b => b[2]).length}/${badges.length} earned</span></summary>
+          <div id="remind-card" hidden class="rounded-[3px] border border-line bg-surface mt-3 flex flex-wrap items-center gap-4 p-4"><span class="text-saffron-deep">${iconSvg('clock', 'h-8 w-8')}</span><span class="min-w-0 flex-1"><span class="block font-bold text-navy">Remind me to keep learning</span><span id="remind-body" class="block font-sans text-sm text-muted">One gentle notification a day — a few minutes of seva to yourself.</span></span><button id="remind-btn" class="btn shrink-0">Enable</button></div>
+          <h3 class="mt-10 text-xl font-bold">Milestone seals</h3>
           <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">${badges.map((b) => {
             let prog = '';
-            if (b[0] === 'Discover') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl1)} courses</div>`;
-            else if (b[0] === 'Explore') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl2)} courses</div>`;
-            else if (b[0] === 'Practise') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl3)} courses</div>`;
-            else if (b[0] === 'Deepen') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl4)} courses</div>`;
-            else if (b[0] === 'Research') prog = lvl5.length ? `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl5)} courses</div>` : `<div class="mt-1 font-sans text-xs text-muted/70">Coming soon</div>`;
+            if (b[0] === 'Freshman') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl1)} courses</div>`;
+            else if (b[0] === 'Sophomore') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl2)} courses</div>`;
+            else if (b[0] === 'Junior') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl3)} courses</div>`;
+            else if (b[0] === 'Senior') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl4)} courses</div>`;
+            else if (b[0] === 'Graduate') prog = lvl5.length ? `<div class="mt-1 font-sans text-xs text-muted/70">${levelProg(lvl5)} courses</div>` : `<div class="mt-1 font-sans text-xs text-muted/70">Coming soon</div>`;
             else if (b[0] === 'Dedicated') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${Math.min(completed.length,25)}/25</div>`;
             else if (b[0] === 'Scholar') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${Math.min(completed.length,100)}/100</div>`;
             else if (b[0] === 'Vidhvaan') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${Math.min(completed.length,250)}/250</div>`;
             else if (b[0] === 'Steady') prog = `<div class="mt-1 font-sans text-xs text-muted/70">${Math.min(st,7)}/7 days</div>`;
             return `<div class="rounded-[3px] border border-line bg-surface p-4 text-center ${b[2] ? '' : 'opacity-50'}"><div class="mx-auto grid h-14 w-14 place-items-center rounded-full border-2 ${b[2] ? 'border-saffron text-saffron-deep' : 'border-line text-muted'}">${iconSvg(b[1], 'h-7 w-7')}</div><div class="mt-2 font-sans text-sm font-bold text-navy">${b[0]}</div><div class="font-sans text-xs text-muted">${b[3]}</div>${b[2] ? '<div class="mt-1 flex items-center justify-center gap-1 font-sans text-xs text-saffron-deep font-semibold">' + iconSvg('check', 'h-3.5 w-3.5') + ' Earned</div>' : prog}</div>`;
           }).join('')}</div>
-          </details>
           ${gradesHtml}
           <div id="assign-summary-section"></div>
           <div id="prog-summary-section"></div>
           <div class="mt-6"><button id="exp" class="btn">${iconSvg('download', 'h-4 w-4')} Export my notes (.md)</button></div>
-          ${section('Completed, certificates earned', completed, 'completed')}
-          <div class="desk-discover"><h2>Follow your curiosity.</h2><p>Let the catalogue take you somewhere unexpected.</p><button id="surprise-course" type="button">Find me a course ↗</button><div id="surprise-result" aria-live="polite"></div></div>
-          ${section('Explore your next subject', fresh.slice(0, 4), 'fresh')}`;
-        document.getElementById('surprise-course')?.addEventListener('click', () => {
-          const pool = fresh.length ? fresh : pub;
-          if (!pool.length) return;
-          const course = pool[Math.floor(Math.random() * pool.length)];
-          document.getElementById('surprise-result').innerHTML = `<a href="/course/${encodeURIComponent(course.id)}">${esc(course.title)} →</a>`;
-        });
+          ${!completed.length && !started.length ? `<div class="rounded-[3px] border border-line bg-surface mt-8 p-6 text-center"><div class="mx-auto flex h-12 w-12 items-center justify-center text-saffron-deep">${iconSvg('sprout', 'h-8 w-8')}</div><p class="mt-3 font-serif text-lg text-navy">Your journey begins here.</p><p class="mt-1 font-sans text-sm text-muted">Start a course and your progress, streak and certificates will appear on this page.</p><div class="mt-4 flex flex-wrap justify-center gap-3"><a class="btn btn-primary" href="/catalog">Browse the catalogue</a>${!user ? '<a class="btn" href="/login">Sign in to save progress</a>' : ''}</div></div>` : ''}
+          ${section('Continue where you stopped', started, 'started')}
+          ${section('Completed — certificates earned', completed, 'completed')}
+          ${section('Start something new', fresh.slice(0, 6), 'fresh')}`;
         initRings(root); // rings render after this async-fetched content is injected
         // Coursework reminder opt-in (Web Push). Card stays hidden unless the
         // server has VAPID configured AND this browser can subscribe; iOS in
@@ -483,8 +400,8 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           const draw = () => {
             btn.textContent = on ? 'Turn off' : 'Enable';
             body.textContent = on
-              ? 'Reminders are on, one notification a day, around 4pm UTC. Turn off any time.'
-              : 'One gentle notification a day, a few minutes of seva to yourself.';
+              ? 'Reminders are on — one notification a day, around 4pm UTC. Turn off any time.'
+              : 'One gentle notification a day — a few minutes of seva to yourself.';
           };
           draw();
           card.hidden = false;
@@ -494,8 +411,8 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             else {
               const r = await pushEnable();
               if (r === 'on') { on = true; draw(); }
-              else if (r === 'denied') body.textContent = 'Notifications are blocked for this site, allow them in your browser settings, then try again.';
-              else body.textContent = 'Could not enable reminders right now, please try again later.';
+              else if (r === 'denied') body.textContent = 'Notifications are blocked for this site — allow them in your browser settings, then try again.';
+              else body.textContent = 'Could not enable reminders right now — please try again later.';
             }
             btn.disabled = false;
           });
@@ -505,9 +422,9 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
         if (enrolled.size) api('/api/announcements').then((d) => {
           const list = ((d && d.announcements) || []).filter((a) => enrolled.has(a.course_id)).slice(0, 5);
           const fe = document.getElementById('ann-feed'); if (!fe || !list.length) return;
-          fe.innerHTML = `<h3 class="mt-10 text-xl font-bold">Announcements</h3><div class="mt-4 space-y-3">${list.map((a) => { const c = pub.find((x) => x.id === a.course_id); return `<div class="rounded-xl2 border-l-4 border-saffron bg-surface p-4"><div class="font-sans text-xs text-muted">${esc(c ? c.title : a.course_id)} · ${esc(a.author_name || '')} · ${fmtRel(a.created_at)}</div>${a.title ? `<div class="mt-1 font-bold text-navy">${esc(a.title)}</div>` : ''}<p class="mt-1 text-sm">${esc(a.body)}</p></div>`; }).join('')}</div>`;
+          fe.innerHTML = `<h3 class="mt-8 text-xl font-bold">Announcements</h3><div class="mt-4 space-y-3">${list.map((a) => { const c = pub.find((x) => x.id === a.course_id); return `<div class="rounded-xl2 border-l-4 border-saffron bg-surface p-4"><div class="font-sans text-xs text-muted">${esc(c ? c.title : a.course_id)} · ${esc(a.author_name || '')} · ${fmtRel(a.created_at)}</div>${a.title ? `<div class="mt-1 font-bold text-navy">${esc(a.title)}</div>` : ''}<p class="mt-1 text-sm">${esc(a.body)}</p></div>`; }).join('')}</div>`;
         });
-        // My assignments, across every explicitly-enrolled course, due-soon first.
+        // My assignments — across every explicitly-enrolled course, due-soon first.
         if (enrolledCourses.size) {
           Promise.all([...enrolledCourses].map((cid) => api('/api/assignments?courseId=' + encodeURIComponent(cid)))).then((results) => {
             const items = [];
@@ -522,7 +439,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
               const statusPill = a.my_status === 'graded' ? `<span class="pill bg-saffron-soft text-saffron-deep">Graded: ${esc(a.my_grade)}/${a.points}</span>`
                 : a.my_status === 'submitted' ? '<span class="pill bg-paper text-muted">Submitted</span>'
                 : '<span class="pill bg-paper text-muted">Not submitted</span>';
-              return `<a href="/course/${esc(a.course_id)}#assignments" class="card hover:border-saffron"><div class="font-sans text-xs text-muted">${esc(c ? c.title : a.course_id)}${a.due_at ? ' · due ' + esc(new Date(a.due_at).toLocaleDateString()) : ''}</div><div class="mt-1 font-bold text-navy">${esc(a.title)}</div><div class="mt-2">${statusPill}</div>${a.my_feedback ? `<p class="mt-2 text-sm text-muted">"${esc(a.my_feedback)}"</p>` : ''}</a>`;
+              return `<a href="/course/${esc(a.course_id)}#assignments" class="card"><div class="font-sans text-xs text-muted">${esc(c ? c.title : a.course_id)}${a.due_at ? ' · due ' + esc(new Date(a.due_at).toLocaleDateString()) : ''}</div><div class="mt-1 font-bold text-navy">${esc(a.title)}</div><div class="mt-2">${statusPill}</div>${a.my_feedback ? `<p class="mt-2 text-sm text-muted">"${esc(a.my_feedback)}"</p>` : ''}</a>`;
             }).join('')}</div>`;
           });
         }
@@ -551,29 +468,29 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           <a href="/programs" class="mt-3 inline-block font-sans text-sm text-saffron-deep underline">Browse all degree programs →</a>`;
         }).catch(() => {});
         const goP = document.getElementById('go-profile');
-        if (goP) goP.addEventListener('click', (e) => { e.preventDefault(); location.href = '/dashboard/profile'; });
+        if (goP) goP.addEventListener('click', (e) => { e.preventDefault(); view = 'profile'; location.hash = '#profile'; drawView(); });
         document.getElementById('exp').addEventListener('click', () => {
           const lines = ['# My Sikhi University notes', ''];
-          data.courses.forEach((c) => (c.lessons || []).forEach((ls, i) => { const n = get('note_' + c.id + '_' + i, ''); if (n && n.trim()) lines.push('## ' + c.title + ', ' + ls.title, '', n.trim(), ''); }));
+          data.courses.forEach((c) => (c.lessons || []).forEach((ls, i) => { const n = get('note_' + c.id + '_' + i, ''); if (n && n.trim()) lines.push('## ' + c.title + ' — ' + ls.title, '', n.trim(), ''); }));
           if (lines.length <= 2) lines.push('_No notes yet._');
           const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/markdown' })); a.download = 'sikhi-university-notes.md'; a.click();
         });
       }
 
       function renderTeacher() {
-        const stat = (n, l) => `<div class="glass-lite border-t-4 border-t-saffron p-4 text-center"><div class="text-3xl font-bold text-navy">${n}</div><div class="font-sans text-xs text-muted">${l}</div></div>`;
+        const stat = (n, l) => `<div class="rounded-xl2 border border-line border-t-4 border-t-saffron bg-surface p-4 text-center shadow-card"><div class="text-3xl font-bold text-navy">${n}</div><div class="font-sans text-xs text-muted">${l}</div></div>`;
         const lessonCount = (id) => { const c = pub.find((x) => x.id === id); return (c && c.lessons) ? c.lessons.length : 0; };
         const slugTitle = (id) => String(id || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
         const ctitle = (id) => { const c = pub.find((x) => x.id === id); return c ? c.title : slugTitle(id); };
 
         if (demo) { renderTeacherDemo(stat); return; }
 
-        root.innerHTML = '<p class="eyebrow text-saffron-deep">Teacher</p><h1 class="text-display-sm font-bold">Teacher dashboard</h1><p class="sr-only">Loading your gradebook…</p><div aria-hidden="true"><div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"><div class="skeleton h-24"></div><div class="skeleton h-24"></div><div class="skeleton h-24"></div><div class="skeleton h-24"></div></div><div class="skeleton mt-6 h-48"></div></div>';
+        root.innerHTML = '<h1 class="text-3xl font-bold">Teacher dashboard</h1><p class="mt-6 text-muted">Loading your gradebook…</p>';
         api('/api/gradebook').then((g) => {
           const tcourses = g.courses || [];
           const rows = g.rows || [];
           if (!tcourses.length) {
-            root.innerHTML = `<p class="eyebrow text-saffron-deep">Teacher</p><h1 class="text-display-sm font-bold">Teacher dashboard</h1>
+            root.innerHTML = `<h1 class="text-3xl font-bold">Teacher dashboard</h1>
               <a href="/studio" class="mt-6 flex items-center gap-4 rounded-xl2 border border-line bg-surface p-4 shadow-card transition hover:border-saffron"><span class="min-w-0 flex-1"><span class="block font-bold text-navy">Course Studio</span><span class="block font-sans text-sm text-muted">Draft a new course and submit it for scholar review.</span></span><span class="font-sans text-sm text-saffron-deep">Open →</span></a>
               <div class="mt-6 rounded-xl2 border border-line bg-surface p-6 text-muted">You are not assigned to any courses yet. An admin assigns teachers to courses.</div>
               <div class="mt-6"><a class="btn" href="/dashboard?demo=teacher">Preview a sample teacher dashboard →</a></div>`;
@@ -584,16 +501,16 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           const scored = rows.filter((r) => r.score != null);
           const avg = scored.length ? Math.round(scored.reduce((a, r) => a + r.score, 0) / scored.length) : 0;
 
-          root.innerHTML = `<p class="eyebrow text-saffron-deep">Teacher</p><h1 class="text-display-sm font-bold">Teacher dashboard</h1>
+          root.innerHTML = `<h1 class="text-3xl font-bold">Teacher dashboard</h1>
             <p class="mt-1 font-sans text-sm text-muted">Real grades and progress for your students.</p>
             <a href="/studio" class="mt-6 flex items-center gap-4 rounded-xl2 border border-line bg-surface p-4 shadow-card transition hover:border-saffron"><span class="min-w-0 flex-1"><span class="block font-bold text-navy">Course Studio</span><span class="block font-sans text-sm text-muted">Draft a new course and submit it for scholar review.</span></span><span class="font-sans text-sm text-saffron-deep">Open →</span></a>
-            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">${stat(tcourses.length, 'Courses you teach')}${stat(students.size, 'Students')}${stat(completions, 'Completions')}${stat(avg ? avg + '%' : '-', 'Avg. score')}</div>
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">${stat(tcourses.length, 'Courses you teach')}${stat(students.size, 'Students')}${stat(completions, 'Completions')}${stat(avg ? avg + '%' : '—', 'Avg. score')}</div>
             <div class="mt-6 flex flex-wrap gap-2 items-end">
-              <input id="t-search" type="search" placeholder="Search students…" class="rounded-lg border border-line bg-paper px-3 py-1.5 font-sans text-sm w-48 focus:border-saffron focus:outline-none" />
-              <select id="t-status" class="rounded-lg border border-line bg-paper px-2 py-1.5 font-sans text-sm focus:border-saffron focus:outline-none">
+              <input id="t-search" type="search" placeholder="Search students…" class="rounded-lg border border-line bg-paper px-3 py-1.5 font-sans text-sm w-48" />
+              <select id="t-status" class="rounded-lg border border-line bg-paper px-2 py-1.5 font-sans text-sm">
                 <option value="">All statuses</option><option value="passed">Passed</option><option value="inprogress">In progress</option><option value="notstarted">Not started</option>
               </select>
-              <select id="t-sort" class="rounded-lg border border-line bg-paper px-2 py-1.5 font-sans text-sm focus:border-saffron focus:outline-none">
+              <select id="t-sort" class="rounded-lg border border-line bg-paper px-2 py-1.5 font-sans text-sm">
                 <option value="score">Sort: Score ↓</option><option value="progress">Sort: Progress ↓</option><option value="name">Sort: Name A→Z</option><option value="active">Sort: Recently active</option>
               </select>
               <button id="t-exp-all" class="btn font-sans text-xs px-3 py-1.5">Expand all</button>
@@ -625,8 +542,8 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
               const passRate = cr.length ? Math.round(cr.filter((r) => r.score != null && r.score >= 80).length / cr.length * 100) : 0;
               const rows_html = cr.map((r, i) => {
                 const pct = lc ? Math.round(r.done / lc * 100) : 0;
-                const st = (r.score != null && r.score >= 80) ? '<span class="pill bg-saffron-soft text-saffron-deep">Passed</span>' : (r.done > 0 ? '<span class="pill bg-paper text-muted">In progress</span>' : '-');
-                return `<tr class="${i % 2 ? 'bg-paper' : ''}" data-u="${esc(r.user_id)}" data-c="${esc(cid)}"><td class="px-3 py-2 font-semibold text-navy">${esc(r.name || r.email)}${r.override ? ' <span title="Grade overridden" class="inline-flex align-[-0.15em] text-saffron-deep">' + iconSvg('edit', 'h-3.5 w-3.5') + '</span>' : ''}</td><td>${pct}%</td><td>${r.score != null ? r.score + '%' : '-'}</td><td>${r.score != null ? grade(r.score) : '-'}</td><td>${st}</td><td class="whitespace-nowrap text-muted">${fmtRel(r.last_active)}</td><td><button class="rounded-lg border border-line px-2 py-1 hover:border-saffron font-sans text-xs" data-ovr>Override</button></td></tr>`;
+                const st = (r.score != null && r.score >= 80) ? '<span class="pill bg-saffron-soft text-saffron-deep">Passed</span>' : (r.done > 0 ? '<span class="pill bg-paper text-muted">In progress</span>' : '—');
+                return `<tr class="${i % 2 ? 'bg-paper' : ''}" data-u="${esc(r.user_id)}" data-c="${esc(cid)}"><td class="px-3 py-2 font-semibold text-navy">${esc(r.name || r.email)}${r.override ? ' <span title="Grade overridden" class="inline-flex align-[-0.15em] text-saffron-deep">' + iconSvg('edit', 'h-3.5 w-3.5') + '</span>' : ''}</td><td>${pct}%</td><td>${r.score != null ? r.score + '%' : '—'}</td><td>${r.score != null ? grade(r.score) : '—'}</td><td>${st}</td><td class="whitespace-nowrap text-muted">${fmtRel(r.last_active)}</td><td><button class="rounded-lg border border-line px-2 py-1 hover:border-saffron font-sans text-xs" data-ovr>Override</button></td></tr>`;
               }).join('');
               return `<details class="mt-4 rounded-xl2 border border-line bg-surface" open>
                 <summary class="cursor-pointer select-none px-4 py-3 flex flex-wrap items-baseline gap-2">
@@ -648,7 +565,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
               const v = await window.suModalForm({ title: 'Request to archive this course', submitLabel: 'Submit request', fields: [{ name: 'reason', label: 'Why should this course be retired? (an admin reviews every request before it takes effect)', type: 'textarea', optional: true }] });
               if (!v) return;
               const d = await api('/api/teacher/archive-request', { method: 'POST', body: JSON.stringify({ courseId: cid, reason: v.reason }) });
-              window.suToast(d && !d.error ? 'Archive request submitted, an admin will review it.' : (d && d.error) || 'Could not submit request.', d && !d.error ? 'ok' : 'error');
+              window.suToast(d && !d.error ? 'Archive request submitted — an admin will review it.' : (d && d.error) || 'Could not submit request.', d && !d.error ? 'ok' : 'error');
             }));
             root.querySelectorAll('[data-ann]').forEach((b) => b.addEventListener('click', async (e) => {
               e.preventDefault();
@@ -710,8 +627,8 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
                   <td class="px-2 py-1 font-semibold text-navy">${esc(s.name || s.email)}</td>
                   <td class="whitespace-nowrap">${fmtRel(s.submitted_at)}${s.late ? ' <span class="pill bg-saffron-soft text-saffron-deep">Late</span>' : ''}</td>
                   <td class="max-w-xs truncate" title="${esc(s.text_content || '')}">${esc((s.text_content || '').slice(0, 60))}</td>
-                  <td>${s.file_key ? `<a class="underline" href="/api/asset?key=${encodeURIComponent(s.file_key)}" target="_blank" rel="noopener">Open</a>` : '-'}</td>
-                  <td>${s.grade != null ? esc(s.grade) + (s.status === 'graded' ? '' : ' (draft)') : '-'}</td>
+                  <td>${s.file_key ? `<a class="underline" href="/api/asset?key=${encodeURIComponent(s.file_key)}" target="_blank" rel="noopener">Open</a>` : '—'}</td>
+                  <td>${s.grade != null ? esc(s.grade) + (s.status === 'graded' ? '' : ' (draft)') : '—'}</td>
                   <td><button class="underline" data-grade="${esc(s.id)}">${s.grade != null ? 'Edit grade' : 'Grade'}</button></td>
                 </tr>`).join('')}</tbody></table></div>` : '<p class="text-muted">No submissions yet.</p>';
               el.querySelectorAll('[data-grade]').forEach((b) => b.addEventListener('click', async () => {
@@ -752,42 +669,20 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
         const dscore = (i, j) => 60 + ((i * 7 + j * 13) % 41);
         const roster = names.map((nm, i) => ({ name: nm, email: nm.toLowerCase().replace(/[^a-z]+/g, '.') + '@example.com', active: ['today', '2d ago', '1w ago', 'today', '3d ago', '5d ago', '1d ago', '2w ago'][i] }));
         const cell = (v) => `<td class="border-t border-line px-2 py-1.5">${v}</td>`;
-        const gradebook = `<div class="mt-4 overflow-x-auto rounded-xl2 border border-line"><table class="w-full font-sans text-sm"><thead><tr class="bg-brand text-left text-white"><th class="px-2 py-2">Student</th>${taught.map((c) => `<th class="px-2 py-2" title="${esc(c.title)}">${esc(c.title.split(/[:-]/)[0].slice(0, 14))}…</th>`).join('')}<th class="px-2 py-2">Avg</th></tr></thead><tbody>${roster.map((st, i) => { const scores = taught.map((c, j) => dscore(i, j)); const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length); return `<tr class="${i % 2 ? 'bg-paper' : ''}">${cell('<strong>' + esc(st.name) + '</strong>')}${scores.map((s) => `<td class="border-t border-line px-2 py-1.5">${s}% <span class="text-muted">(${grade(s)})</span></td>`).join('')}${cell('<strong>' + avg + '%</strong>')}</tr>`; }).join('')}</tbody></table></div>`;
+        const gradebook = `<div class="mt-4 overflow-x-auto rounded-xl2 border border-line"><table class="w-full font-sans text-sm"><thead><tr class="bg-brand text-left text-white"><th class="px-2 py-2">Student</th>${taught.map((c) => `<th class="px-2 py-2" title="${esc(c.title)}">${esc(c.title.split(/[:—]/)[0].slice(0, 14))}…</th>`).join('')}<th class="px-2 py-2">Avg</th></tr></thead><tbody>${roster.map((st, i) => { const scores = taught.map((c, j) => dscore(i, j)); const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length); return `<tr class="${i % 2 ? 'bg-paper' : ''}">${cell('<strong>' + esc(st.name) + '</strong>')}${scores.map((s) => `<td class="border-t border-line px-2 py-1.5">${s}% <span class="text-muted">(${grade(s)})</span></td>`).join('')}${cell('<strong>' + avg + '%</strong>')}</tr>`; }).join('')}</tbody></table></div>`;
         const analytics = `<h3 class="mt-10 text-xl font-bold">Course analytics <span class="rounded-full bg-saffron-soft text-saffron-deep font-sans text-xs px-2.5 py-0.5">Demo preview</span></h3><div class="mt-4 space-y-3">${taught.map((c, j) => { const comp = 35 + ((j * 17) % 55); const avg = 70 + ((j * 9) % 25); return `<div class="rounded-xl2 border border-line bg-surface p-4"><div class="flex flex-wrap items-baseline justify-between gap-2"><span class="font-semibold text-navy">${esc(c.title)}</span><span class="font-sans text-xs text-muted">${(j + 1) * 9} enrolled · avg score ${avg}%</span></div><div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-paper"><div class="h-full bg-saffron" style="width:${comp}%"></div></div><div class="mt-1 font-sans text-xs text-muted">${comp}% completion</div></div>`; }).join('')}</div>`;
         root.innerHTML = `
-          <p class="eyebrow text-saffron-deep">Teacher</p>
-          <h1 class="text-display-sm font-bold">Teacher dashboard</h1>
-          <p class="mt-1 font-sans text-sm text-muted">Sample view for testing, figures and students are illustrative.</p>
-          <p class="mt-1 font-sans text-sm text-muted">Illustrative preview, real teacher analytics arrive with cohort enrolment.</p>
+          <h1 class="text-3xl font-bold">Teacher dashboard</h1>
+          <p class="mt-1 font-sans text-sm text-muted">Sample view for testing — figures and students are illustrative.</p>
+          <p class="mt-1 font-sans text-sm text-muted">Illustrative preview — real teacher analytics arrive with cohort enrolment.</p>
           <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">${stat(taught.length, 'Courses you teach')}${stat(96, 'Students')}${stat(38, 'Completions')}${stat('4.8' + iconSvg('star-filled', 'inline-block h-5 w-5 align-[-0.1em] text-saffron'), 'Avg. rating')}</div>
           <h3 class="mt-10 text-xl font-bold">Gradebook <span class="rounded-full bg-saffron-soft text-saffron-deep font-sans text-xs px-2.5 py-0.5">Demo preview</span></h3>
           <p class="font-sans text-sm text-muted">Each student's test score per course, with a letter grade and class average.</p>
           ${gradebook}
           ${analytics}
           <h3 class="mt-10 text-xl font-bold">Class roster <span class="rounded-full bg-saffron-soft text-saffron-deep font-sans text-xs px-2.5 py-0.5">Demo preview</span></h3><div class="mt-4 overflow-x-auto rounded-xl2 border border-line"><table class="w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="px-3 py-2">Student</th><th>Email</th><th>Last active</th></tr></thead><tbody>${roster.map((st) => `<tr class="border-t border-line"><td class="px-3 py-2 font-semibold text-navy">${esc(st.name)}</td><td>${esc(st.email)}</td><td class="text-muted">${esc(st.active)}</td></tr>`).join('')}</tbody></table></div>
-          <div class="mt-10"><a class="btn" href="/dashboard?demo=student">View the student experience →</a></div>`;
+          <div class="mt-8"><a class="btn" href="/dashboard?demo=student">View the student experience →</a></div>`;
       }
-    }).catch(() => { document.getElementById('dash').innerHTML = '<p class="text-muted">Your learning record could not load. Refresh to try again. You can still use the focus timer and learning shortcuts above.</p>'; });
-  </script>
-  <script>
-    import { initFocusTimer } from '../lib/focus-timer';
-    const duration = document.getElementById('focus-duration') as HTMLSelectElement;
-    if (duration) {
-    initFocusTimer();
-    const dateKey = () => { const d = new Date(); return [d.getFullYear(),d.getMonth()+1,d.getDate()].join('-'); };
-    let today = dateKey();
-    let checks = {};
-    const loadChecks = () => { try { checks = JSON.parse(localStorage.getItem('su_studio_daily_' + today) || '{}'); } catch { checks = {}; } };
-    loadChecks();
-    const inputs = document.querySelectorAll<HTMLInputElement>('[data-daily]');
-    const drawChecks = () => { let count = 0; inputs.forEach(input => { input.checked = !!checks[input.dataset.daily]; if (input.checked) count++; }); document.getElementById('daily-status').textContent = count === 3 ? 'Three small steps. A day well spent.' : `${count} of 3 steps checked today. No rush.`; };
-    inputs.forEach(input => input.addEventListener('change', () => {
-      if (dateKey() !== today) { today = dateKey(); loadChecks(); }
-      checks[input.dataset.daily] = input.checked;
-      try { localStorage.setItem('su_studio_daily_' + today, JSON.stringify(checks)); } catch {}
-      drawChecks();
-    }));
-    drawChecks();
-    }
+    }).catch(() => { document.getElementById('dash').innerHTML = '<p class="text-muted">Could not load.</p>'; });
   </script>
 </Base>

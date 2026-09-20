@@ -1,37 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Sign in / Sign up, Sikhi University" description="Sign in to Sikhi University, as a student to learn, or apply to teach." ambient="hall" noindex={true}>
+<Base title="Sign in / Sign up — Sikhi University" description="Sign in to Sikhi University — as a student to learn, or apply to teach." ambient="hall" noindex={true}>
   <!-- islogin (555-575): centered hero-midnight surface, flat crest, mono
-       footer links, gold primary button.
-
-       2026-09-06, registration is now two steps (username + email -> emailed
-       6-digit code -> code + password), matching sikhi.io and punjabiuni.com.
-       The account is only created once the code is proven, so this site can
-       no longer make an account whose email was never confirmed.
-
-       THE MAGIC-LINK SIGN-IN IS GONE, deliberately and not just hidden. It
-       emailed a link on every use (violating "no email per routine login")
-       and, worse, verify.js CREATED AN ACCOUNT for any unknown address, an
-       implicit registration path with no password and no confirmation. The
-       accounts that predate password auth are not stranded: forgot-password
-       doubles as "set my first password" (see forgot-password.js's own
-       header), which is the legacy on-ramp that made this removal safe.
-
-       data-testid hooks are load-bearing: e2e/tests/site-b/ selects on them,
-       and they mirror sikhi.io's naming so one E2E helper serves both. -->
+       footer links, gold primary button. Real form ids/names/logic below are
+       untouched -- only classes and wrapping markup changed. -->
   <div class="hero-midnight flex min-h-[620px] items-center py-16">
     <div class="wrap relative w-full">
       <div class="mx-auto w-full max-w-[420px]">
-        <a href="/" aria-label="Sikhi University — home" class="mx-auto flex w-full max-w-[320px] flex-col items-center gap-4 px-3">
-          <img src="/assets/brand/sikhiuni-crest-2026.webp" alt="" aria-hidden="true" width="180" height="180" class="h-auto w-24 sm:w-28" style="filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white)" />
-          <span style="font-family: University Gothic, serif; font-size: clamp(30px, 7vw, 38px); line-height: 1.2; color: #fff" translate="no">Sikhi University</span>
-        </a>
+        <div class="flex justify-center">
+          <img src="/assets/su-crest-ivory.png" alt="Sikhi University crest" class="h-16 w-auto" />
+        </div>
+        <p class="mt-4 text-center text-[11.5px] font-bold uppercase tracking-[0.24em] text-white">Sikhi University</p>
         <h1 class="text-display-sm mt-5 text-center font-bold text-white" id="mode-h1">Sign in</h1>
-        <p class="mt-3 text-center text-[15.5px] leading-relaxed text-white/[0.72]" id="mode-sub">New here? <button type="button" id="mode-toggle" data-testid="tab-signup" class="underline underline-offset-2">Create an account</button></p>
-
-        <a id="sikhi-io-login" data-testid="sso-login" href="https://sikhi.io/api/sso/issue?return=https%3A%2F%2Fsikhiuni.com%2Fapi%2Fauth%2Fsso%3Freturn%3D%2Fdashboard.html" class="mt-7 flex min-h-[48px] w-full items-center justify-center rounded-[2px] bg-saffron px-5 py-3 font-semibold text-black">Continue with sikhi.io</a>
-        <p class="mt-3 text-center text-sm leading-relaxed text-white/[0.72]">Already signed in to sikhi.io? Continue above to use that session. You can also enter your Sikhi.io, Sikhi University or PunjabiUni email and password below.</p>
+        <p class="mt-3 text-center text-[15.5px] leading-relaxed text-white/[0.72]" id="mode-sub">New here? <button type="button" id="mode-toggle" class="underline underline-offset-2">Create an account</button></p>
 
         <div id="err" class="mt-4"></div>
 
@@ -43,86 +25,41 @@ import Base from '../layouts/Base.astro';
               <span class="font-semibold text-white">Student</span>
               <p class="mt-1 font-sans text-sm text-white/[0.65]">Learn Sikhi and life skills. Free access to every course, tests, certificates and learning paths.</p>
             </label>
-            <label class="cursor-pointer rounded-[2px] border border-white/[0.2] bg-white/[0.04] p-4 has-[:checked]:border-saffron">
-              <input type="radio" name="role" value="teacher" class="mr-2" />
-              <span class="font-semibold text-white">Teacher</span>
-              <p class="mt-1 font-sans text-sm text-white/[0.65]">Share your knowledge. Sign in, then complete a short application, an admin reviews it before you get teacher access.</p>
-            </label>
           </div>
         </fieldset>
 
-        <!-- Marketing consent, signup mode only. Unchecked by default. The
-             wording names the sister sites explicitly and is byte-identical
-             to sikhi.io's own signup form -- that is what makes carrying the
-             choice across the family coherent rather than consent-laundering.
-             Shown/hidden alongside #role-fieldset by the mode toggle below. -->
-        <div id="marketing-fieldset" class="mt-5 hidden">
-          <label class="flex cursor-pointer items-start gap-3 rounded-[2px] border border-white/[0.2] bg-white/[0.04] p-4 has-[:checked]:border-saffron">
-            <input type="checkbox" id="marketing" name="marketing" class="mt-1 shrink-0" />
-            <span class="font-sans text-sm text-white/[0.75]">
-              Email me about exciting new features and products from sikhi.io and its sister sites (Sikhi University, PunjabiUni).
-              <span class="mt-1 block text-white/[0.5]">You can change this anytime.</span>
-            </span>
-          </label>
-        </div>
-
-        <!-- Sign in: username OR email + password -->
+        <!-- Primary: email + password -->
         <form id="password-form" class="mt-7 space-y-5">
-          <label class="block" id="identifier-label"><span class="field-label-dark">Username or email</span>
-            <input id="identifier" type="text" required autocomplete="username" placeholder="you@example.com" data-testid="login-identifier" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
+          <label class="block"><span class="field-label-dark">Email</span>
+            <input id="email" type="email" required placeholder="you@example.com" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
           </label>
-
-          <!-- Registration step 1: username + email -->
-          <div id="reg-step-1" class="hidden space-y-5">
-            <label class="block"><span class="field-label-dark">Username</span>
-              <input id="reg-username" type="text" autocomplete="username" placeholder="e.g. harjit" maxlength="20" data-testid="reg-username" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
-              <span id="reg-username-note" class="mt-1 block font-sans text-sm text-white/[0.5]">Lowercase letters, numbers, _ or - . Up to 20 characters.</span>
-            </label>
-            <label class="block"><span class="field-label-dark">Email</span>
-              <input id="reg-email" type="email" autocomplete="email" placeholder="you@example.com" data-testid="reg-email" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
-            </label>
-          </div>
-
-          <!-- Registration step 2: the emailed code + a new password -->
-          <div id="reg-step-2" class="hidden space-y-5">
-            <p id="reg-sent" class="font-sans text-sm text-white/[0.72]"></p>
-            <label class="block"><span class="field-label-dark">6-digit code</span>
-              <input id="reg-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" data-testid="reg-code" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-center text-base tracking-[0.5em] text-white focus:border-saffron focus:outline-none" />
-            </label>
-            <label class="block"><span class="field-label-dark">Choose a password</span>
-              <input id="reg-password" type="password" minlength="12" autocomplete="new-password" placeholder="12+ characters" data-testid="reg-password" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
-            </label>
-          </div>
-
-          <label class="block" id="password-label"><span class="field-label-dark">Password</span>
-            <input id="password" type="password" required minlength="12" autocomplete="current-password" data-testid="login-password" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
+          <label class="block"><span class="field-label-dark">Password</span>
+            <input id="password" type="password" required minlength="12" autocomplete="current-password" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
           </label>
-
-          <button id="password-btn" type="submit" data-testid="login-submit" class="btn btn-primary w-full justify-center">Sign in</button>
-
-          <p id="reg-step-2-links" class="hidden text-center">
-            <button type="button" id="reg-back" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Change details</button>
-            <span class="px-2 text-white/[0.35]">·</span>
-            <button type="button" id="reg-resend" data-testid="reg-resend" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Resend code</button>
-          </p>
-          <p class="text-center" id="forgot-wrap"><a href="/reset-password.html" id="forgot-link" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Forgot password?</a></p>
+          <button id="password-btn" type="submit" class="btn btn-primary w-full justify-center">Sign in</button>
+          <p class="text-center"><a href="/reset-password.html" id="forgot-link" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Forgot password?</a></p>
         </form>
 
-        <div id="out" class="mt-4"></div>
+        <!-- Secondary: magic-link, for the accounts that predate password auth -->
+        <div class="mt-8 border-t border-white/10 pt-6 text-center">
+          <button type="button" id="magic-toggle" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Sign in via emailed link instead</button>
+        </div>
+        <div id="magic-wrap" class="mt-4 hidden">
+          <p class="mb-3 font-sans text-sm text-white/[0.65]">For accounts created before password sign-in existed. We'll email you a one-click link — no password needed.</p>
+          <form id="login-form" class="space-y-5">
+            <label class="block"><span class="field-label-dark">Email</span>
+              <input id="magic-email" type="email" required placeholder="you@example.com" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
+            </label>
+            <button id="send" type="submit" class="btn btn-primary w-full justify-center">Send magic link</button>
+          </form>
+        </div>
 
-        <!-- The shared cross-site family mark. Rendered identically on
-             sikhi.io and punjabiuni.com, and in every transactional email
-             (functions/_email-templates.js). Same mono micro-type as the
-             footer links above it. -->
-        <p class="mt-8 text-center font-mono text-[11px] tracking-[0.08em] text-white/[0.62]">
-          Powered by <a href="https://sikhi.io" class="underline underline-offset-2">sikhi.io</a>
-        </p>
+        <div id="out" class="mt-4"></div>
       </div>
     </div>
   </div>
   <script>
-    // The `iconSvg` import that used to live here belonged to the magic-link
-    // "check your email" success card, which is gone with the flow.
+    import { iconSvg } from '../lib/icons';
     function esc(s: string) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     const params = new URLSearchParams(location.search);
     const e = params.get('error');
@@ -130,151 +67,69 @@ import Base from '../layouts/Base.astro';
     if (e) errEl.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc(e)}</strong></div>`;
     const out = document.getElementById('out')!;
 
-    const notice = (html: string) => { out.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm">${html}</div>`; };
-    const problem = (msg: string) => notice(`<strong>${esc(msg)}</strong>`);
-    const clearOut = () => { out.innerHTML = ''; };
-
-    // Sign in / create account, and within create-account, step 1 -> step 2.
+    // Sign in / create account toggle
     let mode: 'signin' | 'signup' = 'signin';
-    let regStep: 1 | 2 = 1;
-
     const h1 = document.getElementById('mode-h1')!;
     const sub = document.getElementById('mode-sub')!;
     const roleFieldset = document.getElementById('role-fieldset')!;
-    const marketingFieldset = document.getElementById('marketing-fieldset')!;
-    const identifierLabel = document.getElementById('identifier-label')!;
-    const passwordLabel = document.getElementById('password-label')!;
-    const regStep1 = document.getElementById('reg-step-1')!;
-    const regStep2 = document.getElementById('reg-step-2')!;
-    const regStep2Links = document.getElementById('reg-step-2-links')!;
-    const forgotWrap = document.getElementById('forgot-wrap')!;
     const passwordBtn = document.getElementById('password-btn') as HTMLButtonElement;
-
-    const identifierInput = document.getElementById('identifier') as HTMLInputElement;
-    const passwordInput = document.getElementById('password') as HTMLInputElement;
-    const regUsername = document.getElementById('reg-username') as HTMLInputElement;
-    const regEmail = document.getElementById('reg-email') as HTMLInputElement;
-    const regCode = document.getElementById('reg-code') as HTMLInputElement;
-    const regPassword = document.getElementById('reg-password') as HTMLInputElement;
-
-    // `required` is toggled with visibility: a hidden required field blocks
-    // form submission with a validation message the user can't even see.
-    function render() {
-      const signup = mode === 'signup';
-      identifierLabel.classList.toggle('hidden', signup);
-      passwordLabel.classList.toggle('hidden', signup);
-      identifierInput.required = !signup;
-      passwordInput.required = !signup;
-
-      roleFieldset.classList.toggle('hidden', !signup);
-      marketingFieldset.classList.toggle('hidden', !signup || regStep !== 1);
-      regStep1.classList.toggle('hidden', !signup || regStep !== 1);
-      regStep2.classList.toggle('hidden', !signup || regStep !== 2);
-      regStep2Links.classList.toggle('hidden', !signup || regStep !== 2);
-      forgotWrap.classList.toggle('hidden', signup);
-
-      regUsername.required = signup && regStep === 1;
-      regEmail.required = signup && regStep === 1;
-      regCode.required = signup && regStep === 2;
-      regPassword.required = signup && regStep === 2;
-
-      h1.textContent = signup ? 'Create your account' : 'Sign in';
-      passwordBtn.textContent = !signup ? 'Sign in' : regStep === 1 ? 'Send me a code' : 'Confirm & create account';
-      // One button serves three states, so its testid moves with it. The names
-      // match sikhi.io's and punjabiuni's exactly, which is what lets one E2E
-      // journey be written once and read the same on all three sites.
-      passwordBtn.setAttribute(
-        'data-testid',
-        !signup ? 'login-submit' : regStep === 1 ? 'reg-start' : 'reg-complete',
-      );
-      sub.innerHTML = signup
-        ? `Already have an account? <button type="button" id="mode-toggle-2" data-testid="tab-signin" class="underline">Sign in</button>`
-        : `New here? <button type="button" id="mode-toggle" data-testid="tab-signup" class="underline underline-offset-2">Create an account</button>`;
-      const toggleId = signup ? 'mode-toggle-2' : 'mode-toggle';
-      document.getElementById(toggleId)!.addEventListener('click', () => {
-        mode = signup ? 'signin' : 'signup';
-        regStep = 1;
-        clearOut();
-        render();
-      });
-    }
-    document.getElementById('mode-toggle')!.addEventListener('click', () => {
-      mode = 'signup'; regStep = 1; clearOut(); render();
-    });
-
-    document.getElementById('reg-back')!.addEventListener('click', () => { regStep = 1; clearOut(); render(); });
-
-    async function postJson(url: string, payload: unknown) {
-      const r = await fetch(url, {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
-      });
-      const d = await r.json().catch(() => ({}));
-      return { ok: r.ok, d: d as Record<string, any> };
-    }
-
-    function registrationPayload() {
-      return {
-        username: regUsername.value.trim().toLowerCase(),
-        email: regEmail.value.trim(),
-        // Only ever a real boolean, the API accepts nothing else as consent.
-        marketing: (document.getElementById('marketing') as HTMLInputElement).checked,
-      };
-    }
-
-    async function startRegistration() {
-      const { ok, d } = await postJson('/api/auth/register-start', registrationPayload());
-      if (!ok) { problem(d.error || 'Could not start sign-up.'); return false; }
-      regStep = 2;
-      render();
-      document.getElementById('reg-sent')!.innerHTML =
-        `We emailed a 6-digit code to <strong>${esc(d.email || regEmail.value.trim())}</strong>. Enter it below and choose a password.`;
-      clearOut();
-      return true;
-    }
-
-    document.getElementById('reg-resend')!.addEventListener('click', async () => {
-      passwordBtn.disabled = true;
-      const { ok, d } = await postJson('/api/auth/register-start', registrationPayload());
-      passwordBtn.disabled = false;
-      if (!ok) { problem(d.error || 'Could not resend the code.'); return; }
-      regCode.value = '';
-      notice(`A fresh code is on its way to <strong>${esc(regEmail.value.trim())}</strong>. The previous one no longer works.`);
-    });
-
-    (document.getElementById('password-form') as HTMLFormElement).addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      passwordBtn.disabled = true;
-      try {
-        if (mode === 'signin') {
-          const identifier = identifierInput.value.trim();
-          const password = passwordInput.value;
-          if (!identifier || !password) return;
-          const { ok, d } = await postJson('/api/auth/login', { identifier, password });
-          if (!ok) { problem(d.error || 'Could not sign in.'); return; }
-          location.href = d.mfaRequired ? '/mfa.html' : '/dashboard.html';
-          return;
-        }
-
-        if (regStep === 1) { await startRegistration(); return; }
-
-        const { ok, d } = await postJson('/api/auth/register-complete', {
-          code: regCode.value.trim(), password: regPassword.value,
-        });
-        if (!ok) {
-          problem(d.error || 'Could not create your account.');
-          // A taken username can only be fixed a step back.
-          if (d.code === 'username_taken') { regStep = 1; render(); }
-          return;
-        }
-        const role = (document.querySelector('input[name="role"]:checked') as HTMLInputElement)?.value || 'student';
-        try { localStorage.setItem('su_v1_signup_intent', JSON.stringify(role)); } catch {}
-        location.href = '/dashboard.html';
-      } catch {
-        problem('Network error. Please try again.');
-      } finally {
-        passwordBtn.disabled = false;
+    const toggleMode = () => {
+      mode = mode === 'signin' ? 'signup' : 'signin';
+      if (mode === 'signup') {
+        h1.textContent = 'Create your account';
+        sub.innerHTML = `Already have an account? <button type="button" id="mode-toggle-2" class="underline">Sign in</button>`;
+        roleFieldset.classList.remove('hidden');
+        passwordBtn.textContent = 'Create account';
+        document.getElementById('mode-toggle-2')!.addEventListener('click', toggleMode);
+      } else {
+        h1.textContent = 'Sign in';
+        sub.innerHTML = `New here? <button type="button" id="mode-toggle">Create an account</button>`;
+        roleFieldset.classList.add('hidden');
+        passwordBtn.textContent = 'Sign in';
+        document.getElementById('mode-toggle')!.addEventListener('click', toggleMode);
       }
+    };
+    document.getElementById('mode-toggle')!.addEventListener('click', toggleMode);
+
+    // Primary password form (handles both sign-in and sign-up submit)
+    (document.getElementById('password-form') as HTMLFormElement).addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const email = (document.getElementById('email') as HTMLInputElement).value.trim();
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+      if (!email || !password) return;
+      passwordBtn.disabled = true;
+      const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+      fetch(endpoint, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) })
+        .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+        .then(({ ok, d }) => {
+          passwordBtn.disabled = false;
+          if (!ok) { out.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc((d && d.error) || 'Could not sign in.')}</strong></div>`; return; }
+          location.href = d.mfaRequired ? '/mfa.html' : '/dashboard.html';
+        })
+        .catch(() => { passwordBtn.disabled = false; out.innerHTML = '<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Network error. Please try again.</div>'; });
+    });
+
+    // Secondary magic-link form (unchanged mechanism, just repositioned)
+    const magicToggle = document.getElementById('magic-toggle')!;
+    const magicWrap = document.getElementById('magic-wrap')!;
+    magicToggle.addEventListener('click', () => magicWrap.classList.toggle('hidden'));
+
+    const form = document.getElementById('login-form') as HTMLFormElement;
+    const btn = document.getElementById('send') as HTMLButtonElement;
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const email = (document.getElementById('magic-email') as HTMLInputElement).value.trim();
+      if (!email) return;
+      btn.disabled = true; btn.textContent = 'Sending…';
+      fetch('/api/auth/request', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) })
+        .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+        .then(({ ok, d }) => {
+          btn.disabled = false; btn.textContent = 'Send magic link';
+          if (!ok) { out.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc((d && d.error) || 'Could not send the link.')}</strong></div>`; return; }
+          if (d.sent) out.innerHTML = `<div class="flex items-start gap-3 rounded-[2px] border-l-4 border-ok bg-surface p-3 font-sans text-sm"><span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ok text-white">${iconSvg('check', 'h-3.5 w-3.5')}</span><span><strong>Check your email.</strong> A sign-in link was sent to ${esc(email)} (expires in 15 minutes).</span></div>`;
+          else out.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>Dev mode:</strong> <a class="underline" href="${esc(d.devLink)}">click here to sign in</a>.</div>`;
+        })
+        .catch(() => { btn.disabled = false; btn.textContent = 'Send magic link'; out.innerHTML = '<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Network error. Please try again.</div>'; });
     });
   </script>
 </Base>

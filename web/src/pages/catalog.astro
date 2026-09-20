@@ -1,44 +1,11 @@
 ---
-import { stageName } from '../lib/stages';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import { topics, published, topicName, paths, TOPIC_ICONS } from '../lib/data';
-import instituteManifest from '../data/institute/manifest.json';
 import programsData from '../../public/assets/data/programs.json';
 const sorted = [...published].sort((a, b) => a.level - b.level);
 const byId = Object.fromEntries(published.map((c) => [c.id, c]));
-
-// The Institute of Technology is the one department whose courses live outside
-// courses.json — its tracks are in the institute manifest. Without this they
-// were reachable from nowhere on this page, breaking the promise the intro
-// above makes ("Every course belongs to a path") for a whole wing of the
-// university. They are rendered here FROM THE MANIFEST rather than written
-// into courses.json, deliberately: that file is guarded by validate.py's
-// no-shrink baseline and drives the catalogue count, the sitemaps and the
-// dataset export, none of which should start claiming a track is a course.
-const instituteSchools = (instituteManifest.schools ?? []) as Array<{ id: string; title: string; blurb: string }>;
-const instituteTracks = ((instituteManifest.tracks ?? []) as Array<any>).filter((t) => t.status === 'published');
-const trackHref = (t: any) => `/technology/track/${(t.kind === 'phase' || t.kind === 'path') && t.slug ? t.slug : t.id}`;
-const instituteById: Record<string, { title: string; summary: string; href: string }> =
-  Object.fromEntries(instituteTracks.map((t) => [t.id, { title: t.title, summary: t.summary, href: trackHref(t) }]));
-
-/** A journey entry, wherever the course actually lives. */
-const entryOf = (id: string) =>
-  byId[id] ? { title: byId[id].title, summary: byId[id].summary, href: `/course/${id}` } : instituteById[id];
-
-// One journey per school, tracks in the order the manifest lists them.
-const institutePaths = instituteSchools
-  .map((s) => ({
-    id: `institute-${s.id}`,
-    name: s.title,
-    blurb: s.blurb,
-    courseIds: instituteTracks.filter((t) => t.school === s.id).map((t) => t.id),
-  }))
-  .filter((p) => p.courseIds.length > 0);
-// NOTE: the `filt` class and the data-t / data-l attributes are JS hooks
-// (see the script below, setActive() toggles bg-brand/text-white/border-navy/
-// text-muted/bg-surface on these). Style around them, never rename them.
-const btn = 'filt rounded-full border border-line bg-surface px-4 py-1.5 font-sans text-muted cursor-pointer transition duration-200 hover:-translate-y-px hover:border-saffron hover:text-navy hover:shadow-card';
+const btn = 'filt rounded-full border border-line bg-surface px-4 py-1.5 text-muted cursor-pointer transition hover:border-saffron hover:text-navy';
 import { SITE } from '../lib/site';
 const itemListLd = {
   '@context': 'https://schema.org', '@type': 'ItemList',
@@ -58,11 +25,11 @@ const GRADS = [
 ];
 const iconFor = (p: typeof paths[number]) =>
   p.id.startsWith('topic-') ? (TOPIC_ICONS[p.id.slice(6)] || 'book') : (CURATED_ICONS[p.id] || 'cap');
-const featured = [...paths.filter((p) => !p.id.startsWith('topic-')), ...institutePaths];
+const featured = paths.filter((p) => !p.id.startsWith('topic-'));
 const subjects = paths.filter((p) => p.id.startsWith('topic-'));
 const withGrad = (list: typeof paths, offset: number) => list.map((p, gi) => ({ p, grad: GRADS[(gi + offset) % GRADS.length] }));
 const progTypeOrder = ['certificate', 'associate', 'bachelor', 'master', 'giani'];
-const progTypeLabel: Record<string, string> = { certificate: 'Certificates', associate: 'Associate Degree', bachelor: "Bachelor's Degrees", master: "Master's Degrees", giani: 'Giani, Highest Distinction' };
+const progTypeLabel: Record<string, string> = { certificate: 'Certificates', associate: 'Associate Degree', bachelor: "Bachelor's Degrees", master: "Master's Degrees", giani: 'Giani — Highest Distinction' };
 const progTypeBg: Record<string, string> = { certificate: 'bg-saffron-soft', associate: 'bg-blue-50 dark:bg-blue-950/20', bachelor: 'bg-paper', master: 'bg-navy/5 dark:bg-navy/20', giani: 'bg-saffron-soft' };
 const grouped = progTypeOrder.map((t) => ({ type: t, label: progTypeLabel[t], programs: programsData.programs.filter((p) => p.type === t) }));
 
@@ -85,51 +52,48 @@ const catGroups = topicsAlpha
   .map((t) => ({ topic: t, courses: sorted.filter((c) => c.topic === t.id) }))
   .filter((g) => g.courses.length > 0);
 ---
-<Base title="Courses & learning paths, Sikhi University" description="Browse all Sikhi University courses by topic, or follow a guided learning path, history, theology, philosophy, language, music, the arts and modern skills." ambient="none" bodyClass="su-catalog">
+<Base title="Courses & learning paths — Sikhi University" description="Browse all Sikhi University courses by topic, or follow a guided learning path — history, theology, philosophy, language, music, the arts and modern skills." ambient="study">
   <script type="application/ld+json" set:html={JSON.stringify(itemListLd)} slot="head" />
 
   <!-- Dept header: eyebrow-with-dash, display h1, mono stat pair (iscatalog 429-441) -->
-  <section class="wrap catalog-intro pt-10 pb-2">
+  <section class="wrap pt-10 pb-2">
     <div class="rule-navy flex flex-wrap items-end justify-between gap-6 pb-4">
       <div class="min-w-0 flex-1">
         <p class="eyebrow flex items-center gap-2 text-saffron-deep">
           <span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>
           <span data-i18n="catalog.eyebrow">Catalogue</span>
         </p>
-        <h1 class="text-display mt-3 text-navy" data-i18n="catalog.h1">Find your next discovery.</h1>
-        <p class="mt-3 max-w-2xl font-sans text-muted" data-i18n="catalog.sub">Explore a subject, build a skill or follow a whole programme. There is a place to begin at every stage.</p>
+        <h1 class="text-display mt-3 text-navy" data-i18n="catalog.h1">Courses &amp; learning paths</h1>
+        <p class="mt-3 max-w-2xl font-sans text-muted" data-i18n="catalog.sub">Browse every course by topic and level — or follow a guided path from foundations to advanced study.</p>
       </div>
-      <div class="catalog-totals flex flex-none gap-8 pb-1">
+      <div class="flex flex-none gap-8 pb-1">
         <div class="stat-mono"><span>{topics.length}</span><span data-i18n="catalog.stat.subjects">Subjects</span></div>
-        <div class="stat-mono"><span >{sorted.length}</span><span data-i18n="catalog.courseslabel">Courses</span></div>
+        <div class="stat-mono"><span id="cat-count">{sorted.length}</span><span data-i18n="catalog.courseslabel">Courses</span></div>
       </div>
     </div>
   </section>
 
   <section class="wrap py-10">
     <div id="tabbar" role="tablist" aria-label="Browse courses" data-i18n-aria="catalog.tabbar.aria" class="inline-flex rounded-full border border-line bg-surface p-1 font-sans text-sm">
-      <button id="tab-catalog-btn" role="tab" aria-controls="view-catalog" aria-selected="true" class="rounded-full px-4 py-1.5 bg-brand text-white" data-i18n="catalog.eyebrow">Catalogue</button>
-      <button id="tab-paths-btn" role="tab" aria-controls="view-paths" aria-selected="false" class="rounded-full px-4 py-1.5 text-muted" data-i18n="catalog.tab.paths">Learning paths</button>
+      <button id="tab-paths-btn" role="tab" aria-controls="view-paths" aria-selected="true" class="rounded-full px-4 py-1.5 bg-brand text-white" data-i18n="catalog.tab.paths">Learning paths</button>
+      <button id="tab-catalog-btn" role="tab" aria-controls="view-catalog" aria-selected="false" class="rounded-full px-4 py-1.5 text-muted" data-i18n="catalog.eyebrow">Catalogue</button>
       <button id="tab-programs-btn" role="tab" aria-controls="view-programs" aria-selected="false" class="rounded-full px-4 py-1.5 text-muted" data-i18n="catalog.tab.programs">Programs</button>
     </div>
 
-    <!-- Catalogue view (default view, per explicit instruction 2026-09-06 --
-         was previously hidden by default so guided paths led instead; the
-         558-row cost on first paint is now the accepted tradeoff). Registrar's-
-         ledger layout: a ruled "filter by school" rail on the left, the
-         courses grouped by school as rule-navy heads + row-ruled rows on the
-         right. -->
-    <div id="view-catalog" role="tabpanel" aria-labelledby="tab-catalog-btn" class="mt-6">
-      <div class="catalog-search-box rounded-[3px] border border-navy bg-surface p-4">
-        <input id="cat-search" type="search" placeholder="What would you like to learn?" data-i18n-ph="catalog.search.ph" aria-label="Search courses" data-i18n-aria="catalog.search.aria"
+    <!-- Catalogue view (hidden by default: guided paths lead so slow connections
+         don't hit a wall of 558 rows before JS runs). Registrar's-ledger layout:
+         a ruled "filter by school" rail on the left, the courses grouped by
+         school as rule-navy heads + row-ruled rows on the right. -->
+    <div id="view-catalog" role="tabpanel" aria-labelledby="tab-catalog-btn" class="mt-6" hidden>
+      <div class="rounded-[3px] border border-navy bg-surface p-4">
+        <input id="cat-search" type="search" placeholder="Search courses…" data-i18n-ph="catalog.search.ph" aria-label="Search courses" data-i18n-aria="catalog.search.aria"
           class="w-full max-w-xl bg-transparent px-1 py-1 font-sans focus:outline-none" />
       </div>
 
-      <div class="catalog-toolbar"><p role="status" aria-live="polite"><strong id="cat-count">{sorted.length}</strong> courses to explore</p><div><label for="cat-sort">Order</label><select id="cat-sort"><option value="stage">Learning stage</option><option value="title">Title A–Z</option><option value="lessons">Fewest lessons</option></select><button id="cat-density" type="button" aria-pressed="false">Compact view</button><button id="cat-reset" type="button">Reset filters ↺</button></div></div>
       <div class="mt-8 flex flex-wrap items-start gap-x-10 gap-y-8">
         <!-- Left filter rail: ruled rows with mono counts (Decision 6). -->
-        <div class="catalog-filter-rail w-full flex-none lg:w-[220px]">
-          <p class="eyebrow text-muted" >Browse subjects</p>
+        <div class="w-full flex-none lg:w-[190px]">
+          <p class="eyebrow text-muted" data-i18n="catalog.filter.schoollabel">Filter by school</p>
           <div id="cat-filters" class="mt-3 flex flex-col font-sans">
             <button data-t="all" class="filt flex items-center justify-between gap-2 border-b border-line py-1.5 text-left text-[14.5px] text-navy" aria-pressed="true">
               <span data-i18n="catalog.filter.all">All</span>
@@ -143,10 +107,10 @@ const catGroups = topicsAlpha
             ))}
           </div>
 
-          <p class="eyebrow mt-6 text-muted" >Learning stage</p>
+          <p class="eyebrow mt-6 text-muted" data-i18n="catalog.filter.levellabel">Level</p>
           <div id="level-filters" class="mt-3 flex flex-wrap items-center gap-2 font-sans text-sm">
-            <button data-l="all" class={btn} aria-pressed="true" >All stages</button>
-            {[100, 200, 300, 400, 500].map((l) => <button data-l={String(l)} class={`${btn} font-mono`} aria-pressed="false">{stageName(l)}</button>)}
+            <button data-l="all" class={btn} aria-pressed="true" data-i18n="catalog.filter.alllevels">All levels</button>
+            {[100, 200, 300, 400, 500].map((l) => <button data-l={String(l)} class={`${btn} font-mono`} aria-pressed="false">{l}</button>)}
           </div>
         </div>
 
@@ -162,12 +126,12 @@ const catGroups = topicsAlpha
               {g.courses.map((c) => (
                 <a href={`/course/${c.id}`}
                    class="cat-item row-ruled group hover:bg-paper"
-                   data-title={c.title} data-lessons={c.lessons?.length || 0} data-topic={c.topic} data-level={String(Math.floor(c.level / 100) * 100)}
+                   data-topic={c.topic} data-level={String(Math.floor(c.level / 100) * 100)}
                    data-hay={`${c.title} ${c.summary} ${c.professor} ${topicName(c.topic)}`.toLowerCase()}>
-                  <span class="cat-stage" data-no-i18n>{stageName(c.level)}</span>
-                  <span class="cat-course-main" data-no-i18n><strong>{c.title}</strong><span class="cat-summary">{c.summary.replace(/<[^>]*>/g, '').slice(0,170)}{c.summary.length > 170 ? '…' : ''}</span><span class="cat-teacher">{c.professor}</span></span>
-
-                  <span class="cat-course-end"><span>{c.gated ? 'Institutional' : `${c.lessons?.length || 0} lessons`}</span><span aria-hidden="true">↗</span></span>
+                  <span class="flex-none font-mono text-[11.5px] text-saffron-deep" data-no-i18n>{shortCode(c.topic)}</span>
+                  <span class="min-w-0 flex-1 text-[16.5px] font-semibold text-navy group-hover:text-saffron-deep" data-no-i18n>{c.title}</span>
+                  <span class="flex-none text-sm text-muted" data-no-i18n>{c.professor}</span>
+                  <span class="flex-none font-mono text-[11px] text-muted">{(c.lessons?.length || 0)} L</span>
                 </a>
               ))}
             </div>
@@ -185,37 +149,31 @@ const catGroups = topicsAlpha
     </div>
 
     <!-- Learning paths view -->
-    <div id="view-paths" role="tabpanel" aria-labelledby="tab-paths-btn" class="mt-6" hidden>
-      <p class="text-muted" data-i18n="catalog.paths.intro">Follow a path from foundations to advanced study, finish one course to light up the next. Every course belongs to a path.</p>
+    <div id="view-paths" role="tabpanel" aria-labelledby="tab-paths-btn" class="mt-6">
+      <p class="text-muted" data-i18n="catalog.paths.intro">Follow a path from foundations to advanced study — finish one course to light up the next. Every course belongs to a path.</p>
       <details id="guided-journeys-section" open class="group/sect mt-6 rounded-xl2 border border-line bg-surface shadow-card">
         <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4">
           <div>
             <h2 class="text-xl font-bold" data-i18n="catalog.paths.guided.h">Guided journeys</h2>
             <p class="text-muted text-sm" data-i18n="catalog.paths.guided.sub">Hand-curated routes that weave across subjects.</p>
           </div>
-          <span aria-hidden="true" class="chev shrink-0 text-lg text-muted transition-transform group-open/sect:rotate-180">▾</span>
+          <span aria-hidden="true" class="shrink-0 text-lg text-muted transition-transform group-open/sect:rotate-180">▾</span>
         </summary>
-        <div class="space-y-4 px-4 pb-6 sm:px-6">
+        <div class="px-5 pb-5 space-y-4">
         {withGrad(featured, 0).map(({ p, grad }) => (
-          <details id={p.id} class="path group scroll-mt-24 overflow-hidden rounded-xl2 shadow-card ring-1 ring-black/5 transition duration-200 hover:shadow-lift">
-            <summary class={`relative flex cursor-pointer list-none items-center gap-4 overflow-hidden bg-gradient-to-r ${grad} p-4 text-white`}>
-              <span aria-hidden="true" class="pattern-lattice pointer-events-none absolute inset-0"></span>
-              <span class="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
-                <Icon name={iconFor(p)} class="h-6 w-6 text-white" />
-              </span>
-              <span class="relative min-w-0 flex-1">
-                <span class="block text-lg font-bold leading-tight text-white">{p.name}</span>
-                <span class="block font-sans text-xs text-white/80">{p.blurb}</span>
-              </span>
-              <span class="path-count relative shrink-0 rounded-full bg-white/20 px-3 py-1 font-sans text-xs font-semibold ring-1 ring-white/25" data-path={p.id}>{p.courseIds.length} courses</span>
-              <span aria-hidden="true" class="chev relative shrink-0 text-lg transition-transform group-open:rotate-180">▾</span>
+          <details id={p.id} class="group scroll-mt-24 overflow-hidden rounded-xl2 border border-line bg-surface shadow-card">
+            <summary class={`flex cursor-pointer list-none items-center gap-3 bg-gradient-to-r ${grad} p-4 text-white`}>
+              <Icon name={iconFor(p)} class="h-7 w-7 shrink-0 text-white" />
+              <span class="min-w-0 flex-1"><span class="block text-lg font-bold text-white">{p.name}</span><span class="block font-sans text-xs text-white/80">{p.blurb}</span></span>
+              <span class="path-count shrink-0 rounded-full bg-white/20 px-2.5 py-1 font-sans text-xs" data-path={p.id}>{p.courseIds.length} courses</span>
+              <span aria-hidden="true" class="shrink-0 text-lg transition-transform group-open:rotate-180">▾</span>
             </summary>
-            <div class="bg-surface p-5">
-              <div class="h-1.5 w-full overflow-hidden rounded-full bg-line/70"><div class="path-bar h-full rounded-full bg-saffron transition-all duration-700" data-path={p.id} style="width:0%"></div></div>
-              <ol class="path-list mt-5">
-                {p.courseIds.map((id) => { const e = entryOf(id); return e && (
-                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={e.href} data-course={id}>{e.title}</a><div class="text-sm leading-snug text-muted">{e.summary}</div></li>
-                ); })}
+            <div class="p-5">
+              <div class="h-2 w-full overflow-hidden rounded-full bg-paper"><div class="path-bar h-full bg-saffron transition-all" data-path={p.id} style="width:0%"></div></div>
+              <ol class="mt-4 list-decimal space-y-2 pl-5">
+                {p.courseIds.map((id) => byId[id] && (
+                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a><div class="text-[0.9rem] text-muted">{byId[id].summary}</div></li>
+                ))}
               </ol>
             </div>
           </details>
@@ -229,28 +187,22 @@ const catGroups = topicsAlpha
             <h2 class="text-xl font-bold" data-i18n="catalog.paths.subject.h">Explore by subject</h2>
             <p class="text-muted text-sm" data-i18n="catalog.paths.subject.sub">Every subject, with all its courses in order.</p>
           </div>
-          <span aria-hidden="true" class="chev shrink-0 text-lg text-muted transition-transform group-open/sect:rotate-180">▾</span>
+          <span aria-hidden="true" class="shrink-0 text-lg text-muted transition-transform group-open/sect:rotate-180">▾</span>
         </summary>
-        <div class="space-y-4 px-4 pb-6 sm:px-6">
+        <div class="px-5 pb-5 space-y-4">
         {withGrad(subjects, 1).map(({ p, grad }) => (
-          <details id={p.id} class="path group scroll-mt-24 overflow-hidden rounded-xl2 shadow-card ring-1 ring-black/5 transition duration-200 hover:shadow-lift">
-            <summary class={`relative flex cursor-pointer list-none items-center gap-4 overflow-hidden bg-gradient-to-r ${grad} p-4 text-white`}>
-              <span aria-hidden="true" class="pattern-lattice pointer-events-none absolute inset-0"></span>
-              <span class="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
-                <Icon name={iconFor(p)} class="h-6 w-6 text-white" />
-              </span>
-              <span class="relative min-w-0 flex-1">
-                <span class="block text-lg font-bold leading-tight text-white">{p.name}</span>
-                <span class="block font-sans text-xs text-white/80">{p.blurb}</span>
-              </span>
-              <span class="path-count relative shrink-0 rounded-full bg-white/20 px-3 py-1 font-sans text-xs font-semibold ring-1 ring-white/25" data-path={p.id}>{p.courseIds.length} courses</span>
-              <span aria-hidden="true" class="chev relative shrink-0 text-lg transition-transform group-open:rotate-180">▾</span>
+          <details id={p.id} class="group scroll-mt-24 overflow-hidden rounded-xl2 border border-line bg-surface shadow-card">
+            <summary class={`flex cursor-pointer list-none items-center gap-3 bg-gradient-to-r ${grad} p-4 text-white`}>
+              <Icon name={iconFor(p)} class="h-7 w-7 shrink-0 text-white" />
+              <span class="min-w-0 flex-1"><span class="block text-lg font-bold text-white">{p.name}</span><span class="block font-sans text-xs text-white/80">{p.blurb}</span></span>
+              <span class="path-count shrink-0 rounded-full bg-white/20 px-2.5 py-1 font-sans text-xs" data-path={p.id}>{p.courseIds.length} courses</span>
+              <span aria-hidden="true" class="shrink-0 text-lg transition-transform group-open:rotate-180">▾</span>
             </summary>
-            <div class="bg-surface p-5">
-              <div class="h-1.5 w-full overflow-hidden rounded-full bg-line/70"><div class="path-bar h-full rounded-full bg-saffron transition-all duration-700" data-path={p.id} style="width:0%"></div></div>
-              <ol class="path-list mt-5">
+            <div class="p-5">
+              <div class="h-2 w-full overflow-hidden rounded-full bg-paper"><div class="path-bar h-full bg-saffron transition-all" data-path={p.id} style="width:0%"></div></div>
+              <ol class="mt-4 list-decimal space-y-2 pl-5">
                 {p.courseIds.map((id) => byId[id] && (
-                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a><div class="text-sm leading-snug text-muted">{byId[id].summary}</div></li>
+                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a><div class="text-[0.9rem] text-muted">{byId[id].summary}</div></li>
                 ))}
               </ol>
             </div>
@@ -261,30 +213,27 @@ const catGroups = topicsAlpha
     </div>
 
     <!-- Programs view -->
-    <div id="view-programs" role="tabpanel" aria-labelledby="tab-programs-btn" class="mt-8" hidden>
-      <p class="max-w-3xl text-lg leading-relaxed text-muted" data-i18n="catalog.programs.intro">Certificate to Giani, a full academic ladder, free and open to all.</p>
-      <div class="glass mt-6 border-l-4 border-saffron p-5 font-sans text-sm" data-i18n="catalog.programs.disclaimer">
+    <div id="view-programs" role="tabpanel" aria-labelledby="tab-programs-btn" class="mt-6" hidden>
+      <p class="text-lg text-muted" data-i18n="catalog.programs.intro">Certificate to Giani — a full academic ladder, free and open to all.</p>
+      <div class="mt-4 rounded-xl2 border-l-4 border-saffron bg-saffron-soft/40 p-4 font-sans text-sm" data-i18n="catalog.programs.disclaimer">
         Sikhi University is not an accredited university and these courses are for self-development only.
       </div>
       {grouped.map(({ type, label, programs }) => programs.length > 0 && (
-        <div class="mt-14">
-          <h2 class="flex items-center gap-5 text-2xl font-bold">
-            <span class="shrink-0">{label}</span>
-            <span aria-hidden="true" class="h-px flex-1 bg-gradient-to-r from-line to-transparent"></span>
-          </h2>
+        <div class="mt-10">
+          <h2 class="border-b border-line pb-2 text-2xl font-bold">{label}</h2>
           <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {programs.map((p) => (
-              <a href={`/program/${p.id}`} class={`glass-lite relative flex flex-col gap-2 p-5 transition duration-200 hover:-translate-y-1.5 hover:border-saffron hover:shadow-lift active:scale-[.985] ${progTypeBg[type]}`}>
+              <a href={`/program/${p.id}`} class={`card flex flex-col gap-2 hover:border-saffron transition ${progTypeBg[type]}`}>
                 <div class="flex items-center gap-3">
                   <Icon name={p.icon} class="h-8 w-8 shrink-0 text-saffron-deep" />
                   <div>
-                    <div class="eyebrow text-muted">{p.abbreviation}</div>
-                    <h3 class="mt-0.5 text-lg font-bold text-navy leading-tight">{p.title}</h3>
-                    <div class="font-gur text-sm text-muted" lang="pa">{p.titleGur}</div>
+                    <div class="font-sans text-xs font-bold uppercase tracking-wider text-muted">{p.abbreviation}</div>
+                    <h3 class="text-lg font-bold text-navy leading-tight">{p.title}</h3>
+                    <div class="font-gur text-sm text-muted">{p.titleGur}</div>
                   </div>
                 </div>
                 <p class="flex-1 font-sans text-sm text-muted">{p.description.slice(0, 140)}…</p>
-                <div class="mt-auto flex flex-wrap gap-3 border-t border-line pt-3 font-sans text-xs text-muted">
+                <div class="mt-auto flex flex-wrap gap-3 font-sans text-xs text-muted">
                   <span class="inline-flex items-center gap-1"><Icon name="books" class="h-3.5 w-3.5" />{p.courseIds.length} courses</span>
                   <span class="inline-flex items-center gap-1"><Icon name="clock" class="h-3.5 w-3.5" />{p.duration}</span>
                   <span class="inline-flex items-center gap-1"><Icon name="check-square" class="h-3.5 w-3.5" />{p.passMark}% to pass cumulative exam</span>
@@ -294,15 +243,15 @@ const catGroups = topicsAlpha
           </div>
         </div>
       ))}
-      <div class="glass mt-16 p-6 sm:p-8">
-        <h2 class="text-2xl font-bold" data-i18n="catalog.programs.how.h">How programs work</h2>
-        <ol class="how-list mt-6 space-y-4 font-sans text-sm text-muted">
-          <li data-i18n="catalog.programs.how.li1">Complete all courses in the program, each has lectures, reading, and a quiz.</li>
+      <div class="mt-12 rounded-xl2 border border-line bg-surface p-6">
+        <h2 class="text-xl font-bold" data-i18n="catalog.programs.how.h">How programs work</h2>
+        <ol class="mt-4 list-decimal list-inside space-y-3 font-sans text-sm text-muted">
+          <li data-i18n="catalog.programs.how.li1">Complete all courses in the program — each has lectures, reading, and a quiz.</li>
           <li>Once every course is passed (70% quiz score), unlock the <strong>Cumulative Examination</strong>.</li>
           <li>Pass the cumulative exam with <strong>80% or higher</strong> to earn the credential.</li>
           <li data-i18n="catalog.programs.how.li4">Download your certificate and share your academic credential.</li>
         </ol>
-        <p class="mt-6 border-t border-line pt-5 font-sans text-sm text-muted" data-i18n="catalog.programs.stackable">Programs are stackable, courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
+        <p class="mt-4 font-sans text-sm text-muted" data-i18n="catalog.programs.stackable">Programs are stackable — courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
       </div>
     </div>
   </section>
@@ -369,9 +318,6 @@ const catGroups = topicsAlpha
     search.addEventListener('input', () => { q = search.value.toLowerCase().trim(); renderCat(); });
     if (clearBtn) clearBtn.addEventListener('click', () => { topic = 'all'; level = 'all'; q = ''; search.value = ''; saveCatState(); renderCat(); });
 
-    document.getElementById('cat-reset').addEventListener('click', () => { topic='all'; level='all'; q=''; search.value=''; saveCatState(); renderCat(); });
-    document.getElementById('cat-density').addEventListener('click', (event) => { const button=event.currentTarget as HTMLButtonElement; const compact=vc.classList.toggle('catalog-compact'); button.setAttribute('aria-pressed',String(compact)); button.textContent=compact?'Comfortable view':'Compact view'; });
-    document.getElementById('cat-sort').addEventListener('change', (event) => { const order=(event.target as HTMLSelectElement).value; groupEls.forEach(group=>{const rows=[...group.querySelectorAll<HTMLElement>('.cat-item')];rows.sort((a,b)=>order==='title'?a.dataset.title.localeCompare(b.dataset.title):order==='lessons'?Number(a.dataset.lessons)-Number(b.dataset.lessons):Number(a.dataset.level)-Number(b.dataset.level)||a.dataset.title.localeCompare(b.dataset.title));rows.forEach(row=>group.appendChild(row));}); });
     // --- Path progress (server grades are the source of truth) ---
     const pdata = JSON.parse(document.getElementById('paths-data').textContent);
     const passed = (id) => { try { return !!localStorage.getItem('su_v1_passed_' + id); } catch { return false; } };
@@ -391,83 +337,29 @@ const catGroups = topicsAlpha
     }).catch(renderPaths);
 
     // initial state: a topic filter (#<topic>) or level (#100 etc) opens the catalogue;
-    // #paths opens Learning paths; #programs opens programs; everything else defaults to the Catalogue.
+    // #catalog opens catalogue; #programs opens programs; everything else defaults to Learning paths.
     const hash = (location.hash || '').replace('#', '');
     if (hash && filters.some((b) => b.dataset.t === hash)) { topic = hash; setTab('catalog', false); }
-    else if (hash && pdata.some((p) => p.id === hash)) {
-      setTab('paths', false);
-      const selectedPath = document.getElementById(hash);
-      if (selectedPath instanceof HTMLDetailsElement) {
-        selectedPath.open = true;
-        requestAnimationFrame(() => selectedPath.scrollIntoView({ block: 'start' }));
-      }
-    }
     else if (hash && levelBtns.some((b) => b.dataset.l === hash)) { level = hash; setTab('catalog', false); }
     else {
-      // no topic/level hash to honor, restore the last persisted catalogue filter state
+      // no topic/level hash to honor — restore the last persisted catalogue filter state
       const savedCat = loadCatState();
       if (savedCat) {
         if (savedCat.topic && filters.some((b) => b.dataset.t === savedCat.topic)) topic = savedCat.topic;
         if (savedCat.level && levelBtns.some((b) => b.dataset.l === savedCat.level)) level = savedCat.level;
       }
-      if (hash === 'paths') setTab('paths', false);
+      if (hash === 'catalog') setTab('catalog', false);
       else if (hash === 'programs') setTab('programs', false);
-      else setTab('catalog', false);
+      else setTab('paths', false);
     }
     renderCat(); renderPaths();
   </script>
 
   <style>
-    #tabbar { display:flex; width:fit-content; max-width:100%; border-radius:3px; padding:4px; gap:4px; }
-    #tabbar button { border-radius:2px; min-height:44px; font-size:13px; }
-    .catalog-search-box { position:relative; border-color:rgb(var(--c-line)); border-bottom:2px solid rgb(var(--c-navy)); padding:16px 20px; }
-    .catalog-search-box:focus-within { outline:2px solid rgb(var(--c-navy)); outline-offset:3px; }
-    #cat-search { max-width:none; min-height:32px; font-size:17px; }
-    .cat-item { padding:20px 14px; gap:12px 20px; transition:background .15s; }
-    .cat-group > .rule-navy { padding-bottom:16px; }
-    #cat-filters button { min-height:40px; padding-inline:10px; border-inline-start:2px solid transparent; }
-    #cat-filters button[aria-pressed="true"] { border-inline-start-color:rgb(var(--c-saffron-deep)); font-weight:650; }
-    #level-filters button { min-height:40px; border-radius:3px; }
-    @media(min-width:1024px) { .catalog-filter-rail { position:sticky; top:90px; max-height:calc(100dvh - 110px); overflow-y:auto; padding-inline-end:12px; scrollbar-width:thin; } }
-    @media(max-width:1023px) { #cat-filters { flex-direction:row; flex-wrap:nowrap; overflow-x:auto; padding-bottom:10px; gap:8px; } #cat-filters button { flex-shrink:0; gap:12px; border:1px solid rgb(var(--c-line)); border-radius:3px; padding-inline:12px; } }
-
     /* CSS-only fade when the catalogue grid first paints. Per-card reveal would
        replay every time the filter toggles display:none/'' on items, so the
        whole ledger fades once instead. Frozen by the global reduced-motion guard. */
     @keyframes su-cat-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     #view-catalog { animation: su-cat-fade .5s cubic-bezier(.2,.7,.3,1) both; }
-
-    .catalog-intro { padding-top:48px; }
-    .catalog-intro h1 { max-width:16ch; font-size:clamp(36px,4.6vw,65px); letter-spacing:-.055em; line-height:1.06; }
-    .catalog-intro .rule-navy { padding-bottom:32px; }
-    .catalog-totals { border-left:1px solid rgb(var(--c-line)); padding-left:32px; }
-    #tabbar { border:0; border-bottom:1px solid rgb(var(--c-line)); background:transparent; padding:0; gap:22px; width:100%; border-radius:0; }
-    #tabbar button { background:transparent; border-bottom:3px solid transparent; color:rgb(var(--c-muted)); padding:15px 3px; border-radius:0; }
-    #tabbar [aria-selected="true"] { border-bottom-color:rgb(var(--c-saffron-deep)); color:rgb(var(--c-navy)); font-weight:650; }
-    .catalog-search-box { border-radius:12px; padding:18px 24px; border:1px solid rgb(var(--c-line)); box-shadow:0 4px 18px #152c4910; }
-    .catalog-toolbar { display:flex; justify-content:space-between; gap:15px; align-items:center; margin-top:20px; color:rgb(var(--c-muted)); font-size:12px; }
-    .catalog-toolbar>div { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .catalog-toolbar select,.catalog-toolbar button { min-height:38px; border:1px solid rgb(var(--c-line)); border-radius:6px; padding:8px 10px; background:rgb(var(--c-surface)); color:rgb(var(--c-navy)); }
-    .catalog-filter-rail { padding:20px 16px; border:1px solid rgb(var(--c-line)); border-radius:12px; background:rgb(var(--c-surface)); }
-    #cat-filters button { font-size:12px; min-height:38px; border-bottom:0; margin:1px 0; }
-    #cat-filters [aria-pressed="true"] { background:rgb(var(--c-paper)); }
-    #level-filters { gap:6px; } #level-filters button { font-size:10px; padding:6px 10px; }
-    .cat-group { border:1px solid rgb(var(--c-line)); background:rgb(var(--c-surface)); border-radius:12px; overflow:hidden; }
-    .cat-group>.rule-navy { padding:22px; border-bottom:1px solid rgb(var(--c-line)); background:rgb(var(--c-paper)); }
-    .cat-group h2 { font-size:23px; }.cat-group>.rule-navy>span:last-child { font-size:12px; }
-    .cat-item { display:flex; align-items:flex-start; padding:24px 22px; gap:20px; border-bottom:1px solid rgb(var(--c-line)); }
-    .cat-item:last-child { border-bottom:0; }.cat-item:hover { background:rgb(var(--c-paper)); }
-    .cat-stage { flex:0 0 70px; padding-top:4px; font:10px/1.6 'IBM Plex Mono',monospace; color:rgb(var(--c-saffron-deep)); }
-    .cat-course-main { flex:1; min-width:0; }.cat-course-main strong { display:block; font-size:17px; line-height:1.4; color:rgb(var(--c-navy)); font-weight:650; }
-    .cat-summary { display:block; font-size:13px; line-height:1.65; color:rgb(var(--c-muted)); margin-top:7px; max-width:65ch; }
-    .cat-teacher { display:block; font-size:11px; margin-top:10px; color:rgb(var(--c-muted)); }
-    .cat-course-end { display:flex; flex-direction:column; align-items:flex-end; gap:14px; flex:0 0 75px; font-size:10px; color:rgb(var(--c-muted)); }.cat-course-end>span:last-child { font-size:24px; color:rgb(var(--c-saffron-deep)); }
-    .catalog-compact .cat-summary,.catalog-compact .cat-teacher { display:none; }.catalog-compact .cat-item { padding-block:15px; }.catalog-compact .cat-course-end { flex-direction:row; flex-basis:90px; align-items:center; }
-    @media(max-width:700px) { .catalog-totals { border-left:0; padding-left:0; }.catalog-toolbar { align-items:start; flex-direction:column; }.cat-item { flex-wrap:wrap; gap:8px; padding:20px 16px; }.cat-stage { flex-basis:100%; }.cat-course-end { flex-basis:60px; }.cat-course-main strong { font-size:16px; }#tabbar { gap:14px; }#tabbar button { font-size:12px; }.catalog-filter-rail { padding:15px; } }
-  </style>
-
-  <style is:global>
-    html[data-theme="light"] body.su-catalog { background:#f7f4ed; --c-paper:247 244 237; --c-surface:255 253 248; --c-line:218 211 198; }
-    html[data-theme="dark"] body.su-catalog { background:#0c192f; }
   </style>
 </Base>

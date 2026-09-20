@@ -18,7 +18,7 @@ import Base from '../layouts/Base.astro';
      admin.astro) -- no new i18n keys were added, matching that posture.
      Protected hooks (untouched): #app, data-open, #back, #notes, #approve,
      #changes. -->
-<Base title="Review, Sikhi University" description="Scholar review queue for submitted courses." ambient="none" noindex={true}>
+<Base title="Review — Sikhi University" description="Scholar review queue for submitted courses." ambient="none" noindex={true}>
   <section class="wrap max-w-4xl py-10">
     <div class="rule-navy flex flex-wrap items-end justify-between gap-4 pb-4">
       <div>
@@ -45,17 +45,17 @@ import Base from '../layouts/Base.astro';
       'Key concepts and technical terms are in Punjabi Unicode (no transliteration)',
       'At least four ਸ਼ਬਦ from Sri Guru Granth Sahib Ji, in Gurmukhi with a faithful English translation',
       'Citations follow Chicago Manual of Style',
-      'Gurbani references cite the ਅੰਗ, no invented Gurbani phrases',
+      'Gurbani references cite the ਅੰਗ — no invented Gurbani phrases',
       'Table of contents and Works Cited are present',
       'AI-assisted content is honestly declared and will render "Created by AI"',
     ];
 
     // Same convention as catalog.astro's shortCode(): a mono badge derived
     // from the real topic id, never a fabricated course-code taxonomy.
-    const shortCode = (topic: unknown) => String(topic || '').replace(/[^a-z]/gi, '').slice(0, 4).toUpperCase() || '-';
+    const shortCode = (topic: unknown) => String(topic || '').replace(/[^a-z]/gi, '').slice(0, 4).toUpperCase() || '—';
 
     const waiting = (ts: number) => {
-      if (!ts) return '-';
+      if (!ts) return '—';
       const s = (Date.now() - ts) / 1000;
       if (s < 3600) return Math.max(1, Math.floor(s / 60)) + ' min';
       if (s < 86400) return Math.floor(s / 3600) + ' hours';
@@ -73,7 +73,7 @@ import Base from '../layouts/Base.astro';
     async function loadStats() {
       const { ok, d } = await api('/api/review/queue?history=1');
       const set = (id: string, v: string) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-      if (!ok) { set('stat-awaiting', '-'); set('stat-changes', '-'); set('stat-cleared', '-'); return; }
+      if (!ok) { set('stat-awaiting', '—'); set('stat-changes', '—'); set('stat-cleared', '—'); return; }
       const history = d.drafts || [];
       set('stat-changes', String(history.filter((h: any) => h.status === 'changes_requested').length));
       set('stat-cleared', String(history.filter((h: any) => h.status === 'approved' || h.status === 'published').length));
@@ -82,7 +82,7 @@ import Base from '../layouts/Base.astro';
     async function renderQueue() {
       const { ok, d } = await api('/api/review/queue');
       const set = (id: string, v: string) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-      if (!ok) { app.innerHTML = '<p class="text-muted">You need reviewer access (a reviewer flag, or admin) to see this queue.</p>'; set('stat-awaiting', '-'); set('stat-changes', '-'); set('stat-cleared', '-'); return; }
+      if (!ok) { app.innerHTML = '<p class="text-muted">You need reviewer access (a reviewer flag, or admin) to see this queue.</p>'; set('stat-awaiting', '—'); set('stat-changes', '—'); set('stat-cleared', '—'); return; }
       const drafts = d.drafts || [];
       set('stat-awaiting', String(drafts.length));
       loadStats();

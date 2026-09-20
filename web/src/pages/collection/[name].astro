@@ -8,14 +8,14 @@ const { c } = Astro.props;
 
 // Registrar's-ledger collection page (task 9: iscollection #2, the refined
 // block, prototype lines 1033-1064). REF's real per-bani record only ever
-// carries { gur, en, href? }, no author/date field exists anywhere in this
-// data model (checked before writing this template), so the prototype's
+// carries { gur, en, href? } — no author/date field exists anywhere in this
+// data model (checked before writing this template) — so the prototype's
 // "Author" / "When" columns are not rendered as permanently-empty cells
 // (Decision 12: never fabricate). What IS real and data-derived is the
 // "Source" cell: for any item whose real href already encodes a Sri Guru
 // Granth Sahib Ji / Dasam Granth ang (see the santhiya reader's own
 // ?src=&ang= query shape in lib/santhya.ts's REF table), the ang is parsed
-// straight out of that href at build time, never typed in by hand -
+// straight out of that href at build time — never typed in by hand —
 // matching the spec's own "ang citations come from data" rule. Items with no
 // ang in their href (courses, external chronicles, non-Gurbani works) get no
 // fabricated citation.
@@ -38,15 +38,15 @@ function actionLabel(href?: string): string {
   return 'Read →';
 }
 // Footer CTA (Decision 12: never invent a course code like the prototype's
-// "Take SPIR 110"), the first real item in this collection that actually
+// "Take SPIR 110") — the first real item in this collection that actually
 // opens the scripture reader, if the collection has one at all.
 const readerId = c.groups.flatMap((g) => g.items).find((id) => REF[id]?.href?.startsWith('/santhiya'));
 const readerHref = readerId ? REF[readerId].href : null;
 ---
-<Base title={`${c.name}, Santhya | Sikhi University`} description={c.blurb} ambient="sanctum">
+<Base title={`${c.name} — Santhya | Sikhi University`} description={c.blurb} ambient="sanctum">
   <!-- Dark header (iscollection#2 1035-1043): the page's own ambient-sanctum
        gradient (.ambient-sanctum in global.css) IS the prototype's inline
-       dark-navy linear-gradient, same colours, one layer, per Decision 5 -
+       dark-navy linear-gradient — same colours, one layer, per Decision 5 —
        so no separate background is set here; this div is just the text
        content sitting on top of it. -->
   <div class="wrap relative py-14 sm:py-16 text-paper">
@@ -61,7 +61,7 @@ const readerHref = readerId ? REF[readerId].href : null;
   </div>
 
   <!-- Ruled bani table (iscollection#2 1044-1057): full-bleed light band
-       right under the dark header, same edge-to-edge convention as
+       right under the dark header — same edge-to-edge convention as
        about.astro's pillar grid (task 9). Bani | Source columns; a real
        per-group heading stands in for the prototype's flat list where our
        real data is naturally grouped (Amrit Vela / Evening / Night, etc.). -->

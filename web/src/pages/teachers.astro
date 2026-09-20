@@ -1,11 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import { professorList } from '../lib/data';
-// Real count, never hardcoded, of the historical/authorial scholars listed
+// Real count — never hardcoded — of the historical/authorial scholars listed
 // on the faculty page, referenced honestly in section II below.
 const scholarCount = professorList().length;
 ---
-<Base title="Our teachers, Sikhi University" description="Meet the living teachers of Sikhi University, verified educators sharing Gurbani, Gurmat, history and more." ambient="hall">
+<Base title="Our teachers — Sikhi University" description="Meet the living teachers of Sikhi University — verified educators sharing Gurbani, Gurmat, history and more." ambient="hall">
   <section class="wrap py-12">
     <div class="border border-line bg-paper px-6 py-9 sm:px-8 sm:py-11">
       <p class="eyebrow flex items-center gap-2.5 text-saffron-deep">
@@ -13,7 +13,7 @@ const scholarCount = professorList().length;
         <span data-i18n="teachers.eyebrow">Teaching</span>
       </p>
       <h1 class="text-display-sm mt-3 text-navy" data-i18n="teachers.h1">Who teaches here</h1>
-      <p class="mt-4 max-w-[66ch] text-lg leading-[1.62] text-muted" data-i18n="teachers.intro">Two different things wear the word "teacher" on this site. Historical scholars are attributed, their published work is the source of a course. Contemporary teachers are people who actually teach, review and answer.</p>
+      <p class="mt-4 max-w-[66ch] text-lg leading-[1.62] text-muted" data-i18n="teachers.intro">Two different things wear the word "teacher" on this site. Historical scholars are attributed — their published work is the source of a course. Contemporary teachers are people who actually teach, review and answer.</p>
 
       <div class="mt-8 flex items-baseline gap-3 rule-navy pb-2">
         <span class="font-mono text-[11px] text-saffron-deep">I</span>
@@ -58,7 +58,7 @@ const scholarCount = professorList().length;
           ${t.areas && t.areas.length ? `<span class="flex-1 basis-[250px] text-[14.5px] leading-[1.55] text-muted">${esc(t.areas.slice(0, 3).join(', '))}</span>` : ''}
         </a>`).join('');
     }).catch(() => {
-      // real static empty-state stays in place, an honest "nothing to show"
+      // real static empty-state stays in place — an honest "nothing to show"
       // beats a fabricated error banner most visitors will never see anyway.
     });
   </script>

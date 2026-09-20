@@ -2,7 +2,6 @@
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import { iconSvg } from '../../lib/icons';
-import { SITE, ldJson } from '../../lib/site';
 import programsData from '../../../public/assets/data/programs.json';
 import coursesData from '../../../public/assets/data/courses.json';
 
@@ -22,7 +21,7 @@ const topicSet = [...new Set(progCourses.map((c) => c.topic))].sort();
 // Breadcrumb labels + "entry from" meta are real, derived data (programs.json
 // `type` and `prerequisites`); course codes are still a proposal nobody has
 // decided (see the "flagged design note" this page deliberately does NOT
-// render, per Decision 12), the level slot beside each course is the real
+// render, per Decision 12) — the level slot beside each course is the real
 // `level` field from courses.json, never a fabricated letters-plus-digits code.
 const BREADCRUMB_TYPE: Record<string, string> = {
   certificate: 'Certificates',
@@ -41,20 +40,11 @@ function entryFrom(p: typeof prog): { text: string; none: boolean } {
 }
 const entry = entryFrom(prog);
 
-// Real programme(s) that require this one, computed from programs.json,
+// Real programme(s) that require this one — computed from programs.json,
 // never hand-listed.
 const leadsTo = programsData.programs.filter((p) => p.prerequisites.includes(prog.id));
-
-const breadcrumb = {
-  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Sikhi University', item: SITE + '/' },
-    { '@type': 'ListItem', position: 2, name: 'Programs', item: SITE + '/programs' },
-    { '@type': 'ListItem', position: 3, name: prog.title, item: `${SITE}/program/${prog.id}` },
-  ],
-};
 ---
-<Base title={`${prog.title}, Sikhi University`} description={prog.description} ambient="study">
+<Base title={`${prog.title} — Sikhi University`} description={prog.description} ambient="study">
   <div class="band-navy">
     <div class="wrap py-8 sm:pb-9 sm:pt-10">
       <p class="flex flex-wrap items-center gap-2.5 font-mono text-[10.5px] uppercase tracking-[.16em] text-white/72">
@@ -177,7 +167,7 @@ const breadcrumb = {
   const pct = Math.round((done / total) * 100);
   const allDone = done === total;
 
-  // Update status panel ("Your standing" rail, ruled ledger treatment)
+  // Update status panel ("Your standing" rail — ruled ledger treatment)
   const statusEl = document.getElementById('prog-status');
   const cumPassed = get('cum_passed_' + progId, false);
   statusEl.innerHTML = `
@@ -208,12 +198,17 @@ const breadcrumb = {
   });
 
   function launchTest() {
-    // Pull this program's quiz *questions* from its build-time-generated exam pool
-    // (web/scripts/build-index.mjs), no answers, and no need to fetch the full
-    // 40+ MB catalogue for one program. Grading is done on the server via
-    // /api/program-exam, keyed by (courseId, question-index).
-    fetch(`/data/exam/${progId}.json`).then(r => r.json()).then(data => {
-      const pool = data.questions || [];
+    // Pull quiz *questions* from the public catalogue. Answers are NOT present in
+    // the browser-served catalogue (stripped by build_public_data.py) — grading is
+    // done on the server via /api/program-exam, keyed by (courseId, question-index).
+    fetch('/assets/data/courses.json').then(r => r.json()).then(data => {
+      const pool = [];
+      data.courses.forEach(c => {
+        if (!courseIds.includes(c.id)) return;
+        (c.quiz || []).forEach((q, qi) => {
+          pool.push({ cid: c.id, qi, q: q.q, options: q.options, courseTitle: c.title });
+        });
+      });
       // Shuffle and pick N questions
       const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, testQuestions);
       if (shuffled.length === 0) {
@@ -221,7 +216,7 @@ const breadcrumb = {
         return;
       }
       renderTest(shuffled);
-    }).catch(() => { window.suToast('Could not load the exam, please try again in a moment.', 'error'); });
+    });
   }
 
   function renderTest(questions) {
@@ -232,7 +227,7 @@ const breadcrumb = {
     const result = document.getElementById('cum-test-result');
     const submitBtn = document.getElementById('cum-submit');
 
-    title.textContent = progTitle + ', Cumulative Examination';
+    title.textContent = progTitle + ' — Cumulative Examination';
     sub.textContent = `${questions.length} questions · ${passMark}% required to pass · Drawn from all courses in this program`;
     result.classList.add('hidden');
     submitBtn.classList.remove('hidden');
@@ -240,7 +235,7 @@ const breadcrumb = {
     body.innerHTML = questions.map((q, i) => `
       <div class="space-y-2" data-qi="${i}" data-cid="${esc(q.cid)}" data-qidx="${q.qi}">
         <p class="font-semibold text-navy"><span class="text-muted font-normal">${i+1}.</span> ${esc(q.q)}</p>
-        <div class="font-sans text-xs text-muted mb-1">- ${esc(q.courseTitle)}</div>
+        <div class="font-sans text-xs text-muted mb-1">— ${esc(q.courseTitle)}</div>
         ${q.options.map((opt, oi) => `
           <label class="flex items-start gap-2 cursor-pointer border border-line rounded-xl2 p-2 hover:bg-paper transition">
             <input type="radio" name="q${i}" value="${oi}" class="mt-0.5 accent-saffron shrink-0" />
@@ -264,22 +259,17 @@ const breadcrumb = {
     });
     const submitBtn = document.getElementById('cum-submit');
     submitBtn.disabled = true;
-    // passMark is NOT sent: the server owns the threshold (see
-    // functions/api/program-exam.js). A client-supplied pass mark was an
-    // answer-key oracle. The `passMark` in scope here is display copy only.
     fetch('/api/program-exam', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, passMark }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('grade failed'))))
-      .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.passed); })
+      .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.correct, res.total, res.passed); })
       .catch(() => { submitBtn.disabled = false; window.suToast('Could not grade the exam right now. Please check your connection and try again.', 'error'); });
   }
 
-  // The server returns the score only on a pass, a failing attempt is just the
-  // boolean, so the count can't be used to reverse-engineer the answer key.
-  function showTestResult(score, passed_exam) {
+  function showTestResult(score, correct, total, passed_exam) {
     const resultEl = document.getElementById('cum-test-result');
     const iconEl = document.getElementById('cum-result-icon');
     const scoreEl = document.getElementById('cum-result-score');
@@ -288,17 +278,16 @@ const breadcrumb = {
     const certLink = document.getElementById('cum-cert-link');
 
     iconEl.innerHTML = passed_exam ? ICONS.cap : ICONS.books;
+    scoreEl.textContent = `${score}% (${correct} / ${total} correct)`;
     if (passed_exam) {
-      scoreEl.textContent = `${score}%`;
-      msgEl.textContent = `Congratulations, you have passed the ${progTitle} cumulative examination. Your credential is ready.`;
+      msgEl.textContent = `Congratulations — you have passed the ${progTitle} cumulative examination. Your credential is ready.`;
       certLink.href = `/cert?program=${progId}`;
       certLink.classList.remove('hidden');
       retryBtn.classList.add('hidden');
       set('cum_passed_' + progId, true);
       set('cum_score_' + progId, score);
     } else {
-      scoreEl.textContent = '';
-      msgEl.textContent = `Not passed, you need ${passMark}% to pass. Review the material and try again.`;
+      msgEl.textContent = `You scored ${score}% — you need ${passMark}% to pass. Review the material and try again.`;
       retryBtn.classList.remove('hidden');
       certLink.classList.add('hidden');
     }
@@ -308,7 +297,7 @@ const breadcrumb = {
     retryBtn.onclick = launchTest;
   }
 
-  // Explicit program registration, server is the source of truth; localStorage mirrors it.
+  // Explicit program registration — server is the source of truth; localStorage mirrors it.
   (function () {
     const btn = document.getElementById('register-btn'); if (!btn) return;
     const rk = 'su_v1_registered_program_' + progId;

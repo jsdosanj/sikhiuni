@@ -15,7 +15,7 @@ const professors = professorList().map((p) => ({
 const granths = [
   { gur: 'ਸ੍ਰੀ ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ ਜੀ', title: 'Sri Guru Granth Sahib Ji', url: '/santhiya?src=sggs', sub: 'Read Ang by Ang with Santhya audio' },
   { gur: 'ਦਸਮ ਗ੍ਰੰਥ', title: 'Dasam Granth', url: '/santhiya?src=dasam', sub: 'Read-along, Ang by Ang' },
-  { gur: 'ਸ੍ਰੀ ਸਰਬਲੋਹ ਗ੍ਰੰਥ ਸਾਹਿਬ', title: 'Sri Sarbloh Granth Sahib', url: '/santhiya?src=sarbloh', sub: 'The Khalsa Mahima, read-along' },
+  { gur: 'ਸ੍ਰੀ ਸਰਬਲੋਹ ਗ੍ਰੰਥ ਸਾਹਿਬ', title: 'Sri Sarbloh Granth Sahib', url: '/santhiya?src=sarbloh', sub: 'The Khalsa Mahima — read-along' },
 ];
 const banis = Object.values(REF).map((b) => ({ gur: b.gur, title: b.en, url: b.href || '/santhiya', sub: 'Bani · read-along' }));
 const collections = Object.entries(COLLECTIONS).map(([id, c]) => ({ gur: c.gur, title: c.name, url: '/collection/' + id, sub: c.blurb }));
@@ -25,7 +25,7 @@ const pages = [
   { title: 'Course catalogue', url: '/catalog', sub: 'Browse every course by topic' },
   { title: 'Learning paths', url: '/catalog#paths', sub: 'Guided, ordered routes through the courses' },
   { title: 'Santhya pathway & read-along', url: '/santhiya', sub: 'Learn to read Gurbani, and read the Granths' },
-  { title: 'Baal Updesh, learn Gurmukhi', url: '/baal-updesh', sub: 'Alphabet, Muharni, words, numbers, flashcards' },
+  { title: 'Baal Updesh — learn Gurmukhi', url: '/baal-updesh', sub: 'Alphabet, Muharni, words, numbers, flashcards' },
   { title: 'Flashcards', url: '/baal-updesh#flashcards', sub: 'Spaced-repetition study of Gurbani words & terms' },
   { title: 'Professors', url: '/professors', sub: 'The scholars behind the courses' },
   { title: 'My Learning', url: '/dashboard', sub: 'Your progress, grades and certificates' },
@@ -39,81 +39,36 @@ const gWords = (gurbaniWords as { gur: string; tr: string; var?: string; url: st
 }));
 
 const extra = { professors, readings, pages, gWords };
-
-// Starter queries, drawn from the app's own bani register (web/src/lib/santhya.ts)
-// so every Gurmukhi label here is verbatim from the corpus, never hand-typed.
-// Plain links carrying ?q=, so they work before (and without) the page script.
-const SUGGEST_IDS = ['japji', 'sukhmani', 'asadivar', 'anand'] as const;
-const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
 ---
-<Base title="Search, Sikhi University" description="Search everything at Sikhi University, courses, professors, topics, learning paths, banis and scripture." ambient="study">
+<Base title="Search — Sikhi University" description="Search everything at Sikhi University — courses, professors, topics, learning paths, banis and scripture." ambient="study">
   <section class="wrap py-12">
     <h1 class="text-display-sm text-navy" data-i18n="search.h1">Search Sikhi University</h1>
 
     <!-- Bordered query box with a mono "/" glyph (issearch, lines 497-527). -->
     <div class="mt-5 flex max-w-xl flex-wrap items-center gap-3 rounded-[3px] border border-navy bg-surface px-4 py-3">
       <span aria-hidden="true" class="font-mono text-[15px] text-saffron-deep">/</span>
-      <input id="q" type="search" aria-label="Search Sikhi University" data-i18n-aria="search.h1" placeholder="Search in English or ਪੰਜਾਬੀ, courses, banis, Gurbani words…" data-i18n-ph="search.ph" autofocus
+      <input id="q" type="search" aria-label="Search Sikhi University" data-i18n-aria="search.h1" placeholder="Search in English or ਪੰਜਾਬੀ — courses, banis, Gurbani words…" data-i18n-ph="search.ph" autofocus
         class="min-w-0 flex-1 bg-transparent py-1 text-[21px] font-medium tracking-[-.02em] text-navy outline-none placeholder:text-base placeholder:font-normal placeholder:tracking-normal placeholder:text-muted" />
     </div>
 
-    <!-- Mono count chips, one per result kind, filled by render() below. -->
+    <!-- Mono count chips, one per result kind — filled by render() below. -->
     <div id="chips" class="mt-4 flex flex-wrap gap-2" aria-live="polite"></div>
 
     <div id="out" class="mt-8" aria-live="polite"></div>
   </section>
-
-  <section class="wrap pb-16">
-    <div id="out" class="mt-8" aria-live="polite"></div>
-  </section>
-
   <style>
-    /* The whole result list is injected via innerHTML, so anything that has to
-       reach it must be :global, the Astro scope class is never stamped on
-       dynamically-created nodes. (Tailwind utilities are already global.) */
-
     /* Highlight for matched query terms. Saffron-soft ground + ink text keeps AA
-       contrast in both themes (see global.css tokens). */
+       contrast in both themes (see global.css tokens). Results are injected via
+       innerHTML, so :global reaches the dynamically-created <mark> under scoped #out. */
     #out :global(mark) {
       background: rgb(var(--c-saffron-soft));
       color: rgb(var(--c-ink));
       border-radius: 3px;
       padding: 0 .15em;
     }
-
-    /* The search desk: a saffron focus ring that reads as a lit lamp rather than
-       a form outline. box-shadow only, never animate backdrop-filter. */
-    .searchfield { transition: box-shadow .3s var(--ease-out), transform .3s var(--ease-out); }
-    .searchfield:focus-within {
-      box-shadow: 0 0 0 3px rgb(244 178 26 / .32), 0 18px 44px rgb(11 30 58 / .16);
-      transform: translateY(-1px);
-    }
-    /* The field owns the focus ring; the input inside it does not double up. */
-    .searchfield input:focus-visible { outline: none; }
-
-    /* Result group headings: a hairline that trails off to the right. */
-    #out :global(.res-head)::after {
-      content: ''; flex: 1 1 auto; height: 1px;
-      background: linear-gradient(90deg, rgb(var(--c-line)), transparent);
-    }
-
-    /* Each hit lifts on a gold hairline, the same language as .card-lift. */
-    #out :global(.res-hit)::after {
-      content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-      border: 1px solid transparent; transition: border-color .2s var(--ease-out);
-    }
-    #out :global(.res-hit:hover)::after,
-    #out :global(.res-hit:focus-visible)::after { border-color: rgb(244 178 26 / .6); }
-
-    /* Whisper-quiet entrance for the FIRST result set only (a ?q= deep link).
-       Re-typing must not replay it, an animation on every keystroke would fight
-       the reader. Frozen by the global reduced-motion guard. */
-    @keyframes su-res-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    #out :global(.res-in) { animation: su-res-in .45s var(--ease-out) both; }
   </style>
   <script type="application/json" id="extra-index" set:html={JSON.stringify(extra)}></script>
   <script>
-    import { iconSvg } from '../lib/icons';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const extra = JSON.parse(document.getElementById('extra-index').textContent);
@@ -125,12 +80,10 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     // Build a flat, typed index. Each entry carries display fields (kind/title/sub/url)
     // plus four lowercased search fields the scorer weights: t = title, p = professor,
     // o = topic, b = body/summary. Non-course kinds leave p/o empty.
-    // `gur` is display-only: the Gurmukhi half of a reading's name, kept in its own
-    // field so the row can render it with lang="pa" in a real Gurmukhi face.
     let index = [];
     function buildIndex() {
       index = [];
-      const push = (e) => index.push({ p: '', o: '', b: '', gur: '', ...e });
+      const push = (e) => index.push({ p: '', o: '', b: '', ...e });
       data.courses.forEach((c) => push({
         kind: 'Course', title: c.title, sub: 'Prof. ' + c.professor + ' · ' + tn(c.topic), url: '/course/' + c.id,
         t: (c.title || '').toLowerCase(), p: (c.professor || '').toLowerCase(), o: tn(c.topic).toLowerCase(),
@@ -149,7 +102,7 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
         t: (p.name || '').toLowerCase(), b: (p.blurb || '').toLowerCase(),
       }));
       extra.readings.forEach((r) => push({
-        kind: 'Reading', title: r.title, gur: r.gur || '', sub: r.sub || '', url: r.url,
+        kind: 'Reading', title: (r.gur ? r.gur + ' — ' : '') + r.title, sub: r.sub || '', url: r.url,
         t: ((r.gur || '') + ' ' + r.title).toLowerCase(), b: (r.sub || '').toLowerCase(),
       }));
       extra.pages.forEach((p) => push({
@@ -210,7 +163,7 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     const LABEL = { Course: 'Courses', Professor: 'Professors', Reading: 'Reading & Bani', Word: 'Gurbani Words', Path: 'Learning paths', Topic: 'Topics', Page: 'Pages' };
 
     // Mono count chips ("ALL 24 / COURSES 11 / ANGS 9 / FACULTY 3", issearch
-    // 497-527), display counters only, driven by the same score groups the
+    // 497-527) — display counters only, driven by the same score groups the
     // sections below render from. Not a second filter control.
     function renderChips(scored, groups) {
       if (!scored.length) { chips.innerHTML = ''; return; }
@@ -232,10 +185,9 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     function section(k, g, terms) {
       return `<div class="min-w-0 flex-1 basis-[280px]"><p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">${esc(LABEL[k])}</p><div class="rule-navy"></div>${g.map((r) => row(r, terms)).join('')}</div>`;
     }
-    let firstPaint = true;   // the entrance animation plays once, not per keystroke
     function render() {
       const v = q.value.normalize('NFC').toLowerCase().trim();
-      if (!v) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">Type to search ${index.length} things, courses, professors, banis, Gurbani words and more.</p>`; return; }
+      if (!v) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">Type to search ${index.length} things — courses, professors, banis, Gurbani words and more.</p>`; return; }
       let terms = v.split(/\s+/);
       let scored = search(terms, v);
       let note = '';
@@ -261,8 +213,9 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     }
     fetch('/data/search.json').then((r) => r.json()).then((d) => {
       data = d; buildIndex();
+      const pre = new URLSearchParams(location.search).get('q'); if (pre) q.value = pre;
       render();
-    }).catch(() => { out.innerHTML = panel('<p class="font-sans text-muted">Could not load the search index.</p>'); });
+    }).catch(() => { out.innerHTML = '<p class="text-muted">Could not load the search index.</p>'; });
     q.addEventListener('input', render);
   </script>
 </Base>

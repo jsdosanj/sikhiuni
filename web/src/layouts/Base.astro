@@ -1,7 +1,5 @@
 ---
 import '../styles/global.css';
-import '../styles/mobile.css';
-import '../styles/institute.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
@@ -18,16 +16,8 @@ import path from 'node:path';
 // an asset reference and the embedded CSS breaks the compiled module.)
 const fontFaceCss = readFileSync(path.resolve(process.cwd(), 'public/fonts/fonts.css'), 'utf-8');
 
-interface Props { title: string; description?: string; canonical?: string; ogType?: string; autoTranslate?: boolean; ambient?: 'hall' | 'study' | 'sanctum' | 'none'; bgImage?: string; noindex?: boolean; bodyClass?: string; institute?: boolean }
-const { title, description = 'A free, open online university for Sikhi and modern skills, open to all, worldwide.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
-const instituteFontCss = institute ? readFileSync(path.resolve(process.cwd(), 'public/fonts/institute-fonts.css'), 'utf-8') : '';
-const autoTranslateEff = institute ? false : autoTranslate;
-// Google truncates a meta description around 155-160 chars anyway; better to
-// truncate at ~155-160 and a hard mid-word cut looks careless. The full text
-// still renders in the page body -- this only trims what crawlers read.
-const metaDesc = description.length <= 160
-  ? description
-  : description.slice(0, 157).replace(/\s+\S*$/, '').replace(/[,;:\u2014-]$/, '') + '…';
+interface Props { title: string; description?: string; canonical?: string; ogType?: string; autoTranslate?: boolean; ambient?: 'hall' | 'study' | 'sanctum' | 'none'; bgImage?: string; noindex?: boolean; bodyClass?: string }
+const { title, description = 'A free, open online university for Sikhi and modern skills — open to all, worldwide.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass } = Astro.props;
 import { SITE, ldJson } from '../lib/site';
 // Normalise to the extensionless URLs the site is actually served/linked at
 // (e.g. /catalog, not /catalog.html; / for the homepage).
@@ -35,24 +25,23 @@ const cleanPath = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html
 const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
 ---
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <!-- Self-hosted fonts (Gurmukhi is first-class, never left to device chance).
        @font-face rules are inlined (see frontmatter) and the two above-the-fold
        faces are preloaded so text paints without a stylesheet round-trip. -->
-  <Fragment set:html={`<style>${fontFaceCss}${instituteFontCss}</style>`} />
-  <link rel="preload" href="/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <Fragment set:html={`<style>${fontFaceCss}</style>`} />
+  <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/notoserifgur-gurmukhi-400.woff2" as="font" type="font/woff2" crossorigin />
-  {institute && <link rel="preload" href="/fonts/chakrapetch-latin-600.woff2" as="font" type="font/woff2" crossorigin />}
-  {institute && <link rel="preload" href="/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin />}
   <script is:inline>
-    // Start in light mode unless the visitor explicitly saved a theme.
+    // Set the colour theme before first paint to avoid a flash. Honours a
+    // saved choice, else the OS preference.
     (function () {
       try {
         var t = localStorage.getItem('su_v1_theme');
-        if (t !== 'light' && t !== 'dark') t = 'light';
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
         // ?lang= deep link (shareable translated URLs) wins over the saved choice.
         var qlang = new URLSearchParams(location.search).get('lang');
@@ -64,38 +53,16 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       } catch (e) {}
     })();
   </script>
-  {import.meta.env.DEV && <script is:inline>
-    // Local previews must not reuse the production app shell's cached CSS/JS.
-    // Keep downloaded course packs and all learning preferences intact.
-    (async function () {
-      if (!('serviceWorker' in navigator)) return;
-      try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        const own = registrations.filter(r => [r.active, r.waiting, r.installing].some(w => w && new URL(w.scriptURL).pathname === '/sw.js'));
-        if (!own.length) return;
-        await Promise.all(own.map(r => r.unregister()));
-        const keys = await caches.keys();
-        await Promise.all(keys.filter(k => k.startsWith('su-web-')).map(k => caches.delete(k)));
-        location.reload();
-      } catch (_) {}
-    })();
-  </script>}
   <title>{title}</title>
-  <meta name="description" content={metaDesc} />
+  <meta name="description" content={description} />
   <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
   <meta name="application-name" content="Sikhi University" />
   <meta name="theme-color" content="#16335c" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0d1016" media="(prefers-color-scheme: dark)" />
   <link rel="canonical" href={canon} />
-  {/* ?v=2 cache-busts the 2026-08-07 crest rebrand's icon assets: browsers
-      cache favicons far more stickily than normal Cache-Control/ETag
-      revalidation accounts for, so visitors who saw the old book+turban
-      mark before the icons were regenerated could keep seeing it
-      indefinitely without a URL change. Bump the version again if the
-      icon/logo ever changes. */}
-  <link rel="icon" href="/assets/brand/icon-32.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/brand/icon-192.png" />
-  <link rel="apple-touch-icon" href="/assets/brand/icon-180.png" />
+  <link rel="icon" href="/assets/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sikhi University" />
@@ -103,8 +70,8 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", "@id": SITE + "/#org", "name": "Sikhi University", "url": SITE,
-        "description": "A free, open online university for Sikhi, Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide.",
-        "logo": { "@type": "ImageObject", "url": SITE + "/assets/brand/crest-2026.webp", "width": 1200, "height": 1200 } },
+        "description": "A free, open online university for Sikhi — Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi — open to all, worldwide.",
+        "logo": { "@type": "ImageObject", "url": SITE + "/assets/logo.png", "width": 1200, "height": 1200 } },
       { "@type": "WebSite", "@id": SITE + "/#website", "url": SITE, "name": "Sikhi University",
         "publisher": { "@id": SITE + "/#org" },
         "potentialAction": { "@type": "SearchAction", "target": SITE + "/search?q={search_term_string}", "query-input": "required name=search_term_string" } }
@@ -115,20 +82,19 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
   <meta property="og:type" content={ogType} />
   <meta property="og:site_name" content="Sikhi University" />
   <meta property="og:title" content={title} />
-  <meta property="og:description" content={metaDesc} />
+  <meta property="og:description" content={description} />
   <meta property="og:url" content={canon} />
-  <meta property="og:image" content={`${SITE}/assets/brand/share-2026.png`} />
+  <meta property="og:image" content={`${SITE}/assets/og-image.png`} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Sikhi University, free, open learning in Sikhi" />
+  <meta property="og:image:alt" content="Sikhi University — free, open learning in Sikhi" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={metaDesc} />
-  <meta name="twitter:image" content={`${SITE}/assets/brand/share-2026.png`} />
-  <meta name="twitter:image:alt" content="Sikhi University, free, open learning in Sikhi" />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={`${SITE}/assets/og-image.png`} />
   <slot name="head" />
 </head>
-<body class={bodyClass} data-ambient={ambient} data-institute={institute ? '' : undefined}>
+<body class={bodyClass}>
   {ambient !== 'none' && (
     <div aria-hidden="true" class={`ambient ambient-${ambient}`}>
       {bgImage && <div class="ambient-painting" style={`background-image:url('${bgImage}')`}></div>}
@@ -138,7 +104,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
   )}
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
   <Nav />
-  <main id="main" data-autotranslate={autoTranslateEff ? '1' : '0'}>
+  <main id="main" data-autotranslate={autoTranslate ? '1' : '0'}>
     <slot />
   </main>
   <Footer />
@@ -169,7 +135,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     const fab = document.getElementById('a11y-fab'); const panel = document.getElementById('a11y-panel');
     // Read the page via the shared TTS engine: whole page (no 9000-char cap),
     // best available voice for the current UI language. Gurbani/Gurmukhi is
-    // never synthesized, sacred text is stripped, matching the course reader.
+    // never synthesized — sacred text is stripped, matching the course reader.
     const readableText = () => {
       const m = document.querySelector('main'); if (!m) return '';
       const clone = m.cloneNode(true);
@@ -178,12 +144,6 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     };
     if (!ttsSupported()) panel?.querySelectorAll('[data-a="read"],[data-a="stop"]').forEach((b) => b.remove());
     fab?.addEventListener('click', () => { const hidden = panel?.classList.toggle('hidden'); fab.setAttribute('aria-expanded', String(!hidden)); });
-    // Escape closes the accessibility panel and hands focus back to its button.
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && panel && !panel.classList.contains('hidden')) {
-        panel.classList.add('hidden'); fab?.setAttribute('aria-expanded', 'false'); fab?.focus();
-      }
-    });
     panel?.addEventListener('click', (e) => {
       const t = e.target.closest('button'); if (!t) return; const p = get(); const a = t.dataset.a;
       if (a === 'smaller') p.scale = Math.max(80, (p.scale || 100) - 10);
@@ -194,7 +154,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       else if (a === 'reset') { localStorage.removeItem(P); apply(); return; }
       localStorage.setItem(P, JSON.stringify(p)); apply();
     });
-    if (import.meta.env.PROD && 'serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   </script>
   <script>
     // Lightweight UI i18n: swaps text/placeholders of [data-i18n*] elements from a
@@ -312,7 +272,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     body.hc { background: #000; color: #fff; }
     body.hc .card, body.hc .card-lift, body.hc .bg-surface, body.hc .bg-paper, body.hc nav, body.hc footer { background: #000 !important; color: #fff !important; border-color: #fff !important; }
     /* High contrast defeats glass entirely: solid black, no blur, white borders. */
-    body.hc .glass, body.hc .glass-strong, body.hc .glass-lite, body.hc .glass-card, body.hc .glass-hall { background: #000 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; border-color: #fff !important; color: #fff !important; }
+    body.hc .glass, body.hc .glass-strong, body.hc .glass-lite, body.hc .glass-card { background: #000 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; border-color: #fff !important; color: #fff !important; }
     body.hc .ambient { display: none !important; }
     body.hc a, body.hc h1, body.hc h2, body.hc h3 { color: #ffd479 !important; }
   </style>
@@ -356,6 +316,5 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       });
     };
   </script>
-  <script type="module" src="/scripts/activity-tracker.js"></script>
 </body>
 </html>

@@ -1,11 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-import { professorList, profSlug, professorPhotos, profInitials, avatarColor, topicName } from '../lib/data';
-import { departments } from '../lib/departments';
+import { professorList, profBio, profSlug, professorPhotos, profInitials, avatarColor, topicName } from '../lib/data';
 const list = professorList().sort((a, b) => a.name.localeCompare(b.name));
 
 // Real specialty tag line, derived from the topics of the professor's own
-// published courses, never invented. Capped at 3 so a prolific scholar
+// published courses — never invented. Capped at 3 so a prolific scholar
 // (dozens of courses) doesn't produce a run-on label.
 function specialtyFor(courses: { topic: string }[]): string {
   const seen = new Set<string>();
@@ -21,11 +20,11 @@ function specialtyFor(courses: { topic: string }[]): string {
 }
 
 // The footnote is only shown if the real data actually carries a photo
-// credit, never invent an attribution the source file doesn't have.
+// credit — never invent an attribution the source file doesn't have.
 const anyCredited = list.some(({ name }) => professorPhotos[name]?.credit);
 const anyUncredited = list.some(({ name }) => !professorPhotos[name]?.img);
 ---
-<Base title="Our professors, Sikhi University" description="The Sikh scholars and writers whose works anchor Sikhi University's courses." ambient="none">
+<Base title="Our professors — Sikhi University" description="The Sikh scholars and writers whose works anchor Sikhi University's courses." ambient="study">
   <section class="wrap py-12">
     <div class="border border-line bg-paper px-6 py-9 sm:px-8 sm:py-11">
       <div class="flex flex-wrap items-end justify-between gap-6 rule-navy pb-4">
@@ -43,91 +42,30 @@ const anyUncredited = list.some(({ name }) => !professorPhotos[name]?.img);
       </div>
       <p class="mt-4 max-w-2xl text-lg text-muted" data-i18n="profs.sub">Sikhi University courses are built on the works of leading Sikh scholars and writers. Each course is taught in the voice of, or drawn from, its author.</p>
 
-      <form class="faculty-filters" role="search" aria-label="Find a professor">
-        <label class="faculty-search">Search scholars<input id="faculty-search" type="search" placeholder="Name or subject…" autocomplete="off" /></label>
-        <label>School<select id="faculty-school"><option value="">All schools</option>{departments.map(d => <option value={d.id}>{d.name}</option>)}</select></label>
-        <label>Order<select id="faculty-sort"><option value="name">Name A–Z</option><option value="courses">Most courses</option></select></label>
-        <button id="faculty-reset" type="reset">Reset</button>
-      </form>
-      <div class="faculty-results"><p id="faculty-count" role="status" aria-live="polite">{list.length} scholars</p><span>Explore the people behind your courses ↗</span></div>
-      <div class="faculty-grid" id="faculty-grid">
+      <div class="mt-6 columns-1 gap-x-11 md:columns-2">
         {list.map(({ name, courses }) => {
           const photo = professorPhotos[name];
           const specialty = specialtyFor(courses);
           return (
-            <a href={`/professor/${profSlug(name)}`} class="faculty-card" data-name={name} data-search={[name, ...courses.map(c => topicName(c.topic))].join(' ').toLowerCase()} data-schools={departments.filter(d => courses.some(c => d.topics.includes(c.topic))).map(d => d.id).join(' ')} data-courses={courses.length}>
+            <a href={`/professor/${profSlug(name)}`} class="row-ruled block [break-inside:avoid-column] hover:bg-surface">
               {photo && photo.img ? (
-                <img src={`/${photo.img}`} width="88" height="88" loading="lazy" alt="" style="object-position:center top"
-                  class="faculty-portrait" />
+                <img src={`/${photo.img}`} width="52" height="52" loading="lazy" alt="" style="object-position:center top"
+                  class="h-[52px] w-[52px] shrink-0 rounded-full border border-line bg-line object-cover" />
               ) : (
-                <span aria-hidden="true" class="faculty-portrait faculty-initials" style={`background:${avatarColor(name)}`}>{profInitials(name)}</span>
+                <span aria-hidden="true" class="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full font-mono text-sm text-paper" style={`background:${avatarColor(name)}`}>{profInitials(name)}</span>
               )}
               <span class="min-w-0">
                 <span class="block text-base font-semibold leading-tight text-navy" data-no-i18n>{name}</span>
                 {specialty && <span class="mt-0.5 block font-mono text-[10.5px] uppercase tracking-[.1em] text-muted" data-no-i18n>{specialty}</span>}
               </span>
-              <span class="faculty-course-count">{courses.length} course{courses.length === 1 ? '' : 's'} <span aria-hidden="true">↗</span></span>
             </a>
           );
         })}
       </div>
-
-      <p id="faculty-empty" hidden>No scholars match these filters. Try another name or reset your search.</p>
 
       {(anyCredited || anyUncredited) && (
         <p class="mt-6 max-w-[86ch] font-mono text-[11px] leading-[1.75] text-muted" data-i18n="profs.creditNote">Portraits: Wikimedia Commons, public domain unless credited otherwise on the scholar's page. Scholars with no archived portrait show initials instead.</p>
       )}
     </div>
   </section>
-  <style>
-    .faculty-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin-top:32px; padding:18px; border:1px solid rgb(var(--c-line)); border-radius:14px; background:rgb(var(--c-surface)); }
-    .faculty-filters label { display:grid; gap:6px; font-size:11px; font-weight:650; color:rgb(var(--c-muted)); letter-spacing:.04em; }
-    .faculty-search { flex:1 1 240px; }
-    .faculty-filters input,.faculty-filters select { width:100%; min-height:46px; padding:10px 12px; border:1px solid rgb(var(--c-line)); border-radius:8px; background:rgb(var(--c-paper)); color:rgb(var(--c-navy)); font-size:14px; letter-spacing:normal; }
-    .faculty-filters button { min-height:46px; padding:10px 18px; background:#102c4f; color:white; border-radius:8px; font-size:13px; }
-    .faculty-results { display:flex; justify-content:space-between; gap:16px; margin:22px 0 14px; color:rgb(var(--c-muted)); font-size:12px; }
-    .faculty-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; }
-    .faculty-card { display:flex; flex-direction:column; align-items:flex-start; gap:18px; min-width:0; padding:20px 16px 14px; border:1px solid rgb(var(--c-line)); border-radius:12px; background:rgb(var(--c-surface)); text-decoration:none; transition:transform .18s,border-color .18s,box-shadow .18s; }
-    .faculty-card[hidden],#faculty-empty[hidden] { display:none; }
-    .faculty-card:hover,.faculty-card:focus-visible { transform:translateY(-4px); border-color:#b58b40; box-shadow:0 12px 26px rgb(10 30 50 / .09); }
-    .faculty-portrait { width:88px; height:88px; border-radius:50%; object-fit:cover; border:1px solid rgb(var(--c-line)); }
-    .faculty-initials { display:grid; place-items:center; color:white; font-size:24px; font-family:Georgia,serif; }
-    .faculty-course-count { display:flex; justify-content:space-between; gap:12px; width:100%; margin-top:auto; padding-top:12px; border-top:1px solid rgb(var(--c-line)); font-size:11px; color:rgb(var(--c-muted)); }
-    #faculty-empty { padding:36px 20px; text-align:center; background:rgb(var(--c-surface)); border-radius:12px; }
-    @media(max-width:1100px) { .faculty-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-    @media(max-width:640px) { .faculty-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .faculty-card { padding:16px 12px; } .faculty-filters label:not(.faculty-search) { flex:1 1 120px; } .faculty-filters input,.faculty-filters select { font-size:16px; } .faculty-results>span { display:none; } }
-    @media(max-width:360px) { .faculty-grid { grid-template-columns:1fr; } }
-    @media(prefers-reduced-motion:reduce) { .faculty-card { transition:none; } .faculty-card:hover { transform:none; } }
-  </style>
-  <script>
-    const grid = document.querySelector<HTMLElement>('#faculty-grid')!;
-    const cards = [...grid.querySelectorAll<HTMLAnchorElement>('.faculty-card')];
-    const search = document.querySelector<HTMLInputElement>('#faculty-search')!;
-    const school = document.querySelector<HTMLSelectElement>('#faculty-school')!;
-    const sort = document.querySelector<HTMLSelectElement>('#faculty-sort')!;
-    const params = new URLSearchParams(location.search);
-    search.value = params.get('q') || '';
-    school.value = params.get('school') || '';
-    sort.value = params.get('sort') === 'courses' ? 'courses' : 'name';
-    function update() {
-      const words = search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      let count = 0;
-      cards.sort((a,b) => (sort.value === 'courses' ? Number(b.dataset.courses)-Number(a.dataset.courses) : 0) || a.dataset.name!.localeCompare(b.dataset.name!)).forEach(card => {
-        card.hidden = !words.every(word => card.dataset.search!.includes(word)) || (!!school.value && !card.dataset.schools!.split(' ').includes(school.value));
-        if (!card.hidden) count++;
-        grid.append(card);
-      });
-      document.querySelector('#faculty-count')!.textContent = `${count} of ${cards.length} scholars`;
-      document.querySelector<HTMLElement>('#faculty-empty')!.hidden = count > 0;
-      const url = new URL(location.href);
-      for (const [key,value] of [['q',search.value],['school',school.value],['sort',sort.value === 'name' ? '' : sort.value]]) { if (value) url.searchParams.set(key,value); else url.searchParams.delete(key); }
-      history.replaceState(null,'',url);
-    }
-    search.addEventListener('input',update);
-    school.addEventListener('change',update);
-    sort.addEventListener('change',update);
-    document.querySelector('.faculty-filters')!.addEventListener('submit',event => event.preventDefault());
-    document.querySelector('.faculty-filters')!.addEventListener('reset',() => { search.value=''; school.value=''; sort.value='name'; update(); });
-    update();
-  </script>
 </Base>
