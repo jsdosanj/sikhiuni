@@ -1,0 +1,51 @@
+{
+  "track": "ai-94-fanout-labs",
+  "school": "ai",
+  "blurb": "Sixteen free, interactive Fanout Labs — small browser tools that make an inference, system-design, or ML calculation tangible instead of abstract.",
+  "license": "CC-BY-SA-4.0",
+  "generated": "2026-09-20",
+  "creditLabel": "Labs discovered through",
+  "adaptedFrom": {
+    "name": "Fanout (Suraj Gaud)",
+    "href": "https://fanout.sh/labs",
+    "license": "Vendor content — link-out only",
+    "note": "Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to link this directory. Every lab runs at fanout.sh — none of its code or interface is reproduced here. Unlike the rest of Fanout's catalogue, all sixteen Labs are free with no account required."
+  },
+  "modules": [
+    {
+      "num": 1,
+      "slug": "systems-and-inference-labs",
+      "title": "Systems and inference labs",
+      "objective": "Turn eight abstract inference and systems-engineering ideas — capacity planning, KV-cache memory, GPU memory budgets, timeouts, latency, tokenization, sampling, and model cost — into something you can drag a slider on.",
+      "teach": "Each lab is a single-purpose calculator or visualizer, not a course. Run the numbers for a workload you actually care about — your own model size, your own context length — rather than the defaults; that's where the intuition actually lands.",
+      "labs": [
+        { "title": "What breaks first, and at what scale?", "provider": "Fanout", "href": "https://fanout.sh/labs/back-of-the-envelope", "cost": "free" },
+        { "title": "Watch context turn into inference memory", "provider": "Fanout", "href": "https://fanout.sh/labs/kv-cache", "cost": "free" },
+        { "title": "Can you fit the workload without changing the task?", "provider": "Fanout", "href": "https://fanout.sh/labs/memory-workbench", "cost": "free" },
+        { "title": "Timeout Architect", "provider": "Fanout", "href": "https://fanout.sh/labs/timeout-architect", "cost": "free" },
+        { "title": "Latency Numbers", "provider": "Fanout", "href": "https://fanout.sh/labs/latency-numbers", "cost": "free" },
+        { "title": "See what the model actually reads", "provider": "Fanout", "href": "https://fanout.sh/labs/tokenizer-context", "cost": "free" },
+        { "title": "Shape the next-token distribution", "provider": "Fanout", "href": "https://fanout.sh/labs/sampling-playground", "cost": "free" },
+        { "title": "Model Router and Pareto Explorer", "provider": "Fanout", "href": "https://fanout.sh/labs/model-router-and-pareto-explorer", "cost": "free" }
+      ]
+    },
+    {
+      "num": 2,
+      "slug": "ai-and-research-labs",
+      "title": "AI and research labs",
+      "objective": "Use the remaining eight labs to inspect an agent's configuration, an eval's statistical confidence, an optimizer's path, memory architectures, notation, retrieval chunking, a PDF's RAG-readiness, and your own day.",
+      "teach": "A few of these are directly useful outside any course: the eval-confidence lab turns a raw pass rate into a proper Wilson interval before you trust a benchmark claim, and the PDF-to-RAG scan will save you from shipping a retrieval pipeline on a badly-parsed document.",
+      "labs": [
+        { "title": "Agent Control Room", "provider": "Fanout", "href": "https://fanout.sh/labs/agent-control-room", "cost": "free" },
+        { "title": "Put uncertainty around an evaluation score", "provider": "Fanout", "href": "https://fanout.sh/labs/eval-confidence", "cost": "free" },
+        { "title": "Steer an optimizer down the loss curve", "provider": "Fanout", "href": "https://fanout.sh/labs/gradient-descent", "cost": "free" },
+        { "title": "What happens when an AI runs out of memory?", "provider": "Fanout", "href": "https://fanout.sh/labs/how-ai-remembers", "cost": "free" },
+        { "title": "Search mathematical notation by meaning", "provider": "Fanout", "href": "https://fanout.sh/labs/math-decoder", "cost": "free" },
+        { "title": "See what retrieval keeps and loses", "provider": "Fanout", "href": "https://fanout.sh/labs/rag-chunking", "cost": "free" },
+        { "title": "PDF-to-RAG Readiness Scan", "provider": "Fanout", "href": "https://fanout.sh/labs/pdf-to-rag-readiness-scan", "cost": "free" },
+        { "title": "Daily Planner", "provider": "Fanout", "href": "https://fanout.sh/labs/daily-planner", "cost": "free" }
+      ]
+    }
+  ],
+  "bench": []
+}
