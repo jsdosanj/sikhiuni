@@ -62,6 +62,17 @@
     ],
     "license": "No stated licence — linked, never adapted"
   },
+  "fanout": {
+    "name": "Fanout",
+    "kind": "org",
+    "role": "Course platform — Suraj Gaud",
+    "bio": "Fanout is an independent, for-profit technical-education platform built by Suraj Gaud, covering AI research, system design, ML mathematics, LLM inference engineering, and open robotics. Fanout publishes no open licence on its site; Sikhi University has Fanout's written permission to point students at its free public pages, so this wing is a reading map, not an adaptation — no lesson text, video, lab code, or paper note is reproduced here, and every card opens the real page at fanout.sh. The items linked are Fanout's own free public pages, its sixteen interactive Labs, and a handful of free sample lessons; the full 108-lesson AI research course, the 301-lesson ML math course, and most of the system design course sit behind Fanout's paid Monthly, Quarterly, Annual, or limited Lifetime plans, which these paths do not include or require. Sikhi University is not affiliated with, sponsored by, or endorsed by Fanout or Suraj Gaud.",
+    "links": [
+      { "label": "fanout.sh", "href": "https://fanout.sh/" },
+      { "label": "fanout.sh/ai/overview", "href": "https://fanout.sh/ai/overview" }
+    ],
+    "license": "Vendor content — link-out only, no content used"
+  },
   "it-vendor-training": {
     "name": "Apple and Microsoft IT training",
     "kind": "org",
