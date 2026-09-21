@@ -56,8 +56,14 @@ collegiate display/wordmark face and was shipping in production as a **demo-lice
 (fontspace.com/vintage-college-dept-font, uppercase glyphs only). Archivo replaced its role in
 task 2 (`.text-display`, `.su-nav-link`). The `@font-face` block and the `.ttf` file are gone.
 
-Display scale: `.text-display` / `.text-display-sm` / `.eyebrow` are the only sanctioned
-sizes above `text-4xl`. `.gur` bumps to `1.12em` / 1.9 leading; every Gurmukhi run carries
+Display scale: `.text-display` / `.text-display-sm` / `.eyebrow` / `.text-display-xl` /
+`.eyebrow-rule` / `.versal` / `.bilingual-display` are the only sanctioned sizes/treatments
+above `text-4xl`. `.text-display-xl` is reserved for the index hero h1 only. `.versal` is an
+illuminated-manuscript drop cap (float, 3-line) — **Latin only, never on Gurmukhi**: a drop
+cap would orphan matras above/below the line. `.bilingual-display` pairs a `.gur lang="pa"`
+label at or above the optical size of its paired Latin line (honoring the never-smaller-than-
+Latin rule below) — for page-title/eyebrow labels, never for Gurbani verse text. `.gur` bumps
+to `1.12em` / 1.9 leading; every Gurmukhi run carries
 `lang="pa"`. No raw `text-[Nrem]` literals outside the scale.
 
 ## Color — locked tokens + banned list
@@ -199,10 +205,12 @@ Vars: `--ease-out` (enters), `--ease-cinema` (transitions, ring sweeps), `--ease
 | enter | `.reveal` fade+rise 16px, IO **threshold 0** (law — see Principle 3) | lesson/quiz/santhiya content |
 | stagger | `data-reveal-delay`, 90ms steps | more than 6 siblings |
 | tilt-3d | `[data-tilt]`, ≤6°, `(pointer:fine)` only, rAF, will-change scoped to hover | touch devices, content blocks |
-| parallax | `data-parallax="0.15/0.3"` hero layers, desktop only, translate3d | body content, mobile |
+| parallax | `data-parallax="0.15/0.3/0.08"` hero layers, desktop only, translate3d | body content, mobile |
 | page transitions | CSS-only MPA `@view-transition` cross-fade 250ms; Safari falls back to `su-page-enter` (auto-disabled where VT is supported) | — |
 | progress ring | SVG `data-ring-pct` dashoffset sweep 900ms; the value is ALWAYS also text | rings without a text value |
 | celebration | drawn seal stamp-in (`--ease-spring`) + one glow pulse + toast | confetti, emoji, sound |
+| arrival | `data-arrival` hairline sweep + staggered rise, once per load, armed via JS-stamped `data-arrival-ready` (content-safe by the same contract as `.reveal`) | any page not `ambient="hall"`; anything outside the hero `<header>`; `#daily-shabad` |
+| seal reveal | `sealReveal()` — same drawn-seal language as celebration, fired after the real content/verdict already renders | gating the verdict/content itself on the animation; lesson/quiz/santhiya |
 
 All motion is behind `prefers-reduced-motion` (global kill-switch + JS `reduced()` gates);
 reduced users get final states instantly.

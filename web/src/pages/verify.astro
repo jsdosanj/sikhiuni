@@ -10,7 +10,7 @@ import Base from '../layouts/Base.astro';
 // confirms a matching record exists and nothing more, per Principle 4
 // (trust is earned, not claimed).
 ---
-<Base title="Verify a certificate — Sikhi University" description="Verify the authenticity of a Sikhi University certificate of completion." autoTranslate={false} ambient="study">
+<Base title="Verify a certificate, Sikhi University" description="Verify the authenticity of a Sikhi University certificate of completion." autoTranslate={false} ambient="study">
   <section class="wrap max-w-xl py-14">
     <p class="eyebrow text-saffron-deep" data-i18n="verify.eyebrow">Credential check</p>
     <h1 class="text-display-sm mt-3 text-navy" data-i18n="verify.h1">Verify a certificate</h1>
@@ -32,6 +32,13 @@ import Base from '../layouts/Base.astro';
     const out = document.getElementById('out');
     let titles = {};
     fetch('/data/index.json').then((r) => r.json()).then((d) => { d.courses.forEach((c) => (titles[c.id] = c.title)); }).catch(() => {});
+    // Institute of Technology phase ids (e.g. aisf-11-llm-engineering) aren't in
+    // the main catalogue, resolve their names from the Institute manifest.
+    fetch('/data/institute/manifest.json').then((r) => r.json()).then((m) => {
+      (m.tracks || []).forEach((t) => {
+        if (!titles[t.id]) titles[t.id] = t.kind === 'phase' ? `${t.title}, Institute of Technology` : t.title;
+      });
+    }).catch(() => {});
     const btn = document.querySelector('#vf button');
     function verify(id) {
       if (!id) return;
@@ -40,7 +47,7 @@ import Base from '../layouts/Base.astro';
       fetch('/api/certificates?id=' + encodeURIComponent(id)).then(async (r) => {
         const d = await r.json().catch(() => ({}));
         // A non-OK response (e.g. 503 cannot_check during a DB outage) must not be
-        // read as "not found" — a real certificate could be declared fake otherwise.
+        // read as "not found", a real certificate could be declared fake otherwise.
         if (!r.ok || (d && d.error)) {
           out.innerHTML = `<div class="rounded-xl2 border-l-4 border-saffron bg-surface p-5 font-sans text-sm"><strong data-i18n="verify.error.title">Couldn't check right now.</strong> <span data-i18n="verify.error.detail">This is a temporary problem on our side, not a verdict on the certificate. Please try again in a moment.</span></div>`;
           return;
@@ -53,7 +60,7 @@ import Base from '../layouts/Base.astro';
               ${sealMark()}
             </div>
             <div class="mt-5 grid grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[15px]">
-              <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.holder">Holder</span><span class="font-semibold text-navy">${esc(d.name || '—')}</span>
+              <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.holder">Holder</span><span class="font-semibold text-navy">${esc(d.name || '-')}</span>
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.programme">Programme</span><span class="text-ink">${esc(titles[d.courseId] || d.courseId)}</span>
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.conferred">Conferred</span><span class="text-ink">${dt}</span>
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.score">Score</span><span class="text-ink">${d.score}%</span>

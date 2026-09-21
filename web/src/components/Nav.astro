@@ -1,10 +1,23 @@
 ---
 import Icon from './Icon.astro';
+import deptData from '../data/departments.json';
+const departments = (deptData as any).departments as { name: string; slug: string }[];
+const wing = (deptData as any).wing as { name: string; href: string };
+// "Departments" is a mega-menu (see below). Explicit instruction 2026-09-05:
+// Courses/Santhya/Professors go back to being direct top-level links (as
+// they were on the redesign branch before this file merged with master's
+// version) rather than living only inside the Departments menu -- restored
+// per direct feedback that folding them away read as fewer options, not a
+// deliberate simplification.
 const links = [
   { href: '/catalog', label: 'Courses', m: '/catalog', key: 'nav.courses' },
   { href: '/santhiya', label: 'Santhya', m: '/santhiya', key: 'nav.santhya' },
-  { href: '/professors', label: 'Professors', m: '/professor', key: 'nav.professors' },
+  { href: '/professors', label: 'Professors', m: '/professors', key: 'nav.professors' },
   { href: '/about', label: 'About', m: '/about', key: 'nav.about' },
+];
+const moreWays = [
+  { href: '/catalog#paths', label: 'Guided journeys' },
+  { href: '/programs', label: 'Degree programs' },
 ];
 const LANG_OPTS = [
   ['en', 'English'], ['pa', 'ਪੰਜਾਬੀ'], ['hi', 'हिन्दी'], ['ur', 'اردو'], ['es', 'Español'],
@@ -27,38 +40,60 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     onScroll();
   </script>
   <div class="wrap flex items-center gap-x-3 py-3">
-    <!-- Logo: the crest emblem + wordmark lockup from the cinematic hero,
-         same assets used there (su-crest.png / su-wordmark.png). -->
+    <!-- White menu silhouette with the university wordmark. -->
     <a href="/" aria-label="Sikhi University — home" class="flex shrink-0 items-center gap-2.5">
-      <img src="/assets/su-crest.png" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
-      <img src="/assets/su-wordmark.png" alt="Sikhi University" class="h-6 w-auto shrink-0" />
+      <img src="/assets/brand/menu-silhouette-2026.webp" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
+      <span style="font-family: University Gothic, serif; font-size: 26px; line-height: 1.2; white-space: nowrap; color: #fff" translate="no">Sikhi University</span>
     </a>
-
-    <!-- Search (desktop only — appears between logo and nav links) -->
-    <form id="nav-search-form" action="/search" method="get" role="search" class="hidden md:block mx-4 w-52 xl:w-64 shrink-0">
-      <label class="sr-only" for="nav-search-input">Search courses</label>
-      <div class="relative">
-        <svg aria-hidden="true" class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        </svg>
-        <input
-          id="nav-search-input"
-          type="search"
-          name="q"
-          placeholder="Search in English or ਪੰਜਾਬੀ…"
-          data-i18n-ph="nav.searchph"
-          autocomplete="off"
-          class="w-full rounded-full bg-white/10 pl-8 pr-12 py-1.5 font-sans text-sm text-white placeholder-white/50 outline-none ring-1 ring-white/20 focus:bg-white/20 focus:ring-saffron/60 transition"
-        />
-        <button type="button" data-cmdk-open aria-label="Open command palette" class="absolute right-1.5 top-1/2 -translate-y-1/2 rounded border border-white/25 px-1.5 py-0.5 font-sans text-[0.65rem] text-white/70 hover:border-saffron hover:text-white">⌘K</button>
-      </div>
-    </form>
 
     <!-- Spacer pushes nav links to the right -->
     <div class="flex-1"></div>
 
-    <!-- Nav links + auth (desktop) -->
-    <div class="hidden md:flex items-center gap-x-5">
+    <!-- Nav links + auth (desktop). Shown at xl (1280px), not md: the full row
+         (logo + 5 links + My Learning + Cohorts + search + language + theme +
+         auth) measures ~1170px, which only clears the viewport once gutters
+         fit too, below ~1280px the flex-1 spacer collapses to 0 and the tail
+         (theme toggle, auth pill) sits at a viewport-independent pixel
+         position and silently clips (page has overflow-x:clip). Below xl the
+         hamburger menu carries every item instead. The old inline search box
+         (~250px) was dropped from this row, the ⌘K palette below and the
+         mobile menu both search the same index. -->
+    <div class="nav-desktop hidden xl:flex items-center gap-x-3">
+      <!-- Departments mega-menu -->
+      <div id="nav-mega" class="relative">
+        <button id="nav-mega-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-mega-panel"
+          data-i18n="nav.departments"
+          class={`su-nav-link inline-flex items-center gap-1 font-sans text-sm border-b-2 pb-0.5 transition whitespace-nowrap ${isActive('/departments') || isActive('/technology') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}
+        >Departments
+          <svg id="nav-mega-chev" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="nav-mega-panel" role="menu" aria-labelledby="nav-mega-btn" hidden
+          class="absolute left-0 top-full mt-3 w-[min(46rem,90vw)] overflow-hidden rounded-xl2 border border-white/15 bg-brand-strong text-white shadow-lift">
+          <div class="grid gap-x-8 gap-y-2 p-6 sm:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p class="mb-2 font-sans text-[0.68rem] font-bold uppercase tracking-wider text-white/45">Schools &amp; departments</p>
+              <ul class="grid gap-0.5 sm:grid-cols-2">
+                {departments.map((d) => (
+                  <li><a role="menuitem" href={`/departments/${d.slug}`} class="block rounded-md px-2.5 py-1.5 font-sans text-sm text-white/85 hover:bg-white/10 hover:text-white">{d.name.replace(/^Department(s)? of (the )?/, '').replace(/ Department$/, '').replace(/^School of /, '')}</a></li>
+                ))}
+                <li><a role="menuitem" href={wing.href} class="block rounded-md px-2.5 py-1.5 font-sans text-sm text-white/85 hover:bg-white/10 hover:text-white">{wing.name}</a></li>
+              </ul>
+            </div>
+            <div>
+              <p class="mb-2 font-sans text-[0.68rem] font-bold uppercase tracking-wider text-white/45">More ways to learn</p>
+              <ul class="grid gap-0.5">
+                {moreWays.map((m) => (
+                  <li><a role="menuitem" href={m.href} class="block rounded-md px-2.5 py-1.5 font-sans text-sm text-white/85 hover:bg-white/10 hover:text-white">{m.label}</a></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-4 border-t border-white/10 bg-white/[0.03] px-6 py-3 font-sans text-sm">
+            <a role="menuitem" href="/departments" class="text-white/80 hover:text-white">All departments &rarr;</a>
+            <a role="menuitem" href="/catalog" class="font-semibold text-saffron hover:brightness-110">Browse all courses &rarr;</a>
+          </div>
+        </div>
+      </div>
       {links.map((l) => (
         <a
           href={l.href}
@@ -67,50 +102,101 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
           class={`su-nav-link text-xs border-b-2 pb-1 transition whitespace-nowrap ${isActive(l.m) ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}
         >{l.label}</a>
       ))}
-      <a href="/dashboard" aria-current={isActive('/dashboard') ? 'page' : undefined} data-i18n="nav.mylearning" class={`su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>My Learning</a>
       <a href="/cohorts" aria-current={isActive('/cohorts') ? 'page' : undefined} data-i18n="nav.cohorts" class={`su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/cohorts') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>Cohorts</a>
+      <button type="button" data-cmdk-open aria-label="Search" data-i18n-aria="nav.search" title="Search (⌘K)"
+        class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/85 hover:bg-white/10 hover:text-white transition">
+        <svg aria-hidden="true" class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
       <select data-lang-switch aria-label="Language" data-i18n-aria="lang.label" class="shrink-0 rounded-full bg-white/10 px-2 py-1.5 font-sans text-xs text-white outline-none ring-1 ring-white/20 hover:bg-white/20 [&>option]:text-black">
-        {LANG_OPTS.map(([v, l]) => (<option value={v}>{l}</option>))}
+        {LANG_OPTS.map(([v, l]) => (<option value={v} lang={v}>{l}</option>))}
       </select>
       <button id="theme-toggle" type="button" aria-label="Toggle light or dark theme" title="Toggle light/dark"
         class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base text-white/90 hover:bg-white/10 hover:text-white transition"><span data-theme-icon><Icon name="moon" class="h-5 w-5" /></span></button>
-      <a id="nav-auth" href="/login" data-i18n="nav.signin" class="rounded-full bg-saffron px-4 py-1.5 font-sans text-sm font-semibold text-[#2a1c06] hover:brightness-105 whitespace-nowrap">Sign in</a>
+      <a id="nav-auth" href="/login" data-i18n="nav.signin" class="rounded-full bg-saffron px-4 py-1.5 font-sans text-sm font-semibold text-[#2a1c06] hover:brightness-105 whitespace-nowrap shrink-0">Sign in</a>
+      <!-- Signed-in identity cluster: ONE bounded-width menu, never flat links.
+           A user can hold multiple hats (student/teacher/admin) and the old
+           pattern appended one link per hat + "Sign out" straight into this
+           row, near the xl breakpoint that overflowed and either wrapped
+           "Sign out" onto two lines or got clipped off-screen entirely by the
+           page's overflow-x:clip (invisible, unclickable sign-out for an
+           authenticated admin). This wrapper's width never grows past the
+           button below, regardless of hat count. -->
+      <div id="nav-account" class="relative hidden shrink-0">
+        <!-- Icon-only trigger, deliberately: keeps this cluster no wider than
+             the signed-out "Sign in" pill, so signing in never makes the row
+             wider than signing out did, and leaves headroom for the wider
+             translated nav-link labels (Punjabi / German) at the xl breakpoint
+             where the row is tightest. A labelled "Account" button (~117px)
+             would eat that headroom. -->
+        <button id="nav-account-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-account-menu"
+          aria-label="Account" data-i18n-aria="nav.account" title="Account"
+          class="inline-flex items-center gap-1 rounded-full bg-white/10 py-1.5 pl-2.5 pr-2 text-white hover:bg-white/20 transition">
+          <svg aria-hidden="true" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+          <svg id="nav-account-chevron" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="nav-account-menu" role="menu" aria-labelledby="nav-account-btn" hidden
+          class="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl2 border border-white/15 bg-brand-strong py-1.5 shadow-lift"></div>
+      </div>
+      <a href="/dashboard" aria-current={isActive('/dashboard') ? 'page' : undefined} data-i18n="nav.mylearning" class={`nav-learning su-nav-link text-xs border-b-2 pb-1 whitespace-nowrap transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80 hover:text-white'}`}>My Learning</a>
     </div>
 
-    <!-- Hamburger (mobile) -->
+    <!-- Hamburger (below xl, see the desktop-cluster comment above) -->
     <button id="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu"
-      class="md:hidden ml-2 inline-flex items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/10 hover:text-white transition">
+      class="xl:hidden ml-2 inline-flex items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/10 hover:text-white transition">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M4 6h16M4 12h16M4 18h16"/>
       </svg>
     </button>
   </div>
 
-  <!-- Mobile menu (full-width dropdown) -->
-  <div id="nav-menu" class="hidden md:hidden border-t border-white/10">
+  <!-- Menu below xl (full-width dropdown) -->
+  <div id="nav-menu" class="hidden xl:hidden border-t border-white/10">
     <div class="wrap py-3 flex flex-col gap-y-1">
-      <!-- Search on mobile -->
+      <!-- Search (below xl) -->
       <form action="/search" method="get" role="search" class="mb-2">
         <div class="relative">
           <svg aria-hidden="true" class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
-          <input type="search" name="q" placeholder="Search in English or ਪੰਜਾਬੀ…" data-i18n-ph="nav.searchph" autocomplete="off"
-            class="w-full rounded-full bg-white/10 pl-8 pr-3 py-1.5 font-sans text-sm text-white placeholder-white/50 outline-none ring-1 ring-white/20" />
+          <input id="nav-search-input" type="search" name="q" placeholder="Search in English or ਪੰਜਾਬੀ…" data-i18n-ph="nav.searchph" autocomplete="off"
+            class="w-full rounded-full bg-white/10 pl-8 pr-3 py-1.5 font-sans text-sm text-white placeholder-white/75 outline-none ring-1 ring-white/20 focus:bg-white/20 focus:ring-saffron/60 transition" />
         </div>
       </form>
+      <details class="group/dept rounded">
+        <summary class="su-nav-link flex cursor-pointer items-center justify-between font-sans text-sm py-1.5 px-2 rounded text-white/80 marker:content-none">
+          <span data-i18n="nav.departments">Departments</span>
+          <svg aria-hidden="true" class="h-4 w-4 transition-transform group-open/dept:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="ml-2 border-l border-white/10 pl-3 py-1">
+          {departments.map((d) => (
+            <a href={`/departments/${d.slug}`} class="block font-sans text-[0.82rem] py-1 px-2 rounded text-white/75 hover:text-white">{d.name}</a>
+          ))}
+          <a href={wing.href} class="block font-sans text-[0.82rem] py-1 px-2 rounded text-white/75 hover:text-white">{wing.name}</a>
+          <div class="my-1.5 border-t border-white/10"></div>
+          {moreWays.map((m) => (
+            <a href={m.href} class="block font-sans text-[0.82rem] py-1 px-2 rounded text-white/75 hover:text-white">{m.label}</a>
+          ))}
+          <a href="/catalog" class="block font-sans text-[0.82rem] py-1 px-2 rounded font-semibold text-saffron">Browse all courses &rarr;</a>
+        </div>
+      </details>
       {links.map((l) => (
         <a href={l.href} data-i18n={l.key} class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive(l.m) ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>{l.label}</a>
       ))}
-      <a href="/dashboard" data-i18n="nav.mylearning" class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>My Learning</a>
       <a href="/cohorts" data-i18n="nav.cohorts" class={`su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/cohorts') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>Cohorts</a>
       <div class="mt-2 flex items-center gap-x-3 px-2">
         <button id="theme-toggle-mobile" type="button" aria-label="Toggle theme" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 transition"><span data-theme-icon-mobile><Icon name="moon" class="h-5 w-5" /></span></button>
-        <select data-lang-switch aria-label="Language" data-i18n-aria="lang.label" class="rounded-full bg-white/10 px-2 py-1.5 font-sans text-xs text-white outline-none ring-1 ring-white/20 [&>option]:text-black">
-          {LANG_OPTS.map(([v, l]) => (<option value={v}>{l}</option>))}
+        <select data-lang-switch aria-label="Language" data-i18n-aria="lang.label" class="rounded-full bg-white/10 px-2 py-1.5 font-sans text-xs text-white outline-none ring-1 ring-white/20 focus-visible:ring-2 focus-visible:ring-saffron [&>option]:text-black">
+          {LANG_OPTS.map(([v, l]) => (<option value={v} lang={v}>{l}</option>))}
         </select>
         <a id="nav-auth-mobile" href="/login" data-i18n="nav.signin" class="rounded-full bg-saffron px-4 py-1.5 font-sans text-sm font-semibold text-[#2a1c06]">Sign in</a>
       </div>
+      <!-- Signed-in identity cluster (mobile): stacked full-width rows below
+           the theme/language row, same reasoning as #nav-account above, a
+           multi-hat user must never grow a horizontal row. -->
+      <div id="nav-account-mobile" class="hidden mt-2 border-t border-white/10 pt-2"></div>
+      <a href="/dashboard" data-i18n="nav.mylearning" class={`nav-learning su-nav-link text-xs py-1.5 pl-2 border-l-2 transition ${isActive('/dashboard') ? 'border-saffron text-white' : 'border-transparent text-white/80'}`}>My Learning</a>
     </div>
   </div>
 </nav>
@@ -136,12 +222,36 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
   const toggle = document.getElementById('nav-toggle');
   const menu = document.getElementById('nav-menu');
   if (toggle && menu) {
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { menu.classList.add('hidden');toggle.setAttribute('aria-expanded','false');toggle.focus(); } });
     toggle.addEventListener('click', () => {
       const open = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!open));
       menu.classList.toggle('hidden', open);
     });
   }
+</script>
+<script>
+  // Departments mega-menu (desktop, >= xl). Click to open; close on outside
+  // click, Escape, or following a link. Hover opens after a short intent delay.
+  (function () {
+    const wrap = document.getElementById('nav-mega');
+    const btn = document.getElementById('nav-mega-btn');
+    const panel = document.getElementById('nav-mega-panel');
+    const chev = document.getElementById('nav-mega-chev');
+    if (!wrap || !btn || !panel) return;
+    let hoverT = 0;
+    const set = (open) => {
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      chev && chev.classList.toggle('rotate-180', open);
+    };
+    btn.addEventListener('click', () => set(panel.hidden));
+    wrap.addEventListener('mouseenter', () => { clearTimeout(hoverT); hoverT = window.setTimeout(() => set(true), 120); });
+    wrap.addEventListener('mouseleave', () => { clearTimeout(hoverT); hoverT = window.setTimeout(() => set(false), 180); });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) set(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); } });
+    panel.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+  })();
 </script>
 <script>
   (function () {
@@ -154,63 +264,121 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
 </script>
 <script>
   fetch('/api/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : { user: null })).then((d) => {
-    const updateAuth = (authEl: HTMLElement | null, isMobile: boolean) => {
-      if (!authEl || !d || !d.user) return;
-      const u = d.user;
-      if (window.suRelabel) window.suRelabel(authEl, 'nav.signout', 'Sign out');
-      else authEl.textContent = 'Sign out';
-      authEl.href = '#';
-      authEl.className = isMobile
-        ? 'rounded-full bg-white/20 px-4 py-1.5 font-sans text-sm font-semibold text-white'
-        : 'font-sans text-sm text-white/80 hover:text-white';
-      authEl.addEventListener('click', (e) => {
-        e.preventDefault();
-        fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(() => (location.href = '/'));
-      });
-      // A user who holds more than one "hat" (e.g. admin AND teacher, on top of
-      // always being able to view their own learning) gets a small portal switcher
-      // instead of a single link, so it's always clear which portal they're in and
-      // one click away from the others. Someone with only one hat beyond plain
-      // student sees exactly what they saw before (a lone "Admin" link, or nothing
-      // extra for a plain teacher) — unchanged.
-      const extraHats = [];
-      if (u.isTeacher) extraHats.push('teacher');
-      if (u.role === 'admin') extraHats.push('admin');
+    if (!d || !d.user) return;
+    const u = d.user;
 
-      if (extraHats.length > 1) {
-        const hats = [
-          { key: 'student', label: 'Student', href: '/dashboard' },
-          { key: 'teacher', label: 'Teacher', href: '/dashboard?view=teacher' },
-          { key: 'admin', label: 'Admin', href: '/admin' },
-        ];
-        const path = location.pathname;
-        const view = new URLSearchParams(location.search).get('view');
-        const current = path.startsWith('/admin') ? 'admin' : (path === '/dashboard' && view === 'teacher') ? 'teacher' : (path === '/dashboard') ? 'student' : null;
-        hats.forEach((h) => {
-          const a = document.createElement('a');
-          a.href = h.href;
-          a.textContent = h.label;
-          const isCurrent = h.key === current;
-          if (isCurrent) a.setAttribute('aria-current', 'page');
-          a.className = isMobile
-            ? `font-sans text-sm py-1.5 px-2 ${isCurrent ? 'text-white font-semibold' : 'text-white/80'}`
-            : `font-sans text-sm whitespace-nowrap ${isCurrent ? 'text-white font-semibold' : 'text-white/80 hover:text-white'}`;
-          authEl.parentNode!.insertBefore(a, authEl);
-        });
-      } else if (u.role === 'admin') {
-        const ad = document.createElement('a');
-        ad.href = '/admin';
-        ad.textContent = 'Admin';
-        ad.className = isMobile ? 'font-sans text-sm py-1.5 px-2 text-white/80' : 'font-sans text-sm text-white/80 hover:text-white whitespace-nowrap';
-        authEl.parentNode!.insertBefore(ad, authEl);
-      }
+    const doSignOut = (e: Event) => {
+      e.preventDefault();
+      fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(() => (location.href = '/'));
     };
-    updateAuth(document.getElementById('nav-auth'), false);
-    updateAuth(document.getElementById('nav-auth-mobile'), true);
+    const signOutLink = (className: string) => {
+      const a = document.createElement('a');
+      a.href = '#';
+      if (window.suRelabel) window.suRelabel(a, 'nav.signout', 'Sign out');
+      else a.textContent = 'Sign out';
+      a.className = className;
+      a.addEventListener('click', doSignOut);
+      return a;
+    };
+
+    // A user who holds more than one "hat" (e.g. admin AND teacher, on top of
+    // always being able to view their own learning) gets a small portal switcher.
+    // Someone with only one hat beyond plain student sees just that one hat link
+    // (or nothing extra for a plain teacher), same logic as before this fix.
+    const extraHats = [];
+    if (u.isTeacher) extraHats.push('teacher');
+    if (u.role === 'admin') extraHats.push('admin');
+    const hats = [];
+    if (extraHats.length > 1) {
+      hats.push({ key: 'student', label: 'Student', href: '/dashboard' });
+      if (u.isTeacher) hats.push({ key: 'teacher', label: 'Teacher', href: '/dashboard/learning?view=teacher' });
+      if (u.role === 'admin') hats.push({ key: 'admin', label: 'Admin', href: '/admin' });
+    } else if (u.role === 'admin') {
+      hats.push({ key: 'admin', label: 'Admin', href: '/admin' });
+    }
+    const path = location.pathname;
+    const view = new URLSearchParams(location.search).get('view');
+    const currentHat = path.startsWith('/admin') ? 'admin' : (path.startsWith('/dashboard') && view === 'teacher') ? 'teacher' : (path.startsWith('/dashboard')) ? 'student' : null;
+
+    // ---- Desktop: everything collapses into ONE bounded-width dropdown ----
+    // (see the "signed-in identity cluster" comment on #nav-account in the
+    // markup above for why, flat per-hat links overflowed the row at
+    // 1280-1440px and either wrapped "Sign out" onto two lines or clipped it
+    // off-screen entirely via the page's overflow-x:clip.)
+    const wrap = document.getElementById('nav-account');
+    const btn = document.getElementById('nav-account-btn') as HTMLButtonElement | null;
+    const menu = document.getElementById('nav-account-menu');
+    const chevron = document.getElementById('nav-account-chevron');
+    document.getElementById('nav-auth')?.classList.add('hidden');
+    if (wrap && btn && menu) {
+      wrap.classList.remove('hidden');
+      hats.forEach((h) => {
+        const a = document.createElement('a');
+        a.href = h.href;
+        a.textContent = h.label;
+        a.setAttribute('role', 'menuitem');
+        const isCurrent = h.key === currentHat;
+        if (isCurrent) a.setAttribute('aria-current', 'page');
+        a.className = `block px-4 py-2 font-sans text-sm ${isCurrent ? 'text-saffron font-semibold' : 'text-white/85 hover:bg-white/10 hover:text-white'}`;
+        menu.appendChild(a);
+      });
+      if (hats.length) {
+        const divider = document.createElement('div');
+        divider.className = 'my-1 border-t border-white/10';
+        menu.appendChild(divider);
+      }
+      menu.appendChild(signOutLink('block px-4 py-2 font-sans text-sm text-white/85 hover:bg-white/10 hover:text-white'));
+
+      const setOpen = (open: boolean) => {
+        menu.hidden = !open;
+        btn.setAttribute('aria-expanded', String(open));
+        chevron?.classList.toggle('rotate-180', open);
+      };
+      btn.addEventListener('click', () => setOpen(menu.hidden));
+      document.addEventListener('click', (e) => { if (!wrap.contains(e.target as Node)) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); } });
+      // role="menu" semantics promise arrow-key movement to screen-reader
+      // users (APG menu-button pattern), so deliver it: ArrowDown from the
+      // trigger opens + enters the menu; arrows/Home/End cycle the items.
+      const menuItems = () => Array.from(menu.querySelectorAll('a')) as HTMLElement[];
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || (e.key === 'ArrowUp' && menu.hidden)) {
+          e.preventDefault();
+          if (menu.hidden) setOpen(true);
+          menuItems()[0]?.focus();
+        }
+      });
+      menu.addEventListener('keydown', (e) => {
+        const list = menuItems();
+        const i = list.indexOf(document.activeElement as HTMLElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); (list[i + 1] || list[0])?.focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); (list[i - 1] || list[list.length - 1])?.focus(); }
+        else if (e.key === 'Home') { e.preventDefault(); list[0]?.focus(); }
+        else if (e.key === 'End') { e.preventDefault(); list[list.length - 1]?.focus(); }
+      });
+    }
+
+    // ---- Mobile: stacked full-width rows (a dropdown-in-hamburger would be
+    // awkward to use; vertical stacking can't overflow horizontally either way) ----
+    const mobileWrap = document.getElementById('nav-account-mobile');
+    document.getElementById('nav-auth-mobile')?.classList.add('hidden');
+    if (mobileWrap) {
+      mobileWrap.classList.remove('hidden');
+      hats.forEach((h) => {
+        const a = document.createElement('a');
+        a.href = h.href;
+        a.textContent = h.label;
+        const isCurrent = h.key === currentHat;
+        if (isCurrent) a.setAttribute('aria-current', 'page');
+        a.className = `su-nav-link block font-sans text-sm py-1.5 px-2 rounded ${isCurrent ? 'text-white font-semibold' : 'text-white/80'}`;
+        mobileWrap.appendChild(a);
+      });
+      mobileWrap.appendChild(signOutLink('su-nav-link block font-sans text-sm py-1.5 px-2 rounded text-white/80'));
+    }
 
     // Teachers get a direct "Studio" link next to Cohorts (desktop + mobile), so it's
     // reachable from anywhere on the site, not just from inside the dashboard's card.
-    if (d && d.user && d.user.isTeacher) {
+    if (u.isTeacher) {
       document.querySelectorAll('a[href="/cohorts"]').forEach((cohortsLink) => {
         const studio = document.createElement('a');
         studio.href = '/studio';

@@ -1,6 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,ts,tsx,md,mdx}'],
+  // The site's theme switch sets data-theme on <html> (Base.astro, key
+  // su_v1_theme). Without this, `dark:` variants follow the OS
+  // prefers-color-scheme media query instead — disconnected from the toggle,
+  // so e.g. the program-card tints (programs/catalog) kept their LIGHT
+  // background for an OS-light user in site-dark mode (light-blue panel with
+  // light-blue text, ~1.8:1) and vice versa.
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
@@ -37,9 +44,18 @@ export default {
       },
       fontFamily: {
         serif: ['"Source Serif 4"', 'Georgia', '"Iowan Old Style"', '"Times New Roman"', 'serif'],
-        sans: ['Archivo', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        // "Noto Sans Gurmukhi" sits after Inter as a GLYPH fallback, not a
+        // face change: Inter still wins every Latin character, and the
+        // Gurmukhi face is only reached for codepoints Inter does not carry.
+        // Without it, Gurmukhi inside otherwise-English strings that cannot be
+        // wrapped in a `.gur` span — an <option> label, a mixed-script
+        // placeholder, a course summary with an inline term — fell through to
+        // whatever the OS happened to have, or to tofu. Both Noto faces are
+        // self-hosted and inlined on every page by Base.astro, so this costs
+        // no extra request. Found by /qa 2026-09-09.
+        sans: ['Inter', '"Noto Sans Gurmukhi"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-        display: ['Archivo', 'Georgia', 'serif'],
+        display: ['Inter', 'Georgia', 'serif'],
         gur: ['"Noto Sans Gurmukhi"', '"Gurmukhi MN"', '"Gurbani Akhar"', '"Raavi"', 'serif'],
         gurserif: ['"Noto Serif Gurmukhi"', '"Noto Sans Gurmukhi"', '"Gurbani Akhar"', 'serif'],
       },

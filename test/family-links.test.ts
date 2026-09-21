@@ -21,7 +21,7 @@ describe("family-links hrefs", () => {
 
   it("punjabiuni is hub-routed with a properly encoded nested return", () => {
     expect(PUNJABIUNI_SSO).toBe(
-      "https://sikhi.io/api/sso/issue?return=https%3A%2F%2Fpunjabiuni.com%2Fapi%2Fauth%2Fsso%3Freturn%3D%2F",
+      "https://sikhi.io/api/sso/issue?return=https%3A%2F%2Fpunjabiuni.com%2Fapi%2Fauth%2Fsso%3Freturn%3D%2Fdashboard",
     );
   });
 
@@ -30,9 +30,9 @@ describe("family-links hrefs", () => {
     // destination back out intact, including its own query string.
     const url = new URL(PUNJABIUNI_SSO);
     const ret = url.searchParams.get("return")!;
-    expect(ret).toBe("https://punjabiuni.com/api/auth/sso?return=/");
+    expect(ret).toBe("https://punjabiuni.com/api/auth/sso?return=/dashboard");
     expect(new URL(ret).origin).toBe("https://punjabiuni.com"); // what the issuer allowlists
-    expect(new URL(ret).searchParams.get("return")).toBe("/");
+    expect(new URL(ret).searchParams.get("return")).toBe("/dashboard");
   });
 
   it("encodes a return path with its own query string without losing it", () => {
