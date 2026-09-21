@@ -16,7 +16,8 @@ compatibility_date = "2026-06-14"
 # `wrangler deploy`'s routes management) -- deliberately not listed here,
 # so a deploy from this file never touches or removes them.
 routes = [
-  { pattern = "sikhiuni.com", custom_domain = true }
+  { pattern = "sikhiuni.com", custom_domain = true },
+  { pattern = "www.sikhiuni.com", custom_domain = true }
 ]
 
 # Build the Astro frontend (web/) before deploying; its output is the static site.
@@ -34,7 +35,18 @@ binding = "ASSETS"
 # path is still served straight from the edge (Worker skipped). The legacy
 # /institute prefix stays in the list so the Worker runs to 301 it to
 # /technology (the wing was renamed 2026-08).
-run_worker_first = ["/technology", "/technology/*", "/institute", "/institute/*", "/_lab/*"]
+# HTML runs Worker first so LEGACY_HOSTS 301 to sikhiuni.com (same pattern as sikhi.io).
+# Immutable static stays asset-first for LCP.
+run_worker_first = [
+  "/*",
+  "!/_astro/*",
+  "!/assets/*",
+  "!/media/*",
+  "!/fonts/*",
+  "!/scripts/*",
+  "!/favicon.ico",
+  "!/robots.txt",
+]
 
 [[d1_databases]]
 binding = "DB"
