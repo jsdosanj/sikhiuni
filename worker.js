@@ -346,26 +346,26 @@ export default {
     // cross-origin redirect there breaks program/dashboard/cert course
     // loading whenever the canonical domain is unreachable or interstitial-
     // blocked (e.g. during a Safe Browsing review).
-    if (LEGACY_HOSTS.has(url.hostname) && !pathname.startsWith("/api/") && !pathname.startsWith("/media/") && !pathname.startsWith("/assets/data/")) {
-      return Response.redirect(CANONICAL_ORIGIN + pathname + url.search, 301);
-    }
-    // The engineering wing moved /institute -> /technology (2026-08). 301 the
-    // old paths, preserving the sub-path and query. Kept in run_worker_first so
-    // the Worker actually runs for these.
+    // Path aliases first so www + apex land on the final URL in one hop.
+    let destPath = pathname;
     if (pathname === "/institute" || pathname.startsWith("/institute/")) {
-      return Response.redirect(CANONICAL_ORIGIN + "/technology" + pathname.slice("/institute".length) + url.search, 301);
+      destPath = "/technology" + pathname.slice("/institute".length);
+    } else if (pathname === "/courses" || pathname === "/courses/") {
+      destPath = "/catalog";
+    } else if (pathname === "/contact" || pathname === "/contact/") {
+      destPath = "/feedback";
+    } else if (pathname === "/muharni" || pathname === "/muharni/") {
+      destPath = "/baal-updesh";
     }
-    // /courses was never a real page (catalog is the course list). Soft 404 → hard 301.
-    if (pathname === "/courses" || pathname === "/courses/") {
-      return Response.redirect(CANONICAL_ORIGIN + "/catalog" + url.search, 301);
-    }
-    // Retired contact URL (GSC 404) → feedback form.
-    if (pathname === "/contact" || pathname === "/contact/") {
-      return Response.redirect(CANONICAL_ORIGIN + "/feedback" + url.search, 301);
-    }
-    // Muharni moved into Baal Updesh — real 301 (not meta-refresh 200).
-    if (pathname === "/muharni" || pathname === "/muharni/") {
-      return Response.redirect(CANONICAL_ORIGIN + "/baal-updesh" + url.search, 301);
+    const pathAliased = destPath !== pathname;
+    if (
+      pathAliased
+      || (LEGACY_HOSTS.has(url.hostname)
+        && !pathname.startsWith("/api/")
+        && !pathname.startsWith("/media/")
+        && !pathname.startsWith("/assets/data/"))
+    ) {
+      return Response.redirect(CANONICAL_ORIGIN + destPath + url.search, 301);
     }
     if (pathname.startsWith("/api/")) {
       const route = routes[pathname];
