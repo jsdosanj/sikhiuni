@@ -7,7 +7,9 @@ import { BUILD_DATE, siteBase } from '../lib/sitemap';
 // new courses, programs, collections and professors are always discoverable.
 // 'teachers' is served dynamically by worker.js (D1-backed, no redeploy needed
 // per new profile) — it isn't one of the build-time Astro sitemaps below.
-const CHILDREN = ['pages', 'courses', 'technology', 'programs', 'professors', 'collections', 'teachers'];
+// 'teachers' omitted while D1 has zero public profiles (empty urlset confuses GSC).
+// Worker still serves /sitemaps/teachers.xml dynamically when profiles exist.
+const CHILDREN = ['pages', 'courses', 'technology', 'programs', 'professors', 'collections'];
 
 export const GET: APIRoute = ({ site }) => {
   const base = siteBase(site);

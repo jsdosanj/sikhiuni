@@ -355,6 +355,14 @@ export default {
     if (pathname === "/institute" || pathname.startsWith("/institute/")) {
       return Response.redirect(CANONICAL_ORIGIN + "/technology" + pathname.slice("/institute".length) + url.search, 301);
     }
+    // /courses was never a real page (catalog is the course list). Soft 404 → hard 301.
+    if (pathname === "/courses" || pathname === "/courses/") {
+      return Response.redirect(CANONICAL_ORIGIN + "/catalog" + url.search, 301);
+    }
+    // Muharni moved into Baal Updesh — real 301 (not meta-refresh 200).
+    if (pathname === "/muharni" || pathname === "/muharni/") {
+      return Response.redirect(CANONICAL_ORIGIN + "/baal-updesh" + url.search, 301);
+    }
     if (pathname.startsWith("/api/")) {
       const route = routes[pathname];
       if (!route) {
