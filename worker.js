@@ -359,6 +359,10 @@ export default {
     if (pathname === "/courses" || pathname === "/courses/") {
       return Response.redirect(CANONICAL_ORIGIN + "/catalog" + url.search, 301);
     }
+    // Retired contact URL (GSC 404) → feedback form.
+    if (pathname === "/contact" || pathname === "/contact/") {
+      return Response.redirect(CANONICAL_ORIGIN + "/feedback" + url.search, 301);
+    }
     // Muharni moved into Baal Updesh — real 301 (not meta-refresh 200).
     if (pathname === "/muharni" || pathname === "/muharni/") {
       return Response.redirect(CANONICAL_ORIGIN + "/baal-updesh" + url.search, 301);
