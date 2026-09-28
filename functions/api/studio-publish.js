@@ -101,11 +101,11 @@ function unitHasText(unit) {
   return Object.keys(t).some((k) => typeof t[k] === "string" && t[k].trim());
 }
 
-// Lesson 1's honesty notice: "Created by AI-assisted tools" plus attribution,
+// Lesson 1's honesty notice: "Created by AI" (the site-wide label, CLAUDE.md) plus attribution,
 // licence, the optional source label (transcription/OCR), and one line per
 // machine-translated language.
 function noticeHtml(labels) {
-  const parts = ["<p><strong>Created by AI-assisted tools.</strong></p>"];
+  const parts = ["<p><strong>Created by AI.</strong></p>"];
   if (labels.attribution) parts.push(`<p>${escapeHtml(labels.attribution)}</p>`);
   if (labels.licence) parts.push(`<p>${escapeHtml(labels.licence)}</p>`);
   if (labels.source) parts.push(`<p>${escapeHtml(labels.source)}</p>`);
@@ -259,10 +259,11 @@ async function handlePublish(env, body, row, priorDraft, publicationId, seq) {
   if (errors.length) return json({ code: "invalid_package", errors }, 422);
 
   // Same content re-sent at a higher seq is a no-op — UNLESS the publication
-  // was previously withdrawn (see REPLACEABLE_STATUSES): that's a genuine
+  // was previously withdrawn (the draft set aside, or an archive requested for
+  // a published course; see REPLACEABLE_STATUSES): that's a genuine
   // republish and must revive the draft, not just bump the counter.
   const sameContent = !!(
-    priorDraft && priorDraft.status !== "withdrawn" &&
+    priorDraft && priorDraft.status !== "withdrawn" && row.state !== "withdrawn" &&
     row.content_sha256 && pkg.contentSha256 && row.content_sha256 === pkg.contentSha256
   );
   if (sameContent) {

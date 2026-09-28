@@ -381,7 +381,7 @@ describe("POST /api/studio-publish", () => {
     expect(lesson1.html).not.toMatch(/<script[\s>]/i);
     expect(lesson1.html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(lesson1.html).toContain("Hello");
-    expect(lesson1.html).toContain("Created by AI-assisted tools.");
+    expect(lesson1.html).toContain("Created by AI.");
     expect(lesson1.html).toContain("CC BY-SA 4.0");
     expect(lesson1.html).toContain("Machine transcribed, reviewed by Test Org");
     expect(lesson1.html).toContain("Machine translated, reviewed by Test Org");
