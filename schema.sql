@@ -201,6 +201,19 @@ CREATE TABLE IF NOT EXISTS course_archive_requests (
   requested_at INTEGER NOT NULL, decided_by TEXT, decided_at INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_archive_requests_status ON course_archive_requests(status, requested_at);
+
+-- Sikhi Studio publish protocol, v1: one row per publicationId, tracking the
+-- (seq, contentSha256) idempotency key and which local draft/course it maps to
+-- (functions/api/studio-publish.js, migrations/0016_studio_inbound.sql).
+CREATE TABLE IF NOT EXISTS studio_inbound (
+  publication_id TEXT PRIMARY KEY,
+  org_id TEXT NOT NULL, org_name TEXT,
+  item_id TEXT, draft_id TEXT, course_id TEXT,
+  seq INTEGER NOT NULL, revision INTEGER, content_sha256 TEXT,
+  state TEXT NOT NULL DEFAULT 'active', -- active|withdrawn
+  last_status TEXT,
+  received_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS ratings (
   course_id TEXT NOT NULL, user_id TEXT NOT NULL, stars INTEGER NOT NULL,
   review TEXT, updated_at INTEGER NOT NULL, PRIMARY KEY (course_id, user_id)

@@ -99,6 +99,48 @@ wrangler d1 execute sikh-university --remote --command "ALTER TABLE users ADD CO
 
 (The `enrollments` table auto-creates on first write, so it needs no migration.)
 
+## Sikhi Studio publishing (owner setup, one time)
+Sikhi University is one of two receivers of sikhi.io's Sikhi Studio publish protocol
+(the other is Panjabi Uni). sikhi.io signs and posts a finished, human-reviewed Studio
+item to `POST /api/studio-publish` (`functions/api/studio-publish.js`); this site
+verifies the signature, then lands it as a `submitted` row in the **existing** course
+review queue (`/api/review/queue`) — a scholar (or admin) must approve it like any
+teacher-authored draft. Nothing from Studio ever goes live without that step. Full
+protocol: sikhi.io's `docs/studio/publish-protocol.md`.
+
+1. **Apply the migration** (idempotent, `CREATE TABLE IF NOT EXISTS`):
+
+   ```bash
+   wrangler d1 execute sikh-university --remote --file ./migrations/0016_studio_inbound.sql
+   ```
+
+2. **Set the shared secret** — generated once by whoever owns sikhi.io and shared with
+   you out of band (never commit it). It must be the SAME value sikhi.io has under
+   `STUDIO_PUBLISH_SECRET_SIKHIUNI`:
+
+   ```bash
+   wrangler secret put STUDIO_PUBLISH_SECRET
+   ```
+
+   Until this is set (or if it's ever shorter than 32 characters), the route refuses
+   every request with `503 { code: "not_configured" }` rather than accepting anything
+   unsigned.
+
+3. **Optional: `STUDIO_PUBLISH_TOPIC`** — which of this site's catalogue topics
+   (`site/assets/data/courses.json` → `topics`) a Studio-published course is filed
+   under. Defaults to `spirituality` (a generic Sikhi-practice topic, since a Studio
+   item can come from any org's book/audio/video, not necessarily doctrine-specific).
+   Set it to another topic id from that list if you'd rather Studio courses land
+   somewhere else:
+
+   ```bash
+   wrangler secret put STUDIO_PUBLISH_TOPIC    # e.g. "history", "theology" — a plain var is fine too
+   ```
+
+Rotating the secret: set the new value here AND on sikhi.io's
+`STUDIO_PUBLISH_SECRET_SIKHIUNI` together — requests signed with the old value start
+failing with `401 bad_signature` and sikhi.io retries them with the new one.
+
 ## Web Push reminders (VAPID secrets — owner setup, one time)
 The daily coursework-reminder push (cron in `wrangler.toml`, sender in
 `functions/push-sender.js`) is a no-op until a VAPID keypair exists. The whole feature

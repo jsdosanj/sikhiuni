@@ -68,6 +68,7 @@ import { onRequestPost as reviewDecisionPost } from "./functions/api/review/deci
 import { onRequestGet as adminDraftsExportGet } from "./functions/api/admin/drafts-export.js";
 import { onRequestPost as adminDraftsMarkPublishedPost } from "./functions/api/admin/drafts-mark-published.js";
 import { onRequestGet as teacherArchiveRequestGet, onRequestPost as teacherArchiveRequestPost } from "./functions/api/teacher/archive-request.js";
+import { onRequestPost as studioPublishPost } from "./functions/api/studio-publish.js";
 import { onRequestGet as adminArchiveRequestsGet, onRequestPost as adminArchiveRequestsPost } from "./functions/api/admin/archive-requests.js";
 import { onRequestGet as adminArchiveRequestsExportGet } from "./functions/api/admin/archive-requests-export.js";
 import { onRequestGet as ratingsGet, onRequestPost as ratingsPost } from "./functions/api/ratings.js";
@@ -148,6 +149,7 @@ const routes = {
   "/api/admin/drafts-export": { GET: adminDraftsExportGet },
   "/api/admin/drafts-mark-published": { POST: adminDraftsMarkPublishedPost },
   "/api/teacher/archive-request": { GET: teacherArchiveRequestGet, POST: teacherArchiveRequestPost },
+  "/api/studio-publish": { POST: studioPublishPost },
   "/api/admin/archive-requests": { GET: adminArchiveRequestsGet, POST: adminArchiveRequestsPost },
   "/api/admin/archive-requests-export": { GET: adminArchiveRequestsExportGet },
   "/api/ratings": { GET: ratingsGet, POST: ratingsPost },
