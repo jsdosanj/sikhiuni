@@ -40,7 +40,8 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true });
   }
 
-  const sql = ACTIONS[b.action];
+  // Own keys only: a plain object also answers for inherited names like "constructor" or "__proto__".
+  const sql = typeof b.action === "string" && Object.hasOwn(ACTIONS, b.action) ? ACTIONS[b.action] : undefined;
   if (!b.id || !sql) return json({ error: "id and a valid action required" }, 400);
 
   const msg = await env.DB.prepare("SELECT course_id, parent_id FROM discussions WHERE id=?").bind(b.id).first();
