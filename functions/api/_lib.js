@@ -1,5 +1,6 @@
 import { schemaOnce } from "./_schema-once.js";
 // Shared helpers for Sikhi University Pages Functions. (_-prefixed → not a route.)
+import { bearerToken, verifyClerkToken, emailFor } from "./_clerk.js";
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -21,7 +22,7 @@ export function sessionCookie(id, maxAgeSec) {
   return `su_session=${id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAgeSec}`;
 }
 
-// Resolve the logged-in user from the session cookie, or null.
+// Resolve the logged-in user from the session cookie (or, failing that, a Clerk bearer token), or null.
 //
 // marketing_optin is selected here (not just in me.js) so every route that
 // calls getUser() gets the current opt-in value on the user object for free.
@@ -31,7 +32,10 @@ export function sessionCookie(id, maxAgeSec) {
 // query and default the opt-in to 0 rather than throwing.
 export async function getUser(env, request) {
   const sid = readCookie(request, "su_session");
-  if (!sid) return null;
+  if (!sid) {
+    const token = bearerToken(request);
+    return token ? getUserFromClerk(env, token) : null;
+  }
   try {
     const row = await env.DB.prepare(
       "SELECT u.id, u.email, u.name, u.country, u.languages, u.role, u.marketing_optin, s.mfa_ok FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?"
@@ -45,6 +49,24 @@ export async function getUser(env, request) {
     ).bind(sid, Date.now()).first();
     return row ? { ...row, marketing_optin: 0 } : null;
   }
+}
+
+// A Clerk-authenticated user (the unified Sikhi login). Mapped to this site's account by verified email, created on
+// first use like a magic-link sign-in. Deliberately limited: always the "learner" role and never MFA-cleared, so a
+// bearer token can read and save learning progress but cannot reach teacher or admin features, whatever the account is.
+export async function getUserFromClerk(env, token) {
+  const payload = await verifyClerkToken(token, env);
+  if (!payload) return null;
+  const email = await emailFor(payload, env);
+  if (!email) return null;
+  let row = await env.DB.prepare("SELECT id, email, name, country, languages FROM users WHERE email = ?").bind(email).first();
+  if (!row) {
+    const id = newId();
+    await env.DB.prepare("INSERT INTO users (id, email, name, role, created_at) VALUES (?,?,?,?,?)").bind(id, email, null, "learner", Date.now()).run();
+    await logEvent(env, { id, role: "learner" }, "user_created", email, "clerk");
+    row = { id, email, name: null, country: null, languages: null };
+  }
+  return { id: row.id, email: row.email, name: row.name, country: row.country, languages: row.languages, role: "learner", mfa_ok: 0, marketing_optin: 0 };
 }
 
 export function isAdminEmail(env, email) {
