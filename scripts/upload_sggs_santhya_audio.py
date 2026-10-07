@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Bulk-upload the per-Ang SGGS Santhya recordings (Bhagat Jaswant Singh Ji
-Daudar) to R2 under santhya/sggs/<ang>.mp3 — the already-whitelisted,
+Daudar) to R2 under santhya/sggs/<NNNN>.mp3 (zero-padded) — the already-whitelisted,
 currently-empty prefix worker.js's /media/ route serves (see
 docs/BACKEND-cloudflare.md). Resumable: a local, out-of-repo state file
 records confirmed uploads so a re-run only retries what's missing.
@@ -50,7 +50,7 @@ def find_numbered_files(src_dir):
 
 
 def upload_one(ang, path):
-    key = f"{BUCKET}/santhya/sggs/{ang}.mp3"
+    key = f"{BUCKET}/santhya/sggs/{ang:04d}.mp3"
     cmd = [
         "npx", "wrangler", "r2", "object", "put", key,
         "--file", path, "--remote", "--config", "wrangler.toml",

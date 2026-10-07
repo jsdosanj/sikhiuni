@@ -41,7 +41,6 @@ run_worker_first = [
   "/*",
   "!/_astro/*",
   "!/assets/*",
-  "!/media/*",
   "!/fonts/*",
   "!/scripts/*",
   "!/favicon.ico",
