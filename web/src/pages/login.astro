@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import { universitySigninHref } from '../lib/login-links';
+const googleSigninHref = universitySigninHref('https://sikhiuni.com', '/dashboard.html', true);
 ---
 <Base title="Sign in / Sign up, Sikhi University" description="Sign in to Sikhi University, as a student to learn, or apply to teach." ambient="hall" noindex={true}>
   <!-- islogin (555-575): centered hero-midnight surface, flat crest, mono
@@ -31,6 +33,8 @@ import Base from '../layouts/Base.astro';
         <p class="mt-3 text-center text-[15.5px] leading-relaxed text-white/[0.72]" id="mode-sub">New here? <button type="button" id="mode-toggle" data-testid="tab-signup" class="underline underline-offset-2">Create an account</button></p>
 
         <a id="sikhi-io-login" data-testid="sso-login" href="https://sikhi.io/api/sso/issue?return=https%3A%2F%2Fsikhiuni.com%2Fapi%2Fauth%2Fsso%3Freturn%3D%2Fdashboard.html" class="mt-7 flex min-h-[48px] w-full items-center justify-center rounded-[2px] bg-saffron px-5 py-3 font-semibold text-black">Continue with sikhi.io</a>
+        <a id="google-login" data-testid="google-login" href={googleSigninHref} aria-describedby="google-signin-note" class="mt-3 flex min-h-[48px] w-full items-center justify-center gap-3 rounded-[2px] border border-[#747775] bg-white px-5 py-3 font-sans font-medium text-[#1f1f1f] hover:bg-[#f2f2f2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-saffron"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24.41v7.42h10.76a9.21 9.21 0 0 1-3.99 6.04v5.02h6.46c3.78-3.48 5.97-8.61 5.97-14.56Z"/><path fill="#34A853" d="M24.41 44c5.4 0 9.93-1.79 13.24-4.98l-6.46-5.02c-1.79 1.2-4.08 1.92-6.78 1.92-5.2 0-9.61-3.51-11.19-8.23H6.56v5.18A20 20 0 0 0 24.41 44Z"/><path fill="#FBBC05" d="M13.22 27.69a12 12 0 0 1 0-7.38v-5.18H6.56a20 20 0 0 0 0 17.74l6.66-5.18Z"/><path fill="#EA4335" d="M24.41 12.08c2.94 0 5.58 1.01 7.66 3l5.75-5.75A19.28 19.28 0 0 0 24.41 4 20 20 0 0 0 6.56 15.13l6.66 5.18c1.58-4.72 5.99-8.23 11.19-8.23Z"/></svg>Continue with Google</a>
+        <p id="google-signin-note" class="mt-2 text-center text-xs text-white/[0.72]">Opens secure sign-in on sikhi.io, then returns here.</p>
         <p class="mt-3 text-center text-sm leading-relaxed text-white/[0.72]">Already signed in to sikhi.io? Continue above to use that session. You can also enter your Sikhi.io, Sikhi University or PunjabiUni email and password below.</p>
 
         <div id="err" class="mt-4"></div>
@@ -116,10 +120,14 @@ import Base from '../layouts/Base.astro';
     </div>
   </div>
   <script>
+    import { safeLoginReturn, universitySigninHref } from "../lib/login-links";
     // The `iconSvg` import that used to live here belonged to the magic-link
     // "check your email" success card, which is gone with the flow.
     function esc(s: string) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     const params = new URLSearchParams(location.search);
+    const next = safeLoginReturn(params.get('next') || params.get('return'), '/dashboard.html');
+    (document.getElementById('sikhi-io-login') as HTMLAnchorElement).href = universitySigninHref(location.origin, next);
+    (document.getElementById('google-login') as HTMLAnchorElement).href = universitySigninHref(location.origin, next, true);
     const e = params.get('error');
     const errEl = document.getElementById('err')!;
     if (e) errEl.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc(e)}</strong></div>`;
@@ -247,7 +255,7 @@ import Base from '../layouts/Base.astro';
           if (!identifier || !password) return;
           const { ok, d } = await postJson('/api/auth/login', { identifier, password });
           if (!ok) { problem(d.error || 'Could not sign in.'); return; }
-          location.href = d.mfaRequired ? '/mfa.html' : '/dashboard.html';
+          location.href = d.mfaRequired ? '/mfa.html' : next;
           return;
         }
 
@@ -262,7 +270,7 @@ import Base from '../layouts/Base.astro';
           if (d.code === 'username_taken') { regStep = 1; render(); }
           return;
         }
-        location.href = '/dashboard.html';
+        location.href = next;
       } catch {
         problem('Network error. Please try again.');
       } finally {
