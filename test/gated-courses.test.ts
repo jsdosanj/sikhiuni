@@ -150,6 +150,15 @@ describe("GET /api/course-content", () => {
     expect(res.status).toBe(200);
   });
 
+  it("keeps a newly published institutional draft cohort-protected before its outline is exported", async () => {
+    env.MEDIA = { get: async (key: string) => key === 'courses-outline.json' ? { json: async () => ({courses:[]}) } : null };
+    const member = await courseContentGet({ request: asReq("member1", undefined, `http://x/api/course-content?courseId=${GATED_COURSE}`), env });
+    expect(member.status).toBe(200);
+    expect((await member.json()).lessons[0].html).toBe("<p>Real gated content.</p>");
+    const stranger = await courseContentGet({ request: asReq("stranger1", undefined, `http://x/api/course-content?courseId=${GATED_COURSE}`), env });
+    expect(stranger.status).toBe(403);
+  });
+
   it("quiz questions never include the answer field", async () => {
     const res = await courseContentGet({ request: asReq("member1", undefined, `http://x/api/course-content?courseId=${GATED_COURSE}`), env });
     const { quiz } = await res.json();

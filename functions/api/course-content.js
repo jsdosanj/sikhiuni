@@ -1,10 +1,13 @@
-import { json, getUser, isCourseTeacher, hasCohortAccess } from "./_lib.js";
+import { getLearningUser } from './_learning-user.js';
+import { json as baseJson, isCourseTeacher, hasCohortAccess } from "./_lib.js";
+import { storedCourse } from './_course-store.js';
+import { checkRateLimit } from './_rate-limit.js';
+import { PRIVATE_COURSE_HEADERS } from "./_course-access.js";
+const json = (data, status=200) => baseJson(data,status,PRIVATE_COURSE_HEADERS);
 
-// GET /api/course-content?courseId=<id> -> { lessons, quiz } for a gated
-// (institutional) course's most-recently-published draft. The real content
-// never leaves D1's draft_lessons/draft_quiz — the public, git-tracked
-// courses.json entry for a gated course only ever carries title/summary
-// (see functions/api/admin/drafts-export.js).
+// GET /api/course-content?courseId=<id>: authenticated free lessons from private
+// per-course R2 objects, or institutional lessons from D1's published draft.
+// The public courses.json endpoint contains outline metadata only.
 //
 // Entitlement: the course's teacher/admin, or a member of a cohort tied to
 // this courseId (functions/api/cohorts.js — the institution licensing the
@@ -15,11 +18,32 @@ import { json, getUser, isCourseTeacher, hasCohortAccess } from "./_lib.js";
 // course-viewing experience for a free course; grading happens separately
 // via POST /api/quiz (extended to grade gated courses from draft_quiz too).
 export async function onRequestGet({ request, env }) {
-  const user = await getUser(env, request);
+  let user,needsMfa;
+  try { ({user,needsMfa}=await getLearningUser(env,request)); } catch { return json({error:"Authentication unavailable"},503); }
   if (!user) return json({ error: "Please sign in to view this course." }, 401);
+  if (needsMfa) return json({error:"mfa_required"},403);
 
   const courseId = new URL(request.url).searchParams.get("courseId");
-  if (!courseId) return json({ error: "courseId required" }, 400);
+  if (!courseId || courseId.length>200 || /[\\/]/.test(courseId)) return json({ error: "Valid courseId required" }, 400);
+  if (!await checkRateLimit(env, 'course-content:' + user.id, 30, 60)) return baseJson({error:'rate_limited'},429,{...PRIVATE_COURSE_HEADERS,'retry-after':'60'});
+
+  // Free published courses are still free, but lesson delivery requires a verified
+  // session. Institutional courses continue through their existing cohort checks.
+  if (env.MEDIA?.get) {
+    let course;
+    try { course = await storedCourse(env.MEDIA, courseId); } catch { return json({error:'Course content is temporarily unavailable.'},503); }
+    // An institutional draft can be published in D1 before its outline export.
+    // Unknown outline IDs continue through the existing cohort/teacher checks.
+    if (course && !course.gated) {
+      if (course.status !== 'published') return json({error:'not found'},404);
+      return json({
+        lessons:(course.lessons || []).map(l=>({title:l.title,...(l.summary?{summary:l.summary}:{}),html:l.html || ''})),
+        quiz:(course.quiz || []).map(q=>({q:q.q,options:q.options})),
+        terms:course.terms || [], references:course.references || [],
+      });
+    }
+  }
+
 
   const entitled = user.role === "admin"
     || (await isCourseTeacher(env, user.id, courseId))

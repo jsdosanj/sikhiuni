@@ -33,28 +33,26 @@ From a maintainer laptop with `wrangler` authenticated to the Dosanjh Labs accou
 wrangler deploy        # runs the [build] command, then publishes worker.js + web/dist
 ```
 
-## Push the course catalogue to R2 (required after any catalogue change)
-`site/assets/data/courses.json` (~43 MB) exceeds Cloudflare's 25 MiB asset limit, so the
-build strips it from `web/dist` and the Worker serves it from R2 (`worker.js`). **`wrangler
-deploy` alone does NOT update the catalogue** — the R2 object must be pushed separately, or
-the site will show a stale course count.
+## Publish private course objects before deploying
 
-After any change to `site/assets/data/courses.json`:
+Course outlines remain public. Full published free-course payloads live in private split R2 objects, read only through the authenticated course-content handler. The old large `courses.json` is not the new delivery source.
+
+Before pushing a release to `master` (which may trigger an automatic Worker build):
 
 ```bash
-cd web && npm run deploy-data
-# = wrangler r2 object put sikh-university-media/courses.json \
-#     --file ../site/assets/data/courses.json --remote --config ../wrangler.toml
+node scripts/export-private-courses.mjs        # local, checksummed staging only
+npm --prefix web run deploy-data              # explicitly uploads the split objects
 ```
 
-The Worker caches the R2 object for 1 hour. For an immediate client refresh, bump the
-service-worker cache (below) and redeploy.
+This writes one `courses-outline.json` plus one answer-free `course-content/v1/<id>.json` per published free course. Current coverage is 559 objects. Keep `.course-content-export/` out of Git and static assets. Confirm the bucket has no public managed/custom domains and verify uploaded objects before deploying. Missing objects fail closed with 503; the handler does not load the legacy full catalogue.
+
+The legacy GitHub catalogue-sync workflow alone does not upload these split objects. Follow the explicit sequence above whenever course content changes. See [the course-access release notes](learning-content-access-2026-10-29.md) for validation and privacy details.
 
 ## Bump the service-worker cache
 Edit the cache version at the top of `web/public/sw.js`:
 
 ```js
-var CACHE = 'su-web-v11';   // → 'su-web-v12', etc.
+var CACHE = 'su-web-v31-__BUILD__';   // increment the version on the next release
 ```
 
 Incrementing it invalidates the old app-shell cache so returning clients pick up the new

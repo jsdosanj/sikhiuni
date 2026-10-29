@@ -1,5 +1,6 @@
 // Single source of content: the same courses.json the Worker serves.
 import raw from '../../../site/assets/data/courses.json';
+import { publicCourseCatalogue } from '../../../functions/api/_course-access.js';
 import photos from '../../../site/assets/data/professors.json';
 
 export type Term = { t: string; m: string };
@@ -14,12 +15,13 @@ export type Course = {
   // absent here (served only to entitled users via /api/course-content) — see
   // functions/api/admin/drafts-export.js.
   gated?: boolean;
+  nQuiz?: number;
   sourceText?: { work: string; url: string; gurmukhi?: string; english?: string; sikhArchiveUrl?: string };
 };
 export type Topic = { id: string; name: string; blurb: string };
 export type Path = { id: string; name: string; blurb: string; courseIds: string[] };
 
-export const courses: Course[] = (raw as any).courses;
+export const courses: Course[] = publicCourseCatalogue(raw).courses;
 export const topics: Topic[] = (raw as any).topics;
 export const paths: Path[] = (raw as any).paths || [];
 export const professorPhotos: Record<string, { img: string; credit?: string; source?: string }> = photos as any;

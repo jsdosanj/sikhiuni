@@ -7,9 +7,9 @@ into a server-only module; program pages read it at build time), but it must NEV
 be served to a browser: anyone who can read the answers can POST a perfect score to
 /api/quiz and mint a real, publicly-verifiable certificate.
 
-This script writes site/assets/data/courses.public.json — identical to the source
-but with every quiz `answer` removed. That sanitized file is what gets pushed to R2
-and served at /assets/data/courses.json. Run it before deploy-data (the deploy-data
+This script writes public outlines to courses.public.json and private, answer-free
+lessons to courses.content.json. The private file is stored in R2; the Worker serves
+only sanitized outlines at /assets/data/courses.json. Run it before deploy-data (the deploy-data
 script does this). It also self-asserts the output is answer-free, and can be run as
 a standalone CI check with --check (fails if any answer key survives).
 """
@@ -20,6 +20,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "site/assets/data/courses.json")
 OUT = os.path.join(ROOT, "site/assets/data/courses.public.json")
+CONTENT = os.path.join(ROOT, "site/assets/data/courses.content.json")
 
 
 def strip_answers(data):
@@ -66,8 +67,18 @@ def main():
         print(f"OK — sanitiser removes {n} quiz answers; output is answer-free.")
         return
 
-    with open(OUT, "w", encoding="utf-8") as f:
+    # Full answer-free lessons stay private in R2, fetched only by authenticated API.
+    with open(CONTENT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+    fields = ["id", "title", "topic", "level", "professor", "source", "aiCreated", "status", "summary", "outcomes", "references", "gated"]
+    public = {"topics": data.get("topics", []), "paths": data.get("paths", []), "courses": []}
+    for course in data.get("courses", []):
+        outline = {k: course[k] for k in fields if k in course}
+        outline["lessons"] = [{k: lesson[k] for k in ["title", "summary"] if k in lesson} for lesson in course.get("lessons", [])]
+        outline["nQuiz"] = len(course.get("quiz", []))
+        public["courses"].append(outline)
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(public, f, ensure_ascii=False, separators=(",", ":"))
     print(f"wrote {os.path.relpath(OUT, ROOT)} — {n} quiz answers stripped, "
           f"{len(data.get('courses', []))} courses.")
 

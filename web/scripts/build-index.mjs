@@ -34,7 +34,7 @@ const search = {
   paths: src.paths || [],
   courses: all.filter((c) => c.status === 'published').map((c) => ({
     id: c.id, title: c.title, professor: c.professor, topic: c.topic,
-    summary: c.summary, terms: c.terms || [], outcomes: c.outcomes || [],
+    summary: c.summary, terms: (c.terms || []).map(t=>({t:t.t})), outcomes: c.outcomes || [],
     lessonTitles: (c.lessons || []).map((l) => l.title),
   })),
 };

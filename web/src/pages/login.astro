@@ -116,10 +116,12 @@ import Base from '../layouts/Base.astro';
     </div>
   </div>
   <script>
+    import { safeReturnPath } from '../lib/return-path';
     // The `iconSvg` import that used to live here belonged to the magic-link
     // "check your email" success card, which is gone with the flow.
     function esc(s: string) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     const params = new URLSearchParams(location.search);
+    const next = safeReturnPath(new URLSearchParams(location.search).get('next'));
     const e = params.get('error');
     const errEl = document.getElementById('err')!;
     if (e) errEl.innerHTML = `<div class="rounded-[2px] border-l-4 border-saffron bg-surface p-3 font-sans text-sm"><strong>${esc(e)}</strong></div>`;
@@ -247,7 +249,7 @@ import Base from '../layouts/Base.astro';
           if (!identifier || !password) return;
           const { ok, d } = await postJson('/api/auth/login', { identifier, password });
           if (!ok) { problem(d.error || 'Could not sign in.'); return; }
-          location.href = d.mfaRequired ? '/mfa.html' : '/dashboard.html';
+          location.href = d.mfaRequired ? '/mfa?next=' + encodeURIComponent(next) : next;
           return;
         }
 
@@ -262,7 +264,7 @@ import Base from '../layouts/Base.astro';
           if (d.code === 'username_taken') { regStep = 1; render(); }
           return;
         }
-        location.href = '/dashboard.html';
+        location.href = next;
       } catch {
         problem('Network error. Please try again.');
       } finally {

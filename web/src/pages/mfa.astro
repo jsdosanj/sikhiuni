@@ -23,7 +23,9 @@ import Base from '../layouts/Base.astro';
     </div>
   </div>
   <script>
+    import { safeReturnPath } from '../lib/return-path';
     import { encodeQR, qrToSvg } from '../lib/qr';
+    const next = safeReturnPath(new URLSearchParams(location.search).get('next'));
 
     const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
     const sub = document.getElementById('mfa-sub')!;
@@ -58,7 +60,7 @@ import Base from '../layouts/Base.astro';
         api('/api/auth/mfa/verify', { method: 'POST', body: JSON.stringify({ code }) }).then(({ ok, d }) => {
           btn.disabled = false; btn.textContent = 'Verify';
           if (!ok) { out.innerHTML = errorBox(d.error === 'too many failed attempts, please sign in again' ? d.error : 'Incorrect code. Please try again.'); if (d.error && d.error.includes('sign in again')) setTimeout(() => location.href = '/login.html', 1500); return; }
-          location.href = '/dashboard.html';
+          location.href = next;
         }).catch(() => { btn.disabled = false; btn.textContent = 'Verify'; out.innerHTML = errorBox('Network error. Please try again.'); });
       });
     }
@@ -71,7 +73,7 @@ import Base from '../layouts/Base.astro';
           ${codes.map((c) => `<div>${esc(c)}</div>`).join('')}
         </div>
         <button id="mfa-done" class="btn btn-primary mt-4 w-full justify-center">I've saved these, continue</button>`;
-      document.getElementById('mfa-done')!.addEventListener('click', () => { location.href = '/dashboard.html'; });
+      document.getElementById('mfa-done')!.addEventListener('click', () => { location.href = next; });
     }
 
     function renderEnroll() {

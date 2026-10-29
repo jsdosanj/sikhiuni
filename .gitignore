@@ -26,3 +26,7 @@ web/public/media/media/hero/
 
 # gstack local artifacts (security reports stay local, never committed)
 .gstack/
+
+# Private per-course R2 deployment staging (never static assets)
+.course-content-export/
+site/assets/data/courses.content.json

@@ -5,7 +5,7 @@
 // decision: the old hand-bumped 'su-web-v26' hadn't changed in months, which
 // meant returning visitors could be stuck on a stale app shell indefinitely.
 // Same failure mode as the crest's stale-SW debugging session earlier today.)
-var CACHE = 'su-web-v29-__BUILD__';
+var CACHE = 'su-web-v31-__BUILD__';
 // Offline course packs live in their OWN unversioned cache, separate from the
 // app-shell CACHE above. The activate handler purges every cache key except
 // CACHE on every version bump (below) — before this split, that purge was
@@ -33,7 +33,7 @@ self.addEventListener('activate', function (e) {
       .then(function () { return self.clients.claim(); }));
     return;
   }
-  e.waitUntil(caches.keys().then(function (keys) { return Promise.all(keys.filter(function (k) { return k !== CACHE && k !== PACKS_CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (keys) { return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
 });
 
 // Rebuild a response without the "redirected" flag (which navigations reject).
@@ -41,13 +41,17 @@ function clean(res) {
   if (!res || !res.redirected) return res;
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: res.headers });
 }
-function cacheable(res) { return res && res.ok && !res.redirected && res.type === 'basic'; }
+function cacheable(res) { return res && res.ok && !res.redirected && res.type === 'basic' && !/private|no-store/i.test(res.headers.get('cache-control') || ''); }
 
 self.addEventListener('fetch', function (e) {
   if (IS_LEGACY) return; // let navigations hit the network → 301 → sikhiuni.com
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url); if (url.origin !== location.origin) return;
-  if (url.pathname.indexOf('/api/') === 0) return; // never touch APIs
+  // Full lessons/media always revalidate the session; never use old offline packs.
+  if (/^\/assets\/(?:gurbani|audio)\//.test(url.pathname) || /^\/(?:api|media)\//.test(url.pathname) || /^\/data\/(?:exam\/|institute\/(?:lessons|exam|dojo)\/)/.test(url.pathname) || /^\/(?:technology|institute)\/(?:lesson|dojo|capstone|exam|guide)(?:\/|$)/.test(url.pathname) || /^\/departments\/martial-arts\/workshop(?:\/|$)/.test(url.pathname) || /^\/(?:read|santhiya|muharni|baal-updesh)(?:\.html)?\/?$/.test(url.pathname)) {
+    e.respondWith(fetch(new Request(req,{cache:'no-store'})));
+    return;
+  }
   if (url.pathname.indexOf('/media/') === 0) return; // audio streams direct (range requests); don't cache
   if (url.pathname.indexOf('/data/institute/atlas/') === 0) return; // large (~4 MB), rarely changes — a stuck cache here is worse than a fetch
 
@@ -99,23 +103,7 @@ self.addEventListener('notificationclick', function (e) {
   }));
 });
 
-// Offline course packs (E1): the course page posts its own URL + same-origin images
-// here; we add them to the cache so the lesson reads offline. Third-party audio/YouTube
-// and the live BaniDB verse viewer are excluded — they need a connection and degrade
-// gracefully. Reports back so the button can show a "Saved" state.
-self.addEventListener('message', function (e) {
-  var d = e.data || {};
-  if (d.type === 'cache-pack' && Array.isArray(d.urls)) {
-    e.waitUntil(caches.open(PACKS_CACHE).then(function (c) {
-      return Promise.all(d.urls.map(function (u) {
-        return fetch(u, { credentials: 'same-origin' }).then(function (res) {
-          if (res && res.ok && res.type === 'basic') return c.put(u, res.clone());
-        }).catch(function () {});
-      }));
-    }).then(function () {
-      if (e.source) e.source.postMessage({ type: 'pack-cached', id: d.id, ok: true });
-    }).catch(function () {
-      if (e.source) e.source.postMessage({ type: 'pack-cached', id: d.id, ok: false });
-    }));
-  }
+// Offline lesson packs are disabled: sign-out must end access on this device.
+self.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'cache-pack' && e.source) e.source.postMessage({type:'pack-cached',id:e.data.id,ok:false});
 });

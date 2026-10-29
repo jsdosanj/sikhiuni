@@ -2,7 +2,7 @@
 // observer. A production incident (PR #195) shipped course pages whose entire
 // main column stayed opacity:0 because `.reveal` sat on sections too tall for
 // the IntersectionObserver threshold. This gate locks the law from DESIGN.md:
-// on course pages, content is server-rendered and carries no `reveal` class.
+// on course pages, public outlines carry no `reveal` class; lesson content now loads only after authentication.
 //
 // Runs after `astro build` (wired into web/package.json). Exits 1 on violation.
 import { readFileSync, readdirSync } from 'node:fs';
@@ -51,4 +51,4 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(`no-reveal-on-content: OK — ${files.length} course pages (${gatedCount} gated, teaser-only by design), ` +
-  `content in raw HTML for the rest, zero reveal-gated elements`);
+  `public outline placeholders for the rest, zero scroll-reveal-gated elements`);

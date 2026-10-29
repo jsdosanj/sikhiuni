@@ -1,3 +1,7 @@
+import { courseOutline } from './functions/api/_course-store.js';
+import { checkRateLimit } from './functions/api/_rate-limit.js';
+import { getLearningUser } from './functions/api/_learning-user.js';
+import { protectedLearningPath, PRIVATE_COURSE_HEADERS } from './functions/api/_course-access.js';
 // Sikhi University Worker entrypoint.
 // Static files from the Astro build (web/dist) are served by the [assets]
 // binding -- NOT site/, which is legacy and unreachable (confirmed 2026-09-06
@@ -211,25 +215,6 @@ const RL_ENFORCE = true;
 // slip through on stale reads the way a KV counter would. Fails OPEN on any error / no DB
 // so a limiter problem never locks out the mission's users. Creates its table lazily,
 // once per isolate.
-let rlReady = false;
-async function checkRateLimit(env, key, limit, windowSec) {
-  if (!env.DB) return true;
-  try {
-    if (!rlReady) {
-      await env.DB.prepare("CREATE TABLE IF NOT EXISTS rate_limits (k TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL)").run();
-      rlReady = true;
-    }
-    const now = Math.floor(Date.now() / 1000);
-    const row = await env.DB.prepare(
-      "INSERT INTO rate_limits (k, count, reset_at) VALUES (?1, 1, ?2) " +
-      "ON CONFLICT(k) DO UPDATE SET " +
-      "count = CASE WHEN reset_at <= ?3 THEN 1 ELSE count + 1 END, " +
-      "reset_at = CASE WHEN reset_at <= ?3 THEN ?2 ELSE reset_at END " +
-      "RETURNING count"
-    ).bind(key, now + windowSec, now).first();
-    return !row || row.count <= limit;
-  } catch (e) { return true; }
-}
 
 // The site's canonical home. Requests reaching the Worker on a legacy hostname
 // (the old custom domain or the bare workers.dev alias) are permanently
@@ -339,6 +324,22 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const { pathname } = url;
+    if (pathname.startsWith('/media/')) {
+      let key; try { key=decodeURIComponent(pathname.slice(7)); } catch { return new Response('Not found',{status:404}); }
+      if (!key || key.includes('..') || !/^(santhya|audio|gurbani|media)\//.test(key)) return new Response('Not found',{status:404});
+    }
+    const privateLearning = protectedLearningPath(pathname);
+    if (privateLearning) {
+      let user, needsMfa;
+      try { ({user,needsMfa} = await getLearningUser(env, request)); } catch { return new Response('Authentication unavailable', {status:503,headers:PRIVATE_COURSE_HEADERS}); }
+      if (!user || needsMfa) {
+        const page = !pathname.startsWith('/media/') && !pathname.startsWith('/data/') && !pathname.startsWith('/assets/');
+        const headers = new Headers(PRIVATE_COURSE_HEADERS);
+        if (page) headers.set('location', (user ? '/mfa?next=' : '/login?next=') + encodeURIComponent(pathname + url.search));
+        return new Response(page ? null : 'Please sign in to access learning content.', {status:page?302:401,headers});
+      }
+    }
+
     // Pages/assets on a legacy host 301 to the canonical origin. /api/,
     // /media/ and /assets/data/ are exempt and served in place: a 301 turns
     // POST into a bodyless GET (per the Fetch spec), which would silently
@@ -421,18 +422,16 @@ export default {
         return new Response("Not found", { status: 404 });
       }
       const resp = await serveR2Object(env, request, key);
-      return resp || new Response("Not found", { status: 404 });
+      if (!resp) return new Response("Not found", { status: 404, headers: PRIVATE_COURSE_HEADERS });
+      const headers = new Headers(resp.headers);
+      for (const [key,value] of Object.entries(PRIVATE_COURSE_HEADERS)) headers.set(key,value);
+      return new Response(resp.body,{status:resp.status,headers});
     }
     // courses.json is too large for Cloudflare's 25 MiB asset limit; serve from R2 instead.
     if (pathname === '/assets/data/courses.json') {
-      const obj = await env.MEDIA.get('courses.json');
-      if (!obj) return new Response('Not found', { status: 404 });
-      const headers = new Headers();
-      obj.writeHttpMetadata(headers);
-      headers.set('content-type', 'application/json; charset=utf-8');
-      headers.set('cache-control', 'public, max-age=3600');
-      headers.set('access-control-allow-origin', '*');
-      return new Response(obj.body, { status: 200, headers });
+      let data;
+      try { data = await courseOutline(env.MEDIA); } catch { return new Response('Catalogue temporarily unavailable',{status:503,headers:PRIVATE_COURSE_HEADERS}); }
+      return new Response(JSON.stringify(data), {headers:{'content-type':'application/json; charset=utf-8','cache-control':'public, max-age=300'}});
     }
     // Worker-rendered teacher public profile. Falls through to the Astro 404 (the
     // final branch below) on an invalid/unknown/private slug — this branch only
@@ -473,7 +472,10 @@ export default {
     // security + AI-policy headers below are therefore a defense-in-depth backstop
     // — the ones that actually apply to real pages live in web/public/_headers,
     // which Cloudflare's asset layer honours on every static response.
-    const assetResp = await env.ASSETS.fetch(request);
+    const rawAssetResp = await env.ASSETS.fetch(request);
+    const assetHeaders = new Headers(rawAssetResp.headers);
+    if (privateLearning) for (const [key,value] of Object.entries(PRIVATE_COURSE_HEADERS)) assetHeaders.set(key,value);
+    const assetResp = privateLearning ? new Response(rawAssetResp.body,{status:rawAssetResp.status,headers:assetHeaders}) : rawAssetResp;
     const ct = assetResp.headers.get('content-type') || '';
     const h = new Headers(assetResp.headers);
     // AI-crawler policy: all AI crawling is welcome, including AI answer/search

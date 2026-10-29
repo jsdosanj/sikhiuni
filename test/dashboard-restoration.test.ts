@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { safeReturnPath } from '../web/src/lib/return-path';
 const read = (file: string) => readFileSync(new URL(`../web/src/${file}`, import.meta.url), 'utf8');
 
 describe('current campus navigation and dashboard contract', () => {
@@ -28,6 +29,10 @@ describe('current campus navigation and dashboard contract', () => {
     expect(login).not.toContain('value="teacher"');
     expect(login).not.toContain('su_v1_signup_intent');
     expect(login).toContain('/api/auth/register-complete');
-    expect(login).toContain('/dashboard.html');
+    expect(login).toContain('safeReturnPath');
+    expect(login).toContain('location.href = next');
+    expect(safeReturnPath(null)).toBe('/dashboard');
+    expect(safeReturnPath('//attacker.test')).toBe('/dashboard');
+    expect(safeReturnPath('/course/history#lesson-0')).toBe('/course/history#lesson-0');
   });
 });

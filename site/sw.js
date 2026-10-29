@@ -1,5 +1,5 @@
 /* Sikhi University service worker — offline app shell + course data. */
-var CACHE = "su-v2";
+var CACHE = "su-v4";
 var SHELL = [
   "index.html", "catalog.html", "course.html", "dashboard.html", "cert.html",
   "search.html", "paths.html", "professors.html", "professor.html", "about.html",
@@ -25,13 +25,15 @@ self.addEventListener("fetch", function (e) {
   // Never cache API calls (auth/session/feedback/etc.) — always go to network.
   if (url.origin === location.origin && url.pathname.indexOf("/api/") === 0) return;
   if (url.origin !== location.origin) return;
-  // Network-first for course data so updates show; fall back to cache offline.
+  // The legacy shell must never retain lesson payloads after sign-out.
+  if (/^\/(?:media|data)\//.test(url.pathname)) { e.respondWith(fetch(new Request(req,{cache:'no-store'}))); return; }
+  // Network-first for public outline data.
   if (url.pathname.indexOf("courses.json") !== -1) {
-    e.respondWith(fetch(req).then(function (r) { var cp = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); return r; }).catch(function () { return caches.match(req); }));
+    e.respondWith(fetch(req).then(function (r) { if(r.ok && !/private|no-store/i.test(r.headers.get('cache-control')||'')) { var cp = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); } return r; }).catch(function () { return caches.match(req); }));
     return;
   }
   // Cache-first for the app shell.
   e.respondWith(caches.match(req).then(function (hit) {
-    return hit || fetch(req).then(function (r) { var cp = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); return r; }).catch(function () { return caches.match("index.html"); });
+    return hit || fetch(req).then(function (r) { if(r.ok && !/private|no-store/i.test(r.headers.get('cache-control')||'')) { var cp = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, cp); }); } return r; }).catch(function () { return caches.match("index.html"); });
   }));
 });
