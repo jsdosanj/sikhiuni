@@ -663,7 +663,7 @@
       var t = document.getElementById("contactThanks"); if (t) t.style.display = "block";
       form.style.display = "none"; window.scrollTo(0, 0); return;
     }
-    var email = atob("ZG90cy13aGlza3MuNnJAaWNsb3VkLmNvbQ==");  // dots-whisks.6r@icloud.com (obfuscated from scrapers)
+    var email = "akaal@sikhi.io";
     form.action = "https://formsubmit.co/" + email;
     var nxt = document.createElement("input"); nxt.type = "hidden"; nxt.name = "_next";
     nxt.value = location.origin + location.pathname + "?sent=1"; form.appendChild(nxt);

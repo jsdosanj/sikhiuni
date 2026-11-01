@@ -68,7 +68,7 @@ export async function onRequestPost(context) {
           body: JSON.stringify({
             from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>",
             to: [email],
-            reply_to: env.REPLY_TO || "contact@sikhism.io",
+            reply_to: env.REPLY_TO || "akaal@sikhi.io",
             subject: t.subject,
             text: t.text,
             html: t.html,
