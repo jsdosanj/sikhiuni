@@ -1,3 +1,5 @@
+import { protectedLearningPath } from '../../../functions/api/_course-access.js';
+
 // Shared helpers for the sitemap index + child sitemaps under /sitemaps/.
 // The site is fully prerendered, so "last modified" is the build date — real,
 // not hand-maintained (the old sitemap hardcoded a date that went stale).
@@ -28,6 +30,9 @@ function xmlEscape(s: string): string {
 }
 
 export function urlsetXml(base: string, entries: UrlEntry[]): Response {
+  // Reuse the serving policy so all child sitemaps omit sign-in-only content,
+  // including new protected routes added to that policy in future.
+  entries = entries.filter((entry) => !protectedLearningPath(entry.path));
   const hasImages = entries.some((e) => e.images && e.images.length);
   const imageXml = (e: UrlEntry) =>
     (e.images || [])
