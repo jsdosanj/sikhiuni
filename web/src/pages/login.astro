@@ -225,7 +225,7 @@ import Base from '../layouts/Base.astro';
       regStep = 2;
       render();
       document.getElementById('reg-sent')!.innerHTML =
-        `We emailed a 6-digit code to <strong>${esc(d.email || regEmail.value.trim())}</strong>. Enter it below and choose a password.`;
+        `We emailed a 6-digit code to <strong>${esc(d.email || regEmail.value.trim())}</strong>. Enter it below and choose a password. It can take a minute or two; if it hasn't arrived, check your spam or junk folder for an email from Sikhi University, then use Resend code.`;
       clearOut();
       return true;
     }
