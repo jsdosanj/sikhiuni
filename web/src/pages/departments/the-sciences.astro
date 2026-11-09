@@ -9,7 +9,7 @@ const ld = {
   '@context': 'https://schema.org', '@type': 'EducationalOrganization',
   name: `${d.name}, Sikhi University`, description: d.blurb,
   url: 'https://sikhiuni.com/departments/the-sciences',
-  parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
+  parentOrganization: { '@type': 'EducationalOrganization', name: 'Sikhi University', url: 'https://sikhiuni.com/' },
 };
 ---
 <Base title={`${d.name}, Sikhi University`} description={d.blurb} ambient="none">

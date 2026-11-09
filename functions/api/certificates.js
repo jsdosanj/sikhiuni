@@ -70,15 +70,16 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Pass the course (80%+) first — your progress must sync while signed in." }, 403);
   }
 
-  const existing = await env.DB.prepare("SELECT id FROM certificates WHERE user_id=? AND course_id=?").bind(user.id, courseId).first();
+  const existing = await env.DB.prepare("SELECT id, issued_at FROM certificates WHERE user_id=? AND course_id=?").bind(user.id, courseId).first();
   if (existing) {
     if (name) await env.DB.prepare("UPDATE certificates SET name=? WHERE id=?").bind(name, existing.id).run();
-    return json({ ok: true, id: existing.id });
+    return json({ ok: true, id: existing.id, issuedAt: existing.issued_at });
   }
   const id = "SU-" + newId().slice(0, 10).toUpperCase();
+  const issuedAt = Date.now();
   await env.DB.prepare("INSERT INTO certificates (id, user_id, course_id, name, score, issued_at) VALUES (?,?,?,?,?,?)")
-    .bind(id, user.id, courseId, name, score, Date.now()).run();
+    .bind(id, user.id, courseId, name, score, issuedAt).run();
   await logEvent(env, user, "certificate_issued", courseId, "cert_id=" + id);
   await sendCertificateEmail(env, user.email, name, id);
-  return json({ ok: true, id });
+  return json({ ok: true, id, issuedAt });
 }

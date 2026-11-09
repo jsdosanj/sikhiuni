@@ -274,7 +274,7 @@ const breadcrumb = {
     fetch('/api/program-exam', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, programId: progId }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('grade failed'))))
       .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.passed); })

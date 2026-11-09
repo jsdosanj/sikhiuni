@@ -21,14 +21,14 @@ const portals = [
 ];
 
 const ld = {
-  '@context': 'https://schema.org', '@type': 'CollegeOrUniversity',
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
   '@id': SITE + '/#org', // merges with the Organization node Base.astro emits site-wide
-  name: 'Sikhi University', url: SITE + '/', description: 'A free, open online school for Sikhi and modern skills. Not an accredited institution; no degrees or university credit.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
+  name: 'Sikhi University', url: SITE + '/', description: 'Sikhi University is a free, open online university for Sikhi, Gurbani, Sikh history and Gurmukhi. Not accredited; certificates are for self-development only.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
   sameAs: ['https://sikharchive.net'],
 };
 // WebSite (with the sitelinks SearchAction) is now emitted site-wide by Base.astro.
 ---
-<Base title="Sikhi University, free, open Sikhi & modern-skills courses" ambient="hall" bodyClass="su-home">
+<Base title="Sikhi University | Free Online Sikhi, Gurbani & Sikh History Courses" description="Sikhi University is a free, open online university for Sikhi, Gurbani, Sikh history and Gurmukhi. Not accredited; certificates are for self-development only." ambient="hall" bodyClass="su-home">
   <script type="application/ld+json" set:html={ldJson(ld)} slot="head" />
   <script type="module" src="/scripts/model-viewer.min.js" slot="head" />
 
@@ -242,7 +242,7 @@ const ld = {
               ['sprout', 'Discover', 'Complete beginners, no background needed'],
               ['book', 'Explore & practise', 'Growing students ready to go deeper'],
               ['microscope', 'Deepen', 'Advanced learners in serious study'],
-              ['cap', 'Research', 'Graduate seminars for scholars'],
+              ['cap', 'Research', 'Advanced seminars for scholars'],
               ['pen', 'Languages change', 'Gurbani was written in Punjabi, Braj Bhasha, Sant Bhasha, and Persian. Every course here bridges the Guru\'s depth to the language you live in today.'],
               ['diya', 'ਸਿੱਖ means learner', 'Gurbani\'s call to forever seek is written into our name. This university exists to honour that call, for every generation, everywhere on Earth.'],
             ].map((t, i) => (

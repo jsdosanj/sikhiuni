@@ -60,6 +60,9 @@ describe("POST /api/certificates — issuance gate", () => {
 
     expect(second.status).toBe(200);
     expect(secondBody.id).toBe(firstBody.id);
+    // The stored issue date is returned (and is stable), so the certificate can show the real date.
+    expect(typeof firstBody.issuedAt).toBe("number");
+    expect(secondBody.issuedAt).toBe(firstBody.issuedAt);
   });
 });
 

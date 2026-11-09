@@ -86,7 +86,7 @@ const catGroups = topicsAlpha
   .map((t) => ({ topic: t, courses: sorted.filter((c) => c.topic === t.id) }))
   .filter((g) => g.courses.length > 0);
 ---
-<Base title="Courses & learning paths, Sikhi University" description="Browse all Sikhi University courses by topic, or follow a guided learning path, history, theology, philosophy, language, music, the arts and modern skills." ambient="none" bodyClass="su-catalog">
+<Base title="Courses & learning paths, Sikhi University" description="Browse free Sikhi courses on Gurbani, Sikh history, Gurmukhi, theology, philosophy, Gurmat Sangeet and modern skills, or follow a guided learning path." ambient="none" bodyClass="su-catalog">
   <script type="application/ld+json" set:html={JSON.stringify(itemListLd)} slot="head" />
 
   <!-- Dept header: eyebrow-with-dash, display h1, mono stat pair (iscatalog 429-441) -->

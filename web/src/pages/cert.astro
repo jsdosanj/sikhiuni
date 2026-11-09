@@ -37,7 +37,8 @@ import Base from '../layouts/Base.astro';
       const score = prog ? (getRaw('cum_passed_' + prog.id, false) ? getRaw('cum_score_' + prog.id, null) : null) : get('passed_' + c.id, null);
       if (!score) { app.innerHTML = `<div class="rounded-xl border-l-4 border-saffron bg-surface p-4"><span class="inline-flex items-center gap-1.5">${iconSvg('lock', 'h-4 w-4 shrink-0')}<span><span data-i18n="cert.locked.prefix">Complete</span> <a class="underline" href="${c.href}">${esc(c.title)}</a> <span data-i18n="cert.locked.suffix">and pass its test (80%+) to earn your certificate.</span></span></span></div>`; return; }
       const name = (get('profile', {}) || {}).name || (me && me.user && me.user.name) || '';
-      const issued = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      // The completion date is the SERVER's stored issue date (shown once the record exists), never today's date.
+      const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
       // Solid registrar's-ledger certificate, double-bordered (1px navy outer,
       // gold inner) per the redesign prototype's iscert block. THE RENDER
       // SURFACE (#cert-card) STAYS FULLY SOLID -- no glass, no alpha
@@ -63,12 +64,12 @@ import Base from '../layouts/Base.astro';
             <div class="mt-11 flex items-end justify-between gap-4 border-t border-line pt-6 text-left">
               <div class="font-mono text-navy">
                 <div class="text-[9.5px] uppercase tracking-[0.16em] text-muted" data-i18n="cert.label.conferred">Completed</div>
-                <div class="mt-1 text-[13px]">${issued}</div>
+                <div id="cert-date" class="mt-1 text-[13px]">&mdash;</div>
               </div>
               ${sealMark()}
               <div id="cert-vid" class="text-right font-mono text-[13px] text-navy"></div>
             </div>
-            <p role="note" class="su-disclaimer mx-auto mt-6 max-w-[56ch]" style="text-align:center" data-i18n="disclaimer.cert">Certificate of completion. Self-development only. Sikhi University is not accredited and offers no university credit or degrees.</p>
+            <p role="note" class="su-disclaimer mx-auto mt-6 max-w-[56ch]" style="text-align:center" data-i18n="disclaimer.cert">Certificate of completion. Self-development only. Sikhi University is not accredited and offers no university credit or degrees. This certificate cannot be transferred for credit at any educational institution.</p>
             <p class="mx-auto mt-4 max-w-[56ch] font-sans text-[11.5px] leading-relaxed text-muted" data-i18n="cert.aidisclosure">Course content created by AI and reviewed for accuracy. Verify authenticity at sikhiuni.com/verify</p>
           </div>
         </div>
@@ -96,13 +97,14 @@ import Base from '../layouts/Base.astro';
         } catch (e) { window.suToast('Could not generate the PDF, please use Print instead.', 'error'); }
         btn.disabled = false; btn.innerHTML = old;
       });
-      // Program certificates are not stored server-side (the exam endpoint is stateless), so there is no ID to verify.
-      if (prog) { const pv = document.getElementById('cert-vid'); if (pv) { pv.innerHTML = '<span data-i18n="cert.vid.programnote">Program certificate. No online verification ID.</span>'; if (window.suReapply) window.suReapply(); } return; }
       // Issue a verifiable certificate ID (needs sign-in; validates the synced pass server-side).
       fetch('/api/certificates', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ courseId: c.id, name }) })
         .then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
           const v = document.getElementById('cert-vid'); if (!v) return;
+          const dateEl = document.getElementById('cert-date');
+          if (ok && d.issuedAt && dateEl) dateEl.textContent = fmtDate(d.issuedAt);
           if (ok && d.id) v.innerHTML = '<span data-i18n="cert.vid.prefix">Verification ID:</span> <strong>' + esc(d.id) + '</strong> <span data-i18n="cert.vid.middle">· verify at</span> <span>sikhiuni.com/verify?id=' + esc(d.id) + '</span>';
+          else if (prog) v.innerHTML = '<span class="noprint" data-i18n="cert.vid.programnote">Sign in and retake the cumulative exam to get a verifiable certificate ID.</span>';
           else v.innerHTML = '<span class="noprint" data-i18n="cert.vid.signin">Sign in (and let your progress sync) to get a verifiable certificate ID.</span>';
           if (window.suReapply) window.suReapply();
         }).catch(() => {});

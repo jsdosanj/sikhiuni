@@ -19,7 +19,7 @@ import path from 'node:path';
 const fontFaceCss = readFileSync(path.resolve(process.cwd(), 'public/fonts/fonts.css'), 'utf-8');
 
 interface Props { title: string; description?: string; canonical?: string; ogType?: string; autoTranslate?: boolean; ambient?: 'hall' | 'study' | 'sanctum' | 'none'; bgImage?: string; noindex?: boolean; bodyClass?: string; institute?: boolean }
-const { title, description = 'A free, open online school for Sikhi and modern skills, open to all, worldwide. Certificates are for self-development only. No university credit.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
+const { title, description = 'A free, open online university for Sikhi, Gurbani, Sikh history and Gurmukhi, open to all. Not accredited; certificates are for self-development only.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
 const instituteFontCss = institute ? readFileSync(path.resolve(process.cwd(), 'public/fonts/institute-fonts.css'), 'utf-8') : '';
 const autoTranslateEff = institute ? false : autoTranslate;
 // Google truncates a meta description around 155-160 chars anyway; better to
@@ -103,9 +103,11 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", "@id": SITE + "/#org", "name": "Sikhi University", "url": SITE,
-        "description": "A free, open online school for Sikhi, Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide. Not an accredited institution; no degrees or university credit.",
+        "alternateName": ["SikhiUni", "Sikhi Uni", "Sikh University"],
+        "description": "A free, open online university for Sikhi, Gurbani, Sikh history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide. Not an accredited institution; certificates are for self-development only and carry no degree or university credit.",
+        "knowsAbout": ["Sikhi", "Sikhism", "Gurbani", "Sri Guru Granth Sahib Ji", "Sikh history", "Gurmukhi", "Gurmat Sangeet", "Sikh philosophy"],
         "logo": { "@type": "ImageObject", "url": SITE + "/assets/brand/crest-2026.webp", "width": 1200, "height": 1200 } },
-      { "@type": "WebSite", "@id": SITE + "/#website", "url": SITE, "name": "Sikhi University",
+      { "@type": "WebSite", "@id": SITE + "/#website", "url": SITE, "name": "Sikhi University", "alternateName": ["SikhiUni", "Sikhi Uni"],
         "publisher": { "@id": SITE + "/#org" },
         "potentialAction": { "@type": "SearchAction", "target": SITE + "/search?q={search_term_string}", "query-input": "required name=search_term_string" } }
     ]

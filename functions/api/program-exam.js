@@ -1,5 +1,6 @@
-import { json } from "./_lib.js";
+import { json, getUser, logEvent } from "./_lib.js";
 import { QUIZ_KEYS } from "./_quiz-keys.js";
+import programsData from "../../site/assets/data/programs.json";
 
 // POST /api/program-exam { items:[{cid, qi, sel}] }
 // Grades a program cumulative exam ON THE SERVER against the secret answer keys,
@@ -30,10 +31,61 @@ const PASS_MARK = 80;
 // count toward `total`, so a real attempt is always its full question count.
 const MIN_GRADABLE_ITEMS = 10;
 
+// RECORDED MODE (added 2026-11): when the body names a real `programId` AND the
+// caller is signed in, a pass is persisted to `progress` under
+// course_id = <programId> (best score kept), exactly like /api/institute-exam does
+// for its tracks. functions/api/certificates.js then issues a verifiable
+// certificate id for it with no schema change. Because that pass now mints a
+// verifiable certificate (before, it only set a browser flag), recorded mode is
+// STRICT: every answer must be a distinct (cid, qi) from THIS program's own
+// courses and the attempt must be the full exam (min(testQuestions, size of the
+// program's question pool)), so none of the denominator-shrinking / repeat-item
+// oracle tricks documented above apply. Anonymous or programId-less calls keep the
+// legacy behaviour byte for byte (graded, never recorded).
+function programById(id) {
+  return typeof id === "string" ? programsData.programs.find((p) => p.id === id) : undefined;
+}
+
+function gradeStrict(prog, items) {
+  const allowed = new Set(prog.courseIds);
+  const poolSize = prog.courseIds.reduce((n, cid) => n + (QUIZ_KEYS[cid] ? QUIZ_KEYS[cid].length : 0), 0);
+  const need = Math.min(prog.testQuestions, poolSize);
+  const seen = new Set();
+  let correct = 0;
+  for (const it of items) {
+    const cid = it && it.cid;
+    const qi = Number(it && it.qi);
+    const key = allowed.has(cid) ? QUIZ_KEYS[cid] : null;
+    if (!key || !Number.isInteger(qi) || qi < 0 || qi >= key.length) continue;
+    const id = cid + "#" + qi;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    if (Number(it.sel) === key[qi]) correct++;
+  }
+  if (need === 0 || seen.size < need) return null;
+  return Math.round((correct / seen.size) * 100);
+}
+
 export async function onRequestPost({ request, env }) {
   let b; try { b = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
   const items = Array.isArray(b && b.items) ? b.items : [];
   if (items.length === 0) return json({ error: "no answers submitted" }, 400);
+
+  const prog = programById(b && b.programId);
+  const user = prog ? await getUser(env, request) : null;
+  if (prog && user) {
+    const score = gradeStrict(prog, items);
+    if (score === null) return json({ error: "answer the full exam first" }, 400);
+    const passed = score >= PASS_MARK;
+    await logEvent(env, user, "program_exam_attempted", prog.id, passed ? "score=" + score : "failed");
+    if (!passed) return json({ passed: false });
+    await env.DB.prepare(
+      "INSERT INTO progress (user_id, course_id, done, passed_score, updated_at) VALUES (?,?,'[]',?,?) " +
+      "ON CONFLICT(user_id, course_id) DO UPDATE SET updated_at=excluded.updated_at, " +
+      "passed_score=CASE WHEN progress.passed_score IS NULL THEN excluded.passed_score ELSE MAX(progress.passed_score, excluded.passed_score) END"
+    ).bind(user.id, prog.id, score, Date.now()).run();
+    return json({ passed: true, score, recorded: true });
+  }
 
   let correct = 0, total = 0;
   for (const it of items) {

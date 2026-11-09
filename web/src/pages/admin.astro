@@ -482,7 +482,7 @@ import Base from '../layouts/Base.astro';
             const rows = g.d.rows || [];
             const byUser = {}; rows.forEach((r) => { if (r.score != null && r.score >= 80) byUser[r.user_id] = (byUser[r.user_id] || 0) + 1; });
             const counts = Object.values(byUser);
-            const badgeCounts = { 'Graduate (1+)': counts.filter((n) => n >= 1).length, 'Dedicated (25+)': counts.filter((n) => n >= 25).length, 'Scholar (100+)': counts.filter((n) => n >= 100).length, 'Vidhvaan (250+)': counts.filter((n) => n >= 250).length };
+            const badgeCounts = { 'Completer (1+)': counts.filter((n) => n >= 1).length, 'Dedicated (25+)': counts.filter((n) => n >= 25).length, 'Scholar (100+)': counts.filter((n) => n >= 100).length, 'Vidhvaan (250+)': counts.filter((n) => n >= 250).length };
             html += `<h3 class="mt-8 text-xl font-bold">Badge distribution</h3><div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">${Object.entries(badgeCounts).map(([name, count]) => stat(count, name)).join('')}</div>`;
           }
           const pop = s.d.popular || [];
