@@ -23,3 +23,12 @@
   X-Frame-Options: DENY
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' https:; font-src 'self'; connect-src 'self' blob: https://api.banidb.com https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self' blob:; form-action 'self' https://formsubmit.co; base-uri 'self'; frame-ancestors 'none'
+
+# Long-lived caching (repeat visits and Core Web Vitals). /_astro/* filenames are content-hashed, so they are
+# immutable. Fonts and brand images keep stable names, so a shorter (not immutable) lifetime.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+/fonts/*
+  Cache-Control: public, max-age=2592000
+/assets/brand/*
+  Cache-Control: public, max-age=604800

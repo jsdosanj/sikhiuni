@@ -18,7 +18,10 @@ response.
 - **JSON-LD.** Structured data is inlined per page:
   - `Organization` + `WebSite` (with a `SearchAction` pointing at `/search?q={query}`) —
     emitted site-wide from `Base.astro`.
-  - `CollegeOrUniversity` — homepage (`web/src/pages/index.astro`).
+  - `EducationalOrganization` — homepage and department pages. Deliberately NOT
+    `CollegeOrUniversity` (2026-11): we are not accredited and grant no degrees, and the
+    legal position on "university" in Washington is unconfirmed (see the PR notes). Do not
+    add degree/credential structured data of any kind.
   - `Course` + `BreadcrumbList` — every course page (`web/src/pages/course/[id].astro`),
     generated at build time from the catalogue.
   - `Person` — professor pages (`web/src/pages/professor/[slug].astro`).
@@ -112,3 +115,26 @@ of new/changed URLs on the engines that support the protocol.
   rather than help international ranking. Shareable `?lang=` deep links exist for humans
   (chat links, social shares), not for crawlers. Revisit this only if per-locale
   server-rendered/prerendered pages are ever adopted; until then, ship no hreflang tags.
+
+
+## What does and does not move rankings (2026-11)
+
+On-page work is in place: unique keyword-bearing titles/descriptions, `SikhiUni` /
+`Sikhi Uni` / `Sikh University` as `alternateName` on the Organization and WebSite nodes
+(helps brand-name queries), `knowsAbout`, canonical + OG/Twitter tags, full sitemap index,
+IndexNow, open robots. No one can guarantee a #1 ranking for "all Sikhi-related searches";
+the remaining levers are off-page: Search Console + Bing Webmaster verification and sitemap
+submission (see the migration checklist), links from sikhi.io / sikharchive.net / gurdwara
+and Sikh-studies sites, and original, accurate content that earns citations.
+
+## 2026-11 audit pass (built HTML, 1,317 pages)
+
+Checked every built page: all 3,126 JSON-LD blocks parse; every indexable page has a title,
+description, one `<h1>` and a canonical. Changes: professor pages with no bio now get a real
+description (course count + titles) instead of a one-line stub (short descriptions 114 → 43);
+program pages emit `BreadcrumbList` + an `ItemList` of their courses (the breadcrumb was built
+but never output); `/muharni` (a redirect stub) and `/offline` are `noindex`; the footer links to
+Certificate programs, Departments and Santhya from every page (internal links to key landing
+pages); `sameAs` includes sikhi.io; `llms.txt` no longer calls programs "credentials". Known and
+left alone: ~330 titles over 65 characters (mostly Institute/course titles, Google rewrites these),
+lastmod in sitemaps is the build date.

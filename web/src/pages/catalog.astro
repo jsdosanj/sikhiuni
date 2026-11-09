@@ -2,6 +2,7 @@
 import { stageName } from '../lib/stages';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import { topics, published, topicName, paths, TOPIC_ICONS } from '../lib/data';
 import instituteManifest from '../data/institute/manifest.json';
 import programsData from '../../public/assets/data/programs.json';
@@ -61,9 +62,9 @@ const iconFor = (p: typeof paths[number]) =>
 const featured = [...paths.filter((p) => !p.id.startsWith('topic-')), ...institutePaths];
 const subjects = paths.filter((p) => p.id.startsWith('topic-'));
 const withGrad = (list: typeof paths, offset: number) => list.map((p, gi) => ({ p, grad: GRADS[(gi + offset) % GRADS.length] }));
-const progTypeOrder = ['certificate', 'associate', 'bachelor', 'master', 'giani'];
-const progTypeLabel: Record<string, string> = { certificate: 'Certificates', associate: 'Associate Degree', bachelor: "Bachelor's Degrees", master: "Master's Degrees", giani: 'Giani, Highest Distinction' };
-const progTypeBg: Record<string, string> = { certificate: 'bg-saffron-soft', associate: 'bg-blue-50 dark:bg-blue-950/20', bachelor: 'bg-paper', master: 'bg-navy/5 dark:bg-navy/20', giani: 'bg-saffron-soft' };
+const progTypeOrder = ['certificate', 'advanced', 'specialist', 'scholar', 'giani'];
+const progTypeLabel: Record<string, string> = { certificate: 'Certificates', advanced: 'Advanced Certificate', specialist: 'Specialist Certificates', scholar: 'Scholar Certificates', giani: 'Giani, Highest Distinction' };
+const progTypeBg: Record<string, string> = { certificate: 'bg-saffron-soft', advanced: 'bg-blue-50 dark:bg-blue-950/20', specialist: 'bg-paper', scholar: 'bg-navy/5 dark:bg-navy/20', giani: 'bg-saffron-soft' };
 const grouped = progTypeOrder.map((t) => ({ type: t, label: progTypeLabel[t], programs: programsData.programs.filter((p) => p.type === t) }));
 
 // --- Registrar's-ledger catalogue grouping (task 6: iscatalog, lines 429-462) ---
@@ -85,7 +86,7 @@ const catGroups = topicsAlpha
   .map((t) => ({ topic: t, courses: sorted.filter((c) => c.topic === t.id) }))
   .filter((g) => g.courses.length > 0);
 ---
-<Base title="Courses & learning paths, Sikhi University" description="Browse all Sikhi University courses by topic, or follow a guided learning path, history, theology, philosophy, language, music, the arts and modern skills." ambient="none" bodyClass="su-catalog">
+<Base title="Courses & learning paths, Sikhi University" description="Browse free Sikhi courses on Gurbani, Sikh history, Gurmukhi, theology, philosophy, Gurmat Sangeet and modern skills, or follow a guided learning path." ambient="none" bodyClass="su-catalog">
   <script type="application/ld+json" set:html={JSON.stringify(itemListLd)} slot="head" />
 
   <!-- Dept header: eyebrow-with-dash, display h1, mono stat pair (iscatalog 429-441) -->
@@ -262,10 +263,8 @@ const catGroups = topicsAlpha
 
     <!-- Programs view -->
     <div id="view-programs" role="tabpanel" aria-labelledby="tab-programs-btn" class="mt-8" hidden>
-      <p class="max-w-3xl text-lg leading-relaxed text-muted" data-i18n="catalog.programs.intro">Certificate to Giani, a full academic ladder, free and open to all.</p>
-      <div class="glass mt-6 border-l-4 border-saffron p-5 font-sans text-sm" data-i18n="catalog.programs.disclaimer">
-        Sikhi University is not an accredited university and these courses are for self-development only.
-      </div>
+      <p class="max-w-3xl text-lg leading-relaxed text-muted" data-i18n="catalog.programs.intro">Certificate to Giani, a full ladder of programs, free and open to all.</p>
+      <Disclaimer variant="full" callout class="mt-6 max-w-[78ch]" />
       {grouped.map(({ type, label, programs }) => programs.length > 0 && (
         <div class="mt-14">
           <h2 class="flex items-center gap-5 text-2xl font-bold">
@@ -278,7 +277,7 @@ const catGroups = topicsAlpha
                 <div class="flex items-center gap-3">
                   <Icon name={p.icon} class="h-8 w-8 shrink-0 text-saffron-deep" />
                   <div>
-                    <div class="eyebrow text-muted">{p.abbreviation}</div>
+                    {p.abbreviation && <div class="eyebrow text-muted">{p.abbreviation}</div>}
                     <h3 class="mt-0.5 text-lg font-bold text-navy leading-tight">{p.title}</h3>
                     <div class="font-gur text-sm text-muted" lang="pa">{p.titleGur}</div>
                   </div>
@@ -299,10 +298,10 @@ const catGroups = topicsAlpha
         <ol class="how-list mt-6 space-y-4 font-sans text-sm text-muted">
           <li data-i18n="catalog.programs.how.li1">Complete all courses in the program, each has lectures, reading, and a quiz.</li>
           <li>Once every course is passed (70% quiz score), unlock the <strong>Cumulative Examination</strong>.</li>
-          <li>Pass the cumulative exam with <strong>80% or higher</strong> to earn the credential.</li>
-          <li data-i18n="catalog.programs.how.li4">Download your certificate and share your academic credential.</li>
+          <li>Pass the cumulative exam with <strong>80% or higher</strong> to earn the certificate.</li>
+          <li data-i18n="catalog.programs.how.li4">Download and share your certificate.</li>
         </ol>
-        <p class="mt-6 border-t border-line pt-5 font-sans text-sm text-muted" data-i18n="catalog.programs.stackable">Programs are stackable, courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
+        <p class="mt-6 border-t border-line pt-5 font-sans text-sm text-muted" data-i18n="catalog.programs.stackable">Programs are stackable, courses completed in a certificate count toward higher certificate programs. Your progress is always saved.</p>
       </div>
     </div>
   </section>

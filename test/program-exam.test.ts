@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { onRequestPost } from "../functions/api/program-exam.js";
 import { QUIZ_KEYS } from "../functions/api/_quiz-keys.js";
-import { mockEnv, req } from "./helpers";
+import { mockEnv, req, LEARNER } from "./helpers";
+import programs from "../site/assets/data/programs.json";
 
 // INVARIANT 2: program exam grades submitted {cid,qi,sel} tuples against the
 // secret QUIZ_KEYS on the server. Unknown/out-of-range tuples are silently
@@ -137,5 +138,105 @@ describe("POST /api/program-exam — cumulative exam grading", () => {
     const body = await (await call({ items: allCorrect(), passMark: 100 })).json();
     expect(body.score).toBe(100);
     expect(body.passed).toBe(true);
+  });
+});
+
+// RECORDED MODE (2026-11): a signed-in pass on a real program is persisted to
+// `progress` (course_id = program id) so /api/certificates can issue a verifiable
+// certificate. Because that now mints something verifiable it is STRICT: the full
+// exam, distinct questions, from that program's own courses only.
+describe("POST /api/program-exam — recorded mode (programId + signed in)", () => {
+  const PROG = "cert-gurbani-literacy"; // 40 questions drawn from an 88-question pool
+  const prog = programs.programs.find((p: any) => p.id === PROG)!;
+  const pool: { cid: string; qi: number }[] = [];
+  for (const cid of prog.courseIds) for (let qi = 0; qi < (QUIZ_KEYS[cid] || []).length; qi++) pool.push({ cid, qi });
+  const exam = (pick: (cid: string, qi: number) => number, n = prog.testQuestions) =>
+    pool.slice(0, n).map((q) => ({ ...q, sel: pick(q.cid, q.qi) }));
+  const right = (cid: string, qi: number) => QUIZ_KEYS[cid][qi];
+
+  const run = async (items: unknown[], programId: string | null = PROG, signedIn = true) => {
+    const env: any = mockEnv({ user: signedIn ? LEARNER : null });
+    const writes: any[][] = [];
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = (sql: string) => {
+      const st = prepare(sql);
+      const bind = st.bind.bind(st);
+      st.bind = (...a: any[]) => { if (/INSERT INTO progress/.test(sql)) writes.push(a); return bind(...a); };
+      return st;
+    };
+    const res = await onRequestPost({
+      request: req({ url: "http://localhost/api/program-exam", cookie: signedIn ? "sess-learner" : undefined, body: { items, ...(programId ? { programId } : {}) } }),
+      env,
+    });
+    return { res, writes };
+  };
+
+  it("a full passing exam is recorded under the program id and reported as recorded", async () => {
+    const { res, writes } = await run(exam(right));
+    expect(await res.json()).toEqual({ passed: true, score: 100, recorded: true });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].slice(0, 3)).toEqual([LEARNER.id, PROG, 100]);
+  });
+
+  it("a failing full exam records nothing and reveals only the boolean", async () => {
+    const { res, writes } = await run(exam((c, q) => (right(c, q) + 1) % 4));
+    expect(await res.json()).toEqual({ passed: false });
+    expect(writes).toHaveLength(0);
+  });
+
+  it("a short (cherry-picked) submission is refused, not graded", async () => {
+    const { res, writes } = await run(exam(right, 12));
+    expect(res.status).toBe(400);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("repeating one question to reach the count does not pass", async () => {
+    const one = exam(right, 1)[0];
+    const { res, writes } = await run(Array.from({ length: prog.testQuestions }, () => one));
+    expect(res.status).toBe(400);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("questions from another program's courses are ignored (cannot pad the count)", async () => {
+    const foreign = Object.keys(QUIZ_KEYS).find((c) => !prog.courseIds.includes(c))!;
+    const padded = [...exam(right, 10), ...Array.from({ length: 30 }, (_, i) => ({ cid: foreign, qi: i % QUIZ_KEYS[foreign].length, sel: QUIZ_KEYS[foreign][i % QUIZ_KEYS[foreign].length] }))];
+    const { res } = await run(padded);
+    expect(res.status).toBe(400);
+  });
+
+  it("signed-out, or no programId, keeps the legacy graded-but-never-recorded behaviour", async () => {
+    const a = await run(exam(right), PROG, false);
+    expect(await a.res.json()).toEqual({ passed: true, score: 100 });
+    expect(a.writes).toHaveLength(0);
+    const b = await run(exam(right), null, true);
+    expect(await b.res.json()).toEqual({ passed: true, score: 100 });
+    expect(b.writes).toHaveLength(0);
+  });
+
+  it("refuses an oversized answers array", async () => {
+    const { res, writes } = await run(Array.from({ length: 301 }, (_, i) => ({ ...pool[i % pool.length], sel: 0 })));
+    expect(res.status).toBe(400);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("rate limits recorded attempts per account (429)", async () => {
+    const env: any = mockEnv({ user: LEARNER });
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = (sql: string) => {
+      const st = prepare(sql);
+      if (/rate_limits/.test(sql) && /RETURNING/.test(sql)) st.first = async () => ({ count: 21 });
+      return st;
+    };
+    const res = await onRequestPost({
+      request: req({ url: "http://localhost/api/program-exam", cookie: "sess-learner", body: { items: exam(right), programId: PROG } }),
+      env,
+    });
+    expect(res.status).toBe(429);
+  });
+
+  it("an unknown programId is not recorded", async () => {
+    const { res, writes } = await run(exam(right), "not-a-program", true);
+    expect(writes).toHaveLength(0);
+    expect((await res.json()).recorded).toBeUndefined();
   });
 });

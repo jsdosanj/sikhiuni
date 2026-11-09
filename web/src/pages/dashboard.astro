@@ -534,21 +534,22 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             return done > 0 || registeredPrograms.has(p.id);
           });
           if (!active.length) return;
-          el.innerHTML = `<h3 class="mt-10 text-xl font-bold">My Degree Programs</h3>
+          el.innerHTML = `<h3 class="mt-10 text-xl font-bold">My Certificate Programs</h3>
           <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           ${active.map(p => {
             const done = p.courseIds.filter(id => passed(id)).length;
             const total = p.courseIds.length;
             const pct = Math.round((done/total)*100);
-            const cumDone = get('cum_passed_' + p.id, false);
+            const cumDone = (() => { try { return !!JSON.parse(localStorage.getItem('cum_passed_' + p.id)); } catch { return false; } })(); // raw key, written by /program/<id>
             const reg = registeredPrograms.has(p.id);
             return `<a href="/program/${p.id}" class="card hover:border-saffron transition">
-              <div class="flex items-center gap-2"><span class="text-saffron-deep">${iconSvg(p.icon, 'h-6 w-6')}</span><div><div class="font-sans text-xs text-muted font-bold">${esc(p.abbreviation)}${reg ? ' · <span class="text-saffron-deep">Registered</span>' : ''}</div><div class="font-semibold text-navy text-sm leading-tight">${esc(p.title)}</div></div></div>
+              <div class="flex items-center gap-2"><span class="text-saffron-deep">${iconSvg(p.icon, 'h-6 w-6')}</span><div><div class="font-sans text-xs text-muted font-bold">${[p.abbreviation ? esc(p.abbreviation) : '', reg ? '<span class="text-saffron-deep">Registered</span>' : ''].filter(Boolean).join(' · ')}</div><div class="font-semibold text-navy text-sm leading-tight">${esc(p.title)}</div><div role="note" class="su-disclaimer su-disclaimer--short mt-1" data-i18n="disclaimer.short">No university credit · Self-development only</div></div></div>
               <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-paper border border-line"><div class="h-full bg-saffron" style="width:${pct}%"></div></div>
-              <div class="mt-1 font-sans text-xs text-muted">${done}/${total} courses ${cumDone ? '· <span class="inline-flex items-center gap-1 align-[-0.15em] text-saffron-deep font-semibold">' + iconSvg('check', 'h-3.5 w-3.5') + ' Credential earned</span>' : ''}</div>
+              <div class="mt-1 font-sans text-xs text-muted">${done}/${total} courses ${cumDone ? '· <span class="inline-flex items-center gap-1 align-[-0.15em] text-saffron-deep font-semibold">' + iconSvg('check', 'h-3.5 w-3.5') + ' Certificate earned</span>' : ''}</div>
             </a>`;
           }).join('')}</div>
-          <a href="/programs" class="mt-3 inline-block font-sans text-sm text-saffron-deep underline">Browse all degree programs →</a>`;
+          <a href="/programs" class="mt-3 inline-block font-sans text-sm text-saffron-deep underline">Browse all certificate programs →</a>`;
+          if (window.suReapply) window.suReapply();
         }).catch(() => {});
         const goP = document.getElementById('go-profile');
         if (goP) goP.addEventListener('click', (e) => { e.preventDefault(); location.href = '/dashboard/profile'; });
@@ -571,7 +572,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
         root.innerHTML = '<p class="eyebrow text-saffron-deep">Teacher</p><h1 class="text-display-sm font-bold">Teacher dashboard</h1><p class="sr-only">Loading your gradebook…</p><div aria-hidden="true"><div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"><div class="skeleton h-24"></div><div class="skeleton h-24"></div><div class="skeleton h-24"></div><div class="skeleton h-24"></div></div><div class="skeleton mt-6 h-48"></div></div>';
         api('/api/gradebook').then((g) => {
           const tcourses = g.courses || [];
-          const rows = g.rows || [];
+          const rows = (g.rows || []).filter((r) => !r.program); // program-exam passes are not course enrolments
           if (!tcourses.length) {
             root.innerHTML = `<p class="eyebrow text-saffron-deep">Teacher</p><h1 class="text-display-sm font-bold">Teacher dashboard</h1>
               <a href="/studio" class="mt-6 flex items-center gap-4 rounded-xl2 border border-line bg-surface p-4 shadow-card transition hover:border-saffron"><span class="min-w-0 flex-1"><span class="block font-bold text-navy">Course Studio</span><span class="block font-sans text-sm text-muted">Draft a new course and submit it for scholar review.</span></span><span class="font-sans text-sm text-saffron-deep">Open →</span></a>

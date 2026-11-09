@@ -9,7 +9,7 @@
 // __tests__/email-templates.test.ts and punjabiuni's
 // lib/email/templates.test.ts in the same breath.
 import { describe, it, expect } from "vitest";
-import { resetCodeTemplate, welcomeTemplate, registrationCodeTemplate, POWERED_BY_HTML } from "../functions/_email-templates.js";
+import { resetCodeTemplate, welcomeTemplate, registrationCodeTemplate, certificateEarnedTemplate, POWERED_BY_HTML } from "../functions/_email-templates.js";
 
 const ALL: Array<[string, { subject: string; html: string; text: string }]> = [
   ["resetCode", resetCodeTemplate("482913")],
@@ -165,5 +165,43 @@ describe("resetCodeTemplate — the live forgot-password email", () => {
   it("reassures a reader who didn't ask for it", () => {
     expect(t.html).toContain("current password remains unchanged");
     expect(t.text).toContain("current password remains unchanged");
+  });
+});
+
+describe("certificate / degree wording in emails", () => {
+  it("welcome + registration emails no longer promise 'real certificates'", () => {
+    for (const t of [welcomeTemplate("harjit"), registrationCodeTemplate("482913", "harjit")]) {
+      expect(t.html).not.toMatch(/real certificates/i);
+      expect(t.text).not.toMatch(/real certificates/i);
+      expect(t.html).toContain("certificates of completion");
+      expect(t.html).toContain("No university credit");
+      expect(t.text).toContain("No university credit · Self-development only");
+    }
+  });
+});
+
+describe("certificateEarnedTemplate", () => {
+  const t = certificateEarnedTemplate("Harjit <b>", "SU-ABC123DEF4");
+  it("carries the exact short disclaimer in html and text", () => {
+    expect(t.html).toContain("No university credit &middot; Self-development only");
+    expect(t.text).toContain("No university credit · Self-development only");
+  });
+  it("links to /verify with the id, and escapes the learner name", () => {
+    expect(t.html).toContain("https://sikhiuni.com/verify?id=SU-ABC123DEF4");
+    expect(t.html).toContain("Harjit &lt;b&gt;");
+    expect(t.html).not.toContain("<b>");
+  });
+  it("never uses degree / credential language, ends with the powered-by mark", () => {
+    expect(t.html + t.text).not.toMatch(/degree|credential|graduat|conferred/i);
+    expect(t.html).toContain(POWERED_BY_HTML);
+    expect(t.subject).toBe("Your Sikhi University certificate of completion");
+  });
+});
+
+describe("certificateEarnedTemplate kind", () => {
+  it("says 'a program' for a program certificate and 'a course' otherwise", () => {
+    expect(certificateEarnedTemplate("H", "SU-1", "program").text).toContain("completed a program at Sikhi University");
+    expect(certificateEarnedTemplate("H", "SU-1").text).toContain("completed a course at Sikhi University");
+    expect(certificateEarnedTemplate("H", "SU-1", "program").html).toContain("completed a program");
   });
 });

@@ -69,11 +69,9 @@ export function initInstituteCert(): void {
       }
 
       const name = String(user.name || '').trim();
-      const issued = new Date().toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
+      // Shown from the server's stored issue date once the record exists, never today's date.
+      const fmtDate = (ms: number): string =>
+        new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
       app.innerHTML = `
         ${
@@ -95,7 +93,7 @@ export function initInstituteCert(): void {
             <div class="i-cert-meta">Adapted from AI Engineering from Scratch (MIT) &middot; Score ${score}%</div>
             <div class="i-cert-foot">
               <div class="i-cert-foot-l">
-                <div>Issued ${issued}</div>
+                <div>Issued <span id="i-cert-date">&mdash;</span></div>
                 <div id="i-cert-vid" class="i-cert-vid"></div>
               </div>
               <div class="i-cert-seal">
@@ -103,13 +101,16 @@ export function initInstituteCert(): void {
                 <div class="i-cert-sealed">Sealed</div>
               </div>
             </div>
+            <div class="i-cert-line" role="note" data-i18n="disclaimer.cert">Certificate of completion. Self-development only. Sikhi University is not accredited and offers no university credit or degrees. This certificate cannot be transferred for credit at any educational institution.</div>
             <div class="i-cert-verify">Verify authenticity at sikhiuni.com/verify</div>
           </div>
         </div>
         <div class="i-cert-actions noprint">
           <button id="i-cert-pdf" class="i-btn i-btn-primary">Download PDF</button>
           <button id="i-cert-print" class="i-btn i-btn-ghost">Print</button>
-        </div>`;
+        </div>
+        <div class="i-cert-disclaimer" role="note" data-i18n="disclaimer.full">Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered.</div>`;
+      window.suReapply?.();
 
       const card = document.getElementById('i-cert-card');
       if (card) sealReveal(card);
@@ -126,6 +127,8 @@ export function initInstituteCert(): void {
         .then(({ ok, d }) => {
           const v = document.getElementById('i-cert-vid');
           if (!v) return;
+          const dateEl = document.getElementById('i-cert-date');
+          if (ok && d && d.issuedAt && dateEl) dateEl.textContent = fmtDate(d.issuedAt);
           if (ok && d && d.id) {
             v.innerHTML =
               `Verification ID <strong>${esc(d.id)}</strong> &middot; ` +

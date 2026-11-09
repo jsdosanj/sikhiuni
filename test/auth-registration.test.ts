@@ -7,6 +7,7 @@
 // written) is the wrong tool. This file uses a small stateful in-memory D1
 // mock in the same prepare -> bind -> first/run/all shape the handlers expect.
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { isResendUrl } from "./helpers";
 import { onRequestPost as registerStart } from "../functions/api/auth/register-start.js";
 import { onRequestPost as registerComplete } from "../functions/api/auth/register-complete.js";
 import { onRequestPost as signupPost } from "../functions/api/auth/signup.js";
@@ -121,7 +122,7 @@ afterEach(() => { vi.unstubAllGlobals(); });
 
 const codeSends = () =>
   fetchMock.mock.calls.filter(([url, init]: any[]) =>
-    String(url).includes("api.resend.com") && /confirmation code/i.test(String(init?.body ?? "")));
+    isResendUrl(url) && /confirmation code/i.test(String(init?.body ?? "")));
 
 describe("POST /api/auth/register-start", () => {
   it("writes a pending row and sets an httpOnly rsid cookie — and creates NO user", async () => {
@@ -330,7 +331,7 @@ describe("POST /api/auth/register-complete", () => {
     env.RESEND_API_KEY = "re_test";
     fetchMock.mockClear();
     await registerComplete({ request: completeReq({ code, password: PW }, rsid), env } as any);
-    expect(fetchMock.mock.calls.filter(([u]: any[]) => String(u).includes("api.resend.com"))).toHaveLength(0);
+    expect(fetchMock.mock.calls.filter(([u]: any[]) => isResendUrl(u))).toHaveLength(0);
     expect(tables.users).toHaveLength(1);
   });
 });

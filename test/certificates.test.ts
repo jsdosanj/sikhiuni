@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { onRequestGet, onRequestPost } from "../functions/api/certificates.js";
 import { mockEnv, req, LEARNER } from "./helpers";
 
@@ -60,6 +60,55 @@ describe("POST /api/certificates — issuance gate", () => {
 
     expect(second.status).toBe(200);
     expect(secondBody.id).toBe(firstBody.id);
+    // The stored issue date is returned (and is stable), so the certificate can show the real date.
+    expect(typeof firstBody.issuedAt).toBe("number");
+    expect(secondBody.issuedAt).toBe(firstBody.issuedAt);
+  });
+});
+
+describe("POST /api/certificates — certificate-earned email", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const post = (env: any) =>
+    onRequestPost({ request: req({ url: "http://localhost/api/certificates", cookie: "sess-learner", body: { courseId: "ai-foundations" } }), env });
+
+  it("sends exactly one email on first issue, none on re-issue", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const env: any = { ...mockEnv({ user: LEARNER, progress: { passed_score: 90 } }) };
+    env.RESEND_API_KEY = "re_test";
+    const first = await (await post(env)).json();
+    const sends = () => fetchMock.mock.calls.filter((c) => new URL(String(c[0])).hostname === "api.resend.com");
+    expect(sends()).toHaveLength(1);
+    const payload = JSON.parse(sends()[0][1].body);
+    expect(payload.to).toEqual([LEARNER.email]);
+    expect(payload.text).toContain("No university credit · Self-development only");
+    expect(payload.text).toContain(first.id);
+    await post(env);
+    expect(sends()).toHaveLength(1);
+  });
+
+  it("a Resend failure never changes the response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("resend down")));
+    const env: any = { ...mockEnv({ user: LEARNER, progress: { passed_score: 90 } }) };
+    env.RESEND_API_KEY = "re_test";
+    const res = await post(env);
+    expect(res.status).toBe(200);
+    expect((await res.json()).id.startsWith("SU-")).toBe(true);
+  });
+});
+
+describe("GET /api/certificates — verification is rate limited", () => {
+  it("returns 429 (not a verdict on the certificate) once the per-IP limit is exceeded", async () => {
+    const env: any = mockEnv();
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = (sql: string) => {
+      const st = prepare(sql);
+      if (/rate_limits/.test(sql) && /RETURNING/.test(sql)) st.first = async () => ({ count: 61 });
+      return st;
+    };
+    const res = await onRequestGet({ request: req({ url: "http://localhost/api/certificates?id=SU-ABCDEF1234" }), env });
+    expect(res.status).toBe(429);
+    expect((await res.json()).valid).toBeUndefined();
   });
 });
 

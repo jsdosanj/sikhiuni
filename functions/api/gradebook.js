@@ -1,4 +1,9 @@
 import { json, getUser, logEvent, parseBody } from "./_lib.js";
+import programsData from "../../site/assets/data/programs.json";
+
+// Program exam passes live in `progress` under course_id = <program id> (see program-exam.js).
+// They are flagged so UIs can keep them out of course enrolment / completion tallies.
+const PROGRAM_IDS = new Set(programsData.programs.map((p) => p.id));
 
 // course_teachers maps a teacher to the courses they teach (admin-assigned).
 // grade_overrides lets a teacher/admin set a final score that wins over the
@@ -53,15 +58,16 @@ export async function onRequestGet({ request, env }) {
     try { const a = JSON.parse(r.done || "[]"); done = Array.isArray(a) ? a.length : 0; } catch (e) {}
     const eff = (r.override_score != null) ? r.override_score : r.passed_score;
     return {
+      program: PROGRAM_IDS.has(r.course_id), // a passed program exam, not a course enrolment
       course_id: r.course_id, user_id: r.user_id, email: r.email, name: r.name,
       done, score: eff, raw: r.passed_score, override: r.override_score != null,
       reason: r.override_reason || null, last_active: r.updated_at,
     };
   });
-  const courses = isAdmin ? Array.from(new Set(rows.map((r) => r.course_id))) : scopeIds;
+  const courses = isAdmin ? Array.from(new Set(rows.filter((r) => !r.program).map((r) => r.course_id))) : scopeIds;
 
   if (url.searchParams.get("format") === "csv") {
-    const head = ["course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];
+    const head = ["kind", "course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];
     // Neutralise spreadsheet formula injection: a cell like =HYPERLINK(...) in a
     // learner-set name executes when the CSV is opened in Excel/Sheets. Prefix any
     // value starting with a formula trigger with a single quote.
@@ -73,7 +79,7 @@ export async function onRequestGet({ request, env }) {
     const lines = [head.join(",")];
     rows.forEach((r) => {
       const passed = (r.score != null && r.score >= 80) ? "yes" : "no";
-      const cells = [r.course_id, r.name || "", r.email || "", r.done, r.score == null ? "" : r.score, passed, r.override ? "yes" : "no", new Date(r.last_active).toISOString()];
+      const cells = [r.program ? "program" : "course", r.course_id, r.name || "", r.email || "", r.done, r.score == null ? "" : r.score, passed, r.override ? "yes" : "no", new Date(r.last_active).toISOString()];
       lines.push(cells.map(csvCell).join(","));
     });
     return new Response(lines.join("\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": "attachment; filename=gradebook.csv" } });

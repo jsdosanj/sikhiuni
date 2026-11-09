@@ -4,6 +4,7 @@
 // encryption is needed server-side). Signed-in users get the sub linked to
 // their account; anonymous subs are allowed (endpoint is the identity).
 import { json, parseBody, getUser } from "../_lib.js";
+import { isAllowedPushEndpoint } from "../../push-hosts.js";
 
 let ready = false;
 async function ensureTable(env) {
@@ -23,7 +24,7 @@ export async function onRequestPost({ request, env }) {
   const auth = b && b.keys && typeof b.keys.auth === "string" ? b.keys.auth : "";
   // Endpoints are push-service URLs; anything else is junk (and keeps the
   // table from being used as arbitrary storage).
-  if (!endpoint.startsWith("https://") || endpoint.length > 1024 || !p256dh || !auth || p256dh.length > 256 || auth.length > 64) {
+  if (!isAllowedPushEndpoint(endpoint) || endpoint.length > 1024 || !p256dh || !auth || p256dh.length > 256 || auth.length > 64) {
     return json({ error: "bad subscription" }, 400);
   }
   const user = await getUser(env, request).catch(() => null);

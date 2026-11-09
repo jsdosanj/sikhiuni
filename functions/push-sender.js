@@ -6,6 +6,8 @@
 // VAPID_PRIVATE_KEY / VAPID_PUBLIC_KEY secrets (docs/DEPLOY.md explains how to
 // generate them). If the secrets are absent the sender is a no-op.
 
+import { isAllowedPushEndpoint } from "./push-hosts.js";
+
 const te = new TextEncoder();
 
 function b64url(bytes) {
@@ -59,6 +61,9 @@ export function pushConfigured(env) {
 // Send one payload-less push. Returns the HTTP status; 404/410 mean the
 // subscription is dead and should be deleted.
 export async function sendPush(env, endpoint) {
+  // Defence in depth: never request a host outside the push-service allowlist. Returns 0 (neither sent nor
+  // dead) so a legitimate vendor host missing from the list is skipped, not deleted; the row just stays unused.
+  if (!isAllowedPushEndpoint(endpoint)) { console.warn("push: endpoint host not on the allowlist, skipped"); return 0; }
   const aud = new URL(endpoint).origin;
   const jwt = await vapidJwt(env, aud);
   const res = await fetch(endpoint, {

@@ -28,6 +28,11 @@ function specialtyFor(list: { topic: string }[]): string[] {
   return names;
 }
 const specialty = specialtyFor(courses);
+// Meta description for professors with no bio: say what the page actually offers (course count + a few real
+// titles) instead of a one-line stub, so 70-odd professor pages are not near-duplicate thin snippets.
+const metaDesc = bio || (courses.length
+  ? `${name} teaches ${courses.length} free course${courses.length === 1 ? '' : 's'} at Sikhi University, including ${sorted.slice(0, 3).map((c) => c.title).join('; ')}.`
+  : `${name} teaches courses at Sikhi University.`);
 
 // "Source works" rail: the real primary texts these courses draw on
 // (course.sourceText), not the academic bibliography (course.references) -
@@ -60,7 +65,7 @@ const personLd = {
   },
 };
 ---
-<Base title={`${name}, Sikhi University`} description={bio || `${name} teaches courses at Sikhi University.`} ogType="profile" ambient="study">
+<Base title={`${name}, Sikhi University`} description={metaDesc} ogType="profile" ambient="study">
   <script type="application/ld+json" set:html={ldJson(personLd)} slot="head" />
 
   <div class="band-navy">

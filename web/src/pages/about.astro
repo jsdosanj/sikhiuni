@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import { ldJson } from '../lib/site';
 const offers = [
   ['books', 'Real courses, by topic', 'Dozens of courses across theology, philosophy, history, language, spirituality, music, the arts, and modern skills like AI.'],
@@ -9,7 +10,7 @@ const offers = [
   ['note', 'Tests & certificates', 'Each course ends with a test. Pass with 80%+ to unlock the next course and earn a printable certificate.'],
   ['accessibility', 'Open & accessible', 'Read-aloud, larger text, high-contrast mode, offline access, built so everyone can use it.'],
   ['globe', 'Free, forever for now', 'Every course is free today. We may add paid offerings later, but open access stays at our core.'],
-  ['cap', 'Graduate seminars', '500-level advanced seminars across every subject, research-focused, scholarly, for serious students who want to go as deep as possible.'],
+  ['cap', 'Advanced seminars', '500-level advanced seminars across every subject, research-focused, scholarly, for serious students who want to go as deep as possible.'],
 ];
 const steps = [
   ['Browse or follow a path.', 'Pick a topic, search the catalogue, or follow a guided learning path.'],
@@ -20,7 +21,7 @@ const steps = [
 const faqs = [
   ['Is Sikhi University really free?', 'Yes. Every course, lesson, test and learning path is free today, with no sign-up required to start learning, pick a course and begin straight away.'],
   ['Do I need an account?', "No account is needed to start a course. You only need to sign in, free, to save your progress across devices and to download a certificate after you pass a course's test. Signing up takes a username, an email and a code we send you."],
-  ['Is Sikhi University an accredited university?', "No. Sikhi University is not an accredited institution, and its courses and academic-ladder programs (Certificate through Giani) are for self-development only, they don't confer an accredited degree."],
+  ['Is Sikhi University an accredited university?', "No. Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered."],
   ['What does the "Created by AI" label mean?', 'Some courses are drafted with AI to make broad teaching possible quickly. Every such course is clearly labelled "Created by AI" and reviewed for accuracy, and every Gurbani quote across the site is machine-verified against the canonical text of Sri Guru Granth Sahib Ji at build time, see the /integrity page for the method and numbers.'],
   ['How does Sikhi University relate to the Sikh Archive?', 'The Sikh Archive (sikharchive.net) is a companion project, a growing library of Sikh primary sources and free courses. Sikhi University courses link out to it for deeper reading, and the two are designed to work hand in hand.'],
   ['What subjects can I study?', 'Sikh theology, philosophy, history, language (Gurmukhi/Punjabi), spiritual practice, music (Gurmat Sangeet), art and architecture, comparative religion, ethics, and modern life skills, hundreds of free courses organised into guided learning paths from foundations to advanced study.'],
@@ -46,7 +47,7 @@ const pillars: [string, string][] = [
   ['A relationship with Waheguru', 'Not just knowledge, but Naam, Simran and seva, a living, personal bond with the Divine.'],
 ];
 ---
-<Base title="About, Sikhi University" description="Why Sikhi University exists: a free, open space for anyone, anywhere to dig deeper into Sikhi and modern skills." ambient="hall" bgImage="/assets/backgrounds/about.jpg">
+<Base title="About, Sikhi University" description="Why Sikhi University exists: a free, open online university where anyone can study Sikhi, Gurbani and Sikh history. Self-development only; not accredited." ambient="hall" bgImage="/assets/backgrounds/about.jpg">
   <script type="application/ld+json" set:html={ldJson(faqLd)} slot="head" />
 
   <!-- Mission hero (isabout 1585-1591): dark hero-midnight band, mono eyebrow
@@ -139,6 +140,8 @@ const pillars: [string, string][] = [
   <section class="wrap pb-14">
     <div class="rounded-xl2 border border-line bg-surface p-8 sm:p-12">
       <h2 class="text-2xl font-bold text-navy" data-i18n="about.faq.h2">Frequently asked questions</h2>
+      <!-- Always visible (not inside a <details>), next to the accreditation question below. -->
+      <Disclaimer variant="full" callout class="mt-6 max-w-[78ch]" />
       <div class="mt-6">
         {faqs.map(([q, a]) => (
           <details class="group border-b border-line py-4 first:pt-0 last:border-b-0">

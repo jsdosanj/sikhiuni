@@ -551,3 +551,16 @@ html .su-nav .su-nav-link { font-family:Inter,"Noto Sans Gurmukhi",sans-serif; t
 .su-nav #nav-menu input { min-height:46px; border-radius:8px; }
 .su-nav #nav-menu > .wrap { padding-top:18px; padding-bottom:max(20px,env(safe-area-inset-bottom)); }
 .su-nav a:focus-visible, .su-nav button:focus-visible, .su-nav summary:focus-visible, .su-nav select:focus-visible { outline:2px solid #edc66d; outline-offset:3px; }
+
+/* ── No-degree / no-credit disclaimer (real text, role="note") ───────────────
+   Never smaller than 16px even when the user picks "Smaller text" (root
+   font-size < 100%); still grows with "Larger text". Logical properties so
+   the callout lays out correctly in RTL (Urdu, Arabic). Colours come from the
+   theme tokens (ink on surface) and are forced to white-on-black in the
+   high-contrast mode, matching the other body.hc overrides. */
+.su-disclaimer { font-size: max(16px, 1rem); line-height: 1.55; color: rgb(var(--c-ink)); text-align: start; }
+.su-disclaimer--callout { border: 2px solid rgb(var(--c-navy)); border-inline-start-width: 6px; background: rgb(var(--c-surface)); padding: 1rem 1.25rem; }
+.su-disclaimer--callout > p { margin: 0; }
+.su-disclaimer--short { font-weight: 600; }
+body.hc .su-disclaimer { color: #fff !important; border-color: #fff !important; }
+body.hc .su-disclaimer--callout { background: #000 !important; }

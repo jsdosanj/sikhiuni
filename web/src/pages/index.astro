@@ -21,16 +21,15 @@ const portals = [
 ];
 
 const ld = {
-  '@context': 'https://schema.org', '@type': 'CollegeOrUniversity',
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization',
   '@id': SITE + '/#org', // merges with the Organization node Base.astro emits site-wide
-  name: 'Sikhi University', url: SITE + '/', description: 'A free, open online university for Sikhi and modern skills.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
+  name: 'Sikhi University', url: SITE + '/', description: 'SikhiUni, Sikhi University: a free online university for Sikhi, Gurbani, Sikh history & Gurmukhi. Not accredited; certificates are for self-development only.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
   sameAs: ['https://sikharchive.net'],
 };
 // WebSite (with the sitelinks SearchAction) is now emitted site-wide by Base.astro.
 ---
-<Base title="Sikhi University, free, open Sikhi & modern-skills courses" ambient="hall" bodyClass="su-home">
+<Base title="Sikhi University | Free Online Sikhi, Gurbani & Sikh History Courses" description="SikhiUni, Sikhi University: a free online university for Sikhi, Gurbani, Sikh history & Gurmukhi. Not accredited; certificates are for self-development only." ambient="hall" bodyClass="su-home">
   <script type="application/ld+json" set:html={ldJson(ld)} slot="head" />
-  <script type="module" src="/scripts/model-viewer.min.js" slot="head" />
 
 
   <header class="home-hero">
@@ -65,10 +64,23 @@ const ld = {
   </header>
   <script>
     const crest = document.getElementById('su-crest-model');
+    // Core Web Vitals: the 3D crest is a ~19 MB glTF plus a ~1 MB viewer script. Fetching them on every
+    // page view hurt LCP/INP and mobile data (and page-experience is a ranking signal), so the static
+    // webp crest (already the LCP image) stays for phones / Save-Data / slow links, and the 3D model is
+    // fetched only on wide screens, after the page has loaded and the browser is idle.
     function loadCrest() {
-      if (crest && !crest.hasAttribute('src')) crest.setAttribute('src', crest.dataset.src!);
+      if (!crest || crest.hasAttribute('src')) return;
+      const s = document.createElement('script');
+      s.type = 'module'; s.src = '/scripts/model-viewer.min.js';
+      document.head.appendChild(s);
+      crest.setAttribute('src', crest.dataset.src!);
     }
-    loadCrest();
+    const conn: any = (navigator as any).connection;
+    const slowLink = !!conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''));
+    if (!slowLink && matchMedia('(min-width: 900px)').matches) {
+      const go = () => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(loadCrest, { timeout: 3000 }) : setTimeout(loadCrest, 1500));
+      document.readyState === 'complete' ? go() : window.addEventListener('load', go, { once: true });
+    }
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let played = false;
@@ -242,7 +254,7 @@ const ld = {
               ['sprout', 'Discover', 'Complete beginners, no background needed'],
               ['book', 'Explore & practise', 'Growing students ready to go deeper'],
               ['microscope', 'Deepen', 'Advanced learners in serious study'],
-              ['cap', 'Research', 'Graduate seminars for scholars'],
+              ['cap', 'Research', 'Advanced seminars for scholars'],
               ['pen', 'Languages change', 'Gurbani was written in Punjabi, Braj Bhasha, Sant Bhasha, and Persian. Every course here bridges the Guru\'s depth to the language you live in today.'],
               ['diya', 'ਸਿੱਖ means learner', 'Gurbani\'s call to forever seek is written into our name. This university exists to honour that call, for every generation, everywhere on Earth.'],
             ].map((t, i) => (
@@ -295,7 +307,7 @@ const ld = {
   <!-- Call to action -->
   <section class="text-white">
     <div class="wrap py-24 text-center">
-      <img src="/assets/brand/closing-crest-final-2026.webp" width="1254" height="1254" alt="Sikhi University crest" class="home-closing-crest mx-auto w-auto" />
+      <img src="/assets/brand/closing-crest-final-2026.webp" width="1254" height="1254" alt="Sikhi University crest" class="home-closing-crest mx-auto w-auto" loading="lazy" decoding="async" />
       <p class="eyebrow text-saffron mt-6" data-i18n="home.cta2.eyebrow">Begin today</p>
       <h2 class="text-display-sm mt-4 font-bold text-white" data-i18n="home.cta2.heading">Start your journey today.</h2>
       <p class="mx-auto mt-4 max-w-xl text-lg text-white/85" data-i18n="home.cta2.sub">It takes thirty seconds to begin. No sign-up required. Pick a course, start a lesson, and see how deep Sikhi really goes.</p>
