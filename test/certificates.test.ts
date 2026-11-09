@@ -77,7 +77,7 @@ describe("POST /api/certificates — certificate-earned email", () => {
     const env: any = { ...mockEnv({ user: LEARNER, progress: { passed_score: 90 } }) };
     env.RESEND_API_KEY = "re_test";
     const first = await (await post(env)).json();
-    const sends = () => fetchMock.mock.calls.filter((c) => String(c[0]).includes("api.resend.com"));
+    const sends = () => fetchMock.mock.calls.filter((c) => new URL(String(c[0])).hostname === "api.resend.com");
     expect(sends()).toHaveLength(1);
     const payload = JSON.parse(sends()[0][1].body);
     expect(payload.to).toEqual([LEARNER.email]);
