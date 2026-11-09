@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { onRequestGet, onRequestPost } from "../functions/api/certificates.js";
 import { mockEnv, req, LEARNER } from "./helpers";
 
@@ -60,6 +60,37 @@ describe("POST /api/certificates — issuance gate", () => {
 
     expect(second.status).toBe(200);
     expect(secondBody.id).toBe(firstBody.id);
+  });
+});
+
+describe("POST /api/certificates — certificate-earned email", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const post = (env: any) =>
+    onRequestPost({ request: req({ url: "http://localhost/api/certificates", cookie: "sess-learner", body: { courseId: "ai-foundations" } }), env });
+
+  it("sends exactly one email on first issue, none on re-issue", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const env: any = { ...mockEnv({ user: LEARNER, progress: { passed_score: 90 } }) };
+    env.RESEND_API_KEY = "re_test";
+    const first = await (await post(env)).json();
+    const sends = () => fetchMock.mock.calls.filter((c) => String(c[0]).includes("api.resend.com"));
+    expect(sends()).toHaveLength(1);
+    const payload = JSON.parse(sends()[0][1].body);
+    expect(payload.to).toEqual([LEARNER.email]);
+    expect(payload.text).toContain("No university credit · Self-development only");
+    expect(payload.text).toContain(first.id);
+    await post(env);
+    expect(sends()).toHaveLength(1);
+  });
+
+  it("a Resend failure never changes the response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("resend down")));
+    const env: any = { ...mockEnv({ user: LEARNER, progress: { passed_score: 90 } }) };
+    env.RESEND_API_KEY = "re_test";
+    const res = await post(env);
+    expect(res.status).toBe(200);
+    expect((await res.json()).id.startsWith("SU-")).toBe(true);
   });
 });
 

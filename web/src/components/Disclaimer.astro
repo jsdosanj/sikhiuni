@@ -1,0 +1,23 @@
+---
+// The approved "self-development only / no university credit" notices, as REAL
+// TEXT (never an image) with role="note". English is the in-markup source;
+// other languages come from the data-i18n keys disclaimer.{full,short,cert}
+// in web/public/assets/i18n/<lang>.json. Styles: .su-disclaimer* in global.css.
+// JS-rendered surfaces (dashboard, certificate card) use the same strings via
+// the constants below mirrored in their scripts - keep the wording identical.
+interface Props { variant?: 'full' | 'short' | 'cert'; callout?: boolean; class?: string; }
+const { variant = 'full', callout = false, class: cls = '' } = Astro.props;
+const TEXT = {
+  full: 'Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered.',
+  short: 'No university credit · Self-development only',
+  cert: 'Certificate of completion. Self-development only. Sikhi University is not accredited and offers no university credit or degrees.',
+} as const;
+const mod = `su-disclaimer su-disclaimer--${variant}`;
+---
+{callout ? (
+  <div role="note" class:list={[mod, 'su-disclaimer--callout', cls]}><p data-i18n={`disclaimer.${variant}`}>{TEXT[variant]}</p></div>
+) : variant === 'short' ? (
+  <span role="note" class:list={[mod, cls]} data-i18n="disclaimer.short">{TEXT.short}</span>
+) : (
+  <p role="note" class:list={[mod, cls]} data-i18n={`disclaimer.${variant}`}>{TEXT[variant]}</p>
+)}

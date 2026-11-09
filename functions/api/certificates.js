@@ -1,4 +1,5 @@
 import { json, getUser, newId, logEvent } from "./_lib.js";
+import { certificateEarnedTemplate } from "../_email-templates.js";
 
 async function ensure(env) {
   await env.DB.prepare(
@@ -22,6 +23,31 @@ export async function onRequestGet({ request, env }) {
     console.error("cert_verify_db_error", id, e && e.stack || String(e));
     return json({ error: "cannot_check" }, 503);
   }
+}
+
+// One transactional email, only on FIRST issuance (the early return above
+// handles re-issue / name edits, so a repeat visit never re-sends). Never
+// throws and never changes the response: the certificate already exists. Same
+// Resend shape as functions/api/auth/_onboarding.js sendWelcomeEmail. Awaited
+// (with a short timeout) rather than fire-and-forget because the Worker router
+// does not pass waitUntil to handlers.
+async function sendCertificateEmail(env, email, name, certId) {
+  if (!email) return;
+  if (!env.RESEND_API_KEY) { console.log("cert email: RESEND_API_KEY not configured"); return; }
+  try {
+    const t = certificateEarnedTemplate(name, certId);
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>",
+        to: [email],
+        reply_to: env.REPLY_TO || "akaal@sikhi.io",
+        subject: t.subject, text: t.text, html: t.html,
+      }),
+      signal: AbortSignal.timeout(4000),
+    });
+  } catch (e) { console.log("Resend threw (certificate)", e && e.message); }
 }
 
 // POST /api/certificates { courseId, name } -> issue (or return existing) verifiable id.
@@ -53,5 +79,6 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare("INSERT INTO certificates (id, user_id, course_id, name, score, issued_at) VALUES (?,?,?,?,?,?)")
     .bind(id, user.id, courseId, name, score, Date.now()).run();
   await logEvent(env, user, "certificate_issued", courseId, "cert_id=" + id);
+  await sendCertificateEmail(env, user.email, name, id);
   return json({ ok: true, id });
 }

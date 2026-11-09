@@ -224,7 +224,7 @@ export function welcomeTemplate(name) {
       ${paragraph(greeting, 10)}
       ${paragraph("Your enrollment is complete. Every course on this campus is open to you, at no cost, from today.", 24)}
       ${highlight("A full departments catalogue", "Browse by department and take any course in any order — nothing is gated behind a prerequisite you haven&rsquo;t met.")}
-      ${highlight("Free courses, real certificates", "Complete a course, pass its assessment, and a verifiable certificate is issued in your name.")}
+      ${highlight("Free courses and certificates of completion", "Complete a course, pass its assessment, and a verifiable certificate of completion is issued in your name. No university credit &middot; Self-development only.")}
       ${highlight("Learning paths", "Follow a structured route through a subject instead of choosing every next step yourself.")}
       <tr><td style="padding-bottom:6px;">&nbsp;</td></tr>
       ${button("https://sikhiuni.com/dashboard.html", "Go to your dashboard")}
@@ -240,7 +240,7 @@ ${name ? `Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh — and welcome, ${name}.`
 Your enrollment is complete. Every course on this campus is open to you, at no cost, from today.
 
 - A full departments catalogue: browse by department and take any course in any order.
-- Free courses, real certificates: pass a course's assessment and a verifiable certificate is issued in your name.
+- Free courses and certificates of completion: pass a course's assessment and a verifiable certificate of completion is issued in your name. No university credit · Self-development only.
 - Learning paths: follow a structured route through a subject.
 
 Go to your dashboard: https://sikhiuni.com/dashboard.html
@@ -316,7 +316,7 @@ export function registrationCodeTemplate(code, username) {
       ${codeBlock}
       ${paragraph("The code only works in that same tab &mdash; opening this email on another device won&rsquo;t sign anyone in. It expires in <strong style=\"color:#0b1e3a;\">15 minutes</strong>.", 24)}
       ${highlight("A full departments catalogue", "Browse by department and take any course in any order &mdash; nothing is gated behind a prerequisite you haven&rsquo;t met.")}
-      ${highlight("Free courses, real certificates", "Complete a course, pass its assessment, and a verifiable certificate is issued in your name.")}
+      ${highlight("Free courses and certificates of completion", "Complete a course, pass its assessment, and a verifiable certificate of completion is issued in your name. No university credit &middot; Self-development only.")}
       ${highlight("Learning paths", "Follow a structured route through a subject instead of choosing every next step yourself.")}
       ${paragraph("Your Sikhi University sign-in also works on <strong style=\"color:#0b1e3a;\">sikhi.io</strong> and <strong style=\"color:#0b1e3a;\">PunjabiUni</strong> &mdash; one account across all three.", 0)}
     `,
@@ -332,7 +332,7 @@ Your confirmation code: ${code}
 Enter it in the browser tab where you started signing up, then choose a password. The code only works in that same tab — opening this email on another device won't sign anyone in. It expires in 15 minutes.
 
 - A full departments catalogue: browse by department and take any course in any order.
-- Free courses, real certificates: pass a course's assessment and a verifiable certificate is issued in your name.
+- Free courses and certificates of completion: pass a course's assessment and a verifiable certificate of completion is issued in your name. No university credit · Self-development only.
 - Learning paths: follow a structured route through a subject.
 
 Your Sikhi University sign-in also works on sikhi.io and PunjabiUni — one account across all three.
@@ -348,6 +348,72 @@ Sikhi University · sikhiuni.com
 Powered by sikhi.io — https://sikhi.io`;
 
   return { subject: `${code} is your Sikhi University confirmation code`, html, text };
+}
+
+// ── Certificate earned ──────────────────────────────────────────────────────
+// Sent once, the first time a certificate of completion is issued for a
+// course (functions/api/certificates.js; a re-issue/name-update never
+// re-sends). Transactional, no marketing content. Added 2026-11 by explicit
+// instruction; like the welcome email it supersedes the older "auth mail
+// only" volume note at the top of this file, and the volume is bounded at one
+// send per (learner, course) because certificates are UNIQUE(user_id,
+// course_id). It carries the SHORT no-credit disclaimer on purpose, and must
+// never describe the certificate as a degree, credential or credit.
+function escHtml(v) {
+  return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+export function certificateEarnedTemplate(name, certId) {
+  const who = name ? escHtml(name) : "";
+  const id = escHtml(certId);
+  const verifyUrl = `https://sikhiuni.com/verify?id=${encodeURIComponent(certId || "")}`;
+  const html = shell({
+    title: "Your Sikhi University certificate of completion",
+    preheader: "Your certificate of completion is ready. No university credit · Self-development only.",
+    eyebrow: "Office of the Registrar",
+    heading: "Certificate of completion",
+    bodyRows: `
+      ${paragraph(who ? `Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh &mdash; and well done, ${who}.` : "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh.", 10)}
+      ${paragraph("You have completed a course at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.", 20)}
+      <tr><td style="padding-bottom:20px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="4" bgcolor="#f4b21a" style="background-color:#f4b21a; font-size:0; line-height:0;">&nbsp;</td>
+            <td style="padding-left:14px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
+              <strong style="color:#0b1e3a;">Verification ID</strong><br>${id}
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+      ${button(verifyUrl, "Verify this certificate")}
+      <tr>
+        <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#0b1e3a; padding-bottom:6px;">No university credit &middot; Self-development only</td>
+      </tr>
+    `,
+    footerNote: "You&rsquo;re receiving this because you earned a certificate of completion on Sikhi University. This is a one-off message about that certificate.",
+  });
+
+  const text = `SIKHI UNIVERSITY — Certificate of completion
+
+${name ? `Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh — and well done, ${name}.` : "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh."}
+
+You have completed a course at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.
+
+Verification ID: ${certId}
+Verify this certificate: ${verifyUrl}
+
+No university credit · Self-development only
+
+Respectfully,
+Office of the Registrar
+Sikhi University
+
+Sikhi University · sikhiuni.com
+You're receiving this because you earned a certificate of completion on Sikhi University.
+
+Powered by sikhi.io — https://sikhi.io`;
+
+  return { subject: "Your Sikhi University certificate of completion", html, text };
 }
 
 // ── Magic-link sign-in — TEMPLATE DELETED 2026-09-06 ────────────────────────

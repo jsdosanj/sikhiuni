@@ -447,6 +447,12 @@ body[data-institute] .i-cert-verify {
   margin-top: 14px; font-family: "JetBrains Mono", monospace; font-size: 10px;
   color: var(--i-muted); letter-spacing: 0.02em;
 }
+body[data-institute] .i-cert-line { margin-top: 18px; font-size: max(16px, 1rem); line-height: 1.55; color: var(--i-ink); }
+body[data-institute] .i-cert-disclaimer {
+  max-width: 720px; margin: 20px auto 0; padding: 14px 18px;
+  border: 2px solid var(--i-filament-dim); border-inline-start-width: 6px;
+  font-size: max(16px, 1rem); line-height: 1.55; color: var(--i-ink); text-align: start;
+}
 body[data-institute] .i-cert-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
 
 @media print {

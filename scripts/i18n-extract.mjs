@@ -83,7 +83,8 @@ for (const dict of dicts) {
   const entries = JSON.parse(readFileSync(join(I18N_DIR, dict), 'utf8'));
   const have = new Set(Object.keys(entries));
   const missing = [...used.keys()].filter((k) => !have.has(k)).sort();
-  const orphans = [...have].filter((k) => !used.has(k)).sort();
+  // "<key>@TODO(native-review)" marks a machine-drafted string awaiting native review; it is metadata, not an orphan.
+  const orphans = [...have].filter((k) => !used.has(k) && !k.endsWith('@TODO(native-review)')).sort();
   if (missing.length) {
     missingTotal += missing.length;
     console.error(`✗ ${lang}: ${missing.length} missing key(s):`);

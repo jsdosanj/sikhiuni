@@ -103,13 +103,16 @@ export function initInstituteCert(): void {
                 <div class="i-cert-sealed">Sealed</div>
               </div>
             </div>
+            <div class="i-cert-line" role="note" data-i18n="disclaimer.cert">Certificate of completion. Self-development only. Sikhi University is not accredited and offers no university credit or degrees.</div>
             <div class="i-cert-verify">Verify authenticity at sikhiuni.com/verify</div>
           </div>
         </div>
         <div class="i-cert-actions noprint">
           <button id="i-cert-pdf" class="i-btn i-btn-primary">Download PDF</button>
           <button id="i-cert-print" class="i-btn i-btn-ghost">Print</button>
-        </div>`;
+        </div>
+        <div class="i-cert-disclaimer" role="note" data-i18n="disclaimer.full">Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered.</div>`;
+      window.suReapply?.();
 
       const card = document.getElementById('i-cert-card');
       if (card) sealReveal(card);

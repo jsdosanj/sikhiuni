@@ -19,7 +19,7 @@ import path from 'node:path';
 const fontFaceCss = readFileSync(path.resolve(process.cwd(), 'public/fonts/fonts.css'), 'utf-8');
 
 interface Props { title: string; description?: string; canonical?: string; ogType?: string; autoTranslate?: boolean; ambient?: 'hall' | 'study' | 'sanctum' | 'none'; bgImage?: string; noindex?: boolean; bodyClass?: string; institute?: boolean }
-const { title, description = 'A free, open online university for Sikhi and modern skills, open to all, worldwide.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
+const { title, description = 'A free, open online school for Sikhi and modern skills, open to all, worldwide. Certificates are for self-development only. No university credit.', canonical, ogType = 'website', autoTranslate = true, ambient = 'none', bgImage, noindex = false, bodyClass, institute = false } = Astro.props;
 const instituteFontCss = institute ? readFileSync(path.resolve(process.cwd(), 'public/fonts/institute-fonts.css'), 'utf-8') : '';
 const autoTranslateEff = institute ? false : autoTranslate;
 // Google truncates a meta description around 155-160 chars anyway; better to
@@ -103,7 +103,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", "@id": SITE + "/#org", "name": "Sikhi University", "url": SITE,
-        "description": "A free, open online university for Sikhi, Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide.",
+        "description": "A free, open online school for Sikhi, Gurbani, history, philosophy, Rehat, Kirtan, and Gurmukhi/Punjabi, open to all, worldwide. Not an accredited institution; no degrees or university credit.",
         "logo": { "@type": "ImageObject", "url": SITE + "/assets/brand/crest-2026.webp", "width": 1200, "height": 1200 } },
       { "@type": "WebSite", "@id": SITE + "/#website", "url": SITE, "name": "Sikhi University",
         "publisher": { "@id": SITE + "/#org" },
@@ -204,6 +204,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
       const RTL = new Set(['ar', 'ur']);
       const orig = new WeakMap();
       let curDict = {};
+      let curLang = 'en';
       // Let JS-driven labels (e.g. the nav auth button toggling Sign in <-> Sign out) opt
       // into i18n: update the element's snapshot fallback + data-i18n key and re-apply the
       // current language, so a later language switch translates the CURRENT state, not the
@@ -230,6 +231,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
         try { const r = await fetch('/assets/i18n/' + lang + '.json'); return r.ok ? await r.json() : {}; } catch (e) { return {}; }
       }
       async function apply(lang) {
+        curLang = lang;
         snapshot();
         document.documentElement.setAttribute('lang', lang);
         document.documentElement.setAttribute('dir', RTL.has(lang) ? 'rtl' : 'ltr');
@@ -293,6 +295,9 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
         }
       }
 
+      // For markup rendered by page scripts AFTER the first apply() (dashboard, certificate card,
+      // verify result): re-run the current language over the new [data-i18n] nodes.
+      window.suReapply = () => apply(curLang);
       let lang = 'en';
       try { lang = localStorage.getItem('su_v1_lang') || 'en'; } catch (e) {}
       const switches = document.querySelectorAll('[data-lang-switch]');

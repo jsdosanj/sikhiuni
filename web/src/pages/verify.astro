@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 // Redesign task 18 (isverify, prototype lines 763-788). The "What this does
 // and does not attest" note below ships as a STATIC block in raw markup
 // (never only inside the JS-built #out card) so it holds with JS disabled,
@@ -12,7 +13,7 @@ import Base from '../layouts/Base.astro';
 ---
 <Base title="Verify a certificate, Sikhi University" description="Verify the authenticity of a Sikhi University certificate of completion." autoTranslate={false} ambient="study">
   <section class="wrap max-w-xl py-14">
-    <p class="eyebrow text-saffron-deep" data-i18n="verify.eyebrow">Credential check</p>
+    <p class="eyebrow text-saffron-deep" data-i18n="verify.eyebrow">Certificate check</p>
     <h1 class="text-display-sm mt-3 text-navy" data-i18n="verify.h1">Verify a certificate</h1>
     <p class="mt-4 font-sans text-[15.5px] leading-relaxed text-muted"><span data-i18n="verify.hint1">Enter a certificate ID (e.g.</span> <code class="font-mono">SU-XXXXXXXXXX</code><span data-i18n="verify.hint2">) to confirm it was issued by Sikhi University.</span></p>
     <form id="vf" class="mt-6 flex flex-wrap gap-2">
@@ -20,10 +21,12 @@ import Base from '../layouts/Base.astro';
       <button class="btn btn-primary" data-i18n="verify.submit">Verify</button>
     </form>
     <div id="out" class="mt-6" aria-live="polite"></div>
+    <!-- Full disclaimer sits directly under the result area; static markup so it shows with JS off too. -->
+    <Disclaimer variant="full" callout class="mt-6" />
 
     <div class="mt-9 max-w-[74ch] border border-line border-l-[3px] border-l-saffron-deep bg-surface px-5 py-4">
       <p class="font-mono text-[10.5px] uppercase tracking-[.18em] text-saffron-deep" data-i18n="verify.attest.label">What this does and does not attest</p>
-      <p class="mt-2.5 font-sans text-[15px] leading-relaxed text-muted" data-i18n="verify.attest.body">This check confirms that a matching credential exists in our records, issued to this name, for this course, with this score. It does not attest to accreditation by any external body, and it is not a degree. Sikhi University is not an accredited institution, and course content is reviewed by our own scholar board before publication.</p>
+      <p class="mt-2.5 font-sans text-[15px] leading-relaxed text-muted" data-i18n="verify.attest.body">This check confirms that a matching certificate exists in our records, issued to this name, for this course, with this score. Course content is reviewed by our own scholar board before publication.</p>
     </div>
   </section>
   <script>
@@ -39,6 +42,9 @@ import Base from '../layouts/Base.astro';
         if (!titles[t.id]) titles[t.id] = t.kind === 'phase' ? `${t.title}, Institute of Technology` : t.title;
       });
     }).catch(() => {});
+    // Program names (e.g. "Specialist Certificate in Sikh Studies") resolve from the live programs list,
+    // so any record is always shown under the CURRENT program name, never a retired one.
+    fetch('/assets/data/programs.json').then((r) => r.json()).then((d) => { (d.programs || []).forEach((p) => { if (!titles[p.id]) titles[p.id] = p.title; }); }).catch(() => {});
     const btn = document.querySelector('#vf button');
     function verify(id) {
       if (!id) return;
@@ -62,10 +68,11 @@ import Base from '../layouts/Base.astro';
             <div class="mt-5 grid grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[15px]">
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.holder">Holder</span><span class="font-semibold text-navy">${esc(d.name || '-')}</span>
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.programme">Programme</span><span class="text-ink">${esc(titles[d.courseId] || d.courseId)}</span>
-              <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.conferred">Conferred</span><span class="text-ink">${dt}</span>
+              <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.conferred">Completed</span><span class="text-ink">${dt}</span>
               <span class="pt-0.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted" data-i18n="verify.field.score">Score</span><span class="text-ink">${d.score}%</span>
             </div>
           </div>`;
+          if (window.suReapply) window.suReapply();
         } else {
           out.innerHTML = `<div class="rounded-xl2 border-l-4 border-saffron bg-surface p-5 font-sans text-sm"><strong data-i18n="verify.notfound.title">Not found.</strong> <span data-i18n="verify.notfound.detail">No certificate matches that ID.</span></div>`;
         }

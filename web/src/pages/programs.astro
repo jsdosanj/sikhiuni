@@ -1,22 +1,23 @@
 ---
 import Base from '../layouts/Base.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import programsData from '../../public/assets/data/programs.json';
 
 // --- Registrar's-ledger programmes list (task 7: isprograms, lines 921-953) ---
-// One flat ruled row per real programme, ordered certificate -> associate ->
-// bachelor -> master -> giani (the same academic-ladder order the
-// old card grid used). No invented course codes (Decision 12): the tinted
-// mono slot is the real abbreviation from programs.json, never a fabricated
-// code.
-const typeOrder = ['certificate', 'associate', 'bachelor', 'master', 'giani'];
+// One flat ruled row per real programme, ordered certificate -> advanced ->
+// specialist -> scholar -> giani (the same ladder order the old card grid
+// used). No invented course codes (Decision 12): the tinted mono slot is the
+// real abbreviation from programs.json (only the three base certificates and
+// Giani have one), never a fabricated code.
+const typeOrder = ['certificate', 'advanced', 'specialist', 'scholar', 'giani'];
 const TYPE_TINT: Record<string, string> = {
   certificate: 'text-saffron-deep',
-  associate: 'text-navy-soft',
-  bachelor: 'text-navy',
+  advanced: 'text-navy-soft',
+  specialist: 'text-navy',
 };
-// Master/Giani tints are page-local constants (Design decision 1), used
+// Scholar/Giani tints are page-local constants (Design decision 1), used
 // nowhere else in the design system, not worth a token.
-const TYPE_HEX: Record<string, string> = { master: '#5c3b8a', giani: '#8a5a14' };
+const TYPE_HEX: Record<string, string> = { scholar: '#5c3b8a', giani: '#8a5a14' };
 const orderedPrograms = typeOrder.flatMap((t) => programsData.programs.filter((p) => p.type === t));
 
 const passMarks = [...new Set(programsData.programs.map((p) => p.passMark))];
@@ -24,10 +25,10 @@ const passMarkLabel = passMarks.length === 1 ? `${passMarks[0]}%` : '-';
 
 function prereqLabel(p: (typeof programsData.programs)[number]): { text: string; none: boolean } {
   if (!p.prerequisites.length) return { text: 'No prerequisites', none: true };
-  const abbrs = p.prerequisites.map(
-    (pid) => programsData.programs.find((x) => x.id === pid)?.abbreviation ?? pid,
+  const names = p.prerequisites.map(
+    (pid) => programsData.programs.find((x) => x.id === pid)?.title ?? pid,
   );
-  return { text: abbrs.join(' or '), none: false };
+  return { text: names.join(' or '), none: false };
 }
 
 // Real data issues found while building this page (Decision 12, flagged
@@ -36,11 +37,11 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
 //   1. `credits` on every one of the 11 programmes is exactly the length of
 //      `courseIds`, it is a course count, not a weighted credit value. The
 //      column below is labelled "Courses" for that reason.
-//   2. M.A.S.S. (mass) and Giani both require 558 courses (courseIds.length),
+//   2. The Scholar Certificate in Sikh Studies (mass) and Giani both require 558 courses (courseIds.length),
 //      but the Giani programme's own `description` field says "all 534
 //      courses", a third number. One of these three figures is wrong.
 ---
-<Base title="Degree Programs, Sikhi University" description="Certificate, Associate, Bachelor's, Master's and Giani degree programs in Sikh Studies, free, open, and comprehensive." ambient="study">
+<Base title="Certificate Programs, Sikhi University" description="Eleven free certificate programs in Sikh Studies. For self-development only. No university credit." ambient="study">
   <section class="wrap pt-10 pb-2">
     <div class="rule-navy flex flex-wrap items-end justify-between gap-6 pb-4">
       <div class="min-w-0 flex-1">
@@ -59,6 +60,8 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
   </section>
 
   <section class="wrap pb-16">
+    <!-- Full disclaimer: always visible, bordered, above the program list. -->
+    <Disclaimer variant="full" callout class="mb-8 max-w-[78ch]" />
     <!-- Mono column-header row -->
     <div class="flex flex-wrap gap-x-4 gap-y-1 border-b border-line py-3 font-mono text-[10px] uppercase tracking-[.16em] text-muted">
       <span class="w-[76px] flex-none" data-i18n="programs.col.abbr">Abbrev.</span>
@@ -75,7 +78,7 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
       const tintHex = TYPE_HEX[p.type];
       return (
         <a href={`/program/${p.id}`} class="row-ruled hover:bg-paper" data-no-i18n>
-          <span class:list={["w-[76px] flex-none font-mono text-[12.5px] font-medium", tintClass]} style={tintHex ? { color: tintHex } : undefined}>{p.abbreviation}</span>
+          <span class:list={["w-[76px] flex-none font-mono text-[12.5px] font-medium", tintClass]} style={tintHex ? { color: tintHex } : undefined}>{p.abbreviation ?? ''}</span>
           <span class="min-w-[220px] flex-1">
             <span class="block text-[16.5px] font-semibold leading-tight text-navy">{p.title}</span>
             <span lang="pa" class="mt-0.5 block font-gurmukhi text-sm leading-[1.85] text-muted">{p.titleGur}</span>
@@ -88,20 +91,15 @@ function prereqLabel(p: (typeof programsData.programs)[number]): { text: string;
       );
     })}
 
-    <div class="mt-10 max-w-[78ch] border border-line border-l-[3px] border-l-saffron-deep bg-surface px-5 py-4">
-      <p class="font-mono text-[10.5px] uppercase tracking-[.18em] text-saffron-deep" data-i18n="programs.disclaimer.label">Not an accredited university</p>
-      <p class="mt-2.5 font-sans text-[15.5px] leading-relaxed text-muted" data-i18n="programs.disclaimer">Sikhi University is not an accredited university and these courses are for self-development only.</p>
-    </div>
-
     <div class="mt-10 border-t-2 border-navy pt-6">
       <h2 class="text-xl font-bold text-navy" data-i18n="programs.how.h2">How programs work</h2>
       <ol class="mt-4 max-w-[74ch] list-decimal space-y-3 pl-5 font-sans text-sm text-muted">
         <li data-i18n="programs.how.step1">Complete all courses in the program, each has lectures, reading, and a quiz.</li>
         <li><span data-i18n="programs.how.step2a">Once every course is passed (70% quiz score), unlock the</span> <strong class="text-ink" data-i18n="programs.how.step2b">Cumulative Examination</strong>.</li>
-        <li><span data-i18n="programs.how.step3a">Pass the cumulative exam with</span> <strong class="text-ink" data-i18n="programs.how.step3b">80% or higher</strong> <span data-i18n="programs.how.step3c">to earn the credential.</span></li>
-        <li data-i18n="programs.how.step4">Download your certificate and share your academic credential.</li>
+        <li><span data-i18n="programs.how.step3a">Pass the cumulative exam with</span> <strong class="text-ink" data-i18n="programs.how.step3b">80% or higher</strong> <span data-i18n="programs.how.step3c">to earn the certificate.</span></li>
+        <li data-i18n="programs.how.step4">Download and share your certificate.</li>
       </ol>
-      <p class="mt-4 max-w-[74ch] font-sans text-sm text-muted" data-i18n="programs.how.footer">Programs are stackable, courses completed in a certificate count toward higher degrees. Your progress is always saved.</p>
+      <p class="mt-4 max-w-[74ch] font-sans text-sm text-muted" data-i18n="programs.how.footer">Programs are stackable, courses completed in a certificate count toward higher certificate programs. Your progress is always saved.</p>
     </div>
   </section>
 </Base>

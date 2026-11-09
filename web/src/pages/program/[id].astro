@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
 import { iconSvg } from '../../lib/icons';
 import { SITE, ldJson } from '../../lib/site';
 import programsData from '../../../public/assets/data/programs.json';
@@ -26,18 +27,18 @@ const topicSet = [...new Set(progCourses.map((c) => c.topic))].sort();
 // `level` field from courses.json, never a fabricated letters-plus-digits code.
 const BREADCRUMB_TYPE: Record<string, string> = {
   certificate: 'Certificates',
-  associate: 'Associate Degree',
-  bachelor: "Bachelor's Degrees",
-  master: "Master's Degrees",
+  advanced: 'Advanced Certificate',
+  specialist: 'Specialist Certificates',
+  scholar: 'Scholar Certificates',
   giani: 'Giani',
 };
 
 function entryFrom(p: typeof prog): { text: string; none: boolean } {
   if (!p.prerequisites.length) return { text: 'No prerequisites', none: true };
-  const abbrs = p.prerequisites.map(
-    (pid) => programsData.programs.find((x) => x.id === pid)?.abbreviation ?? pid,
+  const names = p.prerequisites.map(
+    (pid) => programsData.programs.find((x) => x.id === pid)?.title ?? pid,
   );
-  return { text: abbrs.join(' or '), none: false };
+  return { text: names.join(' or '), none: false };
 }
 const entry = entryFrom(prog);
 
@@ -61,12 +62,12 @@ const breadcrumb = {
         <a href="/programs" class="hover:text-white" data-i18n="program.breadcrumb.programs">Programmes</a>
         <span aria-hidden="true">›</span>
         <span data-no-i18n>{BREADCRUMB_TYPE[prog.type]}</span>
-        <span aria-hidden="true">›</span>
-        <span class="text-saffron" data-no-i18n>{prog.abbreviation}</span>
+        {prog.abbreviation && <span aria-hidden="true">›</span>}
+        {prog.abbreviation && <span class="text-saffron" data-no-i18n>{prog.abbreviation}</span>}
       </p>
       <div class="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2">
         <h1 class="text-display-sm max-w-[26ch] text-white" data-no-i18n>{prog.title}</h1>
-        <span class="font-mono text-[15px] text-saffron" data-no-i18n>{prog.abbreviation}</span>
+        {prog.abbreviation && <span class="font-mono text-[15px] text-saffron" data-no-i18n>{prog.abbreviation}</span>}
       </div>
       <p lang="pa" class="mt-2.5 font-gurmukhi text-xl leading-[1.9] text-white/88" data-no-i18n>{prog.titleGur}</p>
       <div class="mt-4 flex flex-wrap gap-x-7 gap-y-2.5 font-mono text-[11px] uppercase tracking-[.12em] text-white/78">
@@ -79,6 +80,7 @@ const breadcrumb = {
       <div class="mt-6">
         <button id="register-btn" class="btn btn-ghost">Register for this program</button>
       </div>
+      <Disclaimer variant="full" callout class="mt-5 max-w-[78ch]" />
     </div>
   </div>
 
@@ -127,7 +129,7 @@ const breadcrumb = {
           ) : (
             leadsTo.map((lp) => (
               <a href={`/program/${lp.id}`} class="row-ruled hover:bg-paper" data-no-i18n>
-                <span class="text-[15px] font-semibold text-navy">{lp.abbreviation}</span>
+                <span class="text-[15px] font-semibold text-navy">{lp.title}</span>
                 <span class="ml-auto font-mono text-[11px] text-muted">{lp.courseIds.length} courses</span>
               </a>
             ))
@@ -142,11 +144,13 @@ const breadcrumb = {
     <div class="mx-4 w-full max-w-2xl border border-line bg-surface p-8">
       <h2 class="text-2xl font-bold text-navy" id="cum-test-title">Cumulative Examination</h2>
       <p class="mt-1 font-sans text-sm text-muted" id="cum-test-subtitle"></p>
+      <Disclaimer variant="short" class="mt-2 block" />
       <div id="cum-test-body" class="mt-6 space-y-6"></div>
       <div id="cum-test-result" class="hidden mt-6 rounded-xl2 border border-line bg-paper p-5 text-center">
         <div id="cum-result-icon"><Icon name="cap" class="mx-auto h-9 w-9 text-saffron-deep" /></div>
         <div class="mt-2 text-2xl font-bold text-navy" id="cum-result-score"></div>
         <div class="mt-1 font-sans text-sm text-muted" id="cum-result-msg"></div>
+        <Disclaimer variant="short" class="mt-2 block" />
         <button id="cum-retry" class="btn mt-4 hidden">Retry Exam</button>
         <a id="cum-cert-link" href="#" class="btn btn-primary mt-4 hidden">Download Certificate →</a>
       </div>
@@ -188,7 +192,7 @@ const breadcrumb = {
     <div class="mt-3 h-1 w-full bg-line"><div class="h-full bg-saffron" style="width:${pct}%"></div></div>
     ${allDone
       ? cumPassed
-        ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Credential earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View credential →</a></div>`
+        ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Certificate earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View certificate →</a></div>`
         : `<button id="start-cum-test" class="btn btn-primary mt-4 w-full">Take Cumulative Exam →</button>`
       : `<p class="mt-3 font-sans text-[14.5px] leading-relaxed text-muted">The comprehensive examination unlocks when all ${total} courses are complete. ${testQuestions} questions, ${passMark}% to pass.</p><div class="mt-3 border border-line bg-surface px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[.12em] text-muted">Exam locked</div>`
     }
@@ -290,7 +294,7 @@ const breadcrumb = {
     iconEl.innerHTML = passed_exam ? ICONS.cap : ICONS.books;
     if (passed_exam) {
       scoreEl.textContent = `${score}%`;
-      msgEl.textContent = `Congratulations, you have passed the ${progTitle} cumulative examination. Your credential is ready.`;
+      msgEl.textContent = `Congratulations, you have passed the ${progTitle} cumulative examination. Your certificate is ready.`;
       certLink.href = `/cert?program=${progId}`;
       certLink.classList.remove('hidden');
       retryBtn.classList.add('hidden');
