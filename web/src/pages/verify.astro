@@ -34,23 +34,26 @@ import Disclaimer from '../components/Disclaimer.astro';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const out = document.getElementById('out');
     let titles = {};
-    fetch('/data/index.json').then((r) => r.json()).then((d) => { d.courses.forEach((c) => (titles[c.id] = c.title)); }).catch(() => {});
+    // Every title source is awaited before a result renders (verify() below), so a prefilled ?id= can't show a raw id.
+    const titleLoads = [];
+    titleLoads.push(fetch('/data/index.json').then((r) => r.json()).then((d) => { d.courses.forEach((c) => (titles[c.id] = c.title)); }).catch(() => {}));
     // Institute of Technology phase ids (e.g. aisf-11-llm-engineering) aren't in
     // the main catalogue, resolve their names from the Institute manifest.
-    fetch('/data/institute/manifest.json').then((r) => r.json()).then((m) => {
+    titleLoads.push(fetch('/data/institute/manifest.json').then((r) => r.json()).then((m) => {
       (m.tracks || []).forEach((t) => {
         if (!titles[t.id]) titles[t.id] = t.kind === 'phase' ? `${t.title}, Institute of Technology` : t.title;
       });
-    }).catch(() => {});
+    }).catch(() => {}));
     // Program names (e.g. "Specialist Certificate in Sikh Studies") resolve from the live programs list,
     // so any record is always shown under the CURRENT program name, never a retired one.
-    fetch('/assets/data/programs.json').then((r) => r.json()).then((d) => { (d.programs || []).forEach((p) => { if (!titles[p.id]) titles[p.id] = p.title; }); }).catch(() => {});
+    titleLoads.push(fetch('/assets/data/programs.json').then((r) => r.json()).then((d) => { (d.programs || []).forEach((p) => { if (!titles[p.id]) titles[p.id] = p.title; }); }).catch(() => {}));
+    const titlesReady = Promise.all(titleLoads);
     const btn = document.querySelector('#vf button');
     function verify(id) {
       if (!id) return;
       out.innerHTML = '<p class="text-muted" data-i18n="verify.checking">Checking…</p>';
       if (btn) btn.disabled = true;
-      fetch('/api/certificates?id=' + encodeURIComponent(id)).then(async (r) => {
+      Promise.all([fetch('/api/certificates?id=' + encodeURIComponent(id)), titlesReady]).then(async ([r]) => {
         const d = await r.json().catch(() => ({}));
         // A non-OK response (e.g. 503 cannot_check during a DB outage) must not be
         // read as "not found", a real certificate could be declared fake otherwise.
