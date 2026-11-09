@@ -193,3 +193,6 @@ export function req({ url = "http://localhost/api/x", cookie, body, method }: Re
 export const LEARNER = { id: "u-learner", email: "learner@example.com", name: "Learner", role: "learner" };
 export const ADMIN = { id: "u-admin", email: "admin@example.com", name: "Admin", role: "admin" };
 export const TEACHER = { id: "u-teacher", email: "teacher@example.com", name: "Teacher", role: "teacher" };
+
+// True only when the request URL's HOST is api.resend.com (not a substring match anywhere in the URL).
+export const isResendUrl = (u: unknown): boolean => { try { return new URL(String(u)).hostname === "api.resend.com"; } catch { return false; } };

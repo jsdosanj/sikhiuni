@@ -11,6 +11,7 @@
 // 2026-09-07, once an hour had comfortably passed since the deploy that
 // converged this flow onto codes.
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { isResendUrl } from "./helpers";
 import { onRequestPost as forgotPost } from "../functions/api/auth/forgot-password.js";
 import { onRequestPost as verifyCodePost } from "../functions/api/auth/verify-reset-code.js";
 import { onRequestPost as resetPost } from "../functions/api/auth/reset-password.js";
@@ -95,7 +96,7 @@ afterEach(() => { vi.unstubAllGlobals(); });
 
 const codeSends = () =>
   fetchMock.mock.calls.filter(([url, init]: any[]) =>
-    String(url).includes("api.resend.com") && /reset code/i.test(String(init?.body ?? "")));
+    isResendUrl(url) && /reset code/i.test(String(init?.body ?? "")));
 
 describe("POST /api/auth/forgot-password — now a code", () => {
   it("writes a code row, sets an httpOnly psid cookie, and emails the code", async () => {

@@ -15,6 +15,7 @@
 // this file uses its own recording DB mock in the same shape (prepare -> bind
 // -> first/run/all) that the handlers already expect.
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { isResendUrl } from "./helpers";
 
 type Call = { sql: string; args: unknown[] };
 
@@ -64,7 +65,7 @@ afterEach(() => { vi.unstubAllGlobals(); });
 
 const welcomeSends = () =>
   fetchMock.mock.calls.filter(([url, init]: any[]) =>
-    String(url).includes("api.resend.com") && String(init?.body ?? "").includes("Welcome to Sikhi University"));
+    isResendUrl(url) && String(init?.body ?? "").includes("Welcome to Sikhi University"));
 
 // ── POST /api/auth/signup — RETIRED 2026-09-06 ──────────────────────────────
 // The instant-signup route this file used to cover is now a 410. Its opt-in

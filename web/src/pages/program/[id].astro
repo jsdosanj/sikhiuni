@@ -191,6 +191,7 @@ const breadcrumb = {
 
   // Update status panel ("Your standing" rail, ruled ledger treatment)
   const statusEl = document.getElementById('prog-status');
+  function drawStatus() {
   const cumPassed = get('cum_passed_' + progId, false);
   statusEl.innerHTML = `
     <div class="flex items-baseline justify-between gap-3">
@@ -198,13 +199,22 @@ const breadcrumb = {
       <span class="font-mono text-[19px] text-navy">${done} / ${total}</span>
     </div>
     <div class="mt-3 h-1 w-full bg-line"><div class="h-full bg-saffron" style="width:${pct}%"></div></div>
-    ${allDone
-      ? cumPassed
-        ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Certificate earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View certificate →</a></div>`
-        : `<button id="start-cum-test" class="btn btn-primary mt-4 w-full">Take Cumulative Exam →</button>`
-      : `<p class="mt-3 font-sans text-[14.5px] leading-relaxed text-muted">The comprehensive examination unlocks when all ${total} courses are complete. ${testQuestions} questions, ${passMark}% to pass.</p><div class="mt-3 border border-line bg-surface px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[.12em] text-muted">Exam locked</div>`
+    ${cumPassed
+      ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Certificate earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View certificate →</a></div>`
+      : allDone
+        ? `<button id="start-cum-test" class="btn btn-primary mt-4 w-full">Take Cumulative Exam →</button>`
+        : `<p class="mt-3 font-sans text-[14.5px] leading-relaxed text-muted">The comprehensive examination unlocks when all ${total} courses are complete. ${testQuestions} questions, ${passMark}% to pass.</p><div class="mt-3 border border-line bg-surface px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[.12em] text-muted">Exam locked</div>`
     }
   `;
+  }
+  drawStatus();
+  // A pass recorded by the server (signed-in exam, possibly on another device) wins over this browser's flag.
+  fetch('/api/progress', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+    const row = d && d.progress && d.progress.find((p) => p.course_id === progId && p.passed_score >= 80);
+    if (!row || get('cum_passed_' + progId, false)) return;
+    set('cum_passed_' + progId, true); set('cum_score_' + progId, row.passed_score);
+    drawStatus();
+  }).catch(() => {});
 
   // Update course rows with completion checkmarks
   document.querySelectorAll('[data-course-id]').forEach((card) => {

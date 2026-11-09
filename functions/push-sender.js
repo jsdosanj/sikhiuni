@@ -6,6 +6,8 @@
 // VAPID_PRIVATE_KEY / VAPID_PUBLIC_KEY secrets (docs/DEPLOY.md explains how to
 // generate them). If the secrets are absent the sender is a no-op.
 
+import { isAllowedPushEndpoint } from "./push-hosts.js";
+
 const te = new TextEncoder();
 
 function b64url(bytes) {
@@ -59,6 +61,8 @@ export function pushConfigured(env) {
 // Send one payload-less push. Returns the HTTP status; 404/410 mean the
 // subscription is dead and should be deleted.
 export async function sendPush(env, endpoint) {
+  // Defence in depth (and cleans up any pre-allowlist junk rows): a non-push-service endpoint reads as "dead" and is deleted.
+  if (!isAllowedPushEndpoint(endpoint)) return 410;
   const aud = new URL(endpoint).origin;
   const jwt = await vapidJwt(env, aud);
   const res = await fetch(endpoint, {

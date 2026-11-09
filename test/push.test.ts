@@ -44,7 +44,7 @@ function pushDb(subs: string[] = []) {
 }
 
 const GOOD_SUB = {
-  endpoint: "https://push.example.com/send/abc123",
+  endpoint: "https://fcm.googleapis.com/fcm/send/send/abc123",
   keys: { p256dh: "BPubKeyMaterial", auth: "authSecret16" },
 };
 
@@ -73,7 +73,10 @@ describe("POST /api/push/subscribe", () => {
     ["non-https endpoint", { ...GOOD_SUB, endpoint: "http://push.example.com/x" }],
     ["missing keys", { endpoint: GOOD_SUB.endpoint }],
     ["missing auth", { endpoint: GOOD_SUB.endpoint, keys: { p256dh: "x" } }],
-    ["oversized endpoint", { ...GOOD_SUB, endpoint: "https://x.com/" + "a".repeat(1100) }],
+    ["oversized endpoint", { ...GOOD_SUB, endpoint: "https://fcm.googleapis.com/" + "a".repeat(1100) }],
+    ["arbitrary https host (SSRF)", { ...GOOD_SUB, endpoint: "https://attacker.example/x" }],
+    ["push host only as a substring", { ...GOOD_SUB, endpoint: "https://fcm.googleapis.com.attacker.example/x" }],
+    ["credentials in URL", { ...GOOD_SUB, endpoint: "https://fcm.googleapis.com@attacker.example/x" }],
     ["oversized auth", { ...GOOD_SUB, keys: { p256dh: "x", auth: "a".repeat(100) } }],
   ])("rejects %s with 400", async (_name, body) => {
     const DB = pushDb();
@@ -140,15 +143,15 @@ describe("sendDailyReminders", () => {
   it("skips entirely when VAPID secrets are absent", async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
-    const r = await sendDailyReminders({ DB: pushDb(["https://push.example.com/a"]) });
+    const r = await sendDailyReminders({ DB: pushDb(["https://fcm.googleapis.com/fcm/send/a"]) });
     expect(r).toEqual({ sent: 0, pruned: 0, skipped: true });
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(pushConfigured({})).toBe(false);
   });
 
   it("sends to live endpoints and prunes dead ones", async () => {
-    const live = "https://push.example.com/live";
-    const dead = "https://push.example.com/dead";
+    const live = "https://fcm.googleapis.com/fcm/send/live";
+    const dead = "https://fcm.googleapis.com/fcm/send/dead";
     const seen: Array<{ url: string; headers: any }> = [];
     vi.stubGlobal("fetch", vi.fn(async (url: string, init: any) => {
       seen.push({ url, headers: init.headers });
@@ -166,8 +169,8 @@ describe("sendDailyReminders", () => {
   });
 
   it("one failing endpoint never stops the sweep", async () => {
-    const boom = "https://push.example.com/boom";
-    const ok = "https://push.example.com/ok";
+    const boom = "https://fcm.googleapis.com/fcm/send/boom";
+    const ok = "https://fcm.googleapis.com/fcm/send/ok";
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       if (url === boom) throw new Error("network");
       return new Response(null, { status: 201 });

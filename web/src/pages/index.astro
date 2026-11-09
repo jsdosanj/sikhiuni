@@ -30,7 +30,6 @@ const ld = {
 ---
 <Base title="Sikhi University | Free Online Sikhi, Gurbani & Sikh History Courses" description="SikhiUni, Sikhi University: a free online university for Sikhi, Gurbani, Sikh history & Gurmukhi. Not accredited; certificates are for self-development only." ambient="hall" bodyClass="su-home">
   <script type="application/ld+json" set:html={ldJson(ld)} slot="head" />
-  <script type="module" src="/scripts/model-viewer.min.js" slot="head" />
 
 
   <header class="home-hero">
@@ -65,10 +64,23 @@ const ld = {
   </header>
   <script>
     const crest = document.getElementById('su-crest-model');
+    // Core Web Vitals: the 3D crest is a ~19 MB glTF plus a ~1 MB viewer script. Fetching them on every
+    // page view hurt LCP/INP and mobile data (and page-experience is a ranking signal), so the static
+    // webp crest (already the LCP image) stays for phones / Save-Data / slow links, and the 3D model is
+    // fetched only on wide screens, after the page has loaded and the browser is idle.
     function loadCrest() {
-      if (crest && !crest.hasAttribute('src')) crest.setAttribute('src', crest.dataset.src!);
+      if (!crest || crest.hasAttribute('src')) return;
+      const s = document.createElement('script');
+      s.type = 'module'; s.src = '/scripts/model-viewer.min.js';
+      document.head.appendChild(s);
+      crest.setAttribute('src', crest.dataset.src!);
     }
-    loadCrest();
+    const conn: any = (navigator as any).connection;
+    const slowLink = !!conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''));
+    if (!slowLink && matchMedia('(min-width: 900px)').matches) {
+      const go = () => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(loadCrest, { timeout: 3000 }) : setTimeout(loadCrest, 1500));
+      document.readyState === 'complete' ? go() : window.addEventListener('load', go, { once: true });
+    }
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let played = false;
