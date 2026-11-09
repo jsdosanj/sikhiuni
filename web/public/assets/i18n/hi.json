@@ -304,6 +304,8 @@
   "footer.aiNote": "\"AI द्वारा निर्मित\" के रूप में लेबल किए गए कोर्स AI से तैयार किए गए हैं और सटीकता के लिए जाँचे जाते हैं। पवित्र सामग्री को आदर के साथ संभाला जाता है।",
   "footer.aipolicy": "AI व सामग्री-उपयोग नीति",
   "footer.catalogue": "कोर्स सूची",
+  "footer.contact": "संपर्क करें",
+  "footer.contact@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed",
   "footer.feedback": "फीडबैक",
   "footer.integrity": "सामग्री की प्रामाणिकता",
   "footer.learn": "सीखें",

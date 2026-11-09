@@ -306,6 +306,8 @@
   "footer.aiNote": "标注为“由 AI 创建”的课程为 AI 起草并经准确性审核。神圣内容均以审慎之心处理。",
   "footer.aipolicy": "AI 与内容使用政策",
   "footer.catalogue": "课程目录",
+  "footer.contact": "联系我们",
+  "footer.contact@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed",
   "footer.feedback": "反馈",
   "footer.integrity": "内容诚信",
   "footer.learn": "学习",

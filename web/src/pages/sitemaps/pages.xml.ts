@@ -13,6 +13,7 @@ const STATIC_PATHS: [string, string][] = [
   ['/programs', '0.8'],
   ['/professors', '0.7'],
   ['/about', '0.7'],
+  ['/contact', '0.5'],
   ['/integrity', '0.6'],
   ['/search', '0.5'],
   ['/santhiya', '0.7'],

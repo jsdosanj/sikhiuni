@@ -43,6 +43,7 @@ import { onRequestGet as adminUploadsGet, onRequestPost as adminUploadsPost } fr
 import { onRequestPost as teacherApplyPost } from "./functions/api/teacher/apply.js";
 import { onRequestGet as adminAppsGet, onRequestPost as adminAppsPost } from "./functions/api/admin/applications.js";
 import { onRequestPost as feedbackPost } from "./functions/api/feedback.js";
+import { onRequestPost as contactPost } from "./functions/api/contact.js";
 import { onRequestGet as adminFeedbackGet } from "./functions/api/admin/feedback.js";
 import { onRequestGet as adminStatsGet } from "./functions/api/admin/stats.js";
 import { onRequestGet as adminUsersGet, onRequestPost as adminUsersPost } from "./functions/api/admin/users.js";
@@ -124,6 +125,7 @@ const routes = {
   "/api/teacher/apply": { POST: teacherApplyPost },
   "/api/admin/applications": { GET: adminAppsGet, POST: adminAppsPost },
   "/api/feedback": { POST: feedbackPost },
+  "/api/contact": { POST: contactPost },
   "/api/admin/feedback": { GET: adminFeedbackGet },
   "/api/admin/stats": { GET: adminStatsGet },
   "/api/admin/users": { GET: adminUsersGet, POST: adminUsersPost },
@@ -186,6 +188,7 @@ const RATE_LIMITS = {
   "/api/auth/register-complete": { limit: 10, window: 60 },
   "/api/translate": { limit: 60, window: 60 },     // paid Workers AI — cap per-IP cost
   "/api/feedback": { limit: 15, window: 60 },
+  "/api/contact": { limit: 5, window: 600 },  // public form that sends mail: 5 per IP per 10 min
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },

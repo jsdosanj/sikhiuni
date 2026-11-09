@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+// Public "Contact us" form. Posts to /api/contact, which stores the message and
+// emails akaal@sikhi.io with the sender as reply-to (functions/api/contact.js).
+// Page copy is English in markup; Base's auto-translate covers <main> for other
+// languages (no new dictionary keys needed here).
+const field = 'mt-2.5 w-full border border-line bg-surface px-4 py-3 font-sans text-[15px] text-ink outline-none focus:border-navy';
+const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.16em] text-muted';
+---
+<Base title="Contact us, Sikhi University" description="Get in touch with Sikhi University: questions about your account, courses, certificates or partnerships. We read every message." ambient="none">
+  <section class="wrap max-w-4xl py-12 sm:py-14">
+    <p class="eyebrow flex items-center gap-2.5 text-saffron-deep"><span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>Contact</p>
+    <h1 class="text-display-sm mt-3 text-navy">Contact us</h1>
+    <p class="mt-4 max-w-[66ch] text-lg leading-[1.62] text-muted">Questions about your account, a course, a certificate, or working with us? Send a message and the team will reply by email. You can also write to <a class="underline" href="mailto:akaal@sikhi.io">akaal@sikhi.io</a>.</p>
+
+    <div class="mt-9 flex flex-wrap gap-10">
+      <div class="min-w-0 flex-[1_1_420px]">
+        <form id="contact-form" class="space-y-5" novalidate>
+          <label class={label}>Your name
+            <input id="c-name" name="name" type="text" required maxlength="120" autocomplete="name" class={field} style="border-radius:2px" />
+          </label>
+          <label class={label}>Email (so we can reply)
+            <input id="c-email" name="email" type="email" required maxlength="200" autocomplete="email" placeholder="you@example.com" class={field} style="border-radius:2px" />
+          </label>
+          <label class={label}>Topic
+            <select id="c-topic" name="topic" class={field} style="border-radius:2px">
+              <option value="general">General question</option>
+              <option value="account">Account or sign-in help</option>
+              <option value="courses">Courses and content</option>
+              <option value="certificates">Certificates and verification</option>
+              <option value="technical">Report a technical problem</option>
+              <option value="partnerships">Partnerships and teaching</option>
+              <option value="other">Something else</option>
+            </select>
+          </label>
+          <label class={label}>Message
+            <textarea id="c-msg" name="message" rows="7" required minlength="10" maxlength="5000" class={field + ' leading-[1.6]'} style="border-radius:2px"></textarea>
+          </label>
+          <p id="c-count" class="-mt-3 text-right font-mono text-[11px] text-muted" aria-live="polite">0 / 5000</p>
+          <!-- Honeypot: hidden from people and assistive tech; bots that fill it are dropped server-side. -->
+          <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+            <label>Leave this empty<input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          <button id="c-send" type="submit" class="btn btn-primary">Send message</button>
+        </form>
+        <div id="c-out" class="mt-4" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="min-w-0 flex-[1_1_260px]">
+        <p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">Before you write</p>
+        <div class="mt-1 border-t-2 border-navy">
+          <div class="border-b border-line py-3.5"><p class="text-[15px] leading-[1.55] text-ink"><strong>Didn't get a sign-up or reset code?</strong> Check your spam or junk folder, wait a minute, then use “Resend code”. If it still doesn't arrive, choose “Account or sign-in help” and tell us the email you used.</p></div>
+          <div class="border-b border-line py-3.5"><p class="text-[15px] leading-[1.55] text-ink">Found an error in a course? The <a class="underline" href="/feedback">feedback form</a> lets you point to the exact course.</p></div>
+          <div class="border-b border-line py-3.5"><p class="text-[15px] leading-[1.55] text-ink">Checking a certificate? Use <a class="underline" href="/verify">Verify a certificate</a>.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+    const msg = $('c-msg'), count = document.getElementById('c-count')!, out = document.getElementById('c-out')!, btn = $('c-send') as unknown as HTMLButtonElement;
+    const upd = () => { count.textContent = msg.value.length + ' / 5000'; };
+    msg.addEventListener('input', upd); upd();
+    // Prefill for signed-in learners and from ?topic= (e.g. links from the sign-up page).
+    const qTopic = new URLSearchParams(location.search).get('topic');
+    if (qTopic && document.querySelector(`#c-topic option[value="${CSS.escape(qTopic)}"]`)) ($('c-topic') as any).value = qTopic;
+    fetch('/api/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+      const u = d && d.user; if (!u) return;
+      if (u.name && !$('c-name').value) $('c-name').value = u.name;
+      if (u.email && !$('c-email').value) $('c-email').value = u.email;
+    }).catch(() => {});
+    const box = (tone: string, html: string) => `<div class="rounded-xl border-l-4 ${tone} bg-surface p-4 font-sans text-[15px]">${html}</div>`;
+    document.getElementById('contact-form')!.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = { name: $('c-name').value.trim(), email: $('c-email').value.trim(), topic: ($('c-topic') as any).value, message: msg.value.trim(), website: $('c-website').value };
+      if (!body.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) || body.message.length < 10) {
+        out.innerHTML = box('border-saffron', 'Please add your name, a valid email, and a message of at least 10 characters.'); return;
+      }
+      btn.disabled = true; btn.textContent = 'Sending…'; out.innerHTML = '';
+      try {
+        const r = await fetch('/api/contact', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 429) throw new Error('Too many messages from this connection. Please wait a few minutes and try again.');
+        if (!r.ok) throw new Error(d.error || 'Could not send your message. Please try again.');
+        const ref = d.reference ? ` Reference: <code>${esc(String(d.reference).slice(0, 10))}</code>.` : '';
+        (document.getElementById('contact-form') as HTMLElement).outerHTML = d.notified
+          ? box('border-ok', `<strong>Thank you, ${esc(body.name)}.</strong> Your message has been sent. We'll reply to ${esc(body.email)}.${ref}`)
+          : box('border-saffron', `<strong>Your message was saved,</strong> but the email notification did not go through. We'll still see it. If it's urgent, please also email <a class="underline" href="mailto:akaal@sikhi.io">akaal@sikhi.io</a>.${ref}`);
+      } catch (e: any) {
+        btn.disabled = false; btn.textContent = 'Send message';
+        out.innerHTML = box('border-saffron', esc(e.message || 'Could not send your message.') + ' You can also email <a class="underline" href="mailto:akaal@sikhi.io">akaal@sikhi.io</a>.');
+      }
+    });
+  </script>
+</Base>
