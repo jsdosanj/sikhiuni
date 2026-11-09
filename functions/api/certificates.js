@@ -1,5 +1,6 @@
 import { json, getUser, newId, logEvent } from "./_lib.js";
 import { certificateEarnedTemplate } from "../_email-templates.js";
+import { checkRateLimit } from "./_rate-limit.js";
 
 async function ensure(env) {
   await env.DB.prepare(
@@ -11,6 +12,9 @@ async function ensure(env) {
 export async function onRequestGet({ request, env }) {
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return json({ valid: false });
+  // Public lookup that returns a holder name: throttle per IP so ids cannot be enumerated.
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  if (!(await checkRateLimit(env, "certverify:" + ip, 60, 60))) return json({ error: "rate_limited" }, 429);
   try {
     await ensure(env);
     const r = await env.DB.prepare("SELECT course_id, name, score, issued_at FROM certificates WHERE id=?").bind(id).first();

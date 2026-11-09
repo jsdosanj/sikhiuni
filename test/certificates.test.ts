@@ -97,6 +97,21 @@ describe("POST /api/certificates — certificate-earned email", () => {
   });
 });
 
+describe("GET /api/certificates — verification is rate limited", () => {
+  it("returns 429 (not a verdict on the certificate) once the per-IP limit is exceeded", async () => {
+    const env: any = mockEnv();
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = (sql: string) => {
+      const st = prepare(sql);
+      if (/rate_limits/.test(sql) && /RETURNING/.test(sql)) st.first = async () => ({ count: 61 });
+      return st;
+    };
+    const res = await onRequestGet({ request: req({ url: "http://localhost/api/certificates?id=SU-ABCDEF1234" }), env });
+    expect(res.status).toBe(429);
+    expect((await res.json()).valid).toBeUndefined();
+  });
+});
+
 describe("GET /api/certificates — public verification", () => {
   it("unknown id → { valid:false } with HTTP 200", async () => {
     const res = await onRequestGet({
