@@ -106,8 +106,8 @@ export function initInstituteCert(): void {
           </div>
         </div>
         <div class="i-cert-actions noprint">
-          <button id="i-cert-pdf" class="i-btn i-btn-primary">Download PDF</button>
-          <button id="i-cert-print" class="i-btn i-btn-ghost">Print</button>
+          <button id="i-cert-pdf" class="i-btn i-btn-primary" disabled>Download PDF</button>
+          <button id="i-cert-print" class="i-btn i-btn-ghost" disabled>Print</button>
         </div>
         <div class="i-cert-disclaimer" role="note" data-i18n="disclaimer.full">Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered.</div>`;
       window.suReapply?.();
@@ -128,7 +128,11 @@ export function initInstituteCert(): void {
           const v = document.getElementById('i-cert-vid');
           if (!v) return;
           const dateEl = document.getElementById('i-cert-date');
-          if (ok && d && d.issuedAt && dateEl) dateEl.textContent = fmtDate(d.issuedAt);
+          if (ok && d && d.issuedAt && dateEl) {
+            dateEl.textContent = fmtDate(d.issuedAt);
+            // Export only once the stored issue date is on the card, so a certificate is never exported with a blank date.
+            for (const id of ['i-cert-pdf', 'i-cert-print']) { const b = document.getElementById(id) as HTMLButtonElement | null; if (b) b.disabled = false; }
+          }
           if (ok && d && d.id) {
             v.innerHTML =
               `Verification ID <strong>${esc(d.id)}</strong> &middot; ` +
@@ -138,7 +142,10 @@ export function initInstituteCert(): void {
               '<span class="noprint">Let your progress finish syncing, then reload for a verification ID.</span>';
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          const v = document.getElementById('i-cert-vid');
+          if (v) v.innerHTML = '<span class="noprint">Could not reach the server to issue your certificate. Check your connection and reload to enable download.</span>';
+        });
     })
     .catch(() => {
       app.innerHTML = panel('Could not load your certificate — try again in a moment.');

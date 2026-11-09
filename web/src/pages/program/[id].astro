@@ -191,8 +191,11 @@ const breadcrumb = {
 
   // Update status panel ("Your standing" rail, ruled ledger treatment)
   const statusEl = document.getElementById('prog-status');
+  // null = not known yet; true = the server has this pass (verifiable certificate); false = the pass exists only in this browser.
+  let serverRecorded = null;
   function drawStatus() {
   const cumPassed = get('cum_passed_' + progId, false);
+  const localOnly = cumPassed && serverRecorded === false;
   statusEl.innerHTML = `
     <div class="flex items-baseline justify-between gap-3">
       <span class="font-mono text-[11px] uppercase tracking-[.12em] text-muted">Courses complete</span>
@@ -200,7 +203,7 @@ const breadcrumb = {
     </div>
     <div class="mt-3 h-1 w-full bg-line"><div class="h-full bg-saffron" style="width:${pct}%"></div></div>
     ${cumPassed
-      ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Certificate earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View certificate →</a></div>`
+      ? `<div class="mt-4 flex flex-col items-center gap-1.5 text-center"><span>${ICONS.capSmall}</span><span class="font-mono text-xs uppercase tracking-[.1em] text-saffron-deep">Certificate earned</span><a href="/cert?program=${progId}" class="btn btn-primary mt-1 w-full">View certificate →</a></div>${localOnly ? `<p class="mt-3 font-sans text-[14.5px] leading-relaxed text-muted">This pass is saved only in this browser, so the certificate has no verification ID. Sign in${allDone ? ' and retake the exam to record it.' : ', open each required course and pass its quiz, then retake the exam to record it.'}</p>${allDone ? `<button id="start-cum-test" class="btn mt-3 w-full">Retake exam to record it →</button>` : ''}` : ''}`
       : allDone
         ? `<button id="start-cum-test" class="btn btn-primary mt-4 w-full">Take Cumulative Exam →</button>`
         : `<p class="mt-3 font-sans text-[14.5px] leading-relaxed text-muted">The comprehensive examination unlocks when all ${total} courses are complete. ${testQuestions} questions, ${passMark}% to pass.</p><div class="mt-3 border border-line bg-surface px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[.12em] text-muted">Exam locked</div>`
@@ -211,8 +214,8 @@ const breadcrumb = {
   // A pass recorded by the server (signed-in exam, possibly on another device) wins over this browser's flag.
   fetch('/api/progress', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
     const row = d && d.progress && d.progress.find((p) => p.course_id === progId && p.passed_score >= 80);
-    if (!row || get('cum_passed_' + progId, false)) return;
-    set('cum_passed_' + progId, true); set('cum_score_' + progId, row.passed_score);
+    serverRecorded = !!row; // a 401 (signed out) also lands here as "not recorded"
+    if (row && !get('cum_passed_' + progId, false)) { set('cum_passed_' + progId, true); set('cum_score_' + progId, row.passed_score); }
     drawStatus();
   }).catch(() => {});
 
@@ -224,7 +227,8 @@ const breadcrumb = {
   });
 
   // Cumulative test logic
-  document.getElementById('start-cum-test')?.addEventListener('click', launchTest);
+  // Delegated: the status panel is redrawn, so the exam button is re-created.
+  statusEl.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#start-cum-test')) launchTest(); });
   document.getElementById('cum-close')?.addEventListener('click', () => {
     document.getElementById('cum-test-modal').classList.add('hidden');
   });
@@ -294,14 +298,22 @@ const breadcrumb = {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ items, programId: progId }),
     })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('grade failed'))))
-      .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.passed); })
-      .catch(() => { submitBtn.disabled = false; window.suToast('Could not grade the exam right now. Please check your connection and try again.', 'error'); });
+      .then(async (r) => { if (r.ok) return r.json(); const d = await r.json().catch(() => ({})); const err = new Error('grade failed'); err.code = d.error; throw err; })
+      .then((res) => { submitBtn.disabled = false; showTestResult(res.score, res.passed, !!res.recorded); })
+      .catch((err) => {
+        submitBtn.disabled = false;
+        const reasons = {
+          complete_required_courses: 'To earn this certificate, every required course needs a passing quiz score (80%+) saved to your signed-in account. Open each course while signed in and pass its quiz, then try again.',
+          prerequisite_required: 'This program requires one of its prerequisite programs to be completed first (see "Requires" above).',
+          rate_limited: 'Too many exam attempts for now. Please try again later.',
+        };
+        window.suToast(reasons[err && err.code] || 'Could not grade the exam right now. Please check your connection and try again.', 'error');
+      });
   }
 
   // The server returns the score only on a pass, a failing attempt is just the
   // boolean, so the count can't be used to reverse-engineer the answer key.
-  function showTestResult(score, passed_exam) {
+  function showTestResult(score, passed_exam, recorded) {
     const resultEl = document.getElementById('cum-test-result');
     const iconEl = document.getElementById('cum-result-icon');
     const scoreEl = document.getElementById('cum-result-score');
@@ -312,12 +324,14 @@ const breadcrumb = {
     iconEl.innerHTML = passed_exam ? ICONS.cap : ICONS.books;
     if (passed_exam) {
       scoreEl.textContent = `${score}%`;
-      msgEl.textContent = `Congratulations, you have passed the ${progTitle} cumulative examination. Your certificate is ready.`;
+      msgEl.textContent = `Congratulations, you have passed the ${progTitle} cumulative examination. Your certificate is ready.` + (recorded ? '' : ' Sign in and retake the exam to record this pass and get a verifiable certificate.');
       certLink.href = `/cert?program=${progId}`;
       certLink.classList.remove('hidden');
       retryBtn.classList.add('hidden');
       set('cum_passed_' + progId, true);
       set('cum_score_' + progId, score);
+      serverRecorded = !!recorded;
+      drawStatus();
     } else {
       scoreEl.textContent = '';
       msgEl.textContent = `Not passed, you need ${passMark}% to pass. Review the material and try again.`;

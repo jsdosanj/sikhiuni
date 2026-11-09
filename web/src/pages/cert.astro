@@ -40,6 +40,8 @@ import Base from '../layouts/Base.astro';
       const score = prog ? (getRaw('cum_passed_' + prog.id, false) ? getRaw('cum_score_' + prog.id, null) : (serverRow ? serverRow.passed_score : null)) : get('passed_' + c.id, null);
       if (!score) { app.innerHTML = `<div class="rounded-xl border-l-4 border-saffron bg-surface p-4"><span class="inline-flex items-center gap-1.5">${iconSvg('lock', 'h-4 w-4 shrink-0')}<span><span data-i18n="cert.locked.prefix">Complete</span> <a class="underline" href="${c.href}">${esc(c.title)}</a> <span data-i18n="cert.locked.suffix">and pass its test (80%+) to earn your certificate.</span></span></span></div>`; return; }
       const name = (get('profile', {}) || {}).name || (me && me.user && me.user.name) || '';
+      // Export (PDF / print) stays disabled until the server's issue date has loaded, so a certificate is never exported with a blank date.
+      const setExport = (on) => ['dl-pdf', 'print'].forEach((i) => { const b = document.getElementById(i); if (b) b.disabled = !on; });
       // The completion date is the SERVER's stored issue date (shown once the record exists), never today's date.
       const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
       // Solid registrar's-ledger certificate, double-bordered (1px navy outer,
@@ -76,7 +78,7 @@ import Base from '../layouts/Base.astro';
             <p class="mx-auto mt-4 max-w-[56ch] font-sans text-[11.5px] leading-relaxed text-muted" data-i18n="cert.aidisclosure">Course content created by AI and reviewed for accuracy. Verify authenticity at sikhiuni.com/verify</p>
           </div>
         </div>
-        <div class="noprint mt-6 flex flex-wrap justify-center gap-3"><button id="dl-pdf" class="btn btn-primary">${iconSvg('download', 'h-4 w-4')} <span data-i18n="cert.btn.downloadpdf">Download PDF</span></button><button id="print" class="btn">${iconSvg('printer', 'h-4 w-4')} <span data-i18n="cert.btn.print">Print</span></button></div>
+        <div class="noprint mt-6 flex flex-wrap justify-center gap-3"><button id="dl-pdf" class="btn btn-primary" disabled>${iconSvg('download', 'h-4 w-4')} <span data-i18n="cert.btn.downloadpdf">Download PDF</span></button><button id="print" class="btn" disabled>${iconSvg('printer', 'h-4 w-4')} <span data-i18n="cert.btn.print">Print</span></button></div>
         <div role="note" class="su-disclaimer su-disclaimer--callout mx-auto mt-6 max-w-3xl"><p data-i18n="disclaimer.full">Self-development only. Sikhi University is not an accredited institution and does not grant college or university degrees or credit. Our certificates are not degrees, and no university credit is offered.</p></div>`;
       if (window.suReapply) window.suReapply();
       // Decorative only, fired after the real certificate is already fully rendered -
@@ -105,12 +107,16 @@ import Base from '../layouts/Base.astro';
         .then((r) => r.json().then((d) => ({ ok: r.ok, d }))).then(({ ok, d }) => {
           const v = document.getElementById('cert-vid'); if (!v) return;
           const dateEl = document.getElementById('cert-date');
-          if (ok && d.issuedAt && dateEl) dateEl.textContent = fmtDate(d.issuedAt);
+          if (ok && d.issuedAt && dateEl) { dateEl.textContent = fmtDate(d.issuedAt); setExport(true); }
           if (ok && d.id) v.innerHTML = '<span data-i18n="cert.vid.prefix">Verification ID:</span> <strong>' + esc(d.id) + '</strong> <span data-i18n="cert.vid.middle">· verify at</span> <span>sikhiuni.com/verify?id=' + esc(d.id) + '</span>';
           else if (prog) v.innerHTML = '<span class="noprint" data-i18n="cert.vid.programnote">Sign in and retake the cumulative exam to get a verifiable certificate ID.</span>';
           else v.innerHTML = '<span class="noprint" data-i18n="cert.vid.signin">Sign in (and let your progress sync) to get a verifiable certificate ID.</span>';
           if (window.suReapply) window.suReapply();
-        }).catch(() => {});
+        }).catch(() => {
+          // Issuance request failed outright: say so (export stays disabled; there is no stored date to print).
+          const v = document.getElementById('cert-vid');
+          if (v) { v.innerHTML = '<span class="noprint" data-i18n="cert.vid.signin">Sign in (and let your progress sync) to get a verifiable certificate ID.</span>'; if (window.suReapply) window.suReapply(); }
+        });
     }).catch(() => { app.innerHTML = '<p class="text-muted" data-i18n="cert.loaderror">Could not load.</p>'; });
   </script>
 </Base>

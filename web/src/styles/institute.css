@@ -453,6 +453,12 @@ body[data-institute] .i-cert-disclaimer {
   border: 2px solid var(--i-filament-dim); border-inline-start-width: 6px;
   font-size: max(16px, 1rem); line-height: 1.55; color: var(--i-ink); text-align: start;
 }
+/* High-contrast mode (body.hc, set by the accessibility panel): the notices must stay readable on black. */
+body.hc[data-institute] .i-cert-card,
+body.hc[data-institute] .i-cert-inner,
+body.hc[data-institute] .i-cert-disclaimer { background: #000 !important; border-color: #fff !important; }
+body.hc[data-institute] .i-cert-card *,
+body.hc[data-institute] .i-cert-disclaimer { color: #fff !important; }
 body[data-institute] .i-cert-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
 
 @media print {
