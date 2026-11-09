@@ -197,3 +197,11 @@ describe("certificateEarnedTemplate", () => {
     expect(t.subject).toBe("Your Sikhi University certificate of completion");
   });
 });
+
+describe("certificateEarnedTemplate kind", () => {
+  it("says 'a program' for a program certificate and 'a course' otherwise", () => {
+    expect(certificateEarnedTemplate("H", "SU-1", "program").text).toContain("completed a program at Sikhi University");
+    expect(certificateEarnedTemplate("H", "SU-1").text).toContain("completed a course at Sikhi University");
+    expect(certificateEarnedTemplate("H", "SU-1", "program").html).toContain("completed a program");
+  });
+});

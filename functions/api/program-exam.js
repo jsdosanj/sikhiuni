@@ -1,4 +1,5 @@
 import { json, getUser, logEvent } from "./_lib.js";
+import { checkRateLimit } from "./_rate-limit.js";
 import { QUIZ_KEYS } from "./_quiz-keys.js";
 import programsData from "../../site/assets/data/programs.json";
 
@@ -70,10 +71,14 @@ export async function onRequestPost({ request, env }) {
   let b; try { b = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
   const items = Array.isArray(b && b.items) ? b.items : [];
   if (items.length === 0) return json({ error: "no answers submitted" }, 400);
+  // The longest real exam is 120 answers; bound the work an attempt can cause.
+  if (items.length > 300) return json({ error: "too many answers" }, 400);
 
   const prog = programById(b && b.programId);
   const user = prog ? await getUser(env, request) : null;
   if (prog && user) {
+    // Recorded attempts can mint a certificate: cap them per account (a real exam takes far longer than this allows).
+    if (!(await checkRateLimit(env, "progexam:" + user.id, 20, 3600))) return json({ error: "rate_limited" }, 429);
     const score = gradeStrict(prog, items);
     if (score === null) return json({ error: "answer the full exam first" }, 400);
     const passed = score >= PASS_MARK;

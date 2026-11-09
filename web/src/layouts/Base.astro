@@ -229,9 +229,12 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
           });
         });
       }
+      const dictCache = {};
       async function dict(lang) {
         if (lang === 'en') return {};
-        try { const r = await fetch('/assets/i18n/' + lang + '.json'); return r.ok ? await r.json() : {}; } catch (e) { return {}; }
+        // Cached per language so window.suReapply() (called after page scripts render new markup) does not refetch.
+        if (dictCache[lang]) return dictCache[lang];
+        try { const r = await fetch('/assets/i18n/' + lang + '.json'); if (!r.ok) return {}; return (dictCache[lang] = await r.json()); } catch (e) { return {}; }
       }
       async function apply(lang) {
         curLang = lang;

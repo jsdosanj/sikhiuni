@@ -1,6 +1,7 @@
 import { json, getUser, newId, logEvent } from "./_lib.js";
 import { certificateEarnedTemplate } from "../_email-templates.js";
 import { checkRateLimit } from "./_rate-limit.js";
+import programsData from "../../site/assets/data/programs.json";
 
 async function ensure(env) {
   await env.DB.prepare(
@@ -32,14 +33,13 @@ export async function onRequestGet({ request, env }) {
 // One transactional email, only on FIRST issuance (the early return above
 // handles re-issue / name edits, so a repeat visit never re-sends). Never
 // throws and never changes the response: the certificate already exists. Same
-// Resend shape as functions/api/auth/_onboarding.js sendWelcomeEmail. Awaited
-// (with a short timeout) rather than fire-and-forget because the Worker router
-// does not pass waitUntil to handlers.
-async function sendCertificateEmail(env, email, name, certId) {
+// Resend shape as functions/api/auth/_onboarding.js sendWelcomeEmail. Runs via
+// waitUntil when the router provides it, so Resend latency never delays the response.
+async function sendCertificateEmail(env, email, name, certId, courseId) {
   if (!email) return;
   if (!env.RESEND_API_KEY) { console.log("cert email: RESEND_API_KEY not configured"); return; }
   try {
-    const t = certificateEarnedTemplate(name, certId);
+    const t = certificateEarnedTemplate(name, certId, programsData.programs.some((p) => p.id === courseId) ? "program" : "course");
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
@@ -56,7 +56,7 @@ async function sendCertificateEmail(env, email, name, certId) {
 
 // POST /api/certificates { courseId, name } -> issue (or return existing) verifiable id.
 // Server-validates the pass against the synced progress table.
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   await ensure(env);
   const user = await getUser(env, request);
   if (!user) return json({ error: "Please sign in." }, 401);
@@ -84,6 +84,8 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare("INSERT INTO certificates (id, user_id, course_id, name, score, issued_at) VALUES (?,?,?,?,?,?)")
     .bind(id, user.id, courseId, name, score, issuedAt).run();
   await logEvent(env, user, "certificate_issued", courseId, "cert_id=" + id);
-  await sendCertificateEmail(env, user.email, name, id);
+  // Off the request path where the runtime provides waitUntil (worker.js passes it); awaited otherwise (tests).
+  const sending = sendCertificateEmail(env, user.email, name, id, courseId);
+  if (typeof waitUntil === "function") waitUntil(sending); else await sending;
   return json({ ok: true, id, issuedAt });
 }

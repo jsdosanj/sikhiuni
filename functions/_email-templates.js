@@ -363,7 +363,8 @@ function escHtml(v) {
   return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-export function certificateEarnedTemplate(name, certId) {
+export function certificateEarnedTemplate(name, certId, kind = "course") {
+  const what = kind === "program" ? "a program" : "a course";
   const who = name ? escHtml(name) : "";
   const id = escHtml(certId);
   const verifyUrl = `https://sikhiuni.com/verify?id=${encodeURIComponent(certId || "")}`;
@@ -374,7 +375,7 @@ export function certificateEarnedTemplate(name, certId) {
     heading: "Certificate of completion",
     bodyRows: `
       ${paragraph(who ? `Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh &mdash; and well done, ${who}.` : "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh.", 10)}
-      ${paragraph("You have completed a course at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.", 20)}
+      ${paragraph(`You have completed ${what} at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.`, 20)}
       <tr><td style="padding-bottom:20px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -397,7 +398,7 @@ export function certificateEarnedTemplate(name, certId) {
 
 ${name ? `Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh — and well done, ${name}.` : "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh."}
 
-You have completed a course at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.
+You have completed ${what} at Sikhi University, and your certificate of completion is ready. You can view and download it from your dashboard.
 
 Verification ID: ${certId}
 Verify this certificate: ${verifyUrl}

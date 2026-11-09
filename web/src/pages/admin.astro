@@ -397,7 +397,7 @@ import Base from '../layouts/Base.astro';
         Promise.all([api('/api/admin/users'), api('/api/gradebook')]).then(([u, g]) => {
           if (!u.ok) { panel.innerHTML = '<div class="rounded-xl bg-surface p-4">Could not load users.</div>'; return; }
           const list = u.d.users || [];
-          const gbRows = (g.ok && g.d.rows) || [];
+          const gbRows = ((g.ok && g.d.rows) || []).filter((r) => !r.program);
           const userCourses = {}; gbRows.forEach((r) => { userCourses[r.user_id] = (userCourses[r.user_id] || 0) + 1; });
           const userPassed = {}; gbRows.forEach((r) => { if (r.score != null && r.score >= 80) userPassed[r.user_id] = (userPassed[r.user_id] || 0) + 1; });
           const badge = (r) => `<span class="chip-status ${r === 'admin' ? 'border-saffron-deep text-saffron-deep' : r === 'teacher' ? 'border-navy text-navy' : 'border-muted text-muted'}">${esc(r)}</span>`;

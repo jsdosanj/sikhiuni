@@ -149,6 +149,15 @@ describe("sendDailyReminders", () => {
     expect(pushConfigured({})).toBe(false);
   });
 
+  it("never requests a host outside the push-service allowlist, and does not delete the row", async () => {
+    const fetchSpy = vi.fn(async () => new Response(null, { status: 201 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const DB = pushDb(["https://attacker.example/steal"]);
+    const r = await sendDailyReminders({ DB, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY });
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(r).toEqual({ sent: 0, pruned: 0, skipped: false });
+  });
+
   it("sends to live endpoints and prunes dead ones", async () => {
     const live = "https://fcm.googleapis.com/fcm/send/live";
     const dead = "https://fcm.googleapis.com/fcm/send/dead";

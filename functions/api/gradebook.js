@@ -67,7 +67,7 @@ export async function onRequestGet({ request, env }) {
   const courses = isAdmin ? Array.from(new Set(rows.filter((r) => !r.program).map((r) => r.course_id))) : scopeIds;
 
   if (url.searchParams.get("format") === "csv") {
-    const head = ["course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];
+    const head = ["kind", "course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];
     // Neutralise spreadsheet formula injection: a cell like =HYPERLINK(...) in a
     // learner-set name executes when the CSV is opened in Excel/Sheets. Prefix any
     // value starting with a formula trigger with a single quote.
@@ -79,7 +79,7 @@ export async function onRequestGet({ request, env }) {
     const lines = [head.join(",")];
     rows.forEach((r) => {
       const passed = (r.score != null && r.score >= 80) ? "yes" : "no";
-      const cells = [r.course_id, r.name || "", r.email || "", r.done, r.score == null ? "" : r.score, passed, r.override ? "yes" : "no", new Date(r.last_active).toISOString()];
+      const cells = [r.program ? "program" : "course", r.course_id, r.name || "", r.email || "", r.done, r.score == null ? "" : r.score, passed, r.override ? "yes" : "no", new Date(r.last_active).toISOString()];
       lines.push(cells.map(csvCell).join(","));
     });
     return new Response(lines.join("\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": "attachment; filename=gradebook.csv" } });

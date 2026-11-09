@@ -213,6 +213,27 @@ describe("POST /api/program-exam — recorded mode (programId + signed in)", () 
     expect(b.writes).toHaveLength(0);
   });
 
+  it("refuses an oversized answers array", async () => {
+    const { res, writes } = await run(Array.from({ length: 301 }, (_, i) => ({ ...pool[i % pool.length], sel: 0 })));
+    expect(res.status).toBe(400);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("rate limits recorded attempts per account (429)", async () => {
+    const env: any = mockEnv({ user: LEARNER });
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = (sql: string) => {
+      const st = prepare(sql);
+      if (/rate_limits/.test(sql) && /RETURNING/.test(sql)) st.first = async () => ({ count: 21 });
+      return st;
+    };
+    const res = await onRequestPost({
+      request: req({ url: "http://localhost/api/program-exam", cookie: "sess-learner", body: { items: exam(right), programId: PROG } }),
+      env,
+    });
+    expect(res.status).toBe(429);
+  });
+
   it("an unknown programId is not recorded", async () => {
     const { res, writes } = await run(exam(right), "not-a-program", true);
     expect(writes).toHaveLength(0);

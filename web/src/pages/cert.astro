@@ -24,8 +24,10 @@ import Base from '../layouts/Base.astro';
     Promise.all([
       fetch('/data/index.json').then((r) => r.json()),
       fetch('/assets/data/programs.json').then((r) => r.json()).catch(() => ({ programs: [] })),
+      // A pass recorded by the server (another device / cleared storage) must open the program certificate too.
+      pid ? fetch('/api/progress', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : { progress: [] })).catch(() => ({ progress: [] })) : Promise.resolve({ progress: [] }),
       fetch('/api/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : { user: null })).catch(() => ({ user: null })),
-    ]).then(([data, pdata, me]) => {
+    ]).then(([data, pdata, serverProgress, me]) => {
       const prog = pid ? (pdata.programs || []).find((x) => x.id === pid) : null;
       const course = prog ? null : data.courses.find((x) => x.id === id);
       const tn = (t) => (data.topics.find((x) => x.id === t) || {}).name || t;
@@ -34,7 +36,8 @@ import Base from '../layouts/Base.astro';
         ? { id: prog.id, title: prog.title, href: '/program/' + prog.id, meta: prog.courseIds.length + ' courses' }
         : course && { id: course.id, title: course.title, href: '/course/' + course.id, meta: tn(course.topic) + ' &middot; Level ' + course.level };
       if (!c) { app.innerHTML = '<p class="text-muted" data-i18n="cert.notfound">' + (pid ? 'Program' : 'Course') + ' not found.</p>'; return; }
-      const score = prog ? (getRaw('cum_passed_' + prog.id, false) ? getRaw('cum_score_' + prog.id, null) : null) : get('passed_' + c.id, null);
+      const serverRow = prog && (serverProgress.progress || []).find((p) => p.course_id === prog.id && p.passed_score >= 80);
+      const score = prog ? (getRaw('cum_passed_' + prog.id, false) ? getRaw('cum_score_' + prog.id, null) : (serverRow ? serverRow.passed_score : null)) : get('passed_' + c.id, null);
       if (!score) { app.innerHTML = `<div class="rounded-xl border-l-4 border-saffron bg-surface p-4"><span class="inline-flex items-center gap-1.5">${iconSvg('lock', 'h-4 w-4 shrink-0')}<span><span data-i18n="cert.locked.prefix">Complete</span> <a class="underline" href="${c.href}">${esc(c.title)}</a> <span data-i18n="cert.locked.suffix">and pass its test (80%+) to earn your certificate.</span></span></span></div>`; return; }
       const name = (get('profile', {}) || {}).name || (me && me.user && me.user.name) || '';
       // The completion date is the SERVER's stored issue date (shown once the record exists), never today's date.

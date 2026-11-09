@@ -321,7 +321,7 @@ export default {
       if (!r.skipped) console.log("prune_expired", JSON.stringify(r));
     }).catch((e) => console.error("prune_expired_error", String(e))));
   },
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { pathname } = url;
     if (pathname.startsWith('/media/')) {
@@ -403,7 +403,7 @@ export default {
       // Single choke point: any handler exception returns a JSON 500 (never a raw
       // Cloudflare HTML error page) and is logged so failures are observable.
       try {
-        return await handler({ request, env });
+        return await handler({ request, env, waitUntil: (p) => ctx && ctx.waitUntil(p) });
       } catch (err) {
         console.error("api_error", request.method, pathname, err && err.stack || String(err));
         return new Response(JSON.stringify({ error: "server_error" }), {
