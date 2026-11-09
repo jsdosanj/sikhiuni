@@ -27,18 +27,28 @@ function rsidCookie(rsid, maxAgeSec) {
   return `${RSID_COOKIE}=${rsid}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAgeSec}`;
 }
 
-/** Fire-and-forget send. A Resend outage must degrade to "resend the code",
- *  never to a failed request — same shape as forgot-password.js. */
-function sendCode(context, email, code, username) {
+/** Send the code and REPORT whether Resend accepted it.
+ *
+ *  2026-11 (user report: "it says it sent a code but I never receive it"): this
+ *  used to be fire-and-forget and logged "sent" for ANY response, so a Resend
+ *  refusal (unverified sender domain, 429 rate limit, daily quota, bad key) still
+ *  told the learner "we emailed a code" and nothing ever arrived. Before #293 the
+ *  router also never passed waitUntil, so the request could be torn down before
+ *  the send finished. Now the send is awaited (short timeout) and a refusal is a
+ *  visible, retryable error. Returns "sent" | "no_key" | "failed".
+ *  No key = local dev / E2E (the harness reads the code from local D1), which
+ *  stays a soft success exactly as before. */
+async function sendCode(context, email, code, username) {
   const { env } = context;
   if (!env.RESEND_API_KEY) {
     // Pinned marker: the E2E harness asserts on "[email]" lines to prove no
     // mail is sent during a routine login.
     console.log("[email] registration code send failed: RESEND_API_KEY not configured for", email);
-    return;
+    return "no_key";
   }
   const t = registrationCodeTemplate(code, username);
-  const p = fetch("https://api.resend.com/emails", {
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
     body: JSON.stringify({
@@ -49,11 +59,17 @@ function sendCode(context, email, code, username) {
       text: t.text,
       html: t.html,
     }),
-  })
-    .then(() => { console.log("[email] registration code sent"); })
-    .catch((e) => { console.log("[email] registration code send failed", e && e.message); });
-
-  if (typeof context.waitUntil === "function") context.waitUntil(p);
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) { console.log("[email] registration code sent"); return "sent"; }
+    // Resend's error body names the cause (e.g. "domain is not verified", "rate limit", "daily quota").
+    const detail = await res.text().catch(() => "");
+    console.error("[email] registration code send REFUSED", res.status, detail.slice(0, 300));
+    return "failed";
+  } catch (e) {
+    console.error("[email] registration code send failed", e && e.message);
+    return "failed";
+  }
 }
 
 export async function onRequestPost(context) {
@@ -93,7 +109,15 @@ export async function onRequestPost(context) {
     "INSERT INTO pending_registrations (rsid, email, username, code, attempts, marketing, expires_at, created_at) VALUES (?,?,?,?,0,?,?,?)"
   ).bind(rsid, email, username, code, marketing ? 1 : 0, now + RSID_TTL_MS, now).run();
 
-  sendCode(context, email, code, username);
+  const sent = await sendCode(context, email, code, username);
+  if (sent === "failed") {
+    // The code never left: don't strand the learner on "check your email".
+    await env.DB.prepare("DELETE FROM pending_registrations WHERE rsid = ?").bind(rsid).run();
+    return json({
+      error: "We couldn't send the confirmation email just now. Please try again in a few minutes. If it keeps happening, contact us at akaal@sikhi.io.",
+      code: "email_send_failed",
+    }, 502);
+  }
 
   // The code is NEVER in the response body. The E2E harness reads it out of
   // local D1 instead, so there is no dev-mode branch to fail open.

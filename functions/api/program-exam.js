@@ -47,6 +47,18 @@ function programById(id) {
   return typeof id === "string" ? programsData.programs.find((p) => p.id === id) : undefined;
 }
 
+// A recorded pass mints a verifiable certificate for the WHOLE program, so the server must also know the
+// learner earned what the program is made of: every required course passed (>= PASS_MARK, the same bar
+// /api/certificates uses for a course certificate) and, when the program has prerequisites, at least one of them
+// passed as a program (a recorded program exam pass). Returns an error code or null.
+async function missingRequirements(env, userId, prog) {
+  const { results } = await env.DB.prepare("SELECT course_id, passed_score FROM progress WHERE user_id=?").bind(userId).all();
+  const passed = new Set((results || []).filter((r) => typeof r.passed_score === "number" && r.passed_score >= PASS_MARK).map((r) => r.course_id));
+  if (prog.courseIds.some((cid) => !passed.has(cid))) return "complete_required_courses";
+  if (prog.prerequisites.length && !prog.prerequisites.some((pid) => passed.has(pid))) return "prerequisite_required";
+  return null;
+}
+
 function gradeStrict(prog, items) {
   const allowed = new Set(prog.courseIds);
   const poolSize = prog.courseIds.reduce((n, cid) => n + (QUIZ_KEYS[cid] ? QUIZ_KEYS[cid].length : 0), 0);
@@ -79,6 +91,8 @@ export async function onRequestPost({ request, env }) {
   if (prog && user) {
     // Recorded attempts can mint a certificate: cap them per account (a real exam takes far longer than this allows).
     if (!(await checkRateLimit(env, "progexam:" + user.id, 20, 3600))) return json({ error: "rate_limited" }, 429);
+    const missing = await missingRequirements(env, user.id, prog);
+    if (missing) return json({ error: missing }, 403);
     const score = gradeStrict(prog, items);
     if (score === null) return json({ error: "answer the full exam first" }, 400);
     const passed = score >= PASS_MARK;

@@ -99,6 +99,8 @@ import Base from '../layouts/Base.astro';
             <button type="button" id="reg-back" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Change details</button>
             <span class="px-2 text-white/[0.35]">·</span>
             <button type="button" id="reg-resend" data-testid="reg-resend" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Resend code</button>
+            <span class="px-2 text-white/[0.35]">·</span>
+            <a href="/contact?topic=account" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Need help?</a>
           </p>
           <p class="text-center" id="forgot-wrap"><a href="/reset-password.html" id="forgot-link" class="font-mono text-[11px] tracking-[0.08em] text-white/[0.62] underline underline-offset-2">Forgot password?</a></p>
         </form>
@@ -225,7 +227,7 @@ import Base from '../layouts/Base.astro';
       regStep = 2;
       render();
       document.getElementById('reg-sent')!.innerHTML =
-        `We emailed a 6-digit code to <strong>${esc(d.email || regEmail.value.trim())}</strong>. Enter it below and choose a password.`;
+        `We emailed a 6-digit code to <strong>${esc(d.email || regEmail.value.trim())}</strong>. Enter it below and choose a password. It can take a minute or two; if it hasn't arrived, check your spam or junk folder for an email from Sikhi University, then use Resend code.`;
       clearOut();
       return true;
     }

@@ -154,8 +154,10 @@ describe("POST /api/program-exam — recorded mode (programId + signed in)", () 
     pool.slice(0, n).map((q) => ({ ...q, sel: pick(q.cid, q.qi) }));
   const right = (cid: string, qi: number) => QUIZ_KEYS[cid][qi];
 
-  const run = async (items: unknown[], programId: string | null = PROG, signedIn = true) => {
-    const env: any = mockEnv({ user: signedIn ? LEARNER : null });
+  // Server-side progress rows that satisfy a program's requirements (every course >= 80), plus extras.
+  const earned = (p: any, extra: any[] = []) => [...p.courseIds.map((c: string) => ({ course_id: c, passed_score: 90 })), ...extra];
+  const run = async (items: unknown[], programId: string | null = PROG, signedIn = true, rows: any[] = earned(prog)) => {
+    const env: any = mockEnv({ user: signedIn ? LEARNER : null, rows });
     const writes: any[][] = [];
     const prepare = env.DB.prepare.bind(env.DB);
     env.DB.prepare = (sql: string) => {
@@ -211,6 +213,32 @@ describe("POST /api/program-exam — recorded mode (programId + signed in)", () 
     const b = await run(exam(right), null, true);
     expect(await b.res.json()).toEqual({ passed: true, score: 100 });
     expect(b.writes).toHaveLength(0);
+  });
+
+  it("refuses to record when a required course is not passed on the server (403, nothing written)", async () => {
+    const rows = earned(prog).slice(1); // one course missing
+    const { res, writes } = await run(exam(right), PROG, true, rows);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("complete_required_courses");
+    expect(writes).toHaveLength(0);
+  });
+
+  it("a course below the 80 bar does not count", async () => {
+    const rows = earned(prog).map((r, i) => (i === 0 ? { ...r, passed_score: 79 } : r));
+    const { res } = await run(exam(right), PROG, true, rows);
+    expect(res.status).toBe(403);
+  });
+
+  it("a program with prerequisites needs one of them recorded", async () => {
+    const adv = programs.programs.find((p: any) => p.id === "bass")!; // requires aass
+    const advPool: { cid: string; qi: number }[] = [];
+    for (const cid of adv.courseIds) for (let qi = 0; qi < (QUIZ_KEYS[cid] || []).length; qi++) advPool.push({ cid, qi });
+    const advExam = advPool.slice(0, adv.testQuestions).map((q) => ({ ...q, sel: QUIZ_KEYS[q.cid][q.qi] }));
+    const without = await run(advExam, "bass", true, earned(adv));
+    expect(without.res.status).toBe(403);
+    expect((await without.res.json()).error).toBe("prerequisite_required");
+    const withPrereq = await run(advExam, "bass", true, earned(adv, [{ course_id: "aass", passed_score: 88 }]));
+    expect((await withPrereq.res.json()).recorded).toBe(true);
   });
 
   it("refuses an oversized answers array", async () => {

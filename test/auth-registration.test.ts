@@ -167,12 +167,30 @@ describe("POST /api/auth/register-start", () => {
     log.mockRestore();
   });
 
-  it("uses waitUntil when the Pages context provides one", async () => {
+  // 2026-11 regression ("it says it sent a code but I never receive it"): a Resend refusal used to be
+  // logged as "sent" and the learner was told to check an inbox that would never get the code.
+  it("awaits the send: when Resend refuses it, the learner gets a 502 and no pending row is left", async () => {
+    const { env, tables } = statefulEnv();
+    env.RESEND_API_KEY = "re_test";
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ message: "The sikhiuni.com domain is not verified" }), { status: 403 })));
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await registerStart({ request: startReq({ username: "harjit", email: "h@example.com" }), env } as any);
+    expect(res.status).toBe(502);
+    expect((await res.json()).code).toBe("email_send_failed");
+    expect(tables.pending_registrations).toHaveLength(0);
+    expect(res.headers.get("Set-Cookie")).toBeNull();
+    expect(err.mock.calls.some((c) => String(c[0]).includes("REFUSED") && c[1] === 403)).toBe(true);
+    err.mockRestore();
+  });
+
+  it("a network failure on the send is also reported (502), never a false 'sent'", async () => {
     const { env } = statefulEnv();
     env.RESEND_API_KEY = "re_test";
-    const waitUntil = vi.fn();
-    await registerStart({ request: startReq({ username: "harjit", email: "h@example.com" }), env, waitUntil } as any);
-    expect(waitUntil).toHaveBeenCalledTimes(1);
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network down"); }));
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await registerStart({ request: startReq({ username: "harjit", email: "h@example.com" }), env } as any);
+    expect(res.status).toBe(502);
+    err.mockRestore();
   });
 
   it("409s a taken email or username, and writes nothing", async () => {

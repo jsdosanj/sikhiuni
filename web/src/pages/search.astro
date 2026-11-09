@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { professorList, profBio, profSlug } from '../lib/data';
 import { REF, COLLECTIONS } from '../lib/santhya';
 import gurbaniWords from '../data/gurbani-words.json';
+import programsData from '../../public/assets/data/programs.json';
 
 // A universal index, built at compile time, of everything searchable that the
 // course catalogue alone doesn't cover: professors (with bios), banis, scripture,
@@ -31,14 +32,23 @@ const pages = [
   { title: 'My Learning', url: '/dashboard', sub: 'Your progress, grades and certificates' },
   { title: 'About Sikhi University', url: '/about', sub: 'Why we built this' },
   { title: 'Send feedback', url: '/feedback', sub: 'Report a correction or suggest a course' },
+  { title: 'Contact us', url: '/contact', sub: 'Account help, questions, partnerships' },
+  { title: 'Certificate programs', url: '/programs', sub: 'Eleven free certificate programs. Self-development only, no university credit' },
+  { title: 'Study paths', url: '/paths', sub: 'From a first certificate to Giani' },
+  { title: 'Verify a certificate', url: '/verify', sub: 'Check a certificate ID' },
+  { title: 'Sign in or create an account', url: '/login', sub: 'Save progress and earn certificates' },
 ];
+
+// Certificate programs (titles, Punjabi titles, descriptions) so "specialist", "giani",
+// "gurbani studies" etc. find the program pages, not only individual courses.
+const programs = programsData.programs.map((p) => ({ title: p.title, gur: p.titleGur, sub: p.description, url: '/program/' + p.id }));
 
 const gWords = (gurbaniWords as { gur: string; tr: string; var?: string; url: string }[]).map((w) => ({
   title: w.gur, sub: w.tr, url: w.url,
   hay: `${w.gur} ${w.tr} ${w.var || ''}`.toLowerCase(),
 }));
 
-const extra = { professors, readings, pages, gWords };
+const extra = { professors, readings, pages, gWords, programs };
 
 // Starter queries, drawn from the app's own bani register (web/src/lib/santhya.ts)
 // so every Gurmukhi label here is verbatim from the corpus, never hand-typed.
@@ -60,11 +70,16 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     <!-- Mono count chips, one per result kind, filled by render() below. -->
     <div id="chips" class="mt-4 flex flex-wrap gap-2" aria-live="polite"></div>
 
-    <div id="out" class="mt-8" aria-live="polite"></div>
-  </section>
+    <!-- Starter queries: plain ?q= links, so they work before (and without) the script. -->
+    <p id="suggest" class="mt-5 flex flex-wrap items-center gap-2 font-sans text-sm text-muted">
+      <span>Try:</span>
+      {suggestions.map((b) => <a class="chip-status border-line bg-surface text-navy hover:border-saffron" href={`/search?q=${encodeURIComponent(b.en)}`}>{b.en}</a>)}
+      <a class="chip-status border-line bg-surface text-navy hover:border-saffron" href="/search?q=sikh%20history">Sikh history</a>
+      <a class="chip-status border-line bg-surface text-navy hover:border-saffron" href="/search?q=gurmukhi">Gurmukhi</a>
+      <a class="chip-status border-line bg-surface text-navy hover:border-saffron" href="/search?q=certificate">Certificates</a>
+    </p>
 
-  <section class="wrap pb-16">
-    <div id="out" class="mt-8" aria-live="polite"></div>
+    <div id="out" class="mt-8 pb-16" aria-live="polite"></div>
   </section>
 
   <style>
@@ -114,6 +129,7 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
   <script type="application/json" id="extra-index" set:html={JSON.stringify(extra)}></script>
   <script>
     import { iconSvg } from '../lib/icons';
+    import { fold, queryTerms, scoreEntry } from '../lib/search-core';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const extra = JSON.parse(document.getElementById('extra-index').textContent);
@@ -133,56 +149,40 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
       const push = (e) => index.push({ p: '', o: '', b: '', gur: '', ...e });
       data.courses.forEach((c) => push({
         kind: 'Course', title: c.title, sub: 'Prof. ' + c.professor + ' · ' + tn(c.topic), url: '/course/' + c.id,
-        t: (c.title || '').toLowerCase(), p: (c.professor || '').toLowerCase(), o: tn(c.topic).toLowerCase(),
-        b: [c.summary, (c.terms || []).map((x) => x.t + ' ' + x.m).join(' '), (c.outcomes || []).join(' '), (c.lessonTitles || []).join(' ')].join(' ').toLowerCase(),
+        t: fold(c.title), p: fold(c.professor), o: fold(tn(c.topic)),
+        b: fold([c.summary, (c.terms || []).map((x) => x.t + ' ' + x.m).join(' '), (c.outcomes || []).join(' '), (c.lessonTitles || []).join(' ')].join(' ')),
       }));
       extra.professors.forEach((p) => push({
         kind: 'Professor', title: p.title, sub: p.count + ' course' + (p.count === 1 ? '' : 's'), url: '/professor/' + p.slug,
-        t: (p.title || '').toLowerCase(), b: (p.bio || '').toLowerCase(),
+        t: fold(p.title), b: fold(p.bio),
       }));
       (data.topics || []).forEach((t) => push({
         kind: 'Topic', title: t.name, sub: t.blurb || '', url: '/catalog#' + t.id,
-        t: (t.name || '').toLowerCase(), b: (t.blurb || '').toLowerCase(),
+        t: fold(t.name), b: fold(t.blurb),
       }));
       (data.paths || []).forEach((p) => push({
         kind: 'Path', title: p.name, sub: (p.blurb || '') + ' · ' + (p.courseIds || []).length + ' courses', url: '/catalog#paths',
-        t: (p.name || '').toLowerCase(), b: (p.blurb || '').toLowerCase(),
+        t: fold(p.name), b: fold(p.blurb),
       }));
       extra.readings.forEach((r) => push({
         kind: 'Reading', title: r.title, gur: r.gur || '', sub: r.sub || '', url: r.url,
-        t: ((r.gur || '') + ' ' + r.title).toLowerCase(), b: (r.sub || '').toLowerCase(),
+        t: fold((r.gur || '') + ' ' + r.title), b: fold(r.sub),
       }));
       extra.pages.forEach((p) => push({
         kind: 'Page', title: p.title, sub: p.sub || '', url: p.url,
-        t: (p.title || '').toLowerCase(), b: (p.sub || '').toLowerCase(),
+        t: fold(p.title), b: fold(p.sub),
+      }));
+      (extra.programs || []).forEach((p) => push({
+        kind: 'Program', title: p.title, gur: p.gur || '', sub: p.sub || '', url: p.url,
+        t: fold((p.gur || '') + ' ' + p.title), b: fold(p.sub),
       }));
       (extra.gWords || []).forEach((w) => push({
         kind: 'Word', title: w.title, sub: w.sub, url: w.url,
-        t: (w.title || '').toLowerCase(), b: w.hay,
+        t: fold(w.title), b: fold(w.hay),
       }));
     }
 
-    // Field-weighted scorer. A term at a word start scores double a mid-word substring.
-    // Weights: title 5×, professor 3×, topic 2×, body 1×.
-    function fieldScore(field, t) {
-      if (!field) return 0;
-      const i = field.indexOf(t);
-      if (i === -1) return 0;
-      const wordStart = i === 0 || !/[a-z0-9]/i.test(field[i - 1]);
-      return wordStart ? 2 : 1;
-    }
-    function scoreEntry(r, terms, phrase) {
-      let score = 0, present = 0;
-      for (const t of terms) {
-        const hit = fieldScore(r.t, t) * 5 + fieldScore(r.p, t) * 3 + fieldScore(r.o, t) * 2 + fieldScore(r.b, t);
-        if (hit) present++;
-        score += hit;
-      }
-      if (!score) return 0;
-      if (present === terms.length) score += 4;               // all-terms-present bonus
-      if (phrase && r.t.indexOf(phrase) !== -1) score += 20;   // exact phrase in title
-      return score;
-    }
+    // Scoring (title 5x, professor 3x, topic 2x, body 1x, typo tolerance, synonyms) lives in lib/search-core.ts.
     function search(terms, phrase) {
       const res = [];
       for (const r of index) { const s = scoreEntry(r, terms, phrase); if (s) res.push({ r, s }); }
@@ -206,8 +206,8 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
       return html + esc(text.slice(last));
     }
 
-    const ORDER = ['Course', 'Professor', 'Reading', 'Word', 'Path', 'Topic', 'Page'];
-    const LABEL = { Course: 'Courses', Professor: 'Professors', Reading: 'Reading & Bani', Word: 'Gurbani Words', Path: 'Learning paths', Topic: 'Topics', Page: 'Pages' };
+    const ORDER = ['Course', 'Program', 'Professor', 'Reading', 'Word', 'Path', 'Topic', 'Page'];
+    const LABEL = { Course: 'Courses', Program: 'Certificate programs', Professor: 'Professors', Reading: 'Reading & Bani', Word: 'Gurbani Words', Path: 'Learning paths', Topic: 'Topics', Page: 'Pages' };
 
     // Mono count chips ("ALL 24 / COURSES 11 / ANGS 9 / FACULTY 3", issearch
     // 497-527), display counters only, driven by the same score groups the
@@ -229,22 +229,30 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
     }
     // One ruled-ledger column per result kind, headed by a mono eyebrow over a
     // rule-navy hairline ("In the corpus" / "Courses" / …).
+    // Long groups (a broad query can match hundreds of courses) show the top 8, with a "Show all" toggle.
+    const CAP = 8;
+    const expanded = new Set();
     function section(k, g, terms) {
-      return `<div class="min-w-0 flex-1 basis-[280px]"><p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">${esc(LABEL[k])}</p><div class="rule-navy"></div>${g.map((r) => row(r, terms)).join('')}</div>`;
+      const shown = expanded.has(k) ? g : g.slice(0, CAP);
+      const more = g.length > shown.length ? `<button type="button" data-expand="${k}" class="mt-3 font-mono text-[11px] uppercase tracking-[.12em] text-saffron-deep underline underline-offset-2">Show all ${g.length} ${esc(LABEL[k].toLowerCase())}</button>` : '';
+      return `<div class="min-w-0 flex-1 basis-[280px]"><p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">${esc(LABEL[k])}</p><div class="rule-navy"></div>${shown.map((r) => row(r, terms)).join('')}${more}</div>`;
     }
     let firstPaint = true;   // the entrance animation plays once, not per keystroke
     function render() {
-      const v = q.value.normalize('NFC').toLowerCase().trim();
-      if (!v) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">Type to search ${index.length} things, courses, professors, banis, Gurbani words and more.</p>`; return; }
-      let terms = v.split(/\s+/);
-      let scored = search(terms, v);
+      const raw = q.value.trim();
+      const v = fold(raw).trim();
+      document.getElementById('suggest').hidden = !!v;
+      if (!v) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">Type to search ${index.length} things, courses, programs, professors, banis, Gurbani words and more.</p>`; return; }
+      let alts = queryTerms(raw);
+      let scored = search(alts, v);
       let note = '';
-      if (!scored.length && terms.length > 1) {          // did-you-mean: drop the last term once
-        const shorter = terms.slice(0, -1);
-        const retry = search(shorter, shorter.join(' '));
-        if (retry.length) { scored = retry; terms = shorter; note = shorter.join(' '); }
+      if (!scored.length && alts.length > 1) {          // did-you-mean: drop the last term once
+        const shorter = alts.slice(0, -1);
+        const retry = search(shorter, shorter.map((a) => a[0]).join(' '));
+        if (retry.length) { scored = retry; alts = shorter; note = shorter.map((a) => a[0]).join(' '); }
       }
-      if (!scored.length) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">No results for "${esc(q.value)}".</p>`; return; }
+      const terms = alts.flat();
+      if (!scored.length) { chips.innerHTML = ''; out.innerHTML = `<p class="text-muted">No results for "${esc(raw)}". Try fewer or different words, or <a class="underline" href="/catalog">browse the catalogue</a>.</p>`; return; }
       const groups = {};
       scored.forEach(({ r }) => (groups[r.kind] = groups[r.kind] || []).push(r));  // globally score-sorted, so each group stays in order
       renderChips(scored, groups);
@@ -259,10 +267,28 @@ const suggestions = SUGGEST_IDS.filter((id) => REF[id]).map((id) => REF[id]);
       html += `</div>`;
       out.innerHTML = html;
     }
+    // ?q= deep links (404 page, sitelinks SearchAction in Base.astro JSON-LD, starter chips) prefill the box;
+    // typing keeps the URL in sync (replaceState, so Back isn't flooded) so a search can be shared.
+    const initial = new URLSearchParams(location.search).get('q');
+    if (initial) q.value = initial;
     fetch('/data/search.json').then((r) => r.json()).then((d) => {
       data = d; buildIndex();
       render();
-    }).catch(() => { out.innerHTML = panel('<p class="font-sans text-muted">Could not load the search index.</p>'); });
-    q.addEventListener('input', render);
+    }).catch(() => { out.innerHTML = '<p class="font-sans text-muted">Could not load the search index. Please reload the page.</p>'; });
+    let t;
+    q.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        expanded.clear();
+        const u = new URL(location.href);
+        if (q.value.trim()) u.searchParams.set('q', q.value.trim()); else u.searchParams.delete('q');
+        history.replaceState(null, '', u);
+        render();
+      }, 120);
+    });
+    out.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('[data-expand]');
+      if (b) { expanded.add(b.getAttribute('data-expand')); render(); }
+    });
   </script>
 </Base>
