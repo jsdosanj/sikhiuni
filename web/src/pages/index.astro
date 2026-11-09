@@ -23,12 +23,12 @@ const portals = [
 const ld = {
   '@context': 'https://schema.org', '@type': 'EducationalOrganization',
   '@id': SITE + '/#org', // merges with the Organization node Base.astro emits site-wide
-  name: 'Sikhi University', url: SITE + '/', description: 'Sikhi University is a free, open online university for Sikhi, Gurbani, Sikh history and Gurmukhi. Not accredited; certificates are for self-development only.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
+  name: 'Sikhi University', url: SITE + '/', description: 'SikhiUni, Sikhi University: a free online university for Sikhi, Gurbani, Sikh history & Gurmukhi. Not accredited; certificates are for self-development only.', logo: SITE + '/assets/brand/icon-512.png', image: SITE + '/assets/brand/share-2026.png',
   sameAs: ['https://sikharchive.net'],
 };
 // WebSite (with the sitelinks SearchAction) is now emitted site-wide by Base.astro.
 ---
-<Base title="Sikhi University | Free Online Sikhi, Gurbani & Sikh History Courses" description="Sikhi University is a free, open online university for Sikhi, Gurbani, Sikh history and Gurmukhi. Not accredited; certificates are for self-development only." ambient="hall" bodyClass="su-home">
+<Base title="Sikhi University | Free Online Sikhi, Gurbani & Sikh History Courses" description="SikhiUni, Sikhi University: a free online university for Sikhi, Gurbani, Sikh history & Gurmukhi. Not accredited; certificates are for self-development only." ambient="hall" bodyClass="su-home">
   <script type="application/ld+json" set:html={ldJson(ld)} slot="head" />
   <script type="module" src="/scripts/model-viewer.min.js" slot="head" />
 
@@ -295,7 +295,7 @@ const ld = {
   <!-- Call to action -->
   <section class="text-white">
     <div class="wrap py-24 text-center">
-      <img src="/assets/brand/closing-crest-final-2026.webp" width="1254" height="1254" alt="Sikhi University crest" class="home-closing-crest mx-auto w-auto" />
+      <img src="/assets/brand/closing-crest-final-2026.webp" width="1254" height="1254" alt="Sikhi University crest" class="home-closing-crest mx-auto w-auto" loading="lazy" decoding="async" />
       <p class="eyebrow text-saffron mt-6" data-i18n="home.cta2.eyebrow">Begin today</p>
       <h2 class="text-display-sm mt-4 font-bold text-white" data-i18n="home.cta2.heading">Start your journey today.</h2>
       <p class="mx-auto mt-4 max-w-xl text-lg text-white/85" data-i18n="home.cta2.sub">It takes thirty seconds to begin. No sign-up required. Pick a course, start a lesson, and see how deep Sikhi really goes.</p>

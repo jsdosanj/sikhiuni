@@ -68,7 +68,7 @@ import Base from '../layouts/Base.astro';
       function gradebook() {
         Promise.all([api('/api/gradebook'), Promise.resolve(programs)]).then(([{ ok, d }]) => {
           if (!ok) { panel.innerHTML = '<div class="rounded-xl bg-surface p-4">Could not load the gradebook.</div>'; return; }
-          const rows = d.rows || [], cids = d.courses || [];
+          const rows = (d.rows || []).filter((r) => !r.program), cids = d.courses || []; // program-exam passes are tallied separately
           const lc = (id) => { const c = courses.find((x) => x.id === id); return c ? (c.nLessons || 0) : 0; };
           if (!rows.length) { panel.innerHTML = '<div class="rounded-xl bg-surface p-4 text-muted">No enrolments yet.</div>'; return; }
 
@@ -476,10 +476,10 @@ import Base from '../layouts/Base.astro';
           if (!s.ok) { panel.innerHTML = '<div class="rounded-xl bg-surface p-4">Could not load stats.</div>'; return; }
           const t = s.d.totals || {};
           const stat = (n, l) => `<div class="rounded-[3px] border border-line bg-surface p-4 text-center"><div class="stat-mono items-center"><span>${n || 0}</span><span>${l}</span></div></div>`;
-          let html = `<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">${stat(t.users, 'Total users')}${stat(t.enrollments, 'Enrollments')}${stat(t.completions, 'Completions')}${stat(t.activeSessions, 'Active sessions')}${stat(t.teachers, 'Teachers')}${stat(t.pendingApplications, 'Pending apps')}${stat(t.newFeedback, 'New feedback')}${stat(t.admins, 'Admins')}</div>`;
+          let html = `<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">${stat(t.users, 'Total users')}${stat(t.enrollments, 'Enrollments')}${stat(t.completions, 'Completions')}${stat(t.programPasses, 'Program passes')}${stat(t.activeSessions, 'Active sessions')}${stat(t.teachers, 'Teachers')}${stat(t.pendingApplications, 'Pending apps')}${stat(t.newFeedback, 'New feedback')}${stat(t.admins, 'Admins')}</div>`;
           html += `<div class="mt-6 rounded-xl2 border border-line bg-surface p-4"><h3 class="text-lg font-bold">Preview dashboards</h3><p class="font-sans text-sm text-muted">See exactly what a student and a teacher see.</p><div class="mt-3 flex flex-wrap gap-2"><a class="btn" href="/dashboard/learning?demo=student">View student dashboard →</a><a class="btn" href="/dashboard/learning?demo=teacher">View teacher dashboard →</a></div></div>`;
           if (g.ok) {
-            const rows = g.d.rows || [];
+            const rows = (g.d.rows || []).filter((r) => !r.program);
             const byUser = {}; rows.forEach((r) => { if (r.score != null && r.score >= 80) byUser[r.user_id] = (byUser[r.user_id] || 0) + 1; });
             const counts = Object.values(byUser);
             const badgeCounts = { 'Completer (1+)': counts.filter((n) => n >= 1).length, 'Dedicated (25+)': counts.filter((n) => n >= 25).length, 'Scholar (100+)': counts.filter((n) => n >= 100).length, 'Vidhvaan (250+)': counts.filter((n) => n >= 250).length };

@@ -13,9 +13,7 @@ foundations to advanced study. Every course ends with a test; passing with
 80% or higher unlocks a printable certificate. Courses drafted with AI
 assistance are clearly labeled "Created by AI" and reviewed for accuracy;
 Gurbani (scripture) is handled with reverence and sourced faithfully. Sikh
-University also offers free-form academic programs (Certificate through
-Giani) that stack courses into a credential — self-development credentials,
-not accredited degrees.
+University also offers free certificate programs (Certificate through Giani) that stack courses into a certificate of completion. Certificates are for self-development only: Sikhi University is not accredited, grants no degrees and offers no university credit.
 
 Sikhi University was founded by Bhai Jasvant Singh ਪੰਛੀ, a Sikh educator and
 pracharik, and works alongside the Sikh Archive (a companion library of Sikh
@@ -34,7 +32,7 @@ roughly 280+ courses across 22 subject areas and 30+ guided learning paths.
 
 - [Homepage](https://sikhiuni.com/): mission, subjects and guided learning paths.
 - [Course catalogue](https://sikhiuni.com/catalog): browse every course by topic, level, or guided learning path.
-- [Academic programs](https://sikhiuni.com/programs): Certificate through Giani credential ladder.
+- [Certificate programs](https://sikhiuni.com/programs): Certificate through Giani. Self-development only; no degrees or university credit.
 - [About](https://sikhiuni.com/about): why Sikhi University exists, how it works, and our approach to accuracy.
 - [Professors](https://sikhiuni.com/professors): the scholars and writers whose works form each course.
 - [Santhya (Gurbani reading pathway)](https://sikhiuni.com/santhiya): a structured path through Nitnem and Sri Guru Granth Sahib Ji.

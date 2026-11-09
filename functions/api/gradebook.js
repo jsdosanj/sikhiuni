@@ -1,4 +1,9 @@
 import { json, getUser, logEvent, parseBody } from "./_lib.js";
+import programsData from "../../site/assets/data/programs.json";
+
+// Program exam passes live in `progress` under course_id = <program id> (see program-exam.js).
+// They are flagged so UIs can keep them out of course enrolment / completion tallies.
+const PROGRAM_IDS = new Set(programsData.programs.map((p) => p.id));
 
 // course_teachers maps a teacher to the courses they teach (admin-assigned).
 // grade_overrides lets a teacher/admin set a final score that wins over the
@@ -53,12 +58,13 @@ export async function onRequestGet({ request, env }) {
     try { const a = JSON.parse(r.done || "[]"); done = Array.isArray(a) ? a.length : 0; } catch (e) {}
     const eff = (r.override_score != null) ? r.override_score : r.passed_score;
     return {
+      program: PROGRAM_IDS.has(r.course_id), // a passed program exam, not a course enrolment
       course_id: r.course_id, user_id: r.user_id, email: r.email, name: r.name,
       done, score: eff, raw: r.passed_score, override: r.override_score != null,
       reason: r.override_reason || null, last_active: r.updated_at,
     };
   });
-  const courses = isAdmin ? Array.from(new Set(rows.map((r) => r.course_id))) : scopeIds;
+  const courses = isAdmin ? Array.from(new Set(rows.filter((r) => !r.program).map((r) => r.course_id))) : scopeIds;
 
   if (url.searchParams.get("format") === "csv") {
     const head = ["course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];

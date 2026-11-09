@@ -126,3 +126,15 @@ IndexNow, open robots. No one can guarantee a #1 ranking for "all Sikhi-related 
 the remaining levers are off-page: Search Console + Bing Webmaster verification and sitemap
 submission (see the migration checklist), links from sikhi.io / sikharchive.net / gurdwara
 and Sikh-studies sites, and original, accurate content that earns citations.
+
+## 2026-11 audit pass (built HTML, 1,317 pages)
+
+Checked every built page: all 3,126 JSON-LD blocks parse; every indexable page has a title,
+description, one `<h1>` and a canonical. Changes: professor pages with no bio now get a real
+description (course count + titles) instead of a one-line stub (short descriptions 114 → 43);
+program pages emit `BreadcrumbList` + an `ItemList` of their courses (the breadcrumb was built
+but never output); `/muharni` (a redirect stub) and `/offline` are `noindex`; the footer links to
+Certificate programs, Departments and Santhya from every page (internal links to key landing
+pages); `sameAs` includes sikhi.io; `llms.txt` no longer calls programs "credentials". Known and
+left alone: ~330 titles over 65 characters (mostly Institute/course titles, Google rewrites these),
+lastmod in sitemaps is the build date.
