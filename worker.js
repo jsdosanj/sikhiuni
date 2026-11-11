@@ -95,6 +95,7 @@ import { onRequestGet as rubricsGet, onRequestPost as rubricsPost } from "./func
 import { onRequestGet as messagingSettingsGet, onRequestPost as messagingSettingsPost } from "./functions/api/messaging-settings.js";
 import { onRequestGet as messagesGet, onRequestPost as messagesPost } from "./functions/api/messages.js";
 import { onRequestGet as releaseRulesGet, onRequestPost as releaseRulesPost } from "./functions/api/release-rules.js";
+import { onRequestGet as lmsQuizzesGet, onRequestPost as lmsQuizzesPost } from "./functions/api/lms-quizzes.js";
 import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
@@ -190,6 +191,7 @@ const routes = {
   "/api/messaging-settings": { GET: messagingSettingsGet, POST: messagingSettingsPost },
   "/api/messages": { GET: messagesGet, POST: messagesPost },
   "/api/release-rules": { GET: releaseRulesGet, POST: releaseRulesPost },
+  "/api/lms-quizzes": { GET: lmsQuizzesGet, POST: lmsQuizzesPost },
   "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
   "/api/calendar.ics": { GET: calendarIcsGet },
   "/api/account/delete": { POST: accountDeletePost },
@@ -229,6 +231,7 @@ const RATE_LIMITS = {
   "/api/messaging-settings": { limit: 20, window: 60 },
   "/api/messages": { limit: 20, window: 60 },  // DMs: sends, requests, reports
   "/api/release-rules": { limit: 30, window: 60 },
+  "/api/lms-quizzes": { limit: 60, window: 60 },  // includes autosave while answering
   "/api/calendar-feed": { limit: 5, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },

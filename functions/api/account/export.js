@@ -69,6 +69,7 @@ export async function onRequestGet({ request, env }) {
     forum_follows: await all("SELECT thread_id, created_at FROM forum_subscriptions WHERE user_id=?", user.id),
     course_mutes: await all("SELECT course_id, created_at FROM course_mutes WHERE user_id=?", user.id),
     calendar_feed: await all("SELECT created_at, last_used_at FROM calendar_feeds WHERE user_id=?", user.id),
+    quiz_attempts: await all("SELECT quiz_id, course_id, started_at, submitted_at, score, max_score, status FROM lms_quiz_attempts WHERE user_id=?", user.id),
     trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 

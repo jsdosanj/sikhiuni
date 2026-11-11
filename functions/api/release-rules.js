@@ -13,7 +13,7 @@ import { courseAccess } from "./_course-auth.js";
 // POST /api/release-rules { courseId, itemType:"assignment"|"poll", itemId, minLessons?, requireQuizPass?, notBefore? }
 //      all empty -> the rule is removed
 
-const TYPES = { assignment: "assignments", poll: "polls" };
+const TYPES = { assignment: "assignments", poll: "polls", quiz: "lms_quizzes" };
 
 export function ensureRelease(env) {
   return schemaOnce(env.DB, "release_rules", () => env.DB.prepare(
@@ -71,7 +71,7 @@ export async function onRequestPost({ request, env }) {
   const { user, error } = await courseAccess(env, request, b && b.courseId, "teacher");
   if (error) return error;
   const table = TYPES[b.itemType];
-  if (!table) return json({ error: "itemType must be assignment or poll" }, 400);
+  if (!table) return json({ error: "itemType must be assignment, poll or quiz" }, 400);
   const item = await env.DB.prepare(`SELECT course_id FROM ${table} WHERE id=?`).bind(String(b.itemId || "")).first().catch(() => null);
   if (!item || item.course_id !== b.courseId) return json({ error: "That item isn't in this course." }, 404);
   await ensureRelease(env);
