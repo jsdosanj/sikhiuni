@@ -63,10 +63,11 @@ const ACTOR = [
   ["glossary_terms", "created_by"], ["polls", "created_by"],
   ["rubrics", "created_by"], ["submission_grading", "graded_by"],
   ["course_messaging_settings", "updated_by"], ["course_mutes", "muted_by"], ["dm_reports", "resolved_by"],
+  ["release_rules", "updated_by"],
 ];
 
 // Credential + transient state keyed by user_id: dropped, never moved (rule 3).
-const DROP_BY_USER = ["sessions", "user_mfa", "mfa_backup_codes", "password_reset_codes", "mfa_trusted_devices"];
+const DROP_BY_USER = ["sessions", "user_mfa", "mfa_backup_codes", "password_reset_codes", "mfa_trusted_devices", "calendar_feeds"];
 
 // Same, but keyed by email rather than id.
 const DROP_BY_EMAIL = ["magic_tokens", "pending_registrations"];

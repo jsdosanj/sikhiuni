@@ -1,6 +1,7 @@
 import { json, getUser } from "./_lib.js";
 import { ensurePolicies } from "./course-policies.js";
 import { ensurePolls } from "./polls.js";
+import { courseRules, learnerProgress, lockReason } from "./release-rules.js";
 
 // C1 Calendar + To-Do (Canvas Calendar / To-Do list, Moodle Timeline).
 // One read-only feed across every course the caller teaches or is enrolled in:
@@ -14,19 +15,23 @@ const DAY = 24 * 60 * 60 * 1000;
 export async function onRequestGet({ request, env }) {
   const user = await getUser(env, request);
   if (!user) return json({ error: "Please sign in." }, 401);
-  await ensurePolicies(env);
-  await ensurePolls(env);
   const sp = new URL(request.url).searchParams;
   const now = Date.now();
-  const from = Number(sp.get("from")) || now - 30 * DAY;
-  const to = Number(sp.get("to")) || now + 120 * DAY;
+  return json(await calendarFor(env, user, Number(sp.get("from")) || now - 30 * DAY, Number(sp.get("to")) || now + 120 * DAY));
+}
+
+/** { events, todo } for one user (also used by the private iCal feed, calendar-feed.js). */
+export async function calendarFor(env, user, from, to) {
+  await ensurePolicies(env);
+  await ensurePolls(env);
+  const now = Date.now();
 
   const teaching = user.role === "admin" ? [] :
     ((await env.DB.prepare("SELECT course_id FROM course_teachers WHERE user_id=?").bind(user.id).all()).results || []).map((r) => r.course_id);
   const enrolled = ((await env.DB.prepare("SELECT target_id FROM enrollments WHERE user_id=? AND kind='course'").bind(user.id).all().catch(() => ({ results: [] }))).results || [])
     .map((r) => r.target_id).filter((c) => !teaching.includes(c));
   const all = teaching.concat(enrolled);
-  if (!all.length) return json({ events: [], todo: [] });
+  if (!all.length) return { events: [], todo: [] };
   const ph = (a) => a.map(() => "?").join(",");
 
   const events = [];
@@ -65,7 +70,18 @@ export async function onRequestGet({ request, env }) {
     if (!teach && !p.answered && !(p.closes_at && p.closes_at < now)) todo.push({ type: "poll", id: p.id, course_id: p.course_id, title: p.title, kind: p.kind, at: p.closes_at || null });
   }
 
+  // C3: items still locked by a release rule stay off the learner's to-do list.
+  const lockCache = new Map();
+  const isLocked = async (type, it) => {
+    if (teaching.includes(it.course_id)) return false;
+    if (!lockCache.has(it.course_id)) lockCache.set(it.course_id, { rules: await courseRules(env, it.course_id), progress: await learnerProgress(env, user.id, it.course_id) });
+    const c = lockCache.get(it.course_id);
+    return !!lockReason(c.rules[`${type}:${it.id}`], c.progress, now);
+  };
+  const kept = [];
+  for (const it of todo) if (it.type === "grade" || !(await isLocked(it.type, it))) kept.push(it);
+  todo.length = 0; todo.push(...kept);
   events.sort((x, y) => x.at - y.at);
   todo.sort((x, y) => (x.at || Infinity) - (y.at || Infinity));
-  return json({ events, todo: todo.slice(0, 100) });
+  return { events, todo: todo.slice(0, 100) };
 }

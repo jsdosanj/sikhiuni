@@ -478,3 +478,12 @@ CREATE TABLE IF NOT EXISTS dm_reports (
   reason TEXT, status TEXT NOT NULL DEFAULT 'open', created_at INTEGER NOT NULL, resolved_by TEXT, resolved_at INTEGER, UNIQUE (message_id, reporter_id)
 );
 CREATE TABLE IF NOT EXISTS forum_subscriptions (user_id TEXT NOT NULL, thread_id TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (user_id, thread_id));
+
+-- C3 release rules + C1 iCal feed (migrations/0023_release_rules_calendar_feed.sql).
+CREATE TABLE IF NOT EXISTS release_rules (
+  item_type TEXT NOT NULL, item_id TEXT NOT NULL, course_id TEXT NOT NULL, min_lessons INTEGER,
+  require_quiz_pass INTEGER NOT NULL DEFAULT 0, not_before INTEGER, updated_by TEXT, updated_at INTEGER NOT NULL,
+  PRIMARY KEY (item_type, item_id)
+);
+-- The feed token is a bearer secret: only its SHA-256 is stored.
+CREATE TABLE IF NOT EXISTS calendar_feeds (user_id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL, last_used_at INTEGER);

@@ -2,6 +2,7 @@ import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent } from "./_lib.js";
 import { dueFor, latePenaltyPct, pastCutoff } from "./course-policies.js";
 import { rubricForAssignment } from "./rubrics.js";
+import { itemLock } from "./release-rules.js";
 
 async function ensure(env) {
   return schemaOnce(env.DB, "submissions", async () => {
@@ -113,6 +114,8 @@ export async function onRequestPost({ request, env }) {
   // The learner's own due date (an extension wins) and the course's late policy.
   const due = await dueFor(env, assignment, assignmentId, user.id);
   if (pastCutoff(due, now)) return json({ error: "The late-submission window for this assignment has closed. Ask your teacher for an extension." }, 400);
+  const locked = await itemLock(env, "assignment", assignmentId, assignment.course_id, user.id);
+  if (locked) return json({ error: locked }, 403);
   const late = due.dueAt && now > due.dueAt ? 1 : 0;
   await env.DB.prepare(
     "INSERT INTO submissions (id, assignment_id, user_id, text_content, file_key, submitted_at, updated_at, late, status) " +

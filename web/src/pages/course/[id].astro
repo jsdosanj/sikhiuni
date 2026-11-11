@@ -848,7 +848,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           return '<div class="rounded-lg border border-line bg-surface p-3" data-assignment="' + esc(a.id) + '" data-allow-file="' + (a.allow_file ? '1' : '0') + '" data-closed="' + (a.status === 'closed' ? '1' : '0') + '">' +
               '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + ((a.my_due_at || a.due_at) ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.my_due_at || a.due_at).toLocaleDateString()) + (a.extended ? ' (your extended date)' : '') + (a.late_penalty_per_day ? ' · late work loses ' + esc(a.late_penalty_per_day) + '% per day' : '') + '</span>' : '') + statusLine + '</div>' +
               '<p class="mt-1 text-sm text-muted">' + esc(a.instructions) + '</p>' +
-              (a.my_status !== 'graded' && a.status !== 'closed' ? (
+              (a.locked ? '<p class="mt-1 font-sans text-sm text-muted">' + esc(a.lock_reason) + '</p>' :
+              a.my_status !== 'graded' && a.status !== 'closed' ? (
                 '<textarea rows="2" class="mt-2 w-full rounded-lg border border-line p-2 font-sans text-sm focus:border-saffron" placeholder="Your answer…" data-assign-text></textarea>' +
                 (a.allow_file ? '<input type="file" class="mt-2 block font-sans text-xs" data-assign-file />' : '') +
                 '<button type="button" class="btn mt-2" data-assign-submit>' + (a.my_status === 'submitted' ? 'Resubmit' : 'Submit') + '</button>' +

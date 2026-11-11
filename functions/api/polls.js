@@ -2,6 +2,7 @@ import { json, newId, logEvent } from "./_lib.js";
 import { schemaOnce } from "./_schema-once.js";
 import { courseAccess, cleanText } from "./_course-auth.js";
 import { notify, courseLearnerIds } from "./_notify.js";
+import { courseRules, learnerProgress, lockReason, itemLock } from "./release-rules.js";
 
 // C12 Polls, surveys and course evaluations (Moodle Choice/Feedback, Canvas surveys).
 //
@@ -116,6 +117,8 @@ export async function onRequestGet({ request, env }) {
     if (!teach && p.status === "draft") return json({ error: "not found" }, 404);
     const questions = JSON.parse(p.questions);
     const answered = teach ? false : !!(await env.DB.prepare("SELECT 1 AS x FROM poll_participants WHERE poll_id=? AND user_id=?").bind(id, user.id).first());
+    const locked = teach || answered ? null : await itemLock(env, "poll", p.id, p.course_id, user.id);
+    if (locked) return json({ poll: { id: p.id, course_id: p.course_id, kind: p.kind, title: p.title, locked: true, lock_reason: locked, questions: [], open: false, answered: false } });
     const poll = { id: p.id, course_id: p.course_id, kind: p.kind, title: p.title, anonymous: !!p.anonymous, status: p.status, closes_at: p.closes_at, open: isOpen(p, now), questions, answered };
     const showResults = teach || (p.kind === "poll" && answered);
     if (showResults) {
@@ -149,7 +152,12 @@ export async function onRequestGet({ request, env }) {
     "SELECT p.id, p.kind, p.title, p.anonymous, p.status, p.closes_at, " +
     "EXISTS(SELECT 1 FROM poll_participants x WHERE x.poll_id=p.id AND x.user_id=?) AS answered " +
     "FROM polls p WHERE p.course_id=? AND p.status != 'draft' ORDER BY p.created_at DESC").bind(user.id, courseId).all();
-  return json({ scope: "learner", polls: (results || []).map((p) => ({ ...p, open: isOpen(p, now), answered: !!p.answered })) });
+  const rules = await courseRules(env, courseId);
+  const progress = await learnerProgress(env, user.id, courseId);
+  return json({ scope: "learner", polls: (results || []).map((p) => {
+    const lock = p.answered ? null : lockReason(rules[`poll:${p.id}`], progress, now);
+    return { ...p, open: isOpen(p, now) && !lock, answered: !!p.answered, locked: !!lock, lock_reason: lock };
+  }) });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -183,6 +191,8 @@ export async function onRequestPost({ request, env }) {
     if (error) return error;
     if (teach) return json({ error: "Only learners respond." }, 400);
     if (!isOpen(p, now)) return json({ error: "This poll is not open." }, 400);
+    const locked = await itemLock(env, "poll", p.id, p.course_id, user.id);
+    if (locked) return json({ error: locked }, 403);
     const answers = cleanAnswers(JSON.parse(p.questions), b.answers);
     if (typeof answers === "string") return json({ error: answers }, 400);
     // The participant row is the double-vote guard; INSERT OR IGNORE + changes tells us who won a race.

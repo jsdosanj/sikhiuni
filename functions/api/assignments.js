@@ -1,6 +1,7 @@
 import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent } from "./_lib.js";
 import { dueFor } from "./course-policies.js";
+import { courseRules, learnerProgress, lockReason } from "./release-rules.js";
 
 async function ensure(env) {
   return schemaOnce(env.DB, "assignments", async () => {
@@ -57,10 +58,14 @@ export async function onRequestGet({ request, env }) {
     "WHERE a.course_id=? AND a.status != 'draft' ORDER BY a.due_at IS NULL, a.due_at ASC"
   ).bind(user.id, courseId).all();
   // Personal due date (extension) and late policy, so the learner sees their real deadline.
+  // C3: an assignment with an unmet release rule is listed as locked, without its instructions.
+  const rules = await courseRules(env, courseId);
+  const progress = await learnerProgress(env, user.id, courseId);
   const out = [];
   for (const a of results || []) {
     const due = await dueFor(env, a, a.id, user.id);
-    out.push({ ...a, my_due_at: due.dueAt, extended: due.extended, late_penalty_per_day: due.latePenaltyPerDay, max_late_days: due.maxLateDays });
+    const locked = a.my_status ? null : lockReason(rules[`assignment:${a.id}`], progress);
+    out.push({ ...a, instructions: locked ? "" : a.instructions, locked: !!locked, lock_reason: locked, my_due_at: due.dueAt, extended: due.extended, late_penalty_per_day: due.latePenaltyPerDay, max_late_days: due.maxLateDays });
   }
   return json({ scope: "student", assignments: out });
 }

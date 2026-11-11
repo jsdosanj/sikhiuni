@@ -78,8 +78,21 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         : '<li class="py-2.5 text-muted">Nothing waiting. Well done.</li>';
       const evHtml = ev.length ? ev.map((e: Any) => `<li class="flex flex-wrap items-baseline gap-2 border-b border-line py-2.5"><span class="font-mono text-xs text-muted">${esc(fmt(e.at))}</span><span>${e.type === 'poll' ? 'Closes' : 'Due'}: <strong>${esc(e.title)}</strong></span>${e.extended ? '<span class="pill bg-paper text-muted">your extended date</span>' : ''}${e.done ? '<span class="pill bg-paper text-muted">done</span>' : ''}</li>`).join('')
         : '<li class="py-2.5 text-muted">No dates in the next few months.</li>';
+      const fd = await api('/api/calendar-feed');
+      const feedHtml = `<div class="mt-10 rounded-xl2 border border-line bg-surface p-5"><h2 class="text-lg font-bold text-navy">Add your due dates to your calendar app</h2>
+        <p class="mt-1 text-sm text-muted">A private link for Google, Apple or Outlook calendar, covering all your courses. It shows titles and dates only. Anyone with the link can see them, so keep it to yourself.</p>
+        <div id="feed-out" class="mt-3 break-all font-mono text-xs"></div>
+        <div class="mt-3 flex flex-wrap gap-2"><button class="btn" id="feed-new">${fd.ok && fd.d.enabled ? 'Make a new link (the old one stops working)' : 'Create my calendar link'}</button>${fd.ok && fd.d.enabled ? '<button class="btn" id="feed-off">Turn off</button>' : ''}</div></div>`;
       el.innerHTML = `<div class="flex flex-wrap gap-10"><div class="min-w-0 flex-[1_1_300px]"><h2 class="text-xl font-bold text-navy">To do</h2><ul class="mt-2 font-sans text-[15px]">${todoHtml}</ul></div>
-        <div class="min-w-0 flex-[1_1_300px]"><h2 class="text-xl font-bold text-navy">Upcoming dates</h2><ul class="mt-2 font-sans text-[15px]">${evHtml}</ul></div></div>`;
+        <div class="min-w-0 flex-[1_1_300px]"><h2 class="text-xl font-bold text-navy">Upcoming dates</h2><ul class="mt-2 font-sans text-[15px]">${evHtml}</ul></div></div>${feedHtml}`;
+      $('feed-new').addEventListener('click', async () => {
+        const r2 = await api('/api/calendar-feed', { action: 'create' });
+        if (!r2.ok) { $('feed-out').textContent = errText(r2); return; }
+        $('feed-out').innerHTML = `Copy this link into your calendar app's "subscribe" or "add from URL" option. It is shown only once:<br><input readonly value="${esc(r2.d.url)}" class="${FIELD} mt-1" aria-label="Your calendar link" />`;
+        ($('feed-out').querySelector('input') as HTMLInputElement).select();
+      });
+      const off = document.getElementById('feed-off');
+      if (off) off.addEventListener('click', async () => { await api('/api/calendar-feed', { action: 'revoke' }); loaders.dates(); });
     };
 
     // ---------- C12 polls / surveys / evaluations ----------
@@ -111,7 +124,8 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       const p = r.d.poll;
       const head = `<h3 class="text-xl font-bold text-navy">${esc(p.title)}</h3><p class="font-sans text-xs text-muted">${esc(KIND[p.kind] || p.kind)}${p.anonymous ? ' · anonymous' : ''}${p.closes_at ? ' · closes ' + esc(fmt(p.closes_at)) : ''}</p>`;
       let body = '';
-      if (isTeacher) body = resultsHtml(p);
+      if (p.locked) body = `<p class="mt-3 text-muted">${esc(p.lock_reason)}</p>`;
+      else if (isTeacher) body = resultsHtml(p);
       else if (p.answered) body = '<p class="mt-3">Thank you, your response is in.</p>' + resultsHtml(p);
       else if (p.open) body = answerForm(p);
       else body = '<p class="mt-3 text-muted">This is closed.</p>';
@@ -139,7 +153,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       const rows = list.length ? list.map((p: Any) => `<li class="flex flex-wrap items-center gap-2 border-b border-line py-2.5"><button class="font-bold text-navy underline" data-open-poll="${esc(p.id)}">${esc(p.title)}</button>
         <span class="pill bg-paper text-muted">${esc(KIND[p.kind] || p.kind)}</span>${isTeacher ? `<span class="pill bg-paper text-muted">${esc(p.status)}</span><span class="font-sans text-xs text-muted">${esc(p.responses)} responses</span>
         <span class="ml-auto flex gap-3 font-sans text-xs">${p.status !== 'open' ? `<button class="underline" data-poll-status="open" data-id="${esc(p.id)}">Open</button>` : `<button class="underline" data-poll-status="closed" data-id="${esc(p.id)}">Close</button>`}<button class="underline text-danger" data-poll-del="${esc(p.id)}">Delete</button></span>`
-        : `<span class="ml-auto font-sans text-xs text-muted">${p.answered ? 'answered' : p.open ? 'open' : 'closed'}</span>`}</li>`).join('')
+        : `<span class="ml-auto font-sans text-xs text-muted">${p.answered ? 'answered' : p.locked ? 'locked' : p.open ? 'open' : 'closed'}</span>`}</li>`).join('')
         : `<li class="py-2.5 text-muted">${isTeacher ? 'No polls yet.' : 'Nothing to answer yet.'}</li>`;
       const builder = isTeacher ? `<details class="mt-6 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New poll, survey or evaluation</summary>
         <form id="poll-new" class="mt-4 space-y-3">
@@ -275,6 +289,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
           <label class="${LABEL}">Note (optional)<input id="acc-note" maxlength="300" class="${FIELD}" /></label><button class="btn btn-primary" type="submit">Save</button><span id="acc-out" class="font-sans text-sm" aria-live="polite"></span></form>` : '<p class="mt-3 text-muted">No enrolled learners yet.</p>'}
         <ul class="mt-3 font-sans text-sm">${accommodations.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · +${esc(x.extra_time_pct)}% time${x.note ? ' · ' + esc(x.note) : ''}<button class="ml-auto underline text-danger" data-acc-del="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>
         <div id="rub-section"></div>
+        <div id="rel-section"></div>
         <div id="msg-section"></div>`;
 
       el.querySelectorAll<HTMLElement>('[data-save-pol]').forEach((b) => b.addEventListener('click', async () => {
@@ -300,14 +315,44 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       });
       el.querySelectorAll<HTMLElement>('[data-acc-del]').forEach((b) => b.addEventListener('click', async () => { await api('/api/course-policies', { action: 'accommodation', courseId, userId: b.dataset.accDel, extraTimePct: 0 }); loaders.settings(); }));
       renderRubrics(assignments);
+      renderRelease(assignments);
       renderMessaging(learners);
     };
+
+    // ---------- C3 release rules (inside Teacher settings) ----------
+    async function renderRelease(assignments: Any[]) {
+      const box = document.getElementById('rel-section'); if (!box) return;
+      const [r, p] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId))]);
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const byKey = Object.fromEntries((r.d.rules || []).map((x: Any) => [`${x.item_type}:${x.item_id}`, x]));
+      const items = assignments.map((a: Any) => ({ type: 'assignment', id: a.id, title: a.title, label: 'Assignment' }))
+        .concat(((p.ok && p.d.polls) || []).map((x: Any) => ({ type: 'poll', id: x.id, title: x.title, label: x.kind === 'evaluation' ? 'Evaluation' : x.kind === 'survey' ? 'Survey' : 'Poll' })));
+      const local = (ms: number | null) => (ms ? new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Release rules</h2>
+        <p class="mt-1 text-sm text-muted">Optional. Keep an assignment or poll locked until a learner has done enough of the course. Lessons themselves are never locked. Leave everything empty for no rule.</p>
+        ${items.length ? `<table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1.5">Item</th><th>Lessons done</th><th>Quiz passed</th><th>Not before</th><th></th></tr></thead><tbody>${items.map((it: Any) => {
+          const x = byKey[`${it.type}:${it.id}`] || {};
+          return `<tr class="border-t border-line" data-rel="${esc(it.type)}" data-id="${esc(it.id)}"><td class="py-2 pr-2"><span class="text-xs text-muted">${esc(it.label)}</span><br><strong class="text-navy">${esc(it.title)}</strong></td>
+            <td class="pr-2"><input type="number" min="1" max="1000" data-min value="${esc(x.min_lessons || '')}" placeholder="any" aria-label="Lessons completed" class="${FIELD} !mt-0 !w-20" /></td>
+            <td class="pr-2"><input type="checkbox" data-quiz ${x.require_quiz_pass ? 'checked' : ''} aria-label="Course quiz passed" /></td>
+            <td class="pr-2"><input type="datetime-local" data-date value="${esc(local(x.not_before || null))}" aria-label="Not before" class="${FIELD} !mt-0" /></td>
+            <td><button class="btn" data-save-rel>Save</button></td></tr>`;
+        }).join('')}</tbody></table>` : '<p class="mt-3 text-muted">No assignments or polls yet.</p>'}`;
+      box.querySelectorAll<HTMLElement>('[data-save-rel]').forEach((b) => b.addEventListener('click', async () => {
+        const row = b.closest('[data-rel]') as HTMLElement;
+        const d = (row.querySelector('[data-date]') as HTMLInputElement).value;
+        const res = await api('/api/release-rules', { courseId, itemType: row.dataset.rel, itemId: row.dataset.id,
+          minLessons: (row.querySelector('[data-min]') as HTMLInputElement).value || null,
+          requireQuizPass: (row.querySelector('[data-quiz]') as HTMLInputElement).checked, notBefore: d ? new Date(d).getTime() : null });
+        b.textContent = res.ok ? 'Saved' : 'Error'; if (!res.ok) alert(errText(res)); setTimeout(() => { b.textContent = 'Save'; }, 1500);
+      }));
+    }
 
     // ---------- C18 forum + messages settings, mutes, report queue (inside Teacher settings) ----------
     async function renderMessaging(learners: Any[]) {
       const box = document.getElementById('msg-section'); if (!box) return;
       const [r, q] = await Promise.all([api('/api/messaging-settings?courseId=' + encodeURIComponent(courseId)), api('/api/messages?reports=' + encodeURIComponent(courseId))]);
-      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      if (!r.ok || !r.d.settings) { box.innerHTML = note('warn', esc(r.ok ? 'Could not load the forum and message settings.' : errText(r))); return; }
       const st = r.d.settings, mutes = r.d.mutes || [], reports = (q.ok && q.d.reports) || [];
       const tog = (k: string, label: string, hint = '') => `<label class="flex items-start gap-2 py-1.5"><input type="checkbox" data-set="${k}" ${st[k] ? 'checked' : ''} class="mt-1" /><span>${label}${hint ? `<span class="block text-xs text-muted">${hint}</span>` : ''}</span></label>`;
       const mutedIds = new Set(mutes.map((m: Any) => m.user_id));

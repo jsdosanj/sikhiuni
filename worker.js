@@ -94,6 +94,8 @@ import { onRequestGet as notificationsGet, onRequestPost as notificationsPost } 
 import { onRequestGet as rubricsGet, onRequestPost as rubricsPost } from "./functions/api/rubrics.js";
 import { onRequestGet as messagingSettingsGet, onRequestPost as messagingSettingsPost } from "./functions/api/messaging-settings.js";
 import { onRequestGet as messagesGet, onRequestPost as messagesPost } from "./functions/api/messages.js";
+import { onRequestGet as releaseRulesGet, onRequestPost as releaseRulesPost } from "./functions/api/release-rules.js";
+import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -187,6 +189,9 @@ const routes = {
   "/api/rubrics": { GET: rubricsGet, POST: rubricsPost },
   "/api/messaging-settings": { GET: messagingSettingsGet, POST: messagingSettingsPost },
   "/api/messages": { GET: messagesGet, POST: messagesPost },
+  "/api/release-rules": { GET: releaseRulesGet, POST: releaseRulesPost },
+  "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
+  "/api/calendar.ics": { GET: calendarIcsGet },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -223,6 +228,8 @@ const RATE_LIMITS = {
   "/api/rubrics": { limit: 30, window: 60 },
   "/api/messaging-settings": { limit: 20, window: 60 },
   "/api/messages": { limit: 20, window: 60 },  // DMs: sends, requests, reports
+  "/api/release-rules": { limit: 30, window: 60 },
+  "/api/calendar-feed": { limit: 5, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },
