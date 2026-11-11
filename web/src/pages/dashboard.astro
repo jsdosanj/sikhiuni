@@ -246,6 +246,12 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             <div id="tp-mfa" class="mt-3"></div>
             <div id="tp-body" class="mt-4 space-y-4"><p class="text-muted font-sans text-sm">Loading…</p></div>
           </div>` : ''}
+          <div class="mt-10 max-w-xl border-t border-line pt-6" id="sec-panel">
+            <h2 class="text-xl font-bold">Security</h2>
+            <p class="mt-1 font-sans text-sm text-muted">Two-factor authentication is optional for every account, and recommended, especially for teachers and admins.</p>
+            <div id="sec-mfa" class="mt-4"></div>
+            <div id="sec-activity" class="mt-6"></div>
+          </div>
           <div class="mt-10 max-w-xl border-t border-line pt-6">
             <h2 class="text-xl font-bold">Your data</h2>
             <p class="mt-1 font-sans text-sm text-muted">Download everything we hold for your account, or permanently delete it.</p>
@@ -263,6 +269,35 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
             </div>
           </div>`;
         document.getElementById('pf-export').addEventListener('click', () => { window.location.href = '/api/account/export'; });
+        // ── Security: optional MFA for every role (plan Part B) ──────────────
+        function drawMfa() {
+          const box = document.getElementById('sec-mfa'); if (!box) return;
+          const on = !!(cur.mfa && cur.mfa.enrolled);
+          box.innerHTML = on
+            ? `<div class="rounded-xl border border-line bg-surface p-4 font-sans text-sm"><p><span class="pill bg-saffron-soft text-saffron-deep">Two-factor authentication is on</span></p>
+                <p class="mt-2 text-muted">New sign-ins ask for a code from your authenticator app, unless you ticked “Remember this device for 30 days”.</p>
+                <div class="mt-3 flex flex-wrap gap-2"><button id="mfa-regen" class="btn">New backup codes</button><button id="mfa-off" class="btn border border-danger/40 text-danger hover:bg-danger/10">Turn off</button></div>
+                <div id="mfa-out" class="mt-3"></div></div>`
+            : `<div class="rounded-xl border border-line bg-surface p-4 font-sans text-sm"><p><strong>Two-factor authentication is off.</strong></p>
+                <p class="mt-1 text-muted">Add a code from an authenticator app to each new sign-in. Optional, and recommended.</p>
+                <a class="btn btn-primary mt-3" href="/mfa?next=${encodeURIComponent('/dashboard#profile')}">Turn on</a></div>`;
+          const out = () => document.getElementById('mfa-out');
+          document.getElementById('mfa-off')?.addEventListener('click', async () => {
+            const v = await window.suModalForm({ title: 'Turn off two-factor authentication', submitLabel: 'Turn off', fields: [{ name: 'code', label: 'Current code (or a backup code)' }] });
+            if (!v || !v.code) return;
+            const r = await api('/api/auth/mfa/disable', { method: 'POST', body: JSON.stringify({ code: v.code.trim() }) });
+            if (r && r.ok) { cur.mfa = { enrolled: false }; drawMfa(); window.suToast && window.suToast('Two-factor authentication turned off.', 'ok'); }
+            else out().innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-paper p-3">That code didn\'t work. Try again.</div>';
+          });
+          document.getElementById('mfa-regen')?.addEventListener('click', async () => {
+            const v = await window.suModalForm({ title: 'New backup codes', submitLabel: 'Create new codes', fields: [{ name: 'code', label: 'Current code from your authenticator app' }] });
+            if (!v || !v.code) return;
+            const r = await api('/api/auth/mfa/backup-codes', { method: 'POST', body: JSON.stringify({ code: v.code.trim() }) });
+            if (r && r.backupCodes) out().innerHTML = `<div class="rounded-xl border-l-4 border-ok bg-paper p-3"><p class="font-semibold">Save these codes now. Each works once; your old codes no longer work.</p><div class="mt-2 grid grid-cols-2 gap-1 font-mono">${r.backupCodes.map((c) => `<div>${esc(c)}</div>`).join('')}</div></div>`;
+            else out().innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-paper p-3">That code didn\'t work. Try again.</div>';
+          });
+        }
+        drawMfa();
         const delConfirm = document.getElementById('pf-del-confirm');
         document.getElementById('pf-delete').addEventListener('click', () => { delConfirm.classList.remove('hidden'); document.getElementById('pf-del-input').focus(); });
         document.getElementById('pf-del-cancel').addEventListener('click', () => { delConfirm.classList.add('hidden'); document.getElementById('pf-del-input').value = ''; });
@@ -305,7 +340,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           if (mfaBox) {
             mfaBox.innerHTML = d.mfaEnrolled
               ? '<span class="pill bg-saffron-soft text-saffron-deep">Two-factor authentication enabled</span>'
-              : '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Two-factor authentication is required before you can request publish. <a class="underline font-semibold" href="/mfa">Set it up →</a></div>';
+              : '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Two-factor authentication is optional, and recommended for teachers. <a class="underline font-semibold" href="/mfa">Set it up →</a></div>';
           }
           const p = d.profile || {};
           const areas = (d.options && d.options.areas) || [];
@@ -345,8 +380,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           document.getElementById('tp-publish').addEventListener('click', () => {
             api('/api/teacher/profile', { method: 'POST', body: JSON.stringify({ ...collect(), requestPublish: true }) }).then((r) => {
               const msg = document.getElementById('tp-msg');
-              if (r && r.error === 'mfa_enrollment_required_to_publish') msg.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">Set up two-factor authentication before requesting publish. <a class="underline" href="/mfa">Set it up →</a></div>';
-              else if (r && r.profile) { msg.innerHTML = '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Publish requested, an admin will review it.</div>'; loadTeacherProfile(); }
+              if (r && r.profile) { msg.innerHTML = '<div class="rounded-xl border-l-4 border-ok bg-surface p-3 font-sans text-sm mt-2">Publish requested, an admin will review it.</div>'; loadTeacherProfile(); }
               else msg.innerHTML = '<div class="rounded-xl border-l-4 border-saffron bg-surface p-3 font-sans text-sm mt-2">Could not submit.</div>';
             });
           });

@@ -26,6 +26,7 @@ import { onRequestPost as mfaEnrollPost } from "./functions/api/auth/mfa/enroll.
 import { onRequestPost as mfaConfirmPost } from "./functions/api/auth/mfa/confirm.js";
 import { onRequestPost as mfaVerifyPost } from "./functions/api/auth/mfa/verify.js";
 import { onRequestPost as mfaDisablePost } from "./functions/api/auth/mfa/disable.js";
+import { onRequestPost as mfaBackupCodesPost } from "./functions/api/auth/mfa/backup-codes.js";
 import { onRequestGet as teacherProfileGet, onRequestPost as teacherProfilePost } from "./functions/api/teacher/profile.js";
 import { onRequestGet as teachersGet } from "./functions/api/teachers.js";
 import { onRequestGet as teacherClaimGet, onRequestPost as teacherClaimPost } from "./functions/api/teacher/claim.js";
@@ -110,6 +111,7 @@ const routes = {
   "/api/auth/mfa/confirm": { POST: mfaConfirmPost },
   "/api/auth/mfa/verify": { POST: mfaVerifyPost },
   "/api/auth/mfa/disable": { POST: mfaDisablePost },
+  "/api/auth/mfa/backup-codes": { POST: mfaBackupCodesPost },
   "/api/teacher/profile": { GET: teacherProfileGet, POST: teacherProfilePost },
   "/api/teachers": { GET: teachersGet },
   "/api/teacher/claim": { GET: teacherClaimGet, POST: teacherClaimPost },
@@ -194,6 +196,8 @@ const RATE_LIMITS = {
   "/api/push/subscribe": { limit: 10, window: 60 },
   "/api/push/unsubscribe": { limit: 10, window: 60 },
   "/api/auth/mfa/verify": { limit: 10, window: 60 },  // 6-digit code brute-force guard
+  "/api/auth/mfa/backup-codes": { limit: 5, window: 60 },
+  "/api/auth/mfa/disable": { limit: 5, window: 60 },
   "/api/teacher/profile": { limit: 10, window: 60 },
   "/api/teacher/claim": { limit: 5, window: 60 },
   "/api/teacher/archive-request": { limit: 5, window: 60 },

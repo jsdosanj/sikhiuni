@@ -1,5 +1,6 @@
 import { json, requireUser, logEvent, parseBody } from "../../_lib.js";
 import { decryptSecret, verifyTotp, sha256Hex } from "../../_totp.js";
+import { revokeTrustedDevices } from "../_trusted-device.js";
 
 // POST /api/auth/mfa/disable { code } -> requires a current code (TOTP or an
 // unused backup code) before turning MFA off, so a hijacked (but not
@@ -27,6 +28,7 @@ export async function onRequestPost({ request, env }) {
 
   await env.DB.prepare("DELETE FROM user_mfa WHERE user_id=?").bind(user.id).run();
   await env.DB.prepare("DELETE FROM mfa_backup_codes WHERE user_id=?").bind(user.id).run();
+  await revokeTrustedDevices(env, user.id);
   await logEvent(env, user, "mfa_disabled", user.id, null);
   return json({ ok: true });
 }

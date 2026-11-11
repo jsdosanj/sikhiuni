@@ -197,12 +197,13 @@ describe("teacher profile upsert + publish lifecycle", () => {
     expect(profile.display_name).toBe("Totally Different Name");
   });
 
-  it("requestPublish without MFA enrollment fails to flag publish, but other fields still save", async () => {
+  // MFA is optional for every role (owner decision 2026-11-11): publishing no longer requires it.
+  it("requestPublish WITHOUT MFA enrollment now flags publish (MFA optional)", async () => {
     const res = await profilePost({ request: asReq("t1", { displayName: "T1", bio: "hi", requestPublish: true }), env });
     const body = await res.json();
-    expect(body.error).toBe("mfa_enrollment_required_to_publish");
+    expect(body.error).toBeUndefined();
     expect(body.profile.bio).toBe("hi");
-    expect(body.profile.publish_requested_at).toBeNull();
+    expect(body.profile.publish_requested_at).not.toBeNull();
   });
 
   it("requestPublish with MFA enrollment sets publish_requested_at", async () => {

@@ -1,6 +1,8 @@
 import { verifyFamilyCredentials, familyErrorMessage } from '../../familyCredentials.js';
 import { insertUserWithOptin } from './_onboarding.js';
 import { newId, sessionCookie, logEvent, json } from "../_lib.js";
+import { sessionNeedsMfa } from "./_trusted-device.js";
+
 import { verifyPassword, DUMMY_HASH } from "../../_password.js";
 
 // POST /api/auth/login { identifier, password }
@@ -43,8 +45,8 @@ export async function onRequestPost({ request, env }) {
 
   const sid = newId() + newId();
   const expires = Date.now() + 30 * 24 * 60 * 60 * 1000;
-  const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(u.id).first();
-  const mfaEnrolled = !!(mfaRow && mfaRow.enabled_at);
+  // Enrolled users need the MFA step unless this browser is a remembered (trusted) device.
+  const mfaEnrolled = await sessionNeedsMfa(env, request, u.id);
   await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at, mfa_ok) VALUES (?,?,?,?)")
     .bind(sid, u.id, expires, mfaEnrolled ? 0 : 1).run();
   await logEvent(env, { id: u.id, role: u.role }, "login", identifier, "password");

@@ -1,4 +1,5 @@
 import { newId, sessionCookie, isAdminEmail, logEvent } from "../_lib.js";
+import { sessionNeedsMfa } from "./_trusted-device.js";
 import { verifySsoToken } from "../../_sso.js";
 import { insertUserWithOptin, sendWelcomeEmail } from "./_onboarding.js";
 
@@ -84,8 +85,7 @@ export async function onRequestGet(context) {
 
   const sid = newId() + newId();
   const expires = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days, matches verify.js
-  const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
-  const mfaEnrolled = !!(mfaRow && mfaRow.enabled_at);
+  const mfaEnrolled = await sessionNeedsMfa(env, request, user.id);
   await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at, mfa_ok) VALUES (?,?,?,?)")
     .bind(sid, user.id, expires, mfaEnrolled ? 0 : 1).run();
   await logEvent(env, user, "login", email, "sso:sikhi.io");
