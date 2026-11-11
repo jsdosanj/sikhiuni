@@ -274,7 +274,8 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         ${learners.length ? `<form id="acc-form" class="mt-3 flex flex-wrap items-end gap-3"><label class="${LABEL}">Learner<select id="acc-u" class="${FIELD}">${learnerOpts}</select></label><label class="${LABEL}">Extra time %<input id="acc-pct" type="number" min="0" max="300" value="50" class="${FIELD}" /></label>
           <label class="${LABEL}">Note (optional)<input id="acc-note" maxlength="300" class="${FIELD}" /></label><button class="btn btn-primary" type="submit">Save</button><span id="acc-out" class="font-sans text-sm" aria-live="polite"></span></form>` : '<p class="mt-3 text-muted">No enrolled learners yet.</p>'}
         <ul class="mt-3 font-sans text-sm">${accommodations.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · +${esc(x.extra_time_pct)}% time${x.note ? ' · ' + esc(x.note) : ''}<button class="ml-auto underline text-danger" data-acc-del="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>
-        <div id="rub-section"></div>`;
+        <div id="rub-section"></div>
+        <div id="msg-section"></div>`;
 
       el.querySelectorAll<HTMLElement>('[data-save-pol]').forEach((b) => b.addEventListener('click', async () => {
         const row = b.closest('[data-pol]') as HTMLElement; const max = (row.querySelector('[data-max]') as HTMLInputElement).value;
@@ -299,7 +300,48 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       });
       el.querySelectorAll<HTMLElement>('[data-acc-del]').forEach((b) => b.addEventListener('click', async () => { await api('/api/course-policies', { action: 'accommodation', courseId, userId: b.dataset.accDel, extraTimePct: 0 }); loaders.settings(); }));
       renderRubrics(assignments);
+      renderMessaging(learners);
     };
+
+    // ---------- C18 forum + messages settings, mutes, report queue (inside Teacher settings) ----------
+    async function renderMessaging(learners: Any[]) {
+      const box = document.getElementById('msg-section'); if (!box) return;
+      const [r, q] = await Promise.all([api('/api/messaging-settings?courseId=' + encodeURIComponent(courseId)), api('/api/messages?reports=' + encodeURIComponent(courseId))]);
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const st = r.d.settings, mutes = r.d.mutes || [], reports = (q.ok && q.d.reports) || [];
+      const tog = (k: string, label: string, hint = '') => `<label class="flex items-start gap-2 py-1.5"><input type="checkbox" data-set="${k}" ${st[k] ? 'checked' : ''} class="mt-1" /><span>${label}${hint ? `<span class="block text-xs text-muted">${hint}</span>` : ''}</span></label>`;
+      const mutedIds = new Set(mutes.map((m: Any) => m.user_id));
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Forum &amp; messages</h2>
+        <form id="ms-form" class="mt-3 font-sans text-sm">
+          ${tog('forums_enabled', 'Course forum is on')}
+          ${tog('forum_locked', 'Forum is read-only', 'Keeps existing posts visible; no new posts or replies.')}
+          ${tog('dms_enabled', 'Classmates can send each other message requests')}
+          <label class="flex items-center gap-2 py-1.5">Who can start a conversation <select data-set="dm_starters" class="border border-line bg-surface px-2 py-1"><option value="learners" ${st.dm_starters === 'learners' ? 'selected' : ''}>Anyone in the course</option><option value="teachers" ${st.dm_starters === 'teachers' ? 'selected' : ''}>Teachers only</option></select></label>
+          ${tog('teachers_read_dms', 'Teachers can read direct messages in this course', 'Learners see a notice in every conversation while this is on.')}
+          ${tog('filter_enabled', 'Filter offensive words (and links in direct messages)')}
+          <button class="btn btn-primary mt-2" type="submit">Save</button> <span id="ms-out" aria-live="polite"></span></form>
+        <h3 class="mt-6 font-bold text-navy">Paused learners</h3><p class="text-sm text-muted">A paused learner can read, but can't post in the forum or send messages in this course.</p>
+        ${learners.length ? `<div class="mt-2 flex flex-wrap items-center gap-2 font-sans text-sm"><label class="sr-only" for="mute-u">Learner</label><select id="mute-u" class="border border-line bg-surface px-2 py-1">${learners.filter((l: Any) => !mutedIds.has(l.id)).map((l: Any) => `<option value="${esc(l.id)}">${esc(l.name || l.email)}</option>`).join('')}</select><button class="btn" id="mute-btn" type="button">Pause</button></div>` : ''}
+        <ul class="mt-2 font-sans text-sm">${mutes.map((m: Any) => `<li class="flex gap-2 border-b border-line py-2">${esc(m.name || m.email)}<button class="ml-auto underline" data-unmute="${esc(m.user_id)}">Resume</button></li>`).join('')}</ul>
+        <h3 class="mt-6 font-bold text-navy">Reported messages</h3>
+        <ul class="mt-2 font-sans text-sm">${reports.length ? reports.map((x: Any) => `<li class="border-b border-line py-2"><a class="underline" href="/messages?c=${encodeURIComponent(x.conversation_id)}">${esc(x.sender || 'Learner')}: “${esc(String(x.body).slice(0, 100))}”</a>
+          <span class="block text-xs text-muted">Reported by ${esc(x.reporter || 'a learner')}${x.reason ? ': ' + esc(x.reason) : ''}</span>
+          <span class="mt-1 flex gap-3 text-xs"><button class="underline" data-resolve="${esc(x.id)}" data-hide="1">Hide message</button><button class="underline" data-resolve="${esc(x.id)}" data-hide="0">Keep, close report</button></span></li>`).join('') : '<li class="py-2 text-muted">No open reports.</li>'}</ul>`;
+      $('ms-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const settings: Any = {};
+        box.querySelectorAll<HTMLInputElement>('input[data-set]').forEach((i) => { settings[i.dataset.set as string] = i.checked; });
+        settings.dm_starters = (box.querySelector('select[data-set="dm_starters"]') as HTMLSelectElement).value;
+        const res = await api('/api/messaging-settings', { courseId, settings });
+        $('ms-out').textContent = res.ok ? 'Saved.' : errText(res);
+      });
+      const mb = document.getElementById('mute-btn');
+      if (mb) mb.addEventListener('click', async () => { await api('/api/messaging-settings', { courseId, action: 'mute', userId: (document.getElementById('mute-u') as HTMLSelectElement).value }); renderMessaging(learners); });
+      box.querySelectorAll<HTMLElement>('[data-unmute]').forEach((b) => b.addEventListener('click', async () => { await api('/api/messaging-settings', { courseId, action: 'unmute', userId: b.dataset.unmute }); renderMessaging(learners); }));
+      box.querySelectorAll<HTMLElement>('[data-resolve]').forEach((b) => b.addEventListener('click', async () => {
+        await api('/api/messages', { action: 'resolve', reportId: b.dataset.resolve, hideMessage: b.dataset.hide === '1' }); renderMessaging(learners);
+      }));
+    }
 
     // ---------- C4 grading + rubrics (inside Teacher settings) ----------
     const critRow = () => `<div class="flex flex-wrap gap-2" data-crit><input data-ct maxlength="120" placeholder="Criterion, e.g. Use of sources" aria-label="Criterion" class="${FIELD} !mt-0 min-w-0 flex-[2_1_200px]" />

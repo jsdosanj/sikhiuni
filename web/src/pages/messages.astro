@@ -1,0 +1,158 @@
+---
+import Base from '../layouts/Base.astro';
+// C18 classmate direct messages. Requests must be accepted before a conversation opens;
+// Decline is silent; Block stops requests in every course. Plain text only: messages are
+// inserted with textContent / escaped, never as HTML, and links are not made clickable.
+// English in markup; Base's auto-translate covers <main> (same as contact.astro).
+const field = 'w-full border border-line bg-surface px-3 py-2 font-sans text-[15px] font-normal normal-case tracking-normal text-ink outline-none focus:border-navy';
+---
+<Base title="Messages, Sikhi University" description="Messages with classmates and teachers in your courses." ambient="none">
+  <section class="wrap max-w-5xl py-10">
+    <p class="eyebrow text-saffron-deep">Your account</p>
+    <h1 class="text-display-sm mt-2 text-navy">Messages</h1>
+    <p class="mt-2 max-w-[66ch] text-sm text-muted">Message classmates in courses you share. The first message is a request: nothing more can be sent until they accept. You can decline or block anyone, and report any message.</p>
+    <div id="m-gate" class="mt-6" role="status" aria-live="polite"></div>
+    <div id="m-app" class="mt-6 hidden flex-wrap gap-8">
+      <aside class="min-w-0 flex-[1_1_260px]" aria-label="Conversations">
+        <button id="m-new-btn" class="btn btn-primary w-full">New message</button>
+        <form id="m-new" class="mt-3 hidden space-y-2 rounded-xl2 border border-line bg-surface p-4">
+          <label class="block font-sans text-sm font-semibold">Course<select id="m-course" class={field + ' mt-1'}></select></label>
+          <label class="block font-sans text-sm font-semibold">To<select id="m-to" class={field + ' mt-1'}></select></label>
+          <p id="m-to-note" class="font-sans text-xs text-muted"></p>
+          <label class="block font-sans text-sm font-semibold">First message<textarea id="m-first" rows="3" maxlength="2000" required class={field + ' mt-1'}></textarea></label>
+          <button class="btn btn-primary" type="submit">Send request</button>
+          <p id="m-new-out" class="font-sans text-sm" aria-live="polite"></p>
+        </form>
+        <h2 class="mt-6 font-mono text-[11px] uppercase tracking-[.16em] text-muted">Requests for you</h2>
+        <ul id="m-requests" class="mt-1"></ul>
+        <h2 class="mt-6 font-mono text-[11px] uppercase tracking-[.16em] text-muted">Conversations</h2>
+        <ul id="m-list" class="mt-1"></ul>
+        <details class="mt-6 font-sans text-sm"><summary class="cursor-pointer text-muted">People you've blocked</summary><ul id="m-blocked" class="mt-2"></ul></details>
+        <div id="m-admin" class="mt-6 hidden"><h2 class="font-mono text-[11px] uppercase tracking-[.16em] text-muted">Reported messages (all courses)</h2><ul id="m-reports" class="mt-1 font-sans text-sm"></ul></div>
+      </aside>
+      <article id="m-thread" class="min-w-0 flex-[2_1_420px]" aria-live="polite"></article>
+    </div>
+  </section>
+  <template id="m-cls" data-field={field}></template>
+  <script>
+    type Any = any;
+    const FIELD = (document.getElementById('m-cls') as HTMLElement).dataset.field || '';
+    const $ = (id: string) => document.getElementById(id) as Any;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const when = (ms: number) => new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    async function api(path: string, body?: Any) {
+      const r = await fetch(path, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      return { ok: r.ok, status: r.status, d: await r.json().catch(() => ({})) };
+    }
+    const errText = (r: Any) => (r.status === 429 ? (r.d.error || 'Too many messages in a minute. Please wait a moment.') : r.d.error || 'Something went wrong.');
+    let titles: Record<string, string> = {};
+    const courseName = (id: string) => titles[id] || id;
+    let current: string | null = new URLSearchParams(location.search).get('c');
+
+    async function loadList() {
+      const r = await api('/api/messages');
+      if (r.status === 401) { $('m-gate').innerHTML = `Please <a class="underline" href="/login?next=${encodeURIComponent(location.pathname + location.search)}">sign in</a> to see your messages.`; return false; }
+      const all = r.d.conversations || [];
+      const reqs = all.filter((c: Any) => c.incoming && c.status === 'pending');
+      const convs = all.filter((c: Any) => !(c.incoming && c.status === 'pending'));
+      $('m-requests').innerHTML = reqs.length ? reqs.map((c: Any) => `<li><button class="w-full border-b border-line py-2.5 text-left" data-open="${esc(c.id)}"><strong>${esc(c.other)}</strong> <span class="pill bg-saffron-soft text-saffron-deep">request</span><span class="block font-sans text-xs text-muted">${esc(courseName(c.course_id))}</span></button></li>`).join('') : '<li class="py-2 text-sm text-muted">None.</li>';
+      $('m-list').innerHTML = convs.length ? convs.map((c: Any) => `<li><button class="w-full border-b border-line py-2.5 text-left ${c.id === current ? 'font-semibold' : ''}" data-open="${esc(c.id)}"><span class="text-navy">${esc(c.other)}</span>${c.status === 'pending' ? ' <span class="pill bg-paper text-muted">request sent</span>' : ''}
+        <span class="block truncate font-sans text-xs text-muted">${esc(courseName(c.course_id))} · ${esc(c.preview)}</span></button></li>`).join('') : '<li class="py-2 text-sm text-muted">No conversations yet.</li>';
+      $('m-blocked').innerHTML = (r.d.blocked || []).length ? r.d.blocked.map((b: Any) => `<li class="flex items-center gap-2 py-1">${esc(b.name)}<button class="ml-auto underline" data-unblock="${esc(b.id)}">Unblock</button></li>`).join('') : '<li class="text-muted">Nobody.</li>';
+      document.querySelectorAll<HTMLElement>('[data-open]').forEach((b) => b.addEventListener('click', () => openConv(b.dataset.open as string)));
+      document.querySelectorAll<HTMLElement>('[data-unblock]').forEach((b) => b.addEventListener('click', async () => { await api('/api/messages', { action: 'unblock', userId: b.dataset.unblock }); loadList(); }));
+      return true;
+    }
+
+    async function openConv(id: string) {
+      current = id; history.replaceState(null, '', '/messages?c=' + encodeURIComponent(id));
+      const box = $('m-thread'); box.textContent = 'Loading…';
+      const r = await api('/api/messages?conversation=' + encodeURIComponent(id));
+      if (!r.ok) { box.textContent = errText(r); return; }
+      const c = r.d.conversation, msgs = r.d.messages || [];
+      const head = `<h2 class="text-xl font-bold text-navy">${esc(c.other || 'Conversation')}</h2><p class="font-sans text-xs text-muted">${esc(courseName(c.course_id))}</p>` +
+        (c.teachers_can_read ? '<p class="mt-2 rounded-lg border-l-4 border-saffron bg-surface p-2 font-sans text-xs">Teachers of this course can read messages sent here.</p>' : '');
+      const list = `<ol class="mt-4 space-y-2">${msgs.map((m: Any) => `<li class="max-w-[85%] rounded-xl2 border border-line p-3 ${m.mine ? 'ml-auto bg-saffron-soft/40' : 'bg-surface'}">
+        <p class="font-sans text-xs text-muted">${m.mine ? 'You' : esc(m.name)} · ${esc(when(m.created_at))}${m.hidden ? ' · hidden by a moderator' : ''}</p><p class="mt-1 whitespace-pre-wrap break-words">${esc(m.body)}</p>
+        ${!m.mine && c.viewer === 'participant' ? `<button class="mt-1 font-sans text-xs text-muted underline" data-report="${esc(m.id)}">Report</button>` : ''}</li>`).join('')}</ol>`;
+      let foot = '';
+      if (c.incoming && c.status === 'pending') {
+        foot = `<div class="mt-4 rounded-xl2 border border-line bg-surface p-4"><p class="font-sans text-sm"><strong>${esc(c.other)}</strong> wants to message you about <strong>${esc(courseName(c.course_id))}</strong>. They won't be told if you decline.</p>
+          <div class="mt-3 flex flex-wrap gap-2"><button class="btn btn-primary" data-act="accept">Accept</button><button class="btn" data-act="decline">Decline</button><button class="btn text-danger" data-act="block">Block</button></div></div>`;
+      } else if (c.status === 'pending') {
+        foot = '<p class="mt-4 font-sans text-sm text-muted">Request sent. You can write more once they accept.</p>';
+      } else if (c.viewer === 'participant') {
+        foot = `<form id="m-send" class="mt-4 flex gap-2"><label class="sr-only" for="m-body">Message</label><textarea id="m-body" rows="2" maxlength="2000" required class="${FIELD} flex-1"></textarea><button class="btn btn-primary self-end" type="submit">Send</button></form>
+          <p class="mt-1 flex gap-4 font-sans text-xs"><span id="m-send-out" aria-live="polite"></span><button class="ml-auto underline text-danger" data-act="block">Block ${esc(c.other)}</button></p>`;
+      } else foot = '<p class="mt-4 font-sans text-xs text-muted">You are viewing this conversation as a teacher or moderator.</p>';
+      box.innerHTML = head + list + foot;
+      box.querySelectorAll('[data-act]').forEach((b: Any) => b.addEventListener('click', async () => {
+        const act = b.dataset.act;
+        if (act === 'block' && !confirm(`Block ${c.other}? They won't be able to message you in any course, and you won't see their forum posts.`)) return;
+        const res = await api('/api/messages', act === 'block' ? { action: 'block', userId: c.other_id } : { action: act, conversationId: c.id });
+        if (!res.ok) { alert(errText(res)); return; }
+        await loadList();
+        if (act === 'accept') openConv(c.id); else { $('m-thread').innerHTML = `<p class="text-muted">${act === 'block' ? 'Blocked.' : 'Declined.'}</p>`; current = null; }
+      }));
+      box.querySelectorAll('[data-report]').forEach((b: Any) => b.addEventListener('click', async () => {
+        const reason = prompt('What is wrong with this message? (optional)');
+        if (reason === null) return;
+        const res = await api('/api/messages', { action: 'report', messageId: b.dataset.report, reason });
+        b.textContent = res.ok ? 'Reported to the course teachers' : errText(res); b.disabled = true;
+      }));
+      const form = document.getElementById('m-send');
+      if (form) form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await api('/api/messages', { action: 'send', conversationId: c.id, body: $('m-body').value });
+        if (!res.ok) { $('m-send-out').textContent = errText(res); return; }
+        await openConv(c.id); loadList();
+      });
+    }
+
+    async function loadClassmates() {
+      const course = $('m-course').value; $('m-to').innerHTML = ''; $('m-to-note').textContent = '';
+      if (!course) return;
+      const r = await api('/api/messages?classmates=' + encodeURIComponent(course));
+      const list = (r.ok && r.d.classmates) || [];
+      $('m-to').innerHTML = list.map((p: Any) => `<option value="${esc(p.id)}">${esc(p.name)}${p.role === 'teacher' ? ' (teacher)' : ''}</option>`).join('');
+      $('m-to-note').textContent = r.ok ? (r.d.reason || (list.length ? '' : 'No one else to message in this course yet.')) : errText(r);
+    }
+    $('m-new-btn').addEventListener('click', () => $('m-new').classList.toggle('hidden'));
+    $('m-course').addEventListener('change', loadClassmates);
+    $('m-new').addEventListener('submit', async (e: Event) => {
+      e.preventDefault();
+      if (!$('m-to').value) return;
+      const r = await api('/api/messages', { action: 'request', courseId: $('m-course').value, toUserId: $('m-to').value, body: $('m-first').value });
+      if (!r.ok) { $('m-new-out').textContent = errText(r); return; }
+      $('m-first').value = ''; $('m-new').classList.add('hidden');
+      await loadList(); openConv(r.d.conversationId);
+    });
+
+    (async () => {
+      try { const d = await (await fetch('/data/index.json')).json(); titles = Object.fromEntries((d.courses || []).map((c: Any) => [c.id, c.title])); } catch { titles = {}; }
+      if (!(await loadList())) return;
+      $('m-app').classList.remove('hidden'); $('m-app').classList.add('flex');
+      const e = await api('/api/enrollments');
+      const ids = new Set(((e.ok && e.d.enrollments) || []).filter((x: Any) => x.kind === 'course').map((x: Any) => x.target_id));
+      const want = new URLSearchParams(location.search).get('course');
+      if (want) ids.add(want);
+      $('m-course').innerHTML = '<option value="">Choose a course…</option>' + [...ids].map((id) => `<option value="${esc(id)}">${esc(courseName(id as string))}</option>`).join('');
+      if (want) { $('m-course').value = want; $('m-new').classList.remove('hidden'); loadClassmates(); }
+      if (current) openConv(current);
+      // Admins: the cross-course report queue (teachers have theirs in Course tools).
+      const me = await api('/api/me');
+      if (me.ok && me.d.user && me.d.user.role === 'admin') {
+        const rr = await api('/api/messages?reports=all');
+        const reps = (rr.ok && rr.d.reports) || [];
+        $('m-admin').classList.remove('hidden');
+        $('m-reports').innerHTML = reps.length ? reps.map((x: Any) => `<li class="border-b border-line py-2"><button class="text-left underline" data-open="${esc(x.conversation_id)}">${esc(x.sender || 'Learner')}: “${esc(String(x.body).slice(0, 80))}”</button>
+          <span class="block text-xs text-muted">${esc(courseName(x.course_id))} · reported by ${esc(x.reporter || 'a learner')}${x.reason ? ': ' + esc(x.reason) : ''}</span>
+          <span class="mt-1 flex gap-3 text-xs"><button class="underline" data-resolve="${esc(x.id)}" data-hide="1">Hide message</button><button class="underline" data-resolve="${esc(x.id)}" data-hide="0">Keep, close report</button></span></li>`).join('') : '<li class="py-2 text-muted">No open reports.</li>';
+        $('m-reports').querySelectorAll('[data-open]').forEach((b: Any) => b.addEventListener('click', () => openConv(b.dataset.open)));
+        $('m-reports').querySelectorAll('[data-resolve]').forEach((b: Any) => b.addEventListener('click', async () => {
+          await api('/api/messages', { action: 'resolve', reportId: b.dataset.resolve, hideMessage: b.dataset.hide === '1' }); b.closest('li').remove();
+        }));
+      }
+    })();
+  </script>
+</Base>
