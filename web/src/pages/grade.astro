@@ -78,7 +78,7 @@ const field = 'mt-1 w-full border border-line bg-surface px-3 py-2 font-sans tex
     }
     function render() {
       const list = visible();
-      $('g-pick').innerHTML = list.map((s: Any, i: number) => `<option value="${i}">${esc(s.name || s.email)}${s.status === 'graded' ? ' ✓' : ''}</option>`).join('');
+      $('g-pick').innerHTML = list.map((s: Any, i: number) => `<option value="${i}">${esc(s.name || s.email)}${s.status === 'graded' ? ' (graded)' : ''}</option>`).join('');
       if (!list.length) {
         $('g-who').textContent = subs.length ? 'Everything is graded.' : 'No submissions yet.';
         ['g-meta', 'g-file', 'g-text', 'g-rubric'].forEach((id) => { $(id).innerHTML = ''; });
