@@ -1,7 +1,7 @@
 {
   "name": "sikhi-university-web",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "astro dev",
@@ -18,7 +18,7 @@
     "preview": "astro preview",
     "build-public-data": "python3 ../scripts/build_public_data.py",
     "deploy-data": "cd .. && node scripts/export-private-courses.mjs --upload",
-    "deploy-institute": "echo 'Wave 4+: push public/data/institute/lessons + atlas to R2 (institute/ prefix) \u2014 no-op until lesson bodies exist'"
+    "deploy-institute": "echo 'Wave 4+: push public/data/institute/lessons + atlas to R2 (institute/ prefix) — no-op until lesson bodies exist'"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
