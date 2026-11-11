@@ -41,6 +41,7 @@ const OWNED = [
   ["poll_participants", "user_id"], ["poll_responses", "user_id"],
   // C5 notifications. A preferences collision keeps the target's choices (rule 2).
   ["notifications", "user_id"], ["notification_prefs", "user_id"],
+  ["grading_comments", "user_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than
@@ -54,6 +55,7 @@ const ACTOR = [
   ["teacher_profiles", "verified_by"], ["teacher_profiles", "approved_by"],
   ["assignment_extensions", "created_by"], ["course_accommodations", "created_by"],
   ["glossary_terms", "created_by"], ["polls", "created_by"],
+  ["rubrics", "created_by"], ["submission_grading", "graded_by"],
 ];
 
 // Credential + transient state keyed by user_id: dropped, never moved (rule 3).

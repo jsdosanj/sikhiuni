@@ -91,6 +91,7 @@ import { onRequestGet as glossaryGet, onRequestPost as glossaryPost } from "./fu
 import { onRequestGet as pollsGet, onRequestPost as pollsPost } from "./functions/api/polls.js";
 import { onRequestGet as calendarGet } from "./functions/api/calendar.js";
 import { onRequestGet as notificationsGet, onRequestPost as notificationsPost } from "./functions/api/notifications.js";
+import { onRequestGet as rubricsGet, onRequestPost as rubricsPost } from "./functions/api/rubrics.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -181,6 +182,7 @@ const routes = {
   "/api/polls": { GET: pollsGet, POST: pollsPost },
   "/api/calendar": { GET: calendarGet },
   "/api/notifications": { GET: notificationsGet, POST: notificationsPost },
+  "/api/rubrics": { GET: rubricsGet, POST: rubricsPost },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -214,6 +216,7 @@ const RATE_LIMITS = {
   "/api/glossary": { limit: 30, window: 60 },
   "/api/polls": { limit: 20, window: 60 },
   "/api/notifications": { limit: 30, window: 60 },
+  "/api/rubrics": { limit: 30, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },

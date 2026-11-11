@@ -38,6 +38,7 @@ export async function onRequestPost({ request, env }) {
   // belongs to a course, and other students' grade/submission history on it must
   // survive the teacher's account deletion. teacher_id becomes a dangling opaque
   // id, same tradeoff already accepted for events.user_id.
+  await wipe("DELETE FROM submission_grading WHERE submission_id IN (SELECT id FROM submissions WHERE user_id=?)");
   await wipe("DELETE FROM submissions WHERE user_id=?");
   // A published draft's content already lives in courses.json (git history) —
   // deleting the D1 workflow row here doesn't touch the live catalogue.
@@ -69,6 +70,7 @@ export async function onRequestPost({ request, env }) {
   await wipe("DELETE FROM poll_participants WHERE user_id=?");
   await wipe("DELETE FROM notifications WHERE user_id=?");
   await wipe("DELETE FROM notification_prefs WHERE user_id=?");
+  await wipe("DELETE FROM grading_comments WHERE user_id=?");
   await wipe("DELETE FROM user_flags WHERE user_id=?");
   await wipe("DELETE FROM teacher_profiles WHERE user_id=?");
   await wipe("DELETE FROM professor_claims WHERE user_id=?");

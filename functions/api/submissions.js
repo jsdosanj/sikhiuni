@@ -1,6 +1,7 @@
 import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent } from "./_lib.js";
 import { dueFor, latePenaltyPct, pastCutoff } from "./course-policies.js";
+import { rubricForAssignment } from "./rubrics.js";
 
 async function ensure(env) {
   return schemaOnce(env.DB, "submissions", async () => {
@@ -35,7 +36,7 @@ export async function onRequestGet({ request, env }) {
   const assignmentId = p.get("assignmentId");
   if (!assignmentId) return json({ error: "assignmentId required" }, 400);
 
-  const assignment = await env.DB.prepare("SELECT course_id, points FROM assignments WHERE id=?").bind(assignmentId).first();
+  const assignment = await env.DB.prepare("SELECT course_id, points, title FROM assignments WHERE id=?").bind(assignmentId).first();
   if (!assignment) return json({ error: "not found" }, 404);
 
   if (p.get("mine") === "1") {
@@ -45,7 +46,14 @@ export async function onRequestGet({ request, env }) {
     const a2 = await env.DB.prepare("SELECT due_at FROM assignments WHERE id=?").bind(assignmentId).first();
     const due = await dueFor(env, a2 || {}, assignmentId, user.id);
     const penalty = row ? latePenaltyPct(due, row.updated_at || row.submitted_at) : 0;
-    return json({ submission: row ? { ...row, late_penalty_pct: penalty } : null, points: assignment.points, due });
+    // C4: once graded, the learner sees the rubric and their per-criterion scores and comments.
+    const rubric = await rubricForAssignment(env, assignmentId);
+    let grading = null;
+    if (row && row.status === "graded") {
+      const g = await env.DB.prepare("SELECT rubric_scores, raw_grade, penalty_pct FROM submission_grading WHERE submission_id=?").bind(row.id).first();
+      if (g) grading = { rubric_scores: g.rubric_scores ? JSON.parse(g.rubric_scores) : null, raw_grade: g.raw_grade, penalty_pct: g.penalty_pct };
+    }
+    return json({ submission: row ? { ...row, late_penalty_pct: penalty, grading } : null, points: assignment.points, due, rubric });
   }
 
   if (!(await ownsCourse(env, user, assignment.course_id))) return json({ error: "forbidden" }, 403);
@@ -56,12 +64,15 @@ export async function onRequestGet({ request, env }) {
   ).bind(assignmentId).all();
   // Each learner's own due date (extensions) and the late-policy deduction, for the grader.
   const a2 = await env.DB.prepare("SELECT due_at FROM assignments WHERE id=?").bind(assignmentId).first();
+  const rubric = await rubricForAssignment(env, assignmentId);
+  const gradingRows = (await env.DB.prepare("SELECT g.submission_id, g.rubric_scores, g.raw_grade, g.penalty_pct FROM submission_grading g JOIN submissions s ON s.id=g.submission_id WHERE s.assignment_id=?").bind(assignmentId).all()).results || [];
+  const gradingBy = Object.fromEntries(gradingRows.map((g) => [g.submission_id, { rubric_scores: g.rubric_scores ? JSON.parse(g.rubric_scores) : null, raw_grade: g.raw_grade, penalty_pct: g.penalty_pct }]));
   const rows = [];
   for (const r of results || []) {
     const due = await dueFor(env, a2 || {}, assignmentId, r.user_id);
-    rows.push({ ...r, due_at: due.dueAt, extended: due.extended, late_penalty_pct: latePenaltyPct(due, r.updated_at || r.submitted_at) });
+    rows.push({ ...r, due_at: due.dueAt, extended: due.extended, late_penalty_pct: latePenaltyPct(due, r.updated_at || r.submitted_at), grading: gradingBy[r.id] || null });
   }
-  return json({ scope: "teacher", points: assignment.points, submissions: rows });
+  return json({ scope: "teacher", title: assignment.title, course_id: assignment.course_id, points: assignment.points, rubric, submissions: rows });
 }
 
 // POST /api/submissions { assignmentId, text?, fileKey? } -> student submits or

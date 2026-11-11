@@ -848,9 +848,30 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
                 (a.allow_file ? '<input type="file" class="mt-2 block font-sans text-xs" data-assign-file />' : '') +
                 '<button type="button" class="btn mt-2" data-assign-submit>' + (a.my_status === 'submitted' ? 'Resubmit' : 'Submit') + '</button>' +
                 '<div class="mt-1 font-sans text-xs text-muted" data-assign-note></div>'
-              ) : (a.my_feedback ? '<p class="mt-2 text-sm"><strong>Feedback:</strong> ' + esc(a.my_feedback) + '</p>' : '')) +
+              ) : (a.my_feedback ? '<p class="mt-2 text-sm"><strong>Feedback:</strong> ' + esc(a.my_feedback) + '</p>' : '') +
+                (a.my_status === 'graded' ? '<button type="button" class="mt-1 font-sans text-xs underline" data-marking>See how it was marked</button><div class="mt-1" data-marking-out></div>' : '')) +
               '</div>';
           }).join('');
+          // C4: per-criterion rubric scores and the late-policy deduction, on request.
+          document.querySelectorAll('[data-marking]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var card = btn.closest('[data-assignment]');
+              var out = card.querySelector('[data-marking-out]');
+              api('/api/submissions?assignmentId=' + encodeURIComponent(card.dataset.assignment) + '&mine=1').then(function (r) {
+                var sub = r.ok && r.d.submission, g = sub && sub.grading, rub = r.ok && r.d.rubric;
+                var html = '';
+                if (rub && g && g.rubric_scores) {
+                  html += '<table class="w-full font-sans text-xs"><tbody>' + rub.criteria.map(function (c) {
+                    var sc = g.rubric_scores[c.id] || {};
+                    return '<tr class="border-t border-line"><td class="py-1 pr-2">' + esc(c.title) + '</td><td class="whitespace-nowrap pr-2">' + esc(sc.points != null ? sc.points : '–') + ' / ' + esc(c.points) + '</td><td class="text-muted">' + esc(sc.comment || '') + '</td></tr>';
+                  }).join('') + '</tbody></table>';
+                }
+                if (g && g.penalty_pct) html += '<p class="font-sans text-xs text-muted">Late policy: −' + esc(g.penalty_pct) + '% (score before deduction ' + esc(g.raw_grade) + '/' + esc(r.d.points) + ').</p>';
+                out.innerHTML = html || '<p class="font-sans text-xs text-muted">This was marked with a single score and the feedback above.</p>';
+                btn.remove();
+              });
+            });
+          });
           document.querySelectorAll('[data-assign-submit]').forEach(function (btn) {
             btn.addEventListener('click', function () {
               var card = btn.closest('[data-assignment]');

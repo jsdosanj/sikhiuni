@@ -741,6 +741,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
                   <span class="text-xs text-muted">${a.graded_count}/${a.submitted_count} graded</span>
                   <span class="ml-auto flex gap-2 text-xs">
                     <button class="underline" data-view-assign="${esc(a.id)}">View &amp; grade</button>
+                    <a class="underline" href="/grade?assignment=${encodeURIComponent(a.id)}">Grader</a>
                     <button class="underline" data-toggle-assign="${esc(a.id)}" data-status="${a.status}">${a.status === 'closed' ? 'Reopen' : 'Close'}</button>
                   </span>
                 </div>

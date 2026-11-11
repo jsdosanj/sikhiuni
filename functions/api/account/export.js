@@ -61,6 +61,8 @@ export async function onRequestGet({ request, env }) {
     poll_responses: await all("SELECT poll_id, answers, created_at FROM poll_responses WHERE user_id=?", user.id),
     notifications: await all("SELECT kind, course_id, title, body, url, created_at, read_at FROM notifications WHERE user_id=?", user.id),
     notification_prefs: await all("SELECT prefs, updated_at FROM notification_prefs WHERE user_id=?", user.id),
+    grading_comments: await all("SELECT text, created_at FROM grading_comments WHERE user_id=?", user.id),
+    submission_marking: await all("SELECT g.submission_id, g.rubric_scores, g.raw_grade, g.penalty_pct FROM submission_grading g JOIN submissions s ON s.id=g.submission_id WHERE s.user_id=?", user.id),
     trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 

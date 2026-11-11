@@ -273,7 +273,8 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <h2 class="mt-10 text-xl font-bold text-navy">Accommodations</h2><p class="mt-1 text-sm text-muted">Extra time on timed quizzes for a learner, as a percentage (for example 50 = time and a half). Only you and the learner can see it.</p>
         ${learners.length ? `<form id="acc-form" class="mt-3 flex flex-wrap items-end gap-3"><label class="${LABEL}">Learner<select id="acc-u" class="${FIELD}">${learnerOpts}</select></label><label class="${LABEL}">Extra time %<input id="acc-pct" type="number" min="0" max="300" value="50" class="${FIELD}" /></label>
           <label class="${LABEL}">Note (optional)<input id="acc-note" maxlength="300" class="${FIELD}" /></label><button class="btn btn-primary" type="submit">Save</button><span id="acc-out" class="font-sans text-sm" aria-live="polite"></span></form>` : '<p class="mt-3 text-muted">No enrolled learners yet.</p>'}
-        <ul class="mt-3 font-sans text-sm">${accommodations.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · +${esc(x.extra_time_pct)}% time${x.note ? ' · ' + esc(x.note) : ''}<button class="ml-auto underline text-danger" data-acc-del="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>`;
+        <ul class="mt-3 font-sans text-sm">${accommodations.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · +${esc(x.extra_time_pct)}% time${x.note ? ' · ' + esc(x.note) : ''}<button class="ml-auto underline text-danger" data-acc-del="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>
+        <div id="rub-section"></div>`;
 
       el.querySelectorAll<HTMLElement>('[data-save-pol]').forEach((b) => b.addEventListener('click', async () => {
         const row = b.closest('[data-pol]') as HTMLElement; const max = (row.querySelector('[data-max]') as HTMLInputElement).value;
@@ -297,6 +298,47 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         loaders.settings();
       });
       el.querySelectorAll<HTMLElement>('[data-acc-del]').forEach((b) => b.addEventListener('click', async () => { await api('/api/course-policies', { action: 'accommodation', courseId, userId: b.dataset.accDel, extraTimePct: 0 }); loaders.settings(); }));
+      renderRubrics(assignments);
+    };
+
+    // ---------- C4 grading + rubrics (inside Teacher settings) ----------
+    const critRow = () => `<div class="flex flex-wrap gap-2" data-crit><input data-ct maxlength="120" placeholder="Criterion, e.g. Use of sources" aria-label="Criterion" class="${FIELD} !mt-0 min-w-0 flex-[2_1_200px]" />
+      <input data-cp type="number" min="0" max="1000" placeholder="Points" aria-label="Points" class="${FIELD} !mt-0 !w-24" /><input data-cd maxlength="500" placeholder="What earns full marks (optional)" aria-label="Description" class="${FIELD} !mt-0 min-w-0 flex-[3_1_240px]" /></div>`;
+    async function renderRubrics(assignments: Any[]) {
+      const box = document.getElementById('rub-section'); if (!box) return;
+      const r = await api('/api/rubrics?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const { rubrics = [], attached = {} } = r.d;
+      const opts = (sel: string) => '<option value="">No rubric</option>' + rubrics.map((x: Any) => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc(x.title)}</option>`).join('');
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Grading &amp; rubrics</h2>
+        <p class="mt-1 text-sm text-muted">Grade one learner at a time in the grader. Attach a rubric to score each criterion; learners see the criteria and their scores.</p>
+        ${assignments.length ? `<ul class="mt-3 font-sans text-sm">${assignments.map((a: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2"><strong class="text-navy">${esc(a.title)}</strong>
+          <label class="ml-auto flex items-center gap-2 text-muted">Rubric <select data-attach="${esc(a.id)}" class="border border-line bg-surface px-2 py-1">${opts(attached[a.id] || '')}</select></label>
+          <a class="btn" href="/grade?assignment=${encodeURIComponent(a.id)}">Open grader</a></li>`).join('')}</ul>` : ''}
+        <ul class="mt-4 space-y-2 font-sans text-sm">${rubrics.map((x: Any) => `<li class="rounded-lg border border-line bg-surface p-3"><strong>${esc(x.title)}</strong> · ${x.criteria.length} criteria · ${x.criteria.reduce((t: number, c: Any) => t + c.points, 0)} points
+          <button class="ml-3 underline text-danger" data-rub-del="${esc(x.id)}">Delete</button><ul class="mt-1 list-disc pl-5 text-muted">${x.criteria.map((c: Any) => `<li>${esc(c.title)} (${esc(c.points)})</li>`).join('')}</ul></li>`).join('')}</ul>
+        <details class="mt-4 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New rubric</summary>
+          <form id="rub-new" class="mt-3 space-y-2"><label class="${LABEL}">Title<input id="rub-title" maxlength="160" required class="${FIELD}" /></label>
+          <div id="rub-crits" class="space-y-2">${critRow()}${critRow()}</div>
+          <div class="flex gap-2"><button type="button" id="rub-add" class="btn">+ Criterion</button><button class="btn btn-primary" type="submit">Create rubric</button><span id="rub-out" class="self-center font-sans text-sm" aria-live="polite"></span></div></form></details>`;
+      box.querySelectorAll<HTMLSelectElement>('[data-attach]').forEach((sel) => sel.addEventListener('change', async () => {
+        const res = await api('/api/rubrics', { action: 'attach', assignmentId: sel.dataset.attach, rubricId: sel.value || null }); if (!res.ok) alert(errText(res));
+      }));
+      box.querySelectorAll<HTMLElement>('[data-rub-del]').forEach((b) => b.addEventListener('click', async () => {
+        if (!confirm('Delete this rubric? Assignments using it will have no rubric. Grades already given stay.')) return;
+        await api('/api/rubrics', { action: 'delete', id: b.dataset.rubDel }); renderRubrics(assignments);
+      }));
+      $('rub-add').addEventListener('click', () => $('rub-crits').insertAdjacentHTML('beforeend', critRow()));
+      $('rub-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const criteria = Array.from(box.querySelectorAll<HTMLElement>('[data-crit]')).map((row) => ({
+          title: (row.querySelector('[data-ct]') as HTMLInputElement).value.trim(), points: Number((row.querySelector('[data-cp]') as HTMLInputElement).value),
+          description: (row.querySelector('[data-cd]') as HTMLInputElement).value.trim(),
+        })).filter((c) => c.title);
+        const res = await api('/api/rubrics', { action: 'create', courseId, title: (document.getElementById('rub-title') as HTMLInputElement).value, criteria });
+        if (!res.ok) { $('rub-out').textContent = errText(res); return; }
+        renderRubrics(assignments);
+      });
     };
 
     // ---------- boot: who am I in this course? ----------
