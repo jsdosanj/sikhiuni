@@ -19,6 +19,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
     <div id="ct-app" class="hidden">
       <div role="tablist" aria-label="Course tools" class="mt-6 flex flex-wrap gap-2 border-b border-line pb-2 font-sans text-sm">
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="dates">Due dates</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="quizzes">Quizzes</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
@@ -26,6 +27,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       </div>
 
       <div id="tab-dates" class="ct-panel mt-6" role="tabpanel"></div>
+      <div id="tab-quizzes" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
@@ -203,6 +205,202 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       });
     };
 
+    // ---------- C2 course quizzes ----------
+    let quizTimer: any = null, quizSave: any = null;
+    const REVIEW_LABEL: Record<string, string> = { none: 'No results shown', score: 'Score only', answers: 'Score and correct answers', after_close: 'Correct answers after closing' };
+    loaders.quizzes = async () => {
+      const el = $('tab-quizzes');
+      clearInterval(quizTimer); clearInterval(quizSave);
+      const r = await api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const list = r.d.quizzes || [];
+      if (r.d.scope === 'teacher') return renderQuizTeacher(el, list);
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Quizzes</h2><ul class="mt-2 font-sans text-[15px]">${list.length ? list.map((q: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-3">
+        <span class="min-w-0 flex-1"><strong class="text-navy">${esc(q.title)}</strong><span class="block text-xs text-muted">${q.time_limit_min ? esc(q.time_limit_min) + ' min · ' : ''}${q.max_attempts ? `${esc(q.attempts_used)}/${esc(q.max_attempts)} attempts` : `${esc(q.attempts_used)} attempt${q.attempts_used === 1 ? '' : 's'}`}${q.best != null ? ` · best ${esc(q.best)}%` : ''}${q.pass_pct != null ? ` · pass ${esc(q.pass_pct)}%` : ''}</span>
+        ${q.locked ? `<span class="block text-xs text-muted">${esc(q.lock_reason)}</span>` : ''}</span>
+        ${q.last_attempt ? `<button class="underline text-sm" data-q-result="${esc(q.last_attempt)}">Result</button>` : ''}
+        ${!q.locked && q.status === 'open' && (q.in_progress || !q.max_attempts || q.attempts_used < q.max_attempts) ? `<button class="btn" data-q-start="${esc(q.id)}">${q.in_progress ? 'Resume' : q.attempts_used ? 'Try again' : 'Start'}</button>` : `<span class="text-xs text-muted">${q.status === 'closed' ? 'closed' : q.locked ? 'locked' : 'no attempts left'}</span>`}</li>`).join('') : '<li class="py-3 text-muted">No quizzes yet.</li>'}</ul><div id="quiz-run" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-q-start]').forEach((b) => b.addEventListener('click', async () => {
+        const s = await api('/api/lms-quizzes', { action: 'start', id: b.dataset.qStart });
+        if (!s.ok) { alert(errText(s)); return; }
+        runAttempt(s.d.attemptId);
+      }));
+      el.querySelectorAll<HTMLElement>('[data-q-result]').forEach((b) => b.addEventListener('click', () => runAttempt(b.dataset.qResult as string)));
+    };
+
+    function answerInput(q: Any, saved: Any) {
+      const n = `qa-${q.id}`;
+      if (q.type === 'single') return q.options.map((o: string, i: number) => `<label class="flex items-start gap-2 py-0.5"><input type="radio" name="${n}" value="${i}" ${saved === i ? 'checked' : ''} class="mt-1" /> ${esc(o)}</label>`).join('');
+      if (q.type === 'multi') return q.options.map((o: string, i: number) => `<label class="flex items-start gap-2 py-0.5"><input type="checkbox" name="${n}" value="${i}" ${Array.isArray(saved) && saved.includes(i) ? 'checked' : ''} class="mt-1" /> ${esc(o)}</label>`).join('') + '<p class="text-xs text-muted">Choose all that apply.</p>';
+      if (q.type === 'truefalse') return ['true', 'false'].map((v) => `<label class="mr-4 inline-flex items-center gap-2"><input type="radio" name="${n}" value="${v}" ${String(saved) === v ? 'checked' : ''} /> ${v === 'true' ? 'True' : 'False'}</label>`).join('');
+      if (q.type === 'short') return `<input name="${n}" maxlength="200" value="${esc(saved || '')}" aria-label="Your answer" class="${FIELD}" />`;
+      if (q.type === 'numeric') return `<input name="${n}" inputmode="decimal" value="${esc(saved ?? '')}" aria-label="Your answer" class="${FIELD} !w-40" />`;
+      if (q.type === 'matching') return q.left.map((l: string, i: number) => `<label class="flex flex-wrap items-center gap-2 py-1"><span class="min-w-[10rem]">${esc(l)}</span><select name="${n}" data-i="${i}" class="border border-line bg-surface px-2 py-1"><option value="">Choose…</option>${q.right.map((r: string, k: number) => `<option value="${k}" ${Array.isArray(saved) && saved[i] === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></label>`).join('');
+      if (q.type === 'ordering') {
+        const order = Array.isArray(saved) && saved.length === q.items.length ? saved : q.items.map((_: Any, i: number) => i);
+        return `<ol data-order="${esc(q.id)}" class="space-y-1">${order.map((k: number) => `<li data-k="${k}" class="flex items-center gap-2 rounded border border-line bg-surface px-2 py-1"><span class="flex-1">${esc(q.items[k])}</span><button type="button" data-up aria-label="Move up" class="px-1">&uarr;</button><button type="button" data-down aria-label="Move down" class="px-1">&darr;</button></li>`).join('')}</ol>`;
+      }
+      return '';
+    }
+    function collect(box: HTMLElement, questions: Any[]) {
+      const out: Any = {};
+      for (const q of questions) {
+        const n = `qa-${q.id}`;
+        if (q.type === 'single') { const c = box.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`); if (c) out[q.id] = Number(c.value); }
+        else if (q.type === 'multi') out[q.id] = Array.from(box.querySelectorAll<HTMLInputElement>(`input[name="${n}"]:checked`)).map((c) => Number(c.value));
+        else if (q.type === 'truefalse') { const c = box.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`); if (c) out[q.id] = c.value === 'true'; }
+        else if (q.type === 'short' || q.type === 'numeric') { const v = (box.querySelector(`[name="${n}"]`) as HTMLInputElement).value; if (v.trim()) out[q.id] = v; }
+        else if (q.type === 'matching') out[q.id] = Array.from(box.querySelectorAll<HTMLSelectElement>(`select[name="${n}"]`)).map((s) => (s.value === '' ? null : Number(s.value)));
+        else if (q.type === 'ordering') out[q.id] = Array.from(box.querySelectorAll<HTMLElement>(`[data-order="${q.id}"] li`)).map((li) => Number(li.dataset.k));
+      }
+      return out;
+    }
+    async function runAttempt(attemptId: string) {
+      const box = $('quiz-run'); clearInterval(quizTimer); clearInterval(quizSave);
+      const r = await api('/api/lms-quizzes?attempt=' + encodeURIComponent(attemptId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const a = r.d.attempt;
+      if (a.status !== 'in_progress') {
+        const showAns = (q: Any, v: Any) => {
+          if (v == null) return '–';
+          if (q.type === 'single') return esc(q.options[v]);
+          if (q.type === 'multi') return (v as number[]).map((i) => esc(q.options[i])).join(', ') || '–';
+          if (q.type === 'truefalse') return v === true || v === 'true' ? 'True' : 'False';
+          if (q.type === 'matching') return q.left.map((l: string, i: number) => `${esc(l)} → ${v[i] == null ? '–' : esc(q.right[v[i]])}`).join('; ');
+          if (q.type === 'ordering') return (v as number[]).map((i) => esc(q.items[i])).join(' → ');
+          return esc(v);
+        };
+        box.innerHTML = `<div class="rounded-xl2 border border-line bg-surface p-5"><h3 class="text-xl font-bold text-navy">${esc(a.title)}</h3>
+          ${a.score != null ? `<p class="mt-2 text-lg">Score: <strong>${esc(a.score)} / ${esc(a.max_score)}</strong> (${esc(a.percent)}%)${a.passed === true ? ' · passed' : a.passed === false ? ' · not passed yet' : ''}</p>` : ''}
+          ${a.review_note ? `<p class="mt-2 text-sm text-muted">${esc(a.review_note)}</p>` : ''}
+          ${a.review ? `<ol class="mt-4 space-y-3">${a.review.map((q: Any) => `<li class="border-t border-line pt-3"><p class="font-semibold">${esc(q.prompt)} <span class="font-sans text-xs font-normal text-muted">${esc(q.earned)}/${esc(q.max)}</span></p>
+            <p class="font-sans text-sm">Your answer: ${showAns(q, q.your_answer)}</p>${q.correct === true && q.earned === q.max ? '' : `<p class="font-sans text-sm text-muted">Correct: ${showAns(q, q.correct)}</p>`}${q.feedback ? `<p class="font-sans text-sm">${esc(q.feedback)}</p>` : ''}</li>`).join('')}</ol>` : ''}</div>`;
+        return;
+      }
+      box.innerHTML = `<form id="qz" class="rounded-xl2 border border-line bg-surface p-5"><div class="flex flex-wrap items-baseline gap-3"><h3 class="text-xl font-bold text-navy">${esc(a.title)}</h3><span id="qz-timer" class="ml-auto font-mono text-sm" aria-live="off"></span></div>
+        <ol class="mt-4 space-y-5">${a.questions.map((q: Any, i: number) => `<li><fieldset><legend class="font-semibold">${i + 1}. ${esc(q.prompt)} <span class="font-sans text-xs font-normal text-muted">(${esc(q.points)} point${q.points === 1 ? '' : 's'})</span></legend><div class="mt-1 font-sans text-[15px]">${answerInput(q, a.answers[q.id])}</div></fieldset></li>`).join('')}</ol>
+        <div class="mt-5 flex flex-wrap items-center gap-3"><button class="btn btn-primary" type="submit">Submit answers</button><span id="qz-out" class="font-sans text-sm text-muted" aria-live="polite">Answers save automatically.</span></div></form>`;
+      const form = $('qz') as HTMLFormElement;
+      form.querySelectorAll('[data-order] li').forEach((li: Any) => {
+        li.querySelector('[data-up]').addEventListener('click', () => { if (li.previousElementSibling) li.parentElement.insertBefore(li, li.previousElementSibling); });
+        li.querySelector('[data-down]').addEventListener('click', () => { if (li.nextElementSibling) li.parentElement.insertBefore(li.nextElementSibling, li); });
+      });
+      const save = () => api('/api/lms-quizzes', { action: 'save', attemptId: a.id, answers: collect(form, a.questions) }).then((s) => { if (s.ok) $('qz-out').textContent = 'Saved ' + new Date().toLocaleTimeString(); });
+      quizSave = setInterval(save, 20000);
+      if (a.deadline_at) {
+        const skew = Date.now() - a.now;
+        const tick = () => {
+          const left = a.deadline_at - (Date.now() - skew);
+          $('qz-timer').textContent = left > 0 ? `Time left ${Math.floor(left / 60000)}:${String(Math.floor((left % 60000) / 1000)).padStart(2, '0')}` : 'Time is up';
+          if (left <= 0) { clearInterval(quizTimer); form.requestSubmit(); }
+        };
+        tick(); quizTimer = setInterval(tick, 1000);
+      }
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); clearInterval(quizTimer); clearInterval(quizSave);
+        const s = await api('/api/lms-quizzes', { action: 'submit', attemptId: a.id, answers: collect(form, a.questions) });
+        if (!s.ok && s.status !== 409) { $('qz-out').textContent = errText(s); return; }
+        await loaders.quizzes(); runAttempt(a.id);
+      });
+    }
+
+    // Compact question editor: options one per line, a leading * marks the correct one(s).
+    const Q_TYPES: Record<string, string> = { single: 'One answer', multi: 'Several answers', truefalse: 'True / false', short: 'Short answer', numeric: 'Number', matching: 'Matching', ordering: 'Put in order' };
+    const Q_HINT: Record<string, string> = { single: 'One option per line. Start the correct one with *', multi: 'One option per line. Start every correct one with *', short: 'Accepted answers, one per line (not case-sensitive)', matching: 'One pair per line: left = right', ordering: 'Items one per line, in the correct order (learners see them shuffled)' };
+    function qToText(q: Any) {
+      const d = q.data || {};
+      if (q.type === 'single') return d.options.map((o: string, i: number) => (i === d.correct ? '*' : '') + o).join('\n');
+      if (q.type === 'multi') return d.options.map((o: string, i: number) => (d.correct.includes(i) ? '*' : '') + o).join('\n');
+      if (q.type === 'short') return d.accept.join('\n');
+      if (q.type === 'matching') return d.left.map((l: string, i: number) => `${l} = ${d.right[i]}`).join('\n');
+      if (q.type === 'ordering') return d.items.join('\n');
+      return '';
+    }
+    function qCard(q: Any) {
+      return `<div class="rounded-lg border border-line p-3" data-qcard><div class="flex flex-wrap gap-2"><select data-qt class="border border-line bg-surface px-2 py-1">${Object.entries(Q_TYPES).map(([k, v]) => `<option value="${k}" ${q.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+        <label class="flex items-center gap-1 text-xs text-muted">Points <input data-qp type="number" min="1" max="100" value="${esc(q.points || 1)}" class="w-16 border border-line bg-surface px-1 py-0.5" /></label><button type="button" class="ml-auto text-xs underline text-danger" data-qdel>Remove</button></div>
+        <textarea data-qprompt rows="2" maxlength="2000" placeholder="Question" aria-label="Question" class="${FIELD} mt-2">${esc(q.prompt || '')}</textarea>
+        <div data-qbody class="mt-2"></div></div>`;
+    }
+    function qBody(card: HTMLElement, q: Any) {
+      const t = (card.querySelector('[data-qt]') as HTMLSelectElement).value, d = (q && q.type === t && q.data) || {};
+      const body = card.querySelector('[data-qbody]') as HTMLElement;
+      if (t === 'truefalse') body.innerHTML = `<label class="text-sm">Answer <select data-qa class="border border-line bg-surface px-2 py-1"><option value="true" ${d.correct !== false ? 'selected' : ''}>True</option><option value="false" ${d.correct === false ? 'selected' : ''}>False</option></select></label>`;
+      else if (t === 'numeric') body.innerHTML = `<label class="text-sm">Answer <input data-qa inputmode="decimal" value="${esc(d.answer ?? '')}" class="w-28 border border-line bg-surface px-2 py-1" /></label> <label class="text-sm">± <input data-qtol inputmode="decimal" value="${esc(d.tolerance ?? 0)}" class="w-20 border border-line bg-surface px-2 py-1" /></label>`;
+      else body.innerHTML = `<textarea data-qa rows="4" class="${FIELD}" aria-label="${esc(Q_HINT[t])}" placeholder="${esc(Q_HINT[t])}">${esc(q && q.type === t ? qToText(q) : '')}</textarea><p class="text-xs text-muted">${esc(Q_HINT[t])}</p>`;
+    }
+    function readCard(card: HTMLElement) {
+      const type = (card.querySelector('[data-qt]') as HTMLSelectElement).value;
+      const prompt = (card.querySelector('[data-qprompt]') as HTMLTextAreaElement).value.trim();
+      const points = Number((card.querySelector('[data-qp]') as HTMLInputElement).value) || 1;
+      const raw = (card.querySelector('[data-qa]') as HTMLInputElement).value;
+      const lines = raw.split('\n').map((s) => s.trim()).filter(Boolean);
+      let data: Any = {};
+      if (type === 'single' || type === 'multi') {
+        const options = lines.map((l) => l.replace(/^\*\s*/, ''));
+        const marked = lines.map((l, i) => (l.startsWith('*') ? i : -1)).filter((i) => i >= 0);
+        data = { options, correct: type === 'single' ? marked[0] : marked };
+      } else if (type === 'truefalse') data = { correct: raw === 'true' };
+      else if (type === 'short') data = { accept: lines };
+      else if (type === 'numeric') data = { answer: Number(raw), tolerance: Number((card.querySelector('[data-qtol]') as HTMLInputElement).value) || 0 };
+      else if (type === 'matching') { const pairs = lines.map((l) => l.split('=').map((s) => s.trim())); data = { left: pairs.map((p) => p[0]), right: pairs.map((p) => p[1] || '') }; }
+      else if (type === 'ordering') data = { items: lines };
+      return { type, prompt, points, data };
+    }
+    async function renderQuizTeacher(el: HTMLElement, list: Any[]) {
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Quizzes</h2>
+        <ul class="mt-2 font-sans text-sm">${list.length ? list.map((q: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2.5"><strong class="text-navy">${esc(q.title)}</strong>
+          <span class="pill bg-paper text-muted">${esc(q.status)}</span><span class="text-xs text-muted">${esc(q.questions)} questions${q.draw_count ? ` (draws ${esc(q.draw_count)})` : ''} · ${esc(q.attempts)} attempts · ${esc(REVIEW_LABEL[q.review] || q.review)}</span>
+          <span class="ml-auto flex gap-3"><button class="underline" data-q-edit="${esc(q.id)}">${q.attempts ? 'Results' : 'Edit'}</button>${q.status !== 'open' ? `<button class="underline" data-q-status="open" data-id="${esc(q.id)}">Open</button>` : `<button class="underline" data-q-status="closed" data-id="${esc(q.id)}">Close</button>`}<button class="underline text-danger" data-q-del="${esc(q.id)}">Delete</button></span></li>`).join('') : '<li class="py-2 text-muted">No quizzes yet.</li>'}</ul>
+        <details class="mt-4 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New quiz</summary>
+          <form id="qz-new" class="mt-3 grid gap-3 sm:grid-cols-2"><label class="${LABEL} sm:col-span-2">Title<input id="qn-title" required maxlength="200" class="${FIELD}" /></label>
+          <label class="${LABEL}">Time limit (minutes, optional)<input id="qn-time" type="number" min="1" max="600" class="${FIELD}" /></label>
+          <label class="${LABEL}">Attempts allowed (blank = unlimited)<input id="qn-att" type="number" min="1" max="50" class="${FIELD}" /></label>
+          <label class="${LABEL}">Questions per attempt (blank = all; fewer = random draw)<input id="qn-draw" type="number" min="1" max="200" class="${FIELD}" /></label>
+          <label class="${LABEL}">Pass mark % (optional)<input id="qn-pass" type="number" min="0" max="100" class="${FIELD}" /></label>
+          <label class="${LABEL} sm:col-span-2">After submitting, learners see<select id="qn-review" class="${FIELD}">${Object.entries(REVIEW_LABEL).map(([k, v]) => `<option value="${k}" ${k === 'score' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+          <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Create as draft</button> <span id="qn-out" class="font-sans text-sm" aria-live="polite"></span></div></form></details>
+        <div id="qz-edit" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-q-status]').forEach((b) => b.addEventListener('click', async () => { const s = await api('/api/lms-quizzes', { action: 'status', id: b.dataset.id, status: b.dataset.qStatus }); if (!s.ok) alert(errText(s)); loaders.quizzes(); }));
+      el.querySelectorAll<HTMLElement>('[data-q-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this quiz and every attempt at it?')) { await api('/api/lms-quizzes', { action: 'delete', id: b.dataset.qDel }); loaders.quizzes(); } }));
+      el.querySelectorAll<HTMLElement>('[data-q-edit]').forEach((b) => b.addEventListener('click', () => editQuiz(b.dataset.qEdit as string)));
+      $('qz-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const v = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
+        const s = await api('/api/lms-quizzes', { action: 'create', courseId, title: v('qn-title'), timeLimitMin: v('qn-time'), maxAttempts: v('qn-att'), drawCount: v('qn-draw'), passPct: v('qn-pass'), review: v('qn-review') });
+        if (!s.ok) { $('qn-out').textContent = errText(s); return; }
+        await loaders.quizzes(); editQuiz(s.d.id);
+      });
+    }
+    async function editQuiz(id: string) {
+      const box = $('qz-edit');
+      const r = await api('/api/lms-quizzes?id=' + encodeURIComponent(id));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const { quiz, questions, learners, attempts } = r.d;
+      if (attempts) {
+        box.innerHTML = `<h3 class="text-lg font-bold text-navy">${esc(quiz.title)}: results</h3><p class="text-sm text-muted">Questions are locked because learners have attempted this quiz.</p>
+          <table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1">Question</th><th>Learners scoring it</th></tr></thead><tbody>${questions.map((q: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-3">${esc(q.prompt)}</td><td>${q.difficulty == null ? '–' : `${esc(q.difficulty)}% of points (${esc(q.answered)} answers)`}</td></tr>`).join('')}</tbody></table>
+          <h4 class="mt-4 font-bold">Learners</h4><ul class="font-sans text-sm">${learners.map((l: Any) => `<li class="border-b border-line py-1.5">${esc(l.name)} · best ${esc(l.best)}% · ${esc(l.attempts)} attempt${l.attempts === 1 ? '' : 's'}</li>`).join('')}</ul>`;
+        return;
+      }
+      box.innerHTML = `<h3 class="text-lg font-bold text-navy">Questions: ${esc(quiz.title)}</h3><p class="text-sm text-muted">Write questions yourself and check them against your sources. Questions lock once a learner attempts the quiz.</p>
+        <div id="qe-list" class="mt-3 space-y-3">${(questions.length ? questions : [{ type: 'single' }]).map(qCard).join('')}</div>
+        <div class="mt-3 flex flex-wrap gap-2"><button class="btn" type="button" id="qe-add">+ Question</button><button class="btn btn-primary" type="button" id="qe-save">Save questions</button><span id="qe-out" class="self-center font-sans text-sm" aria-live="polite"></span></div>`;
+      const cards = () => Array.from(box.querySelectorAll<HTMLElement>('[data-qcard]'));
+      const wire = (card: HTMLElement, q: Any) => {
+        qBody(card, q);
+        card.querySelector('[data-qt]')!.addEventListener('change', () => qBody(card, null));
+        card.querySelector('[data-qdel]')!.addEventListener('click', () => card.remove());
+      };
+      cards().forEach((c, i) => wire(c, questions[i]));
+      $('qe-add').addEventListener('click', () => { $('qe-list').insertAdjacentHTML('beforeend', qCard({ type: 'single' })); const all = cards(); wire(all[all.length - 1], null); });
+      $('qe-save').addEventListener('click', async () => {
+        const s = await api('/api/lms-quizzes', { action: 'questions', id, questions: cards().map(readCard) });
+        $('qe-out').textContent = s.ok ? `Saved ${s.d.count} questions.` : errText(s);
+        if (s.ok) loaders.quizzes().then(() => editQuiz(id));
+      });
+    }
+
     // ---------- C10 journal ----------
     loaders.journal = async () => {
       const el = $('tab-journal');
@@ -322,10 +520,11 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
     // ---------- C3 release rules (inside Teacher settings) ----------
     async function renderRelease(assignments: Any[]) {
       const box = document.getElementById('rel-section'); if (!box) return;
-      const [r, p] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId))]);
+      const [r, p, qz] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId)), api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId))]);
       if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
       const byKey = Object.fromEntries((r.d.rules || []).map((x: Any) => [`${x.item_type}:${x.item_id}`, x]));
       const items = assignments.map((a: Any) => ({ type: 'assignment', id: a.id, title: a.title, label: 'Assignment' }))
+        .concat(((qz.ok && qz.d.quizzes) || []).map((x: Any) => ({ type: 'quiz', id: x.id, title: x.title, label: 'Quiz' })))
         .concat(((p.ok && p.d.polls) || []).map((x: Any) => ({ type: 'poll', id: x.id, title: x.title, label: x.kind === 'evaluation' ? 'Evaluation' : x.kind === 'survey' ? 'Survey' : 'Poll' })));
       const local = (ms: number | null) => (ms ? new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
       box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Release rules</h2>
