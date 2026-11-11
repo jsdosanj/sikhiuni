@@ -84,6 +84,11 @@ import { onRequestGet as certGet, onRequestPost as certPost } from "./functions/
 import { onRequestGet as enrollmentsGet, onRequestPost as enrollmentsPost } from "./functions/api/enrollments.js";
 import { onRequestGet as accountExportGet } from "./functions/api/account/export.js";
 import { onRequestGet as accountActivityGet, onRequestPost as accountActivityPost } from "./functions/api/account/activity.js";
+import { onRequestGet as coursePoliciesGet, onRequestPost as coursePoliciesPost } from "./functions/api/course-policies.js";
+import { onRequestGet as journalGet, onRequestPost as journalPost } from "./functions/api/journal.js";
+import { onRequestGet as glossaryGet, onRequestPost as glossaryPost } from "./functions/api/glossary.js";
+import { onRequestGet as pollsGet, onRequestPost as pollsPost } from "./functions/api/polls.js";
+import { onRequestGet as calendarGet } from "./functions/api/calendar.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -168,6 +173,11 @@ const routes = {
   "/api/enrollments": { GET: enrollmentsGet, POST: enrollmentsPost },
   "/api/account/export": { GET: accountExportGet },
   "/api/account/activity": { GET: accountActivityGet, POST: accountActivityPost },
+  "/api/course-policies": { GET: coursePoliciesGet, POST: coursePoliciesPost },
+  "/api/journal": { GET: journalGet, POST: journalPost },
+  "/api/glossary": { GET: glossaryGet, POST: glossaryPost },
+  "/api/polls": { GET: pollsGet, POST: pollsPost },
+  "/api/calendar": { GET: calendarGet },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -196,6 +206,10 @@ const RATE_LIMITS = {
   "/api/feedback": { limit: 15, window: 60 },
   "/api/contact": { limit: 5, window: 600 },  // public form that sends mail: 5 per IP per 10 min
   "/api/account/activity": { limit: 5, window: 60 },  // sign out everywhere
+  "/api/course-policies": { limit: 30, window: 60 },
+  "/api/journal": { limit: 20, window: 60 },
+  "/api/glossary": { limit: 30, window: 60 },
+  "/api/polls": { limit: 20, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },

@@ -1,5 +1,6 @@
 import { schemaOnce } from "./_schema-once.js";
 import { json, getUser, newId, logEvent } from "./_lib.js";
+import { dueFor, latePenaltyPct, pastCutoff } from "./course-policies.js";
 
 async function ensure(env) {
   return schemaOnce(env.DB, "submissions", async () => {
@@ -41,7 +42,10 @@ export async function onRequestGet({ request, env }) {
     const row = await env.DB.prepare(
       "SELECT id, text_content, file_key, submitted_at, updated_at, late, grade, feedback, status FROM submissions WHERE assignment_id=? AND user_id=?"
     ).bind(assignmentId, user.id).first();
-    return json({ submission: row || null, points: assignment.points });
+    const a2 = await env.DB.prepare("SELECT due_at FROM assignments WHERE id=?").bind(assignmentId).first();
+    const due = await dueFor(env, a2 || {}, assignmentId, user.id);
+    const penalty = row ? latePenaltyPct(due, row.updated_at || row.submitted_at) : 0;
+    return json({ submission: row ? { ...row, late_penalty_pct: penalty } : null, points: assignment.points, due });
   }
 
   if (!(await ownsCourse(env, user, assignment.course_id))) return json({ error: "forbidden" }, 403);
@@ -50,7 +54,14 @@ export async function onRequestGet({ request, env }) {
     "sub.late, sub.grade, sub.feedback, sub.status FROM submissions sub JOIN users u ON u.id=sub.user_id " +
     "WHERE sub.assignment_id=? ORDER BY sub.submitted_at DESC"
   ).bind(assignmentId).all();
-  return json({ scope: "teacher", points: assignment.points, submissions: results || [] });
+  // Each learner's own due date (extensions) and the late-policy deduction, for the grader.
+  const a2 = await env.DB.prepare("SELECT due_at FROM assignments WHERE id=?").bind(assignmentId).first();
+  const rows = [];
+  for (const r of results || []) {
+    const due = await dueFor(env, a2 || {}, assignmentId, r.user_id);
+    rows.push({ ...r, due_at: due.dueAt, extended: due.extended, late_penalty_pct: latePenaltyPct(due, r.updated_at || r.submitted_at) });
+  }
+  return json({ scope: "teacher", points: assignment.points, submissions: rows });
 }
 
 // POST /api/submissions { assignmentId, text?, fileKey? } -> student submits or
@@ -88,7 +99,10 @@ export async function onRequestPost({ request, env }) {
   if (!text && !fileKey) return json({ error: "Submit text or a file." }, 400);
 
   const now = Date.now();
-  const late = assignment.due_at && now > assignment.due_at ? 1 : 0;
+  // The learner's own due date (an extension wins) and the course's late policy.
+  const due = await dueFor(env, assignment, assignmentId, user.id);
+  if (pastCutoff(due, now)) return json({ error: "The late-submission window for this assignment has closed. Ask your teacher for an extension." }, 400);
+  const late = due.dueAt && now > due.dueAt ? 1 : 0;
   await env.DB.prepare(
     "INSERT INTO submissions (id, assignment_id, user_id, text_content, file_key, submitted_at, updated_at, late, status) " +
     "VALUES (?,?,?,?,?,?,?,?, 'submitted') " +
