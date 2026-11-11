@@ -63,6 +63,11 @@ export async function onRequestGet({ request, env }) {
     notification_prefs: await all("SELECT prefs, updated_at FROM notification_prefs WHERE user_id=?", user.id),
     grading_comments: await all("SELECT text, created_at FROM grading_comments WHERE user_id=?", user.id),
     submission_marking: await all("SELECT g.submission_id, g.rubric_scores, g.raw_grade, g.penalty_pct FROM submission_grading g JOIN submissions s ON s.id=g.submission_id WHERE s.user_id=?", user.id),
+    dm_conversations: await all("SELECT id, course_id, status, created_at FROM dm_conversations WHERE requester_id=? OR recipient_id=?", user.id, user.id),
+    dm_messages_sent: await all("SELECT conversation_id, body, created_at FROM dm_messages WHERE sender_id=?", user.id),
+    blocks: await all("SELECT blocked_id, created_at FROM user_blocks WHERE blocker_id=?", user.id),
+    forum_follows: await all("SELECT thread_id, created_at FROM forum_subscriptions WHERE user_id=?", user.id),
+    course_mutes: await all("SELECT course_id, created_at FROM course_mutes WHERE user_id=?", user.id),
     trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 

@@ -93,6 +93,7 @@ import { onRequestGet as calendarGet } from "./functions/api/calendar.js";
 import { onRequestGet as notificationsGet, onRequestPost as notificationsPost } from "./functions/api/notifications.js";
 import { onRequestGet as rubricsGet, onRequestPost as rubricsPost } from "./functions/api/rubrics.js";
 import { onRequestGet as messagingSettingsGet, onRequestPost as messagingSettingsPost } from "./functions/api/messaging-settings.js";
+import { onRequestGet as messagesGet, onRequestPost as messagesPost } from "./functions/api/messages.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -185,6 +186,7 @@ const routes = {
   "/api/notifications": { GET: notificationsGet, POST: notificationsPost },
   "/api/rubrics": { GET: rubricsGet, POST: rubricsPost },
   "/api/messaging-settings": { GET: messagingSettingsGet, POST: messagingSettingsPost },
+  "/api/messages": { GET: messagesGet, POST: messagesPost },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -220,6 +222,7 @@ const RATE_LIMITS = {
   "/api/notifications": { limit: 30, window: 60 },
   "/api/rubrics": { limit: 30, window: 60 },
   "/api/messaging-settings": { limit: 20, window: 60 },
+  "/api/messages": { limit: 20, window: 60 },  // DMs: sends, requests, reports
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },

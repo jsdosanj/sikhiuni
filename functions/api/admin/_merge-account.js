@@ -42,6 +42,12 @@ const OWNED = [
   // C5 notifications. A preferences collision keeps the target's choices (rule 2).
   ["notifications", "user_id"], ["notification_prefs", "user_id"],
   ["grading_comments", "user_id"],
+  // C18 messaging. (A pair key on a moved conversation still names the old id;
+  // it only guards against duplicate requests, so the worst case is one extra request.)
+  ["forum_subscriptions", "user_id"], ["course_mutes", "user_id"],
+  ["user_blocks", "blocker_id"], ["user_blocks", "blocked_id"],
+  ["dm_conversations", "requester_id"], ["dm_conversations", "recipient_id"],
+  ["dm_messages", "sender_id"], ["dm_reports", "reporter_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than
@@ -56,6 +62,7 @@ const ACTOR = [
   ["assignment_extensions", "created_by"], ["course_accommodations", "created_by"],
   ["glossary_terms", "created_by"], ["polls", "created_by"],
   ["rubrics", "created_by"], ["submission_grading", "graded_by"],
+  ["course_messaging_settings", "updated_by"], ["course_mutes", "muted_by"], ["dm_reports", "resolved_by"],
 ];
 
 // Credential + transient state keyed by user_id: dropped, never moved (rule 3).

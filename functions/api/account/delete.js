@@ -71,6 +71,14 @@ export async function onRequestPost({ request, env }) {
   await wipe("DELETE FROM notifications WHERE user_id=?");
   await wipe("DELETE FROM notification_prefs WHERE user_id=?");
   await wipe("DELETE FROM grading_comments WHERE user_id=?");
+  // C18 messaging. A conversation is shared, so the other person's messages go with it:
+  // a deleted account leaves no half-thread behind.
+  await wipe("DELETE FROM dm_reports WHERE conversation_id IN (SELECT id FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1)");
+  await wipe("DELETE FROM dm_messages WHERE conversation_id IN (SELECT id FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1)");
+  await wipe("DELETE FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1");
+  await wipe("DELETE FROM user_blocks WHERE blocker_id=?1 OR blocked_id=?1");
+  await wipe("DELETE FROM forum_subscriptions WHERE user_id=?");
+  await wipe("DELETE FROM course_mutes WHERE user_id=?");
   await wipe("DELETE FROM user_flags WHERE user_id=?");
   await wipe("DELETE FROM teacher_profiles WHERE user_id=?");
   await wipe("DELETE FROM professor_claims WHERE user_id=?");
