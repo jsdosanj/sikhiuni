@@ -100,10 +100,14 @@ describe("C7 extensions, late policy, accommodations", () => {
     await post(policies, "sA", "/api/course-policies", { action: "accommodation", courseId: "courseA", userId: "l1", extraTimePct: 999 });
     const t = await get(policies, "sA", "/api/course-policies?courseId=courseA");
     expect(t.body.accommodations[0].extra_time_pct).toBe(300);
+    // The teacher's roster is this course's learners only.
+    expect(t.body.learners.map((l: any) => l.id).sort()).toEqual(["l1", "l2", "l3"]);
+    expect(t.body.assignments.map((a: any) => a.id)).toEqual(["a1"]);
     const mine = await get(policies, "s1", "/api/course-policies?courseId=courseA");
     expect(mine.body.scope).toBe("learner");
     expect(mine.body.accommodation.extra_time_pct).toBe(300);
     expect(mine.body).not.toHaveProperty("accommodations"); // no one else's data
+    expect(mine.body).not.toHaveProperty("learners");
   });
 
   it("IDOR: a teacher of another course, or a learner, cannot set policies", async () => {

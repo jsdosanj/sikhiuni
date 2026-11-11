@@ -690,7 +690,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
                 <summary class="cursor-pointer select-none px-4 py-3 flex flex-wrap items-baseline gap-2">
                   <span class="font-bold text-navy">${esc(ctitle(cid))}</span>
                   <span class="font-sans text-xs text-muted">${cr.length} enrolled · avg ${cavg}% · ${passRate}% passed</span>
-                  <span class="ml-auto flex gap-2 font-sans text-xs"><button class="underline" data-ann="${esc(cid)}">Announce</button> <button class="underline" data-csv="${esc(cid)}">Export CSV</button> <a class="underline" href="/cohorts?course=${esc(cid)}">Create cohort</a> <button class="underline text-danger" data-request-archive="${esc(cid)}">Request archive</button></span>
+                  <span class="ml-auto flex gap-2 font-sans text-xs"><button class="underline" data-ann="${esc(cid)}">Announce</button> <button class="underline" data-csv="${esc(cid)}">Export CSV</button> <a class="underline" href="/course-tools?course=${esc(cid)}">Course tools</a> <a class="underline" href="/cohorts?course=${esc(cid)}">Create cohort</a> <button class="underline text-danger" data-request-archive="${esc(cid)}">Request archive</button></span>
                 </summary>
                 ${!cr.length ? '<div class="px-4 pb-4 text-muted font-sans text-sm">No students match the current filter.</div>' : `<div class="overflow-x-auto"><table class="w-full font-sans text-sm"><thead><tr class="bg-brand text-left text-white"><th class="px-3 py-2">Student</th><th>Progress</th><th>Score</th><th>Grade</th><th>Status</th><th>Last active</th><th></th></tr></thead><tbody>${rows_html}</tbody></table></div>`}
                 <div class="border-t border-line px-4 py-3">

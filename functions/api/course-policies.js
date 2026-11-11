@@ -56,14 +56,16 @@ export async function onRequestGet({ request, env }) {
   const { user, teach, error } = await courseAccess(env, request, courseId, "member");
   if (error) return error;
   await ensurePolicies(env);
-  const ids = await env.DB.prepare("SELECT id FROM assignments WHERE course_id=?").bind(courseId).all().catch(() => ({ results: [] }));
+  const ids = await env.DB.prepare("SELECT id, title, due_at, status FROM assignments WHERE course_id=? ORDER BY due_at IS NULL, due_at").bind(courseId).all().catch(() => ({ results: [] }));
   const aIds = (ids.results || []).map((r) => r.id);
   const inList = aIds.length ? `(${aIds.map(() => "?").join(",")})` : "('')";
   if (teach) {
     const pol = await env.DB.prepare(`SELECT * FROM assignment_policies WHERE assignment_id IN ${inList}`).bind(...aIds).all();
     const ext = await env.DB.prepare(`SELECT e.assignment_id, e.user_id, e.due_at, e.reason, u.email, u.name FROM assignment_extensions e LEFT JOIN users u ON u.id=e.user_id WHERE e.assignment_id IN ${inList}`).bind(...aIds).all();
     const acc = await env.DB.prepare("SELECT a.user_id, a.extra_time_pct, a.note, u.email, u.name FROM course_accommodations a LEFT JOIN users u ON u.id=a.user_id WHERE a.course_id=?").bind(courseId).all();
-    return json({ scope: "teacher", policies: pol.results || [], extensions: ext.results || [], accommodations: acc.results || [] });
+    // Roster for the extension/accommodation pickers (the gradebook already shows teachers the same names/emails).
+    const learners = await env.DB.prepare("SELECT u.id, u.name, u.email FROM enrollments e JOIN users u ON u.id=e.user_id WHERE e.kind='course' AND e.target_id=? ORDER BY u.name LIMIT 2000").bind(courseId).all();
+    return json({ scope: "teacher", assignments: ids.results || [], learners: learners.results || [], policies: pol.results || [], extensions: ext.results || [], accommodations: acc.results || [] });
   }
   const ext = await env.DB.prepare(`SELECT assignment_id, due_at FROM assignment_extensions WHERE user_id=? AND assignment_id IN ${inList}`).bind(user.id, ...aIds).all();
   const acc = await env.DB.prepare("SELECT extra_time_pct FROM course_accommodations WHERE course_id=? AND user_id=?").bind(courseId, user.id).first();

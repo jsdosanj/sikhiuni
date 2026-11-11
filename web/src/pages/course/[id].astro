@@ -355,6 +355,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         <textarea id="rate-review" rows="2" aria-label="Optional written review" data-i18n-aria="course.rate.reviewAria" placeholder="Optional review…" data-i18n-ph="course.rate.reviewPh" class="mt-2 w-full rounded-lg border border-line p-2 font-sans text-sm transition-colors focus:border-saffron"></textarea>
         <button id="rate-submit" class="btn btn-primary mt-2" data-i18n="course.rate.submit">Submit rating</button>
         <div id="rate-msg" class="mt-2 font-sans text-sm"></div>
+        <p id="course-tools-link" class="mt-6 hidden font-sans text-sm"><a class="underline" href={`/course-tools?course=${c.id}`}>Course tools: due dates, polls, journal and glossary →</a></p>
         <div id="assignments" class="mt-6 hidden border-t border-line pt-6">
           <h2 class="text-xl font-bold">Assignments</h2>
           <div id="assign-list" class="mt-3 space-y-3"></div>
@@ -827,6 +828,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       // user is enrolled (server-gated; a 403 just means "hide this section").
       function loadAssignments() {
         api('/api/assignments?courseId=' + encodeURIComponent(id)).then(function (r) {
+          // Enrolled learners and the course's teachers both get the course tools link.
+          if (r.ok) document.getElementById('course-tools-link').classList.remove('hidden');
           if (!r.ok || r.d.scope !== 'student') return;
           var section = document.getElementById('assignments');
           var list = r.d.assignments || [];
@@ -838,7 +841,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
               : a.status === 'closed' ? '<span class="pill bg-paper text-muted">Closed, no submission</span>'
               : '';
           return '<div class="rounded-lg border border-line bg-surface p-3" data-assignment="' + esc(a.id) + '" data-allow-file="' + (a.allow_file ? '1' : '0') + '" data-closed="' + (a.status === 'closed' ? '1' : '0') + '">' +
-              '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + (a.due_at ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.due_at).toLocaleDateString()) + '</span>' : '') + statusLine + '</div>' +
+              '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + ((a.my_due_at || a.due_at) ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.my_due_at || a.due_at).toLocaleDateString()) + (a.extended ? ' (your extended date)' : '') + (a.late_penalty_per_day ? ' · late work loses ' + esc(a.late_penalty_per_day) + '% per day' : '') + '</span>' : '') + statusLine + '</div>' +
               '<p class="mt-1 text-sm text-muted">' + esc(a.instructions) + '</p>' +
               (a.my_status !== 'graded' && a.status !== 'closed' ? (
                 '<textarea rows="2" class="mt-2 w-full rounded-lg border border-line p-2 font-sans text-sm focus:border-saffron" placeholder="Your answer…" data-assign-text></textarea>' +
