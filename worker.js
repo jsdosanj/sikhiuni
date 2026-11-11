@@ -2,6 +2,7 @@ import { courseOutline } from './functions/api/_course-store.js';
 import { checkRateLimit } from './functions/api/_rate-limit.js';
 import { logEvent } from './functions/api/_lib.js';
 import { pruneAudit, verifyChain } from './functions/api/_audit.js';
+import { queueDueSoon, sendDigests, pruneNotifications } from './functions/api/_notify.js';
 import { getLearningUser } from './functions/api/_learning-user.js';
 import { protectedLearningPath, PRIVATE_COURSE_HEADERS } from './functions/api/_course-access.js';
 // Sikhi University Worker entrypoint.
@@ -89,6 +90,7 @@ import { onRequestGet as journalGet, onRequestPost as journalPost } from "./func
 import { onRequestGet as glossaryGet, onRequestPost as glossaryPost } from "./functions/api/glossary.js";
 import { onRequestGet as pollsGet, onRequestPost as pollsPost } from "./functions/api/polls.js";
 import { onRequestGet as calendarGet } from "./functions/api/calendar.js";
+import { onRequestGet as notificationsGet, onRequestPost as notificationsPost } from "./functions/api/notifications.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -178,6 +180,7 @@ const routes = {
   "/api/glossary": { GET: glossaryGet, POST: glossaryPost },
   "/api/polls": { GET: pollsGet, POST: pollsPost },
   "/api/calendar": { GET: calendarGet },
+  "/api/notifications": { GET: notificationsGet, POST: notificationsPost },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -210,6 +213,7 @@ const RATE_LIMITS = {
   "/api/journal": { limit: 20, window: 60 },
   "/api/glossary": { limit: 30, window: 60 },
   "/api/polls": { limit: 20, window: 60 },
+  "/api/notifications": { limit: 30, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },
@@ -339,6 +343,10 @@ async function pruneExpired(env) {
     result.audit_chain = { checked: chain.checked, broken: chain.broken.length };
     if (chain.broken.length) await logEvent(env, null, "audit_chain_broken", null, `${chain.broken.length} row(s): ${chain.broken.slice(0, 10).join(",")}`, { outcome: "fail" });
   } catch (e) { result.audit_chain = `error: ${String(e)}`; }
+  // C5 notifications: due-soon reminders, then the daily email digest, then retention.
+  try { result.due_soon = await queueDueSoon(env, nowMs); } catch (e) { result.due_soon = `error: ${String(e)}`; }
+  try { result.digests = await sendDigests(env, nowMs); } catch (e) { result.digests = `error: ${String(e)}`; }
+  try { result.notifications_pruned = await pruneNotifications(env, nowMs); } catch (e) { result.notifications_pruned = `error: ${String(e)}`; }
   return result;
 }
 

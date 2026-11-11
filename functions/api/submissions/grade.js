@@ -1,4 +1,5 @@
 import { json, getUser, logEvent, parseBody } from "../_lib.js";
+import { notify } from "../_notify.js";
 
 async function ownsCourse(env, user, courseId) {
   if (user.role === "admin") return true;
@@ -17,7 +18,7 @@ export async function onRequestPost({ request, env }) {
   if (!b.submissionId) return json({ error: "submissionId required" }, 400);
 
   const sub = await env.DB.prepare(
-    "SELECT s.assignment_id, a.course_id, a.points FROM submissions s JOIN assignments a ON a.id=s.assignment_id WHERE s.id=?"
+    "SELECT s.assignment_id, s.user_id, a.course_id, a.points, a.title FROM submissions s JOIN assignments a ON a.id=s.assignment_id WHERE s.id=?"
   ).bind(b.submissionId).first();
   if (!sub) return json({ error: "not found" }, 404);
   if (!(await ownsCourse(env, user, sub.course_id))) return json({ error: "forbidden" }, 403);
@@ -31,5 +32,6 @@ export async function onRequestPost({ request, env }) {
     "UPDATE submissions SET grade=?, feedback=?, graded_by=?, graded_at=?, status='graded' WHERE id=?"
   ).bind(grade, feedback, user.id, now, b.submissionId).run();
   await logEvent(env, user, "submission_graded", b.submissionId, String(grade));
+  await notify(env, [sub.user_id], { kind: "graded", courseId: sub.course_id, title: `Graded: ${sub.title}`, body: `${grade}/${sub.points}`, url: `/course/${sub.course_id}` });
   return json({ ok: true, grade });
 }

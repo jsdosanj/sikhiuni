@@ -1,6 +1,7 @@
 import { json, logEvent } from "./_lib.js";
 import { schemaOnce } from "./_schema-once.js";
 import { courseAccess, cleanText } from "./_course-auth.js";
+import { notify } from "./_notify.js";
 
 // C7 (Canvas "Assign To" / late policies, Moodle user overrides): per-assignment
 // late policy, per-learner due-date extensions, and per-learner accommodations
@@ -110,6 +111,8 @@ export async function onRequestPost({ request, env }) {
         .bind(b.assignmentId, uid, due, cleanText(b.reason, 300) || null, user.id, now).run();
     }
     await logEvent(env, user, "extension_set", b.assignmentId, null, { subject: uid, targetType: "assignment", before: before ? before.due_at : null, after: b.dueAt == null ? null : Number(b.dueAt) });
+    const a = await env.DB.prepare("SELECT title FROM assignments WHERE id=?").bind(b.assignmentId).first();
+    await notify(env, [uid], { kind: "extension", courseId, title: `New due date: ${a ? a.title : "assignment"}`, body: b.dueAt == null ? "Your extension was removed; the course due date applies." : `Now due ${new Date(Number(b.dueAt)).toUTCString()}.`, url: `/course/${courseId}` });
     return json({ ok: true });
   }
 

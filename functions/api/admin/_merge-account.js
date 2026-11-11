@@ -39,6 +39,8 @@ const OWNED = [
   // LMS Phase 1 (plan Part D.10).
   ["journal_entries", "user_id"], ["assignment_extensions", "user_id"], ["course_accommodations", "user_id"],
   ["poll_participants", "user_id"], ["poll_responses", "user_id"],
+  // C5 notifications. A preferences collision keeps the target's choices (rule 2).
+  ["notifications", "user_id"], ["notification_prefs", "user_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than

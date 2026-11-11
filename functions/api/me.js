@@ -52,12 +52,19 @@ export async function onRequestGet({ request, env }) {
   const mfa = { enrolled: !!(mfaRow && mfaRow.enabled_at) };
   const isTeacher = user.role === "teacher" || (await isCourseTeacher(env, user.id));
   const marketingOptin = !!user.marketing_optin;
+  // Unread notification count for the nav (C5). The table is created on first use,
+  // so a database that has never notified anyone simply reports 0.
+  let unreadNotifications = 0;
+  try {
+    const n = await env.DB.prepare("SELECT COUNT(*) AS n FROM notifications WHERE user_id=? AND read_at IS NULL").bind(user.id).first();
+    unreadNotifications = (n && n.n) || 0;
+  } catch { unreadNotifications = 0; }
   // Renewal is best-effort: a failure here must not break the session read
   // that every page depends on.
   let renewed = null;
   try { renewed = await renewSessionIfStale(env, request); }
   catch (e) { console.log("[session] renewal skipped:", (e && e.message) || e); }
-  return json({ user: { ...user, mfa, isTeacher, marketingOptin } }, 200,
+  return json({ user: { ...user, mfa, isTeacher, marketingOptin, unreadNotifications } }, 200,
     renewed ? { "Set-Cookie": renewed } : {});
 }
 

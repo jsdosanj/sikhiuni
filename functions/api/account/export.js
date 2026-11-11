@@ -59,6 +59,8 @@ export async function onRequestGet({ request, env }) {
     // Named poll answers only; anonymous answers are stored without any user id.
     poll_participation: await all("SELECT poll_id FROM poll_participants WHERE user_id=?", user.id),
     poll_responses: await all("SELECT poll_id, answers, created_at FROM poll_responses WHERE user_id=?", user.id),
+    notifications: await all("SELECT kind, course_id, title, body, url, created_at, read_at FROM notifications WHERE user_id=?", user.id),
+    notification_prefs: await all("SELECT prefs, updated_at FROM notification_prefs WHERE user_id=?", user.id),
     trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 

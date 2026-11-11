@@ -1,6 +1,7 @@
 import { json, newId, logEvent } from "./_lib.js";
 import { schemaOnce } from "./_schema-once.js";
 import { courseAccess, cleanText } from "./_course-auth.js";
+import { notify, courseLearnerIds } from "./_notify.js";
 
 // C12 Polls, surveys and course evaluations (Moodle Choice/Feedback, Canvas surveys).
 //
@@ -215,6 +216,9 @@ export async function onRequestPost({ request, env }) {
     await env.DB.prepare("UPDATE polls SET title=COALESCE(?,title), status=COALESCE(?,status), closes_at=?, questions=COALESCE(?,questions), updated_at=? WHERE id=?")
       .bind(title, status, closesAt, questions ? JSON.stringify(questions) : null, now, p.id).run();
     await logEvent(env, user, "poll_updated", p.id, status ? `status=${status}` : null, { targetType: "poll", before: { status: p.status }, after: { status: status || p.status } });
+    if (status === "open" && p.status !== "open") {
+      await notify(env, await courseLearnerIds(env, p.course_id), { kind: "poll", courseId: p.course_id, title: `${p.kind === "evaluation" ? "Course evaluation" : p.kind === "survey" ? "New survey" : "New poll"}: ${title || p.title}`, url: `/course-tools?course=${p.course_id}#polls`, dedupe: `poll:${p.id}` });
+    }
     return json({ ok: true });
   }
   return json({ error: "unknown action" }, 400);

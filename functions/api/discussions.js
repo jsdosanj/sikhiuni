@@ -1,4 +1,5 @@
 import { json, getUser, newId, logEvent } from "./_lib.js";
+import { notify } from "./_notify.js";
 
 // Each ALTER is its own try/catch: SQLite/D1 has no ADD COLUMN IF NOT EXISTS, so
 // after migrations/0004_discussions_threading.sql has run these always fail
@@ -83,15 +84,16 @@ export async function onRequestPost({ request, env }) {
   const message = (b.message || "").trim().slice(0, 2000);
   if (!courseId || !message) return json({ error: "Message required." }, 400);
 
-  let parentId = null;
+  let parentId = null, replyTo = null;
   if (b.parentId) {
     const parent = await env.DB.prepare(
-      "SELECT id, course_id, parent_id, locked, hidden FROM discussions WHERE id=?"
+      "SELECT id, course_id, parent_id, locked, hidden, user_id FROM discussions WHERE id=?"
     ).bind(b.parentId).first();
     if (!parent || parent.course_id !== courseId || parent.hidden) return json({ error: "Cannot reply to that message." }, 400);
     if (parent.parent_id) return json({ error: "Replies can't be nested further." }, 400);
     if (parent.locked) return json({ error: "This thread is locked." }, 400);
     parentId = b.parentId;
+    replyTo = parent.user_id;
   }
 
   // Never derive a public display name from the email (leaks the local-part).
@@ -102,5 +104,6 @@ export async function onRequestPost({ request, env }) {
     "VALUES (?,?,?,?,?,?,?,?,0,0,0)"
   ).bind(newId(), courseId, user.id, name, message, Date.now(), parentId, authorRole).run();
   await logEvent(env, user, "discussion_post", courseId, message.slice(0, 80));
+  if (replyTo && replyTo !== user.id) await notify(env, [replyTo], { kind: "reply", courseId, title: `${name} replied to your post`, body: message.slice(0, 200), url: `/course/${courseId}#discussion` });
   return json({ ok: true });
 }

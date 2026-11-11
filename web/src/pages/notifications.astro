@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+// C5 Notification centre: in-app inbox + per-event email/push choices.
+// English in markup; Base's auto-translate covers <main> (same as contact.astro).
+---
+<Base title="Notifications, Sikhi University" description="Your course notifications and how you receive them." ambient="none">
+  <section class="wrap max-w-3xl py-10 sm:py-12">
+    <p class="eyebrow flex items-center gap-2.5 text-saffron-deep"><span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>Your account</p>
+    <h1 class="text-display-sm mt-3 text-navy">Notifications</h1>
+    <div id="n-gate" class="mt-6" role="status" aria-live="polite"></div>
+    <div id="n-app" class="hidden">
+      <div class="mt-6 flex flex-wrap items-center gap-3 font-sans text-sm">
+        <span id="n-count" class="text-muted"></span>
+        <button id="n-readall" class="btn ml-auto">Mark all as read</button>
+      </div>
+      <ul id="n-list" class="mt-3"></ul>
+
+      <h2 id="settings" class="mt-12 text-xl font-bold text-navy">How you hear about things</h2>
+      <p class="mt-1 text-sm text-muted">Everything always appears here. Choose which ones also reach you by email (right away, or once a day in a summary) or as a phone/browser alert. Course-wide updates can't email instantly, to keep busy courses from filling your inbox.</p>
+      <form id="n-prefs" class="mt-4">
+        <table class="w-full font-sans text-sm">
+          <thead><tr class="text-left text-muted"><th class="py-1.5">When</th><th>Email</th><th>Alert</th></tr></thead>
+          <tbody id="n-prefs-body"></tbody>
+        </table>
+        <p class="mt-2 font-sans text-xs text-muted">Alerts need notifications switched on for this site in your browser, from the reminders option on your dashboard.</p>
+        <button class="btn btn-primary mt-4" type="submit">Save choices</button> <span id="n-prefs-out" class="font-sans text-sm" aria-live="polite"></span>
+      </form>
+    </div>
+  </section>
+  <script>
+    type Any = any;
+    const $ = (id: string) => document.getElementById(id) as HTMLElement;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const ago = (ms: number) => { const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : new Date(ms).toLocaleDateString(); };
+    // Only same-site paths are followed (a notification url is always one of ours).
+    const safeUrl = (u: string) => (typeof u === 'string' && u.startsWith('/') && !u.startsWith('//') ? u : '/dashboard');
+    async function api(path: string, body?: Any) {
+      const r = await fetch(path, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      return { ok: r.ok, status: r.status, d: await r.json().catch(() => ({})) };
+    }
+    async function loadList() {
+      const r = await api('/api/notifications');
+      if (r.status === 401) { $('n-gate').innerHTML = `<p>Please <a class="underline" href="/login?next=/notifications">sign in</a> to see your notifications.</p>`; return false; }
+      const list = r.d.notifications || [];
+      $('n-count').textContent = r.d.unread ? `${r.d.unread} unread` : 'All caught up';
+      $('n-list').innerHTML = list.length ? list.map((n: Any) => `<li class="border-b border-line py-3 ${n.read_at ? '' : 'font-semibold'}">
+          <a class="block" href="${esc(safeUrl(n.url))}" data-n="${esc(n.id)}"><span class="text-navy">${n.read_at ? '' : '<span aria-hidden="true" class="mr-1.5 inline-block h-2 w-2 rounded-full bg-saffron"></span><span class="sr-only">Unread: </span>'}${esc(n.title)}</span>
+          ${n.body ? `<span class="mt-0.5 block font-sans text-sm font-normal text-muted">${esc(n.body)}</span>` : ''}<span class="mt-0.5 block font-mono text-[11px] font-normal text-muted">${esc(ago(n.created_at))}</span></a></li>`).join('')
+        : '<li class="py-3 text-muted">No notifications yet.</li>';
+      $('n-list').querySelectorAll<HTMLAnchorElement>('[data-n]').forEach((a) => a.addEventListener('click', (e) => {
+        e.preventDefault();
+        api('/api/notifications', { action: 'read', ids: [a.dataset.n] }).finally(() => { location.href = a.getAttribute('href') || '/dashboard'; });
+      }));
+      return true;
+    }
+    async function loadPrefs() {
+      const r = await api('/api/notifications?prefs=1');
+      if (!r.ok) return;
+      const { prefs, kinds } = r.d;
+      $('n-prefs-body').innerHTML = Object.keys(kinds).map((k) => `<tr class="border-t border-line"><td class="py-2 pr-3">${esc(kinds[k].label)}</td>
+        <td class="pr-3"><select data-email="${esc(k)}" aria-label="Email for: ${esc(kinds[k].label)}" class="border border-line bg-surface px-2 py-1">
+          <option value="off">Off</option>${kinds[k].fanout ? '' : '<option value="immediate">Right away</option>'}<option value="daily">Daily summary</option></select></td>
+        <td><input type="checkbox" data-push="${esc(k)}" aria-label="Alert for: ${esc(kinds[k].label)}" /></td></tr>`).join('');
+      for (const k of Object.keys(kinds)) {
+        ($('n-prefs-body').querySelector(`[data-email="${k}"]`) as HTMLSelectElement).value = prefs[k].email;
+        ($('n-prefs-body').querySelector(`[data-push="${k}"]`) as HTMLInputElement).checked = !!prefs[k].push;
+      }
+    }
+    $('n-readall').addEventListener('click', async () => { await api('/api/notifications', { action: 'read_all' }); loadList(); });
+    $('n-prefs').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prefs: Any = {};
+      $('n-prefs-body').querySelectorAll<HTMLSelectElement>('[data-email]').forEach((s) => { prefs[s.dataset.email as string] = { email: s.value }; });
+      $('n-prefs-body').querySelectorAll<HTMLInputElement>('[data-push]').forEach((c) => { prefs[c.dataset.push as string].push = c.checked; });
+      const r = await api('/api/notifications', { action: 'prefs', prefs });
+      $('n-prefs-out').textContent = r.ok ? 'Saved.' : (r.d.error || 'Could not save.');
+    });
+    loadList().then((ok) => { if (!ok) return; $('n-app').classList.remove('hidden'); loadPrefs().then(() => { if (location.hash === '#settings') $('settings').scrollIntoView(); }); });
+  </script>
+</Base>

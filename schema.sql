@@ -432,3 +432,12 @@ CREATE INDEX IF NOT EXISTS idx_polls_course ON polls(course_id, status);
 CREATE TABLE IF NOT EXISTS poll_participants (poll_id TEXT NOT NULL, user_id TEXT NOT NULL, PRIMARY KEY (poll_id, user_id));
 CREATE TABLE IF NOT EXISTS poll_responses (id TEXT PRIMARY KEY, poll_id TEXT NOT NULL, user_id TEXT, answers TEXT NOT NULL, created_at INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_poll_responses_poll ON poll_responses(poll_id);
+
+-- C5 notifications (migrations/0020_notifications.sql).
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL, course_id TEXT,
+  title TEXT NOT NULL, body TEXT, url TEXT, dedupe TEXT, created_at INTEGER NOT NULL, read_at INTEGER, emailed_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notifications_dedupe ON notifications(user_id, dedupe);
+CREATE TABLE IF NOT EXISTS notification_prefs (user_id TEXT PRIMARY KEY, prefs TEXT NOT NULL, updated_at INTEGER NOT NULL);
