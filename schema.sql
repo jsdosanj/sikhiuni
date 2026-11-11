@@ -330,6 +330,13 @@ CREATE TABLE IF NOT EXISTS mfa_backup_codes (
 );
 -- SQLite/D1 has no ADD COLUMN IF NOT EXISTS, so these lines are NOT safely re-runnable —
 -- fine here since they only ever run once, against the sessions table just created above.
+-- "Remember this device for 30 days" (functions/api/auth/_trusted-device.js). Only the
+-- SHA-256 of the device token is stored. Also auto-created on first use.
+CREATE TABLE IF NOT EXISTS mfa_trusted_devices (
+  token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, last_used_at INTEGER, ua TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mfa_trusted_devices_user ON mfa_trusted_devices(user_id);
 ALTER TABLE sessions ADD COLUMN mfa_ok INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE sessions ADD COLUMN mfa_fail_count INTEGER NOT NULL DEFAULT 0;
 CREATE TABLE IF NOT EXISTS user_flags (

@@ -280,7 +280,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
                 <div id="mfa-out" class="mt-3"></div></div>`
             : `<div class="rounded-xl border border-line bg-surface p-4 font-sans text-sm"><p><strong>Two-factor authentication is off.</strong></p>
                 <p class="mt-1 text-muted">Add a code from an authenticator app to each new sign-in. Optional, and recommended.</p>
-                <a class="btn btn-primary mt-3" href="/mfa?next=${encodeURIComponent('/dashboard#profile')}">Turn on</a></div>`;
+                <a class="btn btn-primary mt-3" href="/mfa?next=${encodeURIComponent('/dashboard/profile')}">Turn on</a></div>`;
           const out = () => document.getElementById('mfa-out');
           document.getElementById('mfa-off')?.addEventListener('click', async () => {
             const v = await window.suModalForm({ title: 'Turn off two-factor authentication', submitLabel: 'Turn off', fields: [{ name: 'code', label: 'Current code (or a backup code)' }] });
@@ -352,7 +352,7 @@ const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time',
           if (!body) return;
           body.innerHTML = `
             ${p.is_public ? `<a class="pill bg-ok/20 text-ok" href="/teacher/${esc(p.slug)}" target="_blank">Live at /teacher/${esc(p.slug)} →</a>` : p.publish_requested_at ? '<span class="pill bg-paper text-muted">Publish requested, awaiting admin approval</span>' : ''}
-            <label class="block"><span class="font-sans text-sm font-semibold">Display name</span><input id="tp-name" value="${esc(p.display_name || cur.name || '')}" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none" /></label>
+            <label class="block"><span class="font-sans text-sm font-semibold">Display name</span><input id="tp-name" value="${esc(p.display_name || (user && user.name) || '')}" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none" /></label>
             <label class="block"><span class="font-sans text-sm font-semibold">Bio</span><textarea id="tp-bio" rows="4" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none">${esc(p.bio || '')}</textarea></label>
             <label class="block"><span class="font-sans text-sm font-semibold">Credentials</span><textarea id="tp-credentials" rows="2" class="mt-1 w-full rounded-xl border border-line bg-surface px-4 py-2.5 font-sans focus:border-saffron focus:outline-none">${esc(p.credentials || '')}</textarea></label>
             <div><span class="font-sans text-sm font-semibold">Teaching areas</span><div class="mt-2 flex flex-wrap gap-2">${areas.map((a) => `<label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 py-1 font-sans text-xs has-[:checked]:border-saffron has-[:checked]:bg-saffron-soft/40"><input type="checkbox" value="${esc(a)}" ${curAreas.has(a) ? 'checked' : ''} class="tp-area" /> ${esc(a)}</label>`).join('')}</div></div>
