@@ -53,6 +53,23 @@ protect its learners.
 ## Infrastructure & operations
 - Container isolation (Tutor/Docker); network segmentation; WAF + DDoS protection at the edge (CDN).
 - Centralized logging + audit trail (who changed which course/role/data); tamper-evident.
+  - **Implemented (2026-11, `.cc/plan-audit-mfa-lms.md` Part A)**: one `events` table, one write
+    path (`logEvent` in `functions/api/_lib.js`, internals in `functions/api/_audit.js`).
+    Every row carries request context (IP, country, user agent, a SHA-256 prefix of the session
+    id, `cf-ray`), set per request by `worker.js` via `env.AUDIT_REQUEST`, plus `subject_user_id`,
+    `target_type`, `outcome` (ok/fail/denied) and optional before/after values. Newly logged:
+    `login_failed` (+ `login_failed_burst` at 10 in 15 min), `mfa_failed`, `reset_code_failed`,
+    `register_code_failed`, `password_changed`, `admin_granted`, `authz_denied` (throttled to one
+    per user+path per minute), `rate_limited` (once per IP+route per window), `export_*` for every
+    export, and `sessions_revoked`. **Tamper evidence**: a hash chain (`prev_hash`, `hash`); the
+    daily cron verifies the newest 500 rows and logs `audit_chain_broken`. Network fields are
+    outside the hash so they can be erased. **Retention**: IP/country/UA nulled at 90 days,
+    learning events deleted at 180 days, everything at 2 years. **Alerts** (email to the team
+    inbox, max one per action per hour): `mfa_reset`, `account_merge`, `admin_granted`,
+    `login_failed_burst`, `audit_chain_broken`. Admins get presets, outcome/subject filters, a
+    per-user timeline and CSV export (itself logged); learners see their own recent security
+    activity (masked IP) and can sign out everywhere. A write failure is reported with
+    `console.error("audit_write_failed")` instead of being swallowed.
 - Automated, **encrypted, tested backups**; documented disaster recovery (RPO/RTO targets).
 - IaC with reviewed changes; no manual prod edits; staging mirrors prod.
 

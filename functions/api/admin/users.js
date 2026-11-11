@@ -87,6 +87,6 @@ export async function onRequestPost({ request, env }) {
   if (target.role === "admin") return json({ error: "admins are managed via ADMIN_EMAILS" }, 403);
 
   await env.DB.prepare("UPDATE users SET role=? WHERE id=?").bind(role, id).run();
-  await logEvent(env, user, "role_change", id, target.role + "→" + role);
+  await logEvent(env, user, "role_change", id, target.role + "→" + role, { subject: id, targetType: "user", before: target.role, after: role });
   return json({ ok: true });
 }

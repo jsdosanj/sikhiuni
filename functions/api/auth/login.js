@@ -5,6 +5,15 @@ import { sessionNeedsMfa } from "./_trusted-device.js";
 
 import { verifyPassword, DUMMY_HASH } from "../../_password.js";
 
+// 10+ failed sign-ins for one identifier within 15 minutes -> one team alert (throttled in sendAuditAlert's caller).
+async function alertOnLoginBurst(env, identifier, subject) {
+  try {
+    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE action='login_failed' AND target=? AND ts > ?")
+      .bind(identifier, Date.now() - 15 * 60 * 1000).first();
+    if (r && r.n === 10) await logEvent(env, null, "login_failed_burst", identifier, "10 failed sign-ins in 15 minutes", { outcome: "fail", subject, targetType: "account" });
+  } catch { /* best effort */ }
+}
+
 // POST /api/auth/login { identifier, password }
 //
 // `identifier` is a USERNAME or an EMAIL (2026-09-06), discriminated by `@`.
@@ -32,7 +41,12 @@ export async function onRequestPost({ request, env }) {
   const passOk = await verifyPassword(password, storedHash);
   if (!u || !u.password_hash || !passOk) {
     const proof = await verifyFamilyCredentials(env, 'sikhiuni.com', identifier, password, verifyPassword, u?.email || null);
-    if (!proof.ok) return json({ error: familyErrorMessage(proof), code: proof.error }, proof.error === 'family_unavailable' ? 503 : 401);
+    if (!proof.ok) {
+      // Audit the failure (never the password). subject = the account, if one exists.
+      await logEvent(env, null, "login_failed", identifier, proof.error || "bad_credentials", { outcome: "fail", subject: u ? u.id : null, targetType: "account" });
+      await alertOnLoginBurst(env, identifier, u ? u.id : null);
+      return json({ error: familyErrorMessage(proof), code: proof.error }, proof.error === 'family_unavailable' ? 503 : 401);
+    }
     const { email, name } = proof.identity;
     u = await env.DB.prepare('SELECT id,email,role FROM users WHERE email = ?').bind(email).first();
     if (!u) {

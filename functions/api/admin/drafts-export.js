@@ -1,4 +1,4 @@
-import { json, requireMfa } from "../_lib.js";
+import { json, requireMfa, logEvent } from "../_lib.js";
 
 // GET /api/admin/drafts-export?status=approved[&limit=&offset=]
 // Auth: an admin session, OR `Authorization: Bearer ${EXPORT_TOKEN}` (the
@@ -9,10 +9,13 @@ import { json, requireMfa } from "../_lib.js";
 export async function onRequestGet({ request, env }) {
   const authHeader = request.headers.get("authorization") || "";
   const bearerOk = !!env.EXPORT_TOKEN && authHeader === `Bearer ${env.EXPORT_TOKEN}`;
+  let actor = null;
   if (!bearerOk) {
-    const { error } = await requireMfa(env, request, ["admin"]);
+    const { user, error } = await requireMfa(env, request, ["admin"]);
     if (error) return error;
+    actor = user;
   }
+  await logEvent(env, actor, "export_drafts", null, bearerOk ? "export_token" : "admin_session", { targetType: "export" });
 
   const p = new URL(request.url).searchParams;
   const status = p.get("status") || "approved";

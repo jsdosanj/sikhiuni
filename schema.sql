@@ -263,8 +263,16 @@ CREATE TABLE IF NOT EXISTS enrollments (
 -- Append-only audit log (sign-relevant actions: passes, overrides, role changes…).
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY, ts INTEGER NOT NULL, user_id TEXT, role TEXT,
-  action TEXT NOT NULL, target TEXT, detail TEXT
+  action TEXT NOT NULL, target TEXT, detail TEXT,
+  -- Part A (migrations/0018_audit_context.sql): request context (ip/country/ua erased at
+  -- 90 days), structure, and a hash chain for tamper evidence (functions/api/_audit.js).
+  ip TEXT, country TEXT, ua TEXT, session_hash TEXT, ray TEXT,
+  subject_user_id TEXT, target_type TEXT, outcome TEXT, prev_hash TEXT, hash TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_events_user_ts ON events(user_id, ts);
+CREATE INDEX IF NOT EXISTS idx_events_subject_ts ON events(subject_user_id, ts);
+CREATE INDEX IF NOT EXISTS idx_events_action_ts ON events(action, ts);
+CREATE INDEX IF NOT EXISTS idx_events_hash ON events(hash);
 -- The admin events viewer sorts/filters by recency over this append-only table.
 CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts);
 

@@ -38,6 +38,7 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare("UPDATE users SET password_hash = ?, email_verified = 1 WHERE id = ?").bind(passwordHash, u.id).run();
   // A password change revokes every remembered MFA device for this account.
   await revokeTrustedDevices(env, u.id);
+  await logEvent(env, u, "password_changed", u.id, "via reset code", { subject: u.id, targetType: "account" });
 
   const sid = newId() + newId();
   const expires = Date.now() + 30 * 24 * 60 * 60 * 1000;

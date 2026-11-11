@@ -80,6 +80,7 @@ export async function onRequestGet(context) {
     sendWelcomeEmail(context, email, payload.name || null);
   } else if (wantAdmin && user.role !== "admin") {
     await env.DB.prepare("UPDATE users SET role='admin' WHERE id=?").bind(user.id).run();
+    await logEvent(env, user, "admin_granted", user.id, "ADMIN_EMAILS via sso", { subject: user.id, targetType: "user", before: user.role, after: "admin" });
     user = { ...user, role: "admin" };
   }
 

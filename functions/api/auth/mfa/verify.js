@@ -34,6 +34,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   if (!ok) {
+    await logEvent(env, user, "mfa_failed", user.id, null, { outcome: "fail", subject: user.id, targetType: "account" });
     const row = await env.DB.prepare("UPDATE sessions SET mfa_fail_count = mfa_fail_count + 1 WHERE id=? RETURNING mfa_fail_count")
       .bind(sid).first();
     const fails = row ? row.mfa_fail_count : 1;

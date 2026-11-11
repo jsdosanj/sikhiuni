@@ -1,4 +1,6 @@
 import { schemaOnce } from "./_schema-once.js";
+import { checkRateLimit } from "./_rate-limit.js";
+import { ensureAuditSchema, requestContext, rowHash, sendAuditAlert, ALERT_ACTIONS } from "./_audit.js";
 // Shared helpers for Sikhi University Pages Functions. (_-prefixed → not a route.)
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -54,15 +56,55 @@ export function isAdminEmail(env, email) {
 
 // Append-only audit log. Best-effort: auto-creates the table and never throws,
 // so logging a non-critical event can't break the action that triggered it.
-export async function logEvent(env, user, action, target, detail) {
+// Append one audit row. Signature unchanged for the ~75 existing callers; the
+// optional 6th argument adds structure (plan Part A):
+//   { subject: <affected user id>, targetType: "course"|"user"|..., outcome: "ok"|"fail"|"denied",
+//     before, after }   (before/after are folded into `detail` as JSON)
+// Request context (IP, country, UA, session hash, cf-ray) comes from
+// env.AUDIT_REQUEST, set per request by worker.js. Failures are reported to the
+// Workers log (console.error) instead of vanishing.
+export async function logEvent(env, user, action, target, detail, opts = {}) {
   try {
-    await schemaOnce(env.DB, "events", () => env.DB.prepare(
-      "CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, ts INTEGER NOT NULL, user_id TEXT, role TEXT, action TEXT NOT NULL, target TEXT, detail TEXT)"
-    ).run());
+    await schemaOnce(env.DB, "events_v2", () => ensureAuditSchema(env.DB));
+    const ctx = await requestContext(opts.request || env.AUDIT_REQUEST);
+    let det = detail == null ? null : String(detail);
+    if (opts.before !== undefined || opts.after !== undefined) {
+      det = JSON.stringify({ note: det, before: opts.before ?? null, after: opts.after ?? null });
+    }
+    const prev = await env.DB.prepare("SELECT hash FROM events WHERE hash IS NOT NULL ORDER BY ts DESC LIMIT 1").first();
+    const row = {
+      id: newId(), ts: Date.now(), user_id: user ? user.id : null, role: user ? user.role || null : null,
+      action, target: target == null ? null : String(target).slice(0, 500), detail: det == null ? null : det.slice(0, 2000),
+      session_hash: ctx.session_hash || null, ray: ctx.ray || null,
+      subject_user_id: opts.subject || null, target_type: opts.targetType || null, outcome: opts.outcome || "ok",
+      prev_hash: prev ? prev.hash : null,
+    };
+    row.hash = await rowHash(row);
     await env.DB.prepare(
-      "INSERT INTO events (id, ts, user_id, role, action, target, detail) VALUES (?,?,?,?,?,?,?)"
-    ).bind(newId(), Date.now(), user ? user.id : null, user ? user.role : null, action, target || null, detail || null).run();
-  } catch (e) { /* logging is non-critical */ }
+      "INSERT INTO events (id, ts, user_id, role, action, target, detail, ip, country, ua, session_hash, ray, subject_user_id, target_type, outcome, prev_hash, hash) " +
+      "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    ).bind(row.id, row.ts, row.user_id, row.role, row.action, row.target, row.detail,
+      ctx.ip || null, ctx.country || null, ctx.ua || null, row.session_hash, row.ray,
+      row.subject_user_id, row.target_type, row.outcome, row.prev_hash, row.hash).run();
+    if (ALERT_ACTIONS.has(action)) await maybeAlert(env, action, row, ctx);
+  } catch (e) {
+    console.error("audit_write_failed", action, String(e && e.message || e));
+  }
+}
+
+// One email per action per hour at most (rate_limits table, fails open = no email).
+async function maybeAlert(env, action, row, ctx) {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const r = await env.DB.prepare(
+      "INSERT INTO rate_limits (k, count, reset_at) VALUES (?1, 1, ?2) ON CONFLICT(k) DO UPDATE SET " +
+      "count = CASE WHEN reset_at <= ?3 THEN 1 ELSE count + 1 END, reset_at = CASE WHEN reset_at <= ?3 THEN ?2 ELSE reset_at END RETURNING count"
+    ).bind("audit_alert:" + action, now + 3600, now).first();
+    if (r && r.count > 1) return;
+  } catch { /* no rate_limits table: still alert */ }
+  await sendAuditAlert(env, action,
+    `Action: ${action}\nBy user: ${row.user_id || "-"} (${row.role || "-"})\nTarget: ${row.target || "-"}\nDetail: ${row.detail || "-"}\n` +
+    `Country: ${ctx.country || "-"}  Time: ${new Date(row.ts).toISOString()}  Ref: ${row.id}`);
 }
 
 // Resolve the signed-in user and, if `roles` is given, require their role to be
@@ -72,8 +114,22 @@ export async function logEvent(env, user, action, target, detail) {
 export async function requireRole(env, request, roles) {
   const user = await getUser(env, request);
   if (!user) return { error: json({ error: "Please sign in." }, 401) };
-  if (roles && roles.length && !roles.includes(user.role)) return { error: json({ error: "forbidden" }, 403) };
+  if (roles && roles.length && !roles.includes(user.role)) {
+    await logDenied(env, user, request, "need:" + roles.join("|"));
+    return { error: json({ error: "forbidden" }, 403) };
+  }
   return { user };
+}
+
+// A signed-in user was refused (wrong role, missing MFA step, not a reviewer).
+// Logged as `authz_denied`, at most once per user+path per minute so a page that
+// polls a forbidden endpoint can't flood the audit log.
+export async function logDenied(env, user, request, reason) {
+  try {
+    const path = new URL(request.url).pathname;
+    if (!(await checkRateLimit(env, `authz_log:${user.id}:${path}`, 1, 60))) return;
+    await logEvent(env, user, "authz_denied", path, reason, { outcome: "denied", targetType: "route" });
+  } catch { /* best effort */ }
 }
 
 // Same as requireRole but with no role check — just requires a signed-in user.
@@ -107,7 +163,10 @@ export async function requireMfa(env, request, roles) {
   if (error) return { error };
   const row = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
   const enrolled = !!(row && row.enabled_at);
-  if (enrolled && user.mfa_ok !== 1) return { error: json({ error: "mfa_required" }, 403) };
+  if (enrolled && user.mfa_ok !== 1) {
+    await logDenied(env, user, request, "mfa_required");
+    return { error: json({ error: "mfa_required" }, 403) };
+  }
   return { user };
 }
 
@@ -123,7 +182,10 @@ export async function requireReviewer(env, request) {
   const { user, error } = await requireRole(env, request, null);
   if (error) return { error };
   if (user.role === "admin") return { user };
-  if (!(await hasFlag(env, user.id, "reviewer"))) return { error: json({ error: "forbidden" }, 403) };
+  if (!(await hasFlag(env, user.id, "reviewer"))) {
+    await logDenied(env, user, request, "need:reviewer");
+    return { error: json({ error: "forbidden" }, 403) };
+  }
   return { user };
 }
 

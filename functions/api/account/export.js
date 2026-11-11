@@ -1,4 +1,4 @@
-import { json, getUser } from "../_lib.js";
+import { json, getUser, logEvent } from "../_lib.js";
 
 // GET /api/account/export -> downloads everything we hold for the signed-in user
 // as a single JSON file (self-serve data portability).
@@ -50,6 +50,7 @@ export async function onRequestGet({ request, env }) {
     ),
   };
 
+  await logEvent(env, user, "export_account", user.id, null, { subject: user.id, targetType: "export" });
   return new Response(JSON.stringify(data, null, 2), {
     status: 200,
     headers: {

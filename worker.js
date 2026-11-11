@@ -1,5 +1,7 @@
 import { courseOutline } from './functions/api/_course-store.js';
 import { checkRateLimit } from './functions/api/_rate-limit.js';
+import { logEvent } from './functions/api/_lib.js';
+import { pruneAudit, verifyChain } from './functions/api/_audit.js';
 import { getLearningUser } from './functions/api/_learning-user.js';
 import { protectedLearningPath, PRIVATE_COURSE_HEADERS } from './functions/api/_course-access.js';
 // Sikhi University Worker entrypoint.
@@ -81,6 +83,7 @@ import { onRequestGet as ratingsGet, onRequestPost as ratingsPost } from "./func
 import { onRequestGet as certGet, onRequestPost as certPost } from "./functions/api/certificates.js";
 import { onRequestGet as enrollmentsGet, onRequestPost as enrollmentsPost } from "./functions/api/enrollments.js";
 import { onRequestGet as accountExportGet } from "./functions/api/account/export.js";
+import { onRequestGet as accountActivityGet, onRequestPost as accountActivityPost } from "./functions/api/account/activity.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
 import { onRequestGet as cohortsGet, onRequestPost as cohortsPost } from "./functions/api/cohorts.js";
@@ -164,6 +167,7 @@ const routes = {
   "/api/certificates": { GET: certGet, POST: certPost },
   "/api/enrollments": { GET: enrollmentsGet, POST: enrollmentsPost },
   "/api/account/export": { GET: accountExportGet },
+  "/api/account/activity": { GET: accountActivityGet, POST: accountActivityPost },
   "/api/account/delete": { POST: accountDeletePost },
   "/api/translate": { POST: translatePost },
   "/api/cohorts": { GET: cohortsGet, POST: cohortsPost },
@@ -191,6 +195,7 @@ const RATE_LIMITS = {
   "/api/translate": { limit: 60, window: 60 },     // paid Workers AI — cap per-IP cost
   "/api/feedback": { limit: 15, window: 60 },
   "/api/contact": { limit: 5, window: 600 },  // public form that sends mail: 5 per IP per 10 min
+  "/api/account/activity": { limit: 5, window: 60 },  // sign out everywhere
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },
   "/api/push/subscribe": { limit: 10, window: 60 },
@@ -313,6 +318,13 @@ async function pruneExpired(env) {
       result[table] = meta.changes;
     } catch (e) { result[table] = `error: ${String(e)}`; }
   }
+  // Audit retention + minimisation, then a tamper check of the newest rows.
+  try { result.audit = await pruneAudit(env.DB, nowMs); } catch (e) { result.audit = `error: ${String(e)}`; }
+  try {
+    const chain = await verifyChain(env.DB, 500);
+    result.audit_chain = { checked: chain.checked, broken: chain.broken.length };
+    if (chain.broken.length) await logEvent(env, null, "audit_chain_broken", null, `${chain.broken.length} row(s): ${chain.broken.slice(0, 10).join(",")}`, { outcome: "fail" });
+  } catch (e) { result.audit_chain = `error: ${String(e)}`; }
   return result;
 }
 
@@ -394,12 +406,20 @@ export default {
       // limiter outage or an over-limit burst must never lock out the mission's
       // shared-NAT users, so it fails open and (for now) only logs.
       // POST and PUT both carry a body worth rate-limiting (PUT: /api/upload/part).
+      // Per-request env: same bindings, plus the request so logEvent() can record
+      // IP / country / device / session hash / cf-ray (functions/api/_audit.js).
+      const reqEnv = Object.create(env);
+      reqEnv.AUDIT_REQUEST = request;
       const rl = (request.method === "POST" || request.method === "PUT") ? RATE_LIMITS[pathname] : null;
       if (rl) {
         const ip = request.headers.get("CF-Connecting-IP") || "unknown";
         const ok = await checkRateLimit(env, `${pathname}:${ip}`, rl.limit, rl.window);
         if (!ok) {
           console.warn("rate_limit_exceeded", pathname, ip);
+          // Audit once per IP+route per window, not once per blocked request (no write amplification).
+          if (await checkRateLimit(env, `rl_logged:${pathname}:${ip}`, 1, rl.window)) {
+            await logEvent(reqEnv, null, "rate_limited", pathname, null, { outcome: "denied", targetType: "route" });
+          }
           if (RL_ENFORCE) {
             return new Response(JSON.stringify({ error: "rate_limited" }), {
               status: 429, headers: { "content-type": "application/json", "retry-after": "60" },
@@ -410,7 +430,7 @@ export default {
       // Single choke point: any handler exception returns a JSON 500 (never a raw
       // Cloudflare HTML error page) and is logged so failures are observable.
       try {
-        return await handler({ request, env, waitUntil: (p) => ctx && ctx.waitUntil(p) });
+        return await handler({ request, env: reqEnv, waitUntil: (p) => ctx && ctx.waitUntil(p) });
       } catch (err) {
         console.error("api_error", request.method, pathname, err && err.stack || String(err));
         return new Response(JSON.stringify({ error: "server_error" }), {
