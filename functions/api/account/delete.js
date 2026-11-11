@@ -54,8 +54,19 @@ export async function onRequestPost({ request, env }) {
   await wipe("DELETE FROM grade_overrides WHERE user_id=?");
   await wipe("DELETE FROM course_teachers WHERE user_id=?");
   await wipe("DELETE FROM sessions WHERE user_id=?");
+  await wipe("DELETE FROM password_reset_codes WHERE user_id=?");
+  await wipe("DELETE FROM cohort_members WHERE user_id=?");
+  await wipe("DELETE FROM push_subs WHERE user_id=?");
   await wipe("DELETE FROM user_mfa WHERE user_id=?");
   await wipe("DELETE FROM mfa_backup_codes WHERE user_id=?");
+  await wipe("DELETE FROM mfa_trusted_devices WHERE user_id=?");
+  // LMS Phase 1 (plan Part D.10). Anonymous poll answers hold no user id, so they
+  // are not personal data and stay in the tallies; named answers are erased.
+  await wipe("DELETE FROM journal_entries WHERE user_id=?");
+  await wipe("DELETE FROM assignment_extensions WHERE user_id=?");
+  await wipe("DELETE FROM course_accommodations WHERE user_id=?");
+  await wipe("DELETE FROM poll_responses WHERE user_id=?");
+  await wipe("DELETE FROM poll_participants WHERE user_id=?");
   await wipe("DELETE FROM user_flags WHERE user_id=?");
   await wipe("DELETE FROM teacher_profiles WHERE user_id=?");
   await wipe("DELETE FROM professor_claims WHERE user_id=?");

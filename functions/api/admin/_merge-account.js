@@ -36,6 +36,9 @@ const OWNED = [
   ["course_drafts", "author_id"], ["announcements", "author_id"],
   ["course_archive_requests", "teacher_id"], ["assignments", "teacher_id"],
   ["cohorts", "owner_id"], ["media_objects", "owner_id"],
+  // LMS Phase 1 (plan Part D.10).
+  ["journal_entries", "user_id"], ["assignment_extensions", "user_id"], ["course_accommodations", "user_id"],
+  ["poll_participants", "user_id"], ["poll_responses", "user_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than
@@ -47,15 +50,24 @@ const ACTOR = [
   ["course_drafts", "reviewed_by"], ["course_archive_requests", "decided_by"],
   ["professor_claims", "decided_by"],
   ["teacher_profiles", "verified_by"], ["teacher_profiles", "approved_by"],
+  ["assignment_extensions", "created_by"], ["course_accommodations", "created_by"],
+  ["glossary_terms", "created_by"], ["polls", "created_by"],
 ];
 
 // Credential + transient state keyed by user_id: dropped, never moved (rule 3).
-const DROP_BY_USER = ["sessions", "user_mfa", "mfa_backup_codes", "password_reset_codes"];
+const DROP_BY_USER = ["sessions", "user_mfa", "mfa_backup_codes", "password_reset_codes", "mfa_trusted_devices"];
 
 // Same, but keyed by email rather than id.
 const DROP_BY_EMAIL = ["magic_tokens", "pending_registrations"];
 
 const changes = (r) => (r && r.meta && r.meta.changes) || 0;
+
+// Some tables are created lazily (first use or a later migration). A table that
+// doesn't exist yet holds no rows for anyone, so there is nothing to move.
+const runIfTable = async (stmt) => {
+  try { return await stmt.run(); }
+  catch (e) { if (/no such table/i.test(String(e && e.message || e))) return null; throw e; }
+};
 
 // Merge `source` into `target` (both are rows with at least { id, email }).
 // Returns { moved, dropped, skipped } — `skipped` lists only the tables where a
@@ -65,21 +77,21 @@ export async function mergeAccount(env, source, target) {
   const skipped = {};
 
   for (const [table, col] of OWNED) {
-    moved += changes(await env.DB.prepare(
+    moved += changes(await runIfTable(env.DB.prepare(
       `UPDATE OR IGNORE ${table} SET ${col}=? WHERE ${col}=?`
-    ).bind(target.id, source.id).run());
-    const lost = changes(await env.DB.prepare(
+    ).bind(target.id, source.id)));
+    const lost = changes(await runIfTable(env.DB.prepare(
       `DELETE FROM ${table} WHERE ${col}=?`
-    ).bind(source.id).run());
+    ).bind(source.id)));
     if (lost) skipped[table] = (skipped[table] || 0) + lost;
   }
 
   for (const [table, col] of ACTOR) {
-    await env.DB.prepare(`UPDATE ${table} SET ${col}=? WHERE ${col}=?`).bind(target.id, source.id).run();
+    await runIfTable(env.DB.prepare(`UPDATE ${table} SET ${col}=? WHERE ${col}=?`).bind(target.id, source.id));
   }
 
   for (const table of DROP_BY_USER) {
-    dropped += changes(await env.DB.prepare(`DELETE FROM ${table} WHERE user_id=?`).bind(source.id).run());
+    dropped += changes(await runIfTable(env.DB.prepare(`DELETE FROM ${table} WHERE user_id=?`).bind(source.id)));
   }
   for (const table of DROP_BY_EMAIL) {
     dropped += changes(await env.DB.prepare(`DELETE FROM ${table} WHERE email=?`).bind(source.email).run());

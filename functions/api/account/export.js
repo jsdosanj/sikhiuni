@@ -48,6 +48,18 @@ export async function onRequestGet({ request, env }) {
     course_drafts: await all(
       "SELECT id, course_id, title, topic, level, status, submitted_at, created_at FROM course_drafts WHERE author_id=?", user.id
     ),
+    cohort_memberships: await all("SELECT cohort_id, joined_at FROM cohort_members WHERE user_id=?", user.id),
+    courses_taught: await all("SELECT course_id, assigned_at FROM course_teachers WHERE user_id=?", user.id),
+    grade_overrides: await all("SELECT course_id, score, reason, overridden_at FROM grade_overrides WHERE user_id=?", user.id),
+    push_subscriptions: await all("SELECT created_at FROM push_subs WHERE user_id=?", user.id),
+    // LMS Phase 1 (plan Part D.10: export covers every new table).
+    journal_entries: await all("SELECT course_id, body, shared, created_at, updated_at FROM journal_entries WHERE user_id=?", user.id),
+    assignment_extensions: await all("SELECT assignment_id, due_at, reason, created_at FROM assignment_extensions WHERE user_id=?", user.id),
+    course_accommodations: await all("SELECT course_id, extra_time_pct, note, updated_at FROM course_accommodations WHERE user_id=?", user.id),
+    // Named poll answers only; anonymous answers are stored without any user id.
+    poll_participation: await all("SELECT poll_id FROM poll_participants WHERE user_id=?", user.id),
+    poll_responses: await all("SELECT poll_id, answers, created_at FROM poll_responses WHERE user_id=?", user.id),
+    trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 
   await logEvent(env, user, "export_account", user.id, null, { subject: user.id, targetType: "export" });
