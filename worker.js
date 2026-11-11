@@ -96,6 +96,7 @@ import { onRequestGet as messagingSettingsGet, onRequestPost as messagingSetting
 import { onRequestGet as messagesGet, onRequestPost as messagesPost } from "./functions/api/messages.js";
 import { onRequestGet as releaseRulesGet, onRequestPost as releaseRulesPost } from "./functions/api/release-rules.js";
 import { onRequestGet as lmsQuizzesGet, onRequestPost as lmsQuizzesPost } from "./functions/api/lms-quizzes.js";
+import { onRequestGet as analyticsGet } from "./functions/api/analytics.js";
 import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
@@ -192,6 +193,7 @@ const routes = {
   "/api/messages": { GET: messagesGet, POST: messagesPost },
   "/api/release-rules": { GET: releaseRulesGet, POST: releaseRulesPost },
   "/api/lms-quizzes": { GET: lmsQuizzesGet, POST: lmsQuizzesPost },
+  "/api/analytics": { GET: analyticsGet },
   "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
   "/api/calendar.ics": { GET: calendarIcsGet },
   "/api/account/delete": { POST: accountDeletePost },
