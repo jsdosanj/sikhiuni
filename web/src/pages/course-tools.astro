@@ -21,6 +21,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="dates">Due dates</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="quizzes">Quizzes</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="peer">Peer review</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
@@ -30,6 +31,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       <div id="tab-dates" class="ct-panel mt-6" role="tabpanel"></div>
       <div id="tab-quizzes" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-peer" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
@@ -427,6 +429,63 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <ul class="mt-2 font-sans text-sm">${quizzes.map((q: Any) => `<li class="border-b border-line py-2"><strong>${esc(q.title)}</strong> · ${esc(q.learners)} learners · average best ${q.average_best == null ? '–' : esc(q.average_best) + '%'}
           ${q.hardest.length ? `<span class="block text-muted">Hardest: ${q.hardest.map((h: Any) => `“${esc(String(h.prompt).slice(0, 70))}” (${esc(h.percent)}%)`).join('; ')}</span>` : ''}</li>`).join('') || '<li class="py-2 text-muted">No quizzes yet.</li>'}</ul>`;
     };
+
+    // ---------- C9 peer review ----------
+    loaders.peer = async () => {
+      const el = $('tab-peer'); el.textContent = 'Loading…';
+      if (isTeacher) {
+        const r = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+        const assignments = (r.ok && r.d.assignments) || [];
+        const states = await Promise.all(assignments.map((a: Any) => api('/api/peer-reviews?assignmentId=' + encodeURIComponent(a.id))));
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">Peer review</h2><p class="mt-1 text-sm text-muted">Learners who submitted give feedback on classmates' work, anonymously by default, using the assignment's rubric if it has one. Peer reviews never change a grade.</p>
+          <ul class="mt-3 space-y-3 font-sans text-sm">${assignments.map((a: Any, i: number) => {
+            const d = states[i].ok ? states[i].d : {}; const st = d.settings;
+            const done = (d.reviews || []).filter((x: Any) => x.status === 'done').length;
+            return `<li class="rounded-xl2 border border-line bg-surface p-4"><strong class="text-navy">${esc(a.title)}</strong>
+              ${st ? `<span class="pill bg-paper text-muted">${esc(st.status)}</span> <span class="text-muted">${done}/${(d.reviews || []).length} reviews written · ${st.anonymous ? 'anonymous' : 'named'}</span>
+                ${st.status === 'open' ? `<button class="ml-2 underline" data-pr-close="${esc(a.id)}">Close</button>` : ''}
+                <details class="mt-2"><summary class="cursor-pointer underline">Read the reviews</summary><ul class="mt-2">${(d.reviews || []).map((x: Any) => `<li class="border-t border-line py-2"><span class="text-muted">${esc(x.reviewer)} → ${esc(x.author)} · ${esc(x.status)}${x.hidden ? ' · hidden' : ''}</span>${x.comment ? `<p class="mt-1 whitespace-pre-wrap">${esc(x.comment)}</p>` : ''}${x.status === 'done' && !x.hidden ? `<button class="text-xs underline text-danger" data-pr-hide="${esc(x.id)}">Hide from the author</button>` : ''}</li>`).join('')}</ul></details>`
+              : `<span class="ml-2 inline-flex flex-wrap items-center gap-2"><label>Reviews each <input type="number" min="1" max="5" value="2" data-pr-n class="w-14 border border-line bg-surface px-1" /></label><label class="flex items-center gap-1"><input type="checkbox" data-pr-anon checked /> anonymous</label><button class="btn" data-pr-start="${esc(a.id)}">Start peer review</button></span>`}</li>`;
+          }).join('') || '<li class="text-muted">No assignments yet.</li>'}</ul>`;
+        el.querySelectorAll<HTMLElement>('[data-pr-start]').forEach((b) => b.addEventListener('click', async () => {
+          const li = b.closest('li') as HTMLElement;
+          const s = await api('/api/peer-reviews', { action: 'start', assignmentId: b.dataset.prStart, perLearner: Number((li.querySelector('[data-pr-n]') as HTMLInputElement).value), anonymous: (li.querySelector('[data-pr-anon]') as HTMLInputElement).checked });
+          if (!s.ok) alert(errText(s)); loaders.peer();
+        }));
+        el.querySelectorAll<HTMLElement>('[data-pr-close]').forEach((b) => b.addEventListener('click', async () => { await api('/api/peer-reviews', { action: 'close', assignmentId: b.dataset.prClose }); loaders.peer(); }));
+        el.querySelectorAll<HTMLElement>('[data-pr-hide]').forEach((b) => b.addEventListener('click', async () => { await api('/api/peer-reviews', { action: 'hide', reviewId: b.dataset.prHide }); loaders.peer(); }));
+        return;
+      }
+      const r = await api('/api/peer-reviews?courseId=' + encodeURIComponent(courseId));
+      const list = (r.ok && r.d.assignments) || [];
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Peer review</h2><ul class="mt-2 font-sans text-[15px]">${list.length ? list.map((a: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2.5"><strong class="text-navy">${esc(a.title)}</strong><span class="text-xs text-muted">${a.assigned ? `${esc(a.done)}/${esc(a.assigned)} reviews written` : 'nothing assigned to you'} · ${esc(a.status)}</span><button class="ml-auto underline" data-pr-open="${esc(a.id)}">Open</button></li>`).join('') : '<li class="py-2 text-muted">No peer reviews yet.</li>'}</ul><div id="pr-detail" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-pr-open]').forEach((b) => b.addEventListener('click', () => openPeer(b.dataset.prOpen as string)));
+    };
+    async function openPeer(assignmentId: string) {
+      const box = $('pr-detail');
+      const r = await api('/api/peer-reviews?assignmentId=' + encodeURIComponent(assignmentId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const d = r.d, rubric = d.rubric;
+      const rubricInputs = (rv: Any) => rubric ? rubric.criteria.map((c: Any) => `<label class="flex items-center gap-2 py-0.5 font-sans text-sm">${esc(c.title)} <input type="number" min="0" max="${esc(c.points)}" data-crit="${esc(c.id)}" value="${rv.rubric_scores && rv.rubric_scores[c.id] ? esc(rv.rubric_scores[c.id].points) : ''}" class="w-16 border border-line bg-surface px-1" ${rv.status === 'done' ? 'disabled' : ''} /> / ${esc(c.points)}</label>`).join('') : '';
+      const shown = (s: Any) => (rubric && s ? rubric.criteria.map((c: Any) => `${esc(c.title)}: ${s[c.id] ? esc(s[c.id].points) : '–'}/${esc(c.points)}`).join(' · ') : '');
+      box.innerHTML = `<h3 class="text-lg font-bold text-navy">${esc(d.title)}</h3>
+        <ol class="mt-3 space-y-4">${d.to_review.map((rv: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4" data-rv="${esc(rv.id)}"><p class="font-sans text-xs text-muted">${esc(rv.label)}'s work</p>
+          <div class="mt-1 whitespace-pre-wrap">${esc(rv.text) || '(No written answer.)'}</div>
+          <div class="mt-3">${rubricInputs(rv)}</div>
+          <textarea rows="3" maxlength="3000" data-cm class="${FIELD} mt-2" aria-label="Your feedback" placeholder="What works well, and one thing to develop (at least 20 characters)" ${rv.status === 'done' ? 'disabled' : ''}>${esc(rv.comment || '')}</textarea>
+          ${rv.status === 'done' ? '<p class="mt-1 font-sans text-sm text-muted">Sent. Thank you.</p>' : d.settings.status === 'open' ? '<button class="btn btn-primary mt-2" data-send>Send feedback</button> <span data-out class="font-sans text-sm" aria-live="polite"></span>' : ''}</li>`).join('')}</ol>
+        <h3 class="mt-8 text-lg font-bold text-navy">Feedback on your work</h3>
+        ${d.received_note ? `<p class="text-sm text-muted">${esc(d.received_note)}</p>` : ''}
+        <ul class="mt-2 space-y-3">${d.received.map((x: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><p class="font-sans text-xs text-muted">${esc(x.reviewer)}${x.rubric_scores ? ' · ' + shown(x.rubric_scores) : ''}</p><p class="mt-1 whitespace-pre-wrap">${esc(x.comment)}</p></li>`).join('') || (d.received_note ? '' : '<li class="text-muted">None yet.</li>')}</ul>`;
+      box.querySelectorAll<HTMLElement>('[data-send]').forEach((b) => b.addEventListener('click', async () => {
+        const li = b.closest('[data-rv]') as HTMLElement;
+        const rubricScores: Any = {};
+        li.querySelectorAll<HTMLInputElement>('[data-crit]').forEach((i) => { rubricScores[i.dataset.crit as string] = { points: i.value === '' ? null : Number(i.value) }; });
+        const s = await api('/api/peer-reviews', { action: 'submit', reviewId: li.dataset.rv, comment: (li.querySelector('[data-cm]') as HTMLTextAreaElement).value, rubricScores: rubric ? rubricScores : undefined });
+        if (!s.ok) { (li.querySelector('[data-out]') as HTMLElement).textContent = errText(s); return; }
+        await loaders.peer(); openPeer(assignmentId);
+      }));
+    }
 
     // ---------- C10 journal ----------
     loaders.journal = async () => {

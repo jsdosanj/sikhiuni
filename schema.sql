@@ -503,3 +503,15 @@ CREATE TABLE IF NOT EXISTS lms_quiz_attempts (
   submitted_at INTEGER, question_ids TEXT NOT NULL, perms TEXT NOT NULL, answers TEXT, score REAL, max_score REAL, results TEXT, status TEXT NOT NULL DEFAULT 'in_progress'
 );
 CREATE INDEX IF NOT EXISTS idx_lms_quiz_attempts_user ON lms_quiz_attempts(quiz_id, user_id);
+
+-- C9 peer review (migrations/0025_peer_review.sql).
+CREATE TABLE IF NOT EXISTS peer_review_settings (
+  assignment_id TEXT PRIMARY KEY, course_id TEXT NOT NULL, reviews_per_learner INTEGER NOT NULL,
+  anonymous INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'open', opened_at INTEGER NOT NULL, updated_by TEXT
+);
+CREATE TABLE IF NOT EXISTS peer_reviews (
+  id TEXT PRIMARY KEY, assignment_id TEXT NOT NULL, course_id TEXT NOT NULL, reviewer_id TEXT NOT NULL, submission_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'assigned', rubric_scores TEXT, comment TEXT, hidden INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL, submitted_at INTEGER, UNIQUE (reviewer_id, submission_id)
+);
+CREATE INDEX IF NOT EXISTS idx_peer_reviews_assignment ON peer_reviews(assignment_id);

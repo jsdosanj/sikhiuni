@@ -97,6 +97,7 @@ import { onRequestGet as messagesGet, onRequestPost as messagesPost } from "./fu
 import { onRequestGet as releaseRulesGet, onRequestPost as releaseRulesPost } from "./functions/api/release-rules.js";
 import { onRequestGet as lmsQuizzesGet, onRequestPost as lmsQuizzesPost } from "./functions/api/lms-quizzes.js";
 import { onRequestGet as analyticsGet } from "./functions/api/analytics.js";
+import { onRequestGet as peerReviewsGet, onRequestPost as peerReviewsPost } from "./functions/api/peer-reviews.js";
 import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
@@ -194,6 +195,7 @@ const routes = {
   "/api/release-rules": { GET: releaseRulesGet, POST: releaseRulesPost },
   "/api/lms-quizzes": { GET: lmsQuizzesGet, POST: lmsQuizzesPost },
   "/api/analytics": { GET: analyticsGet },
+  "/api/peer-reviews": { GET: peerReviewsGet, POST: peerReviewsPost },
   "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
   "/api/calendar.ics": { GET: calendarIcsGet },
   "/api/account/delete": { POST: accountDeletePost },
@@ -234,6 +236,7 @@ const RATE_LIMITS = {
   "/api/messages": { limit: 20, window: 60 },  // DMs: sends, requests, reports
   "/api/release-rules": { limit: 30, window: 60 },
   "/api/lms-quizzes": { limit: 60, window: 60 },  // includes autosave while answering
+  "/api/peer-reviews": { limit: 20, window: 60 },
   "/api/calendar-feed": { limit: 5, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },

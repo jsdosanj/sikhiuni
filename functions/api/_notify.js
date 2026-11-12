@@ -26,6 +26,7 @@ export const KINDS = {
   announcement: { label: "Course announcements", email: "daily", push: false, fanout: true },
   poll: { label: "A poll or survey opens", email: "off", push: false, fanout: true },
   due_soon: { label: "Work due within 2 days", email: "daily", push: false, fanout: true },
+  peer_review: { label: "Peer reviews are assigned to me", email: "daily", push: false, fanout: true },
 };
 const EMAIL_CHOICES = ["off", "immediate", "daily"];
 const MAX_IMMEDIATE = 50; // recipients per event that get immediate email/push; the rest fall back to in-app
