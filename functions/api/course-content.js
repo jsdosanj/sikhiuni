@@ -3,6 +3,7 @@ import { json as baseJson, isCourseTeacher, hasCohortAccess } from "./_lib.js";
 import { storedCourse } from './_course-store.js';
 import { checkRateLimit } from './_rate-limit.js';
 import { PRIVATE_COURSE_HEADERS } from "./_course-access.js";
+import { applyLessonLocks } from "./release-rules.js";
 const json = (data, status=200) => baseJson(data,status,PRIVATE_COURSE_HEADERS);
 
 // GET /api/course-content?courseId=<id>: authenticated free lessons from private
@@ -37,7 +38,8 @@ export async function onRequestGet({ request, env }) {
     if (course && !course.gated) {
       if (course.status !== 'published') return json({error:'not found'},404);
       return json({
-        lessons:(course.lessons || []).map(l=>({title:l.title,...(l.summary?{summary:l.summary}:{}),html:l.html || ''})),
+        // C3: a teacher's lesson release rules withhold locked lesson bodies (teachers see all).
+        lessons:await applyLessonLocks(env, user, courseId, (course.lessons || []).map(l=>({title:l.title,...(l.summary?{summary:l.summary}:{}),html:l.html || ''}))),
         quiz:(course.quiz || []).map(q=>({q:q.q,options:q.options})),
         terms:course.terms || [], references:course.references || [],
       });
@@ -65,7 +67,7 @@ export async function onRequestGet({ request, env }) {
   ).bind(draft.id).all();
 
   return json({
-    lessons: (lessons || []).map((l) => ({ title: l.title, ...(l.summary ? { summary: l.summary } : {}), html: l.html })),
+    lessons: await applyLessonLocks(env, user, courseId, (lessons || []).map((l) => ({ title: l.title, ...(l.summary ? { summary: l.summary } : {}), html: l.html }))),
     quiz: (quiz || []).map((q) => ({ q: q.q, options: JSON.parse(q.options) })),
   });
 }

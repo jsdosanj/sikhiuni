@@ -1,16 +1,18 @@
 import { json, logEvent } from "./_lib.js";
 import { schemaOnce } from "./_schema-once.js";
-import { courseAccess } from "./_course-auth.js";
+import { courseAccess, canTeach } from "./_course-auth.js";
 
 // C3 conditional release (Moodle "Restrict access", Canvas module requirements), for
-// teacher-created items: assignments and polls/surveys. Optional per item; with no rule
-// an item is open, as before. Lessons and Gurbani content are never gated here (plan:
-// open access is a core value).
+// lessons, assignments, quizzes and polls/surveys. Optional per item; with no rule an
+// item is open, as before (open access stays the default). Lesson locks were approved
+// by the owner on 2026-11-12; they are enforced server-side in course-content.js, and
+// teachers and admins always see every lesson.
 // A rule can require any of: a number of completed lessons in the course, a passed course
 // quiz (the existing >= 80 pass), and a release date. All set conditions must hold.
 //
 // GET  /api/release-rules?courseId=   teacher: the course's rules
-// POST /api/release-rules { courseId, itemType:"assignment"|"poll", itemId, minLessons?, requireQuizPass?, notBefore? }
+// POST /api/release-rules { courseId, itemType:"lesson"|"assignment"|"quiz"|"poll", itemId, minLessons?, requireQuizPass?, notBefore? }
+//      a lesson's itemId is its 0-based position in the course
 //      all empty -> the rule is removed
 
 const TYPES = { assignment: "assignments", poll: "polls", quiz: "lms_quizzes" };
@@ -49,6 +51,28 @@ export function lockReason(rule, progress, now = Date.now()) {
   return `Unlocks when you ${conds.join(" and ")}${date ? `, and not before ${date}` : ""}.`;
 }
 
+/** Lesson rules are keyed by course and 0-based lesson position. */
+export const lessonKey = (courseId, index) => `${courseId}:${index}`;
+
+/**
+ * Withhold the body of each locked lesson from a learner (course-content.js).
+ * Teachers of the course and admins always get every lesson. Titles stay visible,
+ * so the learner can see what is coming and why it is locked.
+ */
+export async function applyLessonLocks(env, user, courseId, lessons) {
+  if (!user || !Array.isArray(lessons) || !lessons.length) return lessons;
+  if (await canTeach(env, user, courseId)) return lessons;
+  await ensureRelease(env);
+  const { results } = await env.DB.prepare("SELECT * FROM release_rules WHERE item_type='lesson' AND course_id=?").bind(courseId).all();
+  if (!results || !results.length) return lessons;
+  const rules = Object.fromEntries(results.map((r) => [r.item_id, r]));
+  const progress = await learnerProgress(env, user.id, courseId);
+  return lessons.map((l, i) => {
+    const why = lockReason(rules[lessonKey(courseId, i)], progress);
+    return why ? { title: l.title, ...(l.summary ? { summary: l.summary } : {}), html: "", locked: true, lock_reason: why } : l;
+  });
+}
+
 /** Convenience for handlers: is this one item locked for this learner? */
 export async function itemLock(env, itemType, itemId, courseId, userId) {
   await ensureRelease(env);
@@ -70,10 +94,15 @@ export async function onRequestPost({ request, env }) {
   let b; try { b = await request.json(); } catch { return json({ error: "bad request" }, 400); }
   const { user, error } = await courseAccess(env, request, b && b.courseId, "teacher");
   if (error) return error;
-  const table = TYPES[b.itemType];
-  if (!table) return json({ error: "itemType must be assignment, poll or quiz" }, 400);
-  const item = await env.DB.prepare(`SELECT course_id FROM ${table} WHERE id=?`).bind(String(b.itemId || "")).first().catch(() => null);
-  if (!item || item.course_id !== b.courseId) return json({ error: "That item isn't in this course." }, 404);
+  if (b.itemType === "lesson") {
+    if (!/^\d{1,3}$/.test(String(b.itemId))) return json({ error: "itemId must be the lesson's position" }, 400);
+    b.itemId = lessonKey(b.courseId, Number(b.itemId));
+  } else {
+    const table = TYPES[b.itemType];
+    if (!table) return json({ error: "itemType must be lesson, assignment, poll or quiz" }, 400);
+    const item = await env.DB.prepare(`SELECT course_id FROM ${table} WHERE id=?`).bind(String(b.itemId || "")).first().catch(() => null);
+    if (!item || item.course_id !== b.courseId) return json({ error: "That item isn't in this course." }, 404);
+  }
   await ensureRelease(env);
   const minLessons = int(b.minLessons, 1, 1000);
   const requireQuiz = b.requireQuizPass ? 1 : 0;

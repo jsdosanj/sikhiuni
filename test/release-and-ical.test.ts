@@ -7,6 +7,7 @@ import * as submissions from "../functions/api/submissions.js";
 import * as polls from "../functions/api/polls.js";
 import * as calendar from "../functions/api/calendar.js";
 import * as feed from "../functions/api/calendar-feed.js";
+import * as content from "../functions/api/course-content.js";
 
 const DAY = 864e5;
 let sql: DatabaseSync, env: any;
@@ -83,6 +84,34 @@ describe("C3 release rules", () => {
     expect((await P(rules, "s1", { courseId: "C", itemType: "assignment", itemId: "a1", minLessons: 1 })).status).toBe(403);
     expect((await P(rules, "stB", { courseId: "D", itemType: "assignment", itemId: "a1", minLessons: 1 })).status).toBe(404);
     expect((await G(rules, "stB", "/api/release-rules?courseId=C")).status).toBe(403);
+  });
+});
+
+describe("C3 lesson locks (owner-approved 2026-11-12)", () => {
+  const COURSE = { id: "C", status: "published", title: "C", lessons: [{ title: "Intro", html: "<p>one</p>" }, { title: "Deeper", html: "<p>two</p>" }, { title: "Final", html: "<p>secret three</p>" }], quiz: [] };
+  const withMedia = () => {
+    env.MEDIA = { get: async (key: string) => ({ json: async () => (key === "courses-outline.json" ? { courses: [{ ...COURSE, lessons: COURSE.lessons.map((l) => ({ title: l.title })) }] } : COURSE) }) };
+    sql.exec("CREATE TABLE IF NOT EXISTS user_mfa (user_id TEXT PRIMARY KEY, secret_enc TEXT, enabled_at INTEGER, created_at INTEGER)");
+  };
+  const lessons = async (sid: string) => (await (await content.onRequestGet({ request: req(sid, "/api/course-content?courseId=C"), env })).json()).lessons;
+
+  it("a locked lesson's body is withheld from learners but not from teachers, and unlocks when met", async () => {
+    withMedia();
+    expect((await P(rules, "st", { courseId: "C", itemType: "lesson", itemId: 2, minLessons: 2 })).status).toBe(200);
+    const l2 = await lessons("s2"); // has done 1 lesson
+    expect(l2[2]).toMatchObject({ title: "Final", html: "", locked: true });
+    expect(l2[2].lock_reason).toMatch(/2 lessons \(you have 1\)/);
+    expect(JSON.stringify(l2)).not.toContain("secret three");
+    expect(l2[0].html).toContain("one");
+    expect((await lessons("s1"))[2].html).toContain("secret three"); // has done 3
+    expect((await lessons("st"))[2].html).toContain("secret three"); // teacher
+    expect((await G(rules, "st", "/api/release-rules?courseId=C")).body.rules[0]).toMatchObject({ item_type: "lesson", item_id: "C:2" });
+  });
+
+  it("lesson ids must be positions, and only the course's teachers set them", async () => {
+    expect((await P(rules, "st", { courseId: "C", itemType: "lesson", itemId: "x", minLessons: 1 })).status).toBe(400);
+    expect((await P(rules, "stB", { courseId: "C", itemType: "lesson", itemId: 0, minLessons: 1 })).status).toBe(403);
+    expect((await P(rules, "s1", { courseId: "C", itemType: "lesson", itemId: 0, minLessons: 1 })).status).toBe(403);
   });
 });
 

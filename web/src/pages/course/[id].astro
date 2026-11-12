@@ -407,7 +407,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           const content = await response.json();
           document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
             const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
-            if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
+            if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
+            else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
           });
           document.getElementById('free-course-access')?.remove();
           const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
@@ -733,7 +734,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           <article id="lesson-${i}" class="border-t-2 border-line pt-8 pb-2 first:border-t-0 first:pt-0">
             <p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">Lesson ${String(i + 1).padStart(2, '0')}</p>
             <h3 class="mt-1 text-2xl font-bold leading-tight text-navy">${esc(ls.title)}</h3>
-            <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed">${expandYoutubeEmbeds(ls.html)}</div>
+            <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed">${ls.locked ? `<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ${esc(ls.lock_reason)}</p>` : expandYoutubeEmbeds(ls.html)}</div>
           </article>`).join('');
 
         const quiz = data.quiz || [];
@@ -776,7 +777,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           const content = await response.json();
           document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
             const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
-            if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
+            if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
+            else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
           });
           document.getElementById('free-course-access')?.remove();
           const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));

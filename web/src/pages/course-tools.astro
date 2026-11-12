@@ -606,17 +606,19 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
     // ---------- C3 release rules (inside Teacher settings) ----------
     async function renderRelease(assignments: Any[]) {
       const box = document.getElementById('rel-section'); if (!box) return;
-      const [r, p, qz] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId)), api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId))]);
+      const [r, p, qz, cc] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId)), api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId)), api('/api/course-content?courseId=' + encodeURIComponent(courseId))]);
       if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
       const byKey = Object.fromEntries((r.d.rules || []).map((x: Any) => [`${x.item_type}:${x.item_id}`, x]));
-      const items = assignments.map((a: Any) => ({ type: 'assignment', id: a.id, title: a.title, label: 'Assignment' }))
+      // Lesson rules are stored as "<course>:<position>"; the API takes the position.
+      const lessonItems = ((cc.ok && cc.d.lessons) || []).map((l: Any, i: number) => ({ type: 'lesson', id: String(i), key: `${courseId}:${i}`, title: l.title, label: `Lesson ${i + 1}` }));
+      const items = lessonItems.concat(assignments.map((a: Any) => ({ type: 'assignment', id: a.id, title: a.title, label: 'Assignment' })))
         .concat(((qz.ok && qz.d.quizzes) || []).map((x: Any) => ({ type: 'quiz', id: x.id, title: x.title, label: 'Quiz' })))
         .concat(((p.ok && p.d.polls) || []).map((x: Any) => ({ type: 'poll', id: x.id, title: x.title, label: x.kind === 'evaluation' ? 'Evaluation' : x.kind === 'survey' ? 'Survey' : 'Poll' })));
       const local = (ms: number | null) => (ms ? new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
       box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Release rules</h2>
-        <p class="mt-1 text-sm text-muted">Optional. Keep an assignment or poll locked until a learner has done enough of the course. Lessons themselves are never locked. Leave everything empty for no rule.</p>
+        <p class="mt-1 text-sm text-muted">Optional. Keep a lesson, assignment, quiz or poll locked until a learner has done enough of the course, or until a date. Learners still see the title and why it is locked; you always see everything. Leave a row empty for no rule.</p>
         ${items.length ? `<table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1.5">Item</th><th>Lessons done</th><th>Quiz passed</th><th>Not before</th><th></th></tr></thead><tbody>${items.map((it: Any) => {
-          const x = byKey[`${it.type}:${it.id}`] || {};
+          const x = byKey[`${it.type}:${it.key || it.id}`] || {};
           return `<tr class="border-t border-line" data-rel="${esc(it.type)}" data-id="${esc(it.id)}"><td class="py-2 pr-2"><span class="text-xs text-muted">${esc(it.label)}</span><br><strong class="text-navy">${esc(it.title)}</strong></td>
             <td class="pr-2"><input type="number" min="1" max="1000" data-min value="${esc(x.min_lessons || '')}" placeholder="any" aria-label="Lessons completed" class="${FIELD} !mt-0 !w-20" /></td>
             <td class="pr-2"><input type="checkbox" data-quiz ${x.require_quiz_pass ? 'checked' : ''} aria-label="Course quiz passed" /></td>
