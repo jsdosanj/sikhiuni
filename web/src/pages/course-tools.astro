@@ -1,0 +1,735 @@
+---
+import Base from '../layouts/Base.astro';
+// Course hub (LMS Phase 1): due dates + to-do (C1), polls/surveys/evaluations (C12),
+// reflective journal (C10), glossary (C11) and, for the course's teachers, late
+// policies / extensions / accommodations (C7). /course-tools?course=<id>
+// Everything is server-gated per course (functions/api/_course-auth.js); this page
+// only renders what the API returns. Copy is English in markup; Base's auto-translate
+// covers <main> for other languages (same approach as contact.astro).
+const field = 'mt-1.5 w-full border border-line bg-surface px-3 py-2 font-sans text-[15px] font-normal normal-case tracking-normal text-ink outline-none focus:border-navy';
+const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.16em] text-muted';
+---
+<Base title="Course tools, Sikhi University" description="Due dates, polls, journal and glossary for a course you take or teach." ambient="none">
+  <section class="wrap max-w-5xl py-10 sm:py-12">
+    <p class="eyebrow flex items-center gap-2.5 text-saffron-deep"><span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>Course tools</p>
+    <h1 id="ct-title" class="text-display-sm mt-3 text-navy">Course tools</h1>
+    <p id="ct-back" class="mt-2 font-sans text-sm"></p>
+    <div id="ct-gate" class="mt-6" role="status" aria-live="polite"></div>
+
+    <div id="ct-app" class="hidden">
+      <div role="tablist" aria-label="Course tools" class="mt-6 flex flex-wrap gap-2 border-b border-line pb-2 font-sans text-sm">
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="dates">Due dates</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="quizzes">Quizzes</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="peer">Peer review</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
+        <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
+        <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="settings" id="ct-tab-settings">Teacher settings</button>
+      </div>
+
+      <div id="tab-dates" class="ct-panel mt-6" role="tabpanel"></div>
+      <div id="tab-quizzes" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-peer" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-settings" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+    </div>
+  </section>
+
+  <template id="ct-field-classes" data-field={field} data-label={label}></template>
+
+  <script>
+    type Any = any;
+    const tpl = document.getElementById('ct-field-classes') as HTMLElement;
+    const FIELD = tpl.dataset.field || '', LABEL = tpl.dataset.label || '';
+    const courseId = new URLSearchParams(location.search).get('course') || '';
+    const $ = (id: string) => document.getElementById(id) as HTMLElement;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const fmt = (ms: number | null) => (ms ? new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '');
+    const note = (tone: 'ok' | 'warn', html: string) => `<div class="rounded-xl border-l-4 ${tone === 'ok' ? 'border-ok' : 'border-saffron'} bg-surface p-4 font-sans text-[15px]">${html}</div>`;
+    async function api(path: string, body?: Any) {
+      const r = await fetch(path, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, d };
+    }
+    const errText = (r: Any) => (r.status === 429 ? 'Too many changes in a minute. Please wait and try again.' : (r.d && r.d.error) || 'Something went wrong.');
+    let isTeacher = false;
+
+    // ---------- tabs ----------
+    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.ct-tab'));
+    const loaders: Record<string, () => void> = {};
+    const loaded = new Set<string>();
+    function show(name: string) {
+      if (!loaders[name] || ((name === 'settings' || name === 'analytics') && !isTeacher)) name = 'dates';
+      tabs.forEach((t) => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', String(on)); t.classList.toggle('bg-navy', on); t.classList.toggle('text-white', on); });
+      document.querySelectorAll('.ct-panel').forEach((p) => p.classList.toggle('hidden', p.id !== 'tab-' + name));
+      if (!loaded.has(name)) { loaded.add(name); loaders[name](); }
+      history.replaceState(null, '', '#' + name);
+    }
+    tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.tab || 'dates')));
+    // Links like #analytics or #settings work even when the page is already open.
+    window.addEventListener('hashchange', () => { if (!$('ct-app').classList.contains('hidden')) show(location.hash.slice(1) || 'dates'); });
+
+    // ---------- C1 due dates + to-do ----------
+    loaders.dates = async () => {
+      const el = $('tab-dates'); el.textContent = 'Loading…';
+      const r = await api('/api/calendar');
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const ev = (r.d.events || []).filter((e: Any) => e.course_id === courseId);
+      const todo = (r.d.todo || []).filter((e: Any) => e.course_id === courseId);
+      const todoHtml = todo.length ? todo.map((t: Any) => `<li class="border-b border-line py-2.5">${
+        t.type === 'grade' ? `<strong>${esc(t.count)}</strong> submission${t.count === 1 ? '' : 's'} to grade: ${esc(t.title)}`
+        : `${t.type === 'poll' ? 'Respond to' : 'Submit'}: <strong>${esc(t.title)}</strong>${t.at ? ` <span class="text-muted">· due ${esc(fmt(t.at))}</span>` : ''}${t.overdue ? ' <span class="pill bg-saffron-soft text-saffron-deep">overdue</span>' : ''}`}</li>`).join('')
+        : '<li class="py-2.5 text-muted">Nothing waiting. Well done.</li>';
+      const evHtml = ev.length ? ev.map((e: Any) => `<li class="flex flex-wrap items-baseline gap-2 border-b border-line py-2.5"><span class="font-mono text-xs text-muted">${esc(fmt(e.at))}</span><span>${e.type === 'poll' ? 'Closes' : 'Due'}: <strong>${esc(e.title)}</strong></span>${e.extended ? '<span class="pill bg-paper text-muted">your extended date</span>' : ''}${e.done ? '<span class="pill bg-paper text-muted">done</span>' : ''}</li>`).join('')
+        : '<li class="py-2.5 text-muted">No dates in the next few months.</li>';
+      const fd = await api('/api/calendar-feed');
+      const feedHtml = `<div class="mt-10 rounded-xl2 border border-line bg-surface p-5"><h2 class="text-lg font-bold text-navy">Add your due dates to your calendar app</h2>
+        <p class="mt-1 text-sm text-muted">A private link for Google, Apple or Outlook calendar, covering all your courses. It shows titles and dates only. Anyone with the link can see them, so keep it to yourself.</p>
+        <div id="feed-out" class="mt-3 break-all font-mono text-xs"></div>
+        <div class="mt-3 flex flex-wrap gap-2"><button class="btn" id="feed-new">${fd.ok && fd.d.enabled ? 'Make a new link (the old one stops working)' : 'Create my calendar link'}</button>${fd.ok && fd.d.enabled ? '<button class="btn" id="feed-off">Turn off</button>' : ''}</div></div>`;
+      el.innerHTML = `<div class="flex flex-wrap gap-10"><div class="min-w-0 flex-[1_1_300px]"><h2 class="text-xl font-bold text-navy">To do</h2><ul class="mt-2 font-sans text-[15px]">${todoHtml}</ul></div>
+        <div class="min-w-0 flex-[1_1_300px]"><h2 class="text-xl font-bold text-navy">Upcoming dates</h2><ul class="mt-2 font-sans text-[15px]">${evHtml}</ul></div></div>${feedHtml}`;
+      $('feed-new').addEventListener('click', async () => {
+        const r2 = await api('/api/calendar-feed', { action: 'create' });
+        if (!r2.ok) { $('feed-out').textContent = errText(r2); return; }
+        $('feed-out').innerHTML = `Copy this link into your calendar app's "subscribe" or "add from URL" option. It is shown only once:<br><input readonly value="${esc(r2.d.url)}" class="${FIELD} mt-1" aria-label="Your calendar link" />`;
+        ($('feed-out').querySelector('input') as HTMLInputElement).select();
+      });
+      const off = document.getElementById('feed-off');
+      if (off) off.addEventListener('click', async () => { await api('/api/calendar-feed', { action: 'revoke' }); loaders.dates(); });
+    };
+
+    // ---------- C12 polls / surveys / evaluations ----------
+    const KIND: Record<string, string> = { poll: 'Poll', survey: 'Survey', evaluation: 'Course evaluation' };
+    function resultsHtml(p: Any) {
+      if (p.results_hidden) return `<p class="mt-3 text-sm text-muted">${esc(p.results_hidden)}</p>`;
+      if (!p.results) return '';
+      return `<div class="mt-4 space-y-4"><p class="font-sans text-xs text-muted">${esc(p.responses)} response${p.responses === 1 ? '' : 's'}</p>` + p.questions.map((q: Any, i: number) => {
+        const r = p.results[i];
+        if (q.type === 'text') return r.answers.length ? `<div><p class="font-bold">${esc(q.prompt)}</p><ul class="mt-1 list-disc pl-5 text-sm">${r.answers.map((a: string) => `<li>${esc(a)}</li>`).join('')}</ul></div>` : '';
+        const labels = q.type === 'choice' ? q.options : ['1', '2', '3', '4', '5'];
+        const max = Math.max(1, ...r.counts);
+        return `<div><p class="font-bold">${esc(q.prompt)}${r.mean != null ? ` <span class="font-sans text-sm font-normal text-muted">· average ${esc(r.mean)} / 5</span>` : ''}</p>` + labels.map((l: string, k: number) =>
+          `<div class="mt-1 flex items-center gap-2 font-sans text-sm"><span class="w-32 shrink-0 truncate">${esc(l)}</span><span class="h-2.5 rounded bg-saffron" style="width:${Math.round((r.counts[k] / max) * 60)}%"></span><span class="text-muted">${r.counts[k]}</span></div>`).join('') + '</div>';
+      }).join('') + (p.individual ? `<details class="font-sans text-sm"><summary class="cursor-pointer underline">Individual responses</summary><ul class="mt-2 space-y-1">${p.individual.map((x: Any) => `<li><strong>${esc(x.name)}</strong>: ${x.answers.map((a: Any, i: number) => esc(p.questions[i].type === 'choice' && a != null ? p.questions[i].options[a] : a ?? '–')).join(' · ')}</li>`).join('')}</ul></details>` : '') + '</div>';
+    }
+    function answerForm(p: Any) {
+      return `<form data-respond="${esc(p.id)}" class="mt-4 space-y-4">` + p.questions.map((q: Any, i: number) => {
+        const name = `q${i}`;
+        if (q.type === 'text') return `<label class="${LABEL}">${esc(q.prompt)}<textarea name="${name}" rows="3" maxlength="2000" class="${FIELD}"></textarea></label>`;
+        const opts = q.type === 'choice' ? q.options.map((o: string, k: number) => [k, o]) : [1, 2, 3, 4, 5].map((n) => [n, n === 1 ? '1 · disagree' : n === 5 ? '5 · agree' : String(n)]);
+        return `<fieldset><legend class="font-bold">${esc(q.prompt)}</legend><div class="mt-1 flex flex-wrap gap-3 font-sans text-[15px]">${opts.map(([v, l]: Any) => `<label class="flex items-center gap-1.5"><input type="radio" name="${name}" value="${v}" required /> ${esc(l)}</label>`).join('')}</div></fieldset>`;
+      }).join('') + `${p.anonymous ? '<p class="font-sans text-xs text-muted">Anonymous: your name is not stored with your answers.</p>' : ''}<button class="btn btn-primary" type="submit">Send</button><div data-out class="font-sans text-sm" aria-live="polite"></div></form>`;
+    }
+    async function openPoll(id: string) {
+      const box = $('poll-detail'); box.textContent = 'Loading…';
+      const r = await api('/api/polls?id=' + encodeURIComponent(id));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const p = r.d.poll;
+      const head = `<h3 class="text-xl font-bold text-navy">${esc(p.title)}</h3><p class="font-sans text-xs text-muted">${esc(KIND[p.kind] || p.kind)}${p.anonymous ? ' · anonymous' : ''}${p.closes_at ? ' · closes ' + esc(fmt(p.closes_at)) : ''}</p>`;
+      let body = '';
+      if (p.locked) body = `<p class="mt-3 text-muted">${esc(p.lock_reason)}</p>`;
+      else if (isTeacher) body = resultsHtml(p);
+      else if (p.answered) body = '<p class="mt-3">Thank you, your response is in.</p>' + resultsHtml(p);
+      else if (p.open) body = answerForm(p);
+      else body = '<p class="mt-3 text-muted">This is closed.</p>';
+      box.innerHTML = `<div class="rounded-xl2 border border-line bg-surface p-5">${head}${body}</div>`;
+      const form = box.querySelector<HTMLFormElement>('form[data-respond]');
+      if (form) form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const answers = p.questions.map((q: Any, i: number) => { const v = fd.get('q' + i); return q.type === 'text' ? String(v || '') : v == null ? null : Number(v); });
+        const res = await api('/api/polls', { action: 'respond', id: p.id, answers });
+        if (!res.ok) { (form.querySelector('[data-out]') as HTMLElement).textContent = errText(res); return; }
+        await loaders.polls(); openPoll(p.id);
+      });
+    }
+    function questionRow(i: number) {
+      return `<div class="rounded-lg border border-line p-3" data-q><div class="flex flex-wrap gap-2"><select data-qtype class="${FIELD} !w-auto"><option value="choice">Choice</option><option value="scale">Scale 1–5</option><option value="text">Written answer</option></select>
+        <input data-qprompt maxlength="500" placeholder="Question ${i + 1}" class="${FIELD} min-w-0 flex-1" /></div>
+        <textarea data-qopts rows="2" placeholder="Options, one per line (2–10)" class="${FIELD}"></textarea></div>`;
+    }
+    loaders.polls = async () => {
+      const el = $('tab-polls');
+      const r = await api('/api/polls?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const list = r.d.polls || [];
+      const rows = list.length ? list.map((p: Any) => `<li class="flex flex-wrap items-center gap-2 border-b border-line py-2.5"><button class="font-bold text-navy underline" data-open-poll="${esc(p.id)}">${esc(p.title)}</button>
+        <span class="pill bg-paper text-muted">${esc(KIND[p.kind] || p.kind)}</span>${isTeacher ? `<span class="pill bg-paper text-muted">${esc(p.status)}</span><span class="font-sans text-xs text-muted">${esc(p.responses)} responses</span>
+        <span class="ml-auto flex gap-3 font-sans text-xs">${p.status !== 'open' ? `<button class="underline" data-poll-status="open" data-id="${esc(p.id)}">Open</button>` : `<button class="underline" data-poll-status="closed" data-id="${esc(p.id)}">Close</button>`}<button class="underline text-danger" data-poll-del="${esc(p.id)}">Delete</button></span>`
+        : `<span class="ml-auto font-sans text-xs text-muted">${p.answered ? 'answered' : p.locked ? 'locked' : p.open ? 'open' : 'closed'}</span>`}</li>`).join('')
+        : `<li class="py-2.5 text-muted">${isTeacher ? 'No polls yet.' : 'Nothing to answer yet.'}</li>`;
+      const builder = isTeacher ? `<details class="mt-6 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New poll, survey or evaluation</summary>
+        <form id="poll-new" class="mt-4 space-y-3">
+          <div class="flex flex-wrap gap-3"><label class="${LABEL} flex-[1_1_160px]">Type<select id="pn-kind" class="${FIELD}"><option value="poll">Poll (learners see tallies after answering)</option><option value="survey">Survey (results for teachers only)</option><option value="evaluation">Course evaluation (anonymous, ready-made questions)</option></select></label>
+          <label class="${LABEL} flex-[2_1_240px]">Title<input id="pn-title" maxlength="200" required class="${FIELD}" /></label></div>
+          <div class="flex flex-wrap items-end gap-4"><label class="flex items-center gap-2 font-sans text-sm"><input id="pn-anon" type="checkbox" /> Anonymous (no names stored; results shown after 3 responses)</label>
+          <label class="${LABEL}">Closes (optional)<input id="pn-closes" type="datetime-local" class="${FIELD}" /></label></div>
+          <div id="pn-qs" class="space-y-2">${questionRow(0)}</div>
+          <p id="pn-template" class="hidden font-sans text-sm text-muted">The evaluation uses the standard questions (four 1–5 statements and two written answers).</p>
+          <div class="flex gap-2"><button type="button" id="pn-addq" class="btn">+ Question</button><button class="btn btn-primary" type="submit">Create as draft</button></div>
+          <div id="pn-out" class="font-sans text-sm" aria-live="polite"></div>
+        </form></details>` : '';
+      el.innerHTML = `<div class="flex flex-wrap gap-8"><div class="min-w-0 flex-[1_1_320px]"><h2 class="text-xl font-bold text-navy">Polls &amp; surveys</h2><ul class="mt-2 font-sans text-[15px]">${rows}</ul>${builder}</div><div id="poll-detail" class="min-w-0 flex-[1_1_360px]"></div></div>`;
+      el.querySelectorAll<HTMLElement>('[data-open-poll]').forEach((b) => b.addEventListener('click', () => openPoll(b.dataset.openPoll || '')));
+      el.querySelectorAll<HTMLElement>('[data-poll-status]').forEach((b) => b.addEventListener('click', async () => {
+        const res = await api('/api/polls', { action: 'update', id: b.dataset.id, status: b.dataset.pollStatus }); if (!res.ok) alert(errText(res)); loaders.polls();
+      }));
+      el.querySelectorAll<HTMLElement>('[data-poll-del]').forEach((b) => b.addEventListener('click', async () => {
+        if (!confirm('Delete this poll and all its responses? This cannot be undone.')) return;
+        const res = await api('/api/polls', { action: 'delete', id: b.dataset.pollDel }); if (!res.ok) alert(errText(res)); loaders.polls(); $('poll-detail').innerHTML = '';
+      }));
+      const form = document.getElementById('poll-new') as HTMLFormElement | null;
+      if (!form) return;
+      const qs = $('pn-qs');
+      const kindSel = $('pn-kind') as HTMLSelectElement;
+      const syncOpts = () => qs.querySelectorAll<HTMLElement>('[data-q]').forEach((q) => { (q.querySelector('[data-qopts]') as HTMLElement).classList.toggle('hidden', (q.querySelector('[data-qtype]') as HTMLSelectElement).value !== 'choice'); });
+      qs.addEventListener('change', syncOpts);
+      kindSel.addEventListener('change', () => {
+        const ev = kindSel.value === 'evaluation';
+        qs.classList.toggle('hidden', ev); $('pn-addq').classList.toggle('hidden', ev); $('pn-template').classList.toggle('hidden', !ev);
+        (document.getElementById('pn-anon') as HTMLInputElement).checked = ev;
+      });
+      $('pn-addq').addEventListener('click', () => { qs.insertAdjacentHTML('beforeend', questionRow(qs.children.length)); syncOpts(); });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const kind = kindSel.value;
+        const questions = kind === 'evaluation' ? undefined : Array.from(qs.querySelectorAll<HTMLElement>('[data-q]')).map((q) => ({
+          type: (q.querySelector('[data-qtype]') as HTMLSelectElement).value,
+          prompt: (q.querySelector('[data-qprompt]') as HTMLInputElement).value.trim(),
+          options: (q.querySelector('[data-qopts]') as HTMLTextAreaElement).value.split('\n').map((s) => s.trim()).filter(Boolean),
+        })).filter((q) => q.prompt);
+        const closes = (document.getElementById('pn-closes') as HTMLInputElement).value;
+        const res = await api('/api/polls', { action: 'create', courseId, kind, title: (document.getElementById('pn-title') as HTMLInputElement).value.trim(),
+          anonymous: (document.getElementById('pn-anon') as HTMLInputElement).checked, closesAt: closes ? new Date(closes).getTime() : null, questions });
+        if (!res.ok) { $('pn-out').textContent = errText(res); return; }
+        await loaders.polls(); openPoll(res.d.id);
+      });
+    };
+
+    // ---------- C2 course quizzes ----------
+    let quizTimer: any = null, quizSave: any = null;
+    const REVIEW_LABEL: Record<string, string> = { none: 'No results shown', score: 'Score only', answers: 'Score and correct answers', after_close: 'Correct answers after closing' };
+    loaders.quizzes = async () => {
+      const el = $('tab-quizzes');
+      clearInterval(quizTimer); clearInterval(quizSave);
+      const r = await api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const list = r.d.quizzes || [];
+      if (r.d.scope === 'teacher') return renderQuizTeacher(el, list);
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Quizzes</h2><ul class="mt-2 font-sans text-[15px]">${list.length ? list.map((q: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-3">
+        <span class="min-w-0 flex-1"><strong class="text-navy">${esc(q.title)}</strong><span class="block text-xs text-muted">${q.time_limit_min ? esc(q.time_limit_min) + ' min · ' : ''}${q.max_attempts ? `${esc(q.attempts_used)}/${esc(q.max_attempts)} attempts` : `${esc(q.attempts_used)} attempt${q.attempts_used === 1 ? '' : 's'}`}${q.best != null ? ` · best ${esc(q.best)}%` : ''}${q.pass_pct != null ? ` · pass ${esc(q.pass_pct)}%` : ''}</span>
+        ${q.locked ? `<span class="block text-xs text-muted">${esc(q.lock_reason)}</span>` : ''}</span>
+        ${q.last_attempt ? `<button class="underline text-sm" data-q-result="${esc(q.last_attempt)}">Result</button>` : ''}
+        ${!q.locked && q.status === 'open' && (q.in_progress || !q.max_attempts || q.attempts_used < q.max_attempts) ? `<button class="btn" data-q-start="${esc(q.id)}">${q.in_progress ? 'Resume' : q.attempts_used ? 'Try again' : 'Start'}</button>` : `<span class="text-xs text-muted">${q.status === 'closed' ? 'closed' : q.locked ? 'locked' : 'no attempts left'}</span>`}</li>`).join('') : '<li class="py-3 text-muted">No quizzes yet.</li>'}</ul><div id="quiz-run" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-q-start]').forEach((b) => b.addEventListener('click', async () => {
+        const s = await api('/api/lms-quizzes', { action: 'start', id: b.dataset.qStart });
+        if (!s.ok) { alert(errText(s)); return; }
+        runAttempt(s.d.attemptId);
+      }));
+      el.querySelectorAll<HTMLElement>('[data-q-result]').forEach((b) => b.addEventListener('click', () => runAttempt(b.dataset.qResult as string)));
+    };
+
+    function answerInput(q: Any, saved: Any) {
+      const n = `qa-${q.id}`;
+      if (q.type === 'single') return q.options.map((o: string, i: number) => `<label class="flex items-start gap-2 py-0.5"><input type="radio" name="${n}" value="${i}" ${saved === i ? 'checked' : ''} class="mt-1" /> ${esc(o)}</label>`).join('');
+      if (q.type === 'multi') return q.options.map((o: string, i: number) => `<label class="flex items-start gap-2 py-0.5"><input type="checkbox" name="${n}" value="${i}" ${Array.isArray(saved) && saved.includes(i) ? 'checked' : ''} class="mt-1" /> ${esc(o)}</label>`).join('') + '<p class="text-xs text-muted">Choose all that apply.</p>';
+      if (q.type === 'truefalse') return ['true', 'false'].map((v) => `<label class="mr-4 inline-flex items-center gap-2"><input type="radio" name="${n}" value="${v}" ${String(saved) === v ? 'checked' : ''} /> ${v === 'true' ? 'True' : 'False'}</label>`).join('');
+      if (q.type === 'short') return `<input name="${n}" maxlength="200" value="${esc(saved || '')}" aria-label="Your answer" class="${FIELD}" />`;
+      if (q.type === 'numeric') return `<input name="${n}" inputmode="decimal" value="${esc(saved ?? '')}" aria-label="Your answer" class="${FIELD} !w-40" />`;
+      if (q.type === 'matching') return q.left.map((l: string, i: number) => `<label class="flex flex-wrap items-center gap-2 py-1"><span class="min-w-[10rem]">${esc(l)}</span><select name="${n}" data-i="${i}" class="border border-line bg-surface px-2 py-1"><option value="">Choose…</option>${q.right.map((r: string, k: number) => `<option value="${k}" ${Array.isArray(saved) && saved[i] === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></label>`).join('');
+      if (q.type === 'ordering') {
+        const order = Array.isArray(saved) && saved.length === q.items.length ? saved : q.items.map((_: Any, i: number) => i);
+        return `<ol data-order="${esc(q.id)}" class="space-y-1">${order.map((k: number) => `<li data-k="${k}" class="flex items-center gap-2 rounded border border-line bg-surface px-2 py-1"><span class="flex-1">${esc(q.items[k])}</span><button type="button" data-up aria-label="Move up" class="px-1">&uarr;</button><button type="button" data-down aria-label="Move down" class="px-1">&darr;</button></li>`).join('')}</ol>`;
+      }
+      return '';
+    }
+    function collect(box: HTMLElement, questions: Any[]) {
+      const out: Any = {};
+      for (const q of questions) {
+        const n = `qa-${q.id}`;
+        if (q.type === 'single') { const c = box.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`); if (c) out[q.id] = Number(c.value); }
+        else if (q.type === 'multi') out[q.id] = Array.from(box.querySelectorAll<HTMLInputElement>(`input[name="${n}"]:checked`)).map((c) => Number(c.value));
+        else if (q.type === 'truefalse') { const c = box.querySelector<HTMLInputElement>(`input[name="${n}"]:checked`); if (c) out[q.id] = c.value === 'true'; }
+        else if (q.type === 'short' || q.type === 'numeric') { const v = (box.querySelector(`[name="${n}"]`) as HTMLInputElement).value; if (v.trim()) out[q.id] = v; }
+        else if (q.type === 'matching') out[q.id] = Array.from(box.querySelectorAll<HTMLSelectElement>(`select[name="${n}"]`)).map((s) => (s.value === '' ? null : Number(s.value)));
+        else if (q.type === 'ordering') out[q.id] = Array.from(box.querySelectorAll<HTMLElement>(`[data-order="${q.id}"] li`)).map((li) => Number(li.dataset.k));
+      }
+      return out;
+    }
+    async function runAttempt(attemptId: string) {
+      const box = $('quiz-run'); clearInterval(quizTimer); clearInterval(quizSave);
+      const r = await api('/api/lms-quizzes?attempt=' + encodeURIComponent(attemptId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const a = r.d.attempt;
+      if (a.status !== 'in_progress') {
+        const showAns = (q: Any, v: Any) => {
+          if (v == null) return '–';
+          if (q.type === 'single') return esc(q.options[v]);
+          if (q.type === 'multi') return (v as number[]).map((i) => esc(q.options[i])).join(', ') || '–';
+          if (q.type === 'truefalse') return v === true || v === 'true' ? 'True' : 'False';
+          if (q.type === 'matching') return q.left.map((l: string, i: number) => `${esc(l)} → ${v[i] == null ? '–' : esc(q.right[v[i]])}`).join('; ');
+          if (q.type === 'ordering') return (v as number[]).map((i) => esc(q.items[i])).join(' → ');
+          return esc(v);
+        };
+        box.innerHTML = `<div class="rounded-xl2 border border-line bg-surface p-5"><h3 class="text-xl font-bold text-navy">${esc(a.title)}</h3>
+          ${a.score != null ? `<p class="mt-2 text-lg">Score: <strong>${esc(a.score)} / ${esc(a.max_score)}</strong> (${esc(a.percent)}%)${a.passed === true ? ' · passed' : a.passed === false ? ' · not passed yet' : ''}</p>` : ''}
+          ${a.review_note ? `<p class="mt-2 text-sm text-muted">${esc(a.review_note)}</p>` : ''}
+          ${a.review ? `<ol class="mt-4 space-y-3">${a.review.map((q: Any) => `<li class="border-t border-line pt-3"><p class="font-semibold">${esc(q.prompt)} <span class="font-sans text-xs font-normal text-muted">${esc(q.earned)}/${esc(q.max)}</span></p>
+            <p class="font-sans text-sm">Your answer: ${showAns(q, q.your_answer)}</p>${q.correct === true && q.earned === q.max ? '' : `<p class="font-sans text-sm text-muted">Correct: ${showAns(q, q.correct)}</p>`}${q.feedback ? `<p class="font-sans text-sm">${esc(q.feedback)}</p>` : ''}</li>`).join('')}</ol>` : ''}</div>`;
+        return;
+      }
+      box.innerHTML = `<form id="qz" class="rounded-xl2 border border-line bg-surface p-5"><div class="flex flex-wrap items-baseline gap-3"><h3 class="text-xl font-bold text-navy">${esc(a.title)}</h3><span id="qz-timer" class="ml-auto font-mono text-sm" aria-live="off"></span></div>
+        <ol class="mt-4 space-y-5">${a.questions.map((q: Any, i: number) => `<li><fieldset><legend class="font-semibold">${i + 1}. ${esc(q.prompt)} <span class="font-sans text-xs font-normal text-muted">(${esc(q.points)} point${q.points === 1 ? '' : 's'})</span></legend><div class="mt-1 font-sans text-[15px]">${answerInput(q, a.answers[q.id])}</div></fieldset></li>`).join('')}</ol>
+        <div class="mt-5 flex flex-wrap items-center gap-3"><button class="btn btn-primary" type="submit">Submit answers</button><span id="qz-out" class="font-sans text-sm text-muted" aria-live="polite">Answers save automatically.</span></div></form>`;
+      const form = $('qz') as HTMLFormElement;
+      form.querySelectorAll('[data-order] li').forEach((li: Any) => {
+        li.querySelector('[data-up]').addEventListener('click', () => { if (li.previousElementSibling) li.parentElement.insertBefore(li, li.previousElementSibling); });
+        li.querySelector('[data-down]').addEventListener('click', () => { if (li.nextElementSibling) li.parentElement.insertBefore(li.nextElementSibling, li); });
+      });
+      const save = () => api('/api/lms-quizzes', { action: 'save', attemptId: a.id, answers: collect(form, a.questions) }).then((s) => { if (s.ok) $('qz-out').textContent = 'Saved ' + new Date().toLocaleTimeString(); });
+      quizSave = setInterval(save, 20000);
+      if (a.deadline_at) {
+        const skew = Date.now() - a.now;
+        const tick = () => {
+          const left = a.deadline_at - (Date.now() - skew);
+          $('qz-timer').textContent = left > 0 ? `Time left ${Math.floor(left / 60000)}:${String(Math.floor((left % 60000) / 1000)).padStart(2, '0')}` : 'Time is up';
+          if (left <= 0) { clearInterval(quizTimer); form.requestSubmit(); }
+        };
+        tick(); quizTimer = setInterval(tick, 1000);
+      }
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); clearInterval(quizTimer); clearInterval(quizSave);
+        const s = await api('/api/lms-quizzes', { action: 'submit', attemptId: a.id, answers: collect(form, a.questions) });
+        if (!s.ok && s.status !== 409) { $('qz-out').textContent = errText(s); return; }
+        await loaders.quizzes(); runAttempt(a.id);
+      });
+    }
+
+    // Compact question editor: options one per line, a leading * marks the correct one(s).
+    const Q_TYPES: Record<string, string> = { single: 'One answer', multi: 'Several answers', truefalse: 'True / false', short: 'Short answer', numeric: 'Number', matching: 'Matching', ordering: 'Put in order' };
+    const Q_HINT: Record<string, string> = { single: 'One option per line. Start the correct one with *', multi: 'One option per line. Start every correct one with *', short: 'Accepted answers, one per line (not case-sensitive)', matching: 'One pair per line: left = right', ordering: 'Items one per line, in the correct order (learners see them shuffled)' };
+    function qToText(q: Any) {
+      const d = q.data || {};
+      if (q.type === 'single') return d.options.map((o: string, i: number) => (i === d.correct ? '*' : '') + o).join('\n');
+      if (q.type === 'multi') return d.options.map((o: string, i: number) => (d.correct.includes(i) ? '*' : '') + o).join('\n');
+      if (q.type === 'short') return d.accept.join('\n');
+      if (q.type === 'matching') return d.left.map((l: string, i: number) => `${l} = ${d.right[i]}`).join('\n');
+      if (q.type === 'ordering') return d.items.join('\n');
+      return '';
+    }
+    function qCard(q: Any) {
+      return `<div class="rounded-lg border border-line p-3" data-qcard><div class="flex flex-wrap gap-2"><select data-qt class="border border-line bg-surface px-2 py-1">${Object.entries(Q_TYPES).map(([k, v]) => `<option value="${k}" ${q.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+        <label class="flex items-center gap-1 text-xs text-muted">Points <input data-qp type="number" min="1" max="100" value="${esc(q.points || 1)}" class="w-16 border border-line bg-surface px-1 py-0.5" /></label><button type="button" class="ml-auto text-xs underline text-danger" data-qdel>Remove</button></div>
+        <textarea data-qprompt rows="2" maxlength="2000" placeholder="Question" aria-label="Question" class="${FIELD} mt-2">${esc(q.prompt || '')}</textarea>
+        <div data-qbody class="mt-2"></div></div>`;
+    }
+    function qBody(card: HTMLElement, q: Any) {
+      const t = (card.querySelector('[data-qt]') as HTMLSelectElement).value, d = (q && q.type === t && q.data) || {};
+      const body = card.querySelector('[data-qbody]') as HTMLElement;
+      if (t === 'truefalse') body.innerHTML = `<label class="text-sm">Answer <select data-qa class="border border-line bg-surface px-2 py-1"><option value="true" ${d.correct !== false ? 'selected' : ''}>True</option><option value="false" ${d.correct === false ? 'selected' : ''}>False</option></select></label>`;
+      else if (t === 'numeric') body.innerHTML = `<label class="text-sm">Answer <input data-qa inputmode="decimal" value="${esc(d.answer ?? '')}" class="w-28 border border-line bg-surface px-2 py-1" /></label> <label class="text-sm">± <input data-qtol inputmode="decimal" value="${esc(d.tolerance ?? 0)}" class="w-20 border border-line bg-surface px-2 py-1" /></label>`;
+      else body.innerHTML = `<textarea data-qa rows="4" class="${FIELD}" aria-label="${esc(Q_HINT[t])}" placeholder="${esc(Q_HINT[t])}">${esc(q && q.type === t ? qToText(q) : '')}</textarea><p class="text-xs text-muted">${esc(Q_HINT[t])}</p>`;
+    }
+    function readCard(card: HTMLElement) {
+      const type = (card.querySelector('[data-qt]') as HTMLSelectElement).value;
+      const prompt = (card.querySelector('[data-qprompt]') as HTMLTextAreaElement).value.trim();
+      const points = Number((card.querySelector('[data-qp]') as HTMLInputElement).value) || 1;
+      const raw = (card.querySelector('[data-qa]') as HTMLInputElement).value;
+      const lines = raw.split('\n').map((s) => s.trim()).filter(Boolean);
+      let data: Any = {};
+      if (type === 'single' || type === 'multi') {
+        const options = lines.map((l) => l.replace(/^\*\s*/, ''));
+        const marked = lines.map((l, i) => (l.startsWith('*') ? i : -1)).filter((i) => i >= 0);
+        data = { options, correct: type === 'single' ? marked[0] : marked };
+      } else if (type === 'truefalse') data = { correct: raw === 'true' };
+      else if (type === 'short') data = { accept: lines };
+      else if (type === 'numeric') data = { answer: Number(raw), tolerance: Number((card.querySelector('[data-qtol]') as HTMLInputElement).value) || 0 };
+      else if (type === 'matching') { const pairs = lines.map((l) => l.split('=').map((s) => s.trim())); data = { left: pairs.map((p) => p[0]), right: pairs.map((p) => p[1] || '') }; }
+      else if (type === 'ordering') data = { items: lines };
+      return { type, prompt, points, data };
+    }
+    async function renderQuizTeacher(el: HTMLElement, list: Any[]) {
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Quizzes</h2>
+        <ul class="mt-2 font-sans text-sm">${list.length ? list.map((q: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2.5"><strong class="text-navy">${esc(q.title)}</strong>
+          <span class="pill bg-paper text-muted">${esc(q.status)}</span><span class="text-xs text-muted">${esc(q.questions)} questions${q.draw_count ? ` (draws ${esc(q.draw_count)})` : ''} · ${esc(q.attempts)} attempts · ${esc(REVIEW_LABEL[q.review] || q.review)}</span>
+          <span class="ml-auto flex gap-3"><button class="underline" data-q-edit="${esc(q.id)}">${q.attempts ? 'Results' : 'Edit'}</button>${q.status !== 'open' ? `<button class="underline" data-q-status="open" data-id="${esc(q.id)}">Open</button>` : `<button class="underline" data-q-status="closed" data-id="${esc(q.id)}">Close</button>`}<button class="underline text-danger" data-q-del="${esc(q.id)}">Delete</button></span></li>`).join('') : '<li class="py-2 text-muted">No quizzes yet.</li>'}</ul>
+        <details class="mt-4 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New quiz</summary>
+          <form id="qz-new" class="mt-3 grid gap-3 sm:grid-cols-2"><label class="${LABEL} sm:col-span-2">Title<input id="qn-title" required maxlength="200" class="${FIELD}" /></label>
+          <label class="${LABEL}">Time limit (minutes, optional)<input id="qn-time" type="number" min="1" max="600" class="${FIELD}" /></label>
+          <label class="${LABEL}">Attempts allowed (blank = unlimited)<input id="qn-att" type="number" min="1" max="50" class="${FIELD}" /></label>
+          <label class="${LABEL}">Questions per attempt (blank = all; fewer = random draw)<input id="qn-draw" type="number" min="1" max="200" class="${FIELD}" /></label>
+          <label class="${LABEL}">Pass mark % (optional)<input id="qn-pass" type="number" min="0" max="100" class="${FIELD}" /></label>
+          <label class="${LABEL} sm:col-span-2">After submitting, learners see<select id="qn-review" class="${FIELD}">${Object.entries(REVIEW_LABEL).map(([k, v]) => `<option value="${k}" ${k === 'score' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+          <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Create as draft</button> <span id="qn-out" class="font-sans text-sm" aria-live="polite"></span></div></form></details>
+        <div id="qz-edit" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-q-status]').forEach((b) => b.addEventListener('click', async () => { const s = await api('/api/lms-quizzes', { action: 'status', id: b.dataset.id, status: b.dataset.qStatus }); if (!s.ok) alert(errText(s)); loaders.quizzes(); }));
+      el.querySelectorAll<HTMLElement>('[data-q-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this quiz and every attempt at it?')) { await api('/api/lms-quizzes', { action: 'delete', id: b.dataset.qDel }); loaders.quizzes(); } }));
+      el.querySelectorAll<HTMLElement>('[data-q-edit]').forEach((b) => b.addEventListener('click', () => editQuiz(b.dataset.qEdit as string)));
+      $('qz-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const v = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
+        const s = await api('/api/lms-quizzes', { action: 'create', courseId, title: v('qn-title'), timeLimitMin: v('qn-time'), maxAttempts: v('qn-att'), drawCount: v('qn-draw'), passPct: v('qn-pass'), review: v('qn-review') });
+        if (!s.ok) { $('qn-out').textContent = errText(s); return; }
+        await loaders.quizzes(); editQuiz(s.d.id);
+      });
+    }
+    async function editQuiz(id: string) {
+      const box = $('qz-edit');
+      const r = await api('/api/lms-quizzes?id=' + encodeURIComponent(id));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const { quiz, questions, learners, attempts } = r.d;
+      if (attempts) {
+        box.innerHTML = `<h3 class="text-lg font-bold text-navy">${esc(quiz.title)}: results</h3><p class="text-sm text-muted">Questions are locked because learners have attempted this quiz.</p>
+          <table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1">Question</th><th>Learners scoring it</th></tr></thead><tbody>${questions.map((q: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-3">${esc(q.prompt)}</td><td>${q.difficulty == null ? '–' : `${esc(q.difficulty)}% of points (${esc(q.answered)} answers)`}</td></tr>`).join('')}</tbody></table>
+          <h4 class="mt-4 font-bold">Learners</h4><ul class="font-sans text-sm">${learners.map((l: Any) => `<li class="border-b border-line py-1.5">${esc(l.name)} · best ${esc(l.best)}% · ${esc(l.attempts)} attempt${l.attempts === 1 ? '' : 's'}</li>`).join('')}</ul>`;
+        return;
+      }
+      box.innerHTML = `<h3 class="text-lg font-bold text-navy">Questions: ${esc(quiz.title)}</h3><p class="text-sm text-muted">Write questions yourself and check them against your sources. Questions lock once a learner attempts the quiz.</p>
+        <div id="qe-list" class="mt-3 space-y-3">${(questions.length ? questions : [{ type: 'single' }]).map(qCard).join('')}</div>
+        <div class="mt-3 flex flex-wrap gap-2"><button class="btn" type="button" id="qe-add">+ Question</button><button class="btn btn-primary" type="button" id="qe-save">Save questions</button><span id="qe-out" class="self-center font-sans text-sm" aria-live="polite"></span></div>`;
+      const cards = () => Array.from(box.querySelectorAll<HTMLElement>('[data-qcard]'));
+      const wire = (card: HTMLElement, q: Any) => {
+        qBody(card, q);
+        card.querySelector('[data-qt]')!.addEventListener('change', () => qBody(card, null));
+        card.querySelector('[data-qdel]')!.addEventListener('click', () => card.remove());
+      };
+      cards().forEach((c, i) => wire(c, questions[i]));
+      $('qe-add').addEventListener('click', () => { $('qe-list').insertAdjacentHTML('beforeend', qCard({ type: 'single' })); const all = cards(); wire(all[all.length - 1], null); });
+      $('qe-save').addEventListener('click', async () => {
+        const s = await api('/api/lms-quizzes', { action: 'questions', id, questions: cards().map(readCard) });
+        $('qe-out').textContent = s.ok ? `Saved ${s.d.count} questions.` : errText(s);
+        if (s.ok) loaders.quizzes().then(() => editQuiz(id));
+      });
+    }
+
+    // ---------- C6 analytics (teachers only) ----------
+    loaders.analytics = async () => {
+      const el = $('tab-analytics'); el.textContent = 'Loading…';
+      const r = await api('/api/analytics?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const { summary: s, lessons, assignments, quizzes, at_risk } = r.d;
+      const tile = (label: string, value: Any, sub = '') => `<div class="rounded-xl2 border border-line bg-surface p-4"><p class="font-mono text-[10.5px] uppercase tracking-[.16em] text-muted">${label}</p><p class="mt-1 text-2xl font-bold text-navy">${value == null ? '–' : esc(value)}</p>${sub ? `<p class="font-sans text-xs text-muted">${sub}</p>` : ''}</div>`;
+      const bar = (p: number | null) => `<span class="inline-block h-2 w-32 overflow-hidden rounded-full bg-paper align-middle"><span class="block h-full bg-saffron" style="width:${Math.max(0, Math.min(100, p || 0))}%"></span></span>`;
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Course analytics</h2>
+        <p class="mt-1 text-sm text-muted">Only you and the other teachers of this course can see this. Use it to decide who to check in with, not to rank anyone.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-4">${tile('Enrolled', s.enrolled)}${tile('Active this week', s.active_7d, `${esc(s.active_30d)} in 30 days`)}
+          ${tile('Finished every lesson', s.completion_percent == null ? '–' : s.completion_percent + '%', s.lesson_count ? `${esc(s.completed_all)} of ${esc(s.enrolled)}` : 'lesson count unavailable')}${tile('Passed the course quiz', s.quiz_pass_percent == null ? '–' : s.quiz_pass_percent + '%', `${esc(s.quiz_passed)} learners`)}</div>
+        <h3 class="mt-8 text-lg font-bold text-navy">Learners to check in with</h3>
+        <ul class="mt-2 font-sans text-sm">${at_risk.length ? at_risk.map((x: Any) => `<li class="border-b border-line py-2"><strong>${esc(x.name)}</strong> · ${esc(x.lessons_done)} lessons done<span class="block text-muted">${x.reasons.map(esc).join(' · ')}</span></li>`).join('') : '<li class="py-2 text-muted">No one stands out right now.</li>'}</ul>
+        <h3 class="mt-8 text-lg font-bold text-navy">Lessons</h3><p class="text-sm text-muted">A sharp drop between two lessons is worth a look.</p>
+        <table class="mt-2 font-sans text-sm"><tbody>${lessons.map((l: Any) => `<tr><td class="py-0.5 pr-3">Lesson ${esc(l.lesson)}</td><td class="pr-3">${bar(l.percent)}</td><td class="text-muted">${esc(l.completed)} (${esc(l.percent ?? 0)}%)</td></tr>`).join('') || '<tr><td class="text-muted">No lesson progress yet.</td></tr>'}</tbody></table>
+        <h3 class="mt-8 text-lg font-bold text-navy">Assignments</h3>
+        <table class="mt-2 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1">Assignment</th><th>Submitted</th><th>Graded</th><th>Missing (past due)</th><th>Average</th></tr></thead><tbody>${assignments.map((a: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-2">${esc(a.title)}</td><td>${esc(a.submitted)}</td><td>${esc(a.graded)}</td><td>${esc(a.missing)}</td><td>${a.average_percent == null ? '–' : esc(a.average_percent) + '%'}</td></tr>`).join('') || '<tr><td class="py-2 text-muted" colspan="5">No assignments.</td></tr>'}</tbody></table>
+        <h3 class="mt-8 text-lg font-bold text-navy">Quizzes</h3>
+        <ul class="mt-2 font-sans text-sm">${quizzes.map((q: Any) => `<li class="border-b border-line py-2"><strong>${esc(q.title)}</strong> · ${esc(q.learners)} learners · average best ${q.average_best == null ? '–' : esc(q.average_best) + '%'}
+          ${q.hardest.length ? `<span class="block text-muted">Hardest: ${q.hardest.map((h: Any) => `“${esc(String(h.prompt).slice(0, 70))}” (${esc(h.percent)}%)`).join('; ')}</span>` : ''}</li>`).join('') || '<li class="py-2 text-muted">No quizzes yet.</li>'}</ul>`;
+    };
+
+    // ---------- C9 peer review ----------
+    loaders.peer = async () => {
+      const el = $('tab-peer'); el.textContent = 'Loading…';
+      if (isTeacher) {
+        const r = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+        const assignments = (r.ok && r.d.assignments) || [];
+        const states = await Promise.all(assignments.map((a: Any) => api('/api/peer-reviews?assignmentId=' + encodeURIComponent(a.id))));
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">Peer review</h2><p class="mt-1 text-sm text-muted">Learners who submitted give feedback on classmates' work, anonymously by default, using the assignment's rubric if it has one. Peer reviews never change a grade.</p>
+          <ul class="mt-3 space-y-3 font-sans text-sm">${assignments.map((a: Any, i: number) => {
+            const d = states[i].ok ? states[i].d : {}; const st = d.settings;
+            const done = (d.reviews || []).filter((x: Any) => x.status === 'done').length;
+            return `<li class="rounded-xl2 border border-line bg-surface p-4"><strong class="text-navy">${esc(a.title)}</strong>
+              ${st ? `<span class="pill bg-paper text-muted">${esc(st.status)}</span> <span class="text-muted">${done}/${(d.reviews || []).length} reviews written · ${st.anonymous ? 'anonymous' : 'named'}</span>
+                ${st.status === 'open' ? `<button class="ml-2 underline" data-pr-close="${esc(a.id)}">Close</button>` : ''}
+                <details class="mt-2"><summary class="cursor-pointer underline">Read the reviews</summary><ul class="mt-2">${(d.reviews || []).map((x: Any) => `<li class="border-t border-line py-2"><span class="text-muted">${esc(x.reviewer)} → ${esc(x.author)} · ${esc(x.status)}${x.hidden ? ' · hidden' : ''}</span>${x.comment ? `<p class="mt-1 whitespace-pre-wrap">${esc(x.comment)}</p>` : ''}${x.status === 'done' && !x.hidden ? `<button class="text-xs underline text-danger" data-pr-hide="${esc(x.id)}">Hide from the author</button>` : ''}</li>`).join('')}</ul></details>`
+              : `<span class="ml-2 inline-flex flex-wrap items-center gap-2"><label>Reviews each <input type="number" min="1" max="5" value="2" data-pr-n class="w-14 border border-line bg-surface px-1" /></label><label class="flex items-center gap-1"><input type="checkbox" data-pr-anon checked /> anonymous</label><button class="btn" data-pr-start="${esc(a.id)}">Start peer review</button></span>`}</li>`;
+          }).join('') || '<li class="text-muted">No assignments yet.</li>'}</ul>`;
+        el.querySelectorAll<HTMLElement>('[data-pr-start]').forEach((b) => b.addEventListener('click', async () => {
+          const li = b.closest('li') as HTMLElement;
+          const s = await api('/api/peer-reviews', { action: 'start', assignmentId: b.dataset.prStart, perLearner: Number((li.querySelector('[data-pr-n]') as HTMLInputElement).value), anonymous: (li.querySelector('[data-pr-anon]') as HTMLInputElement).checked });
+          if (!s.ok) alert(errText(s)); loaders.peer();
+        }));
+        el.querySelectorAll<HTMLElement>('[data-pr-close]').forEach((b) => b.addEventListener('click', async () => { await api('/api/peer-reviews', { action: 'close', assignmentId: b.dataset.prClose }); loaders.peer(); }));
+        el.querySelectorAll<HTMLElement>('[data-pr-hide]').forEach((b) => b.addEventListener('click', async () => { await api('/api/peer-reviews', { action: 'hide', reviewId: b.dataset.prHide }); loaders.peer(); }));
+        return;
+      }
+      const r = await api('/api/peer-reviews?courseId=' + encodeURIComponent(courseId));
+      const list = (r.ok && r.d.assignments) || [];
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Peer review</h2><ul class="mt-2 font-sans text-[15px]">${list.length ? list.map((a: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2.5"><strong class="text-navy">${esc(a.title)}</strong><span class="text-xs text-muted">${a.assigned ? `${esc(a.done)}/${esc(a.assigned)} reviews written` : 'nothing assigned to you'} · ${esc(a.status)}</span><button class="ml-auto underline" data-pr-open="${esc(a.id)}">Open</button></li>`).join('') : '<li class="py-2 text-muted">No peer reviews yet.</li>'}</ul><div id="pr-detail" class="mt-6"></div>`;
+      el.querySelectorAll<HTMLElement>('[data-pr-open]').forEach((b) => b.addEventListener('click', () => openPeer(b.dataset.prOpen as string)));
+    };
+    async function openPeer(assignmentId: string) {
+      const box = $('pr-detail');
+      const r = await api('/api/peer-reviews?assignmentId=' + encodeURIComponent(assignmentId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const d = r.d, rubric = d.rubric;
+      const rubricInputs = (rv: Any) => rubric ? rubric.criteria.map((c: Any) => `<label class="flex items-center gap-2 py-0.5 font-sans text-sm">${esc(c.title)} <input type="number" min="0" max="${esc(c.points)}" data-crit="${esc(c.id)}" value="${rv.rubric_scores && rv.rubric_scores[c.id] ? esc(rv.rubric_scores[c.id].points) : ''}" class="w-16 border border-line bg-surface px-1" ${rv.status === 'done' ? 'disabled' : ''} /> / ${esc(c.points)}</label>`).join('') : '';
+      const shown = (s: Any) => (rubric && s ? rubric.criteria.map((c: Any) => `${esc(c.title)}: ${s[c.id] ? esc(s[c.id].points) : '–'}/${esc(c.points)}`).join(' · ') : '');
+      box.innerHTML = `<h3 class="text-lg font-bold text-navy">${esc(d.title)}</h3>
+        <ol class="mt-3 space-y-4">${d.to_review.map((rv: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4" data-rv="${esc(rv.id)}"><p class="font-sans text-xs text-muted">${esc(rv.label)}'s work</p>
+          <div class="mt-1 whitespace-pre-wrap">${esc(rv.text) || '(No written answer.)'}</div>
+          <div class="mt-3">${rubricInputs(rv)}</div>
+          <textarea rows="3" maxlength="3000" data-cm class="${FIELD} mt-2" aria-label="Your feedback" placeholder="What works well, and one thing to develop (at least 20 characters)" ${rv.status === 'done' ? 'disabled' : ''}>${esc(rv.comment || '')}</textarea>
+          ${rv.status === 'done' ? '<p class="mt-1 font-sans text-sm text-muted">Sent. Thank you.</p>' : d.settings.status === 'open' ? '<button class="btn btn-primary mt-2" data-send>Send feedback</button> <span data-out class="font-sans text-sm" aria-live="polite"></span>' : ''}</li>`).join('')}</ol>
+        <h3 class="mt-8 text-lg font-bold text-navy">Feedback on your work</h3>
+        ${d.received_note ? `<p class="text-sm text-muted">${esc(d.received_note)}</p>` : ''}
+        <ul class="mt-2 space-y-3">${d.received.map((x: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><p class="font-sans text-xs text-muted">${esc(x.reviewer)}${x.rubric_scores ? ' · ' + shown(x.rubric_scores) : ''}</p><p class="mt-1 whitespace-pre-wrap">${esc(x.comment)}</p></li>`).join('') || (d.received_note ? '' : '<li class="text-muted">None yet.</li>')}</ul>`;
+      box.querySelectorAll<HTMLElement>('[data-send]').forEach((b) => b.addEventListener('click', async () => {
+        const li = b.closest('[data-rv]') as HTMLElement;
+        const rubricScores: Any = {};
+        li.querySelectorAll<HTMLInputElement>('[data-crit]').forEach((i) => { rubricScores[i.dataset.crit as string] = { points: i.value === '' ? null : Number(i.value) }; });
+        const s = await api('/api/peer-reviews', { action: 'submit', reviewId: li.dataset.rv, comment: (li.querySelector('[data-cm]') as HTMLTextAreaElement).value, rubricScores: rubric ? rubricScores : undefined });
+        if (!s.ok) { (li.querySelector('[data-out]') as HTMLElement).textContent = errText(s); return; }
+        await loaders.peer(); openPeer(assignmentId);
+      }));
+    }
+
+    // ---------- C10 journal ----------
+    loaders.journal = async () => {
+      const el = $('tab-journal');
+      const r = await api('/api/journal?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const entries = r.d.entries || [];
+      if (r.d.scope === 'teacher') {
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">Journal entries learners shared with you</h2><p class="mt-1 text-sm text-muted">Journals are private. You only see entries a learner chose to share.</p>
+          <ul class="mt-3 space-y-3">${entries.length ? entries.map((x: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><p class="font-sans text-xs text-muted">${esc(x.name || x.email)} · ${esc(fmt(x.updated_at))}</p><p class="mt-1 whitespace-pre-wrap">${esc(x.body)}</p></li>`).join('') : '<li class="text-muted">None shared yet.</li>'}</ul>`;
+        return;
+      }
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">My reflective journal</h2><p class="mt-1 text-sm text-muted">Private to you. Tick “share with my teacher” on an entry if you want your teacher to read it.</p>
+        <form id="j-new" class="mt-4 space-y-2"><textarea id="j-body" rows="5" maxlength="10000" required class="${FIELD} leading-[1.6]" placeholder="What did you learn, notice or wonder about today?"></textarea>
+        <div class="flex flex-wrap items-center gap-4"><label class="flex items-center gap-2 font-sans text-sm"><input id="j-share" type="checkbox" /> Share with my teacher</label><button class="btn btn-primary" type="submit">Save entry</button><span id="j-out" class="font-sans text-sm" aria-live="polite"></span></div></form>
+        <ul class="mt-6 space-y-3">${entries.map((x: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><p class="font-sans text-xs text-muted">${esc(fmt(x.created_at))}${x.shared ? ' · shared with teacher' : ' · private'}</p><p class="mt-1 whitespace-pre-wrap">${esc(x.body)}</p>
+          <p class="mt-2 flex gap-4 font-sans text-xs"><button class="underline" data-j-share="${esc(x.id)}" data-v="${x.shared ? 0 : 1}">${x.shared ? 'Make private' : 'Share with teacher'}</button><button class="underline text-danger" data-j-del="${esc(x.id)}">Delete</button></p></li>`).join('')}</ul>`;
+      $('j-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await api('/api/journal', { courseId, body: (document.getElementById('j-body') as HTMLTextAreaElement).value, shared: (document.getElementById('j-share') as HTMLInputElement).checked });
+        if (!res.ok) { $('j-out').textContent = errText(res); return; }
+        loaders.journal();
+      });
+      el.querySelectorAll<HTMLElement>('[data-j-share]').forEach((b) => b.addEventListener('click', async () => { await api('/api/journal', { id: b.dataset.jShare, shared: b.dataset.v === '1' }); loaders.journal(); }));
+      el.querySelectorAll<HTMLElement>('[data-j-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this entry?')) { await api('/api/journal', { id: b.dataset.jDel, action: 'delete' }); loaders.journal(); } }));
+    };
+
+    // ---------- C11 glossary ----------
+    loaders.glossary = async () => {
+      const el = $('tab-glossary');
+      const r = await api('/api/glossary?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const terms = r.d.terms || [];
+      const add = isTeacher ? `<details class="mt-4 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ Add a term</summary>
+        <form id="g-new" class="mt-3 space-y-2"><div class="flex flex-wrap gap-3"><label class="${LABEL} flex-[1_1_180px]">Term<input id="g-term" maxlength="120" required class="${FIELD}" /></label>
+        <label class="${LABEL} flex-[1_1_180px]">ਗੁਰਮੁਖੀ (optional)<input id="g-gur" maxlength="120" lang="pa" class="${FIELD}" /></label></div>
+        <label class="${LABEL}">Definition<textarea id="g-def" rows="3" maxlength="3000" required class="${FIELD}"></textarea></label>
+        <p class="font-sans text-xs text-muted">Write definitions yourself and check them against your sources. Do not paste AI-generated definitions here.</p>
+        <button class="btn btn-primary" type="submit">Add term</button> <span id="g-out" class="font-sans text-sm" aria-live="polite"></span></form></details>` : '';
+      el.innerHTML = `<div class="flex flex-wrap items-end gap-4"><h2 class="text-xl font-bold text-navy">Glossary</h2><input id="g-q" type="search" placeholder="Filter terms" aria-label="Filter terms" class="${FIELD} !mt-0 max-w-xs" /></div>${add}
+        <dl id="g-list" class="mt-4">${terms.length ? terms.map((t: Any) => `<div class="border-b border-line py-3" data-term="${esc((t.term + ' ' + (t.term_gur || '') + ' ' + t.definition).toLowerCase())}"><dt class="font-bold text-navy">${esc(t.term)}${t.term_gur ? ` <span lang="pa" class="font-normal">${esc(t.term_gur)}</span>` : ''}</dt>
+          <dd class="mt-1 whitespace-pre-wrap">${esc(t.definition)}</dd>${isTeacher ? `<dd class="mt-1 flex gap-4 font-sans text-xs"><button class="underline" data-g-edit="${esc(t.id)}">Edit definition</button><button class="underline text-danger" data-g-del="${esc(t.id)}">Delete</button></dd>` : ''}</div>`).join('') : '<p class="text-muted">No terms yet.</p>'}</dl>`;
+      $('g-q').addEventListener('input', (e) => { const q = (e.target as HTMLInputElement).value.toLowerCase(); el.querySelectorAll<HTMLElement>('[data-term]').forEach((d) => d.classList.toggle('hidden', !!q && !(d.dataset.term || '').includes(q))); });
+      const f = document.getElementById('g-new');
+      if (f) f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await api('/api/glossary', { courseId, term: (document.getElementById('g-term') as HTMLInputElement).value, termGur: (document.getElementById('g-gur') as HTMLInputElement).value, definition: (document.getElementById('g-def') as HTMLTextAreaElement).value });
+        if (!res.ok) { $('g-out').textContent = errText(res); return; }
+        loaders.glossary();
+      });
+      el.querySelectorAll<HTMLElement>('[data-g-edit]').forEach((b) => b.addEventListener('click', async () => {
+        const t = terms.find((x: Any) => x.id === b.dataset.gEdit); const v = prompt('Definition for ' + t.term, t.definition);
+        if (v != null && v.trim()) { const res = await api('/api/glossary', { id: t.id, definition: v }); if (!res.ok) alert(errText(res)); loaders.glossary(); }
+      }));
+      el.querySelectorAll<HTMLElement>('[data-g-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this term?')) { await api('/api/glossary', { id: b.dataset.gDel, action: 'delete' }); loaders.glossary(); } }));
+    };
+
+    // ---------- C7 teacher settings ----------
+    loaders.settings = async () => {
+      const el = $('tab-settings');
+      const r = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok || r.d.scope !== 'teacher') { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const { assignments = [], learners = [], policies = [], extensions = [], accommodations = [] } = r.d;
+      const pol = Object.fromEntries(policies.map((p: Any) => [p.assignment_id, p]));
+      const aTitle = Object.fromEntries(assignments.map((a: Any) => [a.id, a.title]));
+      const learnerOpts = learners.map((l: Any) => `<option value="${esc(l.id)}">${esc(l.name || l.email)}${l.name ? ' (' + esc(l.email) + ')' : ''}</option>`).join('');
+      const assignOpts = assignments.map((a: Any) => `<option value="${esc(a.id)}">${esc(a.title)}</option>`).join('');
+      el.innerHTML = `
+        <h2 class="text-xl font-bold text-navy">Late policy</h2><p class="mt-1 text-sm text-muted">Deduct a percentage for each day late, and optionally stop accepting work after a number of days. Learners see their own penalty.</p>
+        ${assignments.length ? `<table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1.5">Assignment</th><th>Due</th><th>% off per day late</th><th>Stop accepting after (days)</th><th></th></tr></thead><tbody>${assignments.map((a: Any) => {
+          const p = pol[a.id] || {};
+          return `<tr class="border-t border-line" data-pol="${esc(a.id)}"><td class="py-2 pr-2 font-bold text-navy">${esc(a.title)}</td><td class="pr-2 text-muted">${esc(fmt(a.due_at)) || 'no due date'}</td>
+            <td class="pr-2"><input type="number" min="0" max="100" value="${esc(p.late_penalty_per_day || 0)}" data-pen class="${FIELD} !mt-0 !w-24" aria-label="Percent off per day late" /></td>
+            <td class="pr-2"><input type="number" min="0" max="365" value="${p.max_late_days != null ? esc(p.max_late_days) : ''}" placeholder="no limit" data-max class="${FIELD} !mt-0 !w-28" aria-label="Stop accepting after days" /></td>
+            <td><button class="btn" data-save-pol>Save</button></td></tr>`;
+        }).join('')}</tbody></table>` : '<p class="mt-3 text-muted">No assignments in this course yet. Create them from your dashboard.</p>'}
+
+        <h2 class="mt-10 text-xl font-bold text-navy">Due-date extensions</h2><p class="mt-1 text-sm text-muted">Give one learner a later due date for one assignment.</p>
+        ${assignments.length && learners.length ? `<form id="ext-form" class="mt-3 flex flex-wrap items-end gap-3"><label class="${LABEL}">Assignment<select id="ext-a" class="${FIELD}">${assignOpts}</select></label><label class="${LABEL}">Learner<select id="ext-u" class="${FIELD}">${learnerOpts}</select></label>
+          <label class="${LABEL}">New due date<input id="ext-due" type="datetime-local" required class="${FIELD}" /></label><label class="${LABEL}">Reason (optional)<input id="ext-reason" maxlength="300" class="${FIELD}" /></label><button class="btn btn-primary" type="submit">Grant</button><span id="ext-out" class="font-sans text-sm" aria-live="polite"></span></form>` : '<p class="mt-3 text-muted">Needs at least one assignment and one enrolled learner.</p>'}
+        <ul class="mt-3 font-sans text-sm">${extensions.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · ${esc(aTitle[x.assignment_id] || '')} · due ${esc(fmt(x.due_at))}${x.reason ? ' · ' + esc(x.reason) : ''}<button class="ml-auto underline text-danger" data-ext-del="${esc(x.assignment_id)}" data-u="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>
+
+        <h2 class="mt-10 text-xl font-bold text-navy">Accommodations</h2><p class="mt-1 text-sm text-muted">Extra time on timed quizzes for a learner, as a percentage (for example 50 = time and a half). Only you and the learner can see it.</p>
+        ${learners.length ? `<form id="acc-form" class="mt-3 flex flex-wrap items-end gap-3"><label class="${LABEL}">Learner<select id="acc-u" class="${FIELD}">${learnerOpts}</select></label><label class="${LABEL}">Extra time %<input id="acc-pct" type="number" min="0" max="300" value="50" class="${FIELD}" /></label>
+          <label class="${LABEL}">Note (optional)<input id="acc-note" maxlength="300" class="${FIELD}" /></label><button class="btn btn-primary" type="submit">Save</button><span id="acc-out" class="font-sans text-sm" aria-live="polite"></span></form>` : '<p class="mt-3 text-muted">No enrolled learners yet.</p>'}
+        <ul class="mt-3 font-sans text-sm">${accommodations.map((x: Any) => `<li class="flex flex-wrap gap-2 border-b border-line py-2"><strong>${esc(x.name || x.email)}</strong> · +${esc(x.extra_time_pct)}% time${x.note ? ' · ' + esc(x.note) : ''}<button class="ml-auto underline text-danger" data-acc-del="${esc(x.user_id)}">Remove</button></li>`).join('')}</ul>
+        <div id="rub-section"></div>
+        <div id="rel-section"></div>
+        <div id="msg-section"></div>`;
+
+      el.querySelectorAll<HTMLElement>('[data-save-pol]').forEach((b) => b.addEventListener('click', async () => {
+        const row = b.closest('[data-pol]') as HTMLElement; const max = (row.querySelector('[data-max]') as HTMLInputElement).value;
+        const res = await api('/api/course-policies', { action: 'late_policy', assignmentId: row.dataset.pol, latePenaltyPerDay: Number((row.querySelector('[data-pen]') as HTMLInputElement).value || 0), maxLateDays: max === '' ? null : Number(max) });
+        b.textContent = res.ok ? 'Saved' : 'Error'; if (!res.ok) alert(errText(res)); setTimeout(() => { b.textContent = 'Save'; }, 1500);
+      }));
+      const ext = document.getElementById('ext-form');
+      if (ext) ext.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const due = (document.getElementById('ext-due') as HTMLInputElement).value;
+        const res = await api('/api/course-policies', { action: 'extension', assignmentId: (document.getElementById('ext-a') as HTMLSelectElement).value, userId: (document.getElementById('ext-u') as HTMLSelectElement).value, dueAt: new Date(due).getTime(), reason: (document.getElementById('ext-reason') as HTMLInputElement).value });
+        if (!res.ok) { $('ext-out').textContent = errText(res); return; }
+        loaders.settings();
+      });
+      el.querySelectorAll<HTMLElement>('[data-ext-del]').forEach((b) => b.addEventListener('click', async () => { await api('/api/course-policies', { action: 'extension', assignmentId: b.dataset.extDel, userId: b.dataset.u, dueAt: null }); loaders.settings(); }));
+      const acc = document.getElementById('acc-form');
+      if (acc) acc.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await api('/api/course-policies', { action: 'accommodation', courseId, userId: (document.getElementById('acc-u') as HTMLSelectElement).value, extraTimePct: Number((document.getElementById('acc-pct') as HTMLInputElement).value || 0), note: (document.getElementById('acc-note') as HTMLInputElement).value });
+        if (!res.ok) { $('acc-out').textContent = errText(res); return; }
+        loaders.settings();
+      });
+      el.querySelectorAll<HTMLElement>('[data-acc-del]').forEach((b) => b.addEventListener('click', async () => { await api('/api/course-policies', { action: 'accommodation', courseId, userId: b.dataset.accDel, extraTimePct: 0 }); loaders.settings(); }));
+      renderRubrics(assignments);
+      renderRelease(assignments);
+      renderMessaging(learners);
+    };
+
+    // ---------- C3 release rules (inside Teacher settings) ----------
+    async function renderRelease(assignments: Any[]) {
+      const box = document.getElementById('rel-section'); if (!box) return;
+      const [r, p, qz, cc] = await Promise.all([api('/api/release-rules?courseId=' + encodeURIComponent(courseId)), api('/api/polls?courseId=' + encodeURIComponent(courseId)), api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId)), api('/api/course-content?courseId=' + encodeURIComponent(courseId))]);
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const byKey = Object.fromEntries((r.d.rules || []).map((x: Any) => [`${x.item_type}:${x.item_id}`, x]));
+      // Lesson rules are stored as "<course>:<position>"; the API takes the position.
+      const lessonItems = ((cc.ok && cc.d.lessons) || []).map((l: Any, i: number) => ({ type: 'lesson', id: String(i), key: `${courseId}:${i}`, title: l.title, label: `Lesson ${i + 1}` }));
+      const items = lessonItems.concat(assignments.map((a: Any) => ({ type: 'assignment', id: a.id, title: a.title, label: 'Assignment' })))
+        .concat(((qz.ok && qz.d.quizzes) || []).map((x: Any) => ({ type: 'quiz', id: x.id, title: x.title, label: 'Quiz' })))
+        .concat(((p.ok && p.d.polls) || []).map((x: Any) => ({ type: 'poll', id: x.id, title: x.title, label: x.kind === 'evaluation' ? 'Evaluation' : x.kind === 'survey' ? 'Survey' : 'Poll' })));
+      const local = (ms: number | null) => (ms ? new Date(ms - new Date(ms).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Release rules</h2>
+        <p class="mt-1 text-sm text-muted">Optional. Keep a lesson, assignment, quiz or poll locked until a learner has done enough of the course, or until a date. Learners still see the title and why it is locked; you always see everything. Leave a row empty for no rule.</p>
+        ${items.length ? `<table class="mt-3 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1.5">Item</th><th>Lessons done</th><th>Quiz passed</th><th>Not before</th><th></th></tr></thead><tbody>${items.map((it: Any) => {
+          const x = byKey[`${it.type}:${it.key || it.id}`] || {};
+          return `<tr class="border-t border-line" data-rel="${esc(it.type)}" data-id="${esc(it.id)}"><td class="py-2 pr-2"><span class="text-xs text-muted">${esc(it.label)}</span><br><strong class="text-navy">${esc(it.title)}</strong></td>
+            <td class="pr-2"><input type="number" min="1" max="1000" data-min value="${esc(x.min_lessons || '')}" placeholder="any" aria-label="Lessons completed" class="${FIELD} !mt-0 !w-20" /></td>
+            <td class="pr-2"><input type="checkbox" data-quiz ${x.require_quiz_pass ? 'checked' : ''} aria-label="Course quiz passed" /></td>
+            <td class="pr-2"><input type="datetime-local" data-date value="${esc(local(x.not_before || null))}" aria-label="Not before" class="${FIELD} !mt-0" /></td>
+            <td><button class="btn" data-save-rel>Save</button></td></tr>`;
+        }).join('')}</tbody></table>` : '<p class="mt-3 text-muted">No assignments or polls yet.</p>'}`;
+      box.querySelectorAll<HTMLElement>('[data-save-rel]').forEach((b) => b.addEventListener('click', async () => {
+        const row = b.closest('[data-rel]') as HTMLElement;
+        const d = (row.querySelector('[data-date]') as HTMLInputElement).value;
+        const res = await api('/api/release-rules', { courseId, itemType: row.dataset.rel, itemId: row.dataset.id,
+          minLessons: (row.querySelector('[data-min]') as HTMLInputElement).value || null,
+          requireQuizPass: (row.querySelector('[data-quiz]') as HTMLInputElement).checked, notBefore: d ? new Date(d).getTime() : null });
+        b.textContent = res.ok ? 'Saved' : 'Error'; if (!res.ok) alert(errText(res)); setTimeout(() => { b.textContent = 'Save'; }, 1500);
+      }));
+    }
+
+    // ---------- C18 forum + messages settings, mutes, report queue (inside Teacher settings) ----------
+    async function renderMessaging(learners: Any[]) {
+      const box = document.getElementById('msg-section'); if (!box) return;
+      const [r, q] = await Promise.all([api('/api/messaging-settings?courseId=' + encodeURIComponent(courseId)), api('/api/messages?reports=' + encodeURIComponent(courseId))]);
+      if (!r.ok || !r.d.settings) { box.innerHTML = note('warn', esc(r.ok ? 'Could not load the forum and message settings.' : errText(r))); return; }
+      const st = r.d.settings, mutes = r.d.mutes || [], reports = (q.ok && q.d.reports) || [];
+      const tog = (k: string, label: string, hint = '') => `<label class="flex items-start gap-2 py-1.5"><input type="checkbox" data-set="${k}" ${st[k] ? 'checked' : ''} class="mt-1" /><span>${label}${hint ? `<span class="block text-xs text-muted">${hint}</span>` : ''}</span></label>`;
+      const mutedIds = new Set(mutes.map((m: Any) => m.user_id));
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Forum &amp; messages</h2>
+        <form id="ms-form" class="mt-3 font-sans text-sm">
+          ${tog('forums_enabled', 'Course forum is on')}
+          ${tog('forum_locked', 'Forum is read-only', 'Keeps existing posts visible; no new posts or replies.')}
+          ${tog('dms_enabled', 'Classmates can send each other message requests')}
+          <label class="flex items-center gap-2 py-1.5">Who can start a conversation <select data-set="dm_starters" class="border border-line bg-surface px-2 py-1"><option value="learners" ${st.dm_starters === 'learners' ? 'selected' : ''}>Anyone in the course</option><option value="teachers" ${st.dm_starters === 'teachers' ? 'selected' : ''}>Teachers only</option></select></label>
+          ${tog('teachers_read_dms', 'Teachers can read direct messages in this course', 'Learners see a notice in every conversation while this is on.')}
+          ${tog('filter_enabled', 'Filter offensive words (and links in direct messages)')}
+          <button class="btn btn-primary mt-2" type="submit">Save</button> <span id="ms-out" aria-live="polite"></span></form>
+        <h3 class="mt-6 font-bold text-navy">Paused learners</h3><p class="text-sm text-muted">A paused learner can read, but can't post in the forum or send messages in this course.</p>
+        ${learners.length ? `<div class="mt-2 flex flex-wrap items-center gap-2 font-sans text-sm"><label class="sr-only" for="mute-u">Learner</label><select id="mute-u" class="border border-line bg-surface px-2 py-1">${learners.filter((l: Any) => !mutedIds.has(l.id)).map((l: Any) => `<option value="${esc(l.id)}">${esc(l.name || l.email)}</option>`).join('')}</select><button class="btn" id="mute-btn" type="button">Pause</button></div>` : ''}
+        <ul class="mt-2 font-sans text-sm">${mutes.map((m: Any) => `<li class="flex gap-2 border-b border-line py-2">${esc(m.name || m.email)}<button class="ml-auto underline" data-unmute="${esc(m.user_id)}">Resume</button></li>`).join('')}</ul>
+        <h3 class="mt-6 font-bold text-navy">Reported messages</h3>
+        <ul class="mt-2 font-sans text-sm">${reports.length ? reports.map((x: Any) => `<li class="border-b border-line py-2"><a class="underline" href="/messages?c=${encodeURIComponent(x.conversation_id)}">${esc(x.sender || 'Learner')}: “${esc(String(x.body).slice(0, 100))}”</a>
+          <span class="block text-xs text-muted">Reported by ${esc(x.reporter || 'a learner')}${x.reason ? ': ' + esc(x.reason) : ''}</span>
+          <span class="mt-1 flex gap-3 text-xs"><button class="underline" data-resolve="${esc(x.id)}" data-hide="1">Hide message</button><button class="underline" data-resolve="${esc(x.id)}" data-hide="0">Keep, close report</button></span></li>`).join('') : '<li class="py-2 text-muted">No open reports.</li>'}</ul>`;
+      $('ms-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const settings: Any = {};
+        box.querySelectorAll<HTMLInputElement>('input[data-set]').forEach((i) => { settings[i.dataset.set as string] = i.checked; });
+        settings.dm_starters = (box.querySelector('select[data-set="dm_starters"]') as HTMLSelectElement).value;
+        const res = await api('/api/messaging-settings', { courseId, settings });
+        $('ms-out').textContent = res.ok ? 'Saved.' : errText(res);
+      });
+      const mb = document.getElementById('mute-btn');
+      if (mb) mb.addEventListener('click', async () => { await api('/api/messaging-settings', { courseId, action: 'mute', userId: (document.getElementById('mute-u') as HTMLSelectElement).value }); renderMessaging(learners); });
+      box.querySelectorAll<HTMLElement>('[data-unmute]').forEach((b) => b.addEventListener('click', async () => { await api('/api/messaging-settings', { courseId, action: 'unmute', userId: b.dataset.unmute }); renderMessaging(learners); }));
+      box.querySelectorAll<HTMLElement>('[data-resolve]').forEach((b) => b.addEventListener('click', async () => {
+        await api('/api/messages', { action: 'resolve', reportId: b.dataset.resolve, hideMessage: b.dataset.hide === '1' }); renderMessaging(learners);
+      }));
+    }
+
+    // ---------- C4 grading + rubrics (inside Teacher settings) ----------
+    const critRow = () => `<div class="flex flex-wrap gap-2" data-crit><input data-ct maxlength="120" placeholder="Criterion, e.g. Use of sources" aria-label="Criterion" class="${FIELD} !mt-0 min-w-0 flex-[2_1_200px]" />
+      <input data-cp type="number" min="0" max="1000" placeholder="Points" aria-label="Points" class="${FIELD} !mt-0 !w-24" /><input data-cd maxlength="500" placeholder="What earns full marks (optional)" aria-label="Description" class="${FIELD} !mt-0 min-w-0 flex-[3_1_240px]" /></div>`;
+    async function renderRubrics(assignments: Any[]) {
+      const box = document.getElementById('rub-section'); if (!box) return;
+      const r = await api('/api/rubrics?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { box.innerHTML = note('warn', esc(errText(r))); return; }
+      const { rubrics = [], attached = {} } = r.d;
+      const opts = (sel: string) => '<option value="">No rubric</option>' + rubrics.map((x: Any) => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc(x.title)}</option>`).join('');
+      box.innerHTML = `<h2 class="mt-10 text-xl font-bold text-navy">Grading &amp; rubrics</h2>
+        <p class="mt-1 text-sm text-muted">Grade one learner at a time in the grader. Attach a rubric to score each criterion; learners see the criteria and their scores.</p>
+        ${assignments.length ? `<ul class="mt-3 font-sans text-sm">${assignments.map((a: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2"><strong class="text-navy">${esc(a.title)}</strong>
+          <label class="ml-auto flex items-center gap-2 text-muted">Rubric <select data-attach="${esc(a.id)}" class="border border-line bg-surface px-2 py-1">${opts(attached[a.id] || '')}</select></label>
+          <a class="btn" href="/grade?assignment=${encodeURIComponent(a.id)}">Open grader</a></li>`).join('')}</ul>` : ''}
+        <ul class="mt-4 space-y-2 font-sans text-sm">${rubrics.map((x: Any) => `<li class="rounded-lg border border-line bg-surface p-3"><strong>${esc(x.title)}</strong> · ${x.criteria.length} criteria · ${x.criteria.reduce((t: number, c: Any) => t + c.points, 0)} points
+          <button class="ml-3 underline text-danger" data-rub-del="${esc(x.id)}">Delete</button><ul class="mt-1 list-disc pl-5 text-muted">${x.criteria.map((c: Any) => `<li>${esc(c.title)} (${esc(c.points)})</li>`).join('')}</ul></li>`).join('')}</ul>
+        <details class="mt-4 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New rubric</summary>
+          <form id="rub-new" class="mt-3 space-y-2"><label class="${LABEL}">Title<input id="rub-title" maxlength="160" required class="${FIELD}" /></label>
+          <div id="rub-crits" class="space-y-2">${critRow()}${critRow()}</div>
+          <div class="flex gap-2"><button type="button" id="rub-add" class="btn">+ Criterion</button><button class="btn btn-primary" type="submit">Create rubric</button><span id="rub-out" class="self-center font-sans text-sm" aria-live="polite"></span></div></form></details>`;
+      box.querySelectorAll<HTMLSelectElement>('[data-attach]').forEach((sel) => sel.addEventListener('change', async () => {
+        const res = await api('/api/rubrics', { action: 'attach', assignmentId: sel.dataset.attach, rubricId: sel.value || null }); if (!res.ok) alert(errText(res));
+      }));
+      box.querySelectorAll<HTMLElement>('[data-rub-del]').forEach((b) => b.addEventListener('click', async () => {
+        if (!confirm('Delete this rubric? Assignments using it will have no rubric. Grades already given stay.')) return;
+        await api('/api/rubrics', { action: 'delete', id: b.dataset.rubDel }); renderRubrics(assignments);
+      }));
+      $('rub-add').addEventListener('click', () => $('rub-crits').insertAdjacentHTML('beforeend', critRow()));
+      $('rub-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const criteria = Array.from(box.querySelectorAll<HTMLElement>('[data-crit]')).map((row) => ({
+          title: (row.querySelector('[data-ct]') as HTMLInputElement).value.trim(), points: Number((row.querySelector('[data-cp]') as HTMLInputElement).value),
+          description: (row.querySelector('[data-cd]') as HTMLInputElement).value.trim(),
+        })).filter((c) => c.title);
+        const res = await api('/api/rubrics', { action: 'create', courseId, title: (document.getElementById('rub-title') as HTMLInputElement).value, criteria });
+        if (!res.ok) { $('rub-out').textContent = errText(res); return; }
+        renderRubrics(assignments);
+      });
+    };
+
+    // ---------- boot: who am I in this course? ----------
+    (async () => {
+      const gate = $('ct-gate');
+      if (!/^[a-zA-Z0-9_-]{1,120}$/.test(courseId)) { gate.innerHTML = note('warn', 'Open this page from a course: the link needs a course. <a class="underline" href="/catalog">Browse courses</a>.'); return; }
+      $('ct-back').innerHTML = `<a class="underline" href="/course/${encodeURIComponent(courseId)}">← Back to the course</a>`;
+      fetch('/data/index.json').then((r) => r.json()).then((d) => { const c = (d.courses || []).find((x: Any) => x.id === courseId); if (c && c.title) $('ct-title').textContent = c.title; }).catch(() => {});
+      const r = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+      if (r.status === 401) { gate.innerHTML = note('warn', `Please <a class="underline" href="/login?next=${encodeURIComponent(location.pathname + location.search)}">sign in</a> to use course tools.`); return; }
+      if (r.status === 403) { gate.innerHTML = note('warn', `Course tools are for learners enrolled in this course and its teachers. <a class="underline" href="/course/${encodeURIComponent(courseId)}">Open the course</a> to enrol.`); return; }
+      if (!r.ok) { gate.innerHTML = note('warn', esc(errText(r))); return; }
+      isTeacher = r.d.scope === 'teacher';
+      $('ct-tab-settings').classList.toggle('hidden', !isTeacher);
+      $('ct-tab-analytics').classList.toggle('hidden', !isTeacher);
+      $('ct-app').classList.remove('hidden');
+      show(location.hash.slice(1) || 'dates');
+    })();
+  </script>
+</Base>

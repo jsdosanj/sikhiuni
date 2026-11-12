@@ -58,13 +58,12 @@ export async function onRequestPost({ request, env }) {
 
   const existing = await env.DB.prepare("SELECT slug, is_public, publish_requested_at FROM teacher_profiles WHERE user_id=?").bind(user.id).first();
 
-  let requestPublishError = null;
+  // MFA is optional for every role (owner decision 2026-11-11): asking to publish
+  // a profile no longer requires an enrolled authenticator. Still recommended;
+  // the GET response keeps `mfaEnrolled` so the dashboard can say so.
+  const requestPublishError = null;
   let publishRequestedAt = existing ? existing.publish_requested_at : null;
-  if (b.requestPublish) {
-    const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(user.id).first();
-    if (mfaRow && mfaRow.enabled_at) publishRequestedAt = now;
-    else requestPublishError = "mfa_enrollment_required_to_publish";
-  }
+  if (b.requestPublish) publishRequestedAt = now;
 
   if (!existing) {
     const slug = await uniqueSlug(displayName, async (candidate) => {

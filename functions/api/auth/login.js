@@ -1,7 +1,18 @@
 import { verifyFamilyCredentials, familyErrorMessage } from '../../familyCredentials.js';
 import { insertUserWithOptin } from './_onboarding.js';
 import { newId, sessionCookie, logEvent, json } from "../_lib.js";
+import { sessionNeedsMfa } from "./_trusted-device.js";
+
 import { verifyPassword, DUMMY_HASH } from "../../_password.js";
+
+// 10+ failed sign-ins for one identifier within 15 minutes -> one team alert (throttled in sendAuditAlert's caller).
+async function alertOnLoginBurst(env, identifier, subject) {
+  try {
+    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE action='login_failed' AND target=? AND ts > ?")
+      .bind(identifier, Date.now() - 15 * 60 * 1000).first();
+    if (r && r.n === 10) await logEvent(env, null, "login_failed_burst", identifier, "10 failed sign-ins in 15 minutes", { outcome: "fail", subject, targetType: "account" });
+  } catch { /* best effort */ }
+}
 
 // POST /api/auth/login { identifier, password }
 //
@@ -30,7 +41,12 @@ export async function onRequestPost({ request, env }) {
   const passOk = await verifyPassword(password, storedHash);
   if (!u || !u.password_hash || !passOk) {
     const proof = await verifyFamilyCredentials(env, 'sikhiuni.com', identifier, password, verifyPassword, u?.email || null);
-    if (!proof.ok) return json({ error: familyErrorMessage(proof), code: proof.error }, proof.error === 'family_unavailable' ? 503 : 401);
+    if (!proof.ok) {
+      // Audit the failure (never the password). subject = the account, if one exists.
+      await logEvent(env, null, "login_failed", identifier, proof.error || "bad_credentials", { outcome: "fail", subject: u ? u.id : null, targetType: "account" });
+      await alertOnLoginBurst(env, identifier, u ? u.id : null);
+      return json({ error: familyErrorMessage(proof), code: proof.error }, proof.error === 'family_unavailable' ? 503 : 401);
+    }
     const { email, name } = proof.identity;
     u = await env.DB.prepare('SELECT id,email,role FROM users WHERE email = ?').bind(email).first();
     if (!u) {
@@ -43,8 +59,8 @@ export async function onRequestPost({ request, env }) {
 
   const sid = newId() + newId();
   const expires = Date.now() + 30 * 24 * 60 * 60 * 1000;
-  const mfaRow = await env.DB.prepare("SELECT enabled_at FROM user_mfa WHERE user_id=?").bind(u.id).first();
-  const mfaEnrolled = !!(mfaRow && mfaRow.enabled_at);
+  // Enrolled users need the MFA step unless this browser is a remembered (trusted) device.
+  const mfaEnrolled = await sessionNeedsMfa(env, request, u.id);
   await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at, mfa_ok) VALUES (?,?,?,?)")
     .bind(sid, u.id, expires, mfaEnrolled ? 0 : 1).run();
   await logEvent(env, { id: u.id, role: u.role }, "login", identifier, "password");

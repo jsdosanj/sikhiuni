@@ -129,7 +129,8 @@ CREATE TABLE IF NOT EXISTS discussions (
   message TEXT NOT NULL, created_at INTEGER NOT NULL,
   -- Threading + moderation (migrations/0004_discussions_threading.sql):
   parent_id TEXT, author_role TEXT,
-  pinned INTEGER NOT NULL DEFAULT 0, locked INTEGER NOT NULL DEFAULT 0, hidden INTEGER NOT NULL DEFAULT 0
+  pinned INTEGER NOT NULL DEFAULT 0, locked INTEGER NOT NULL DEFAULT 0, hidden INTEGER NOT NULL DEFAULT 0,
+  category TEXT                                -- C18 forum category (migrations/0022_messaging.sql)
 );
 CREATE INDEX IF NOT EXISTS idx_discussions_course ON discussions(course_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_discussions_parent ON discussions(parent_id, created_at);
@@ -263,8 +264,16 @@ CREATE TABLE IF NOT EXISTS enrollments (
 -- Append-only audit log (sign-relevant actions: passes, overrides, role changes…).
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY, ts INTEGER NOT NULL, user_id TEXT, role TEXT,
-  action TEXT NOT NULL, target TEXT, detail TEXT
+  action TEXT NOT NULL, target TEXT, detail TEXT,
+  -- Part A (migrations/0018_audit_context.sql): request context (ip/country/ua erased at
+  -- 90 days), structure, and a hash chain for tamper evidence (functions/api/_audit.js).
+  ip TEXT, country TEXT, ua TEXT, session_hash TEXT, ray TEXT,
+  subject_user_id TEXT, target_type TEXT, outcome TEXT, prev_hash TEXT, hash TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_events_user_ts ON events(user_id, ts);
+CREATE INDEX IF NOT EXISTS idx_events_subject_ts ON events(subject_user_id, ts);
+CREATE INDEX IF NOT EXISTS idx_events_action_ts ON events(action, ts);
+CREATE INDEX IF NOT EXISTS idx_events_hash ON events(hash);
 -- The admin events viewer sorts/filters by recency over this append-only table.
 CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts);
 
@@ -330,6 +339,13 @@ CREATE TABLE IF NOT EXISTS mfa_backup_codes (
 );
 -- SQLite/D1 has no ADD COLUMN IF NOT EXISTS, so these lines are NOT safely re-runnable —
 -- fine here since they only ever run once, against the sessions table just created above.
+-- "Remember this device for 30 days" (functions/api/auth/_trusted-device.js). Only the
+-- SHA-256 of the device token is stored. Also auto-created on first use.
+CREATE TABLE IF NOT EXISTS mfa_trusted_devices (
+  token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, last_used_at INTEGER, ua TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mfa_trusted_devices_user ON mfa_trusted_devices(user_id);
 ALTER TABLE sessions ADD COLUMN mfa_ok INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE sessions ADD COLUMN mfa_fail_count INTEGER NOT NULL DEFAULT 0;
 CREATE TABLE IF NOT EXISTS user_flags (
@@ -382,3 +398,120 @@ CREATE TABLE IF NOT EXISTS media_objects (
 );
 CREATE INDEX IF NOT EXISTS idx_media_owner ON media_objects(owner_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_media_status ON media_objects(status);
+
+-- LMS Phase 1 (migrations/0019_lms_phase1.sql).
+CREATE TABLE IF NOT EXISTS assignment_policies (
+  assignment_id TEXT PRIMARY KEY, late_penalty_per_day INTEGER NOT NULL DEFAULT 0, max_late_days INTEGER, updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS assignment_extensions (
+  assignment_id TEXT NOT NULL, user_id TEXT NOT NULL, due_at INTEGER NOT NULL, reason TEXT, created_by TEXT, created_at INTEGER NOT NULL,
+  PRIMARY KEY (assignment_id, user_id)
+);
+CREATE TABLE IF NOT EXISTS course_accommodations (
+  course_id TEXT NOT NULL, user_id TEXT NOT NULL, extra_time_pct INTEGER NOT NULL DEFAULT 0, note TEXT, created_by TEXT, updated_at INTEGER NOT NULL,
+  PRIMARY KEY (course_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS journal_entries (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, user_id TEXT NOT NULL, body TEXT NOT NULL,
+  shared INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_journal_course_user ON journal_entries(course_id, user_id);
+
+CREATE TABLE IF NOT EXISTS glossary_terms (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, term TEXT NOT NULL, term_gur TEXT, definition TEXT NOT NULL,
+  created_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_glossary_course ON glossary_terms(course_id);
+
+CREATE TABLE IF NOT EXISTS polls (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, kind TEXT NOT NULL, title TEXT NOT NULL,
+  anonymous INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'draft', closes_at INTEGER, questions TEXT NOT NULL,
+  created_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_polls_course ON polls(course_id, status);
+CREATE TABLE IF NOT EXISTS poll_participants (poll_id TEXT NOT NULL, user_id TEXT NOT NULL, PRIMARY KEY (poll_id, user_id));
+CREATE TABLE IF NOT EXISTS poll_responses (id TEXT PRIMARY KEY, poll_id TEXT NOT NULL, user_id TEXT, answers TEXT NOT NULL, created_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_poll_responses_poll ON poll_responses(poll_id);
+
+-- C5 notifications (migrations/0020_notifications.sql).
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL, course_id TEXT,
+  title TEXT NOT NULL, body TEXT, url TEXT, dedupe TEXT, created_at INTEGER NOT NULL, read_at INTEGER, emailed_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notifications_dedupe ON notifications(user_id, dedupe);
+CREATE TABLE IF NOT EXISTS notification_prefs (user_id TEXT PRIMARY KEY, prefs TEXT NOT NULL, updated_at INTEGER NOT NULL);
+
+-- C4 grading + rubrics (migrations/0021_grading_rubrics.sql).
+CREATE TABLE IF NOT EXISTS rubrics (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, title TEXT NOT NULL, criteria TEXT NOT NULL,
+  created_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rubrics_course ON rubrics(course_id);
+CREATE TABLE IF NOT EXISTS assignment_rubrics (assignment_id TEXT PRIMARY KEY, rubric_id TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS submission_grading (
+  submission_id TEXT PRIMARY KEY, rubric_id TEXT, rubric_scores TEXT,
+  raw_grade INTEGER, penalty_pct INTEGER NOT NULL DEFAULT 0, graded_by TEXT, updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS grading_comments (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, text TEXT NOT NULL, created_at INTEGER NOT NULL);
+
+-- C18 forums + classmate messaging (migrations/0022_messaging.sql).
+CREATE TABLE IF NOT EXISTS course_messaging_settings (
+  course_id TEXT PRIMARY KEY, forums_enabled INTEGER NOT NULL DEFAULT 1, forum_locked INTEGER NOT NULL DEFAULT 0,
+  dms_enabled INTEGER NOT NULL DEFAULT 1, dm_starters TEXT NOT NULL DEFAULT 'learners', teachers_read_dms INTEGER NOT NULL DEFAULT 0,
+  filter_enabled INTEGER NOT NULL DEFAULT 1, updated_by TEXT, updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS course_mutes (course_id TEXT NOT NULL, user_id TEXT NOT NULL, muted_by TEXT, created_at INTEGER NOT NULL, PRIMARY KEY (course_id, user_id));
+CREATE TABLE IF NOT EXISTS user_blocks (blocker_id TEXT NOT NULL, blocked_id TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (blocker_id, blocked_id));
+CREATE TABLE IF NOT EXISTS dm_conversations (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, pair_key TEXT NOT NULL, requester_id TEXT NOT NULL, recipient_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL, decided_at INTEGER, last_message_at INTEGER NOT NULL,
+  UNIQUE (course_id, pair_key)
+);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_requester ON dm_conversations(requester_id);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_recipient ON dm_conversations(recipient_id);
+CREATE TABLE IF NOT EXISTS dm_messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL, sender_id TEXT NOT NULL, body TEXT NOT NULL, created_at INTEGER NOT NULL, hidden INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX IF NOT EXISTS idx_dm_messages_conv ON dm_messages(conversation_id, created_at);
+CREATE TABLE IF NOT EXISTS dm_reports (
+  id TEXT PRIMARY KEY, message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, course_id TEXT NOT NULL, reporter_id TEXT NOT NULL,
+  reason TEXT, status TEXT NOT NULL DEFAULT 'open', created_at INTEGER NOT NULL, resolved_by TEXT, resolved_at INTEGER, UNIQUE (message_id, reporter_id)
+);
+CREATE TABLE IF NOT EXISTS forum_subscriptions (user_id TEXT NOT NULL, thread_id TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (user_id, thread_id));
+
+-- C3 release rules + C1 iCal feed (migrations/0023_release_rules_calendar_feed.sql).
+CREATE TABLE IF NOT EXISTS release_rules (
+  item_type TEXT NOT NULL, item_id TEXT NOT NULL, course_id TEXT NOT NULL, min_lessons INTEGER,
+  require_quiz_pass INTEGER NOT NULL DEFAULT 0, not_before INTEGER, updated_by TEXT, updated_at INTEGER NOT NULL,
+  PRIMARY KEY (item_type, item_id)
+);
+-- The feed token is a bearer secret: only its SHA-256 is stored.
+CREATE TABLE IF NOT EXISTS calendar_feeds (user_id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL, last_used_at INTEGER);
+
+-- C2 course quizzes (migrations/0024_lms_quizzes.sql).
+CREATE TABLE IF NOT EXISTS lms_quizzes (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, title TEXT NOT NULL, description TEXT, status TEXT NOT NULL DEFAULT 'draft',
+  time_limit_min INTEGER, max_attempts INTEGER, draw_count INTEGER, review TEXT NOT NULL DEFAULT 'score', pass_pct INTEGER,
+  created_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_lms_quizzes_course ON lms_quizzes(course_id);
+CREATE TABLE IF NOT EXISTS lms_quiz_questions (id TEXT PRIMARY KEY, quiz_id TEXT NOT NULL, position INTEGER NOT NULL, type TEXT NOT NULL, prompt TEXT NOT NULL, data TEXT NOT NULL, points INTEGER NOT NULL DEFAULT 1);
+CREATE INDEX IF NOT EXISTS idx_lms_quiz_questions_quiz ON lms_quiz_questions(quiz_id, position);
+-- Answer keys live only in lms_quiz_questions.data; attempts store this attempt's shuffles.
+CREATE TABLE IF NOT EXISTS lms_quiz_attempts (
+  id TEXT PRIMARY KEY, quiz_id TEXT NOT NULL, course_id TEXT NOT NULL, user_id TEXT NOT NULL, started_at INTEGER NOT NULL, deadline_at INTEGER,
+  submitted_at INTEGER, question_ids TEXT NOT NULL, perms TEXT NOT NULL, answers TEXT, score REAL, max_score REAL, results TEXT, status TEXT NOT NULL DEFAULT 'in_progress'
+);
+CREATE INDEX IF NOT EXISTS idx_lms_quiz_attempts_user ON lms_quiz_attempts(quiz_id, user_id);
+
+-- C9 peer review (migrations/0025_peer_review.sql).
+CREATE TABLE IF NOT EXISTS peer_review_settings (
+  assignment_id TEXT PRIMARY KEY, course_id TEXT NOT NULL, reviews_per_learner INTEGER NOT NULL,
+  anonymous INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'open', opened_at INTEGER NOT NULL, updated_by TEXT
+);
+CREATE TABLE IF NOT EXISTS peer_reviews (
+  id TEXT PRIMARY KEY, assignment_id TEXT NOT NULL, course_id TEXT NOT NULL, reviewer_id TEXT NOT NULL, submission_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'assigned', rubric_scores TEXT, comment TEXT, hidden INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL, submitted_at INTEGER, UNIQUE (reviewer_id, submission_id)
+);
+CREATE INDEX IF NOT EXISTS idx_peer_reviews_assignment ON peer_reviews(assignment_id);

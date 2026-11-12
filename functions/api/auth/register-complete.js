@@ -42,6 +42,7 @@ export async function onRequestPost(context) {
 
   if (code !== pending.code) {
     await env.DB.prepare("UPDATE pending_registrations SET attempts = attempts + 1 WHERE rsid = ?").bind(rsid).run();
+    await logEvent(env, null, "register_code_failed", pending.email, "attempt=" + (pending.attempts + 1), { outcome: "fail", targetType: "registration" });
     return json({ error: "That code isn’t right. Check your email and try again.", code: "invalid_or_expired" }, 400);
   }
 
@@ -76,6 +77,7 @@ export async function onRequestPost(context) {
     throw e;
   }
   await logEvent(env, { id, role }, "user_created", pending.email, "password");
+  if (role === "admin") await logEvent(env, { id, role }, "admin_granted", id, "ADMIN_EMAILS at registration", { subject: id, targetType: "user", after: "admin" });
 
   await env.DB.prepare("DELETE FROM pending_registrations WHERE rsid = ?").bind(rsid).run();
 

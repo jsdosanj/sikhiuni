@@ -38,6 +38,8 @@ export async function onRequestPost({ request, env }) {
   // belongs to a course, and other students' grade/submission history on it must
   // survive the teacher's account deletion. teacher_id becomes a dangling opaque
   // id, same tradeoff already accepted for events.user_id.
+  await wipe("DELETE FROM submission_grading WHERE submission_id IN (SELECT id FROM submissions WHERE user_id=?)");
+  await wipe("DELETE FROM peer_reviews WHERE reviewer_id=?1 OR submission_id IN (SELECT id FROM submissions WHERE user_id=?1)");
   await wipe("DELETE FROM submissions WHERE user_id=?");
   // A published draft's content already lives in courses.json (git history) —
   // deleting the D1 workflow row here doesn't touch the live catalogue.
@@ -54,8 +56,32 @@ export async function onRequestPost({ request, env }) {
   await wipe("DELETE FROM grade_overrides WHERE user_id=?");
   await wipe("DELETE FROM course_teachers WHERE user_id=?");
   await wipe("DELETE FROM sessions WHERE user_id=?");
+  await wipe("DELETE FROM password_reset_codes WHERE user_id=?");
+  await wipe("DELETE FROM cohort_members WHERE user_id=?");
+  await wipe("DELETE FROM push_subs WHERE user_id=?");
   await wipe("DELETE FROM user_mfa WHERE user_id=?");
   await wipe("DELETE FROM mfa_backup_codes WHERE user_id=?");
+  await wipe("DELETE FROM mfa_trusted_devices WHERE user_id=?");
+  // LMS Phase 1 (plan Part D.10). Anonymous poll answers hold no user id, so they
+  // are not personal data and stay in the tallies; named answers are erased.
+  await wipe("DELETE FROM journal_entries WHERE user_id=?");
+  await wipe("DELETE FROM assignment_extensions WHERE user_id=?");
+  await wipe("DELETE FROM course_accommodations WHERE user_id=?");
+  await wipe("DELETE FROM poll_responses WHERE user_id=?");
+  await wipe("DELETE FROM poll_participants WHERE user_id=?");
+  await wipe("DELETE FROM notifications WHERE user_id=?");
+  await wipe("DELETE FROM notification_prefs WHERE user_id=?");
+  await wipe("DELETE FROM grading_comments WHERE user_id=?");
+  // C18 messaging. A conversation is shared, so the other person's messages go with it:
+  // a deleted account leaves no half-thread behind.
+  await wipe("DELETE FROM dm_reports WHERE conversation_id IN (SELECT id FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1)");
+  await wipe("DELETE FROM dm_messages WHERE conversation_id IN (SELECT id FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1)");
+  await wipe("DELETE FROM dm_conversations WHERE requester_id=?1 OR recipient_id=?1");
+  await wipe("DELETE FROM user_blocks WHERE blocker_id=?1 OR blocked_id=?1");
+  await wipe("DELETE FROM forum_subscriptions WHERE user_id=?");
+  await wipe("DELETE FROM course_mutes WHERE user_id=?");
+  await wipe("DELETE FROM calendar_feeds WHERE user_id=?");
+  await wipe("DELETE FROM lms_quiz_attempts WHERE user_id=?");
   await wipe("DELETE FROM user_flags WHERE user_id=?");
   await wipe("DELETE FROM teacher_profiles WHERE user_id=?");
   await wipe("DELETE FROM professor_claims WHERE user_id=?");

@@ -1,4 +1,5 @@
 import { json, getUser, newId, logEvent, parseBody } from "./_lib.js";
+import { notify, courseLearnerIds } from "./_notify.js";
 
 async function ensure(env) {
   await env.DB.prepare(
@@ -39,5 +40,6 @@ export async function onRequestPost({ request, env }) {
     "INSERT INTO announcements (id, course_id, author_id, author_name, title, body, created_at) VALUES (?,?,?,?,?,?,?)"
   ).bind(id, b.courseId, user.id, user.name || user.email, (b.title || "").slice(0, 160), b.body.slice(0, 4000), Date.now()).run();
   await logEvent(env, user, "announcement", b.courseId, (b.title || "").slice(0, 80));
+  await notify(env, await courseLearnerIds(env, b.courseId), { kind: "announcement", courseId: b.courseId, title: (b.title || "New announcement").slice(0, 160), body: b.body.slice(0, 300), url: `/course/${b.courseId}` });
   return json({ ok: true, id });
 }

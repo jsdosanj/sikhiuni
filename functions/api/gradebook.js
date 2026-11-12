@@ -67,6 +67,7 @@ export async function onRequestGet({ request, env }) {
   const courses = isAdmin ? Array.from(new Set(rows.filter((r) => !r.program).map((r) => r.course_id))) : scopeIds;
 
   if (url.searchParams.get("format") === "csv") {
+    await logEvent(env, user, "export_gradebook", course || (isAdmin ? "all" : "assigned"), rows.length + " rows", { targetType: "export" });
     const head = ["kind", "course_id", "student", "email", "completed_lessons", "score", "passed", "overridden", "last_active"];
     // Neutralise spreadsheet formula injection: a cell like =HYPERLINK(...) in a
     // learner-set name executes when the CSV is opened in Excel/Sheets. Prefix any
@@ -103,7 +104,7 @@ export async function onRequestPost({ request, env }) {
 
   if (b.score == null || b.score === "") {
     await env.DB.prepare("DELETE FROM grade_overrides WHERE user_id=? AND course_id=?").bind(b.userId, b.courseId).run();
-    await logEvent(env, user, "grade_override_clear", b.courseId + "/" + b.userId, null);
+    await logEvent(env, user, "grade_override_clear", b.courseId + "/" + b.userId, null, { subject: b.userId, targetType: "grade" });
     return json({ ok: true, cleared: true });
   }
   const n = Number(b.score);
@@ -113,6 +114,6 @@ export async function onRequestPost({ request, env }) {
     "INSERT INTO grade_overrides (user_id, course_id, score, reason, overridden_by, overridden_at) VALUES (?,?,?,?,?,?) " +
     "ON CONFLICT(user_id, course_id) DO UPDATE SET score=excluded.score, reason=excluded.reason, overridden_by=excluded.overridden_by, overridden_at=excluded.overridden_at"
   ).bind(b.userId, b.courseId, score, (b.reason || "").slice(0, 500), user.id, Date.now()).run();
-  await logEvent(env, user, "grade_override", b.courseId + "/" + b.userId, "score=" + score);
+  await logEvent(env, user, "grade_override", b.courseId + "/" + b.userId, "score=" + score, { subject: b.userId, targetType: "grade", after: score });
   return json({ ok: true, score });
 }

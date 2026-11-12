@@ -83,14 +83,27 @@ self.addEventListener('fetch', function (e) {
 // Coursework reminders (payload-less Web Push): the server sends an empty
 // VAPID-signed push; the notification text lives here. Clicking focuses an
 // open tab (or opens the dashboard) so learners land back in their course.
+// Pushes carry no payload. If the signed-in user has a notification from the last
+// few minutes (a grade, a message request…), show that; otherwise the daily reminder.
 self.addEventListener('push', function (e) {
-  e.waitUntil(self.registration.showNotification('Sikhi University', {
+  var reminder = {
     body: 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! Your course is waiting — a few minutes of seva to yourself today.',
     icon: '/assets/icon-192.png',
     badge: '/assets/icon-192.png',
     tag: 'su-reminder',
     data: { url: '/dashboard' },
-  }));
+  };
+  e.waitUntil(fetch('/api/notifications?latest=1', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; })
+    .then(function (d) {
+      var n = d && d.notification;
+      if (!n) return self.registration.showNotification('Sikhi University', reminder);
+      return self.registration.showNotification('Sikhi University', {
+        body: n.title, icon: reminder.icon, badge: reminder.badge, tag: 'su-n-' + n.id,
+        data: { url: n.url || '/notifications' },
+      });
+    }));
 });
 self.addEventListener('notificationclick', function (e) {
   e.notification.close();

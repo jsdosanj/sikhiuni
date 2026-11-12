@@ -355,13 +355,19 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         <textarea id="rate-review" rows="2" aria-label="Optional written review" data-i18n-aria="course.rate.reviewAria" placeholder="Optional review…" data-i18n-ph="course.rate.reviewPh" class="mt-2 w-full rounded-lg border border-line p-2 font-sans text-sm transition-colors focus:border-saffron"></textarea>
         <button id="rate-submit" class="btn btn-primary mt-2" data-i18n="course.rate.submit">Submit rating</button>
         <div id="rate-msg" class="mt-2 font-sans text-sm"></div>
+        <p id="course-tools-link" class="mt-6 hidden font-sans text-sm"><a class="underline" href={`/course-tools?course=${c.id}`}>Course tools: due dates, polls, journal and glossary →</a> · <a class="underline" href={`/messages?course=${c.id}`}>Message a classmate</a></p>
         <div id="assignments" class="mt-6 hidden border-t border-line pt-6">
           <h2 class="text-xl font-bold">Assignments</h2>
           <div id="assign-list" class="mt-3 space-y-3"></div>
         </div>
-        <div class="mt-6 border-t border-line pt-6">
+        <div id="discussion" class="mt-6 border-t border-line pt-6">
           <h2 class="text-xl font-bold" data-i18n="course.discussion.h">Discussion &amp; Q&amp;A</h2>
           <div id="disc-list" class="mt-3 space-y-2"></div>
+          <p id="disc-state" class="mt-3 hidden rounded-lg border-l-4 border-saffron bg-surface p-2 font-sans text-sm"></p>
+          <label class="mt-3 block font-sans text-xs text-muted" id="disc-cat-wrap">Post in
+            <select id="disc-cat" class="ml-1 rounded border border-line bg-surface px-2 py-1 font-sans text-xs">
+              <option value="general">General</option><option value="qa">Q&amp;A</option><option value="announcements">Announcements (teachers)</option>
+            </select></label>
           <textarea id="disc-msg" rows="2" aria-label="Your question or comment" data-i18n-aria="course.discussion.msgAria" placeholder="Ask a question or share a thought…" data-i18n-ph="course.discussion.msgPh" class="mt-3 w-full rounded-lg border border-line p-2 font-sans text-sm transition-colors focus:border-saffron"></textarea>
           <button id="disc-submit" class="btn mt-2" data-i18n="course.discussion.post">Post</button>
           <div id="disc-note" class="mt-1 font-sans text-xs text-muted" data-i18n="course.discussion.signinnote">Sign in to post.</div>
@@ -401,7 +407,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           const content = await response.json();
           document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
             const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
-            if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
+            if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
+            else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
           });
           document.getElementById('free-course-access')?.remove();
           const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
@@ -727,7 +734,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           <article id="lesson-${i}" class="border-t-2 border-line pt-8 pb-2 first:border-t-0 first:pt-0">
             <p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep">Lesson ${String(i + 1).padStart(2, '0')}</p>
             <h3 class="mt-1 text-2xl font-bold leading-tight text-navy">${esc(ls.title)}</h3>
-            <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed">${expandYoutubeEmbeds(ls.html)}</div>
+            <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed">${ls.locked ? `<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ${esc(ls.lock_reason)}</p>` : expandYoutubeEmbeds(ls.html)}</div>
           </article>`).join('');
 
         const quiz = data.quiz || [];
@@ -770,7 +777,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           const content = await response.json();
           document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
             const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
-            if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
+            if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
+            else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
           });
           document.getElementById('free-course-access')?.remove();
           const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
@@ -827,6 +835,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       // user is enrolled (server-gated; a 403 just means "hide this section").
       function loadAssignments() {
         api('/api/assignments?courseId=' + encodeURIComponent(id)).then(function (r) {
+          // Enrolled learners and the course's teachers both get the course tools link.
+          if (r.ok) document.getElementById('course-tools-link').classList.remove('hidden');
           if (!r.ok || r.d.scope !== 'student') return;
           var section = document.getElementById('assignments');
           var list = r.d.assignments || [];
@@ -838,16 +848,38 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
               : a.status === 'closed' ? '<span class="pill bg-paper text-muted">Closed, no submission</span>'
               : '';
           return '<div class="rounded-lg border border-line bg-surface p-3" data-assignment="' + esc(a.id) + '" data-allow-file="' + (a.allow_file ? '1' : '0') + '" data-closed="' + (a.status === 'closed' ? '1' : '0') + '">' +
-              '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + (a.due_at ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.due_at).toLocaleDateString()) + '</span>' : '') + statusLine + '</div>' +
+              '<div class="flex flex-wrap items-center gap-2"><span class="font-bold text-navy">' + esc(a.title) + '</span>' + ((a.my_due_at || a.due_at) ? '<span class="font-sans text-xs text-muted">due ' + esc(new Date(a.my_due_at || a.due_at).toLocaleDateString()) + (a.extended ? ' (your extended date)' : '') + (a.late_penalty_per_day ? ' · late work loses ' + esc(a.late_penalty_per_day) + '% per day' : '') + '</span>' : '') + statusLine + '</div>' +
               '<p class="mt-1 text-sm text-muted">' + esc(a.instructions) + '</p>' +
-              (a.my_status !== 'graded' && a.status !== 'closed' ? (
+              (a.locked ? '<p class="mt-1 font-sans text-sm text-muted">' + esc(a.lock_reason) + '</p>' :
+              a.my_status !== 'graded' && a.status !== 'closed' ? (
                 '<textarea rows="2" class="mt-2 w-full rounded-lg border border-line p-2 font-sans text-sm focus:border-saffron" placeholder="Your answer…" data-assign-text></textarea>' +
                 (a.allow_file ? '<input type="file" class="mt-2 block font-sans text-xs" data-assign-file />' : '') +
                 '<button type="button" class="btn mt-2" data-assign-submit>' + (a.my_status === 'submitted' ? 'Resubmit' : 'Submit') + '</button>' +
                 '<div class="mt-1 font-sans text-xs text-muted" data-assign-note></div>'
-              ) : (a.my_feedback ? '<p class="mt-2 text-sm"><strong>Feedback:</strong> ' + esc(a.my_feedback) + '</p>' : '')) +
+              ) : (a.my_feedback ? '<p class="mt-2 text-sm"><strong>Feedback:</strong> ' + esc(a.my_feedback) + '</p>' : '') +
+                (a.my_status === 'graded' ? '<button type="button" class="mt-1 font-sans text-xs underline" data-marking>See how it was marked</button><div class="mt-1" data-marking-out></div>' : '')) +
               '</div>';
           }).join('');
+          // C4: per-criterion rubric scores and the late-policy deduction, on request.
+          document.querySelectorAll('[data-marking]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var card = btn.closest('[data-assignment]');
+              var out = card.querySelector('[data-marking-out]');
+              api('/api/submissions?assignmentId=' + encodeURIComponent(card.dataset.assignment) + '&mine=1').then(function (r) {
+                var sub = r.ok && r.d.submission, g = sub && sub.grading, rub = r.ok && r.d.rubric;
+                var html = '';
+                if (rub && g && g.rubric_scores) {
+                  html += '<table class="w-full font-sans text-xs"><tbody>' + rub.criteria.map(function (c) {
+                    var sc = g.rubric_scores[c.id] || {};
+                    return '<tr class="border-t border-line"><td class="py-1 pr-2">' + esc(c.title) + '</td><td class="whitespace-nowrap pr-2">' + esc(sc.points != null ? sc.points : '–') + ' / ' + esc(c.points) + '</td><td class="text-muted">' + esc(sc.comment || '') + '</td></tr>';
+                  }).join('') + '</tbody></table>';
+                }
+                if (g && g.penalty_pct) html += '<p class="font-sans text-xs text-muted">Late policy: −' + esc(g.penalty_pct) + '% (score before deduction ' + esc(g.raw_grade) + '/' + esc(r.d.points) + ').</p>';
+                out.innerHTML = html || '<p class="font-sans text-xs text-muted">This was marked with a single score and the feedback above.</p>';
+                btn.remove();
+              });
+            });
+          });
           document.querySelectorAll('[data-assign-submit]').forEach(function (btn) {
             btn.addEventListener('click', function () {
               var card = btn.closest('[data-assignment]');
@@ -893,11 +925,13 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           '<div class="flex flex-wrap items-center gap-2"><span class="h-7 w-7 shrink-0 rounded-full bg-navy text-white grid place-items-center font-sans text-xs" aria-hidden="true">' + esc(initial) + '</span>' +
           '<div class="font-sans text-xs text-muted">' + esc(name) + (x.created_at ? ' · ' + esc(timeAgo(x.created_at)) : '') + '</div>' +
           (x.pinned ? '<span class="rounded-full bg-saffron-soft px-2 py-0.5 font-sans text-[0.65rem] font-semibold text-saffron">Pinned</span>' : '') +
+          (!isReply && x.category && x.category !== 'general' ? '<span class="rounded-full border border-line px-2 py-0.5 font-sans text-[0.65rem] font-semibold text-muted">' + (x.category === 'qa' ? 'Q&amp;A' : 'Announcement') + '</span>' : '') +
           badges(x) + '</div>' +
           '<div class="mt-0.5 text-sm">' + esc(x.message) + '</div>' +
           '<div class="mt-1 flex gap-3 font-sans text-xs text-muted">' +
           (!isReply && !x.locked ? '<button type="button" data-reply="' + esc(x.id) + '" class="hover:text-navy hover:underline">Reply</button>' : '') +
           (!isReply && x.locked ? '<span>Locked</span>' : '') +
+          (!isReply ? '<button type="button" data-follow="' + esc(x.id) + '" data-on="' + (x.following ? '1' : '0') + '" class="hover:text-navy hover:underline">' + (x.following ? 'Following' : 'Follow') + '</button>' : '') +
           '<button type="button" data-report="' + esc(x.id) + '" class="hover:text-navy hover:underline">Report</button>' +
           '</div>' +
           '<div data-reply-box="' + esc(x.id) + '" class="mt-2 hidden"><textarea rows="2" class="w-full rounded-lg border border-line p-2 font-sans text-sm focus:border-saffron" placeholder="Write a reply…"></textarea><button type="button" class="btn mt-1" data-reply-submit="' + esc(x.id) + '">Post reply</button></div>' +
@@ -917,6 +951,15 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
             });
           };
         });
+        document.querySelectorAll('[data-follow]').forEach(function (b) {
+          b.onclick = function () {
+            var on = b.dataset.on === '1';
+            api('/api/discussions', { method: 'POST', body: JSON.stringify({ action: on ? 'unfollow' : 'follow', threadId: b.dataset.follow }) }).then(function (r) {
+              if (!r.ok) { document.getElementById('disc-note').textContent = (r.d && r.d.error) || 'Please sign in to follow threads.'; return; }
+              b.dataset.on = on ? '0' : '1'; b.textContent = on ? 'Follow' : 'Following';
+            });
+          };
+        });
         document.querySelectorAll('[data-report]').forEach(function (b) {
           b.onclick = function () {
             b.disabled = true; b.textContent = 'Reported';
@@ -927,6 +970,13 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       function loadDisc() {
         api('/api/discussions?courseId=' + encodeURIComponent(id)).then(function (r) {
           var m = (r.d && r.d.messages) || [];
+          // C18 course forum settings: off, or read-only.
+          var f = (r.d && r.d.forum) || { enabled: true, locked: false };
+          var state = document.getElementById('disc-state');
+          var closed = !f.enabled || f.locked;
+          state.classList.toggle('hidden', !closed);
+          state.textContent = !f.enabled ? 'The teachers have turned the forum off for this course.' : f.locked ? 'This forum is read-only.' : '';
+          ['disc-msg', 'disc-submit', 'disc-cat-wrap'].forEach(function (k) { document.getElementById(k).classList.toggle('hidden', closed); });
           document.getElementById('disc-list').innerHTML = m.length ? m.map(function (x) {
             return messageHtml(x, false) + (x.replies || []).map(function (rep) { return messageHtml(rep, true); }).join('');
           }).join('') : '<p class="text-sm text-muted">No messages yet, start the conversation.</p>';
@@ -936,7 +986,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       loadDisc();
       document.getElementById('disc-submit').onclick = function () {
         var msg = document.getElementById('disc-msg').value.trim(); if (!msg) return;
-        api('/api/discussions', { method: 'POST', body: JSON.stringify({ courseId: id, message: msg }) }).then(function (r) {
+        api('/api/discussions', { method: 'POST', body: JSON.stringify({ courseId: id, message: msg, category: document.getElementById('disc-cat').value }) }).then(function (r) {
           if (r.ok) { document.getElementById('disc-msg').value = ''; document.getElementById('disc-note').textContent = ''; loadDisc(); }
           else document.getElementById('disc-note').textContent = (r.d && r.d.error) || 'Please sign in to post.';
         });

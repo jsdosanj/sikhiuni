@@ -1,0 +1,169 @@
+---
+import Base from '../layouts/Base.astro';
+// C4 SpeedGrader-style grading: one learner at a time, submission beside the grade
+// panel, rubric scoring, late-policy deduction, a reusable comment library, and
+// previous/next. /grade?assignment=<id>. Server-gated (teacher of the course or admin);
+// grading goes through /api/submissions/grade. English in markup (Base auto-translates <main>).
+const field = 'mt-1 w-full border border-line bg-surface px-3 py-2 font-sans text-[15px] font-normal normal-case tracking-normal text-ink outline-none focus:border-navy';
+---
+<Base title="Grade submissions, Sikhi University" description="Grade a course assignment." ambient="none">
+  <section class="wrap max-w-6xl py-8">
+    <p class="eyebrow text-saffron-deep">Grading</p>
+    <h1 id="g-title" class="mt-2 text-2xl font-bold text-navy sm:text-3xl">Grade submissions</h1>
+    <p id="g-back" class="mt-1 font-sans text-sm"></p>
+    <div id="g-gate" class="mt-6" role="status" aria-live="polite"></div>
+    <div id="g-app" class="hidden">
+      <div class="mt-5 flex flex-wrap items-center gap-2 border-y border-line py-3 font-sans text-sm">
+        <button id="g-prev" class="btn" aria-label="Previous learner">← Previous</button>
+        <label class="sr-only" for="g-pick">Learner</label>
+        <select id="g-pick" class="border border-line bg-surface px-2 py-1.5"></select>
+        <button id="g-next" class="btn" aria-label="Next learner">Next →</button>
+        <span id="g-pos" class="text-muted"></span>
+        <label class="ml-auto flex items-center gap-2"><input id="g-ungraded" type="checkbox" /> Ungraded only</label>
+      </div>
+      <div class="mt-5 flex flex-wrap gap-8">
+        <article class="min-w-0 flex-[3_1_420px]" aria-labelledby="g-who">
+          <h2 id="g-who" class="text-xl font-bold text-navy"></h2>
+          <p id="g-meta" class="mt-1 font-sans text-sm text-muted"></p>
+          <div id="g-file" class="mt-3"></div>
+          <div id="g-text" class="mt-3 whitespace-pre-wrap rounded-xl2 border border-line bg-surface p-5 leading-[1.7]"></div>
+        </article>
+        <form id="g-form" class="min-w-0 flex-[2_1_320px] space-y-4">
+          <div id="g-rubric"></div>
+          <label class="block font-sans text-sm font-semibold">Score <span id="g-outof" class="font-normal text-muted"></span>
+            <input id="g-grade" type="number" min="0" class={field} /></label>
+          <label id="g-late-wrap" class="hidden flex items-center gap-2 font-sans text-sm"><input id="g-late" type="checkbox" checked /> <span id="g-late-label"></span></label>
+          <p id="g-final" class="font-sans text-sm text-muted" aria-live="polite"></p>
+          <label class="block font-sans text-sm font-semibold">Feedback to the learner
+            <textarea id="g-feedback" rows="6" maxlength="4000" class={field + ' leading-[1.6]'}></textarea></label>
+          <div class="flex flex-wrap items-center gap-2 font-sans text-sm">
+            <label class="sr-only" for="g-lib">Insert a saved comment</label>
+            <select id="g-lib" class="max-w-[16rem] border border-line bg-surface px-2 py-1.5"><option value="">Insert a saved comment…</option></select>
+            <button type="button" id="g-lib-save" class="underline">Save feedback to my comments</button>
+          </div>
+          <div class="flex flex-wrap gap-2"><button class="btn btn-primary" type="submit" id="g-save">Save &amp; next</button><button class="btn" type="button" id="g-save-stay">Save</button></div>
+          <div id="g-out" class="font-sans text-sm" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <template id="g-cls" data-field={field}></template>
+  <script>
+    type Any = any;
+    const FIELD = (document.getElementById('g-cls') as HTMLElement).dataset.field || '';
+    const $ = (id: string) => document.getElementById(id) as Any;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const fmt = (ms: number) => (ms ? new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '');
+    async function api(path: string, body?: Any) {
+      const r = await fetch(path, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      return { ok: r.ok, status: r.status, d: await r.json().catch(() => ({})) };
+    }
+    const assignmentId = new URLSearchParams(location.search).get('assignment') || '';
+    let data: Any = null, subs: Any[] = [], idx = 0, comments: Any[] = [];
+
+    const visible = () => ($('g-ungraded').checked ? subs.filter((s) => s.status !== 'graded') : subs);
+    function rubricTotal() {
+      if (!data.rubric) return null;
+      let raw = 0, total = 0;
+      for (const c of data.rubric.criteria) { total += c.points; raw += Number(($(`rc-${c.id}`) || {}).value || 0); }
+      return total ? Math.round((raw / total) * data.points) : 0;
+    }
+    function updateFinal() {
+      const fromRubric = rubricTotal();
+      if (fromRubric != null) $('g-grade').value = fromRubric;
+      const raw = Number($('g-grade').value || 0);
+      const s = visible()[idx];
+      const pct = s && s.late_penalty_pct && $('g-late').checked ? s.late_penalty_pct : 0;
+      $('g-final').textContent = $('g-grade').value === '' ? '' : `Final grade: ${Math.max(0, Math.round(raw * (100 - pct) / 100))} / ${data.points}${pct ? ` (after −${pct}% late)` : ''}`;
+    }
+    function render() {
+      const list = visible();
+      $('g-pick').innerHTML = list.map((s: Any, i: number) => `<option value="${i}">${esc(s.name || s.email)}${s.status === 'graded' ? ' (graded)' : ''}</option>`).join('');
+      if (!list.length) {
+        $('g-who').textContent = subs.length ? 'Everything is graded.' : 'No submissions yet.';
+        ['g-meta', 'g-file', 'g-text', 'g-rubric'].forEach((id) => { $(id).innerHTML = ''; });
+        $('g-text').classList.add('hidden'); $('g-form').classList.add('hidden'); $('g-pos').textContent = '';
+        return;
+      }
+      $('g-text').classList.remove('hidden'); $('g-form').classList.remove('hidden');
+      idx = Math.max(0, Math.min(idx, list.length - 1));
+      const s = list[idx];
+      $('g-pick').value = String(idx);
+      $('g-pos').textContent = `${idx + 1} of ${list.length}`;
+      $('g-prev').disabled = idx === 0; $('g-next').disabled = idx === list.length - 1;
+      $('g-who').textContent = s.name || s.email;
+      $('g-meta').innerHTML = `Submitted ${esc(fmt(s.updated_at || s.submitted_at))}${s.late ? ' · <span class="pill bg-saffron-soft text-saffron-deep">late</span>' : ''}${s.extended ? ' · extended due date' : ''}${s.status === 'graded' ? ` · graded ${esc(s.grade)}/${esc(data.points)}` : ''}`;
+      $('g-file').innerHTML = s.file_key ? `<a class="btn" href="/api/asset?key=${encodeURIComponent(s.file_key)}" target="_blank" rel="noopener">Open the attached file ↗</a>` : '';
+      $('g-text').textContent = s.text_content || '(No written answer.)';
+      const g = s.grading || {};
+      if (data.rubric) {
+        const sc = g.rubric_scores || {};
+        $('g-rubric').innerHTML = `<fieldset class="rounded-xl2 border border-line bg-surface p-4"><legend class="px-1 font-bold text-navy">${esc(data.rubric.title)}</legend>` +
+          data.rubric.criteria.map((c: Any) => `<div class="border-b border-line py-2.5 last:border-0">
+            <div class="flex items-baseline gap-2"><label for="rc-${esc(c.id)}" class="font-semibold">${esc(c.title)}</label><span class="ml-auto font-sans text-xs text-muted">/ ${esc(c.points)}</span></div>
+            ${c.description ? `<p class="font-sans text-xs text-muted">${esc(c.description)}</p>` : ''}
+            ${c.levels ? `<div class="mt-1 flex flex-wrap gap-1.5">${c.levels.map((l: Any) => `<button type="button" class="rounded-full border border-line px-2.5 py-0.5 font-sans text-xs hover:border-saffron" data-level="${esc(c.id)}" data-pts="${esc(l.points)}">${esc(l.label)} · ${esc(l.points)}</button>`).join('')}</div>` : ''}
+            <div class="mt-1 flex gap-2"><input id="rc-${esc(c.id)}" type="number" min="0" max="${esc(c.points)}" required value="${sc[c.id] ? esc(sc[c.id].points) : ''}" class="${FIELD} !w-24" />
+            <input id="rcc-${esc(c.id)}" maxlength="1000" placeholder="Comment (optional)" aria-label="Comment on ${esc(c.title)}" value="${sc[c.id] && sc[c.id].comment ? esc(sc[c.id].comment) : ''}" class="${FIELD}" /></div></div>`).join('') + '</fieldset>';
+        $('g-rubric').querySelectorAll('[data-level]').forEach((btn: Any) => btn.addEventListener('click', () => { $(`rc-${btn.dataset.level}`).value = btn.dataset.pts; updateFinal(); }));
+        $('g-rubric').querySelectorAll('input[type=number]').forEach((i: Any) => i.addEventListener('input', updateFinal));
+        $('g-grade').readOnly = true;
+      } else { $('g-rubric').innerHTML = ''; $('g-grade').readOnly = false; }
+      $('g-grade').value = g.raw_grade != null ? g.raw_grade : s.grade != null ? s.grade : '';
+      $('g-feedback').value = s.feedback || '';
+      $('g-late-wrap').classList.toggle('hidden', !s.late_penalty_pct);
+      $('g-late-label').textContent = `Apply the late policy (−${s.late_penalty_pct}%)`;
+      $('g-out').textContent = '';
+      updateFinal();
+    }
+    async function save(advance: boolean) {
+      const s = visible()[idx];
+      const body: Any = { submissionId: s.id, feedback: $('g-feedback').value, applyLatePenalty: !!s.late_penalty_pct && $('g-late').checked };
+      if (data.rubric) {
+        body.rubricScores = {};
+        for (const c of data.rubric.criteria) body.rubricScores[c.id] = { points: Number($(`rc-${c.id}`).value), comment: $(`rcc-${c.id}`).value };
+      } else body.grade = Number($('g-grade').value);
+      const r = await api('/api/submissions/grade', body);
+      if (!r.ok) { $('g-out').textContent = r.d.error || 'Could not save.'; return; }
+      Object.assign(s, { grade: r.d.grade, status: 'graded', feedback: body.feedback, grading: { raw_grade: r.d.raw, penalty_pct: r.d.penaltyPct, rubric_scores: body.rubricScores || null } });
+      $('g-out').textContent = `Saved: ${r.d.grade}/${data.points}.`;
+      if (advance) { if (!$('g-ungraded').checked) idx++; render(); } else render();
+    }
+    function loadLibrary() {
+      $('g-lib').innerHTML = '<option value="">Insert a saved comment…</option>' + comments.map((c: Any) => `<option value="${esc(c.id)}">${esc(c.text.length > 60 ? c.text.slice(0, 60) + '…' : c.text)}</option>`).join('');
+    }
+    $('g-prev').addEventListener('click', () => { idx--; render(); });
+    $('g-next').addEventListener('click', () => { idx++; render(); });
+    $('g-pick').addEventListener('change', () => { idx = Number($('g-pick').value); render(); });
+    $('g-ungraded').addEventListener('change', () => { idx = 0; render(); });
+    $('g-grade').addEventListener('input', updateFinal);
+    $('g-late').addEventListener('change', updateFinal);
+    $('g-form').addEventListener('submit', (e: Event) => { e.preventDefault(); save(true); });
+    $('g-save-stay').addEventListener('click', () => { if (($('g-form') as HTMLFormElement).reportValidity()) save(false); });
+    $('g-lib').addEventListener('change', () => {
+      const c = comments.find((x: Any) => x.id === $('g-lib').value); if (!c) return;
+      const t = $('g-feedback'); t.value = (t.value ? t.value.trimEnd() + '\n\n' : '') + c.text; $('g-lib').value = ''; t.focus();
+    });
+    $('g-lib-save').addEventListener('click', async () => {
+      const text = $('g-feedback').value.trim(); if (!text) return;
+      const r = await api('/api/rubrics', { action: 'comment_add', text });
+      if (r.ok) { comments.unshift({ id: r.d.id, text }); loadLibrary(); $('g-out').textContent = 'Saved to your comments.'; } else $('g-out').textContent = r.d.error || 'Could not save the comment.';
+    });
+
+    (async () => {
+      if (!/^[a-zA-Z0-9_-]{1,64}$/.test(assignmentId)) { $('g-gate').textContent = 'Open the grader from an assignment.'; return; }
+      const r = await api('/api/submissions?assignmentId=' + encodeURIComponent(assignmentId));
+      if (r.status === 401) { $('g-gate').innerHTML = `Please <a class="underline" href="/login?next=${encodeURIComponent(location.pathname + location.search)}">sign in</a>.`; return; }
+      if (!r.ok || r.d.scope !== 'teacher') { $('g-gate').textContent = r.status === 403 ? 'Only the teachers of this course can grade it.' : (r.d.error || 'Could not load submissions.'); return; }
+      data = r.d; subs = (data.submissions || []).slice().sort((a: Any, b: Any) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+      $('g-title').textContent = data.title || 'Grade submissions';
+      $('g-back').innerHTML = `<a class="underline" href="/course-tools?course=${encodeURIComponent(data.course_id)}#settings">← Course tools</a> · <a class="underline" href="/dashboard/learning?view=teacher">Teacher dashboard</a>`;
+      $('g-outof').textContent = data.rubric ? `(from the rubric, out of ${data.points})` : `(out of ${data.points})`;
+      $('g-grade').max = data.points;
+      const lib = await api('/api/rubrics?courseId=' + encodeURIComponent(data.course_id));
+      comments = (lib.ok && lib.d.comments) || []; loadLibrary();
+      $('g-app').classList.remove('hidden');
+      render();
+    })();
+  </script>
+</Base>

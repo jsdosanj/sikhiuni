@@ -1,4 +1,4 @@
-import { readCookie, json } from "../_lib.js";
+import { readCookie, json, logEvent } from "../_lib.js";
 import { PSID_COOKIE } from "./forgot-password.js";
 
 // POST /api/auth/verify-reset-code { code }
@@ -42,6 +42,7 @@ export async function onRequestPost({ request, env }) {
 
   if (code !== row.code) {
     await env.DB.prepare("UPDATE password_reset_codes SET attempts = attempts + 1 WHERE psid = ?").bind(psid).run();
+    await logEvent(env, null, "reset_code_failed", null, "attempt=" + (row.attempts + 1), { outcome: "fail", subject: row.user_id, targetType: "account" });
     return json({ error: "That code isn’t right. Check your email and try again.", code: "invalid_or_expired" }, 400);
   }
 
