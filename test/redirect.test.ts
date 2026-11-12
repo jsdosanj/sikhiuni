@@ -70,6 +70,15 @@ describe("canonical-host redirect", () => {
     expect(res.headers.get("TDM-Reservation")).toBeNull();
   });
 
+  it("serves /contact in place (the Contact us page), while other path aliases still redirect", async () => {
+    const res = await worker.fetch(new Request("https://sikhiuni.com/contact"), { ASSETS: htmlAssets });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
+    const alias = await worker.fetch(new Request("https://sikhiuni.com/courses"), { ASSETS: htmlAssets });
+    expect(alias.status).toBe(301);
+    expect(alias.headers.get("location")).toBe("https://sikhiuni.com/catalog");
+  });
+
   it("leaves dev/preview hosts alone (localhost keeps working under wrangler dev)", async () => {
     const res = await worker.fetch(new Request("http://localhost:8787/"), {
       ASSETS: htmlAssets,

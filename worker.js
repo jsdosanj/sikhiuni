@@ -420,8 +420,6 @@ export default {
       destPath = "/technology" + pathname.slice("/institute".length);
     } else if (pathname === "/courses" || pathname === "/courses/") {
       destPath = "/catalog";
-    } else if (pathname === "/contact" || pathname === "/contact/") {
-      destPath = "/feedback";
     } else if (pathname === "/muharni" || pathname === "/muharni/") {
       destPath = "/baal-updesh";
     }
