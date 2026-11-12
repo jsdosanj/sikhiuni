@@ -24,9 +24,9 @@ function fakeDB() {
       const u = users.get(s.user_id);
       return u ? { id: u.id, email: u.email, name: u.name, role: u.role, mfa_ok: 1 } : null;
     }
-    if (sql.includes("SELECT id, course_id, parent_id, locked, hidden FROM discussions WHERE id=?")) {
+    if (sql.includes("SELECT id, course_id, parent_id, locked, hidden, user_id FROM discussions WHERE id=?")) {
       const r = rows.get(b[0]);
-      return r ? { id: r.id, course_id: r.course_id, parent_id: r.parent_id, locked: r.locked, hidden: r.hidden } : null;
+      return r ? { id: r.id, course_id: r.course_id, parent_id: r.parent_id, locked: r.locked, hidden: r.hidden, user_id: r.user_id } : null;
     }
     if (sql.includes("SELECT course_id, parent_id FROM discussions WHERE id=?")) {
       const r = rows.get(b[0]);

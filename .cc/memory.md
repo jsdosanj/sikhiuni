@@ -10,6 +10,13 @@ export, gitignored) into the real Astro site, keeping locked DESIGN.md principle
 progress), retirement sweep 21, verification 22, PR 23.
 Supersedes: —
 
+### D-002: MFA optional for every role; remember-device 30 days (2026-11-11)
+Owner decision (`.cc/plan-audit-mfa-lms.md` Part B). Teacher profile publish no longer
+requires MFA. Enrolled users are still challenged per new session unless the browser holds
+a valid `sikhiuni_mfa_dev` token (30 days, hash-only storage, revoked on MFA disable/reset
+and password reset). Do not re-add enrollment as a precondition without a new decision.
+Supersedes: the 2026-09-10 "grace period" for teachers in docs/SECURITY.md.
+
 ## Landmines (things that bit us)
 - **Concurrent subagents in ONE shared (non-worktree) working directory can
   destructively `git reset`/`git stash` each other's uncommitted work.**

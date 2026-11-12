@@ -1,4 +1,5 @@
 import { json, requireMfa, logEvent, parseBody } from "../_lib.js";
+import { revokeTrustedDevices } from "../auth/_trusted-device.js";
 import { mergeAccount } from "./_merge-account.js";
 
 // GET /api/admin/users -> list all users with roles (admin only)
@@ -51,6 +52,7 @@ export async function onRequestPost({ request, env }) {
     if (!body.id) return json({ error: "id required" }, 400);
     await env.DB.prepare("DELETE FROM user_mfa WHERE user_id=?").bind(body.id).run();
     await env.DB.prepare("DELETE FROM mfa_backup_codes WHERE user_id=?").bind(body.id).run();
+    await revokeTrustedDevices(env, body.id);
     await logEvent(env, user, "mfa_reset", body.id, null);
     return json({ ok: true });
   }
@@ -85,6 +87,6 @@ export async function onRequestPost({ request, env }) {
   if (target.role === "admin") return json({ error: "admins are managed via ADMIN_EMAILS" }, 403);
 
   await env.DB.prepare("UPDATE users SET role=? WHERE id=?").bind(role, id).run();
-  await logEvent(env, user, "role_change", id, target.role + "→" + role);
+  await logEvent(env, user, "role_change", id, target.role + "→" + role, { subject: id, targetType: "user", before: target.role, after: role });
   return json({ ok: true });
 }

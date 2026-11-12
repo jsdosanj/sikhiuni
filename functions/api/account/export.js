@@ -1,4 +1,4 @@
-import { json, getUser } from "../_lib.js";
+import { json, getUser, logEvent } from "../_lib.js";
 
 // GET /api/account/export -> downloads everything we hold for the signed-in user
 // as a single JSON file (self-serve data portability).
@@ -48,8 +48,33 @@ export async function onRequestGet({ request, env }) {
     course_drafts: await all(
       "SELECT id, course_id, title, topic, level, status, submitted_at, created_at FROM course_drafts WHERE author_id=?", user.id
     ),
+    cohort_memberships: await all("SELECT cohort_id, joined_at FROM cohort_members WHERE user_id=?", user.id),
+    courses_taught: await all("SELECT course_id, assigned_at FROM course_teachers WHERE user_id=?", user.id),
+    grade_overrides: await all("SELECT course_id, score, reason, overridden_at FROM grade_overrides WHERE user_id=?", user.id),
+    push_subscriptions: await all("SELECT created_at FROM push_subs WHERE user_id=?", user.id),
+    // LMS Phase 1 (plan Part D.10: export covers every new table).
+    journal_entries: await all("SELECT course_id, body, shared, created_at, updated_at FROM journal_entries WHERE user_id=?", user.id),
+    assignment_extensions: await all("SELECT assignment_id, due_at, reason, created_at FROM assignment_extensions WHERE user_id=?", user.id),
+    course_accommodations: await all("SELECT course_id, extra_time_pct, note, updated_at FROM course_accommodations WHERE user_id=?", user.id),
+    // Named poll answers only; anonymous answers are stored without any user id.
+    poll_participation: await all("SELECT poll_id FROM poll_participants WHERE user_id=?", user.id),
+    poll_responses: await all("SELECT poll_id, answers, created_at FROM poll_responses WHERE user_id=?", user.id),
+    notifications: await all("SELECT kind, course_id, title, body, url, created_at, read_at FROM notifications WHERE user_id=?", user.id),
+    notification_prefs: await all("SELECT prefs, updated_at FROM notification_prefs WHERE user_id=?", user.id),
+    grading_comments: await all("SELECT text, created_at FROM grading_comments WHERE user_id=?", user.id),
+    submission_marking: await all("SELECT g.submission_id, g.rubric_scores, g.raw_grade, g.penalty_pct FROM submission_grading g JOIN submissions s ON s.id=g.submission_id WHERE s.user_id=?", user.id),
+    dm_conversations: await all("SELECT id, course_id, status, created_at FROM dm_conversations WHERE requester_id=? OR recipient_id=?", user.id, user.id),
+    dm_messages_sent: await all("SELECT conversation_id, body, created_at FROM dm_messages WHERE sender_id=?", user.id),
+    blocks: await all("SELECT blocked_id, created_at FROM user_blocks WHERE blocker_id=?", user.id),
+    forum_follows: await all("SELECT thread_id, created_at FROM forum_subscriptions WHERE user_id=?", user.id),
+    course_mutes: await all("SELECT course_id, created_at FROM course_mutes WHERE user_id=?", user.id),
+    calendar_feed: await all("SELECT created_at, last_used_at FROM calendar_feeds WHERE user_id=?", user.id),
+    quiz_attempts: await all("SELECT quiz_id, course_id, started_at, submitted_at, score, max_score, status FROM lms_quiz_attempts WHERE user_id=?", user.id),
+    peer_reviews_written: await all("SELECT assignment_id, comment, rubric_scores, submitted_at FROM peer_reviews WHERE reviewer_id=?", user.id),
+    trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 
+  await logEvent(env, user, "export_account", user.id, null, { subject: user.id, targetType: "export" });
   return new Response(JSON.stringify(data, null, 2), {
     status: 200,
     headers: {

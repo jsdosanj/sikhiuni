@@ -34,9 +34,9 @@ function fakeDB() {
       const a = assignments.get(b[0]);
       return a ? { course_id: a.course_id } : null;
     }
-    if (sql.includes("SELECT course_id, points FROM assignments WHERE id=?")) {
+    if (sql.includes("SELECT course_id, points, title FROM assignments WHERE id=?")) {
       const a = assignments.get(b[0]);
-      return a ? { course_id: a.course_id, points: a.points } : null;
+      return a ? { course_id: a.course_id, points: a.points, title: a.title } : null;
     }
     if (sql.includes("SELECT course_id, due_at, allow_file, status FROM assignments WHERE id=?")) {
       const a = assignments.get(b[0]);
@@ -54,11 +54,11 @@ function fakeDB() {
       const m = media.get(b[0]);
       return m || null;
     }
-    if (sql.includes("SELECT s.assignment_id, a.course_id, a.points FROM submissions s JOIN assignments a")) {
+    if (sql.includes("SELECT s.assignment_id, s.user_id, s.grade AS old_grade")) {
       const s = submissions.get(b[0]);
       if (!s) return null;
       const a = assignments.get(s.assignment_id);
-      return { assignment_id: s.assignment_id, course_id: a.course_id, points: a.points };
+      return { assignment_id: s.assignment_id, user_id: s.user_id, course_id: a.course_id, points: a.points, title: a.title };
     }
     return null;
   }

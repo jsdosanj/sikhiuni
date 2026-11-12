@@ -310,8 +310,26 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     const menu = document.getElementById('nav-account-menu');
     const chevron = document.getElementById('nav-account-chevron');
     document.getElementById('nav-auth')?.classList.add('hidden');
+    // Notification centre (C5): first menu item, with the unread count, plus a dot on the account button.
+    const unread = Number(u.unreadNotifications) || 0;
+    const notifLabel = 'Notifications' + (unread ? ` (${unread > 99 ? '99+' : unread})` : '');
     if (wrap && btn && menu) {
       wrap.classList.remove('hidden');
+      const na = document.createElement('a');
+      na.href = '/notifications'; na.textContent = notifLabel; na.setAttribute('role', 'menuitem');
+      na.className = `block px-4 py-2 font-sans text-sm ${path === '/notifications' ? 'text-saffron font-semibold' : 'text-white/85 hover:bg-white/10 hover:text-white'}`;
+      menu.appendChild(na);
+      const ma = document.createElement('a');
+      ma.href = '/messages'; ma.textContent = 'Messages'; ma.setAttribute('role', 'menuitem');
+      ma.className = `block px-4 py-2 font-sans text-sm ${path === '/messages' ? 'text-saffron font-semibold' : 'text-white/85 hover:bg-white/10 hover:text-white'}`;
+      menu.appendChild(ma);
+      if (unread) {
+        const dot = document.createElement('span');
+        dot.className = 'ml-0.5 rounded-full bg-saffron px-1.5 font-sans text-[10px] font-bold leading-4 text-navy';
+        dot.textContent = unread > 99 ? '99+' : String(unread);
+        btn.insertBefore(dot, chevron);
+        btn.setAttribute('aria-label', `Account, ${unread} unread notification${unread === 1 ? '' : 's'}`);
+      }
       hats.forEach((h) => {
         const a = document.createElement('a');
         a.href = h.href;
@@ -364,6 +382,14 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     document.getElementById('nav-auth-mobile')?.classList.add('hidden');
     if (mobileWrap) {
       mobileWrap.classList.remove('hidden');
+      const mn = document.createElement('a');
+      mn.href = '/notifications'; mn.textContent = notifLabel;
+      mn.className = 'su-nav-link block font-sans text-sm py-1.5 px-2 rounded text-white/80';
+      mobileWrap.appendChild(mn);
+      const mm = document.createElement('a');
+      mm.href = '/messages'; mm.textContent = 'Messages';
+      mm.className = 'su-nav-link block font-sans text-sm py-1.5 px-2 rounded text-white/80';
+      mobileWrap.appendChild(mm);
       hats.forEach((h) => {
         const a = document.createElement('a');
         a.href = h.href;

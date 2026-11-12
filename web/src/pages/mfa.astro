@@ -45,6 +45,7 @@ import Base from '../layouts/Base.astro';
             <input id="verify-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456 or a backup code"
               class="mt-3 w-full rounded-[2px] border border-saffron bg-white/[0.05] px-4 py-4 text-center font-mono text-2xl tracking-[0.5em] text-white placeholder:text-sm placeholder:tracking-normal placeholder:text-white/[0.4] placeholder-shown:border-white/[0.34] focus:border-saffron focus:outline-none transition-colors" />
           </label>
+          <label class="flex items-center gap-2.5 font-sans text-sm text-white/[0.8]"><input id="verify-remember" type="checkbox" class="h-4 w-4" /> Remember this device for 30 days</label>
           <button id="verify-submit" type="submit" class="btn btn-primary w-full justify-center">Verify</button>
         </form>
         <div id="verify-out" class="mt-4"></div>
@@ -57,7 +58,8 @@ import Base from '../layouts/Base.astro';
         const code = (document.getElementById('verify-code') as HTMLInputElement).value.trim();
         if (!code) return;
         btn.disabled = true; btn.textContent = 'Verifying…';
-        api('/api/auth/mfa/verify', { method: 'POST', body: JSON.stringify({ code }) }).then(({ ok, d }) => {
+        const remember = (document.getElementById('verify-remember') as HTMLInputElement).checked;
+        api('/api/auth/mfa/verify', { method: 'POST', body: JSON.stringify({ code, remember }) }).then(({ ok, d }) => {
           btn.disabled = false; btn.textContent = 'Verify';
           if (!ok) { out.innerHTML = errorBox(d.error === 'too many failed attempts, please sign in again' ? d.error : 'Incorrect code. Please try again.'); if (d.error && d.error.includes('sign in again')) setTimeout(() => location.href = '/login.html', 1500); return; }
           location.href = next;
