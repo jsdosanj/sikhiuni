@@ -23,6 +23,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
+        <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="settings" id="ct-tab-settings">Teacher settings</button>
       </div>
 
@@ -31,6 +32,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-settings" class="ct-panel mt-6 hidden" role="tabpanel"></div>
     </div>
   </section>
@@ -59,13 +61,15 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
     const loaders: Record<string, () => void> = {};
     const loaded = new Set<string>();
     function show(name: string) {
-      if (!loaders[name] || (name === 'settings' && !isTeacher)) name = 'dates';
+      if (!loaders[name] || ((name === 'settings' || name === 'analytics') && !isTeacher)) name = 'dates';
       tabs.forEach((t) => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', String(on)); t.classList.toggle('bg-navy', on); t.classList.toggle('text-white', on); });
       document.querySelectorAll('.ct-panel').forEach((p) => p.classList.toggle('hidden', p.id !== 'tab-' + name));
       if (!loaded.has(name)) { loaded.add(name); loaders[name](); }
       history.replaceState(null, '', '#' + name);
     }
     tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.tab || 'dates')));
+    // Links like #analytics or #settings work even when the page is already open.
+    window.addEventListener('hashchange', () => { if (!$('ct-app').classList.contains('hidden')) show(location.hash.slice(1) || 'dates'); });
 
     // ---------- C1 due dates + to-do ----------
     loaders.dates = async () => {
@@ -401,6 +405,29 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       });
     }
 
+    // ---------- C6 analytics (teachers only) ----------
+    loaders.analytics = async () => {
+      const el = $('tab-analytics'); el.textContent = 'Loading…';
+      const r = await api('/api/analytics?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const { summary: s, lessons, assignments, quizzes, at_risk } = r.d;
+      const tile = (label: string, value: Any, sub = '') => `<div class="rounded-xl2 border border-line bg-surface p-4"><p class="font-mono text-[10.5px] uppercase tracking-[.16em] text-muted">${label}</p><p class="mt-1 text-2xl font-bold text-navy">${value == null ? '–' : esc(value)}</p>${sub ? `<p class="font-sans text-xs text-muted">${sub}</p>` : ''}</div>`;
+      const bar = (p: number | null) => `<span class="inline-block h-2 w-32 overflow-hidden rounded-full bg-paper align-middle"><span class="block h-full bg-saffron" style="width:${Math.max(0, Math.min(100, p || 0))}%"></span></span>`;
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Course analytics</h2>
+        <p class="mt-1 text-sm text-muted">Only you and the other teachers of this course can see this. Use it to decide who to check in with, not to rank anyone.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-4">${tile('Enrolled', s.enrolled)}${tile('Active this week', s.active_7d, `${esc(s.active_30d)} in 30 days`)}
+          ${tile('Finished every lesson', s.completion_percent == null ? '–' : s.completion_percent + '%', s.lesson_count ? `${esc(s.completed_all)} of ${esc(s.enrolled)}` : 'lesson count unavailable')}${tile('Passed the course quiz', s.quiz_pass_percent == null ? '–' : s.quiz_pass_percent + '%', `${esc(s.quiz_passed)} learners`)}</div>
+        <h3 class="mt-8 text-lg font-bold text-navy">Learners to check in with</h3>
+        <ul class="mt-2 font-sans text-sm">${at_risk.length ? at_risk.map((x: Any) => `<li class="border-b border-line py-2"><strong>${esc(x.name)}</strong> · ${esc(x.lessons_done)} lessons done<span class="block text-muted">${x.reasons.map(esc).join(' · ')}</span></li>`).join('') : '<li class="py-2 text-muted">No one stands out right now.</li>'}</ul>
+        <h3 class="mt-8 text-lg font-bold text-navy">Lessons</h3><p class="text-sm text-muted">A sharp drop between two lessons is worth a look.</p>
+        <table class="mt-2 font-sans text-sm"><tbody>${lessons.map((l: Any) => `<tr><td class="py-0.5 pr-3">Lesson ${esc(l.lesson)}</td><td class="pr-3">${bar(l.percent)}</td><td class="text-muted">${esc(l.completed)} (${esc(l.percent ?? 0)}%)</td></tr>`).join('') || '<tr><td class="text-muted">No lesson progress yet.</td></tr>'}</tbody></table>
+        <h3 class="mt-8 text-lg font-bold text-navy">Assignments</h3>
+        <table class="mt-2 w-full font-sans text-sm"><thead><tr class="text-left text-muted"><th class="py-1">Assignment</th><th>Submitted</th><th>Graded</th><th>Missing (past due)</th><th>Average</th></tr></thead><tbody>${assignments.map((a: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-2">${esc(a.title)}</td><td>${esc(a.submitted)}</td><td>${esc(a.graded)}</td><td>${esc(a.missing)}</td><td>${a.average_percent == null ? '–' : esc(a.average_percent) + '%'}</td></tr>`).join('') || '<tr><td class="py-2 text-muted" colspan="5">No assignments.</td></tr>'}</tbody></table>
+        <h3 class="mt-8 text-lg font-bold text-navy">Quizzes</h3>
+        <ul class="mt-2 font-sans text-sm">${quizzes.map((q: Any) => `<li class="border-b border-line py-2"><strong>${esc(q.title)}</strong> · ${esc(q.learners)} learners · average best ${q.average_best == null ? '–' : esc(q.average_best) + '%'}
+          ${q.hardest.length ? `<span class="block text-muted">Hardest: ${q.hardest.map((h: Any) => `“${esc(String(h.prompt).slice(0, 70))}” (${esc(h.percent)}%)`).join('; ')}</span>` : ''}</li>`).join('') || '<li class="py-2 text-muted">No quizzes yet.</li>'}</ul>`;
+    };
+
     // ---------- C10 journal ----------
     loaders.journal = async () => {
       const el = $('tab-journal');
@@ -639,6 +666,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       if (!r.ok) { gate.innerHTML = note('warn', esc(errText(r))); return; }
       isTeacher = r.d.scope === 'teacher';
       $('ct-tab-settings').classList.toggle('hidden', !isTeacher);
+      $('ct-tab-analytics').classList.toggle('hidden', !isTeacher);
       $('ct-app').classList.remove('hidden');
       show(location.hash.slice(1) || 'dates');
     })();
