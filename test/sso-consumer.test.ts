@@ -16,6 +16,26 @@ import { onRequestGet } from "../functions/api/auth/sso.js";
 import vectors from "./fixtures/sso-test-vectors.json";
 
 describe("verifySsoToken (canonical fixture, matches sikhi.io's issuer + punjabiuni's copy)", () => {
+  it.each(["extra", "trailing-empty", "empty-body", "empty-signature", "empty-middle"] as const)("rejects %s token segments", async kind => {
+    const v = vectors.vectors.find(v => v.name === "valid")!;
+    const [body, sig] = v.token.split(".");
+    const malformed = {
+      extra: `${v.token}.suffix`,
+      "trailing-empty": `${v.token}.`,
+      "empty-body": `.${sig}`,
+      "empty-signature": `${body}.`,
+      "empty-middle": `${body}..${sig}`,
+    }[kind]!;
+    vi.useFakeTimers();
+    vi.setSystemTime(v.verifyAt);
+    try {
+      expect(await verifySsoToken(v.token, vectors.secret)).not.toBeNull();
+      expect(await verifySsoToken(malformed, vectors.secret)).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   const secretByName: Record<string, string> = { secret: vectors.secret, wrongSecret: vectors.wrongSecret };
 
   for (const v of vectors.vectors) {
@@ -44,6 +64,7 @@ type SessionsRow = { id: string; user_id: string; expires_at: number; mfa_ok: nu
 function makeDb(opts: { users?: UsersRow[]; mfaEnrolledUserIds?: string[] } = {}) {
   const users: UsersRow[] = opts.users ? [...opts.users] : [];
   const sessions: SessionsRow[] = [];
+  const usedTokens = new Set<string>();
   const mfaEnrolled = new Set(opts.mfaEnrolledUserIds || []);
 
   function stmt(sql: string) {
@@ -66,6 +87,12 @@ function makeDb(opts: { users?: UsersRow[]; mfaEnrolledUserIds?: string[] } = {}
         return null;
       },
       async run() {
+        if (sql.includes("INSERT OR IGNORE INTO used_sso_tokens")) {
+          const hash = String(bound[0]);
+          if (usedTokens.has(hash)) return { success: true, meta: { changes: 0 } };
+          usedTokens.add(hash);
+          return { success: true, meta: { changes: 1 } };
+        }
         if (sql.includes("INSERT INTO users")) {
           const [id, email, name, role] = bound;
           users.push({ id, email, name: name ?? null, role });
@@ -128,6 +155,25 @@ describe("GET /api/auth/sso (route)", () => {
     expect(_users).toHaveLength(1);
     expect(_users[0].email).toBe(validVector.payload!.email);
     expect(_sessions).toHaveLength(1);
+  });
+
+  it("cannot bypass one-time consumption with token suffixes or signature aliases", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(validVector.verifyAt);
+    const { env, _users, _sessions } = makeEnv();
+    try {
+      const initial = await onRequestGet({ request: new Request(ssoUrl(validVector.token)), env } as any);
+      expect(initial.headers.get("Set-Cookie")).toMatch(/^su_session=/);
+      for (const token of [validVector.token, `${validVector.token}.suffix`, `${validVector.token}.`, `${validVector.token}..suffix`, ...Object.values(signatureAliases(validVector.token))]) {
+        const replay = await onRequestGet({ request: new Request(ssoUrl(token)), env } as any);
+        expect(replay.headers.get("Location")).toContain("/login.html?error=");
+        expect(replay.headers.get("Set-Cookie")).toBeNull();
+      }
+      expect(_users).toHaveLength(1);
+      expect(_sessions).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("valid token + EXISTING email: no new user row, a session is still created", async () => {
@@ -211,5 +257,34 @@ describe("GET /api/auth/sso (route)", () => {
     expect(res.headers.get("Location")).toBe("https://sikhiuni.com/mfa.html");
     expect(_sessions).toHaveLength(1);
     expect(_sessions[0].mfa_ok).toBe(0);
+  });
+});
+
+// These distinct encodings decode to the same HMAC bytes. Consumers hash
+// the original token for one-time use, so each alias must be rejected.
+function signatureAliases(token: string): Record<string, string> {
+  const [body, sig] = token.split(".");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const last = alphabet.indexOf(sig.at(-1)!);
+  return {
+    padded: `${body}.${sig}=`,
+    whitespace: `${body}.${sig}\n`,
+    "unused-bits": `${body}.${sig.slice(0, -1)}${alphabet[last | 1]}`,
+    "standard-base64": `${body}.${sig.replace(/-/g, "+").replace(/_/g, "/")}`,
+  };
+}
+
+describe("SSO canonical signature encoding", () => {
+  it.each(["padded", "whitespace", "unused-bits", "standard-base64"])("rejects %s aliases of a valid signature", async kind => {
+    const fixture = vectors.vectors.find(v => v.name === "valid")!;
+    const alias = signatureAliases(fixture.token)[kind];
+    expect(alias).not.toBe(fixture.token);
+    expect(Buffer.from(alias.split(".")[1], "base64url")).toEqual(Buffer.from(fixture.token.split(".")[1], "base64url"));
+    vi.useFakeTimers();
+    vi.setSystemTime(fixture.verifyAt);
+    try {
+      expect(await verifySsoToken(fixture.token, vectors.secret)).not.toBeNull();
+      expect(await verifySsoToken(alias, vectors.secret)).toBeNull();
+    } finally { vi.useRealTimers(); }
   });
 });

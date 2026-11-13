@@ -10,8 +10,15 @@
 // punjabiuni's randomId() -- none of these three id spaces line up.
 
 function b64urlDecode(s) {
+  // Accept only the issuer's unpadded base64url representation. atob also
+  // accepts padding, whitespace, standard-base64 characters and nonzero
+  // unused bits, which would alias the same signature under another replay hash.
+  if (!/^[A-Za-z0-9_-]+$/.test(s)) throw new Error("Invalid base64url");
   const padded = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
   const bin = atob(padded);
+  if (btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "") !== s) {
+    throw new Error("Noncanonical base64url");
+  }
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
@@ -25,7 +32,11 @@ async function hmacKey(secretHex) {
 /** Verifies signature AND expiry. Returns the payload, or null on any failure -- never throws. */
 export async function verifySsoToken(token, secretHex) {
   try {
-    const [bodyB64, sigB64] = token.split(".");
+    const parts = token.split(".");
+    // Reject suffixes: a different token string must not reuse a signed body
+    // while bypassing a consumer's whole-token replay hash.
+    if (parts.length !== 2) return null;
+    const [bodyB64, sigB64] = parts;
     if (!bodyB64 || !sigB64) return null;
     const key = await hmacKey(secretHex);
     const ok = await crypto.subtle.verify("HMAC", key, b64urlDecode(sigB64), new TextEncoder().encode(bodyB64));
