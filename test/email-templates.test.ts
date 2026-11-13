@@ -131,7 +131,8 @@ describe("registrationCodeTemplate — the single email a new native account rec
 
   it("is branded, not the unbranded markup the old flow started with", () => {
     expect(t.html).toContain("Sikhi University");
-    expect(t.html).toContain("&#9772;"); // the crest glyph
+    expect(t.html).toContain('src="https://sikhiuni.com/assets/brand/icon-512.png"'); // current raster crest
+    expect(t.html).toContain('alt="Sikhi University crest"');
   });
 });
 

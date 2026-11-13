@@ -63,7 +63,7 @@ export function resetCodeTemplate(code) {
       </tr>
       ${paragraph("The code only works in that same tab &mdash; opening this email on another device won&rsquo;t change anyone&rsquo;s password.", 20)}
       <tr>
-        <td bgcolor="#f7f5ef" style="background-color:#f7f5ef; border-left:3px solid #f4b21a; border-radius:0 4px 4px 0; padding:16px 20px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:21px; color:#454b56;">
+        <td bgcolor="#f7f5ef" style="background-color:#f7f5ef; border-left:3px solid #f4b21a; border-radius:0 4px 4px 0; padding:16px 20px; font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:21px; color:#454b56;">
           <strong style="color:#0b1e3a;">For your security:</strong> this code expires in <strong style="color:#0b1e3a;">15 minutes</strong>. If you did not ask to reset your password, no action is required &mdash; your current password remains unchanged.
         </td>
       </tr>
@@ -94,6 +94,7 @@ Powered by sikhi.io — https://sikhi.io`;
   return { subject: `${code} is your Sikhi University reset code`, html, text };
 }
 
+// Brand raster: current2026 crest; local brand fonts fall back safely in mail clients.
 // ── Shared shell ────────────────────────────────────────────────────────────
 // New templates use the shell below.
 //
@@ -128,18 +129,18 @@ function shell({ title, preheader, eyebrow, heading, bodyRows, footerNote }) {
 
           <tr>
             <td bgcolor="#0b2444" align="center" style="background-color:#0b2444; padding:30px 28px 26px 28px;">
-              <div style="font-family:Georgia,'Times New Roman',serif; font-size:34px; line-height:40px; color:#ffc83d;">&#9772;</div>
-              <div style="font-family:Georgia,'Times New Roman',serif; font-size:21px; line-height:28px; letter-spacing:4px; color:#ffffff; text-transform:uppercase; padding-top:10px;">Sikhi University</div>
+              <img src="https://sikhiuni.com/assets/brand/icon-512.png" width="112" height="112" alt="Sikhi University crest" style="display:block; width:112px; height:112px; margin:0 auto 14px; border:0; border-radius:4px; background-color:#ffffff;">
+              <div style="font-family:'University Gothic',Georgia,'Times New Roman',serif; font-size:25px; line-height:32px; letter-spacing:1px; color:#ffffff; text-transform:uppercase; padding-top:10px;">Sikhi University</div>
               <div style="font-family:Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; letter-spacing:2px; color:#8fa3c0; text-transform:uppercase; padding-top:6px;">sikhiuni.com</div>
             </td>
           </tr>
 
           <tr>
-            <td bgcolor="#ffffff" style="background-color:#ffffff; border-left:1px solid #e4e1d6; border-right:1px solid #e4e1d6; padding:40px 36px;">
+            <td bgcolor="#ffffff" style="background-color:#ffffff; border-left:1px solid #e4e1d6; border-right:1px solid #e4e1d6; padding:32px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 ${eyebrow ? `<tr><td style="font-family:Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; letter-spacing:2px; text-transform:uppercase; color:#8a7a4e; padding-bottom:10px;">${eyebrow}</td></tr>` : ""}
                 <tr>
-                  <td style="font-family:Georgia,'Times New Roman',serif; font-weight:normal; font-size:25px; line-height:33px; color:#0b1e3a; padding-bottom:14px;">${heading}</td>
+                  <td style="font-family:'Source Serif 4',Georgia,'Times New Roman',serif; font-weight:normal; font-size:25px; line-height:33px; color:#0b1e3a; padding-bottom:14px;">${heading}</td>
                 </tr>
                 <tr>
                   <td style="padding-bottom:22px;">
@@ -164,8 +165,8 @@ function shell({ title, preheader, eyebrow, heading, bodyRows, footerNote }) {
           <tr>
             <td bgcolor="#0b1e3a" align="center" style="background-color:#0b1e3a; border-radius:0 0 8px 8px; padding:22px 28px;">
               <div style="font-family:Georgia,'Times New Roman',serif; font-size:14px; line-height:20px; letter-spacing:2px; color:#ffc83d; text-transform:uppercase;">Sikhi University</div>
-              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; color:#8fa3c0; padding-top:6px;">sikhiuni.com</div>
-              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:17px; color:#5f7396; padding-top:10px;">${footerNote}</div>
+              <div style="font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; color:#8fa3c0; padding-top:6px;">sikhiuni.com</div>
+              <div style="font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:17px; color:#5f7396; padding-top:10px;">${footerNote}</div>
               ${POWERED_BY_HTML}
             </td>
           </tr>
@@ -180,7 +181,7 @@ function shell({ title, preheader, eyebrow, heading, bodyRows, footerNote }) {
 }
 
 function paragraph(text, paddingBottom = 22) {
-  return `<tr><td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:24px; color:#333a45; padding-bottom:${paddingBottom}px;">${text}</td></tr>`;
+  return `<tr><td style="font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:24px; color:#333a45; padding-bottom:${paddingBottom}px;">${text}</td></tr>`;
 }
 
 function button(href, label) {
@@ -189,7 +190,7 @@ function button(href, label) {
       <table role="presentation" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" bgcolor="#f4b21a" style="background-color:#f4b21a; border-radius:4px; mso-padding-alt:14px 44px;">
-            <a href="${href}" target="_blank" style="display:inline-block; padding:14px 44px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:20px; font-weight:bold; color:#0b1e3a; text-decoration:none; border-radius:4px;">${label}</a>
+            <a href="${href}" target="_blank" style="display:inline-block; padding:14px 44px; font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:20px; font-weight:bold; color:#0b1e3a; text-decoration:none; border-radius:4px;">${label}</a>
           </td>
         </tr>
       </table>
@@ -208,7 +209,7 @@ export function welcomeTemplate(name) {
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
          <tr>
            <td width="4" bgcolor="#f4b21a" style="background-color:#f4b21a; font-size:0; line-height:0;">&nbsp;</td>
-           <td style="padding-left:14px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
+           <td style="padding-left:14px; font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
              <strong style="color:#0b1e3a;">${label}</strong><br>${detail}
            </td>
          </tr>
@@ -298,7 +299,7 @@ export function registrationCodeTemplate(code, username) {
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
          <tr>
            <td width="4" bgcolor="#f4b21a" style="background-color:#f4b21a; font-size:0; line-height:0;">&nbsp;</td>
-           <td style="padding-left:14px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
+           <td style="padding-left:14px; font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
              <strong style="color:#0b1e3a;">${label}</strong><br>${detail}
            </td>
          </tr>
@@ -380,7 +381,7 @@ export function certificateEarnedTemplate(name, certId, kind = "course") {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td width="4" bgcolor="#f4b21a" style="background-color:#f4b21a; font-size:0; line-height:0;">&nbsp;</td>
-            <td style="padding-left:14px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
+            <td style="padding-left:14px; font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#333a45;">
               <strong style="color:#0b1e3a;">Verification ID</strong><br>${id}
             </td>
           </tr>
@@ -388,7 +389,7 @@ export function certificateEarnedTemplate(name, certId, kind = "course") {
       </td></tr>
       ${button(verifyUrl, "Verify this certificate")}
       <tr>
-        <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#0b1e3a; padding-bottom:6px;">No university credit &middot; Self-development only</td>
+        <td style="font-family:Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#0b1e3a; padding-bottom:6px;">No university credit &middot; Self-development only</td>
       </tr>
     `,
     footerNote: "You&rsquo;re receiving this because you earned a certificate of completion on Sikhi University. This is a one-off message about that certificate.",
