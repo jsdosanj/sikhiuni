@@ -85,7 +85,7 @@ describe("GET /api/auth/sso — provision branch only", () => {
 
   it("a token WITH the claim seeds marketing_optin on first landing", async () => {
     vi.resetModules();
-    vi.doMock("../functions/_sso.js", () => ({ verifySsoToken: async () => ({ email: "new@b.com", name: "New", iss: "sikhi.io", marketingOptIn: true }) }));
+    vi.doMock("../functions/_sso.js", async () => ({ ...(await vi.importActual("../functions/_sso.js")), verifySsoToken: async () => ({ email: "new@b.com", name: "New", iss: "sikhi.io", marketingOptIn: true }) }));
     const { onRequestGet } = await import("../functions/api/auth/sso.js");
     const { env, calls } = recordingEnv({ resendKey: "re_test" });
     env.SSO_SHARED_SECRET = "a".repeat(64);
@@ -99,7 +99,7 @@ describe("GET /api/auth/sso — provision branch only", () => {
 
   it("a token WITHOUT the claim provisions with 0 — absence is not consent", async () => {
     vi.resetModules();
-    vi.doMock("../functions/_sso.js", () => ({ verifySsoToken: async () => ({ email: "new@b.com", name: null, iss: "sikhi.io" }) }));
+    vi.doMock("../functions/_sso.js", async () => ({ ...(await vi.importActual("../functions/_sso.js")), verifySsoToken: async () => ({ email: "new@b.com", name: null, iss: "sikhi.io" }) }));
     const { onRequestGet } = await import("../functions/api/auth/sso.js");
     const { env, calls } = recordingEnv();
     env.SSO_SHARED_SECRET = "a".repeat(64);
@@ -110,7 +110,7 @@ describe("GET /api/auth/sso — provision branch only", () => {
 
   it("sends the welcome on first landing", async () => {
     vi.resetModules();
-    vi.doMock("../functions/_sso.js", () => ({ verifySsoToken: async () => ({ email: "new@b.com", name: null, iss: "sikhi.io" }) }));
+    vi.doMock("../functions/_sso.js", async () => ({ ...(await vi.importActual("../functions/_sso.js")), verifySsoToken: async () => ({ email: "new@b.com", name: null, iss: "sikhi.io" }) }));
     const { onRequestGet } = await import("../functions/api/auth/sso.js");
     const { env } = recordingEnv({ resendKey: "re_test" });
     env.SSO_SHARED_SECRET = "a".repeat(64);
@@ -124,7 +124,7 @@ describe("GET /api/auth/sso — provision branch only", () => {
     // clobbered by the hub's echo on every subsequent login, and a returning
     // user must not be welcomed again.
     vi.resetModules();
-    vi.doMock("../functions/_sso.js", () => ({ verifySsoToken: async () => ({ email: "old@b.com", name: null, iss: "sikhi.io", marketingOptIn: true }) }));
+    vi.doMock("../functions/_sso.js", async () => ({ ...(await vi.importActual("../functions/_sso.js")), verifySsoToken: async () => ({ email: "old@b.com", name: null, iss: "sikhi.io", marketingOptIn: true }) }));
     const { onRequestGet } = await import("../functions/api/auth/sso.js");
     const { env, calls } = recordingEnv({ existingUser: { id: "u1", role: "learner" }, resendKey: "re_test" });
     env.SSO_SHARED_SECRET = "a".repeat(64);
@@ -138,7 +138,7 @@ describe("GET /api/auth/sso — provision branch only", () => {
 
   it("an invalid token still fails closed — no user, no mail", async () => {
     vi.resetModules();
-    vi.doMock("../functions/_sso.js", () => ({ verifySsoToken: async () => null }));
+    vi.doMock("../functions/_sso.js", async () => ({ ...(await vi.importActual("../functions/_sso.js")), verifySsoToken: async () => null }));
     const { onRequestGet } = await import("../functions/api/auth/sso.js");
     const { env, calls } = recordingEnv({ resendKey: "re_test" });
     env.SSO_SHARED_SECRET = "a".repeat(64);

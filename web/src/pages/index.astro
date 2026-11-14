@@ -113,6 +113,48 @@ const ld = {
     crest?.addEventListener('error', () => crest.parentElement?.classList.remove('crest-loaded'));
   </script>
 
+  <!-- Continue where you left off: shown only when this device holds a course
+       in progress. Reads the same record the course page writes (su_v1_*); no
+       network for a new visitor. Hidden by default so it never flashes empty. -->
+  <div id="su-resume" hidden class="wrap lq-home-path">
+    <a id="su-resume-link" href="/dashboard" class="lq-glass lq-glass--lg lq-glass--sheen">
+      <span id="su-resume-ring"></span>
+      <span class="lq-stack" style="gap:4px">
+        <span class="lq-eyebrow" data-i18n="home.resume.label">Continue learning</span>
+        <b id="su-resume-title"></b>
+        <span id="su-resume-detail" class="lq-small lq-muted"></span>
+      </span>
+      <span class="lq-btn lq-btn--primary"><span data-i18n="home.resume.cta">Resume &rarr;</span></span>
+    </a>
+  </div>
+  <script>
+    import { store } from '../lib/liquid';
+    import { doneList, startedCourses, type CourseLite, type Records } from '../lib/path';
+    (function () {
+      const last = store.get<string | null>('last_course', null);
+      let any = !!last;
+      try { for (let i = 0; i < localStorage.length && !any; i++) any = (localStorage.key(i) || '').startsWith('su_v1_done_'); } catch (e) { /* storage blocked */ }
+      if (!any) return;
+      fetch('/data/index.json').then((r) => r.json()).then((data) => {
+        const courses: CourseLite[] = data.courses || [];
+        const records: Records = {};
+        for (const c of courses) {
+          const done = doneList(store.get('done_' + c.id, {}), c.nLessons);
+          const passed = !!store.get('passed_' + c.id, false);
+          if (done.length || passed) records[c.id] = { done, passed };
+        }
+        const p = startedCourses(courses, records, last).find((x) => x.state !== 'complete');
+        if (!p) return;
+        const pct = Math.round(p.value * 100), size = 56, stroke = 6, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+        document.getElementById('su-resume-title')!.textContent = p.course.title;
+        document.getElementById('su-resume-detail')!.textContent = p.state === 'lessons-done' ? 'Every lesson done. The test is next.' : `Lesson ${(p.nextLesson ?? 0) + 1} of ${p.total} is next`;
+        document.getElementById('su-resume-ring')!.innerHTML = `<span class="lq-ring" role="img" aria-label="Course progress: ${pct} per cent" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle class="lq-ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"></circle><circle class="lq-ring-value" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - p.value)}"></circle></svg><span aria-hidden="true" class="lq-num" style="font-size:12px">${pct}%</span></span>`;
+        (document.getElementById('su-resume-link') as HTMLAnchorElement).href = p.href;
+        document.getElementById('su-resume')!.hidden = false;
+      }).catch(() => {});
+    })();
+  </script>
+
   <section id="start-learning" class="home-start">
     <div class="wrap">
       <div class="home-section-heading"><div><p class="eyebrow text-saffron-deep">Your next chapter</p><h2 class="text-display-sm">Where would you like to begin?</h2></div><a class="home-text-link" href="/catalog#paths">All learning paths <span aria-hidden="true">↗</span></a></div>
@@ -132,44 +174,6 @@ const ld = {
       <div><p id="ds-line" lang="pa" class="shabad text-white"></p><p id="ds-cite" lang="pa" class="eyebrow mt-4 text-saffron"></p></div>
     </div>
   </section>
-
-  <!-- Continue-learning resume card (E5): shown only if the visitor has a course in
-       progress. Reads localStorage (no network for the anonymous case); resolves the
-       title from the slim index. Hidden by default so it never flashes empty. -->
-  <div id="su-resume" hidden class="wrap pt-6">
-    <a id="su-resume-link" href="#" class="flex items-center justify-between gap-4 rounded-xl2 border border-saffron bg-saffron-soft px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-lift">
-      <span>
-        <span class="block font-sans text-xs font-bold uppercase tracking-wider text-saffron-deep" data-i18n="home.resume.label">Continue learning</span>
-        <span id="su-resume-title" class="block font-serif text-lg font-bold text-navy"></span>
-      </span>
-      <span class="shrink-0 font-sans text-sm font-semibold text-navy" data-i18n="home.resume.cta">Resume &rarr;</span>
-    </a>
-  </div>
-  <script>
-    (function () {
-      var get = function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
-      // Prefer the explicit last-opened course; else the in-progress course with the
-      // most completed lessons.
-      var id = get('last_course', null);
-      if (!id) {
-        var best = null, bestN = 0;
-        for (var i = 0; i < localStorage.length; i++) {
-          var key = localStorage.key(i); if (key.indexOf('done_') !== 0) continue;
-          var d = get(key, {}); var n = 0; for (var k in d) if (d[k]) n++;
-          if (n > bestN) { bestN = n; best = key.slice(5); }
-        }
-        id = best;
-      }
-      if (!id) return;
-      fetch('/data/index.json').then(function (r) { return r.json(); }).then(function (data) {
-        var c = (data.courses || []).find(function (x) { return x.id === id; });
-        if (!c) return;
-        document.getElementById('su-resume-title').textContent = c.title;
-        document.getElementById('su-resume-link').href = '/course/' + id;
-        document.getElementById('su-resume').hidden = false;
-      }).catch(function () {});
-    })();
-  </script>
 
   <script>
     import { initDailyShabad } from '../lib/daily-shabad';

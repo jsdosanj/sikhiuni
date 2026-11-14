@@ -532,5 +532,6 @@
   "verify.notfound.title": "Introuvable.",
   "verify.ph.certid": "SU-…",
   "verify.submit": "Vérifier",
-  "verify.valid": "Certificat valide"
+  "verify.valid": "Certificat valide",
+  "support.stayOnline": "Aidez-nous à rester en ligne 🙏"
 }

@@ -64,9 +64,200 @@
     "credit": "Wikimedia Commons (CC BY 4.0)",
     "source": "https://en.wikipedia.org/wiki/J._S._Grewal"
   },
-  "Jodh Singh": {
-    "img": "assets/professors/jodh-singh.jpg",
+  "Bhai Avtar Singh": {
+    "img": "assets/professors/bhai-avtar-singh-20261114.webp",
+    "credit": "SikhNet artist archive",
+    "source": "https://play.sikhnet.com/artist/bhai-avtar-singh",
+    "kind": "source-site photograph; editorial attribution",
+    "position": "25% top"
+  },
+  "Bhai Joginder Singh Talwara": {
+    "img": "assets/professors/bhai-joginder-singh-talwara-20261114.webp",
+    "credit": "GurbaniNow",
+    "source": "https://gurbaninow.com/about",
+    "kind": "source-site photograph; editorial attribution",
+    "position": "center top"
+  },
+  "Bhai Nand Lal": {
+    "img": "assets/professors/bhai-nand-lal-20261114.webp",
+    "credit": "BhaiNandLal.com — historical painting",
+    "source": "https://www.bhainandlal.com/",
+    "kind": "historical painting",
+    "position": "center top"
+  },
+  "Dr. Kamalroop Singh": {
+    "img": "assets/professors/dr-kamalroop-singh-20261114.webp",
+    "credit": "Dr. Kamalroop Singh official biography",
+    "source": "https://www.kamalroop.com/bio",
+    "kind": "source-site photograph; editorial attribution",
+    "position": "65% top"
+  },
+  "Giani Gurdit Singh": {
+    "img": "assets/professors/giani-gurdit-singh-20261114.webp",
+    "credit": "Giani Gurdit Singh official archive",
+    "source": "https://gianigurditsingh.com/",
+    "kind": "source-site photograph; editorial attribution",
+    "position": "center top"
+  },
+  "Sant Jagjit Singh Harkhowal": {
+    "img": "assets/professors/sant-jagjit-singh-harkhowal-20261114.webp",
+    "credit": "Harkhowal Online",
+    "source": "https://www.harkhowal.com/about/",
+    "kind": "source-site photograph; editorial attribution",
+    "position": "center top"
+  },
+  "Baba Sumer Singh": {
+    "img": "assets/professors/baba-sumer-singh-20261114.webp",
+    "credit": "Wikimedia Commons — public domain; resized WebP",
+    "source": "https://commons.wikimedia.org/wiki/File:Baba_Sumer_Singh.jpg",
+    "kind": "historical photograph",
+    "position": "center top"
+  },
+  "Bhai Hira Singh Dard": {
+    "img": "assets/professors/bhai-hira-singh-dard-20261114.webp",
+    "credit": "Wikimedia Commons — public domain; resized WebP",
+    "source": "https://commons.wikimedia.org/wiki/File:Photograph_of_Hira_Singh_Dard_in_his_office,_ca.1920.jpg",
+    "kind": "historical photograph",
+    "position": "70% top"
+  },
+  "Gurharpal Singh": {
+    "img": "assets/professors/gurharpal-singh-20261114.webp",
+    "credit": "SOAS University of London",
+    "source": "https://www.soas.ac.uk/about/gurharpal-singh",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Pal Singh Purewal": {
+    "img": "assets/professors/pal-singh-purewal-20261114.webp",
+    "credit": "Global Sikh Council",
+    "source": "https://globalsikhcouncil.org/mool-nanak-shahi-que/pal-singh-purewal/",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Sant Waryam Singh Ratwara Sahib": {
+    "img": "assets/professors/sant-waryam-singh-ratwara-sahib-20261114.webp",
+    "credit": "Ratwara Sahib USA",
+    "source": "https://www.ratwarasahib.us/about-us/founder-and-chairman",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Surjit Hans": {
+    "img": "assets/professors/surjit-hans-20261114.webp",
     "credit": "Wikimedia Commons",
-    "source": "https://en.wikipedia.org/wiki/Jodh_Singh"
+    "source": "https://commons.wikimedia.org/wiki/File:Surjit_Hans_%28cropped%29.jpg",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Sant Nihal Singh Nirmala": {
+    "img": "assets/professors/sant-nihal-singh-nirmala-20261114.webp",
+    "credit": "Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Illustration_of_Sant_Nihal_Singh%2C_a_Nirmala_scholar%2C_from_the_title-page_of_%27Granthi_Bhav_Sagar_Setu%27%2C_circa_mid-to-late-19th_century_%28cropped%29.jpg",
+    "kind": "historical illustration",
+    "position": "center top"
+  },
+  "Thich Nhat Hanh": {
+    "img": "assets/professors/thich-nhat-hanh-20261114.webp",
+    "credit": "Duc (pixiduc), CC BY-SA 2.0; Wikimedia Commons; resized WebP",
+    "source": "https://commons.wikimedia.org/wiki/File:Thich_Nhat_Hanh_12_(headshot).jpg",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Sikhi University": {
+    "img": "assets/professors/sikhi-university-logo-20261114.webp",
+    "credit": "Sikhi University — official organization logo",
+    "source": "https://sikhiuni.com/",
+    "kind": "organization logo",
+    "position": "center center"
+  },
+  "Sikh Archive": {
+    "img": "assets/professors/sikh-archive-logo-20261114.webp",
+    "credit": "Sikh Archive — official organization logo",
+    "source": "https://www.sikhi.io/",
+    "kind": "organization logo",
+    "position": "center center"
+  },
+  "Dr. Nikky-Guninder Kaur Singh": {
+    "img": "assets/professors/nikky-guninder-kaur-singh-20261114.webp",
+    "credit": "Brian Fitzgerald / Colby News, reproduced by Asia Samachar",
+    "source": "https://asiasamachar.com/2023/06/20/nikky-guninder-kaur-singh-flesh-and-spirit/",
+    "kind": "photograph",
+    "position": "35% top"
+  },
+  "Nikky-Guninder Kaur Singh": {
+    "img": "assets/professors/nikky-guninder-kaur-singh-20261114.webp",
+    "credit": "Brian Fitzgerald / Colby News, reproduced by Asia Samachar",
+    "source": "https://asiasamachar.com/2023/06/20/nikky-guninder-kaur-singh-flesh-and-spirit/",
+    "kind": "photograph",
+    "position": "35% top"
+  },
+  "Arvind-Pal Singh Mandair": {
+    "img": "assets/professors/arvind-pal-singh-mandair-20261114.webp",
+    "credit": "Arvind-Pal Singh Mandair — official biography",
+    "source": "https://www.arvindpalmandair.com/about-me/",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Pashaura Singh": {
+    "img": "assets/professors/pashaura-singh-20261114.webp",
+    "credit": "University of California, Riverside — Sikh and Punjabi Studies Chair",
+    "source": "https://spstudies.ucr.edu/about-the-chair/",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Rattan Singh Jaggi": {
+    "img": "assets/professors/rattan-singh-jaggi-20261114.webp",
+    "credit": "Dr Rattan Singh Jaggi official memorial archive",
+    "source": "https://rattansinghjaggi.com/",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Giani Gurbachan Singh Bhindranwale": {
+    "img": "assets/professors/giani-gurbachan-singh-bhindranwale-20261114.webp",
+    "credit": "Damdami Taksaal (Jatha Bhindran) — official biography",
+    "source": "https://www.damdamitaksal.com/history/leaders/52-sant-giani-gurbachan-singh-jee-khalsa-bhindranwale",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Daljit Singh Jawa": {
+    "img": "assets/professors/daljit-singh-jawa-20261114.webp",
+    "credit": "SikhNet — Daljit Singh Jawa interview",
+    "source": "https://sikhnet.com/news/my-translation-guru-interview-daljit-singh-jawa",
+    "kind": "photograph",
+    "position": "left top"
+  },
+  "Pritpal Singh Bindra": {
+    "img": "assets/professors/pritpal-singh-bindra-20261114.webp",
+    "credit": "SikhNet — Pritpal Singh Bindra obituary",
+    "source": "https://sikhnet.com/news/sardar-pritpal-singh-bindra-1930-2015-rip",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Giani Pritam Singh Likhari": {
+    "img": "assets/professors/giani-pritam-singh-likhari-20261114.webp",
+    "credit": "Nihung Santhia — Giani Pritam Singh biography",
+    "source": "https://www.nihungsanthia.com/giani-pritam-singh-ji",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Sant Jodh Singh Rishikesh": {
+    "img": "assets/professors/sant-jodh-singh-rishikesh-20261114.webp",
+    "credit": "Nirmal Ashram Hospital — Sant Jodh Singh patron biography",
+    "source": "https://nirmalhospitals.com/our-patron/",
+    "kind": "photograph",
+    "position": "center top"
+  },
+  "Harnam Daas Udasi": {
+    "img": "assets/professors/harnam-daas-udasi-20261114.webp",
+    "credit": "Wikimedia Commons — historical printed illustration, ca.1927",
+    "source": "https://en.wikipedia.org/wiki/Harnam_Das_Udasi",
+    "kind": "historical illustration",
+    "position": "center center"
+  },
+  "Lala Sri Ram": {
+    "img": "assets/professors/lala-sri-ram-20261114.webp",
+    "credit": "Rekhta — Lala Sri Ram author profile",
+    "source": "https://www.rekhta.org/poets/lala-sri-ram-1",
+    "kind": "photograph",
+    "position": "center top"
   }
 }

@@ -1,0 +1,55 @@
+---
+// Wide screens (1024 px and up): the persistent glass rail. Five places and
+// the command palette, always one click away, with keyboard shortcuts
+// (lib/liquid.ts). Narrow screens use the tab bar instead (TabBar.astro).
+// Pure navigation: every item is a real link and works without JavaScript.
+import Icon from './Icon.astro';
+const items = [
+  { href: '/', icon: 'home', label: 'Home', key: 'nav.home', m: '/', keys: 'G H' },
+  { href: '/dashboard', icon: 'compass', label: 'My path', m: '/dashboard', keys: 'G P' },
+  { href: '/catalog', icon: 'books', label: 'Courses', key: 'nav.courses', m: '/catalog', keys: 'G C' },
+  { href: '/departments', icon: 'pillar', label: 'Departments', key: 'nav.departments', m: '/departments', keys: 'G D' },
+  { href: '/santhiya', icon: 'music', label: 'Santhya', key: 'nav.santhya', m: '/santhiya', keys: 'G S' },
+];
+const raw = Astro.url.pathname.replace(/\.html$/, '');
+const path = raw === '/index' ? '/' : raw;
+const isActive = (m: string) =>
+  m === '/' ? path === '/' : path === m || path.startsWith(m + '/') || (m === '/catalog' && path.startsWith('/course/')) || (m === '/departments' && path.startsWith('/technology'));
+---
+<aside class="lq-rail" aria-label="Quick navigation">
+  <a href="/" class="lq-rail-crest" aria-label="Sikhi University, home" tabindex="-1"><img src="/assets/brand/sikhiuni-crest-2026.webp" alt="" width="38" height="38" /></a>
+  {items.map((t) => (
+    <a href={t.href} class="lq-rail-item" aria-current={isActive(t.m) ? 'page' : undefined} title={`${t.label} (${t.keys})`}>
+      <Icon name={t.icon} />
+      <span data-i18n={t.key}>{t.label}</span>
+    </a>
+  ))}
+  <span class="lq-rail-spacer"></span>
+  <button type="button" class="lq-rail-item" data-cmdk-open title="Search (Ctrl or Cmd K)">
+    <Icon name="search" />
+    <span data-i18n="nav.search">Search</span>
+  </button>
+  <button type="button" class="lq-rail-item" data-lq-keys aria-haspopup="dialog" title="Keyboard shortcuts (?)">
+    <kbd aria-hidden="true">?</kbd>
+    <span>Shortcuts</span>
+  </button>
+</aside>
+
+<div class="lq-keys" id="lq-keys" hidden>
+  <div class="lq-glass lq-glass--lg" role="dialog" aria-modal="true" aria-labelledby="lq-keys-title">
+    <p class="lq-eyebrow">Keyboard</p>
+    <h2 id="lq-keys-title" class="lq-title">Shortcuts</h2>
+    <dl>
+      <dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>Search courses, pages and actions</dd>
+      <dt><kbd>G</kbd> <kbd>H</kbd></dt><dd>Home</dd>
+      <dt><kbd>G</kbd> <kbd>P</kbd></dt><dd>My path</dd>
+      <dt><kbd>G</kbd> <kbd>C</kbd></dt><dd>Courses</dd>
+      <dt><kbd>G</kbd> <kbd>D</kbd></dt><dd>Departments</dd>
+      <dt><kbd>G</kbd> <kbd>S</kbd></dt><dd>Santhya</dd>
+      <dt><kbd>J</kbd> <kbd>K</kbd></dt><dd>Next and previous lesson, on a course page</dd>
+      <dt><kbd>?</kbd></dt><dd>Show this list</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Close</dd>
+    </dl>
+    <p class="mt-5"><button type="button" class="lq-btn" data-lq-keys-close>Close</button></p>
+  </div>
+</div>

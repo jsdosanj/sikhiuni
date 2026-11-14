@@ -9,10 +9,12 @@ describe('current campus navigation and dashboard contract', () => {
   });
   it('renders each child dashboard route through its matching section', () => {
     const dashboard = read('pages/dashboard.astro');
-    expect(dashboard).toContain("Astro.props.section || 'studio'");
+    // /dashboard opens on "My path" (DESIGN-LIQUID.md); the study studio keeps its own route.
+    expect(dashboard).toContain("Astro.props.section || 'path'");
+    expect(dashboard).toContain("section === 'path' ? <MyPath");
     expect(dashboard).toContain("section === 'studio' && <LearningStudio");
     expect(dashboard).toContain("section === 'library' && <LearningLibrary");
-    for (const section of ['focus', 'learning', 'library', 'profile']) {
+    for (const section of ['studio', 'focus', 'learning', 'library', 'profile']) {
       expect(read(`pages/dashboard/${section}.astro`)).toContain(`<Dashboard section="${section}"`);
       expect(dashboard).toContain(`section === '${section}'`);
       expect(dashboard).toContain(`/dashboard/${section}`);

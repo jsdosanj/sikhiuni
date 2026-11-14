@@ -41,9 +41,13 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
   </script>
   <div class="wrap flex items-center gap-x-3 py-3">
     <!-- White menu silhouette with the university wordmark. -->
-    <a href="/" aria-label="Sikhi University — home" class="flex shrink-0 items-center gap-2.5">
-      <img src="/assets/brand/menu-silhouette-2026.webp" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
-      <span style="font-family: University Gothic, serif; font-size: 26px; line-height: 1.2; white-space: nowrap; color: #fff" translate="no">Sikhi University</span>
+    <a href="/" aria-label="Sikhi University — home" class="lq-nav-brand flex shrink-0 items-center gap-2.5">
+      <img src="/assets/brand/sikhiuni-crest-2026.webp" alt="" aria-hidden="true" class="h-10 w-auto shrink-0" />
+      <span class="relative block min-w-0">
+        <span class="lq-nav-wordmark block" style="font-family: University Gothic, serif; font-size: 26px; line-height: 1.2; white-space: nowrap; color: #fff" translate="no">Sikhi University</span>
+        <!-- Narrow screens: the page's own title takes the wordmark's place once its large title has scrolled away (lib/liquid.ts). -->
+        <span id="lq-nav-title" class="lq-nav-title" aria-hidden="true"></span>
+      </span>
     </a>
 
     <!-- Spacer pushes nav links to the right -->
@@ -58,7 +62,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
          hamburger menu carries every item instead. The old inline search box
          (~250px) was dropped from this row, the ⌘K palette below and the
          mobile menu both search the same index. -->
-    <div class="nav-desktop hidden xl:flex items-center gap-x-3">
+    <div class="nav-desktop hidden min-[1360px]:flex items-center gap-x-3">
       <!-- Departments mega-menu -->
       <div id="nav-mega" class="relative">
         <button id="nav-mega-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="nav-mega-panel"
@@ -144,7 +148,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
 
     <!-- Hamburger (below xl, see the desktop-cluster comment above) -->
     <button id="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu"
-      class="xl:hidden ml-2 inline-flex items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/10 hover:text-white transition">
+      class="min-[1360px]:hidden ml-2 inline-flex items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/10 hover:text-white transition">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M4 6h16M4 12h16M4 18h16"/>
       </svg>
@@ -152,7 +156,7 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
   </div>
 
   <!-- Menu below xl (full-width dropdown) -->
-  <div id="nav-menu" class="hidden xl:hidden border-t border-white/10">
+  <div id="nav-menu" class="hidden min-[1360px]:hidden border-t border-white/10">
     <div class="wrap py-3 flex flex-col gap-y-1">
       <!-- Search (below xl) -->
       <form action="/search" method="get" role="search" class="mb-2">
@@ -415,3 +419,13 @@ const isActive = (m: string) => path === m || path.startsWith(m + '/') || (m !==
     }
   }).catch(() => {});
 </script>
+
+<style>
+  @media (max-width:360px) {
+    .su-nav > .wrap { column-gap:6px; }
+    .lq-nav-brand { flex-shrink:1; max-width:calc(100% - 50px); gap:6px; }
+    .lq-nav-brand > img { height:32px; max-width:36px; object-fit:contain; }
+    .lq-nav-wordmark { font-size:20px !important; }
+    #nav-toggle { flex-shrink:0; width:44px; height:44px; margin-left:0; }
+  }
+</style>

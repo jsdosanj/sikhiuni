@@ -532,5 +532,6 @@
   "verify.notfound.title": "नहीं मिला।",
   "verify.ph.certid": "SU-…",
   "verify.submit": "सत्यापित करें",
-  "verify.valid": "वैध सर्टिफ़िकेट"
+  "verify.valid": "वैध सर्टिफ़िकेट",
+  "support.stayOnline": "हमें ऑनलाइन बनाए रखने में मदद करें 🙏"
 }

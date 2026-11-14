@@ -24,7 +24,7 @@ export type Path = { id: string; name: string; blurb: string; courseIds: string[
 export const courses: Course[] = publicCourseCatalogue(raw).courses;
 export const topics: Topic[] = (raw as any).topics;
 export const paths: Path[] = (raw as any).paths || [];
-export const professorPhotos: Record<string, { img: string; credit?: string; source?: string }> = photos as any;
+export const professorPhotos: Record<string, { img: string; credit?: string; source?: string; kind?: string; position?: string }> = photos as any;
 
 export const published = courses.filter((c) => c.status === 'published');
 

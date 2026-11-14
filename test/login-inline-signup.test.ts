@@ -20,7 +20,7 @@ function fixture() {
   }
   const fetch = vi.fn();
   const location = { search: '', href: '/login.html' };
-  const script = source.match(/<script>([\s\S]*?)<\/script>/)![1].replace(/import \{ safeReturnPath \} from [^;]+;/, 'const safeReturnPath = () => "/dashboard.html";');
+  const script = source.match(/<script>([\s\S]*?)<\/script>/)![1].replace(/import \{ safeReturnPath \} from [^;]+;/, 'const safeReturnPath = () => "/dashboard.html";').replace(/import \{ courseSsoHref \} from [^;]+;/, 'const courseSsoHref = () => "https://sikhi.io";');
   runInNewContext(transformSync(script, { loader: 'ts' }).code, { document: { getElementById: node }, location, URLSearchParams, fetch });
   node('mode-toggle').fire('click');
   node('reg-username').value = 'harjit';
@@ -41,5 +41,19 @@ describe('signup resend recovery', () => {
     expect(f.node('reg-step-2').classList.contains('hidden')).toBe(false);
     expect(f.node('reg-code').value).toBe('123456');
     expect(f.location.href).toBe('/login.html');
+  });
+});
+
+describe('signup submit network recovery', () => {
+  it.each(['signin', 'details', 'code'])('keeps form usable after %s failure', async step => {
+    const f = fixture();
+    if (step === 'signin') { f.node('mode-toggle').fire('click'); f.node('identifier').value = 'dummy@example.test'; f.node('password').value = 'unchanged'; }
+    if (step === 'code') { f.respond(true, {}); await f.submit(); f.node('reg-code').value = '123456'; }
+    f.fetch.mockRejectedValueOnce(new Error('offline'));
+    await f.submit();
+    expect(f.node('password-btn').disabled).toBe(false);
+    expect(f.node('out').innerHTML).toContain('Network error. Please try again.');
+    expect(f.location.href).toBe('/login.html');
+    if (step === 'code') expect(f.node('reg-code').value).toBe('123456');
   });
 });

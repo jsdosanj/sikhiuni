@@ -49,3 +49,34 @@ export async function verifySsoToken(token, secretHex) {
     return null;
   }
 }
+
+const SSO_DEFAULT_RETURN = "/dashboard.html";
+
+/** Local navigation only; decode nested path escapes before accepting a return. */
+export function safeSsoReturnPath(value) {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || /[\\\u0000-\u001f\u007f]/.test(value)) return SSO_DEFAULT_RETURN;
+  let path = value.split(/[?#]/, 1)[0];
+  try {
+    for (let i = 0; i < 5; i++) {
+      if (/%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i.test(path)) return SSO_DEFAULT_RETURN;
+      const decoded = decodeURIComponent(path);
+      if (decoded === path) break;
+      path = decoded;
+      if (i === 4) return SSO_DEFAULT_RETURN;
+    }
+    // Encoded controls/backslashes are unsafe in query/fragment too.
+    let decoded = value;
+    for (let i = 0; i < 5; i++) {
+      const next = decodeURIComponent(decoded);
+      if (/[\\\u0000-\u001f\u007f]/.test(next)) return SSO_DEFAULT_RETURN;
+      if (next === decoded) break;
+      decoded = next;
+      if (i === 4) return SSO_DEFAULT_RETURN;
+    }
+    const url = new URL(value, "https://local.invalid");
+    if (url.origin !== "https://local.invalid" || url.pathname.startsWith("//")) return SSO_DEFAULT_RETURN;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return SSO_DEFAULT_RETURN;
+  }
+}

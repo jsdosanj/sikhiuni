@@ -57,7 +57,7 @@ const anyUncredited = list.some(({ name }) => !professorPhotos[name]?.img);
           return (
             <a href={`/professor/${profSlug(name)}`} class="faculty-card" data-name={name} data-search={[name, ...courses.map(c => topicName(c.topic))].join(' ').toLowerCase()} data-schools={departments.filter(d => courses.some(c => d.topics.includes(c.topic))).map(d => d.id).join(' ')} data-courses={courses.length}>
               {photo && photo.img ? (
-                <img src={`/${photo.img}`} width="88" height="88" loading="lazy" alt="" style="object-position:center top"
+                <img src={`/${photo.img}`} width="88" height="88" loading="lazy" alt={photo.kind === 'organization logo' ? `${name} logo` : (photo.kind === 'historical painting' || photo.kind === 'historical illustration') ? `Historical depiction of ${name}` : `Portrait of ${name}`} style={`object-position:${photo.position || 'center top'}`}
                   class="faculty-portrait" />
               ) : (
                 <span aria-hidden="true" class="faculty-portrait faculty-initials" style={`background:${avatarColor(name)}`}>{profInitials(name)}</span>
@@ -75,7 +75,7 @@ const anyUncredited = list.some(({ name }) => !professorPhotos[name]?.img);
       <p id="faculty-empty" hidden>No scholars match these filters. Try another name or reset your search.</p>
 
       {(anyCredited || anyUncredited) && (
-        <p class="mt-6 max-w-[86ch] font-mono text-[11px] leading-[1.75] text-muted" data-i18n="profs.creditNote">Portraits: Wikimedia Commons, public domain unless credited otherwise on the scholar's page. Scholars with no archived portrait show initials instead.</p>
+        <p class="mt-6 max-w-[86ch] font-mono text-[11px] leading-[1.75] text-muted">Images include sourced photographs, historical depictions and organization logos. Credits appear on each profile. Scholars without a verified image show initials.</p>
       )}
     </div>
   </section>

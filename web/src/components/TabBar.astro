@@ -1,5 +1,5 @@
 ---
-// Mobile app-shell bottom tab bar (<768px only). Glass-strong, safe-area
+// Narrow-screen app shell tab bar (below 1024 px): a floating glass bar, safe-area
 // aware, active tab marked with a saffron indicator. Slides away while the
 // on-screen keyboard is open (visualViewport heuristic) so it never crowds a
 // form. Pure navigation, content is never gated on it.
@@ -16,9 +16,10 @@ const wing = (deptData as any).wing as { name: string; href: string; accent: str
 
 const tabs = [
   { href: '/', icon: 'home', label: 'Home', key: 'nav.home', m: '/' },
-  { href: '/departments', icon: 'books', label: 'Departments', key: 'nav.departments', m: '/departments', sheet: true },
+  { href: '/catalog', icon: 'books', label: 'Courses', key: 'nav.courses', m: '/catalog' },
+  { href: '/dashboard', icon: 'compass', label: 'My path', key: undefined, m: '/dashboard' },
   { href: '/santhiya', icon: 'music', label: 'Santhya', key: 'nav.santhya', m: '/santhiya' },
-  { href: '/dashboard', icon: 'backpack', label: 'My Learning', key: 'nav.mylearning', m: '/dashboard' },
+  { href: '/departments', icon: 'pillar', label: 'Departments', key: 'nav.departments', m: '/departments', sheet: true },
 ];
 // The static build's pathname carries the file suffix (/catalog.html), strip
 // it so tabs match the clean URLs they're served under.
@@ -29,16 +30,17 @@ const isActive = (m: string) =>
     ? path === '/'
     : path === m ||
       path.startsWith(m + '/') ||
-      (m === '/departments' && (path === '/catalog' || path.startsWith('/course/') || path.startsWith('/catalog/')));
+      (m === '/catalog' && path.startsWith('/course/')) ||
+      (m === '/departments' && path.startsWith('/technology'));
 ---
-<nav aria-label="Quick navigation" class="su-tabbar glass-strong">
+<nav aria-label="Quick navigation" class="su-tabbar">
   {tabs.map((t) => (
     <a
       href={t.href}
       data-dept-sheet={t.sheet ? '' : undefined}
       aria-haspopup={t.sheet ? 'dialog' : undefined}
       aria-current={isActive(t.m) ? 'page' : undefined}
-      class={`su-tab font-sans ${isActive(t.m) ? 'is-active text-saffron-deep' : 'text-ink/65'}`}
+      class={`su-tab font-sans ${isActive(t.m) ? 'is-active' : ''}`}
     >
       <Icon name={t.icon} class="h-6 w-6" />
       <span class="text-[0.65rem] leading-tight" data-i18n={t.key}>{t.label}</span>
@@ -54,6 +56,12 @@ const isActive = (m: string) =>
     <div class="su-sheet-head">
       <h2 id="su-sheet-title" class="su-sheet-title" data-i18n="nav.departments">Departments</h2>
       <a href="/departments" class="su-sheet-all">Full directory &rarr;</a>
+    </div>
+    <div class="lq-sheet-links">
+      <a href="/catalog#paths"><Icon name="compass" />Guided journeys</a>
+      <a href="/programs"><Icon name="medal" />Programmes</a>
+      <a href="/professors"><Icon name="people" />Professors</a>
+      <a href="/cohorts"><Icon name="cap" />Cohorts</a>
     </div>
     <ul class="su-sheet-list">
       {schools.map((d) => (
@@ -87,7 +95,7 @@ const isActive = (m: string) =>
     padding-bottom: env(safe-area-inset-bottom);
     transition: transform var(--dur-hover) var(--ease-out);
   }
-  @media (max-width: 767px) { .su-tabbar { display: flex; } }
+  @media (max-width: 1023px) { .su-tabbar { display: flex; } }
   @media print { .su-tabbar { display: none; } }
   .su-tabbar[data-kb] { transform: translateY(110%); }
   .su-tab {
@@ -110,12 +118,6 @@ const isActive = (m: string) =>
     border-radius: 0 0 3px 3px;
     background: #f4b21a;
   }
-  /* Keep page content, and the a11y FAB, clear of the fixed bar. */
-  @media (max-width: 767px) {
-    body { padding-bottom: calc(52px + env(safe-area-inset-bottom)); }
-    #a11y-fab { bottom: calc(52px + env(safe-area-inset-bottom) + 0.75rem); }
-    #a11y-panel { bottom: calc(52px + env(safe-area-inset-bottom) + 4.5rem); }
-  }
   /* Zen reader and the a11y high-contrast certificate flows want a clean stage. */
   body.zen .su-tabbar { display: none; }
 
@@ -123,7 +125,7 @@ const isActive = (m: string) =>
   /* Closed state = the [hidden] attribute (UA display:none); open/close motion
      is driven by the data-open flag while the element is rendered. */
   .su-sheet { position: fixed; inset: 0; z-index: 50; }
-  @media (min-width: 768px) { .su-sheet { display: none !important; } }
+  @media (min-width: 1024px) { .su-sheet { display: none !important; } }
   .su-sheet-scrim {
     position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0;
     background: rgb(8 12 20 / .5); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
@@ -190,6 +192,9 @@ const isActive = (m: string) =>
     const panel = sheet.querySelector('.su-sheet-panel') as HTMLElement | null;
 
     let lastFocus: HTMLElement | null = null;
+    // Hardware back closes the sheet: opening pushes one history entry, and
+    // closing by any other route takes that entry away again.
+    let pushed = false;
     const open = () => {
       lastFocus = document.activeElement as HTMLElement;
       sheet.hidden = false;
@@ -197,27 +202,33 @@ const isActive = (m: string) =>
       requestAnimationFrame(() => sheet.setAttribute('data-open', ''));
       trigger.setAttribute('aria-expanded', 'true');
       document.addEventListener('keydown', onKey);
+      history.pushState({ lqSheet: true }, '');
+      pushed = true;
       (panel?.querySelector('a') as HTMLElement | null)?.focus();
     };
-    const close = () => {
+    const close = (fromHistory = false, navigating = false) => {
+      if (!sheet.hasAttribute('data-open')) return;
       sheet.removeAttribute('data-open');
       trigger.setAttribute('aria-expanded', 'false');
       document.removeEventListener('keydown', onKey);
       const done = () => { sheet.hidden = true; panel?.removeEventListener('transitionend', done); };
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) done();
       else panel?.addEventListener('transitionend', done);
-      lastFocus?.focus();
+      if (pushed && !fromHistory && !navigating) history.back();
+      pushed = false;
+      if (!navigating) lastFocus?.focus();
     };
+    addEventListener('popstate', () => close(true));
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
 
     trigger.addEventListener('click', (e) => {
       // only intercept on the mobile viewport where the sheet exists
-      if (!matchMedia('(max-width: 767px)').matches) return;
+      if (!matchMedia('(max-width: 1023px)').matches) return;
       e.preventDefault();
       sheet.hasAttribute('data-open') ? close() : open();
     });
-    sheet.querySelector('[data-sheet-close]')?.addEventListener('click', close);
+    sheet.querySelector('[data-sheet-close]')?.addEventListener('click', () => close());
     // selecting a school closes as it navigates
-    sheet.querySelectorAll('.su-sheet-list a, .su-sheet-all').forEach((a) => a.addEventListener('click', () => close()));
+    sheet.querySelectorAll('.su-sheet-list a, .su-sheet-all, .lq-sheet-links a').forEach((a) => a.addEventListener('click', () => close(false, true)));
   })();
 </script>

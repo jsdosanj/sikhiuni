@@ -1,6 +1,6 @@
 import { newId, sessionCookie, isAdminEmail, logEvent } from "../_lib.js";
 import { sessionNeedsMfa } from "./_trusted-device.js";
-import { verifySsoToken } from "../../_sso.js";
+import { verifySsoToken, safeSsoReturnPath } from "../../_sso.js";
 import { insertUserWithOptin, sendWelcomeEmail } from "./_onboarding.js";
 
 async function sha256Hex(input) {
@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
   const returnPath = url.searchParams.get("return") || "/dashboard.html";
   const base = env.SITE_URL || url.origin;
 
-  const safeReturn = returnPath.startsWith("/") && !returnPath.startsWith("//") ? returnPath : "/dashboard.html";
+  const safeReturn = safeSsoReturnPath(returnPath);
   const dest = `${base}${safeReturn}`;
   const fail = (msg) => Response.redirect(`${base}/login.html?error=${encodeURIComponent(msg)}`, 302);
 

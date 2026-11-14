@@ -535,5 +535,6 @@
   "verify.notfound.title": "未找到。",
   "verify.ph.certid": "SU-…",
   "verify.submit": "验证",
-  "verify.valid": "有效证书"
+  "verify.valid": "有效证书",
+  "support.stayOnline": "帮助我们继续在线运营 🙏"
 }

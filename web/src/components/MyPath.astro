@@ -1,0 +1,199 @@
+---
+// "My path": the learner dashboard. One next step, the week's goal, a humane
+// rhythm, a ring per subject, the courses in hand, milestones and a timeline.
+//
+// Data: only what the site already has. The course index (/data/index.json),
+// this device's lesson record (su_v1_done_*, su_v1_passed_*, su_v1_activity),
+// and, when signed in, GET /api/progress and GET /api/activity/stats.
+// Every rule lives in lib/path.ts and is unit-tested (test/my-path.test.ts).
+// What is rendered before the script runs is a neutral frame, never invented
+// figures. See DESIGN-LIQUID.md, section 6.
+---
+<section class="lq-path" id="my-path" aria-labelledby="my-path-title">
+  <div class="lq-path-head">
+    <div>
+      <p class="lq-eyebrow">Sikhi University</p>
+      <h1 id="my-path-title" class="lq-display">My path</h1>
+    </div>
+    <p id="mp-sync" class="lq-small lq-faint" role="status"></p>
+  </div>
+  <div id="mp-root" aria-live="polite">
+    <div class="lq-cols lq-cols--hero"><div class="lq-skel" style="min-height:220px"></div><div class="lq-skel" style="min-height:220px"></div></div>
+    <noscript><p class="lq-note">My path needs JavaScript to read your progress. Your courses are all in the <a href="/catalog">catalogue</a>.</p></noscript>
+  </div>
+</section>
+
+<script>
+  import { iconSvg } from '../lib/icons';
+  import { store } from '../lib/liquid';
+  import {
+    areaRings, clampGoal, courseProgress, DEFAULT_WEEKLY_GOAL, doneList, formatCount, gridFromLocalDays, humaneRhythm,
+    milestones, nextBestStep, nextMilestone, rhythmMessage, startedCourses, timeline, totals, weekMessage, weekProgress,
+    type CourseLite, type GridDay, type LogEntry, type Records, type TopicLite,
+  } from '../lib/path';
+
+  const root = document.getElementById('mp-root');
+  const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+  const api = (p: string) => fetch(p, { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+  function ring(value: number, size: number, stroke: number, label: string, inner: string, done = false) {
+    const r = (size - stroke) / 2, c = 2 * Math.PI * r, v = Math.max(0, Math.min(1, value));
+    return `<span class="lq-ring" role="img" aria-label="${esc(label)}: ${Math.round(v * 100)} per cent" data-done="${done || v >= 1}" style="width:${size}px;height:${size}px">`
+      + `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle class="lq-ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"></circle>`
+      + `<circle class="lq-ring-value" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}"></circle></svg>`
+      + `<span aria-hidden="true" class="lq-num" style="font-size:${Math.max(11, Math.round(size / 4.6))}px">${esc(inner)}</span></span>`;
+  }
+  const bar = (value: number, label: string) =>
+    `<div class="lq-bar" role="progressbar" aria-label="${esc(label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(value * 100)}"><i style="transform:scaleX(${Math.max(0, Math.min(1, value))})"></i></div>`;
+
+  /** Every course record this device holds, from the same keys the course page writes. */
+  function deviceRecords(courses: CourseLite[]): Records {
+    const out: Records = {};
+    for (const c of courses) {
+      const done = doneList(store.get('done_' + c.id, {}), c.nLessons);
+      const passed = !!store.get('passed_' + c.id, false);
+      if (done.length || passed) out[c.id] = { done, passed };
+    }
+    return out;
+  }
+
+  if (root) (async () => {
+    const [index, prog, stats] = await Promise.all([
+      fetch('/data/index.json').then((r) => r.json()).catch(() => null),
+      api('/api/progress'),
+      api('/api/activity/stats'),
+    ]);
+    if (!index) { root.innerHTML = '<p class="lq-note">Your path could not be loaded just now. Please try again in a moment, or open the <a href="/catalog">catalogue</a>.</p>'; return; }
+    const courses: CourseLite[] = (index.courses || []).filter((c: any) => c.status === 'published' || !c.status);
+    const topics: TopicLite[] = index.topics || [];
+    const byId = new Map(courses.map((c) => [c.id, c]));
+    const records = deviceRecords(courses);
+    // The server is the source of truth when signed in: merge its rows over the device record.
+    const signedIn = !!(prog && Array.isArray(prog.progress));
+    if (signedIn) for (const row of prog.progress) {
+      const c = byId.get(row.course_id); if (!c) continue;
+      let server: unknown = []; try { server = JSON.parse(row.done || '[]'); } catch { /* keep empty */ }
+      const merged = new Set([...(records[c.id]?.done ?? []), ...doneList(server, c.nLessons)]);
+      records[c.id] = { done: [...merged], passed: !!records[c.id]?.passed || (row.passed_score != null && row.passed_score >= 80) };
+    }
+    const sync = document.getElementById('mp-sync');
+    if (sync) sync.innerHTML = signedIn ? 'Kept with your account' : 'Kept on this device. <a class="underline" href="/login?return=/dashboard">Sign in</a> to keep it everywhere.';
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const threshold = stats?.activeDayThresholdSeconds ?? 60;
+    const grid: GridDay[] = stats?.grid?.length ? stats.grid : gridFromLocalDays(store.get<string[]>('activity', []), todayKey);
+    const activeDays = stats?.activeDays ?? grid.filter((d) => d.activeSeconds >= threshold).length;
+    const list = startedCourses(courses, records, store.get<string | null>('last_course', null));
+    const t = totals(list);
+    const rhythm = humaneRhythm(grid, threshold);
+    const rings = areaRings(list, topics);
+    const miles = milestones(t, activeDays, rhythm, new Set(list.map((p) => p.course.topic)).size);
+    const days = timeline(store.get<LogEntry[]>('path_log', []), grid.slice(-30), courses);
+    // The device record knows which days were active, not for how long: show minutes only from the server grid.
+    if (!stats?.grid?.length) days.forEach((d) => { d.minutes = null; });
+    // Milestones reached since the last visit glow once.
+    const seen = new Set(store.get<string[]>('path_seen', []));
+    const firstVisit = !localStorage.getItem('su_v1_path_seen');
+    const fresh = new Set(miles.filter((m) => m.achieved && !seen.has(m.id) && !firstVisit).map((m) => m.id));
+    store.set('path_seen', miles.filter((m) => m.achieved).map((m) => m.id));
+
+    function draw() {
+      const goal = clampGoal(store.get('path_goal', DEFAULT_WEEKLY_GOAL));
+      const week = weekProgress(grid, goal, todayKey, threshold, rhythm.restDayKeys);
+      const step = nextBestStep(list, courses, week);
+      const upcoming = nextMilestone(miles);
+      const stepCourse = list.find((p) => p.href === step.href);
+      const reached = miles.filter((m) => m.achieved);
+      const shownMiles = [...reached.slice(-3).reverse(), ...miles.filter((m) => !m.achieved).sort((a, b) => b.progress - a.progress).slice(0, 3)];
+
+      root!.innerHTML = `
+      <div class="lq-stack" style="gap:var(--lq-s-4)">
+        <div class="lq-cols lq-cols--hero">
+          <section class="lq-glass lq-glass--lg lq-glass--blur lq-glass--sheen lq-pad" aria-labelledby="mp-next-h">
+            <div class="lq-next">
+              <div class="lq-stack">
+                <p class="lq-eyebrow">${esc(step.eyebrow)}</p>
+                <h2 id="mp-next-h">${esc(step.title)}</h2>
+                <p class="lq-muted">${esc(step.body)}</p>
+              </div>
+              <div class="lq-row" style="flex-wrap:wrap">
+                ${stepCourse ? ring(stepCourse.value, 56, 6, 'Course progress', Math.round(stepCourse.value * 100) + '%') : ''}
+                <a class="lq-btn lq-btn--primary" href="${esc(step.href)}">${esc(step.cta)} <span aria-hidden="true">&rarr;</span></a>
+                <a class="lq-btn lq-btn--quiet" href="/catalog">Browse courses</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="lq-glass lq-glass--lg lq-pad lq-stack" aria-labelledby="mp-week-h" style="gap:var(--lq-s-4)">
+            <div class="lq-row" style="justify-content:space-between;align-items:flex-start">
+              <div><p class="lq-eyebrow">This week</p><h2 id="mp-week-h" class="lq-title">${week.done} of ${week.goal} days</h2></div>
+              ${ring(Math.min(1, week.done / week.goal), 64, 7, 'Weekly goal', `${week.done}/${week.goal}`, week.met)}
+            </div>
+            <div class="lq-week" aria-hidden="true">${week.days.map((d) => `<span><div class="lq-dots"><i data-on="${d.active}" data-rest="${d.rest}" data-today="${d.today}"></i></div>${d.letter}</span>`).join('')}</div>
+            <p class="lq-small lq-muted">${esc(weekMessage(week))}</p>
+            <div class="lq-row" style="justify-content:space-between;flex-wrap:wrap">
+              <span class="lq-small lq-faint" id="mp-goal-label">Your weekly goal</span>
+              <div class="lq-goal" role="group" aria-labelledby="mp-goal-label">
+                <button type="button" data-goal="-1" aria-label="One day fewer" ${goal <= 1 ? 'disabled' : ''}>&minus;</button>
+                <output aria-live="polite">${goal} ${goal === 1 ? 'day' : 'days'}</output>
+                <button type="button" data-goal="1" aria-label="One day more" ${goal >= 7 ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="lq-tiles">
+          <div class="lq-glass lq-pad lq-stack"><span class="lq-fig">${formatCount(rhythm.days)}</span><span class="lq-small lq-muted">${rhythm.days === 1 ? 'day' : 'days'} in your rhythm${rhythm.restDays ? `, ${rhythm.restDays} rest ${rhythm.restDays === 1 ? 'day' : 'days'} kept` : ''}</span></div>
+          <div class="lq-glass lq-pad lq-stack"><span class="lq-fig">${formatCount(t.lessons)}</span><span class="lq-small lq-muted">${t.lessons === 1 ? 'lesson' : 'lessons'} complete</span></div>
+          <div class="lq-glass lq-pad lq-stack"><span class="lq-fig">${formatCount(t.coursesComplete)}${t.coursesStarted ? `<span class="lq-small lq-faint" style="font-weight:500"> of ${formatCount(t.coursesStarted)}</span>` : ''}</span><span class="lq-small lq-muted">courses complete</span></div>
+          <div class="lq-glass lq-pad lq-stack"><span class="lq-fig">${formatCount(activeDays)}</span><span class="lq-small lq-muted">active ${activeDays === 1 ? 'day' : 'days'} this year</span></div>
+        </div>
+        <p class="lq-small lq-muted" style="margin-top:-4px">${esc(rhythmMessage(rhythm))} One day off in any seven is a rest day and keeps your rhythm.</p>
+
+        <div class="lq-cols lq-cols--main">
+          <div class="lq-stack" style="gap:var(--lq-s-4)">
+            <section aria-labelledby="mp-courses-h" class="lq-stack">
+              <div class="lq-row" style="justify-content:space-between"><h2 id="mp-courses-h" class="lq-title">Continue where you left off</h2><a class="lq-small" href="/dashboard/learning">Full record &rarr;</a></div>
+              ${list.length ? `<div class="lq-shelf">${list.slice(0, 6).map((p) => `
+                <a class="lq-glass lq-course" href="${esc(p.href)}">
+                  ${ring(p.value, 52, 6, p.course.title, p.passed ? '100%' : Math.round(p.value * 100) + '%', p.passed)}
+                  <span class="lq-stack" style="gap:6px"><b>${esc(p.course.title)}</b>
+                  <span class="lq-micro lq-muted">${p.state === 'complete' ? 'Complete. Open it again whenever you wish.' : p.state === 'lessons-done' ? 'Every lesson done. The test is next.' : `Lesson ${(p.nextLesson ?? 0) + 1} of ${p.total} is next`}</span></span>
+                </a>`).join('')}</div>`
+                : `<div class="lq-glass lq-pad lq-stack"><b>Nothing begun yet, and that is a fine place to start.</b><span class="lq-small lq-muted">Open any course and mark a lesson complete. It will appear here, ready to pick up again.</span><span><a class="lq-btn lq-btn--accent" href="/catalog#foundations">Explore the foundations</a></span></div>`}
+            </section>
+
+            <section aria-labelledby="mp-areas-h" class="lq-stack">
+              <h2 id="mp-areas-h" class="lq-title">Your subjects</h2>
+              ${rings.length ? `<div class="lq-tiles" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${rings.map((r) => `
+                <a class="lq-glass lq-area" href="${esc(r.href)}" title="${esc(r.detail)}">${ring(r.value, 76, 7, r.label, r.figure)}<b>${esc(r.label)}</b><span class="lq-micro lq-muted">${esc(r.detail)}</span></a>`).join('')}</div>`
+                : `<p class="lq-note">A ring appears here for each subject you begin: lessons done, out of the lessons in the courses you have started.</p>`}
+            </section>
+          </div>
+
+          <div class="lq-stack" style="gap:var(--lq-s-4)">
+            <section class="lq-glass lq-pad" aria-labelledby="mp-miles-h">
+              <h2 id="mp-miles-h" class="lq-title">Milestones</h2>
+              <p class="lq-small lq-muted" style="margin:4px 0 8px">${reached.length} of ${miles.length} reached${upcoming ? `. Next: ${esc(upcoming.title.toLowerCase())}.` : '.'}</p>
+              ${shownMiles.map((m) => `<div class="lq-mile" data-achieved="${m.achieved}"><span class="lq-mile-mark ${fresh.has(m.id) ? 'lq-celebrate' : ''}">${iconSvg(m.achieved ? 'check' : 'medal', '')}</span><span class="lq-grow lq-stack" style="gap:5px"><b class="lq-small">${esc(m.title)}</b>${m.achieved ? `<span class="lq-micro lq-muted">${esc(m.detail)}</span>` : `${bar(m.progress, m.title)}<span class="lq-micro lq-muted">${esc(m.detail)}</span>`}</span></div>`).join('')}
+            </section>
+
+            <section class="lq-glass lq-pad" aria-labelledby="mp-time-h">
+              <h2 id="mp-time-h" class="lq-title">Recent learning</h2>
+              ${days.length ? days.map((d) => `<div class="lq-time"><span class="lq-micro lq-faint">${esc(d.label)}${d.minutes ? ` &middot; about ${formatCount(d.minutes)} min` : ''}</span>${d.items.length ? d.items.slice(0, 4).map((i) => `<span class="lq-small"><a href="${esc(i.href)}">${esc(i.title)}</a><span class="lq-muted"> &middot; ${esc(i.detail)}</span></span>`).join('') : '<span class="lq-small lq-muted">Time spent learning</span>'}</div>`).join('')
+                : '<p class="lq-small lq-muted" style="margin-top:8px">Your learning days will gather here as you go.</p>'}
+            </section>
+          </div>
+        </div>
+      </div>`;
+
+      root!.querySelectorAll<HTMLButtonElement>('[data-goal]').forEach((b) => b.addEventListener('click', () => {
+        store.set('path_goal', clampGoal(goal + Number(b.dataset.goal)));
+        const which = b.dataset.goal;
+        draw();
+        (root!.querySelector(`[data-goal="${which}"]:not(:disabled)`) as HTMLElement | null ?? root!.querySelector('[data-goal]:not(:disabled)') as HTMLElement | null)?.focus();
+      }));
+    }
+    draw();
+  })();
+</script>

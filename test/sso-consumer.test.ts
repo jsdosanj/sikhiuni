@@ -220,7 +220,7 @@ describe("GET /api/auth/sso (route)", () => {
   });
 
   it("return=//evil.com and return=https://evil.com both fall back to /dashboard.html", async () => {
-    for (const ret of ["//evil.com", "https://evil.com"]) {
+    for (const ret of ["//evil.com", "https://evil.com", "/a/..//evil.test", "/dashboard?x=%7f", "/dashboard?x=%257f", "/%252f%252fevil.test", "/course#%00", "/%255cevil.test"]) {
       vi.useFakeTimers();
       vi.setSystemTime(validVector.verifyAt);
       const { env } = makeEnv();
@@ -229,6 +229,15 @@ describe("GET /api/auth/sso (route)", () => {
       vi.useRealTimers();
       expect(res.headers.get("Location")).toBe("https://sikhiuni.com/dashboard.html");
     }
+  });
+
+  it("preserves local course query and anchor at the receiver", async () => {
+    vi.useFakeTimers(); vi.setSystemTime(validVector.verifyAt);
+    try {
+      const { env } = makeEnv();
+      const res = await onRequestGet({ request: new Request(ssoUrl(validVector.token, "/course/history?mode=pa#lesson-2")), env } as any);
+      expect(res.headers.get("Location")).toBe("https://sikhiuni.com/course/history?mode=pa#lesson-2");
+    } finally { vi.useRealTimers(); }
   });
 
   it("missing SSO_SHARED_SECRET: 'not configured' error redirect, no session", async () => {

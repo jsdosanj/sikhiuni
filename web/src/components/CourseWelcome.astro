@@ -1,0 +1,35 @@
+---
+interface Props { links: { login: string; signup: string }; title: string; }
+const { links, title } = Astro.props;
+---
+<section id="free-course-access" class="course-welcome wrap" aria-labelledby="course-welcome-heading">
+  <div class="welcome-copy">
+    <span class="welcome-kicker">YOUR NEXT CHAPTER · SIKHI UNIVERSITY</span>
+    <h2 id="course-welcome-heading">A little curiosity. A new beginning.</h2>
+    <p>Welcome to <strong>{title}</strong>. Make a space for learning, one lesson at a time.</p>
+    <ul><li>Read the full lessons and explore their sources.</li><li>Save your progress and return where you left off.</li><li>Check your understanding with the course test.</li></ul>
+    <p class="welcome-note">Free to learn. Your course outline is open below. Sign in to begin the lessons.</p>
+  </div>
+  <div class="welcome-actions">
+    <span class="welcome-mark" aria-hidden="true">✦</span>
+    <h3>Make yourself at home.</h3>
+    <a class="btn btn-primary" href={links.signup}>Create your free account <span aria-hidden="true">↗</span></a>
+    <a class="btn welcome-login" href={links.login}>Log in</a>
+    <p>Already part of Sikhi.io? Use <strong>Continue with Sikhi.io</strong> on the sign-in page. One account for your learning.</p>
+  </div>
+</section>
+<style>
+.course-welcome { margin-top:28px; display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:32px; padding:32px; border-radius:28px; color:#eef3ff; background:radial-gradient(ellipse at top left,#526d9e55,transparent 65%),linear-gradient(145deg,#172943ef,#111d34f5); box-shadow:inset 0 1px 0 #ffffff30,0 20px 50px -25px #06142d66; backdrop-filter:blur(20px); }
+.welcome-kicker {font:10px/1.6 Arial,sans-serif;letter-spacing:.14em;color:#e6c67c;}
+#free-course-access .welcome-copy h2 {color:#f5f7ff;font-size:clamp(26px,3vw,38px);line-height:1.18;margin:14px 0;}
+.welcome-copy p,.welcome-copy li {font:15px/1.75 Arial,sans-serif;color:#dce5f3;}
+.welcome-copy ul {padding-left:20px;margin:16px 0;list-style:disc;}
+.welcome-copy .welcome-note {font-size:13px;color:#bfcde2;}
+.welcome-actions {display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px;border-radius:22px;background:#ffffff0b;box-shadow:inset 0 1px 0 #ffffff20;}
+.welcome-mark {font-size:26px;color:#e6c67c;}
+#free-course-access .welcome-actions h3 {color:#f5f7ff;font-size:22px;margin:0 0 6px;}
+.welcome-actions .btn {justify-content:center;min-height:48px;white-space:normal;text-align:center;}
+.welcome-login {background:#ffffff12;color:white;box-shadow:inset 0 0 0 1px #ffffff38;}
+.welcome-actions p {font:12px/1.7 Arial,sans-serif;color:#c4d1e5;margin:4px 0 0;}
+@media(max-width:700px){.course-welcome{grid-template-columns:minmax(0,1fr);padding:24px 20px;gap:24px;width:calc(100% - 32px);}.welcome-actions{padding:22px;}}
+</style>

@@ -1,4 +1,6 @@
 ---
+import { courseAccountLinks } from '../../lib/course-account-links';
+import CourseWelcome from '../../components/CourseWelcome.astro';
 import { stageName } from '../../lib/stages';
 import Base from '../../layouts/Base.astro';
 import Avatar from '../../components/Avatar.astro';
@@ -6,6 +8,7 @@ import Icon from '../../components/Icon.astro';
 import { published, courses, topicName, profSlug, profBio } from '../../lib/data';
 export function getStaticPaths() { return published.map((c) => ({ params: { id: c.id }, props: { c } })); }
 const { c } = Astro.props;
+const accountLinks = courseAccountLinks(c.id);
 // Build-time verification status (from web/scripts/verify-gurbani.mjs, which runs
 // before astro build). A course is "quotes verified" only if every quoted tuk matched
 // canonical text with nothing mismatched or uncovered.
@@ -66,7 +69,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
 
   <div id="read-progress" aria-hidden="true" class="fixed left-0 z-30 h-[3px] bg-saffron" style="top:0;width:0"></div>
 
-  <div class="band-navy">
+  <div class="band-navy lq-course-band">
     <div class="wrap py-8 sm:pb-9 sm:pt-10">
       <p class="flex flex-wrap items-center gap-2.5 font-mono text-[10.5px] uppercase tracking-[.16em] text-white/72">
         <a href="/catalog" class="hover:text-white" data-i18n="course.breadcrumb">Catalogue</a>
@@ -85,12 +88,18 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         {quotesVerified && <a href="/integrity" class="chip-status border-ok text-ok hover:text-white" title="Every quoted shabad matches the canonical text of Sri Guru Granth Sahib Ji" data-i18n="course.verified">Quotes verified</a>}
       </div>
       <div class="mt-6 flex flex-wrap items-center gap-3">
-        <a href={c.gated ? '#gated-access' : '#lesson-0'} class="btn btn-primary" data-i18n="course.begin">Begin course</a>
-        <button id="enroll-btn" class="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">Enroll</button>
+        <a id="course-begin" href={c.gated ? '#gated-access' : '#free-course-access'} class="btn btn-primary" data-i18n="course.begin">Begin course</a>
+        <button hidden id="enroll-btn" class="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">Enroll</button>
         {false && <button id="offline-btn" class="btn border border-white/30 bg-white/10 text-white hover:bg-white/20"><Icon name="download" class="h-4 w-4" /><span id="offline-lbl">Save offline</span></button>}
         <span class="font-mono text-[11px] uppercase tracking-[.12em] text-white/70">{c.gated ? 'Institutional course · full content requires cohort access' : `${lessons.length} lessons · ${nQuiz}-question test · 80% to pass`}</span>
       </div>
     </div>
+  </div>
+
+  {!c.gated && <CourseWelcome links={accountLinks} title={c.title} />}
+  <div class="wrap flex flex-wrap items-center gap-3 mt-4">
+    <p id="course-access-status" class="text-sm text-muted" role="status">Checking your learning access…</p>
+    <button hidden id="course-access-retry" class="btn text-sm min-h-[44px]" type="button">Retry</button>
   </div>
 
   <div class="wrap grid gap-10 py-12 lg:grid-cols-[262px_1fr]">
@@ -104,7 +113,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           </a>
         ))}
       </div>
-      <div class="mt-[18px] border-t border-line pt-4">
+      <div data-learner-progress hidden class="mt-[18px] border-t border-line pt-4">
         <div class="flex items-center gap-4">
           <svg width="60" height="60" viewBox="0 0 80 80" class="shrink-0 -rotate-90" aria-hidden="true">
             <circle class="ring-track" cx="40" cy="40" r="34" fill="none" stroke-width="8"></circle>
@@ -161,7 +170,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
 
       <div id="course-ann" class="mb-8 empty:mb-0"></div>
 
-      <section class="mb-8">
+      <section id="focused-lessons" class="mb-8" hidden={!c.gated}>
         <div class="flex flex-wrap items-end justify-between gap-3 border-b-2 border-saffron-soft pb-1">
           <h2 class="text-xl font-bold" data-i18n="course.lessons.h">Lessons</h2>
           <div class="relative" id="tts-settings-wrap" hidden>
@@ -183,8 +192,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
               </div>
               <div id="gated-lessons" class="mt-2"></div>
             </div>
-          ) : <><div id="free-course-access" class="card-lift mb-6 p-5 text-center"><strong>Free to learn. Sign in to begin.</strong><p class="mt-2 text-sm text-muted">The course outline is public. <a class="underline text-navy" href={`/login?next=${encodeURIComponent('/course/' + c.id)}`}>Sign in or create your free account</a> to read the lessons and take the test.</p></div>{lessons.map((ls, i) => (
-            <article id={`lesson-${i}`} class="border-t-2 border-line pt-8 pb-2 first:border-t-0 first:pt-0">
+          ) : <>{lessons.map((ls, i) => (
+            <article hidden id={`lesson-${i}`} class="border-t-2 border-line pt-8 pb-2 first:border-t-0 first:pt-0">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="font-mono text-[10.5px] uppercase tracking-[.2em] text-saffron-deep" data-no-i18n>{`Lesson ${String(i + 1).padStart(2, '0')}`}</p>
@@ -192,7 +201,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
                 </div>
                 <button data-listen={i} class="btn shrink-0 min-h-[44px] px-3 font-sans text-sm" aria-label={`Listen to lesson ${i + 1}`}><Icon name="volume" class="h-4 w-4" /><span class="listen-lbl" data-i18n="course.listen">Listen</span></button>
               </div>
-              <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed" data-private-lesson={i}><p class="text-sm text-muted">Sign in to read this lesson.</p></div>
+              <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed" data-private-lesson={i}></div>
               <div class="mt-5 border-t border-dashed border-line pt-4">
                 <label class="inline-flex items-center gap-1.5 font-sans text-xs text-muted"><Icon name="note" class="h-3.5 w-3.5" /><span data-i18n="course.notes.label">Your notes, saved on this device</span></label>
                 <textarea data-note={i} aria-label={`Your notes for lesson ${i + 1}`} rows="3" class="mt-1 w-full rounded-lg border border-line bg-paper p-2 text-[0.95rem]" placeholder="Write your notes…" data-i18n-ph="course.notes.ph"></textarea>
@@ -286,7 +295,8 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
     </div>
   </div>
 
-  <section class="wrap pb-14">
+  <details id="course-tools" class="wrap pb-14" hidden><summary class="btn mb-5">Practice, sources &amp; discussion</summary>
+  <section>
     <div class="grid gap-6 lg:grid-cols-2">
       {!c.gated && (
         <section id="flashcards" class="card-lift p-5" hidden>
@@ -376,6 +386,11 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
     </div>
   </section>
 
+  </details>
+
+  <!-- Narrow screens: the lesson dock (lib/liquid.ts). Hidden until there are lessons to step through. -->
+
+
   <div id="pass-celebrate" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="pass-celebrate-h">
     <div class="pass-backdrop absolute inset-0 bg-navy-strong/70"></div>
     <div id="pass-celebrate-panel" class="card-lift relative z-10 w-full max-w-sm p-8 text-center">
@@ -389,7 +404,15 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
     </div>
   </div>
 
-  <style>
+  <style is:global>
+    .focused-navigation { display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:18px;margin:0 0 24px;border-radius:22px;background:linear-gradient(135deg,#eef4fbdd,#fff9);box-shadow:inset 0 1px 0 #fff,0 8px 30px #152b4b12;backdrop-filter:blur(18px); }
+    .focused-navigation small {flex-basis:100%;font:12px Arial,sans-serif;color:#526077;}
+    #focused-lessons {scroll-margin-top:100px;}
+    #focused-lessons article {border:0;padding:24px;border-radius:24px;background:#ffffffb8;box-shadow:inset 0 1px 0 #fff,0 10px 35px #152b4b0a;overflow-wrap:anywhere;}
+    #lesson-rail [aria-current="step"] {background:#eaf1fb;border-left-color:#d6ad50;}
+    #lesson-rail [data-bookmarked] .rail-title::after {content:' ★';color:#9c7628;}
+    @media(max-width:640px){.focused-navigation{padding:14px;gap:8px}.focused-navigation .btn{min-height:44px;padding:8px 12px}#focused-lessons article{padding:20px 16px}}
+    [hidden] { display:none !important; }
     #pass-celebrate-panel.pop { animation: pass-pop .5s var(--ease-spring) both; }
     @keyframes pass-pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     @media (prefers-reduced-motion: reduce) { #pass-celebrate-panel.pop { animation: none; } }
@@ -399,17 +422,33 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
   <script>
     import { iconSvg } from '../../lib/icons';
     import { expandYoutubeEmbeds } from '../../lib/lesson-embeds';
+    import { mountFocusedCourse, courseControls } from '../../lib/focused-course';
     const initialCourse = JSON.parse(document.getElementById('course-data')!.textContent!);
+    const accessStatus = document.getElementById('course-access-status')!;
+    const retryAccess = document.getElementById('course-access-retry')!;
+    retryAccess.addEventListener('click', () => location.reload());
+    const failAccess = (message: string, retry = false) => { accessStatus.textContent = message; retryAccess.hidden = !retry; };
+    let courseAccessGranted = false;
+    if (/^#lesson-\d+$/.test(location.hash)) document.querySelectorAll<HTMLAnchorElement>('#free-course-access a[href*="next="]').forEach(link => { const url = new URL(link.href); url.searchParams.set('next', location.pathname + location.hash); link.href = url.pathname + url.search; });
     if (!initialCourse.gated) {
       try {
+        const session = await fetch('/api/me', {credentials:'same-origin',cache:'no-store'});
+        if (!session.ok) throw new Error('session unavailable');
+        const me = await session.json();
+        if (!me.user) { failAccess('Your course outline is open below. Sign in to begin.'); }
+        else {
         const response = await fetch('/api/course-content?courseId=' + encodeURIComponent(initialCourse.id), {credentials:'same-origin',cache:'no-store'});
         if (response.ok) {
           const content = await response.json();
+          if (!Array.isArray(content.lessons) || content.lessons.length !== initialCourse.nLessons || !content.lessons.length) throw new Error('Course outline needs refreshing');
           document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
             const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
             if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
             else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
           });
+          courseAccessGranted = true;
+          mountFocusedCourse(initialCourse.id, content.lessons || [], me.user.id);
+          accessStatus.hidden = true;
           document.getElementById('free-course-access')?.remove();
           const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
           initialCourse.terms = content.terms || [];
@@ -422,7 +461,11 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
           const form = document.getElementById('quiz');
           if (form) form.innerHTML = (content.quiz || []).map((q:any,i:number)=>`<fieldset><legend class="font-semibold">${i+1}. ${esc(q.q)}</legend>${q.options.map((o:string,j:number)=>`<label class="mt-1 block cursor-pointer"><input type="radio" name="q${i}" value="${j}" class="mr-2" />${esc(o)}</label>`).join('')}</fieldset>`).join('');
         }
-      } catch { /* Public outline and sign-in link remain usable on network failure. */ }
+        else if (response.status === 401) failAccess('Sign in to begin this course.');
+        else if (response.status === 403) failAccess('This course needs additional account or cohort access.');
+        else throw new Error('content unavailable');
+        }
+      } catch { failAccess('We could not load your learning access. Your course outline is still available.', true); }
     }
 
     const __d = JSON.parse(document.getElementById('course-data').textContent);
@@ -449,7 +492,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       clearTimeout(progressTimer); progressTimer = setTimeout(flushProgress, 600);
     }
     async function flushProgress() {
-      if(progressSending || !pendingProgress.size) return;
+      if(!courseAccessGranted || progressSending || !pendingProgress.size) return;
       if(!progressUserId){syncStatus.textContent='Saved on this device. Sign in to sync progress.';return;}
       progressSending = true;
       try {
@@ -529,7 +572,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
     // mispronounces Gurbani; the English translations that follow are read.
     (async function () {
       const tts = await import('../../lib/tts');
-      const buttons = Array.from(document.querySelectorAll('[data-listen]'));
+      const buttons = Array.from(courseControls('[data-listen]'));
       if (!buttons.length) return;
       if (!tts.supported()) { buttons.forEach((b) => b.remove()); return; }
       let playing = null;
@@ -593,7 +636,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
       document.getElementById('prog-text').textContent = pct + '% complete';
       const ring = document.getElementById('prog-ring');
       if (ring) { const circ = 2 * Math.PI * 34; ring.style.strokeDasharray = String(circ); ring.style.strokeDashoffset = String(circ * (1 - pct / 100)); }
-      document.querySelectorAll('[data-done]').forEach((b) => { const i = b.dataset.done; b.innerHTML = done[i] ? iconSvg('check', 'inline-block h-4 w-4 align-[-0.15em]') + ' Completed' : 'Mark complete'; b.classList.toggle('border-saffron', !!done[i]); });
+      courseControls('[data-done]').forEach((b) => { const i = b.dataset.done; b.innerHTML = done[i] ? iconSvg('check', 'inline-block h-4 w-4 align-[-0.15em]') + ' Completed' : 'Mark complete'; b.classList.toggle('border-saffron', !!done[i]); });
       // Lesson rail: highlight the next not-yet-completed lesson (decorative
       // nav only, every lesson's real content is already server-rendered
       // above, unaffected by this state).
@@ -605,13 +648,14 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         row.classList.toggle('border-saffron', active);
         row.classList.toggle('border-transparent', !active);
         row.classList.toggle('bg-saffron-soft/60', active);
+        row.toggleAttribute('data-done', !!done[Number(row.dataset.railRow)]);
         const idx = row.querySelector('.rail-idx'), title = row.querySelector('.rail-title');
         if (idx) { idx.classList.toggle('text-saffron-deep', active); idx.classList.toggle('text-muted', !active); }
         if (title) { title.classList.toggle('text-navy', active); title.classList.toggle('font-semibold', active); title.classList.toggle('text-muted', !active); }
       });
     }
-    document.querySelectorAll('[data-note]').forEach((t) => { const k = 'note_' + id + '_' + t.dataset.note; t.value = get(k, ''); t.addEventListener('input', () => { set(k, t.value); set('note_saved_' + id + '_' + t.dataset.note, new Date().toISOString()); }); });
-    document.querySelectorAll('[data-done]').forEach((b) => b.addEventListener('click', () => { const i = b.dataset.done; done[i] = !done[i]; if (!done[i]) delete done[i]; else recordActivity(); set(doneKey, done); refresh(); push(i, !!done[i]); }));
+    courseControls('[data-note]').forEach((t) => { const k = 'note_' + id + '_' + t.dataset.note; t.value = get(k, ''); t.addEventListener('input', () => { set(k, t.value); set('note_saved_' + id + '_' + t.dataset.note, new Date().toISOString()); }); });
+    courseControls('[data-done]').forEach((b) => b.addEventListener('click', () => { const i = b.dataset.done; done[i] = !done[i]; if (!done[i]) delete done[i]; else { recordActivity(); const log = get('path_log', []); log.push({ t: Date.now(), course: id, lesson: Number(i) }); set('path_log', log.slice(-200)); } set(doneKey, done); refresh(); push(i, !!done[i]); }));
     const submit = document.getElementById('quiz-submit');
     // Gated courses own their own quiz-submit wiring (see the gated-content
     // script below), the real question count isn't known until it loads.
@@ -705,6 +749,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
   {c.gated && (
     <script>
       import { expandYoutubeEmbeds } from '../../lib/lesson-embeds';
+      import { mountFocusedCourse } from '../../lib/focused-course';
       (async function () {
         const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
         const { id } = JSON.parse(document.getElementById('course-data')!.textContent!);
@@ -713,14 +758,19 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         const testSection = document.getElementById('test');
         if (!teaser || !lessonsBox) return;
 
-        const me = await fetch('/api/me', { credentials: 'same-origin' }).then((r) => r.json()).catch(() => ({ user: null }));
+        let me;
+        try { const session = await fetch('/api/me', { credentials:'same-origin',cache:'no-store' }); if (!session.ok) throw new Error('unavailable'); me = await session.json(); }
+        catch { document.getElementById('course-access-status')!.textContent = 'Learning access is temporarily unavailable.'; document.getElementById('course-access-retry')!.hidden = false; return; }
+        document.getElementById('course-access-status')!.hidden = true;
         if (!me.user) {
           teaser.innerHTML = '<p class="font-semibold text-navy">This course is offered through a partner institution.</p><p class="mt-1 text-sm text-muted">Full lessons are available to enrolled cohort members. <a class="underline text-navy" href="/login">Sign in</a>, then join with your institution\'s invite code at <a class="underline text-navy" href="/cohorts">/cohorts</a>.</p>';
           if (testSection) testSection.remove();
           return;
         }
 
-        const res = await fetch('/api/course-content?courseId=' + encodeURIComponent(id), { credentials: 'same-origin' });
+        let res;
+        try { res = await fetch('/api/course-content?courseId=' + encodeURIComponent(id), { credentials:'same-origin',cache:'no-store' }); }
+        catch { teaser.textContent = 'Course content is temporarily unavailable. Please retry.'; document.getElementById('course-access-retry')!.hidden = false; return; }
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           teaser.innerHTML = `<p class="font-semibold text-navy">This course is offered through a partner institution.</p><p class="mt-1 text-sm text-muted">${esc(data.error || 'Full lessons are available to enrolled cohort members.')} <a class="underline text-navy" href="/cohorts">Join at /cohorts →</a></p>`;
@@ -736,6 +786,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
             <h3 class="mt-1 text-2xl font-bold leading-tight text-navy">${esc(ls.title)}</h3>
             <div class="lesson-prose mt-4 max-w-[68ch] leading-relaxed">${ls.locked ? `<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ${esc(ls.lock_reason)}</p>` : expandYoutubeEmbeds(ls.html)}</div>
           </article>`).join('');
+        mountFocusedCourse(id, lessons, me.user.id);
 
         const quiz = data.quiz || [];
         const form = document.getElementById('quiz') as HTMLFormElement | null;
@@ -769,32 +820,6 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
   <script>
     import { iconSvg } from '../../lib/icons';
     import { expandYoutubeEmbeds } from '../../lib/lesson-embeds';
-    const initialCourse = JSON.parse(document.getElementById('course-data')!.textContent!);
-    if (!initialCourse.gated) {
-      try {
-        const response = await fetch('/api/course-content?courseId=' + encodeURIComponent(initialCourse.id), {credentials:'same-origin',cache:'no-store'});
-        if (response.ok) {
-          const content = await response.json();
-          document.querySelectorAll<HTMLElement>('[data-private-lesson]').forEach(node => {
-            const lesson = content.lessons?.[Number(node.dataset.privateLesson)];
-            if (lesson && lesson.locked) node.innerHTML = '<p class="rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">This lesson is locked by your teacher. ' + String(lesson.lock_reason || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string)) + '</p>';
-            else if (lesson) node.innerHTML = expandYoutubeEmbeds(lesson.html || '');
-          });
-          document.getElementById('free-course-access')?.remove();
-          const esc = (s:unknown) => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]!));
-          initialCourse.terms = content.terms || [];
-          document.getElementById('course-data')!.textContent = JSON.stringify(initialCourse);
-          if (initialCourse.terms.length) {
-            document.getElementById('private-terms')?.removeAttribute('hidden');
-            document.getElementById('flashcards')?.removeAttribute('hidden');
-            document.getElementById('private-terms-list')!.innerHTML = initialCourse.terms.map((term:any)=>`<div class="card-lift p-4"><strong>${esc(term.t)}</strong><p class="mt-1 text-muted">${esc(term.m)}</p></div>`).join('');
-          }
-          const form = document.getElementById('quiz');
-          if (form) form.innerHTML = (content.quiz || []).map((q:any,i:number)=>`<fieldset><legend class="font-semibold">${i+1}. ${esc(q.q)}</legend>${q.options.map((o:string,j:number)=>`<label class="mt-1 block cursor-pointer"><input type="radio" name="q${i}" value="${j}" class="mr-2" />${esc(o)}</label>`).join('')}</fieldset>`).join('');
-        }
-      } catch { /* Public outline and sign-in link remain usable on network failure. */ }
-    }
-
     (function () {
       var id = JSON.parse(document.getElementById('course-data').textContent).id;
       var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };

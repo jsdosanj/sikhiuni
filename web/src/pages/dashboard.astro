@@ -2,17 +2,18 @@
 import Base from '../layouts/Base.astro';
 import LearningStudio from '../components/LearningStudio.astro';
 import LearningLibrary from '../components/LearningLibrary.astro';
+import MyPath from '../components/MyPath.astro';
 import { published } from '../lib/data';
 import '../styles/dashboard.css';
 import { FAMILY_TILES, FAMILY_BLURB } from '../lib/family-links';
-const section = Astro.props.section || 'studio';
-const titles = {studio:'Your learning studio', focus:'Time to focus', learning:'Your learning journey', profile:'Make yourself at home', library:'Your connected course workspace'};
-const links = [['studio','Study studio','/dashboard'],['focus','◷ Focus time','/dashboard/focus'],['learning','↗ My learning','/dashboard/learning'],['library','▤ Notes & references','/dashboard/library'],['catalog','⊞ Explore courses','/catalog'],['profile','◎ My profile','/dashboard/profile']];
+const section = Astro.props.section || 'path';
+const titles = {path:'My path', studio:'Your learning studio', focus:'Time to focus', learning:'Your learning journey', profile:'Make yourself at home', library:'Your connected course workspace'};
+const links = [['path','My path','/dashboard'],['studio','Study studio','/dashboard/studio'],['focus','Focus time','/dashboard/focus'],['learning','Learning record','/dashboard/learning'],['library','Notes and references','/dashboard/library'],['catalog','Explore courses','/catalog'],['profile','My profile','/dashboard/profile']];
 ---
-<Base title="My Learning, Sikhi University" description="Your progress, certificates, streak and badges at Sikhi University." ambient="none" bodyClass="su-dashboard" noindex={true}>
+<Base title="My path, Sikhi University" description="Your progress, certificates, streak and badges at Sikhi University." ambient="none" bodyClass="su-dashboard" noindex={true}>
   <section class="wrap py-10 sm:py-12">
-    <div class="dashboard-banner"><div><p class="desk-label">SIKHI UNIVERSITY / MY CAMPUS</p><h1>{titles[section]}</h1><p>A space to learn, practise and make it your own.</p></div><img class="dashboard-logo-light" src="/assets/brand/silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /><img class="dashboard-logo-dark" src="/assets/brand/menu-silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /></div>
     <nav class="dashboard-rail" aria-label="Dashboard sections">{links.map(([key,label,href]) => <a href={href} aria-current={key === section ? 'page' : undefined}>{label}</a>)}</nav>
+    {section === 'path' ? <MyPath /> : <div class="dashboard-banner"><div><p class="desk-label">SIKHI UNIVERSITY / MY CAMPUS</p><h1>{titles[section]}</h1><p>A space to learn, practise and make it your own.</p></div><img class="dashboard-logo-light" src="/assets/brand/silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /><img class="dashboard-logo-dark" src="/assets/brand/menu-silhouette-2026.webp" width="180" height="180" alt="" aria-hidden="true" /></div>}
     {section === 'studio' && <LearningStudio />}
     {section === 'library' && <LearningLibrary />}
     {section === 'focus' && <>

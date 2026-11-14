@@ -2,12 +2,14 @@
 import '../styles/global.css';
 import '../styles/mobile.css';
 import '../styles/institute.css';
+import '../styles/liquid.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
 import InstallPrompt from '../components/InstallPrompt.astro';
 import CommandPalette from '../components/CommandPalette.astro';
 import TabBar from '../components/TabBar.astro';
+import Rail from '../components/Rail.astro';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 // Inline the @font-face rules instead of linking /fonts/fonts.css: the extra
@@ -131,7 +133,8 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
   <meta name="twitter:image:alt" content="Sikhi University, free, open learning in Sikhi" />
   <slot name="head" />
 </head>
-<body class={bodyClass} data-ambient={ambient} data-institute={institute ? '' : undefined}>
+<body class:list={['lq', 'lq-shell', bodyClass]} data-lq-site="sikhiuni" data-ambient={ambient} data-institute={institute ? '' : undefined}>
+  <div class="lq-field" aria-hidden="true"><i></i><i></i><i></i></div>
   {ambient !== 'none' && (
     <div aria-hidden="true" class={`ambient ambient-${ambient}`}>
       {bgImage && <div class="ambient-painting" style={`background-image:url('${bgImage}')`}></div>}
@@ -140,6 +143,7 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     </div>
   )}
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+  <Rail />
   <Nav />
   <main id="main" data-autotranslate={autoTranslateEff ? '1' : '0'}>
     <slot />
@@ -161,7 +165,9 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
   </div>
   <script>
     import { initMotion } from '../lib/motion';
+    import { initLiquid } from '../lib/liquid';
     initMotion();
+    initLiquid();
   </script>
   <script>
     import { speak, stop as ttsStop, supported as ttsSupported } from '../lib/tts';
@@ -368,26 +374,36 @@ const canon = canonical || SITE + (cleanPath === '' ? '/' : cleanPath);
     };
   </script>
   <script type="module" src="/scripts/activity-tracker.js"></script>
-<a class="network-donate-fixed" href="https://dvn.org/projects/sikh-archive" target="_blank" rel="noopener noreferrer" aria-label="Donate · DVN">Donate <span aria-hidden="true">↗</span></a>
+<div class="network-support-fixed"><a class="network-donate-fixed" href="https://dvn.org/projects/sikh-archive" target="_blank" rel="noopener noreferrer" aria-label="Donate · DVN">Donate <span aria-hidden="true">↗</span></a><span class="network-support-caption" data-i18n="support.stayOnline">Help us stay online 🙏</span></div>
 </body>
 </html>
 
 <style is:global>
-.network-donate-fixed{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 22px;border:1px solid rgba(174,126,23,.75);border-radius:999px;background:linear-gradient(145deg,rgba(255,225,139,.86),rgba(184,139,36,.76));color:#3b2a0c;backdrop-filter:blur(12px) saturate(145%);-webkit-backdrop-filter:blur(12px) saturate(145%);box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 14px rgba(99,66,7,.18);font-family:inherit;font-size:16px;font-weight:700;line-height:1.5;text-decoration:none;box-sizing:border-box}@media(max-width:767px){
-  .network-donate-fixed{left:max(16px,env(safe-area-inset-left));right:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px) + 12px)}
-  body:has(#nav-toggle[aria-expanded="true"]) .network-donate-fixed,
-  body:has(#nav-toggle[aria-expanded="true"]) #a11y-fab,
-  body:has(#nav-toggle[aria-expanded="true"]) #a11y-panel,
-  body:has(#su-dept-sheet:not([hidden])) .network-donate-fixed,
-  body:has(#su-dept-sheet:not([hidden])) #a11y-fab,
-  body:has(#su-dept-sheet:not([hidden])) #a11y-panel{visibility:hidden;pointer-events:none}
+.network-donate-fixed{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 22px;border:1px solid rgba(174,126,23,.75);border-radius:999px;background:linear-gradient(145deg,rgba(255,225,139,.86),rgba(184,139,36,.76));color:#3b2a0c;backdrop-filter:blur(12px) saturate(145%);-webkit-backdrop-filter:blur(12px) saturate(145%);box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 14px rgba(99,66,7,.18);font-family:inherit;font-size:16px;font-weight:700;line-height:1.5;text-decoration:none;box-sizing:border-box}.network-donate-fixed:focus-visible{outline:2px solid currentColor;outline-offset:4px}.network-donate-fixed:hover{filter:brightness(1.06)}
+
+/* Caption remains outside the donate pill and wraps clear of narrow screens. */
+.network-support-fixed{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px)}
+.network-support-fixed .network-donate-fixed{position:static;flex-shrink:0}
+.network-support-caption{max-width:160px;color:#5c4b34;font:500 12px/1.4 Arial,Helvetica,sans-serif;opacity:.78;text-shadow:0 1px 3px #fff9;pointer-events:none}
+@media(max-width:380px){.network-support-caption{max-width:130px;font-size:11px}}
+@media(max-width:1023px){body.lq .network-support-fixed{left:max(12px,env(safe-area-inset-left));right:auto;max-width:calc(100vw - 80px);gap:8px;bottom:calc(var(--lq-tabbar-h,64px) + 22px + env(safe-area-inset-bottom,0px))}body.lq .network-support-caption{max-width:145px}body.lq-has-dock .network-support-fixed{display:none}}
+</style>
+
+<style is:global>
+@media(max-width:767px){
+ body:not(.lq) .network-support-fixed{left:max(16px,env(safe-area-inset-left));right:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px) + 12px)}
+ body:has(#nav-toggle[aria-expanded="true"]) .network-support-fixed,
+ body:has(#nav-toggle[aria-expanded="true"]) #a11y-fab,
+ body:has(#nav-toggle[aria-expanded="true"]) #a11y-panel,
+ body:has(#su-dept-sheet:not([hidden])) .network-support-fixed,
+ body:has(#su-dept-sheet:not([hidden])) #a11y-fab,
+ body:has(#su-dept-sheet:not([hidden])) #a11y-panel{visibility:hidden;pointer-events:none}
 }
 @media(max-width:374px){
-  .su-nav > .wrap{column-gap:8px}
-  .su-nav > .wrap > a:first-child{min-width:0;flex-shrink:1;gap:8px}
-  .su-nav > .wrap > a:first-child img{height:32px}
-  .su-nav > .wrap > a:first-child span{font-size:20px!important}
-  .su-nav #nav-toggle{flex:0 0 44px;width:44px;height:44px;margin-left:0}
+ .su-nav > .wrap{column-gap:8px}
+ .su-nav > .wrap > a:first-child{min-width:0;flex-shrink:1;gap:8px}
+ .su-nav > .wrap > a:first-child img{height:32px}
+ .su-nav > .wrap > a:first-child span{font-size:20px!important}
+ .su-nav #nav-toggle{flex:0 0 44px;width:44px;height:44px;margin-left:0}
 }
-.network-donate-fixed:focus-visible{outline:2px solid currentColor;outline-offset:4px}.network-donate-fixed:hover{filter:brightness(1.06)}
 </style>

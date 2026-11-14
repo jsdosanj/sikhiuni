@@ -1,7 +1,7 @@
 {
   "name": "sikhi-university-web",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "dev": "astro dev",
@@ -14,11 +14,11 @@
     "validate-institute": "node scripts/validate-institute.mjs",
     "build-institute-quiz-keys": "node scripts/build-institute-quiz-keys.mjs",
     "sync-aisf": "node scripts/sync-aisf.mjs",
-    "build": "npm run sync-data && npm run build-institute-quiz-keys && npm run sync-institute && npm run build-index && npm run verify-gurbani && npm run check-i18n && npm run build-dataset && npm run validate-institute && astro build && node scripts/stamp-sw.mjs && node scripts/build-csp.mjs && node ../test/course-content-build.mjs && node ../test/no-reveal-on-content.mjs && node ../test/contrast-glass.mjs",
+    "build": "npm run sync-data && npm run build-institute-quiz-keys && npm run sync-institute && npm run build-index && npm run verify-gurbani && npm run check-i18n && npm run build-dataset && npm run validate-institute && astro build && node scripts/stamp-sw.mjs && node scripts/build-csp.mjs && node ../test/course-content-build.mjs && node ../test/no-reveal-on-content.mjs && node ../test/contrast-glass.mjs && node ../test/contrast-liquid.mjs",
     "preview": "astro preview",
     "build-public-data": "python3 ../scripts/build_public_data.py",
     "deploy-data": "cd .. && node scripts/export-private-courses.mjs --upload",
-    "deploy-institute": "echo 'Wave 4+: push public/data/institute/lessons + atlas to R2 (institute/ prefix) — no-op until lesson bodies exist'"
+    "deploy-institute": "echo 'Wave 4+: push public/data/institute/lessons + atlas to R2 (institute/ prefix) \u2014 no-op until lesson bodies exist'"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
