@@ -531,3 +531,8 @@ CREATE TABLE IF NOT EXISTS live_sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_live_sessions_course ON live_sessions(course_id, starts_at);
 CREATE TABLE IF NOT EXISTS attendance (session_id TEXT NOT NULL, user_id TEXT NOT NULL, status TEXT NOT NULL, marked_by TEXT, marked_at INTEGER NOT NULL, PRIMARY KEY (session_id, user_id));
+
+-- C15 badges (migrations/0028_badges.sql).
+CREATE TABLE IF NOT EXISTS badges (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, name TEXT NOT NULL, description TEXT, criteria TEXT NOT NULL, created_by TEXT, created_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_badges_course ON badges(course_id);
+CREATE TABLE IF NOT EXISTS badge_awards (id TEXT PRIMARY KEY, badge_id TEXT NOT NULL, user_id TEXT NOT NULL, awarded_at INTEGER NOT NULL, awarded_by TEXT, how TEXT NOT NULL, UNIQUE (badge_id, user_id));
