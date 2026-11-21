@@ -410,7 +410,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
     #focused-lessons {scroll-margin-top:100px;}
     #focused-lessons article {border:0;padding:24px;border-radius:24px;background:#ffffffb8;box-shadow:inset 0 1px 0 #fff,0 10px 35px #152b4b0a;overflow-wrap:anywhere;}
     #lesson-rail [aria-current="step"] {background:#eaf1fb;border-left-color:#d6ad50;}
-    #lesson-rail [data-bookmarked] .rail-title::after {content:' ★';color:#9c7628;}
+    #lesson-rail [data-bookmarked] .rail-title::after {content:'';display:inline-block;width:.8em;height:.8em;margin-left:.3em;vertical-align:-.05em;background:#9c7628;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z'/%3E%3C/svg%3E") center/contain no-repeat;}
     @media(max-width:640px){.focused-navigation{padding:14px;gap:8px}.focused-navigation .btn{min-height:44px;padding:8px 12px}#focused-lessons article{padding:20px 16px}}
     [hidden] { display:none !important; }
     #pass-celebrate-panel.pop { animation: pass-pop .5s var(--ease-spring) both; }
@@ -917,7 +917,7 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
               var uploadThen = function (fileKey) {
                 api('/api/submissions', { method: 'POST', body: JSON.stringify({ assignmentId: assignmentId, text: text, fileKey: fileKey }) }).then(function (r2) {
                   btn.disabled = false;
-                  note.textContent = r2.ok ? 'Submitted.' : ((r2.d && r2.d.error) || 'Could not submit.');
+                  note.textContent = r2.ok ? (r2.d && r2.d.group ? 'Submitted for ' + r2.d.group + '.' : 'Submitted.') : ((r2.d && r2.d.error) || 'Could not submit.');
                   if (r2.ok) loadAssignments();
                 });
               };
