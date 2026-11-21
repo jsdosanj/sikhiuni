@@ -523,3 +523,11 @@ CREATE TABLE IF NOT EXISTS group_members (group_id TEXT NOT NULL, course_id TEXT
 CREATE TABLE IF NOT EXISTS group_assignments (assignment_id TEXT PRIMARY KEY, course_id TEXT NOT NULL, set_by TEXT, set_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS group_posts (id TEXT PRIMARY KEY, group_id TEXT NOT NULL, user_id TEXT NOT NULL, body TEXT NOT NULL, created_at INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_group_posts_group ON group_posts(group_id, created_at);
+
+-- C14 live sessions + attendance (migrations/0027_live_sessions.sql).
+CREATE TABLE IF NOT EXISTS live_sessions (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, title TEXT NOT NULL, starts_at INTEGER NOT NULL, duration_min INTEGER NOT NULL,
+  join_url TEXT NOT NULL, notes TEXT, created_by TEXT, created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_live_sessions_course ON live_sessions(course_id, starts_at);
+CREATE TABLE IF NOT EXISTS attendance (session_id TEXT NOT NULL, user_id TEXT NOT NULL, status TEXT NOT NULL, marked_by TEXT, marked_at INTEGER NOT NULL, PRIMARY KEY (session_id, user_id));

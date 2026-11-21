@@ -69,9 +69,10 @@ export function buildIcs(events, now = Date.now()) {
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sikhi University//Course calendar//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "X-WR-CALNAME:Sikhi University", "REFRESH-INTERVAL;VALUE=DURATION:PT6H"];
   for (const e of events) {
-    const url = e.type === "poll" ? `${SITE}/course-tools?course=${e.course_id}#polls` : `${SITE}/course/${e.course_id}`;
-    lines.push("BEGIN:VEVENT", `UID:${e.type}-${e.id}@sikhiuni.com`, `DTSTAMP:${icsDate(now)}`, `DTSTART:${icsDate(e.at)}`, `DTEND:${icsDate(e.at)}`,
-      `SUMMARY:${icsText(`${e.type === "poll" ? "Closes" : "Due"}: ${String(e.title).slice(0, 150)}`)}`, `URL:${url}`, "END:VEVENT");
+    const url = e.type === "poll" ? `${SITE}/course-tools?course=${e.course_id}#polls` : e.type === "session" ? `${SITE}/course-tools?course=${e.course_id}#live` : `${SITE}/course/${e.course_id}`;
+    const label = e.type === "poll" ? "Closes" : e.type === "session" ? "Live" : "Due";
+    lines.push("BEGIN:VEVENT", `UID:${e.type}-${e.id}@sikhiuni.com`, `DTSTAMP:${icsDate(now)}`, `DTSTART:${icsDate(e.at)}`, `DTEND:${icsDate(e.end || e.at)}`,
+      `SUMMARY:${icsText(`${label}: ${String(e.title).slice(0, 150)}`)}`, `URL:${url}`, "END:VEVENT");
   }
   lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";

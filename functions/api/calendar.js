@@ -2,6 +2,7 @@ import { json, getUser } from "./_lib.js";
 import { ensurePolicies } from "./course-policies.js";
 import { ensurePolls } from "./polls.js";
 import { courseRules, learnerProgress, lockReason } from "./release-rules.js";
+import { ensureLive } from "./live-sessions.js";
 
 // C1 Calendar + To-Do (Canvas Calendar / To-Do list, Moodle Timeline).
 // One read-only feed across every course the caller teaches or is enrolled in:
@@ -69,6 +70,11 @@ export async function calendarFor(env, user, from, to) {
     if (p.closes_at && p.closes_at >= from && p.closes_at <= to) events.push({ type: "poll", id: p.id, course_id: p.course_id, title: p.title, kind: p.kind, at: p.closes_at, done: !teach && !!p.answered });
     if (!teach && !p.answered && !(p.closes_at && p.closes_at < now)) todo.push({ type: "poll", id: p.id, course_id: p.course_id, title: p.title, kind: p.kind, at: p.closes_at || null });
   }
+
+  // C14: live sessions in every course the user teaches or takes.
+  await ensureLive(env);
+  const live = (await env.DB.prepare(`SELECT id, course_id, title, starts_at, duration_min FROM live_sessions WHERE course_id IN (${ph(all)}) AND starts_at BETWEEN ? AND ?`).bind(...all, from, to).all()).results || [];
+  for (const s of live) events.push({ type: "session", id: s.id, course_id: s.course_id, title: s.title, at: s.starts_at, end: s.starts_at + s.duration_min * 60000 });
 
   // C3: items still locked by a release rule stay off the learner's to-do list.
   const lockCache = new Map();
