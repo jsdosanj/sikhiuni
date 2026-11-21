@@ -73,10 +73,10 @@ async function sendCode(context, email, code, username) {
 }
 
 // Neutral age screen (COPPA / UK Children's Code / GDPR Art. 8). The form asks the
-// month and year of birth without saying what the cut-off is; under-13s are refused
+// month and year of birth without saying what the cut-off is; under-14s are refused
 // and a 24-hour cookie stops an immediate retry with a different answer. The birth date
 // is used for this check only and is never stored.
-export const MIN_AGE = 13;
+export const MIN_AGE = 14; // Sikhi University is for ages 14 and up (stricter than COPPA's 13)
 const AGE_BLOCK_COOKIE = "su_age_block";
 export function ageInYears(year, month, now = new Date()) {
   const y = Number(year), m = Number(month);
