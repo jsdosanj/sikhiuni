@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 interface Props { links: { login: string; signup: string }; title: string; }
 const { links, title } = Astro.props;
 ---
@@ -11,7 +12,7 @@ const { links, title } = Astro.props;
     <p class="welcome-note">Free to learn. Your course outline is open below. Sign in to begin the lessons.</p>
   </div>
   <div class="welcome-actions">
-    <span class="welcome-mark" aria-hidden="true">✦</span>
+    <span class="welcome-mark" aria-hidden="true"><Icon name="star" class="h-7 w-7" /></span>
     <h3>Make yourself at home.</h3>
     <a class="btn btn-primary" href={links.signup}>Create your free account <span aria-hidden="true">↗</span></a>
     <a class="btn welcome-login" href={links.login}>Log in</a>

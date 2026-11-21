@@ -515,3 +515,24 @@ CREATE TABLE IF NOT EXISTS peer_reviews (
   created_at INTEGER NOT NULL, submitted_at INTEGER, UNIQUE (reviewer_id, submission_id)
 );
 CREATE INDEX IF NOT EXISTS idx_peer_reviews_assignment ON peer_reviews(assignment_id);
+
+-- C8 groups (migrations/0026_groups.sql).
+CREATE TABLE IF NOT EXISTS course_groups (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, name TEXT NOT NULL, created_by TEXT, created_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_course_groups_course ON course_groups(course_id);
+CREATE TABLE IF NOT EXISTS group_members (group_id TEXT NOT NULL, course_id TEXT NOT NULL, user_id TEXT NOT NULL, added_at INTEGER NOT NULL, PRIMARY KEY (group_id, user_id), UNIQUE (course_id, user_id));
+CREATE TABLE IF NOT EXISTS group_assignments (assignment_id TEXT PRIMARY KEY, course_id TEXT NOT NULL, set_by TEXT, set_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS group_posts (id TEXT PRIMARY KEY, group_id TEXT NOT NULL, user_id TEXT NOT NULL, body TEXT NOT NULL, created_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_group_posts_group ON group_posts(group_id, created_at);
+
+-- C14 live sessions + attendance (migrations/0027_live_sessions.sql).
+CREATE TABLE IF NOT EXISTS live_sessions (
+  id TEXT PRIMARY KEY, course_id TEXT NOT NULL, title TEXT NOT NULL, starts_at INTEGER NOT NULL, duration_min INTEGER NOT NULL,
+  join_url TEXT NOT NULL, notes TEXT, created_by TEXT, created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_live_sessions_course ON live_sessions(course_id, starts_at);
+CREATE TABLE IF NOT EXISTS attendance (session_id TEXT NOT NULL, user_id TEXT NOT NULL, status TEXT NOT NULL, marked_by TEXT, marked_at INTEGER NOT NULL, PRIMARY KEY (session_id, user_id));
+
+-- C15 badges (migrations/0028_badges.sql).
+CREATE TABLE IF NOT EXISTS badges (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, name TEXT NOT NULL, description TEXT, criteria TEXT NOT NULL, created_by TEXT, created_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_badges_course ON badges(course_id);
+CREATE TABLE IF NOT EXISTS badge_awards (id TEXT PRIMARY KEY, badge_id TEXT NOT NULL, user_id TEXT NOT NULL, awarded_at INTEGER NOT NULL, awarded_by TEXT, how TEXT NOT NULL, UNIQUE (badge_id, user_id));

@@ -3,6 +3,7 @@ import { json, getUser, newId, logEvent } from "./_lib.js";
 import { dueFor, latePenaltyPct, pastCutoff } from "./course-policies.js";
 import { rubricForAssignment } from "./rubrics.js";
 import { itemLock } from "./release-rules.js";
+import { isGroupAssignment, groupOf } from "./groups.js";
 
 async function ensure(env) {
   return schemaOnce(env.DB, "submissions", async () => {
@@ -117,12 +118,29 @@ export async function onRequestPost({ request, env }) {
   const locked = await itemLock(env, "assignment", assignmentId, assignment.course_id, user.id);
   if (locked) return json({ error: locked }, 403);
   const late = due.dueAt && now > due.dueAt ? 1 : 0;
+  // C8: a group assignment is submitted once for the whole group.
+  const grouped = await isGroupAssignment(env, assignmentId);
+  const group = grouped ? await groupOf(env, assignment.course_id, user.id) : null;
+  if (grouped && !group) return json({ error: "This is a group assignment. Ask your teacher to put you in a group first." }, 400);
+  if (group) {
+    const done = await env.DB.prepare(`SELECT 1 AS x FROM submissions WHERE assignment_id=? AND status='graded' AND user_id IN (${group.members.map(() => "?").join(",")})`).bind(assignmentId, ...group.members).first();
+    if (done) return json({ error: "Your group's submission has already been graded and can no longer be changed." }, 400);
+  }
   await env.DB.prepare(
     "INSERT INTO submissions (id, assignment_id, user_id, text_content, file_key, submitted_at, updated_at, late, status) " +
     "VALUES (?,?,?,?,?,?,?,?, 'submitted') " +
     "ON CONFLICT(assignment_id, user_id) DO UPDATE SET text_content=excluded.text_content, file_key=excluded.file_key, " +
     "updated_at=excluded.updated_at, late=excluded.late, status='submitted'"
   ).bind(newId(), assignmentId, user.id, text || null, fileKey, now, now, late).run();
-  await logEvent(env, user, "assignment_submitted", assignmentId, late ? "late" : null);
-  return json({ ok: true, late: !!late });
+  if (group) {
+    for (const member of group.members.filter((m) => m !== user.id)) {
+      const mdue = await dueFor(env, assignment, assignmentId, member);
+      await env.DB.prepare(
+        "INSERT INTO submissions (id, assignment_id, user_id, text_content, file_key, submitted_at, updated_at, late, status) VALUES (?,?,?,?,?,?,?,?, 'submitted') " +
+        "ON CONFLICT(assignment_id, user_id) DO UPDATE SET text_content=excluded.text_content, file_key=excluded.file_key, updated_at=excluded.updated_at, late=excluded.late, status='submitted'"
+      ).bind(newId(), assignmentId, member, text || null, fileKey, now, now, mdue.dueAt && now > mdue.dueAt ? 1 : 0).run();
+    }
+  }
+  await logEvent(env, user, "assignment_submitted", assignmentId, [late ? "late" : null, group ? `for ${group.name}` : null].filter(Boolean).join("; ") || null);
+  return json({ ok: true, late: !!late, group: group ? group.name : null });
 }

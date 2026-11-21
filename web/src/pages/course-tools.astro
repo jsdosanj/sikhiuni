@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 // Course hub (LMS Phase 1): due dates + to-do (C1), polls/surveys/evaluations (C12),
 // reflective journal (C10), glossary (C11) and, for the course's teachers, late
 // policies / extensions / accommodations (C7). /course-tools?course=<id>
@@ -22,6 +23,9 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="quizzes">Quizzes</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="peer">Peer review</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="groups">Groups</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="live">Live sessions</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="badges">Badges</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
@@ -32,6 +36,14 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       <div id="tab-quizzes" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-peer" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-groups" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-live" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-badges" class="ct-panel mt-6 hidden" role="tabpanel">
+        <h2 class="text-xl font-bold text-navy">Badges</h2>
+        <p class="mt-1 text-sm text-muted">Badges mark something you did in this course. They are a record of participation, not a qualification.</p>
+        <Disclaimer variant="full" callout class="mt-3" />
+        <div id="badge-body"></div>
+      </div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
@@ -84,7 +96,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         t.type === 'grade' ? `<strong>${esc(t.count)}</strong> submission${t.count === 1 ? '' : 's'} to grade: ${esc(t.title)}`
         : `${t.type === 'poll' ? 'Respond to' : 'Submit'}: <strong>${esc(t.title)}</strong>${t.at ? ` <span class="text-muted">· due ${esc(fmt(t.at))}</span>` : ''}${t.overdue ? ' <span class="pill bg-saffron-soft text-saffron-deep">overdue</span>' : ''}`}</li>`).join('')
         : '<li class="py-2.5 text-muted">Nothing waiting. Well done.</li>';
-      const evHtml = ev.length ? ev.map((e: Any) => `<li class="flex flex-wrap items-baseline gap-2 border-b border-line py-2.5"><span class="font-mono text-xs text-muted">${esc(fmt(e.at))}</span><span>${e.type === 'poll' ? 'Closes' : 'Due'}: <strong>${esc(e.title)}</strong></span>${e.extended ? '<span class="pill bg-paper text-muted">your extended date</span>' : ''}${e.done ? '<span class="pill bg-paper text-muted">done</span>' : ''}</li>`).join('')
+      const evHtml = ev.length ? ev.map((e: Any) => `<li class="flex flex-wrap items-baseline gap-2 border-b border-line py-2.5"><span class="font-mono text-xs text-muted">${esc(fmt(e.at))}</span><span>${e.type === 'poll' ? 'Closes' : e.type === 'session' ? 'Live session' : 'Due'}: <strong>${esc(e.title)}</strong></span>${e.extended ? '<span class="pill bg-paper text-muted">your extended date</span>' : ''}${e.done ? '<span class="pill bg-paper text-muted">done</span>' : ''}</li>`).join('')
         : '<li class="py-2.5 text-muted">No dates in the next few months.</li>';
       const fd = await api('/api/calendar-feed');
       const feedHtml = `<div class="mt-10 rounded-xl2 border border-line bg-surface p-5"><h2 class="text-lg font-bold text-navy">Add your due dates to your calendar app</h2>
@@ -486,6 +498,157 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         await loaders.peer(); openPeer(assignmentId);
       }));
     }
+
+    // ---------- C8 groups ----------
+    loaders.groups = async () => {
+      const el = $('tab-groups'); el.textContent = 'Loading…';
+      const r = await api('/api/groups?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const ga = r.d.group_assignments || [];
+      if (r.d.scope === 'learner') {
+        const g = r.d.group;
+        if (!g) { el.innerHTML = `<h2 class="text-xl font-bold text-navy">Groups</h2><p class="mt-2 text-muted">You're not in a group in this course yet.${ga.length ? ' Your teacher will add you before the group assignments.' : ''}</p>`; return; }
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">${esc(g.name)}</h2>
+          <p class="mt-1 font-sans text-sm text-muted">${g.members.map((m: Any) => esc(m.name) + (m.me ? ' (you)' : '')).join(' · ')}</p>
+          ${ga.length ? `<p class="mt-3 rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Group assignments: ${ga.map((a: Any) => `<strong>${esc(a.title)}</strong>`).join(', ')}. One of you submits for the whole group, and everyone gets the same grade.</p>` : ''}
+          <h3 class="mt-6 font-bold text-navy">Group board</h3><p class="text-xs text-muted">Only your group and your teachers can read this.</p>
+          <form id="gp-form" class="mt-2 flex gap-2"><label class="sr-only" for="gp-body">Message to your group</label><textarea id="gp-body" rows="2" maxlength="2000" required class="${FIELD} flex-1"></textarea><button class="btn btn-primary self-end" type="submit">Post</button></form>
+          <p id="gp-out" class="font-sans text-sm" aria-live="polite"></p>
+          <ul class="mt-3 space-y-2">${(r.d.posts || []).map((p: Any) => `<li class="rounded-lg border border-line bg-surface p-3"><p class="font-sans text-xs text-muted">${p.mine ? 'You' : esc(p.name)} · ${esc(new Date(p.created_at).toLocaleString())}</p><p class="mt-1 whitespace-pre-wrap">${esc(p.body)}</p></li>`).join('')}</ul>`;
+        $('gp-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const s = await api('/api/groups', { action: 'post', groupId: g.id, body: (document.getElementById('gp-body') as HTMLTextAreaElement).value });
+          if (!s.ok) { $('gp-out').textContent = errText(s); return; }
+          loaders.groups();
+        });
+        return;
+      }
+      const pol = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+      const assignments = (pol.ok && pol.d.assignments) || [];
+      const gaIds = new Set(ga.map((a: Any) => a.id));
+      const everyone = r.d.groups.flatMap((g: Any) => g.members).concat(r.d.unassigned);
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Groups</h2>
+        <div class="mt-3 flex flex-wrap items-end gap-3 font-sans text-sm">
+          <form id="gr-new" class="flex gap-2"><label class="sr-only" for="gr-name">New group name</label><input id="gr-name" maxlength="80" placeholder="New group name" required class="${FIELD} !mt-0 !w-48" /><button class="btn" type="submit">Add group</button></form>
+          ${r.d.unassigned.length > 1 ? `<span class="flex items-center gap-2">Split the ${r.d.unassigned.length} learners without a group into groups of <input id="gr-size" type="number" min="2" max="20" value="4" class="w-14 border border-line bg-surface px-1" aria-label="Group size" /><button class="btn" id="gr-auto" type="button">Split at random</button></span>` : ''}
+        </div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">${r.d.groups.map((g: Any) => `<div class="rounded-xl2 border border-line bg-surface p-4" data-group="${esc(g.id)}"><div class="flex items-center gap-2"><strong class="text-navy">${esc(g.name)}</strong><span class="text-xs text-muted">${g.members.length} member${g.members.length === 1 ? '' : 's'}</span>
+          <button class="ml-auto text-xs underline text-danger" data-gr-del="${esc(g.id)}">Delete</button></div>
+          <details class="mt-2 font-sans text-sm"><summary class="cursor-pointer">${g.members.map((m: Any) => esc(m.name || m.email)).join(', ') || 'No members'}</summary>
+            <div class="mt-2 max-h-48 overflow-auto">${everyone.map((p: Any) => `<label class="flex items-center gap-2 py-0.5"><input type="checkbox" data-member="${esc(p.id)}" ${g.members.some((m: Any) => m.id === p.id) ? 'checked' : ''} /> ${esc(p.name || p.email)}</label>`).join('')}</div>
+            <button class="btn mt-2" data-gr-save="${esc(g.id)}">Save members</button></details></div>`).join('') || '<p class="text-muted">No groups yet.</p>'}</div>
+        ${r.d.unassigned.length ? `<p class="mt-3 font-sans text-sm text-muted">Not in a group: ${r.d.unassigned.map((u: Any) => esc(u.name || u.email)).join(', ')}</p>` : ''}
+        <h3 class="mt-8 font-bold text-navy">Group assignments</h3><p class="text-sm text-muted">One member submits for the group and grading it grades everyone. Switch before anyone submits.</p>
+        <ul class="mt-2 font-sans text-sm">${assignments.map((a: Any) => `<li class="flex items-center gap-2 border-b border-line py-2"><label class="flex items-center gap-2"><input type="checkbox" data-ga="${esc(a.id)}" ${gaIds.has(a.id) ? 'checked' : ''} /> ${esc(a.title)}</label></li>`).join('') || '<li class="text-muted">No assignments yet.</li>'}</ul>`;
+      $('gr-new').addEventListener('submit', async (e) => { e.preventDefault(); const s = await api('/api/groups', { action: 'create', courseId, name: (document.getElementById('gr-name') as HTMLInputElement).value }); if (!s.ok) alert(errText(s)); loaders.groups(); });
+      const auto = document.getElementById('gr-auto');
+      if (auto) auto.addEventListener('click', async () => { const s = await api('/api/groups', { action: 'auto', courseId, size: Number((document.getElementById('gr-size') as HTMLInputElement).value) }); if (!s.ok) alert(errText(s)); loaders.groups(); });
+      el.querySelectorAll<HTMLElement>('[data-gr-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this group and its board? Members keep their submissions.')) { await api('/api/groups', { action: 'delete', groupId: b.dataset.grDel }); loaders.groups(); } }));
+      el.querySelectorAll<HTMLElement>('[data-gr-save]').forEach((b) => b.addEventListener('click', async () => {
+        const box = el.querySelector(`[data-group="${b.dataset.grSave}"]`) as HTMLElement;
+        const userIds = Array.from(box.querySelectorAll<HTMLInputElement>('[data-member]:checked')).map((i) => i.dataset.member);
+        const s = await api('/api/groups', { action: 'members', groupId: b.dataset.grSave, userIds }); if (!s.ok) alert(errText(s)); loaders.groups();
+      }));
+      el.querySelectorAll<HTMLInputElement>('[data-ga]').forEach((c) => c.addEventListener('change', async () => {
+        const s = await api('/api/groups', { action: 'group_mode', assignmentId: c.dataset.ga, on: c.checked });
+        if (!s.ok) { alert(errText(s)); c.checked = !c.checked; }
+      }));
+    };
+
+    // ---------- C14 live sessions ----------
+    const ST_LABEL: Record<string, string> = { present: 'Present', late: 'Late', absent: 'Absent', excused: 'Excused' };
+    loaders.live = async () => {
+      const el = $('tab-live'); el.textContent = 'Loading…';
+      const r = await api('/api/live-sessions?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const now = Date.now();
+      const list = r.d.sessions || [];
+      // Meeting links are https-only on the server; shown as links that open in a new tab.
+      const link = (s: Any) => `<a class="btn" href="${esc(s.join_url)}" target="_blank" rel="noopener noreferrer">Join ↗</a>`;
+      if (r.d.scope === 'learner') {
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">Live sessions</h2><p class="mt-1 text-sm text-muted">Sessions run on the meeting service your teacher chose. Check in when you arrive (from 10 minutes before).</p>
+          <ul class="mt-3 space-y-3 font-sans text-[15px]">${list.map((s: Any) => {
+            const end = s.starts_at + s.duration_min * 60000;
+            return `<li class="rounded-xl2 border border-line bg-surface p-4"><strong class="text-navy">${esc(s.title)}</strong><span class="block text-sm text-muted">${esc(fmt(s.starts_at))} · ${esc(s.duration_min)} min${end < now ? ' · finished' : ''}</span>
+              ${s.notes ? `<p class="mt-1 text-sm">${esc(s.notes)}</p>` : ''}
+              <div class="mt-2 flex flex-wrap items-center gap-2">${end >= now ? link(s) : ''}${s.can_checkin ? `<button class="btn btn-primary" data-checkin="${esc(s.id)}">I'm here</button>` : ''}${s.my_status ? `<span class="pill bg-paper text-muted">${esc(ST_LABEL[s.my_status] || s.my_status)}</span>` : ''}</div></li>`;
+          }).join('') || '<li class="text-muted">No sessions scheduled.</li>'}</ul>`;
+        el.querySelectorAll<HTMLElement>('[data-checkin]').forEach((b) => b.addEventListener('click', async () => { const s = await api('/api/live-sessions', { action: 'checkin', sessionId: b.dataset.checkin }); if (!s.ok) alert(errText(s)); loaders.live(); }));
+        return;
+      }
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Live sessions</h2><p class="mt-1 text-sm text-muted">Link a Jitsi, Zoom or Meet call to a date. Learners can check themselves in; you can correct the roster. Attendance is a record for you, not a grade.</p>
+        <details class="mt-3 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ Schedule a session</summary>
+          <form id="lv-new" class="mt-3 grid gap-3 sm:grid-cols-2"><label class="${LABEL} sm:col-span-2">Title<input id="lv-title" required maxlength="160" class="${FIELD}" /></label>
+          <label class="${LABEL}">Starts<input id="lv-start" type="datetime-local" required class="${FIELD}" /></label><label class="${LABEL}">Minutes<input id="lv-dur" type="number" min="5" max="600" value="60" class="${FIELD}" /></label>
+          <label class="${LABEL} sm:col-span-2">Meeting link (https://)<input id="lv-url" type="url" required placeholder="https://meet.jit.si/…" class="${FIELD}" /></label>
+          <label class="${LABEL} sm:col-span-2">Notes (optional)<input id="lv-notes" maxlength="1000" class="${FIELD}" /></label>
+          <div class="sm:col-span-2"><button class="btn btn-primary" type="submit">Schedule</button> <span id="lv-out" class="font-sans text-sm" aria-live="polite"></span></div></form></details>
+        <ul class="mt-4 space-y-3 font-sans text-sm">${list.map((s: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><div class="flex flex-wrap items-center gap-2"><strong class="text-navy">${esc(s.title)}</strong><span class="text-muted">${esc(fmt(s.starts_at))} · ${esc(s.duration_min)} min</span>
+          <span class="text-xs text-muted">${Object.entries(s.counts || {}).map(([k, v]) => `${esc(ST_LABEL[k] || k)} ${esc(v)}`).join(' · ') || 'no attendance yet'}</span>
+          <span class="ml-auto flex gap-3">${link(s)}<button class="underline" data-roster="${esc(s.id)}">Attendance</button><button class="underline text-danger" data-lv-del="${esc(s.id)}">Delete</button></span></div><div data-roster-box="${esc(s.id)}"></div></li>`).join('') || '<li class="text-muted">No sessions yet.</li>'}</ul>`;
+      $('lv-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const v = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
+        const s = await api('/api/live-sessions', { action: 'create', courseId, title: v('lv-title'), startsAt: new Date(v('lv-start')).getTime(), durationMin: Number(v('lv-dur')), joinUrl: v('lv-url'), notes: v('lv-notes') });
+        if (!s.ok) { $('lv-out').textContent = errText(s); return; }
+        loaders.live();
+      });
+      el.querySelectorAll<HTMLElement>('[data-lv-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this session and its attendance record?')) { await api('/api/live-sessions', { action: 'delete', sessionId: b.dataset.lvDel }); loaders.live(); } }));
+      el.querySelectorAll<HTMLElement>('[data-roster]').forEach((b) => b.addEventListener('click', async () => {
+        const box = el.querySelector(`[data-roster-box="${b.dataset.roster}"]`) as HTMLElement;
+        const rr = await api('/api/live-sessions?sessionId=' + encodeURIComponent(b.dataset.roster as string));
+        if (!rr.ok) { box.textContent = errText(rr); return; }
+        box.innerHTML = `<table class="mt-3 w-full"><tbody>${rr.d.roster.map((p: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-2">${esc(p.name || p.email)}${p.self ? ' <span class="text-xs text-muted">(checked in)</span>' : ''}</td>
+          <td><select data-mark="${esc(p.id)}" aria-label="Attendance for ${esc(p.name || p.email)}" class="border border-line bg-surface px-2 py-1"><option value="">–</option>${Object.entries(ST_LABEL).map(([k, v]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${v}</option>`).join('')}</select></td></tr>`).join('') || '<tr><td class="text-muted">No learners enrolled.</td></tr>'}</tbody></table>`;
+        box.querySelectorAll<HTMLSelectElement>('[data-mark]').forEach((sel) => sel.addEventListener('change', async () => {
+          if (!sel.value) return;
+          const m = await api('/api/live-sessions', { action: 'mark', sessionId: b.dataset.roster, userId: sel.dataset.mark, status: sel.value }); if (!m.ok) alert(errText(m));
+        }));
+      }));
+    };
+
+    // ---------- C15 badges ----------
+    const critText = (c: Any) => [c.allLessons && 'finish every lesson', c.coursePass && 'pass the course test', c.quizId && `score ${c.quizMinPct}%+ on a course quiz`, c.sessions && `attend ${c.sessions} live session${c.sessions === 1 ? '' : 's'}`].filter(Boolean).join(', ') || 'given by your teacher';
+    loaders.badges = async () => {
+      const el = $('badge-body'); el.textContent = 'Loading…';
+      const r = await api('/api/badges?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const medal = (on: boolean) => `<span aria-hidden="true" class="grid h-12 w-12 shrink-0 place-items-center rounded-full ${on ? 'bg-saffron text-navy' : 'bg-paper text-muted'}"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></svg></span>`;
+      if (r.d.scope === 'learner') {
+        el.innerHTML = `<ul class="mt-3 grid gap-3 sm:grid-cols-2">${r.d.badges.map((b: Any) => `<li class="flex gap-3 rounded-xl2 border border-line bg-surface p-4">${medal(b.earned)}<div class="min-w-0"><strong class="text-navy">${esc(b.name)}</strong>
+          ${b.description ? `<p class="text-sm">${esc(b.description)}</p>` : ''}<p class="font-sans text-xs text-muted">${b.earned ? `Earned ${esc(new Date(b.awarded_at).toLocaleDateString())} · <a class="underline" href="/badge?id=${encodeURIComponent(b.award_id)}">Share</a>` : 'To earn it: ' + esc(critText(b.criteria))}</p></div></li>`).join('') || '<li class="text-muted">No badges in this course yet.</li>'}</ul>`;
+        return;
+      }
+      const pol = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+      const learners = (pol.ok && pol.d.learners) || [];
+      const qz = await api('/api/lms-quizzes?courseId=' + encodeURIComponent(courseId));
+      const quizzes = (qz.ok && qz.d.quizzes) || [];
+      el.innerHTML = `<details class="mt-3 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ New badge</summary>
+          <form id="bd-new" class="mt-3 space-y-2 font-sans text-sm"><label class="${LABEL}">Name<input id="bd-name" required maxlength="80" class="${FIELD}" /></label>
+          <label class="${LABEL}">Description (optional)<input id="bd-desc" maxlength="400" class="${FIELD}" /></label>
+          <p class="font-semibold">Earned automatically when the learner has all of:</p>
+          <label class="flex items-center gap-2"><input type="checkbox" id="bd-all" /> finished every lesson</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="bd-pass" /> passed the course test</label>
+          ${quizzes.length ? `<label class="flex flex-wrap items-center gap-2">scored at least <input id="bd-pct" type="number" min="0" max="100" value="80" class="w-16 border border-line bg-surface px-1" /> % on <select id="bd-quiz" class="border border-line bg-surface px-1"><option value="">(no quiz)</option>${quizzes.map((q: Any) => `<option value="${esc(q.id)}">${esc(q.title)}</option>`).join('')}</select></label>` : ''}
+          <label class="flex items-center gap-2">attended at least <input id="bd-sess" type="number" min="0" max="200" value="0" class="w-16 border border-line bg-surface px-1" /> live sessions</label>
+          <p class="text-xs text-muted">Leave every box empty to give this badge by hand only. Badges record participation; avoid words like credit, credential or degree.</p>
+          <button class="btn btn-primary" type="submit">Create badge</button> <span id="bd-out" aria-live="polite"></span></form></details>
+        <ul class="mt-4 space-y-3 font-sans text-sm">${r.d.badges.map((b: Any) => `<li class="rounded-xl2 border border-line bg-surface p-4"><div class="flex flex-wrap items-center gap-3">${medal(true)}<strong class="text-navy">${esc(b.name)}</strong><span class="text-xs text-muted">${esc(critText(b.criteria))} · ${b.holders.length} learner${b.holders.length === 1 ? '' : 's'}</span><button class="ml-auto underline text-danger" data-bd-del="${esc(b.id)}">Delete</button></div>
+          <p class="mt-2">${b.holders.map((h: Any) => `${esc(h.name || h.email)}${h.how === 'awarded' ? ` <button class="text-xs underline" data-bd-revoke="${esc(b.id)}" data-u="${esc(h.id)}">revoke</button>` : ''}`).join(', ') || '<span class="text-muted">Nobody yet.</span>'}</p>
+          ${learners.length ? `<div class="mt-2 flex items-center gap-2"><label class="sr-only" for="bd-u-${esc(b.id)}">Learner</label><select id="bd-u-${esc(b.id)}" class="border border-line bg-surface px-2 py-1">${learners.map((l: Any) => `<option value="${esc(l.id)}">${esc(l.name || l.email)}</option>`).join('')}</select><button class="btn" data-bd-award="${esc(b.id)}">Give badge</button></div>` : ''}</li>`).join('') || '<li class="text-muted">No badges yet.</li>'}</ul>`;
+      $('bd-new').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const v = (id: string) => document.getElementById(id) as HTMLInputElement | null;
+        const criteria: Any = { allLessons: v('bd-all')!.checked, coursePass: v('bd-pass')!.checked, sessions: Number(v('bd-sess')!.value) || 0 };
+        if (v('bd-quiz') && v('bd-quiz')!.value) { criteria.quizId = v('bd-quiz')!.value; criteria.quizMinPct = Number(v('bd-pct')!.value); }
+        const s = await api('/api/badges', { action: 'create', courseId, name: v('bd-name')!.value, description: v('bd-desc')!.value, criteria });
+        if (!s.ok) { $('bd-out').textContent = errText(s); return; }
+        loaders.badges();
+      });
+      el.querySelectorAll<HTMLElement>('[data-bd-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this badge? Learners who have it will lose it.')) { await api('/api/badges', { action: 'delete', badgeId: b.dataset.bdDel }); loaders.badges(); } }));
+      el.querySelectorAll<HTMLElement>('[data-bd-award]').forEach((b) => b.addEventListener('click', async () => { const s = await api('/api/badges', { action: 'award', badgeId: b.dataset.bdAward, userId: (document.getElementById('bd-u-' + b.dataset.bdAward) as HTMLSelectElement).value }); if (!s.ok) alert(errText(s)); loaders.badges(); }));
+      el.querySelectorAll<HTMLElement>('[data-bd-revoke]').forEach((b) => b.addEventListener('click', async () => { await api('/api/badges', { action: 'revoke', badgeId: b.dataset.bdRevoke, userId: b.dataset.u }); loaders.badges(); }));
+    };
 
     // ---------- C10 journal ----------
     loaders.journal = async () => {

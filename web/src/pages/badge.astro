@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+// C15 public badge page (/badge?id=<award id>), for a learner to share. Shows the badge,
+// the learner's first name and the date, always with the approved no-credit notice.
+// A badge is a record of participation, never a credential, qualification or credit.
+---
+<Base title="Badge, Sikhi University" description="A course badge from Sikhi University. Self-development only; not academic credit." ambient="none">
+  <section class="wrap max-w-2xl py-12">
+    <p class="eyebrow text-saffron-deep">Course badge</p>
+    <div id="bd" class="mt-4" aria-live="polite">Loading…</div>
+    <Disclaimer variant="full" callout class="mt-6" />
+  </section>
+  <script>
+    const box = document.getElementById('bd') as HTMLElement;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const id = new URLSearchParams(location.search).get('id') || '';
+    (async () => {
+      const r = await fetch('/api/badges?award=' + encodeURIComponent(id)).catch(() => null);
+      const d = r ? await r.json().catch(() => ({})) : {};
+      if (!r || !r.ok || !d.badge) { box.textContent = 'This badge could not be found.'; return; }
+      const b = d.badge;
+      let course = b.course_id;
+      try { const idx = await (await fetch('/data/index.json')).json(); const c = (idx.courses || []).find((x: any) => x.id === b.course_id); if (c) course = c.title; } catch { /* keep the id */ }
+      box.innerHTML = `<div class="flex items-center gap-4"><span aria-hidden="true" class="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-saffron text-navy"><svg viewBox="0 0 24 24" class="h-10 w-10" fill="currentColor"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></svg></span>
+        <div><h1 class="text-3xl font-bold text-navy">${esc(b.name)}</h1><p class="mt-1 text-muted">${esc(b.recipient)} · <a class="underline" href="/course/${encodeURIComponent(b.course_id)}">${esc(course)}</a> · ${esc(new Date(b.awarded_at).toLocaleDateString(undefined, { dateStyle: 'long' }))}</p></div></div>
+        ${b.description ? `<p class="mt-4 text-lg">${esc(b.description)}</p>` : ''}`;
+    })();
+  </script>
+</Base>

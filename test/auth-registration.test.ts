@@ -94,9 +94,10 @@ function statefulEnv(seed: { users?: Row[] } = {}) {
   return { env: { DB, ADMIN_EMAILS: "", SITE_URL: "https://sikhiuni.com" } as any, tables };
 }
 
-const startReq = (body: unknown) =>
+// An adult birth date by default; the age-screen tests below override it.
+const startReq = (body: any, headers: Record<string, string> = {}) =>
   new Request("https://sikhiuni.com/api/auth/register-start", {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+    method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify({ birthYear: 1990, birthMonth: 6, ...body }),
   });
 const completeReq = (body: unknown, rsid?: string) =>
   new Request("https://sikhiuni.com/api/auth/register-complete", {
@@ -123,6 +124,43 @@ afterEach(() => { vi.unstubAllGlobals(); });
 const codeSends = () =>
   fetchMock.mock.calls.filter(([url, init]: any[]) =>
     isResendUrl(url) && /confirmation code/i.test(String(init?.body ?? "")));
+
+describe("register-start: neutral age screen", () => {
+  it("computes age from month and year, counting the birth month as not yet passed", async () => {
+    const { ageInYears } = await import("../functions/api/auth/register-start.js");
+    const now = new Date("2026-11-21T12:00:00Z");
+    expect(ageInYears(2013, 10, now)).toBe(13);
+    expect(ageInYears(2013, 11, now)).toBe(12); // born this month: not counted as 13 yet
+    expect(ageInYears(2013, 12, now)).toBe(12);
+    expect(ageInYears(2030, 1, now)).toBeNull();
+    expect(ageInYears(1990, 13, now)).toBeNull();
+  });
+
+  it("requires a birth date, refuses under-14s without storing anything, and blocks an immediate retry", async () => {
+    const { env, tables } = statefulEnv();
+    const y = new Date().getUTCFullYear();
+    const none = await registerStart({ request: startReq({ username: "kid", email: "k@example.com", birthYear: null, birthMonth: null }), env } as any);
+    expect(none.status).toBe(400);
+    const young = await registerStart({ request: startReq({ username: "kid", email: "k@example.com", birthYear: y - 10, birthMonth: 1 }), env } as any);
+    expect(young.status).toBe(403);
+    expect((await young.json()).code).toBe("age");
+    expect(young.headers.get("set-cookie")).toMatch(/su_age_block=1; Path=\/api\/auth; HttpOnly/);
+    expect(codeSends()).toHaveLength(0); // no code emailed
+    expect(tables.pending_registrations).toHaveLength(0); // nothing stored
+    const retry = await registerStart({ request: startReq({ username: "kid", email: "k@example.com" }, { cookie: "su_age_block=1" }), env } as any);
+    expect(retry.status).toBe(403);
+  });
+
+  it("the minimum age is 14: a 13-year-old is refused, a 14-year-old gets through", async () => {
+    const { MIN_AGE } = await import("../functions/api/auth/register-start.js");
+    expect(MIN_AGE).toBe(14);
+    const y = new Date().getUTCFullYear();
+    const thirteen = await registerStart({ request: startReq({ username: "teen13", email: "t13@example.com", birthYear: y - 14, birthMonth: 12 }), env: statefulEnv().env } as any);
+    expect(thirteen.status).toBe(403); // turns 14 later this year (December counts as not yet passed)
+    const fourteen = await registerStart({ request: startReq({ username: "teen14", email: "t14@example.com", birthYear: y - 15, birthMonth: 12 }), env: statefulEnv().env } as any);
+    expect(fourteen.status).toBe(200);
+  });
+});
 
 describe("POST /api/auth/register-start", () => {
   it("writes a pending row and sets an httpOnly rsid cookie — and creates NO user", async () => {
