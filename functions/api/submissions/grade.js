@@ -2,6 +2,7 @@ import { json, getUser, logEvent, parseBody } from "../_lib.js";
 import { notify } from "../_notify.js";
 import { rubricForAssignment, scoreRubric } from "../rubrics.js";
 import { dueFor, latePenaltyPct } from "../course-policies.js";
+import { isGroupAssignment, groupOf } from "../groups.js";
 
 async function ownsCourse(env, user, courseId) {
   if (user.role === "admin") return true;
@@ -59,10 +60,31 @@ export async function onRequestPost({ request, env }) {
       "ON CONFLICT(submission_id) DO UPDATE SET rubric_id=excluded.rubric_id, rubric_scores=excluded.rubric_scores, raw_grade=excluded.raw_grade, penalty_pct=excluded.penalty_pct, graded_by=excluded.graded_by, updated_at=excluded.updated_at")
       .bind(b.submissionId, rubric ? rubric.id : null, scored ? JSON.stringify(scored.scores) : null, raw, penaltyPct, user.id, now).run();
   }
+  // C8: grading a group submission grades every member's copy (same raw score and feedback;
+  // each member's own late-policy deduction still applies when the teacher applies it).
+  const groupGrades = [];
+  if (await isGroupAssignment(env, sub.assignment_id)) {
+    const g = await groupOf(env, sub.course_id, sub.user_id);
+    for (const member of g ? g.members.filter((m) => m !== sub.user_id) : []) {
+      const other = await env.DB.prepare("SELECT id, submitted_at, updated_at FROM submissions WHERE assignment_id=? AND user_id=?").bind(sub.assignment_id, member).first();
+      if (!other) continue;
+      let pct = 0;
+      if (b.applyLatePenalty) pct = latePenaltyPct(await dueFor(env, { due_at: sub.due_at }, sub.assignment_id, member), other.updated_at || other.submitted_at);
+      const mg = Math.max(0, Math.round(raw * (100 - pct) / 100));
+      await env.DB.prepare("UPDATE submissions SET grade=?, feedback=?, graded_by=?, graded_at=?, status='graded' WHERE id=?").bind(mg, feedback, user.id, now, other.id).run();
+      if (rubric || pct || b.applyLatePenalty != null) {
+        await env.DB.prepare("INSERT INTO submission_grading (submission_id, rubric_id, rubric_scores, raw_grade, penalty_pct, graded_by, updated_at) VALUES (?,?,?,?,?,?,?) " +
+          "ON CONFLICT(submission_id) DO UPDATE SET rubric_id=excluded.rubric_id, rubric_scores=excluded.rubric_scores, raw_grade=excluded.raw_grade, penalty_pct=excluded.penalty_pct, graded_by=excluded.graded_by, updated_at=excluded.updated_at")
+          .bind(other.id, rubric ? rubric.id : null, scored ? JSON.stringify(scored.scores) : null, raw, pct, user.id, now).run();
+      }
+      groupGrades.push(member);
+      await notify(env, [member], { kind: "graded", courseId: sub.course_id, title: `Graded: ${sub.title}`, body: `${mg}/${sub.points}`, url: `/course/${sub.course_id}` });
+    }
+  }
   await logEvent(env, user, "submission_graded", b.submissionId, String(grade), {
     subject: sub.user_id, targetType: "submission",
     before: { grade: sub.old_grade ?? null, status: sub.old_status }, after: { grade, raw, penaltyPct, rubric: rubric ? rubric.id : null },
   });
   await notify(env, [sub.user_id], { kind: "graded", courseId: sub.course_id, title: `Graded: ${sub.title}`, body: `${grade}/${sub.points}`, url: `/course/${sub.course_id}` });
-  return json({ ok: true, grade, raw, penaltyPct });
+  return json({ ok: true, grade, raw, penaltyPct, groupMembersGraded: groupGrades.length });
 }

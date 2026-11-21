@@ -22,6 +22,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="quizzes">Quizzes</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="polls">Polls &amp; surveys</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="peer">Peer review</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="groups">Groups</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
@@ -32,6 +33,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       <div id="tab-quizzes" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-polls" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-peer" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-groups" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
@@ -486,6 +488,62 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         await loaders.peer(); openPeer(assignmentId);
       }));
     }
+
+    // ---------- C8 groups ----------
+    loaders.groups = async () => {
+      const el = $('tab-groups'); el.textContent = 'Loading…';
+      const r = await api('/api/groups?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const ga = r.d.group_assignments || [];
+      if (r.d.scope === 'learner') {
+        const g = r.d.group;
+        if (!g) { el.innerHTML = `<h2 class="text-xl font-bold text-navy">Groups</h2><p class="mt-2 text-muted">You're not in a group in this course yet.${ga.length ? ' Your teacher will add you before the group assignments.' : ''}</p>`; return; }
+        el.innerHTML = `<h2 class="text-xl font-bold text-navy">${esc(g.name)}</h2>
+          <p class="mt-1 font-sans text-sm text-muted">${g.members.map((m: Any) => esc(m.name) + (m.me ? ' (you)' : '')).join(' · ')}</p>
+          ${ga.length ? `<p class="mt-3 rounded-lg border-l-4 border-saffron bg-surface p-3 font-sans text-sm">Group assignments: ${ga.map((a: Any) => `<strong>${esc(a.title)}</strong>`).join(', ')}. One of you submits for the whole group, and everyone gets the same grade.</p>` : ''}
+          <h3 class="mt-6 font-bold text-navy">Group board</h3><p class="text-xs text-muted">Only your group and your teachers can read this.</p>
+          <form id="gp-form" class="mt-2 flex gap-2"><label class="sr-only" for="gp-body">Message to your group</label><textarea id="gp-body" rows="2" maxlength="2000" required class="${FIELD} flex-1"></textarea><button class="btn btn-primary self-end" type="submit">Post</button></form>
+          <p id="gp-out" class="font-sans text-sm" aria-live="polite"></p>
+          <ul class="mt-3 space-y-2">${(r.d.posts || []).map((p: Any) => `<li class="rounded-lg border border-line bg-surface p-3"><p class="font-sans text-xs text-muted">${p.mine ? 'You' : esc(p.name)} · ${esc(new Date(p.created_at).toLocaleString())}</p><p class="mt-1 whitespace-pre-wrap">${esc(p.body)}</p></li>`).join('')}</ul>`;
+        $('gp-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const s = await api('/api/groups', { action: 'post', groupId: g.id, body: (document.getElementById('gp-body') as HTMLTextAreaElement).value });
+          if (!s.ok) { $('gp-out').textContent = errText(s); return; }
+          loaders.groups();
+        });
+        return;
+      }
+      const pol = await api('/api/course-policies?courseId=' + encodeURIComponent(courseId));
+      const assignments = (pol.ok && pol.d.assignments) || [];
+      const gaIds = new Set(ga.map((a: Any) => a.id));
+      const everyone = r.d.groups.flatMap((g: Any) => g.members).concat(r.d.unassigned);
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Groups</h2>
+        <div class="mt-3 flex flex-wrap items-end gap-3 font-sans text-sm">
+          <form id="gr-new" class="flex gap-2"><label class="sr-only" for="gr-name">New group name</label><input id="gr-name" maxlength="80" placeholder="New group name" required class="${FIELD} !mt-0 !w-48" /><button class="btn" type="submit">Add group</button></form>
+          ${r.d.unassigned.length > 1 ? `<span class="flex items-center gap-2">Split the ${r.d.unassigned.length} learners without a group into groups of <input id="gr-size" type="number" min="2" max="20" value="4" class="w-14 border border-line bg-surface px-1" aria-label="Group size" /><button class="btn" id="gr-auto" type="button">Split at random</button></span>` : ''}
+        </div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">${r.d.groups.map((g: Any) => `<div class="rounded-xl2 border border-line bg-surface p-4" data-group="${esc(g.id)}"><div class="flex items-center gap-2"><strong class="text-navy">${esc(g.name)}</strong><span class="text-xs text-muted">${g.members.length} member${g.members.length === 1 ? '' : 's'}</span>
+          <button class="ml-auto text-xs underline text-danger" data-gr-del="${esc(g.id)}">Delete</button></div>
+          <details class="mt-2 font-sans text-sm"><summary class="cursor-pointer">${g.members.map((m: Any) => esc(m.name || m.email)).join(', ') || 'No members'}</summary>
+            <div class="mt-2 max-h-48 overflow-auto">${everyone.map((p: Any) => `<label class="flex items-center gap-2 py-0.5"><input type="checkbox" data-member="${esc(p.id)}" ${g.members.some((m: Any) => m.id === p.id) ? 'checked' : ''} /> ${esc(p.name || p.email)}</label>`).join('')}</div>
+            <button class="btn mt-2" data-gr-save="${esc(g.id)}">Save members</button></details></div>`).join('') || '<p class="text-muted">No groups yet.</p>'}</div>
+        ${r.d.unassigned.length ? `<p class="mt-3 font-sans text-sm text-muted">Not in a group: ${r.d.unassigned.map((u: Any) => esc(u.name || u.email)).join(', ')}</p>` : ''}
+        <h3 class="mt-8 font-bold text-navy">Group assignments</h3><p class="text-sm text-muted">One member submits for the group and grading it grades everyone. Switch before anyone submits.</p>
+        <ul class="mt-2 font-sans text-sm">${assignments.map((a: Any) => `<li class="flex items-center gap-2 border-b border-line py-2"><label class="flex items-center gap-2"><input type="checkbox" data-ga="${esc(a.id)}" ${gaIds.has(a.id) ? 'checked' : ''} /> ${esc(a.title)}</label></li>`).join('') || '<li class="text-muted">No assignments yet.</li>'}</ul>`;
+      $('gr-new').addEventListener('submit', async (e) => { e.preventDefault(); const s = await api('/api/groups', { action: 'create', courseId, name: (document.getElementById('gr-name') as HTMLInputElement).value }); if (!s.ok) alert(errText(s)); loaders.groups(); });
+      const auto = document.getElementById('gr-auto');
+      if (auto) auto.addEventListener('click', async () => { const s = await api('/api/groups', { action: 'auto', courseId, size: Number((document.getElementById('gr-size') as HTMLInputElement).value) }); if (!s.ok) alert(errText(s)); loaders.groups(); });
+      el.querySelectorAll<HTMLElement>('[data-gr-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this group and its board? Members keep their submissions.')) { await api('/api/groups', { action: 'delete', groupId: b.dataset.grDel }); loaders.groups(); } }));
+      el.querySelectorAll<HTMLElement>('[data-gr-save]').forEach((b) => b.addEventListener('click', async () => {
+        const box = el.querySelector(`[data-group="${b.dataset.grSave}"]`) as HTMLElement;
+        const userIds = Array.from(box.querySelectorAll<HTMLInputElement>('[data-member]:checked')).map((i) => i.dataset.member);
+        const s = await api('/api/groups', { action: 'members', groupId: b.dataset.grSave, userIds }); if (!s.ok) alert(errText(s)); loaders.groups();
+      }));
+      el.querySelectorAll<HTMLInputElement>('[data-ga]').forEach((c) => c.addEventListener('change', async () => {
+        const s = await api('/api/groups', { action: 'group_mode', assignmentId: c.dataset.ga, on: c.checked });
+        if (!s.ok) { alert(errText(s)); c.checked = !c.checked; }
+      }));
+    };
 
     // ---------- C10 journal ----------
     loaders.journal = async () => {

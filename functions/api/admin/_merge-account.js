@@ -49,6 +49,7 @@ const OWNED = [
   ["dm_conversations", "requester_id"], ["dm_conversations", "recipient_id"],
   ["dm_messages", "sender_id"], ["dm_reports", "reporter_id"],
   ["lms_quiz_attempts", "user_id"], ["peer_reviews", "reviewer_id"],
+  ["group_members", "user_id"], ["group_posts", "user_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than
@@ -64,7 +65,7 @@ const ACTOR = [
   ["glossary_terms", "created_by"], ["polls", "created_by"],
   ["rubrics", "created_by"], ["submission_grading", "graded_by"],
   ["course_messaging_settings", "updated_by"], ["course_mutes", "muted_by"], ["dm_reports", "resolved_by"],
-  ["release_rules", "updated_by"], ["lms_quizzes", "created_by"], ["peer_review_settings", "updated_by"],
+  ["release_rules", "updated_by"], ["lms_quizzes", "created_by"], ["peer_review_settings", "updated_by"], ["course_groups", "created_by"], ["group_assignments", "set_by"],
 ];
 
 // Credential + transient state keyed by user_id: dropped, never moved (rule 3).
