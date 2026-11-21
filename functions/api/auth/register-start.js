@@ -72,10 +72,37 @@ async function sendCode(context, email, code, username) {
   }
 }
 
+// Neutral age screen (COPPA / UK Children's Code / GDPR Art. 8). The form asks the
+// month and year of birth without saying what the cut-off is; under-13s are refused
+// and a 24-hour cookie stops an immediate retry with a different answer. The birth date
+// is used for this check only and is never stored.
+export const MIN_AGE = 13;
+const AGE_BLOCK_COOKIE = "su_age_block";
+export function ageInYears(year, month, now = new Date()) {
+  const y = Number(year), m = Number(month);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || m < 1 || m > 12 || y < 1900 || y > now.getUTCFullYear()) return null;
+  // Assume the last day of the birth month: someone born this month counts as not yet a year older.
+  let age = now.getUTCFullYear() - y;
+  if (now.getUTCMonth() + 1 <= m) age -= 1;
+  return age;
+}
+const UNDER_AGE_MESSAGE = "Sorry, you can't create an account on Sikhi University right now. You're welcome to keep exploring the free course outlines.";
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   let body;
   try { body = await request.json(); } catch { return json({ error: "bad request" }, 400); }
+
+  if ((request.headers.get("cookie") || "").split(/;\s*/).includes(`${AGE_BLOCK_COOKIE}=1`)) {
+    return json({ error: UNDER_AGE_MESSAGE, code: "age" }, 403);
+  }
+  const age = ageInYears(body?.birthYear, body?.birthMonth);
+  if (age === null) return json({ error: "Please choose the month and year you were born.", code: "birth_date" }, 400);
+  if (age < MIN_AGE) {
+    return json({ error: UNDER_AGE_MESSAGE, code: "age" }, 403, {
+      "Set-Cookie": `${AGE_BLOCK_COOKIE}=1; Path=/api/auth; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`,
+    });
+  }
 
   const username = normalizeHandle(body?.username);
   const email = String(body?.email || "").trim().toLowerCase();

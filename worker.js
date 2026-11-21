@@ -101,6 +101,7 @@ import { onRequestGet as peerReviewsGet, onRequestPost as peerReviewsPost } from
 import { onRequestGet as groupsGet, onRequestPost as groupsPost } from "./functions/api/groups.js";
 import { onRequestGet as liveSessionsGet, onRequestPost as liveSessionsPost } from "./functions/api/live-sessions.js";
 import { onRequestGet as badgesGet, onRequestPost as badgesPost } from "./functions/api/badges.js";
+import { onRequestGet as unsubscribeGet, onRequestPost as unsubscribePost } from "./functions/api/unsubscribe.js";
 import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
 import { onRequestPost as translatePost } from "./functions/api/translate.js";
@@ -202,6 +203,7 @@ const routes = {
   "/api/groups": { GET: groupsGet, POST: groupsPost },
   "/api/live-sessions": { GET: liveSessionsGet, POST: liveSessionsPost },
   "/api/badges": { GET: badgesGet, POST: badgesPost },
+  "/api/unsubscribe": { GET: unsubscribeGet, POST: unsubscribePost },
   "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
   "/api/calendar.ics": { GET: calendarIcsGet },
   "/api/account/delete": { POST: accountDeletePost },
@@ -246,6 +248,7 @@ const RATE_LIMITS = {
   "/api/groups": { limit: 30, window: 60 },
   "/api/live-sessions": { limit: 60, window: 60 },  // teachers mark a whole roster
   "/api/badges": { limit: 30, window: 60 },
+  "/api/unsubscribe": { limit: 20, window: 60 },
   "/api/calendar-feed": { limit: 5, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
   "/api/ratings": { limit: 15, window: 60 },

@@ -76,6 +76,21 @@ import Base from '../layouts/Base.astro';
             <label class="block"><span class="field-label-dark">Email</span>
               <input id="reg-email" type="email" autocomplete="email" placeholder="you@example.com" data-testid="reg-email" class="mt-2 w-full rounded-[2px] border border-white/[0.34] bg-white/[0.05] px-4 py-3.5 text-base text-white placeholder:text-white/[0.55] focus:border-saffron focus:outline-none" />
             </label>
+            <!-- Neutral age screen: no hint of the minimum age (checked server-side; never stored). -->
+            <fieldset><legend class="field-label-dark">Date of birth</legend>
+              <div class="mt-2 flex gap-3">
+                <label class="sr-only" for="reg-birth-month">Birth month</label>
+                <select id="reg-birth-month" data-testid="reg-birth-month" class="w-1/2 rounded-[2px] border border-white/[0.34] bg-navy px-3 py-3.5 text-base text-white focus:border-saffron focus:outline-none">
+                  <option value="">Month</option>
+                  {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => <option value={String(i + 1)}>{m}</option>)}
+                </select>
+                <label class="sr-only" for="reg-birth-year">Birth year</label>
+                <select id="reg-birth-year" data-testid="reg-birth-year" class="w-1/2 rounded-[2px] border border-white/[0.34] bg-navy px-3 py-3.5 text-base text-white focus:border-saffron focus:outline-none">
+                  <option value="">Year</option>
+                  {Array.from({ length: 101 }, (_, i) => new Date().getFullYear() - i).map((y) => <option value={String(y)}>{y}</option>)}
+                </select>
+              </div>
+            </fieldset>
           </div>
 
           <!-- Registration step 2: the emailed code + a new password -->
@@ -223,11 +238,14 @@ import Base from '../layouts/Base.astro';
         email: regEmail.value.trim(),
         // Only ever a real boolean, the API accepts nothing else as consent.
         marketing: (document.getElementById('marketing') as HTMLInputElement).checked,
+        birthMonth: Number((document.getElementById('reg-birth-month') as HTMLSelectElement).value) || null,
+        birthYear: Number((document.getElementById('reg-birth-year') as HTMLSelectElement).value) || null,
       };
     }
 
     async function startRegistration() {
       const { ok, d } = await postJson('/api/auth/register-start', registrationPayload());
+      if (!ok && d.code === 'age') { regStep1.innerHTML = ''; problem(d.error); return false; } // no retry with a different answer
       if (!ok) { problem(d.error || 'Could not start sign-up.'); return false; }
       regStep = 2;
       render();

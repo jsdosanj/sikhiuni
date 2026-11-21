@@ -12,6 +12,7 @@ import { schemaOnce } from "./_schema-once.js";
 import { newId } from "./_lib.js";
 import { pushConfigured, sendPush } from "../push-sender.js";
 import { ensurePolicies } from "./course-policies.js";
+import { unsubscribeUrl } from "./unsubscribe.js";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -61,13 +62,21 @@ export async function getPrefs(env, userId) {
   return resolvePrefs(stored);
 }
 
-export async function sendEmail(env, to, subject, text) {
+/**
+ * Send a notification email. With a userId, the message gets a one-click unsubscribe link
+ * and List-Unsubscribe headers (RFC 8058) and, when MAIL_POSTAL_ADDRESS is configured, the
+ * sender's postal address (CAN-SPAM).
+ */
+export async function sendEmail(env, to, subject, text, userId = null) {
   if (!env.RESEND_API_KEY || !to || typeof fetch !== "function") return false;
+  const unsub = userId ? await unsubscribeUrl(env, userId) : null;
+  const footer = (unsub ? `\nUnsubscribe from these emails: ${unsub}` : "") + (env.MAIL_POSTAL_ADDRESS ? `\n\nSikhi University · ${env.MAIL_POSTAL_ADDRESS}` : "");
+  const headers = unsub ? { "List-Unsubscribe": `<${unsub}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>", to: [to], subject: subject.slice(0, 160), text }),
+      body: JSON.stringify({ from: env.MAIL_FROM || "Sikhi University <login@sikhiuni.com>", to: [to], subject: subject.slice(0, 160), text: text + footer, ...(headers ? { headers } : {}) }),
       signal: AbortSignal.timeout(5000),
     });
     return res.ok;
@@ -103,7 +112,7 @@ export async function notify(env, userIds, n) {
       const p = prefs[n.kind];
       if (p.email === "immediate") {
         const u = await env.DB.prepare("SELECT email FROM users WHERE id=?").bind(uid).first();
-        if (u && await sendEmail(env, u.email, title, emailText({ title, body, url: n.url }))) {
+        if (u && await sendEmail(env, u.email, title, emailText({ title, body, url: n.url }), uid)) {
           await env.DB.prepare("UPDATE notifications SET emailed_at=? WHERE id=?").bind(now, id).run();
         }
       }
@@ -162,7 +171,7 @@ export async function sendDigests(env, now = Date.now()) {
     if (!items.length) continue;
     const text = `Your Sikhi University updates:\n\n${items.slice(0, 30).map((r) => `- ${r.title}${r.url ? ` (${SITE}${r.url})` : ""}`).join("\n")}` +
       `${items.length > 30 ? `\n…and ${items.length - 30} more at ${SITE}/notifications` : ""}${FOOTER}`;
-    if (await sendEmail(env, rows[0].email, `Your daily summary (${items.length} update${items.length === 1 ? "" : "s"})`, text)) {
+    if (await sendEmail(env, rows[0].email, `Your daily summary (${items.length} update${items.length === 1 ? "" : "s"})`, text, uid)) {
       sent++;
       for (const r of items) await env.DB.prepare("UPDATE notifications SET emailed_at=? WHERE id=?").bind(now, r.id).run();
     }
