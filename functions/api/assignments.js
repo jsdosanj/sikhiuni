@@ -117,3 +117,5 @@ export async function onRequestPost({ request, env }) {
   await logEvent(env, user, "assignment_updated", b.id, null);
   return json({ ok: true });
 }
+
+export { ensure as ensureAssignments };

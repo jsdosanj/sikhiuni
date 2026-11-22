@@ -234,6 +234,27 @@ Deliberately **not** proposed:
 4. **Phase 4 (community):** C8, C13, C14, C15, C16, C17.
    C18 (forums + classmate DMs) moves up into Phase 2.
 
+### Phase 4 decisions (C13, C16, C17)
+
+- **C13 observers.** Consent comes only from the learner: the learner creates a single-use
+  code (valid 7 days; only its hash is stored) and gives it to the observer. The learner is
+  notified when it is used, sees every observer and can remove them at any time; an observer
+  can also leave. At most 5 observers. Observers see progress, assignment status and grades,
+  quiz scores, badges and attendance; never submissions, feedback, journals or messages.
+  Every view is audited. There is no separate under-18 policy, because birth dates are not
+  stored (the sign-up age screen only checks 14+); copying observers on messages is not done.
+- **C16 import/export.** A JSON course package of teaching tools (assignments with policies
+  and rubrics, rubrics, quizzes with answer keys, polls, glossary). No lesson content (that
+  stays in Studio + scholar review), no learner data, no badges or release rules. Import
+  needs a rights basis (own / CC licence allowing adaptation, with attribution added to every
+  item / written permission); everything with a status arrives as a draft; AI-made packages
+  are labelled "Created by AI."; every import is recorded in `course_imports`. IMS Common
+  Cartridge is not supported yet.
+- **C17 LTI / H5P.** H5P activities hosted on h5p.com or h5p.org are embedded in a sandboxed
+  frame (CSP allows those hosts on /course-tools only), start as drafts, need a rights
+  confirmation and are ungraded. LTI 1.3 is deferred until a partner platform provides its
+  registration (issuer, client id, keys); building it without one could not be tested.
+
 ### Cross-cutting rules for every LMS feature
 
 - D1 migrations numbered from `0018_…`, each reversible, each approved before it runs.

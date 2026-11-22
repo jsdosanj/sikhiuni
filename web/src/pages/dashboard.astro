@@ -254,6 +254,11 @@ const links = [['path','My path','/dashboard'],['studio','Study studio','/dashbo
             <div id="sec-activity" class="mt-6"></div>
           </div>
           <div class="mt-10 max-w-xl border-t border-line pt-6">
+            <h2 class="text-xl font-bold">Observers</h2>
+            <p class="mt-1 font-sans text-sm text-muted">Let a parent, guardian or mentor see your progress (read-only), or follow a learner who gave you a code.</p>
+            <a class="btn mt-4" href="/observers">Manage observers</a>
+          </div>
+          <div class="mt-10 max-w-xl border-t border-line pt-6">
             <h2 class="text-xl font-bold">Your data</h2>
             <p class="mt-1 font-sans text-sm text-muted">Download everything we hold for your account, or permanently delete it.</p>
             <div class="mt-4 flex flex-wrap gap-3">
@@ -743,14 +748,14 @@ const links = [['path','My path','/dashboard'],['studio','Study studio','/dashbo
                   <span class="ml-auto flex gap-2 text-xs">
                     <button class="underline" data-view-assign="${esc(a.id)}">View &amp; grade</button>
                     <a class="underline" href="/grade?assignment=${encodeURIComponent(a.id)}">Grader</a>
-                    <button class="underline" data-toggle-assign="${esc(a.id)}" data-status="${a.status}">${a.status === 'closed' ? 'Reopen' : 'Close'}</button>
+                    <button class="underline" data-toggle-assign="${esc(a.id)}" data-status="${a.status}">${a.status === 'draft' ? 'Open to learners' : a.status === 'closed' ? 'Reopen' : 'Close'}</button>
                   </span>
                 </div>
                 <div id="roster-${esc(a.id)}" class="hidden mt-2"></div>
               `).join('') : '<p class="mt-2">No assignments yet for this course.</p>';
 
               box.querySelectorAll('[data-toggle-assign]').forEach((b) => b.addEventListener('click', () => {
-                api('/api/assignments', { method: 'POST', body: JSON.stringify({ id: b.dataset.toggleAssign, action: b.dataset.status === 'closed' ? 'reopen' : 'close' }) })
+                api('/api/assignments', { method: 'POST', body: JSON.stringify({ id: b.dataset.toggleAssign, action: (b.dataset.status === 'closed' || b.dataset.status === 'draft') ? 'reopen' : 'close' }) })
                   .then((r) => { if (r && !r.error) loadAssignments(cid); });
               }));
               box.querySelectorAll('[data-view-assign]').forEach((b) => b.addEventListener('click', () => loadRoster(b.dataset.viewAssign)));

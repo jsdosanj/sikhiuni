@@ -24,6 +24,7 @@ const UNIQUE_KEY: Record<string, string[]> = {
   sessions: ["id"],
   user_mfa: ["user_id"],
   magic_tokens: ["token"],
+  observer_links: ["learner_id", "observer_id"],
 };
 
 function fakeDB(seed: Record<string, any[]>) {
@@ -64,6 +65,14 @@ function fakeDB(seed: Record<string, any[]>) {
       const rows = rowsFor(table);
       const before = rows.length;
       tables[table] = rows.filter((row) => row[whereCol] !== bound[0]);
+      return { meta: { changes: before - tables[table].length } };
+    }
+    m = sql.match(/^DELETE FROM (\w+) WHERE (\w+)=(\w+)$/);
+    if (m) {
+      const [, table, a, b] = m;
+      const rows = rowsFor(table);
+      const before = rows.length;
+      tables[table] = rows.filter((row) => row[a] !== row[b]);
       return { meta: { changes: before - tables[table].length } };
     }
     throw new Error("fakeDB got an unrecognised statement: " + sql);
@@ -167,6 +176,15 @@ describe("mergeAccount", () => {
     expect(skipped).toEqual({ progress: 1, daily_activity: 1 });
     expect(env.DB.tables.progress).toEqual([{ user_id: "dst", course_id: "c1", done: "[0]" }]);
     expect(env.DB.tables.daily_activity).toEqual([{ user_id: "dst", day: "2026-09-10", active_seconds: 25 }]);
+  });
+
+  it("drops an observer link that the merge would turn into someone observing themselves", async () => {
+    const env: any = { DB: fakeDB({
+      users: [{ id: "src", email: "old@example.com" }, { id: "dst", email: "new@example.com" }],
+      observer_links: [{ learner_id: "dst", observer_id: "src" }, { learner_id: "src", observer_id: "parent" }],
+    }) };
+    await mergeAccount(env, SRC, DST);
+    expect(env.DB.tables.observer_links).toEqual([{ learner_id: "dst", observer_id: "parent" }]);
   });
 
   it("leaves no row behind pointing at the deleted account", async () => {

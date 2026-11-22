@@ -101,6 +101,9 @@ import { onRequestGet as peerReviewsGet, onRequestPost as peerReviewsPost } from
 import { onRequestGet as groupsGet, onRequestPost as groupsPost } from "./functions/api/groups.js";
 import { onRequestGet as liveSessionsGet, onRequestPost as liveSessionsPost } from "./functions/api/live-sessions.js";
 import { onRequestGet as badgesGet, onRequestPost as badgesPost } from "./functions/api/badges.js";
+import { onRequestGet as observersGet, onRequestPost as observersPost } from "./functions/api/observers.js";
+import { onRequestGet as coursePackageGet, onRequestPost as coursePackagePost } from "./functions/api/course-package.js";
+import { onRequestGet as embedsGet, onRequestPost as embedsPost } from "./functions/api/embeds.js";
 import { onRequestGet as unsubscribeGet, onRequestPost as unsubscribePost } from "./functions/api/unsubscribe.js";
 import { onRequestGet as calendarFeedGet, onRequestPost as calendarFeedPost, onRequestGetIcs as calendarIcsGet } from "./functions/api/calendar-feed.js";
 import { onRequestPost as accountDeletePost } from "./functions/api/account/delete.js";
@@ -203,6 +206,9 @@ const routes = {
   "/api/groups": { GET: groupsGet, POST: groupsPost },
   "/api/live-sessions": { GET: liveSessionsGet, POST: liveSessionsPost },
   "/api/badges": { GET: badgesGet, POST: badgesPost },
+  "/api/observers": { GET: observersGet, POST: observersPost },
+  "/api/course-package": { GET: coursePackageGet, POST: coursePackagePost },
+  "/api/embeds": { GET: embedsGet, POST: embedsPost },
   "/api/unsubscribe": { GET: unsubscribeGet, POST: unsubscribePost },
   "/api/calendar-feed": { GET: calendarFeedGet, POST: calendarFeedPost },
   "/api/calendar.ics": { GET: calendarIcsGet },
@@ -248,6 +254,9 @@ const RATE_LIMITS = {
   "/api/groups": { limit: 30, window: 60 },
   "/api/live-sessions": { limit: 60, window: 60 },  // teachers mark a whole roster
   "/api/badges": { limit: 30, window: 60 },
+  "/api/observers": { limit: 20, window: 60 },
+  "/api/course-package": { limit: 10, window: 60 },
+  "/api/embeds": { limit: 30, window: 60 },
   "/api/unsubscribe": { limit: 20, window: 60 },
   "/api/calendar-feed": { limit: 5, window: 60 },
   "/api/discussions": { limit: 15, window: 60 },
@@ -614,7 +623,8 @@ export default {
       "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: https:; media-src 'self' https:; font-src 'self'; " +
       "connect-src 'self' blob: https://api.banidb.com https://cloudflareinsights.com; " +
-      "frame-src https://www.youtube-nocookie.com https://www.youtube.com; " +
+      // H5P activities (C17, functions/api/embeds.js) are framed only on the course tools page.
+      `frame-src https://www.youtube-nocookie.com https://www.youtube.com${/^\/course-tools(\/|\.html)?$/.test(pathname) ? " https://*.h5p.com https://h5p.org" : ""}; ` +
       "worker-src 'self' blob:; " +
       "form-action 'self' https://formsubmit.co; base-uri 'self'; frame-ancestors 'none'");
     return new Response(assetResp.body, { status: assetResp.status, statusText: assetResp.statusText, headers: h });

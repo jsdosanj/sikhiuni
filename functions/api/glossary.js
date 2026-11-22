@@ -67,3 +67,5 @@ export async function onRequestPost({ request, env }) {
   await logEvent(env, user, "glossary_added", id, term, { targetType: "glossary" });
   return json({ ok: true, id });
 }
+
+export { ensure as ensureGlossary };

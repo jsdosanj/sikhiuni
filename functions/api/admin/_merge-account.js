@@ -50,7 +50,7 @@ const OWNED = [
   ["dm_messages", "sender_id"], ["dm_reports", "reporter_id"],
   ["lms_quiz_attempts", "user_id"], ["peer_reviews", "reviewer_id"],
   ["group_members", "user_id"], ["group_posts", "user_id"], ["attendance", "user_id"],
-  ["badge_awards", "user_id"],
+  ["badge_awards", "user_id"], ["observer_links", "learner_id"], ["observer_links", "observer_id"], ["observer_invites", "learner_id"],
 ];
 
 // (table, column) pairs where the column records WHO ACTED on a row rather than
@@ -65,7 +65,7 @@ const ACTOR = [
   ["assignment_extensions", "created_by"], ["course_accommodations", "created_by"],
   ["glossary_terms", "created_by"], ["polls", "created_by"],
   ["rubrics", "created_by"], ["submission_grading", "graded_by"],
-  ["course_messaging_settings", "updated_by"], ["course_mutes", "muted_by"], ["dm_reports", "resolved_by"],
+  ["course_messaging_settings", "updated_by"], ["course_imports", "imported_by"], ["course_embeds", "created_by"], ["course_mutes", "muted_by"], ["dm_reports", "resolved_by"],
   ["release_rules", "updated_by"], ["lms_quizzes", "created_by"], ["peer_review_settings", "updated_by"], ["course_groups", "created_by"], ["group_assignments", "set_by"], ["live_sessions", "created_by"], ["attendance", "marked_by"], ["badges", "created_by"], ["badge_awards", "awarded_by"],
 ];
 
@@ -100,6 +100,9 @@ export async function mergeAccount(env, source, target) {
     ).bind(source.id)));
     if (lost) skipped[table] = (skipped[table] || 0) + lost;
   }
+
+  // If one account observed the other, the merge would leave someone observing themselves.
+  await runIfTable(env.DB.prepare("DELETE FROM observer_links WHERE learner_id=observer_id"));
 
   for (const [table, col] of ACTOR) {
     await runIfTable(env.DB.prepare(`UPDATE ${table} SET ${col}=? WHERE ${col}=?`).bind(target.id, source.id));
