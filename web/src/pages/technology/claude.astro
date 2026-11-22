@@ -47,7 +47,7 @@ const courseUrl = (slug: string) => `${acad.url}${slug}`;
         <ul class="i-cl-list">
           {g.courses.map((c) => (
             <li>
-              <a href={courseUrl(c.slug)} target="_blank" rel="noopener">
+              <a href={c.href ?? courseUrl(c.slug)} target="_blank" rel="noopener">
                 <span class="i-cl-list-t">{c.title} <span class="i-mono i-cl-ext" aria-hidden="true">&nearr;</span></span>
                 <span class="i-cl-list-b i-prose">{c.blurb}</span>
               </a>

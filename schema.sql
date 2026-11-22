@@ -536,3 +536,16 @@ CREATE TABLE IF NOT EXISTS attendance (session_id TEXT NOT NULL, user_id TEXT NO
 CREATE TABLE IF NOT EXISTS badges (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, name TEXT NOT NULL, description TEXT, criteria TEXT NOT NULL, created_by TEXT, created_at INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_badges_course ON badges(course_id);
 CREATE TABLE IF NOT EXISTS badge_awards (id TEXT PRIMARY KEY, badge_id TEXT NOT NULL, user_id TEXT NOT NULL, awarded_at INTEGER NOT NULL, awarded_by TEXT, how TEXT NOT NULL, UNIQUE (badge_id, user_id));
+
+-- C13 observers (migrations/0029_observers.sql). Linked only by a learner-created invite code.
+CREATE TABLE IF NOT EXISTS observer_links (learner_id TEXT NOT NULL, observer_id TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (learner_id, observer_id));
+CREATE INDEX IF NOT EXISTS idx_observer_links_observer ON observer_links(observer_id);
+CREATE TABLE IF NOT EXISTS observer_invites (code_hash TEXT PRIMARY KEY, learner_id TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL);
+
+-- C16 course import register (migrations/0030_course_imports.sql): the rights basis of every import.
+CREATE TABLE IF NOT EXISTS course_imports (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, imported_by TEXT, imported_at INTEGER NOT NULL, source TEXT, basis TEXT NOT NULL, licence TEXT, attribution TEXT, permission_from TEXT, permission_ref TEXT, ai_created INTEGER NOT NULL DEFAULT 0, counts TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_course_imports_course ON course_imports(course_id);
+
+-- C17 H5P activities (migrations/0031_embeds.sql): links to the publisher's embed player, never rehosted.
+CREATE TABLE IF NOT EXISTS course_embeds (id TEXT PRIMARY KEY, course_id TEXT NOT NULL, kind TEXT NOT NULL, title TEXT NOT NULL, src TEXT NOT NULL, attribution TEXT, status TEXT NOT NULL DEFAULT 'draft', created_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_course_embeds_course ON course_embeds(course_id);

@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+// C13 observers: a learner lets a parent, guardian or mentor see their progress,
+// read-only, by giving them a single-use code; the observer redeems it here and sees a
+// summary (progress, assignment status and grades, quiz scores, badges, attendance).
+// Never submissions, feedback, journals or messages. functions/api/observers.js.
+// English in markup; Base's auto-translate covers <main> (same as notifications.astro).
+const field = 'mt-1.5 w-full border border-line bg-surface px-3 py-2 font-sans text-[15px] font-normal normal-case tracking-normal text-ink outline-none focus:border-navy';
+---
+<Base title="Observers, Sikhi University" description="Let a parent, guardian or mentor see your progress, or follow a learner's progress." ambient="none">
+  <section class="wrap max-w-3xl py-10 sm:py-12">
+    <p class="eyebrow flex items-center gap-2.5 text-saffron-deep"><span aria-hidden="true" class="inline-block h-px w-6 bg-current opacity-50"></span>Your account</p>
+    <h1 class="text-display-sm mt-3 text-navy">Observers</h1>
+    <p class="mt-2 text-muted">An observer, such as a parent, guardian or mentor, can see your course progress, assignment status and grades, quiz scores, badges and attendance. They cannot see your written work, your teacher's comments, your journal or your messages, and they cannot change anything.</p>
+    <div id="o-gate" class="mt-6" role="status" aria-live="polite"></div>
+    <div id="o-app" class="hidden">
+      <h2 class="mt-8 text-xl font-bold text-navy">People who can see your progress</h2>
+      <ul id="o-mine" class="mt-3 font-sans text-sm"></ul>
+      <div class="mt-4 rounded-xl2 border border-line bg-surface p-5 font-sans text-sm">
+        <p>To add someone, create a code and give it to them yourself. It works once and lasts 7 days. You can remove anyone at any time.</p>
+        <div id="o-invite" class="mt-3" aria-live="polite"></div>
+      </div>
+
+      <h2 class="mt-12 text-xl font-bold text-navy">Learners you follow</h2>
+      <ul id="o-following" class="mt-3 font-sans text-sm"></ul>
+      <form id="o-redeem" class="mt-4 flex flex-wrap items-end gap-3 font-sans text-sm">
+        <label class="min-w-0 flex-1 font-mono text-[10.5px] font-semibold uppercase tracking-[.16em] text-muted">Code from the learner<input id="o-code" required maxlength="16" autocomplete="off" placeholder="ABCDE-FGHJK" class={field} /></label>
+        <button class="btn btn-primary" type="submit">Follow</button>
+      </form>
+      <p id="o-redeem-out" class="mt-2 font-sans text-sm" aria-live="polite"></p>
+      <div id="o-view" class="mt-8"></div>
+    </div>
+  </section>
+  <script>
+    type Any = any;
+    const $ = (id: string) => document.getElementById(id) as HTMLElement;
+    const esc = (s: unknown) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const day = (ms: number | null) => (ms ? new Date(ms).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '');
+    const note = (html: string) => `<div class="rounded-xl border-l-4 border-saffron bg-surface p-4 font-sans text-[15px]">${html}</div>`;
+    async function api(path: string, body?: Any) {
+      const r = await fetch(path, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      return { ok: r.ok, status: r.status, d: await r.json().catch(() => ({})) };
+    }
+    const errText = (r: Any) => (r.status === 429 ? 'Too many tries in a minute. Please wait and try again.' : (r.d && r.d.error) || 'Something went wrong.');
+    let titles: Record<string, string> = {};
+    fetch('/data/index.json').then((r) => r.json()).then((d) => { for (const c of d.courses || []) titles[c.id] = c.title; }).catch(() => {});
+
+    async function view(id: string) {
+      const el = $('o-view'); el.textContent = 'Loading…';
+      const r = await api('/api/observers?learner=' + encodeURIComponent(id));
+      if (!r.ok) { el.innerHTML = note(esc(errText(r))); return; }
+      const courses = r.d.courses || [];
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">${esc(r.d.learner.name || 'Learner')}'s progress</h2>
+        ${courses.length ? courses.map((c: Any) => {
+          const att = c.attendance || {}; const attTxt = ['present', 'late', 'excused', 'absent'].filter((k) => att[k]).map((k) => `${att[k]} ${k}`).join(', ');
+          return `<section class="mt-4 rounded-xl2 border border-line bg-surface p-5 font-sans text-sm">
+          <h3 class="font-bold text-navy"><a class="underline" href="/course/${encodeURIComponent(c.course_id)}">${esc(titles[c.course_id] || c.course_id)}</a></h3>
+          <p class="mt-1 text-muted">${c.enrolled_at ? 'Joined ' + esc(day(c.enrolled_at)) + ' · ' : ''}${c.lessons_done} lesson${c.lessons_done === 1 ? '' : 's'} done · course test ${c.course_test_passed ? 'passed' : 'not passed yet'}${c.last_activity ? ' · last active ' + esc(day(c.last_activity)) : ''}</p>
+          ${c.assignments.length ? `<table class="mt-3 w-full"><thead><tr class="text-left text-muted"><th class="py-1">Assignment</th><th>Due</th><th>Status</th></tr></thead><tbody>${c.assignments.map((a: Any) => `<tr class="border-t border-line"><td class="py-1.5 pr-2">${esc(a.title)}</td><td>${esc(day(a.due_at)) || '–'}</td>
+            <td>${a.graded ? `Graded: ${esc(a.grade)} / ${esc(a.points)}` : a.submitted ? 'Handed in' : 'Not handed in'}${a.late ? ' (late)' : ''}</td></tr>`).join('')}</tbody></table>` : ''}
+          ${c.quizzes.length ? `<p class="mt-3"><strong>Quizzes:</strong> ${c.quizzes.map((q: Any) => `${esc(q.title)} best ${esc(q.best_pct)}%`).join('; ')}</p>` : ''}
+          ${c.badges.length ? `<p class="mt-1"><strong>Badges:</strong> ${c.badges.map((b: Any) => esc(b.name)).join(', ')}</p>` : ''}
+          ${attTxt ? `<p class="mt-1"><strong>Live sessions:</strong> ${esc(attTxt)}</p>` : ''}</section>`;
+        }).join('') : '<p class="mt-2 text-muted">Not enrolled in any course yet.</p>'}`;
+    }
+
+    async function load() {
+      const r = await api('/api/observers');
+      if (r.status === 401) { $('o-gate').innerHTML = note(`Please <a class="underline" href="/login?next=${encodeURIComponent('/observers')}">sign in</a> to manage observers.`); return; }
+      if (!r.ok) { $('o-gate').innerHTML = note(esc(errText(r))); return; }
+      $('o-app').classList.remove('hidden');
+      const { observers = [], observing = [], invite } = r.d;
+      $('o-mine').innerHTML = observers.map((o: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2"><span><strong>${esc(o.name || o.email)}</strong> <span class="text-muted">${esc(o.email || '')} · since ${esc(day(o.created_at))}</span></span>
+        <button class="ml-auto underline text-danger" data-remove="${esc(o.id)}">Remove</button></li>`).join('') || '<li class="text-muted">Nobody can see your progress.</li>';
+      $('o-invite').innerHTML = invite
+        ? `<p>A code is open until ${esc(day(invite.expires_at))}. <button class="btn" id="o-new">Make a new code</button> <button class="underline" id="o-cancel">Cancel it</button></p>`
+        : `<button class="btn btn-primary" id="o-new">Create a code</button>`;
+      $('o-following').innerHTML = observing.map((o: Any) => `<li class="flex flex-wrap items-center gap-3 border-b border-line py-2"><strong>${esc(o.name || 'Learner')}</strong>
+        <button class="btn ml-auto" data-view="${esc(o.id)}">View progress</button><button class="underline text-danger" data-leave="${esc(o.id)}">Stop following</button></li>`).join('') || '<li class="text-muted">You don\'t follow anyone.</li>';
+      $('o-new').addEventListener('click', async () => {
+        const s = await api('/api/observers', { action: 'invite' });
+        if (!s.ok) { $('o-invite').insertAdjacentHTML('beforeend', `<p class="mt-2 text-danger">${esc(errText(s))}</p>`); return; }
+        $('o-invite').innerHTML = `<p>Give this code to the person you choose. It is shown only once:</p><p class="mt-2 font-mono text-2xl font-bold tracking-widest text-navy" id="o-code-shown">${esc(s.d.code)}</p><p class="mt-1 text-muted">Works once, until ${esc(day(s.d.expires_at))}.</p>`;
+      });
+      const cancel = document.getElementById('o-cancel');
+      if (cancel) cancel.addEventListener('click', async () => { await api('/api/observers', { action: 'cancel-invite' }); load(); });
+      document.querySelectorAll<HTMLElement>('[data-remove]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Remove this observer? They will stop seeing your progress straight away.')) { await api('/api/observers', { action: 'remove', observerId: b.dataset.remove }); load(); } }));
+      document.querySelectorAll<HTMLElement>('[data-leave]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Stop following this learner? They would need to give you a new code.')) { await api('/api/observers', { action: 'leave', learnerId: b.dataset.leave }); $('o-view').innerHTML = ''; load(); } }));
+      document.querySelectorAll<HTMLElement>('[data-view]').forEach((b) => b.addEventListener('click', () => view(b.dataset.view || '')));
+    }
+    $('o-redeem').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const s = await api('/api/observers', { action: 'redeem', code: (document.getElementById('o-code') as HTMLInputElement).value });
+      $('o-redeem-out').textContent = s.ok ? 'Done. You can now see their progress.' : errText(s);
+      if (s.ok) { (document.getElementById('o-code') as HTMLInputElement).value = ''; await load(); view(s.d.learnerId); }
+    });
+    load();
+  </script>
+</Base>

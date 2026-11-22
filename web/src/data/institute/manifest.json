@@ -765,6 +765,38 @@
       "href": "https://www.skills.google/",
       "wave": "cloud",
       "blurb": "Google's own training platform — formerly Cloud Skills Boost, formerly Qwiklabs. Over a thousand courses whose labs hand you a live Google Cloud environment for the duration, not a simulation, and free skill badges for finishing them. The Google Cloud career certificates sit behind a monthly subscription; the labs and badges do not."
+    },
+    {
+      "id": "refactoring-guru",
+      "title": "Refactoring.Guru",
+      "kind": "booth",
+      "href": "https://refactoring.guru/",
+      "wave": "depth",
+      "blurb": "Alexander Shvets’ illustrated guide to refactoring, code smells, the classic design patterns and SOLID, with code examples in many languages. The articles are free to read; the eBook and refactoring course are sold separately."
+    },
+    {
+      "id": "roadmap-backend",
+      "title": "roadmap.sh · Backend",
+      "kind": "booth",
+      "href": "https://roadmap.sh/backend",
+      "wave": "depth",
+      "blurb": "A community-made, step-by-step map of what a backend developer learns and in what order: languages, databases, APIs, authentication, Git and projects. Use it to see where the Institute’s tracks fit and what to pick up next."
+    },
+    {
+      "id": "designed-to-scale",
+      "title": "Designed to Scale",
+      "kind": "booth",
+      "href": "https://designed-to-scale.vercel.app/",
+      "wave": "depth",
+      "blurb": "A free, interactive system-design course by Dilum Sanjaya: 40 animated lessons from how one request travels, through caching, sharding, queues and reliability, to designing a URL shortener, news feed and chat system. In 20 languages."
+    },
+    {
+      "id": "calling-bullshit",
+      "title": "Calling Bullshit",
+      "kind": "booth",
+      "href": "https://callingbullshit.org/",
+      "wave": "depth",
+      "blurb": "Carl Bergstrom and Jevin West’s course on thinking critically about the data, charts and models used as evidence in science and society. Lectures and readings are free for personal study; the book is published by Penguin Random House."
     }
   ],
   "resources": [
@@ -927,6 +959,26 @@
       "author": "Undercode Testing",
       "price": "free",
       "blurb": "A community roundup of free security and cloud certification courses. An aggregator, not a curriculum — worth a scan when you want a vendor course this Institute has not mapped. Their editorial, their list; we link and copy nothing."
+    },
+    {
+      "id": "deepmind-institute",
+      "title": "DeepMind Institute",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://institute.deepmind.com/",
+      "author": "Researchers from Google and Google DeepMind",
+      "price": "free",
+      "blurb": "Essays on artificial general intelligence and what it could mean, written by researchers from Google and Google DeepMind. The site notes the pieces are the authors’ own views, not Google’s. Reading for after the ethics and agent phases."
+    },
+    {
+      "id": "openadvisor",
+      "title": "OpenAdvisor",
+      "kind": "list",
+      "category": "lists",
+      "href": "https://openadvisor.net/",
+      "author": "Community-run",
+      "price": "free",
+      "blurb": "Anonymous, community-written reviews of graduate-school research advisors. Useful if the Institute has you thinking about a research master’s or PhD: read what former students say before you choose a lab."
     }
   ],
   "deferred": {

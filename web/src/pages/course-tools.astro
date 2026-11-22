@@ -26,10 +26,12 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="groups">Groups</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="live">Live sessions</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="badges">Badges</button>
+        <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="activities">Activities</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="journal">Journal</button>
         <button role="tab" class="ct-tab rounded-full border border-line px-4 py-1.5" data-tab="glossary">Glossary</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="analytics" id="ct-tab-analytics">Analytics</button>
         <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="settings" id="ct-tab-settings">Teacher settings</button>
+        <button role="tab" class="ct-tab hidden rounded-full border border-line px-4 py-1.5" data-tab="copy" id="ct-tab-copy">Copy &amp; import</button>
       </div>
 
       <div id="tab-dates" class="ct-panel mt-6" role="tabpanel"></div>
@@ -44,10 +46,12 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
         <Disclaimer variant="full" callout class="mt-3" />
         <div id="badge-body"></div>
       </div>
+      <div id="tab-activities" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-journal" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-glossary" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-analytics" class="ct-panel mt-6 hidden" role="tabpanel"></div>
       <div id="tab-settings" class="ct-panel mt-6 hidden" role="tabpanel"></div>
+      <div id="tab-copy" class="ct-panel mt-6 hidden" role="tabpanel"></div>
     </div>
   </section>
 
@@ -75,7 +79,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
     const loaders: Record<string, () => void> = {};
     const loaded = new Set<string>();
     function show(name: string) {
-      if (!loaders[name] || ((name === 'settings' || name === 'analytics') && !isTeacher)) name = 'dates';
+      if (!loaders[name] || ((name === 'settings' || name === 'analytics' || name === 'copy') && !isTeacher)) name = 'dates';
       tabs.forEach((t) => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', String(on)); t.classList.toggle('bg-navy', on); t.classList.toggle('text-white', on); });
       document.querySelectorAll('.ct-panel').forEach((p) => p.classList.toggle('hidden', p.id !== 'tab-' + name));
       if (!loaded.has(name)) { loaded.add(name); loaders[name](); }
@@ -650,6 +654,94 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       el.querySelectorAll<HTMLElement>('[data-bd-revoke]').forEach((b) => b.addEventListener('click', async () => { await api('/api/badges', { action: 'revoke', badgeId: b.dataset.bdRevoke, userId: b.dataset.u }); loaders.badges(); }));
     };
 
+    // ---------- C17 H5P activities ----------
+    loaders.activities = async () => {
+      const el = $('tab-activities'); el.textContent = 'Loading…';
+      const r = await api('/api/embeds?courseId=' + encodeURIComponent(courseId));
+      if (!r.ok) { el.innerHTML = note('warn', esc(errText(r))); return; }
+      const teacher = r.d.scope === 'teacher';
+      const frame = (e: Any) => `<div class="mt-3 overflow-hidden rounded-xl border border-line bg-white"><iframe src="${esc(e.src)}" title="${esc(e.title)}" loading="lazy" class="block h-[480px] w-full" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Interactive activities</h2>
+        <p class="mt-1 text-sm text-muted">Practice activities made with H5P. They are not graded and your answers are not saved by Sikhi University.</p>
+        ${teacher ? `<details class="mt-3 rounded-xl2 border border-line bg-surface p-5"><summary class="cursor-pointer font-bold text-navy">+ Add an H5P activity</summary>
+          <form id="em-new" class="mt-3 space-y-2 font-sans text-sm"><label class="${LABEL}">Title<input id="em-title" required maxlength="160" class="${FIELD}" /></label>
+          <label class="${LABEL}">Link on h5p.com or h5p.org<input id="em-url" required type="url" placeholder="https://yourname.h5p.com/content/123456" class="${FIELD}" /></label>
+          <label class="${LABEL}">Attribution (author and licence, if not your own)<input id="em-attr" maxlength="300" class="${FIELD}" /></label>
+          <label class="flex items-start gap-2"><input type="checkbox" id="em-rights" required class="mt-1" /> I have the right to use this activity: it is my own, openly licensed, or used with written permission.</label>
+          <p class="text-xs text-muted">New activities start as drafts. Check the content for accuracy before you open it to learners.</p>
+          <button class="btn btn-primary" type="submit">Add activity</button> <span id="em-out" aria-live="polite"></span></form></details>` : ''}
+        <div class="mt-4 space-y-8">${r.d.embeds.map((e: Any) => `<section><div class="flex flex-wrap items-center gap-3 font-sans text-sm"><h3 class="text-lg font-bold text-navy">${esc(e.title)}</h3>
+          ${teacher ? `<span class="pill bg-surface text-muted">${e.status === 'open' ? 'open to learners' : 'draft'}</span><button class="underline" data-em-status="${esc(e.id)}" data-to="${e.status === 'open' ? 'draft' : 'open'}">${e.status === 'open' ? 'Hide from learners' : 'Open to learners'}</button><button class="ml-auto underline text-danger" data-em-del="${esc(e.id)}">Delete</button>` : ''}</div>
+          ${frame(e)}${e.attribution ? `<p class="mt-1 font-sans text-xs text-muted">${esc(e.attribution)}</p>` : ''}</section>`).join('') || '<p class="text-muted">No activities yet.</p>'}</div>`;
+      if (!teacher) return;
+      $('em-new').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const v = (id: string) => document.getElementById(id) as HTMLInputElement;
+        const s = await api('/api/embeds', { action: 'create', courseId, title: v('em-title').value, url: v('em-url').value, attribution: v('em-attr').value, rightsConfirmed: v('em-rights').checked });
+        if (!s.ok) { $('em-out').textContent = errText(s); return; }
+        loaders.activities();
+      });
+      el.querySelectorAll<HTMLElement>('[data-em-status]').forEach((b) => b.addEventListener('click', async () => { const s = await api('/api/embeds', { action: 'status', id: b.dataset.emStatus, status: b.dataset.to }); if (!s.ok) alert(errText(s)); loaders.activities(); }));
+      el.querySelectorAll<HTMLElement>('[data-em-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this activity from the course? The H5P content itself is not affected.')) { await api('/api/embeds', { action: 'delete', id: b.dataset.emDel }); loaders.activities(); } }));
+    };
+
+    // ---------- C16 copy / import-export ----------
+    const LICENCES: Record<string, string> = { 'CC-BY-4.0': 'CC BY 4.0', 'CC-BY-SA-4.0': 'CC BY-SA 4.0', 'CC-BY-NC-4.0': 'CC BY-NC 4.0', 'CC-BY-NC-SA-4.0': 'CC BY-NC-SA 4.0', 'CC0-1.0': 'CC0 (public domain)' };
+    const NOUNS: Record<string, [string, string]> = { assignments: ['assignment', 'assignments'], rubrics: ['rubric', 'rubrics'], quizzes: ['quiz', 'quizzes'], polls: ['poll or survey', 'polls and surveys'], glossary: ['glossary term', 'glossary terms'] };
+    const countText = (c: Any) => Object.entries(c || {}).filter(([, n]) => n).map(([k, n]) => `${n} ${(NOUNS[k] || [k, k])[n === 1 ? 0 : 1]}`).join(', ') || 'nothing';
+    loaders.copy = async () => {
+      const el = $('tab-copy');
+      el.innerHTML = `<h2 class="text-xl font-bold text-navy">Copy this course's tools</h2>
+        <p class="mt-1 text-sm text-muted">Download this course's assignments (with late policies and rubrics), quizzes, polls and surveys, and glossary as one file, then import it into another course you teach. Lessons are not included: they go through Sikhi Studio and scholar review. No learner data is ever included. The file contains quiz answers, so keep it private.</p>
+        <a class="btn mt-3" id="cp-export" href="/api/course-package?courseId=${encodeURIComponent(courseId)}" download>Download course package</a>
+        <h2 class="mt-10 text-xl font-bold text-navy">Import into this course</h2>
+        <p class="mt-1 text-sm text-muted">Imported assignments, quizzes and polls arrive as drafts. Check each one for accuracy before opening it to learners.</p>
+        <form id="cp-form" class="mt-3 space-y-3 rounded-xl2 border border-line bg-surface p-5 font-sans text-sm">
+          <label class="${LABEL}">Course package (.json)<input id="cp-file" type="file" accept="application/json,.json" required class="${FIELD}" /></label>
+          <fieldset><legend class="font-semibold">What rights do you have to this material?</legend>
+            <label class="mt-1 flex items-center gap-2"><input type="radio" name="cp-basis" value="own" checked /> It is Sikhi University's or my own material</label>
+            <label class="mt-1 flex items-center gap-2"><input type="radio" name="cp-basis" value="cc" /> It is under a Creative Commons licence</label>
+            <label class="mt-1 flex items-center gap-2"><input type="radio" name="cp-basis" value="permission" /> I have written permission from the owner</label></fieldset>
+          <div id="cp-cc" class="hidden space-y-2"><label class="${LABEL}">Licence<select id="cp-licence" class="${FIELD}">${Object.entries(LICENCES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+            <label class="${LABEL}">Attribution (author and source)<input id="cp-attr" maxlength="300" class="${FIELD}" /></label>
+            <p class="text-xs text-muted">The attribution is added to every imported item. No-derivatives (ND) material can't be imported.</p></div>
+          <div id="cp-perm" class="hidden space-y-2"><label class="${LABEL}">Permission from<input id="cp-from" maxlength="200" class="${FIELD}" /></label>
+            <label class="${LABEL}">Where it is recorded (for example the email date and subject)<input id="cp-ref" maxlength="300" class="${FIELD}" /></label></div>
+          <div class="flex flex-wrap gap-2"><button class="btn" type="submit">Check package</button><button class="btn btn-primary hidden" type="button" id="cp-go">Import</button></div>
+          <div id="cp-out" aria-live="polite"></div></form>
+        <h2 class="mt-10 text-xl font-bold text-navy">Imports into this course</h2><div id="cp-log" class="mt-2 font-sans text-sm"></div>`;
+      const basis = () => (el.querySelector('input[name="cp-basis"]:checked') as HTMLInputElement).value;
+      el.querySelectorAll('input[name="cp-basis"]').forEach((r) => r.addEventListener('change', () => { $('cp-cc').classList.toggle('hidden', basis() !== 'cc'); $('cp-perm').classList.toggle('hidden', basis() !== 'permission'); $('cp-go').classList.add('hidden'); }));
+      const v = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
+      let pkgData: Any = null;
+      const send = async (confirm: boolean) => api('/api/course-package', { courseId, package: pkgData, confirm, rights: { basis: basis(), licence: v('cp-licence'), attribution: v('cp-attr'), permissionFrom: v('cp-from'), permissionRef: v('cp-ref') } });
+      $('cp-form').addEventListener('submit', async (e) => {
+        e.preventDefault(); $('cp-go').classList.add('hidden');
+        const f = (document.getElementById('cp-file') as HTMLInputElement).files![0];
+        try { pkgData = JSON.parse(await f.text()); } catch { $('cp-out').innerHTML = note('warn', 'That file isn\'t a course package.'); return; }
+        const r = await send(false);
+        if (!r.ok) { $('cp-out').innerHTML = note('warn', esc(errText(r))); return; }
+        const problems = r.d.problems || [], rightsErr = r.d.rights && r.d.rights.error;
+        $('cp-out').innerHTML = note(problems.length || rightsErr ? 'warn' : 'ok', `<p>This package has ${esc(countText(r.d.counts))}${r.d.source ? ` (from ${esc(r.d.source.course_id)})` : ''}.</p>
+          ${r.d.aiCreated ? '<p class="mt-1">It is marked as made by AI: every item will be labelled "Created by AI." and must be checked by a scholar before learners rely on it.</p>' : ''}
+          ${problems.length ? `<ul class="mt-2 list-disc pl-5">${problems.map((x: string) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${rightsErr ? `<p class="mt-2">${esc(rightsErr)}</p>` : ''}`);
+        if (!problems.length && !rightsErr) $('cp-go').classList.remove('hidden');
+      });
+      $('cp-go').addEventListener('click', async () => {
+        const r = await send(true);
+        $('cp-go').classList.add('hidden');
+        $('cp-out').innerHTML = r.ok ? note('ok', `Imported ${esc(countText(r.d.counts))} as drafts. Open them from the Quizzes and Polls tabs here, and from your dashboard for assignments, after checking them.`) : note('warn', esc(errText(r)));
+        renderImportLog();
+      });
+      renderImportLog();
+    };
+    async function renderImportLog() {
+      const r = await api('/api/course-package?log=1&courseId=' + encodeURIComponent(courseId));
+      const box = document.getElementById('cp-log'); if (!box) return;
+      if (!r.ok) { box.textContent = errText(r); return; }
+      box.innerHTML = (r.d.imports || []).map((i: Any) => `<p class="border-b border-line py-2">${esc(new Date(i.imported_at).toLocaleDateString())} · ${esc(i.by_name || '')} · ${esc(countText(i.counts))}${i.source ? ' from ' + esc(i.source) : ''} · ${i.basis === 'cc' ? esc(LICENCES[i.licence] || i.licence) + (i.attribution ? ', ' + esc(i.attribution) : '') : i.basis === 'permission' ? 'permission from ' + esc(i.permission_from) + ' (' + esc(i.permission_ref) + ')' : 'own material'}${i.ai_created ? ' · Created by AI' : ''}</p>`).join('') || '<p class="text-muted">None yet.</p>';
+    }
+
     // ---------- C10 journal ----------
     loaders.journal = async () => {
       const el = $('tab-journal');
@@ -891,6 +983,7 @@ const label = 'block font-mono text-[10.5px] font-semibold uppercase tracking-[.
       isTeacher = r.d.scope === 'teacher';
       $('ct-tab-settings').classList.toggle('hidden', !isTeacher);
       $('ct-tab-analytics').classList.toggle('hidden', !isTeacher);
+      $('ct-tab-copy').classList.toggle('hidden', !isTeacher);
       $('ct-app').classList.remove('hidden');
       show(location.hash.slice(1) || 'dates');
     })();

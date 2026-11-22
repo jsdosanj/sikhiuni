@@ -86,6 +86,8 @@ export async function onRequestPost({ request, env }) {
   await wipe("DELETE FROM group_posts WHERE user_id=?");
   await wipe("DELETE FROM attendance WHERE user_id=?");
   await wipe("DELETE FROM badge_awards WHERE user_id=?");
+  await wipe("DELETE FROM observer_links WHERE learner_id=?1 OR observer_id=?1");
+  await wipe("DELETE FROM observer_invites WHERE learner_id=?");
   await wipe("DELETE FROM user_flags WHERE user_id=?");
   await wipe("DELETE FROM teacher_profiles WHERE user_id=?");
   await wipe("DELETE FROM professor_claims WHERE user_id=?");

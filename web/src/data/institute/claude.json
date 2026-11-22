@@ -69,6 +69,12 @@
         "courses": [
           { "title": "Claude Certified Architect — Foundations", "slug": "claude-certified-architect-foundations-certification", "blurb": "Anthropic's foundations-level certification." }
         ]
+      },
+      {
+        "label": "For partners",
+        "courses": [
+          { "title": "Claude Forward Deployed Engineer path", "href": "https://anthropic-partners.skilljar.com/path/claude-fde", "blurb": "A 10-course path on Anthropic's partner learning portal, from a customer's first use case to a working pilot. Hosted for the Claude Partner Network, so it may need a partner sign-in." }
+        ]
       }
     ]
   },

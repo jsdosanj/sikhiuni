@@ -75,6 +75,8 @@ export async function onRequestGet({ request, env }) {
     group_posts: await all("SELECT group_id, body, created_at FROM group_posts WHERE user_id=?", user.id),
     attendance: await all("SELECT session_id, status, marked_at FROM attendance WHERE user_id=?", user.id),
     badges: await all("SELECT w.id, b.name, b.course_id, w.awarded_at, w.how FROM badge_awards w JOIN badges b ON b.id=w.badge_id WHERE w.user_id=?", user.id),
+    my_observers: await all("SELECT observer_id, created_at FROM observer_links WHERE learner_id=?", user.id),
+    observing: await all("SELECT learner_id, created_at FROM observer_links WHERE observer_id=?", user.id),
     trusted_devices: await all("SELECT created_at, expires_at, last_used_at, ua FROM mfa_trusted_devices WHERE user_id=?", user.id),
   };
 
