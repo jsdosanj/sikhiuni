@@ -29,25 +29,44 @@ language:
 - da
 - ko
 - ms
+multilinguality:
+- multilingual
+size_categories:
+- 10K<n<100K
 tags:
 - sikh
+- sikhism
+- sikhi
 - gurbani
-- religion
+- guru-granth-sahib
+- dasam-granth
+- sarbloh-granth
+- gurmukhi
+- shahmukhi
 - punjabi
-- research
-- librarian
-- text-corpus
-- multilingual
+- punjabi-literature
+- sikh-history
+- sikh-studies
+- religious-studies
+- religion
+- theology
 - scripture
-- historical
-- philosophical
-- spiritual
+- exegesis
+- teeka
+- katha
+- nitnem
+- mahan-kosh
 - dictionary
 - encyclopedia
-- lexicon
-- mahan-kosh
+- digital-humanities
+- digital-library
+- historical
+- ocr
+- text-corpus
+- multilingual
 - translation
-pretty_name: The Universal Sikh Research Library (1B+ Words)
+- research
+pretty_name: "SikhLibrary: The World's Largest Sikh Text Dataset (1B+ Words of Gurbani, History & Scholarship)"
 extra_gated_heading: "Request access to SikhLibrary"
 extra_gated_description: "Access is free, for people, and approved by hand. Read the Access & AI policy in the dataset card before you ask."
 extra_gated_prompt: >-
@@ -77,54 +96,65 @@ extra_gated_button_content: "Request access"
 <div align="center">
 
 # 🪯 SikhLibrary
-### A Universal, Comprehensive Research Corpus for the Sikh Community
+
+### The world's largest Sikh text dataset on Hugging Face
+
+**Over 1 billion words of Gurbani, teekas, Sikh history and scholarship, in 26 languages, from 3,600+ works.**
 
 *ਵਾਹਿਗੁਰੂ ਜੀ ਕਾ ਖਾਲਸਾ ਵਾਹਿਗੁਰੂ ਜੀ ਕੀ ਫ਼ਤਿਹ ਜੀ*
 
-[![License: CC BY-NC-ND 4.0 compilation; third-party works reserved](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0%20(compilation)-lightgrey.svg)](LICENSE.md)
-[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-yellow)](https://huggingface.co/datasets/jsdosanj/SikhLibrary)
-![Words](https://img.shields.io/badge/Words-1.07B%2B-success)
-![Files](https://img.shields.io/badge/Files-28%2C165-blue)
-![Size](https://img.shields.io/badge/Size-25.6%20GB-blue)
-![Languages](https://img.shields.io/badge/Languages-26-blue)
-![Sources](https://img.shields.io/badge/Named%20Author%20Archives-86-blueviolet)
-![Version](https://img.shields.io/badge/Version-3.4-informational)
-![Access](https://img.shields.io/badge/Access-Gated%2C%20manual%20approval-orange)
-![Status](https://img.shields.io/badge/Largest%20Known-Sikh%20Text%20Corpus-critical)
+[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-SikhLibrary-yellow)](https://huggingface.co/datasets/jsdosanj/SikhLibrary)
+[![Version](https://img.shields.io/badge/Version-3.4.1-informational)](#-version-history)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0%20%2B%20source%20licenses-lightgrey)](LICENSE.md)
+[![Access](https://img.shields.io/badge/Access-Free%2C%20approved%20by%20hand-orange)](#-access--ai-policy)
 
-**Production home:** [sikhi.io](https://sikhi.io) &nbsp;·&nbsp; **Planned backend for:** [sikharchive.net](https://sikharchive.net)
+[![Words](https://img.shields.io/badge/Words-1.07%20billion-success)](#-at-a-glance)
+[![Works](https://img.shields.io/badge/Works-3%2C616%2B-success)](#-at-a-glance)
+[![Files](https://img.shields.io/badge/Files-28%2C165-blue)](#-at-a-glance)
+[![Size](https://img.shields.io/badge/Size-25.6%20GB-blue)](#-at-a-glance)
+[![Languages](https://img.shields.io/badge/Languages-26-blue)](#-at-a-glance)
+[![Collections](https://img.shields.io/badge/Collections-115-blueviolet)](#full-index-of-the-115-top-level-collections)
+
+[![Gurbani lines](https://img.shields.io/badge/Gurbani%20lines-190%2C238-8A2BE2)](#-gurbani-databases-for-apps)
+[![Mahan Kosh](https://img.shields.io/badge/Mahan%20Kosh-64%2C218%20entries-8A2BE2)](#-whats-inside)
+[![sikhi.io](https://img.shields.io/badge/Read%20online-sikhi.io-FF9933)](https://sikhi.io)
+[![Cite](https://img.shields.io/badge/Cite-BibTeX-informational)](#-how-to-cite)
+
+[**Request access**](https://huggingface.co/datasets/jsdosanj/SikhLibrary) · [**License**](LICENSE.md) · [**How to load**](#-access--loading) · [**Cite**](#-how-to-cite) · [**Remove a work you own**](#-rights-holders-notice--takedown)
 
 </div>
 
 ---
 
-## 📖 Overview
+## 📖 About SikhLibrary
 
-> **A gathering of the Panth's khajana (ਖ਼ਜ਼ਾਨਾ), not a new owner of it.** SikhLibrary brings together texts, databases and translations made and kept by many Sikh organizations, scholars and digitizers. Each of them keeps its own rights and its own license. **If you use data from an organization through this dataset, you are bound by that organization's license or terms**, listed in [License, Copyright & Attribution](#-license-copyright--attribution) and in [`LICENSE.md`](LICENSE.md), as well as by this dataset's own terms. Any organization can ask for the removal of texts it owns by writing to **`akaal@sikhi.io`**.
+**SikhLibrary** is the largest collection of Sikh texts on Hugging Face: Sikh scripture (Gurbani), exegesis (teekas and steeks), history, rehatnamas, dictionaries and modern scholarship, scanned, transcribed and organized into one machine-readable research library. It brings together Sri Guru Granth Sahib Ji, Sri Dasam Granth Sahib and Sri Sarbloh Granth Sahib with their translations and commentaries; Bhai Kahan Singh Nabha's *Mahan Kosh*; the collected works of 86 Sikh scholars, historians and saints; colonial-era chronicles; and hundreds of theses and academic studies of Sikhism.
 
-**SikhLibrary** centralizes Sikh scripture, exegesis, history, and scholarship — scanned, OCR'd, and machine-readable — into a single, standardized research corpus. It exists so that Sikh scholars, students, and researchers no longer have to hunt across dozens of scattered archives, out-of-print books, and regional digital libraries to find primary source material.
+It was built so that Sikh scholars, students, educators, kathavachaks and Gurbani-app developers can find primary sources in one place, instead of searching across scattered archives, out-of-print books and regional digital libraries.
 
-This is a **living, actively-maintained dataset**. Every release is documented in the [Version History](#-version-history) below, and every identifiable source and copyright holder in the corpus is disclosed in [License, Copyright & Attribution](#-license-copyright--attribution) and [`LICENSE.md`](LICENSE.md) — not just the top-level license, but the actual publishers, digitizers, and rights-holders found printed inside the scanned works themselves. Rights-holders can have a work removed: see [Notice & Takedown](#-rights-holders-notice--takedown).
+> **A gathering of the Panth's khajana (ਖ਼ਜ਼ਾਨਾ).** SikhLibrary brings together texts, databases and translations made and kept by many Sikh organizations, scholars and digitizers. Each of them keeps its own rights and its own license. **If you use data from an organization through this dataset, you are bound by that organization's license or terms**, listed in [License, Copyright & Attribution](#-license-copyright--attribution) and in [`LICENSE.md`](LICENSE.md), as well as by this dataset's own terms. Any organization can ask for the removal of texts it owns by writing to **`akaal@sikhi.io`**.
 
-If you are a researcher, educator, or developer working on Sikh studies or Gurbani apps, this dataset is built for you. Access is approved by hand, and AI training, AI agents and scraping are not permitted without written permission: see [Access & AI Policy](#-access--ai-policy).
+**Who it is for:** researchers in Sikh studies, religious studies and South Asian history; students and teachers of Gurbani and Punjabi; Gurbani and Sikh-education app developers; and the sangat. Access is free and approved by hand; AI training, AI agents and scraping require written permission (see [Access & AI Policy](#-access--ai-policy)).
 
-### Table of Contents
+### Contents
 - [At a Glance](#-at-a-glance)
-- [Why This Is the Largest Sikh Text Dataset](#-why-this-is-the-largest-sikh-text-dataset)
-- [What This Dataset Provides](#-what-this-dataset-provides)
+- [The Largest Sikh Text Dataset on Hugging Face](#-the-largest-sikh-text-dataset-on-hugging-face)
+- [What's Inside](#-whats-inside)
 - [Directory Structure & Statistics](#-directory-structure--statistics)
-- [Version History](#-version-history)
+- [Gurbani Databases for Apps](#-gurbani-databases-for-apps)
+- [The sikhi.io Database Export](#-the-sikhiio-database-export)
+- [Access & Loading](#-access--loading)
 - [Access & AI Policy](#-access--ai-policy)
 - [License, Copyright & Attribution](#-license-copyright--attribution)
 - [Rights-holders: Notice & Takedown](#-rights-holders-notice--takedown)
-- [How to Load](#-how-to-load)
-- [Using SikhiDB in Gurbani Apps](#-using-sikhidb-in-gurbani-apps)
 - [Data Quality & Known Limitations](#-data-quality--known-limitations)
-- [Future Collaboration & Contributions](#-future-collaboration--contributions)
-- [Acknowledgements & Gratitude](#-acknowledgements--gratitude)
-- [Companion / Upstream Repositories](#-companion--upstream-repositories)
+- [Version History](#-version-history)
+- [FAQ](#-faq)
+- [Contributing](#-contributing)
+- [Acknowledgements](#-acknowledgements)
+- [Related Resources](#-related-resources)
 - [How to Cite](#-how-to-cite)
-- [Contact & Maintainers](#-contact--maintainers)
+- [Maintainers & Contact](#-maintainers--contact)
 
 ---
 
@@ -132,35 +162,29 @@ If you are a researcher, educator, or developer working on Sikh studies or Gurba
 
 | | |
 | :--- | :--- |
-| **Total word count** | ~1.07 billion (independently re-verified, Sept 2026 — see [methodology](#-data-quality--known-limitations); not yet re-measured after the v3.2–v3.3 additions) |
-| **Total size** | ~25.6 GB (November 2026) |
-| **Total files** | 28,165 (November 2026) |
-| **Distinct works** | 3,616+ individually catalogued books, manuscripts, and tracts |
-| **Top-level collections** | 115 (86 named author/scholar archives + 29 thematic/scriptural collections) |
-| **Languages** | 26 declared (`pa`, `en`, `hi`, `ur`, `fa`, `es`, `fr`, `de`, `pt`, `it`, `zh`, `ru`, `bn`, `gu`, `ta`, `te`, `ja`, `pl`, `nl`, `sv`, `ro`, `cs`, `hu`, `da`, `ko`, `ms`), plus Gurmukhi- and Shahmukhi-script editions inside the Mahan Kosh sub-corpus |
-| **Primary formats** | Clean UTF-8 `.txt`, structured OCR `JSON`, `JSONL` |
-| **License** | The maintainers' compilation and contributions: [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/); Mahan Kosh packaging: CC BY 4.0; **every third-party work keeps its owner's rights** — see [`LICENSE.md`](LICENSE.md) |
-| **Access** | Gated, free, **approved by hand**; no AI training, AI agents or scraping (see [Access & AI Policy](#-access--ai-policy)) |
-| **Gurbani database** | **SikhiDB** — BaniDB-compatible SQLite at `Gurbani/GursevakDB/` (see [Using SikhiDB in Gurbani Apps](#-using-sikhidb-in-gurbani-apps)); the **Sikhi Gurbani Library** — the Sikhi app's own database, with its search indexes — at `Gurbani/SikhiLibrary/` (see [The Sikhi Gurbani Library](#the-sikhi-gurbani-library-gurbanisikhilibrary)) |
-| **Current version** | 3.4.1 (November 23, 2026) |
+| **Words** | ~1.07 billion (measured September 2026; see [method](#-data-quality--known-limitations)) |
+| **Size** | ~25.6 GB |
+| **Files** | 28,165 |
+| **Distinct works** | 3,616+ books, manuscripts and tracts |
+| **Collections** | 115: 86 named author and scholar archives, 29 thematic and scriptural collections |
+| **Languages** | 26 (`pa`, `en`, `hi`, `ur`, `fa`, `es`, `fr`, `de`, `pt`, `it`, `zh`, `ru`, `bn`, `gu`, `ta`, `te`, `ja`, `pl`, `nl`, `sv`, `ro`, `cs`, `hu`, `da`, `ko`, `ms`), plus Gurmukhi- and Shahmukhi-script editions in the Mahan Kosh |
+| **Formats** | UTF-8 `.txt`, structured OCR `JSON`, `JSONL`, Parquet, SQLite |
+| **Gurbani databases** | **SikhiDB** (BaniDB-compatible SQLite, 190,238 lines) and the **Sikhi Gurbani Library** (the Sikhi app's database, 179,414 lines incl. the complete Sri Sarbloh Granth Sahib); see [Gurbani Databases for Apps](#-gurbani-databases-for-apps) |
+| **License** | Maintainers' compilation: [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/); each organization's data under its own license; see [`LICENSE.md`](LICENSE.md) |
+| **Access** | Free, gated, approved by hand; no AI training, AI agents or scraping without written permission |
+| **Version** | 3.4.1 (November 23, 2026) |
 
 ---
 
-## 🏆 Why This Is the Largest Sikh Text Dataset
+## 🏆 The Largest Sikh Text Dataset on Hugging Face
 
-As of September 2026, a systematic search of Hugging Face's public and gated datasets for `sikh`, `gurbani`, and `punjabi` found no other open text corpus at this scale dedicated to the Sikh community. Every comparable result was either:
+With **~1.07 billion words, 3,616+ works, 115 collections and 26 languages**, SikhLibrary is the largest Sikh text dataset on Hugging Face. Other Sikh and Gurbani datasets on the Hub are speech corpora of kirtan or sehaj paath, question-answering or classification sets of a few hundred to a few thousand rows, or extracts of a single work such as one teeka or the Mahan Kosh. SikhLibrary is the only one that brings scripture, exegesis, history, reference works and scholarship together in one library.
 
-- an audio/ASR corpus (kirtan or sehaj-path transcription), not a text-scholarship corpus;
-- a question-answering or classification set of a few hundred to a few thousand rows; or
-- a single-work extract (e.g., a Mahan Kosh-only corpus).
-
-SikhLibrary is, to our knowledge, the only Sikh-focused corpus spanning **~1.07 billion words, 3,616+ distinct works, 115 author/source collections, and 26+ languages** in one place — larger by orders of magnitude than anything else tagged for this community on the Hub.
-
-**We are not claiming this lightly, and we want to be proven wrong if we are:** if you know of a larger Sikh-community text corpus, please open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) — we will verify it and correct this claim.
+If you know of a larger Sikh text dataset, tell us in the [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) and we will update this page.
 
 ---
 
-## 📚 What This Dataset Provides
+## 📚 What's Inside
 
 - **Primary scripture** — Sri Guru Granth Sahib, Sri Dasam Granth, Sri Sarbloh Granth, and Nitnem banis, including multilingual translations.
 - **Exegesis & commentary (Teekas/Steeks)** — word-by-word meanings and classical commentaries, including Guru Granth Sahib Darpan (Prof. Sahib Singh), the Faridkot Wala Teeka, and dozens of others.
@@ -170,7 +194,7 @@ SikhLibrary is, to our knowledge, the only Sikh-focused corpus spanning **~1.07 
 - **Reference & discourse corpora** — a combined Punjabi dictionary (87,636 entries), katha transcripts (1,179 recordings), a katha-terms glossary, sakhi stories, and detailed per-Guru biographical pages.
 - **Academic literature** — theses, dissertations, and peer-reviewed monographs on Sikh history, theology, and identity.
 
-Every item above is traceable to a real top-level folder in the repository — see the next section.
+Each item corresponds to a top-level folder, listed in the next section.
 
 ---
 
@@ -207,7 +231,7 @@ The repository is organized **folder-per-collection**, with most individual work
 | 14 | Gurbani | 275 |
 | 15 | Granths | 264 |
 
-*(As of the September 2026 reorganization described in [Version History](#-version-history) — the former catch-all "General" folder no longer exists; its 730 works were redistributed above by actual content.)*
+*Every work is filed under its author or, where the author is unknown or the work is a compilation, under the thematic collection that fits its content.*
 
 ### Full index of the 115 top-level collections
 
@@ -227,172 +251,106 @@ Aad Dasam Sarabloh Gutka Sahibs · Aad Dasam Sarabloh Saroop te Bhaag · Aad Das
 
 ---
 
-## 🕐 Version History
+## 📱 Gurbani Databases for Apps
 
-| Version | Date | Files | Δ Files | What changed |
-| :--- | :--- | ---: | ---: | :--- |
-| **2.0** — *Initial Public Release* | 2026-03-30 | 626 | — | First publication on Hugging Face. Note: the project's own first release was already versioned "2.0" — no separate v1.0 was ever published here. Five core folders (Gurbani, Steeks, Granths, Literature, Research); 758,354,306 words self-reported at the time. Licensed **CC BY 4.0** at launch. |
-| **2.0** — *License tightened* | 2026-04-12 | — | — | License changed from CC BY 4.0 to the current, more conservative **CC BY-NC-ND 4.0**, less than two weeks after launch. |
-| **2.0** — *The Grand Literary Expansion* | 2026-05-30 | 5,629 | +5,003 | The largest single restructuring to date: transformed the repository from a small core-scripture database into a library of individual named-author archives, using an OCR/extraction pipeline built on OpenRouter (Gemini 1.5 Flash-Lite, Gemma 4 31B). |
-| **2.1** — *Multilingual Scripture & Reference Expansion* | 2026-08-28 | 9,899 | +4,270 | Back-filled ~1.2 GB from the sikhi.io/sikharchive.net production database: Dasam Granth in 12 languages, Sarbloh Granth in 12 languages, Faridkot Wala Teeka in 7 languages, full-text OCR for Sri Gur Pratap Suraj Granth (11,180 pages) and eight other steeks/granths, ~45 additional colonial-era and historical books, plus reference/discourse corpora (Punjabi dictionary, katha transcripts, sakhi stories, per-Guru biographies). |
-| **3.0** — *The Mahan Kosh Multilingual Expansion* | 2026-09-03 | 9,977 | +78 | Mirrored the complete [redroyals/mahan-kosh-multilingual](https://github.com/redroyals/mahan-kosh-multilingual) project (Sikhi.io): Bhai Kahan Singh Nabha's *Mahan Kosh* as structured JSON, 64,218 entries × 28 language/script editions, ~723 MB, released in honour of Guru Tegh Bahadur Ji's 350th year of sacrifice. |
-| **3.1** — *The Production Library Sync & Copyright Audit* | 2026-09-10 → 2026-09-16 | 23,366 | +13,389 | A 66-batch automated sync from the sikhi.io production database added 2,475 new works. Followed by a full documentation overhaul: independently re-verified word count (~1.07B, replacing the long-stale self-reported figure), a corpus-wide structural + content-level copyright audit, and a complete named-author/source attribution index. |
-| **3.1** — *General Folder Reorganization* | 2026-09-16 | 23,366 | 0 (moves only) | The generic catch-all "General" folder (4,380 files / 730 works) was eliminated. Each work's front matter was actually read by an LLM classification pass (not filename matching, which was tried first and rejected — see below) and routed into an existing named-author folder (138 works, byline-confirmed) or the best-fitting existing thematic folder (592 works); 1 genuinely indeterminate fragment went to "Unknown Authors." Executed as 4,380 server-side file moves; 3 title collisions with pre-existing content were disambiguated rather than overwritten. Also fixed 3 pre-existing folder-name inconsistencies (two trailing-space duplicates, one misspelling: "Maucliffe" → "Macauliffe") discovered during the move, merging ~400 further files into their correct canonical folder. Top-level collection count: 116 → 115. |
-| **3.1.1** — *Maintainer uploads* | 2026-09-19 → 2026-10-02 | 23,371 | +5 | Individual files added by hand: *P10 Fatehnama* (`Unknown Authors/` and `Additional Granths attributed to Guru Sahib/`), *Mata Sahib Deva ji* pustak by Giani Surjit Singh Mehron (repository root), and two PDFs not about Sikhi: `Spirituality/CIA quantum healing codes.pdf` and `Age Of Spiritual Machines - Ray Kurzweil.pdf` (repository root). |
-| **3.2** — *Production backup & database exports* | 2026-10-13 → 2026-10-29 | 28,131 | +4,760 | **`sikhi-io-library/`** (2026-10-13, 4,564 files): a backup of the public library pages of sikhi.io, 4,561 books as per-book JSONL.gz, with a manifest and PDF registries. **`sikhi-io-d1/`** (2026-10-29, 112 files): 55 public content tables (6,080,005 rows) from the Cloudflare D1 databases behind sikhi.io, as Parquet + JSONL.gz; no user, account or analytics data (see the section at the end of this card). **`mahan-kosh-multilingual/`** (2026-10-29, 84 files): a newer snapshot of the Mahan Kosh project (GitHub @ `b298c32`: 64,218 entries, Gurmukhi body for 60,196 = 93.74%, EN + HI + 23 machine-translated languages, CC BY 4.0) beside the v3.0 copy in `Granths/`. |
-| **3.3** — *SikhiDB: GursevakDB, Randhawa commentary & Sundar Gutka* | 2026-11-02 → 2026-11-11 | 28,159 | +28 | **Faridkot Wala Teeka, English, line-mapped** (2026-11-02, audited 2026-10-31) at `mahan-kosh-multilingual/data/reading-aids/faridkot/en/line-mapped/`. **SikhiDB** at `Gurbani/GursevakDB/` (v1 2026-11-02, v2 2026-11-11): one BaniDB-format SQLite (801 MB, 190,238 lines). Its Guru Granth Sahib and Dasam Granth are GursevakDB's text, pagination and vishraams; it also carries the **Jatha Randhawa Gurbani Arth Bhandar** commentary (49,344 entries on 59,008 SGGS lines), the **Damdami Taksal Sundar Gutka** banis (87, incl. Taksali, Hazuri and Buddha Dal printings), and GursevakDB's other granths as 57 banis, 91.9% of their panktis linked to their lines by exact or fuzzy matching (every fuzzy link listed with its score in `bani-links-review.csv`), with a BaniDB-compatible API server (`banidb_api.py`) to run it in Gurbani apps. **Access tightened** (2026-11-11): gate terms that rule out AI agents, scraping and AI training without permission; the public *SikhLibrarian* Space retired and its storage (which held an index of the corpus) made private. See [Access & AI Policy](#-access--ai-policy). |
-| **3.4** — *The Sikhi Gurbani Library* | 2026-11-19 | 28,165 | +4 | **`Gurbani/SikhiLibrary/`**: the Gurbani database inside the Sikhi app (sikhi.io), version 1.2.0, as one ready-to-open SQLite file (`GurbaniIndex.sqlite`, 270 MB, 179,414 lines). New in it: **Sri Sarbloh Granth Sahib in full** (35,994 lines, pages 1–1,216); the **Faridkot Teeka English line by line**, aligned to every line of Sri Guru Granth Sahib Ji; **phonetic search** (Gurbani typed as it sounds) and first letters of the printed word split, beside GursevakDB's own. With it, `Commentary.sqlite`: **Jatha Randhawa's Gurbani Arth Bhandar**, line by line. Checksums in `SHA256SUMS`; schema, counts and credits in its `README.md`. |
-| **3.4.1** — *Licensing, permissions & attribution* | 2026-11-23 | 28,165 | 0 | **Removed** `sikhi-io-d1/sikhi-scripture/sggs_sggsonline` (25,137 rows; Parquet + JSONL.gz), because its source's terms prohibit database extraction; its files were also deleted from the repository's storage, so they cannot be fetched from older revisions. **Licensing:** the CC BY-NC-ND 4.0 license now states plainly that it covers only the maintainers' own contributions, and that every organization's data stays under that organization's own license, which users must follow; new [`LICENSE.md`](LICENSE.md) with the license and terms of every source; written permissions recorded for BaniDB (Khalis Foundation), GursevakDB (Gursevak), Jatha Randhawa, Damdami Taksal, Gian Singh (Chet) and Punjabi University, Patiala; the BaniDB logo shown as its terms ask; a [notice-and-takedown](#-rights-holders-notice--takedown) procedure; the gate terms reconciled with the license; the same licensing notice added to every folder's README. Added `LICENSE.md` and `assets/banidb-logo.png`. |
+SikhLibrary includes two ready-to-use Gurbani databases: **SikhiDB**, in BaniDB's format, and the **Sikhi Gurbani Library**, the database inside the Sikhi app.
 
-Word counts prior to v3.1 were self-reported at each release and, as this audit discovered, were never recomputed after the 2026-05-30 and 2026-08-28 expansions — meaning the "808,354,306" figure quoted through early September 2026 undercounted the true corpus substantially. The ~1.07 billion figure now shown is independently measured; see [Data Quality & Known Limitations](#-data-quality--known-limitations) for the method.
+### SikhiDB (`Gurbani/GursevakDB/`)
 
----
+**SikhiDB** is one SQLite file, `Gurbani/GursevakDB/gursevakdb-banidb.sqlite` (801 MB), in **BaniDB's v2 format**, so code written for BaniDB works with it. In it:
 
-## 🔒 Access & AI Policy
+- **Gurbani:** Guru Granth Sahib (60,610 lines) and Dasam Granth (68,949) in GursevakDB's text, pagination and shabad grouping, plus Vaaran and Kabit Savaiye Bhai Gurdas Ji, Bhai Nand Lal Ji, Sri Sarbloh Granth, Amrit Keertan and the Rehatname (190,238 lines).
+- **Translations and teekas:** in English, Punjabi, Hindi and Spanish (`translations`, keyed by translator).
+- **Transliteration:** English, Hindi, Urdu and IPA (`transliterations`).
+- **Vishraams:** six schemes (`visraam`: `gursevak`, `sttm`, `sttm2`, `igurbani`, `sgpc`, `bhagat`).
+- **Jatha Randhawa · Gurbani Arth Bhandar:** the commentary on 59,008 Guru Granth Sahib lines.
+- **Banis:** 144 (Damdami Taksal Sundar Gutka, with Taksali, Hazuri and Buddha Dal printings, plus GursevakDB's granths), each line linked to its verse where possible.
 
-SikhLibrary holds Gurbani, the life's work of Sikh scholars and saints, and copyrighted editions shared for study. It is offered **to people**, for study, research and seva.
+What changed in each version, and how lines were matched, is documented in [`Gurbani/GursevakDB/README.md`](Gurbani/GursevakDB/README.md).
 
-**The access agreement.** To get access you accept the terms in the request form. They are a contract between you and the maintainers, and they apply **in addition to** the licenses described in [License, Copyright & Attribution](#-license-copyright--attribution). Where the agreement is narrower than a license, the agreement governs **your** use of the copy you obtained here. It does not limit what you may do with a work you obtain elsewhere under its owner's open license (for example the Mahan Kosh from [its GitHub home](https://github.com/redroyals/mahan-kosh-multilingual)), or what fair use, fair dealing or any other exception in copyright law allows.
+#### 1. Download it (after your access is approved)
 
-**Not permitted** without written permission from the maintainers:
-- access by **AI agents, crawlers, bots or automated pipelines**, including passing your access on to one;
-- **training, fine-tuning or evaluating AI models** on any part of the dataset;
-- building an **embedding, search or retrieval (RAG) index** of it that others can query;
-- **re-hosting, mirroring or passing on** the files to anyone else. Point people to this page instead, so that each person accepts these terms and every rights-holder's notice stays attached.
+```python
+from huggingface_hub import hf_hub_download
+db_path = hf_hub_download("jsdosanj/SikhLibrary", "Gurbani/GursevakDB/gursevakdb-banidb.sqlite", repo_type="dataset")
+```
 
-**How this is enforced:**
-- Access is **gated and approved by hand**. Every request is read by a maintainer, and the request form asks who you are, why you want access, and for your agreement to the terms above.
-- The Hugging Face file viewer and Dataset Viewer show file contents only to approved accounts. File names and this card stay public.
-- There is no public copy elsewhere on Hugging Face. The former *SikhLibrarian* Space, a public AI search over the corpus, was retired on 2026-11-11, and its storage bucket (which held an index of the text) is private.
-- Access that breaks these terms is revoked, and the maintainers may report the breach to the affected rights-holders.
+#### 2a. Query it directly (any language with SQLite: Swift, Kotlin, JavaScript, Python …)
 
-**Being honest about the limits:** no setting can stop an approved person from copying files they have downloaded, and Hugging Face does not let a dataset owner set `robots.txt` or crawler headers. These terms are a condition of access, and we act on breaches.
+```sql
+-- Ang 1 of Sri Guru Granth Sahib (source G; D = Dasam Granth)
+SELECT verse_id, shabad_id, unicode FROM verses WHERE source_id = 'G' AND page_no = 1 ORDER BY verse_id;
 
-To ask for permission (for example, for a Gurbani app or a research model), open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions). Permission from the maintainers covers only what the maintainers own; for third-party works you also need the rights-holder's permission (see below).
+-- A whole shabad
+SELECT verse_id, unicode FROM verses WHERE shabad_id = 1 ORDER BY verse_id;
 
----
+-- First-letter search (ਸੋਚੈ ਸੋਚਿ ਨ ਹੋਵਈ → ਸਸਨਹ)
+SELECT verse_id, page_no, unicode FROM verses WHERE source_id = 'G' AND first_letters LIKE 'ਸਸਨਹ%';
 
-## ⚖️ License, Copyright & Attribution
+-- Translations of a line (ms = Manmohan Singh, randhawa = Gurbani Arth Bhandar arth, …)
+SELECT translator, lang, text FROM translations WHERE verse_id = 1;
 
-> **Summary.** SikhLibrary is a *compilation*. The maintainers license only what they own, under CC BY-NC-ND 4.0. Every other work in it keeps its own owner and its own terms, and **nothing on this page grants you a license to a work the maintainers do not own.** The full terms, and the notice for every source, are in [`LICENSE.md`](LICENSE.md). If this card and `LICENSE.md` differ, `LICENSE.md` governs.
+-- The full Gurbani Arth Bhandar entries for a line: uthanka, arth, parman, sakhi, Q&A
+SELECT c.* FROM commentary_lines l JOIN commentary_entries c USING (entry_id) WHERE l.verse_id = 5;
 
-### 1. What the maintainers license: CC BY-NC-ND 4.0
+-- The printings of Rehras Sahib, and one bani's paragraphs with their linked verses
+SELECT bani_id, token, unicode, version FROM banis WHERE version_group = 'rehras';
+SELECT k.pos, k.kind, k.unicode, k.pauses, bv.verse_id
+FROM bani_blocks k LEFT JOIN bani_verses bv ON bv.bani_id = k.bani_id AND bv.pos = k.pos AND bv.word = 0
+WHERE k.bani_id = (SELECT bani_id FROM banis WHERE token = 'bani_comma_rehras') ORDER BY k.pos;
+```
 
-The maintainers' own contributions are licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)** (Attribution–NonCommercial–NoDerivatives). These are:
-- the **selection, arrangement and structure** of the collection (folders, file naming, per-book JSON layout, manifests);
-- the **OCR transcriptions and extracted text** the maintainers produced, to the extent they carry any copyright of their own;
-- **translations, metadata, indexes, scripts and documentation** written by the maintainers or by Sikhi.io for this dataset (including this card, `merge_gursevakdb_v2.py`, `banidb_api.py` and `gurmukhi_ascii.py`);
-- the original works of **Bhai Jasvant Singh Panchhi** included here.
+#### 2b. Or serve BaniDB's API from it
 
-Within that scope, **you may** download the files unmodified and use them for personal study, academic research and other non-commercial purposes, subject to the [Access & AI Policy](#-access--ai-policy). **You may not** use them commercially, or distribute a modified or derived version.
+`Gurbani/GursevakDB/banidb_api.py` (with `gurmukhi_ascii.py` beside it) is a single-file server, Python standard library only. It answers the same paths, parameters and JSON as `https://api.banidb.com/v2`: angs, shabads, random, sources, writers, raags, and search types 0–7. An app built on BaniDB can point at it by changing the base URL.
 
-### 2. What the maintainers do *not* license: third-party works
+```bash
+python3 banidb_api.py --db gursevakdb-banidb.sqlite --port 8787
+curl "http://127.0.0.1:8787/v2/angs/1/G"
+curl "http://127.0.0.1:8787/v2/search/ssnh?searchtype=0"   # first letters, legacy-font or Unicode
+```
 
-Most of the text in this corpus was written, translated, edited, published or digitized by **someone else**. For each such work:
-- **Its copyright stays with its owner.** The CC license in §1 does **not** apply to it, and including it here is not a claim of ownership and not a grant of rights in it.
-- **It is included for non-commercial study and research**, under the permissions listed in §3 where we have them, and otherwise as an archival research copy that we remove on request (see [Rights-holders: notice & takedown](#-rights-holders-notice--takedown)).
-- **Before you reuse it beyond private study**, check its own front matter and get any permission you need from its owner. Your use of it is your responsibility.
+Run it for your own app. A public endpoint that serves the database to others is a retrieval service, so it needs permission (see the [Access & AI Policy](#-access--ai-policy)). `banidb_api.py` is an independent re-implementation of BaniDB's public API shape for compatibility; it is not BaniDB's code and is not provided or endorsed by the Khalis Foundation.
 
-Gurbani itself (Sri Guru Granth Sahib Ji, Sri Dasam Granth Sahib, Sri Sarbloh Granth Sahib, Vaaran and Kabit of Bhai Gurdas Ji, Bhai Nand Lal Ji) is centuries old and belongs to the Panth, not to any database or to us. Particular **digital editions** of it (their corrections, pagination, vishraams, line ids and accompanying translations) can carry their makers' rights and terms, which is why the Gurbani databases below are credited and their terms respected.
+#### 3. Shipping it in an app
 
-**Older works.** Colonial-era works published before 1900 (for example Crooke, Griffin, Massy, Hutchison and Vogel) and Macauliffe's *The Sikh Religion* (1909; Macauliffe d. 1913) are public domain in most countries by age. In India, copyright lasts for the author's life plus 60 years, so the works of Bhai Kahan Singh Nabha (d. 1938) and Bhai Vir Singh (d. 1957) are public domain there, while those of **Prof. Sahib Singh (d. 1977) stay in copyright in India until the end of 2037**. In the United States a work is protected for 95 years from publication, regardless of when its author died, so a book first published after 1930 may still be in copyright there. A later editor's, annotator's or translator's version has its own, newer copyright. We make no blanket claim.
+- **License:** SikhiDB is part of this dataset. The maintainers' work in it (the merge, links, schema and scripts) is CC BY-NC-ND 4.0, plus the Access & AI Policy; its Gurbani text, translations and commentary belong to the sources credited below and in [`LICENSE.md`](LICENSE.md), and their terms apply too, including [BaniDB's Terms of Service](https://www.banidb.com/tos/) for the BaniDB data it carries (an app that shows BaniDB data must acknowledge BaniDB and show its logo). The permissions Gursevak, Jatha Randhawa and Damdami Taksal gave the maintainers do not extend to your app: **to ship their text or commentary, ask them as well as us.** To ship a **trimmed or modified copy** (most mobile apps will want a smaller file), or for any commercial use, ask first in [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions); we want SikhiDB in Gurbani apps and will help.
+- **Credit in your app:** GursevakDB (Gursevak, gursevak.com), Shabad OS, BaniDB (Khalis Foundation), the translators of any translation you show, Jatha Randhawa · Gurbani Arth Bhandar (where you show the commentary), Damdami Taksal · Sundar Gutka (where you show its banis), and SikhLibrary. Ship `CREDITS.txt` with the file. Do not suggest that BaniDB, Gursevak or Shabad OS endorse your app.
+- **Size:** the FTS search indexes are a large part of the file. An app that searches with its own index or with SQL `LIKE` on `first_letters` can work from a smaller copy (ask, as above).
+- **Ids:** `verse_id` and `shabad_id` match BaniDB's wherever GursevakDB's line matches BaniDB's (60,342 of 60,610 SGGS lines). Every line also has `uid`, GursevakDB's own line id; use it as the key to follow a line from one SikhiDB version to the next.
 
-**Live, institutional rights.** Some works are very likely still in copyright and are held by publishers who are outside the Sikh-publishing ecosystem or who enforce actively (Oxford University Press, Human Rights Watch, ProQuest/UMI, the Kundalini Research Institute for Yogi Bhajan's works, the Himalayan Institute for Swami Rama's, and W.H. McLeod's estate). They are listed in the audit below and are under review for removal unless permission is obtained.
+### The Sikhi Gurbani Library (`Gurbani/SikhiLibrary/`)
 
-**Changes in the license over time.** From 2026-03-30 to 2026-04-12 the dataset was published under CC BY 4.0. A CC license cannot be withdrawn for copies already received, so the maintainers' own material in copies obtained in that window remains under CC BY 4.0 for those recipients. That earlier license never covered third-party works, because the maintainers could not license what they did not own.
+The database the **Sikhi app** (sikhi.io) ships, version 1.2.0: one SQLite file, ready to open, with the search indexes the app uses. It is a different shape from SikhiDB (not BaniDB's format): a `verses` table with one row per line (`g` Gurmukhi, `fl`/`fls` first letters, `en` English, `rm` transliteration, `writer`, `raag`, `ang`, `shabad`), the full records LZMA-compressed in `rz`, and FTS5 indexes (`tg_*`) for words, first letters, English and phonetic search.
 
-### 3. Sources, credits and their terms
+| Granth | Lines |
+| :--- | ---: |
+| Sri Dasam Granth Sahib | 68,949 |
+| Sri Guru Granth Sahib Ji | 60,610 |
+| Sri Sarbloh Granth Sahib (complete) | 35,994 |
+| Vaaran Bhai Gurdas Ji | 7,950 |
+| Kabit Savaiye Bhai Gurdas Ji | 2,762 |
+| Bhai Nand Lal Ji | 2,559 |
+| Bhai Gurdas Singh Ji | 352 |
+| Rehatname | 238 |
+| **Total** | **179,414** |
 
-| Source | Legal owner / steward | What is used, and where | Terms we follow |
-| :--- | :--- | :--- | :--- |
-| **BaniDB** ([banidb.com](https://www.banidb.com))<br><img src="https://www.banidb.com/wp-content/uploads/2019/05/full-banidb-logo.png" alt="BaniDB" width="140"> | **Khalis Foundation**, a California non-profit | The BaniDB v2 database format and API shape; English and transliteration carried in SikhiDB (`Gurbani/GursevakDB/`) and in `sikhi-io-d1/` | **Used with the written permission of the Khalis Foundation.** BaniDB data stays under BaniDB's [Terms of Service](https://www.banidb.com/tos/) and the [Non-Profit Open Software License 3.0](https://www.banidb.com/nposl/) they reference; **anyone who uses BaniDB data from this dataset must follow those terms**, including written acknowledgement of BaniDB and its logo in their project. Credit: *"Gurbani data courtesy of BaniDB, Khalis Foundation."* `banidb_api.py` is an independent re-implementation and contains no BaniDB code. |
-| **GursevakDB / Gursevak** ([gursevak.com](https://www.gursevak.com)) | **Dear Father Brave Guru God's Slave Society** ("Gursevak"), a registered charity | Guru Granth Sahib and Dasam Granth text, pagination, shabad grouping, vishraams and pronunciation tips (SikhiDB and the Sikhi Gurbani Library); unmodified verse CSVs in `Gurbani/GursevakDB/source-csv/` | **Used with the written permission of Gursevak.** Gursevak has published no open license, so its data may not be reused outside this dataset without Gursevak's own permission. `Gurbani/GursevakDB/CREDITS.txt` is Gursevak's own acknowledgement and **must stay with any copy.** Gursevak credits Baba Darshan Singh Ji Mallehwal, Bhai Manraj Singh Ji (Akal Design), Siri Guru Granth Sahib Academy Malaysia, Bhai Binod Singh Ji, Bhai Sant Singh Khalsa Ji and Bibi Inderpreet Kaur Ji (Darer Designs), with their sevadaars. |
-| **Shabad OS** ([shabados.com](https://shabados.com)) | **Shabad OS Organization and Contributors** | Base Gurbani database (v5.0.0-next.0) of the Sikhi Gurbani Library; SGGS per-ang content in `sikhi-io-d1/sikhi-gurbani/` | Code: MIT License, © Shabad OS Organization and Contributors. Texts: marked public domain by Shabad OS. We honour its integrity condition: Gurbani is not added to, deleted from or altered in a way that distorts it. |
-| **GurmatVeechar.com** ([gurmatveechar.com](https://www.gurmatveechar.com)) | GurmatVeechar.com | 509 works whose file names carry `(GurmatVeechar.com)`, e.g. the *Amir Bhandar* teeka | No license published. The `(GurmatVeechar.com)` tag is kept in every file name as its credit. Underlying works keep their authors' and publishers' rights. |
-| **Sikhi.io** ([sikhi.io](https://sikhi.io)) | Sikhi.io | Digitized library, translations, `sikhi-io-library/`, `sikhi-io-d1/`, the Sikhi Gurbani Library, the Mahan Kosh packaging, the OCR pipeline | Contributed by the maintainers; covered by §1 except for the third-party works it carries. |
-| **Jatha Randhawa · Gurbani Arth Bhandar** | Sant Hari Singh Ji Randhawe Wale / Jatha Randhawa | Line-by-line SGGS commentary (`Commentary.sqlite`, SikhiDB `commentary_*`) | **Used with the written permission of Jatha Randhawa.** Not covered by §1; no reuse outside this dataset without Jatha Randhawa's permission. |
-| **Damdami Taksal · Sundar Gutka** | Damdami Taksal | 87 banis with vishraams from the Damdami Taksal *Sundar Gutka* app (SikhiDB `banis`), and works bearing its copyright notice | **Used with the written permission of Damdami Taksal.** Not covered by §1; no reuse outside this dataset without Damdami Taksal's permission. |
-| **Gian Singh (Chet)** | Gian Singh (Chet) | Full text of Sri Sarbloh Granth Sahib (Sikhi Gurbani Library); his help building the Sikhi app and cleaning up the English Faridkot Teeka (`a.ft_en` in the Sikhi Gurbani Library; `mahan-kosh-multilingual/data/reading-aids/faridkot/`) | **Used with his written permission.** Not covered by §1; no reuse of his Sarbloh Granth text outside this dataset without his permission. |
-| **Mahan Kosh** | Bhai Kahan Singh Nabha (1930, public domain); English edition **© Punjabi University, Patiala** | `Granths/Mahan_Kosh_Multilingual/`, `mahan-kosh-multilingual/`, `Granths/Mahan_Kosh_Dictionary/` | The 1930 Gurmukhi text is public domain. **The English text is Punjabi University, Patiala's, used with its written permission; it stays under Punjabi University's copyright** and is not under CC BY 4.0 or §1. Sikhi.io's own packaging, Hindi text and viewer are CC BY 4.0 (see each folder's `LICENSE`). |
-| **Translations & teekas** inside the Gurbani databases | Their translators and publishers | Faridkot Teeka; Prof. Sahib Singh's *Darpan*; Dr. Sant Singh Khalsa's English; Bhai Manmohan Singh's English (SGPC); Bhai Vir Singh; Dr. Ratan Singh Jaggi; Dr. Surinder Singh Kohli; Dr. Daljit Singh Jawa; and others named in each record | Credited by name in each record. Not covered by §1. Modern translations (e.g. Sant Singh Khalsa, Manmohan Singh) are in copyright. |
-| **Digitizers** | Panjab Digital Library; Sri Satguru Jagjit Singh Ji E-Library ("Namdhari E-Library"); Internet Archive; Google Books | Scans that were OCR'd into this corpus | Their imprints and watermarks are kept where they appear. Google Books scans: non-commercial use, keep the attribution, no automated querying, per Google's usage guidelines. |
-| **Punjabi University, Patiala** (Publication Bureau) | Punjabi University, Patiala | The Mahan Kosh English edition, and its publications in this corpus (≥358 works) | **Used with the written permission of Punjabi University, Patiala.** They stay under the University's copyright; no reuse outside this dataset without its permission. |
-| **Original publishers & copyright holders** | SGPC; Language Department Punjab; Bhai Vir Singh Sahit Sadan; Damdami Taksal; Bhai Sahib Randhir Singh Trust; Guru Nanak Foundation, Bhatinda; Oxford University Press; Human Rights Watch; ProQuest/UMI | Works bearing their notices (see the audit below) | Their notices are kept with each work. Not covered by §1. |
-| **Web sources** in `sikhi-io-d1/` | SikhiWiki; Gurbani.org; Sikh web archives | `sikhiwiki_articles`, `gurbani_org_posts`, `web_archive_entries`, `gallery_images` | Each site's own license applies; see `LICENSE.md` §4. (SGGS Online's `sggs_sggsonline` table was removed in v3.4.1.) |
-| **Named authors** | The 86 authors in the [index](#full-index-of-the-115-top-level-collections), their estates and publishers | Their folders | Their rights are reserved to them. |
+```python
+from huggingface_hub import hf_hub_download
+db = hf_hub_download("jsdosanj/SikhLibrary", "Gurbani/SikhiLibrary/GurbaniIndex.sqlite", repo_type="dataset")
+```
 
-**No endorsement.** The organizations and people above are credited because their work is used. None of them has reviewed, sponsored or endorsed SikhLibrary unless this page says so, and their names and marks (including *BaniDB*, *Shabad OS*, *Gursevak* and *GurmatVeechar*) belong to them. "BaniDB-compatible" and "BaniDB format" describe compatibility only.
-
-### 4. The audit: what license & copyright information actually exists in this corpus
-
-No structured license or rights *metadata* exists anywhere in the corpus outside the `LICENSE` files of the Mahan Kosh folders — we scanned all 23,366 filenames and every `manifest`/`metadata`/`source` JSON file, and the per-book JSON schema is limited to `pdf_name` and `pages`, with no rights field. **But most scanned books preserve their own original title and copyright page as OCR'd text**, so the underlying publisher, digitizer, or rights-holder is usually still recoverable from the work itself. Two passes were run against the live corpus (September 2026) to recover this:
-
-1. **Filename-tag scan (exact, 100% coverage)** — many files carry their source as a literal `(Domain.com)` suffix in the filename.
-2. **Front-matter content scan (~84% coverage)** — the first ~6,000 characters of all 10,799 `.txt` files were fetched and searched for publisher/copyright keywords (9,086 of 10,799 files were successfully retrieved; the rest were skipped, so the figures below are **lower bounds**).
-
-| Source (as printed in the work) | Role | Works found |
-| :--- | :--- | ---: |
-| GurmatVeechar.com | digitization / hosting (in filename) | 509 *(exact)* |
-| sikhi.io | production-library source tag (in filename) | 4 bulk archives *(exact)* |
-| Punjabi University, Patiala (Publication Bureau) | original publisher | ≥358 |
-| SGPC (Shiromani Gurdwara Parbandhak Committee) | original publisher | ≥194 |
-| Panjab Digital Library (panjabdigilib.org) | digitizer | ≥158 |
-| Bhai Vir Singh Sahit Sadan, New Delhi | copyright holder | ≥137 |
-| Damdami Taksal | publisher / copyright holder | ≥78 |
-| Sri Satguru Jagjit Singh Ji E-Library ("**Namdhari E-Library**," `NamdhariElibrary@gmail.com`) | digitizer | ≥40 |
-| Language Department, Punjab | original publisher | ≥37 |
-| Oxford University Press | copyright holder (modern academic monographs) | ≥32 |
-| Human Rights Watch | copyright holder (modern reports — see caution) | ≥32 |
-| Bhai Sahib Randhir Singh Trust | copyright holder | ≥26 |
-| Internet Archive | digitizer | ≥23 |
-| Google Books | digitizer | ≥20 |
-| Guru Nanak Foundation, Bhatinda | copyright holder | ≥11 |
-| ProQuest LLC / UMI Dissertation Publishing | copyright holder (doctoral dissertation) | ≥1 |
-
-**Flagged for removal unless permission is obtained:** Oxford University Press monographs by living scholars (Pashaura Singh, Harjot Oberoi) and Gurinder Singh Mann's *The Making of Sikh Scripture* (© 2001); at least 32 **Human Rights Watch** reports (2008–2012), each stamped "Copyright © [year] Human Rights Watch. All rights reserved."; ProQuest/UMI dissertations; and the two files added by hand that are not about Sikhi (`Age Of Spiritual Machines - Ray Kurzweil.pdf`, `Spirituality/CIA quantum healing codes.pdf`).
-
-This is a *structural and textual* audit — what is actually printed or embedded in the files — not a legal opinion on the copyright status of any work.
-
-### 5. Your obligations, and the attribution requirement
-
-**Follow each organization's license.** This dataset is a gathering of many organizations' work. When you use data that came from an organization — BaniDB, Gursevak, Shabad OS, Jatha Randhawa, Damdami Taksal, Punjabi University, Gian Singh (Chet), a publisher or an author — you must follow **that organization's license or terms** (§3 and [`LICENSE.md`](LICENSE.md)) as well as this dataset's. The permissions listed above were given to the maintainers for this dataset; they do not pass to you. If you want to use an organization's data outside this dataset, ask that organization.
-
-Any use of this dataset must credit:
-- **SikhLibrary** (`jsdosanj/SikhLibrary`) on Hugging Face, with a link to this page and the license, and a note of any changes you made;
-- **Original dataset:** Bhai Jasvant Singh ਪੰਛੀ (Panchhi), whose personal library of over 1,200 books, and his translations of it, are the foundation of this corpus;
-- **Contributing sources:** Sikhi.io; **BaniDB (Khalis Foundation)**, with the BaniDB logo where its terms ask for it; **GursevakDB (Gursevak — Dear Father Brave Guru God's Slave Society)**; **Shabad OS**; **GurmatVeechar.com**; SGPC; Sri Satguru Jagjit Singh Ji E-Library ("Namdhari E-Library"); Punjabi University Patiala (Publication Bureau); Panjab Digital Library; Language Department Punjab; Internet Archive; Google Books;
-- **the original author, translator, publisher and digitizer of each individual work you use**, as printed in that work and listed in §3;
-- the folder-specific credits in §3 and in each folder's own `README.md`, `LICENSE` or `CREDITS.txt`.
-
-Suggested credit line: *"Contains material from SikhLibrary (huggingface.co/datasets/jsdosanj/SikhLibrary), compiled by Bhai Jasvant Singh Panchhi and Sukhjeet Singh Sodhi, LLB (Hons), with Gurbani data from GursevakDB (Gursevak), Shabad OS and BaniDB (Khalis Foundation). Compilation licensed CC BY-NC-ND 4.0; individual works © their respective owners."*
-
-### 6. No warranty
-
-The dataset is provided **as is**, without warranty of any kind, including any warranty that a work's copyright status is as described. To the extent the law allows, the maintainers are not liable for any use of it. This card is not legal advice.
+Its own [`README.md`](Gurbani/SikhiLibrary/README.md) lists the tables, what is new in 1.2.0, and the sources to credit.
 
 ---
 
-## 📮 Rights-holders: notice & takedown
+## 💾 The sikhi.io Database Export
 
-**Any organization or author can ask for the removal of texts it owns** — or for a corrected credit or a license discussion — and we will act on it. **You do not need to send a formal legal notice**, and you may write privately.
-
-**Write to:** `akaal@sikhi.io` with *"SikhLibrary rights notice"* in the subject, or open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) if you prefer to raise it publicly. Please include:
-1. the work, and your relationship to it (owner, or authorized to act for the owner);
-2. where it is in this dataset (folder or file path, or a link);
-3. what you want: removal, a corrected credit, or a license discussion;
-4. how to contact you.
-
-A notice under the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512(c)(3)) is also accepted at the same address; it should add your physical or electronic signature, a statement of good-faith belief that the use is not authorized, and a statement, under penalty of perjury, that the notice is accurate and that you are authorized to act for the owner. You may instead notify Hugging Face, which hosts this dataset, through its own [content policy and DMCA process](https://huggingface.co/content-guidelines).
-
-**What we do:**
-- We acknowledge a notice within **3 business days**.
-- While we check it, we **restrict access** to the work (it is removed from the current revision and new access requests for it are not served).
-- If the claim is substantiated, the work is **deleted, including from the repository's history**, so that it cannot be fetched from an earlier commit, and we record the removal (work, date, reason) in the [Version History](#-version-history) without republishing the work.
-- If you uploaded something that was removed and believe that was a mistake, reply to the removal notice with your reasons; we will reconsider, and follow the counter-notice procedure of 17 U.S.C. § 512(g) where a DMCA notice was involved.
+Public content tables exported on 2026-10-29 from the Cloudflare D1 databases behind sikhi.io (gurbani-search, sikhi-colonial-archive, sikhi-gurbani, sikhi-io-prod, sikhi-scripture, sikhi-search, sikhidb), as Parquet (zstd) + JSONL.gz with Gurmukhi text unchanged: **54 tables, 6,054,868 rows**. Third-party content in these tables keeps its owners' rights (see [`LICENSE.md`](LICENSE.md) §4). This includes the **Faridkot Wala Teeka** exegesis shown on sikhi.io/exegesis (`sikhi-io-d1/sikhi-scripture/scripture_pages.*`, `text = 'faridkot'`), katha transcripts and glossary, SGGS multilingual pages, Mahan Kosh, Punjabi dictionary, library pages and search corpora. No user, account or analytics data is included. See [`sikhi-io-d1/README.md`](sikhi-io-d1/README.md) and [`sikhi-io-d1/manifest.json`](sikhi-io-d1/manifest.json) for per-table row counts and sources.
 
 ---
 
-## 💻 How to Load
+## 💻 Access & Loading
 
 Access is **gated but free** — request access on the [dataset page](https://huggingface.co/datasets/jsdosanj/SikhLibrary), then authenticate locally.
 
@@ -403,7 +361,7 @@ Access is **gated but free** — request access on the [dataset page](https://hu
 ```python
 from huggingface_hub import snapshot_download
 
-# Download the entire corpus (~14.2 GB) to a local directory
+# Download the entire corpus (~25.6 GB) to a local directory
 local_dir = snapshot_download(
     repo_id="jsdosanj/SikhLibrary",
     repo_type="dataset",
@@ -446,117 +404,197 @@ hf download jsdosanj/SikhLibrary --repo-type dataset \
 
 ---
 
-## 📱 Using SikhiDB in Gurbani Apps
+## 🔒 Access & AI Policy
 
-**SikhiDB** is one SQLite file, `Gurbani/GursevakDB/gursevakdb-banidb.sqlite` (801 MB), in **BaniDB's v2 format**, so code written for BaniDB works with it. In it:
+SikhLibrary holds Gurbani, the life's work of Sikh scholars and saints, and copyrighted editions shared for study. It is offered **to people**, for study, research and seva.
 
-- **Gurbani:** Guru Granth Sahib (60,610 lines) and Dasam Granth (68,949) in GursevakDB's text, pagination and shabad grouping, plus Vaaran and Kabit Savaiye Bhai Gurdas Ji, Bhai Nand Lal Ji, Sri Sarbloh Granth, Amrit Keertan and the Rehatname (190,238 lines).
-- **Translations and teekas:** in English, Punjabi, Hindi and Spanish (`translations`, keyed by translator).
-- **Transliteration:** English, Hindi, Urdu and IPA (`transliterations`).
-- **Vishraams:** six schemes (`visraam`: `gursevak`, `sttm`, `sttm2`, `igurbani`, `sgpc`, `bhagat`).
-- **Jatha Randhawa · Gurbani Arth Bhandar:** the commentary on 59,008 Guru Granth Sahib lines.
-- **Banis:** 144 (Damdami Taksal Sundar Gutka, with Taksali, Hazuri and Buddha Dal printings, plus GursevakDB's granths), each line linked to its verse where possible.
+**The access agreement.** To get access you accept the terms in the request form. They are a contract between you and the maintainers, and they apply **in addition to** the licenses described in [License, Copyright & Attribution](#-license-copyright--attribution). Where the agreement is narrower than a license, the agreement governs **your** use of the copy you obtained here. It does not limit what you may do with a work you obtain elsewhere under its owner's open license (for example the Mahan Kosh from [its GitHub home](https://github.com/redroyals/mahan-kosh-multilingual)), or what fair use, fair dealing or any other exception in copyright law allows.
 
-What changed in each version, and how lines were matched, is documented in [`Gurbani/GursevakDB/README.md`](Gurbani/GursevakDB/README.md).
+**Not permitted** without written permission from the maintainers:
+- access by **AI agents, crawlers, bots or automated pipelines**, including passing your access on to one;
+- **training, fine-tuning or evaluating AI models** on any part of the dataset;
+- building an **embedding, search or retrieval (RAG) index** of it that others can query;
+- **re-hosting, mirroring or passing on** the files to anyone else. Point people to this page instead, so that each person accepts these terms and every rights-holder's notice stays attached.
 
-### 1. Download it (after your access is approved)
+**How this is enforced:**
+- Access is **gated and approved by hand**. Every request is read by a maintainer, and the request form asks who you are, why you want access, and for your agreement to the terms above.
+- The Hugging Face file viewer and Dataset Viewer show file contents only to approved accounts. File names and this card stay public.
+- There is no public copy elsewhere on Hugging Face. The former *SikhLibrarian* Space, a public AI search over the corpus, was retired on 2026-11-11, and its storage bucket (which held an index of the text) is private.
+- Access that breaks these terms is revoked, and the maintainers may report the breach to the affected rights-holders.
 
-```python
-from huggingface_hub import hf_hub_download
-db_path = hf_hub_download("jsdosanj/SikhLibrary", "Gurbani/GursevakDB/gursevakdb-banidb.sqlite", repo_type="dataset")
-```
+**Scope:** no setting can stop an approved person from copying files they have downloaded, and Hugging Face does not let a dataset owner set `robots.txt` or crawler headers. These terms are a condition of access, and we act on breaches.
 
-### 2a. Query it directly (any language with SQLite: Swift, Kotlin, JavaScript, Python …)
+To ask for permission (for example, for a Gurbani app or a research model), open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions). Permission from the maintainers covers only what the maintainers own; for third-party works you also need the rights-holder's permission (see below).
 
-```sql
--- Ang 1 of Sri Guru Granth Sahib (source G; D = Dasam Granth)
-SELECT verse_id, shabad_id, unicode FROM verses WHERE source_id = 'G' AND page_no = 1 ORDER BY verse_id;
+---
 
--- A whole shabad
-SELECT verse_id, unicode FROM verses WHERE shabad_id = 1 ORDER BY verse_id;
+## ⚖️ License, Copyright & Attribution
 
--- First-letter search (ਸੋਚੈ ਸੋਚਿ ਨ ਹੋਵਈ → ਸਸਨਹ)
-SELECT verse_id, page_no, unicode FROM verses WHERE source_id = 'G' AND first_letters LIKE 'ਸਸਨਹ%';
+> **Summary.** SikhLibrary is a *compilation*. The maintainers license only what they own, under CC BY-NC-ND 4.0. Every other work in it keeps its own owner and its own terms, and **nothing on this page grants you a license to a work the maintainers do not own.** The full terms, and the notice for every source, are in [`LICENSE.md`](LICENSE.md). If this card and `LICENSE.md` differ, `LICENSE.md` governs.
 
--- Translations of a line (ms = Manmohan Singh, randhawa = Gurbani Arth Bhandar arth, …)
-SELECT translator, lang, text FROM translations WHERE verse_id = 1;
+### 1. What the maintainers license: CC BY-NC-ND 4.0
 
--- The full Gurbani Arth Bhandar entries for a line: uthanka, arth, parman, sakhi, Q&A
-SELECT c.* FROM commentary_lines l JOIN commentary_entries c USING (entry_id) WHERE l.verse_id = 5;
+The maintainers' own contributions are licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)** (Attribution–NonCommercial–NoDerivatives). These are:
+- the **selection, arrangement and structure** of the collection (folders, file naming, per-book JSON layout, manifests);
+- the **OCR transcriptions and extracted text** the maintainers produced, to the extent they carry any copyright of their own;
+- **translations, metadata, indexes, scripts and documentation** written by the maintainers or by Sikhi.io for this dataset (including this card, `merge_gursevakdb_v2.py`, `banidb_api.py` and `gurmukhi_ascii.py`);
+- the original works of **Bhai Jasvant Singh Panchhi** included here.
 
--- The printings of Rehras Sahib, and one bani's paragraphs with their linked verses
-SELECT bani_id, token, unicode, version FROM banis WHERE version_group = 'rehras';
-SELECT k.pos, k.kind, k.unicode, k.pauses, bv.verse_id
-FROM bani_blocks k LEFT JOIN bani_verses bv ON bv.bani_id = k.bani_id AND bv.pos = k.pos AND bv.word = 0
-WHERE k.bani_id = (SELECT bani_id FROM banis WHERE token = 'bani_comma_rehras') ORDER BY k.pos;
-```
+Within that scope, **you may** download the files unmodified and use them for personal study, academic research and other non-commercial purposes, subject to the [Access & AI Policy](#-access--ai-policy). **You may not** use them commercially, or distribute a modified or derived version.
 
-### 2b. Or serve BaniDB's API from it
+### 2. What the maintainers do *not* license: third-party works
 
-`Gurbani/GursevakDB/banidb_api.py` (with `gurmukhi_ascii.py` beside it) is a single-file server, Python standard library only. It answers the same paths, parameters and JSON as `https://api.banidb.com/v2`: angs, shabads, random, sources, writers, raags, and search types 0–7. An app built on BaniDB can point at it by changing the base URL.
+Most of the text in this corpus was written, translated, edited, published or digitized by **someone else**. For each such work:
+- **Its copyright stays with its owner.** The CC license in §1 does **not** apply to it, and including it here is not a claim of ownership and not a grant of rights in it.
+- **It is included for non-commercial study and research**, under the permissions listed in §3 where we have them, and otherwise as an archival research copy that we remove on request (see [Rights-holders: notice & takedown](#-rights-holders-notice--takedown)).
+- **Before you reuse it beyond private study**, check its own front matter and get any permission you need from its owner. Your use of it is your responsibility.
 
-```bash
-python3 banidb_api.py --db gursevakdb-banidb.sqlite --port 8787
-curl "http://127.0.0.1:8787/v2/angs/1/G"
-curl "http://127.0.0.1:8787/v2/search/ssnh?searchtype=0"   # first letters, legacy-font or Unicode
-```
+Gurbani itself (Sri Guru Granth Sahib Ji, Sri Dasam Granth Sahib, Sri Sarbloh Granth Sahib, Vaaran and Kabit of Bhai Gurdas Ji, Bhai Nand Lal Ji) is centuries old and belongs to the Panth, not to any database or to us. Particular **digital editions** of it (their corrections, pagination, vishraams, line ids and accompanying translations) can carry their makers' rights and terms, which is why the Gurbani databases below are credited and their terms respected.
 
-Run it for your own app. A public endpoint that serves the database to others is a retrieval service, so it needs permission (see the [Access & AI Policy](#-access--ai-policy)). `banidb_api.py` is an independent re-implementation of BaniDB's public API shape for compatibility; it is not BaniDB's code and is not provided or endorsed by the Khalis Foundation.
+**Older works.** Colonial-era works published before 1900 (for example Crooke, Griffin, Massy, Hutchison and Vogel) and Macauliffe's *The Sikh Religion* (1909; Macauliffe d. 1913) are public domain in most countries by age. In India, copyright lasts for the author's life plus 60 years, so the works of Bhai Kahan Singh Nabha (d. 1938) and Bhai Vir Singh (d. 1957) are public domain there, while those of **Prof. Sahib Singh (d. 1977) stay in copyright in India until the end of 2037**. In the United States a work is protected for 95 years from publication, regardless of when its author died, so a book first published after 1930 may still be in copyright there. A later editor's, annotator's or translator's version has its own, newer copyright. We make no blanket claim.
 
-### 3. Shipping it in an app
+**Live, institutional rights.** Some works are very likely still in copyright and are held by publishers who are outside the Sikh-publishing ecosystem or who enforce actively (Oxford University Press, Human Rights Watch, ProQuest/UMI, the Kundalini Research Institute for Yogi Bhajan's works, the Himalayan Institute for Swami Rama's, and W.H. McLeod's estate). They are included only as archival research copies, and are removed at their owners' request.
 
-- **License:** SikhiDB is part of this dataset. The maintainers' work in it (the merge, links, schema and scripts) is CC BY-NC-ND 4.0, plus the Access & AI Policy; its Gurbani text, translations and commentary belong to the sources credited below and in [`LICENSE.md`](LICENSE.md), and their terms apply too, including [BaniDB's Terms of Service](https://www.banidb.com/tos/) for the BaniDB data it carries (an app that shows BaniDB data must acknowledge BaniDB and show its logo). The permissions Gursevak, Jatha Randhawa and Damdami Taksal gave the maintainers do not extend to your app: **to ship their text or commentary, ask them as well as us.** To ship a **trimmed or modified copy** (most mobile apps will want a smaller file), or for any commercial use, ask first in [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions); we want SikhiDB in Gurbani apps and will help.
-- **Credit in your app:** GursevakDB (Gursevak, gursevak.com), Shabad OS, BaniDB (Khalis Foundation), the translators of any translation you show, Jatha Randhawa · Gurbani Arth Bhandar (where you show the commentary), Damdami Taksal · Sundar Gutka (where you show its banis), and SikhLibrary. Ship `CREDITS.txt` with the file. Do not suggest that BaniDB, Gursevak or Shabad OS endorse your app.
-- **Size:** the FTS search indexes are a large part of the file. An app that searches with its own index or with SQL `LIKE` on `first_letters` can work from a smaller copy (ask, as above).
-- **Ids:** `verse_id` and `shabad_id` match BaniDB's wherever GursevakDB's line matches BaniDB's (60,342 of 60,610 SGGS lines). Every line also has `uid`, GursevakDB's own line id; use it as the key to follow a line from one SikhiDB version to the next.
+**Changes in the license over time.** From 2026-03-30 to 2026-04-12 the dataset was published under CC BY 4.0. A CC license cannot be withdrawn for copies already received, so the maintainers' own material in copies obtained in that window remains under CC BY 4.0 for those recipients. That earlier license never covered third-party works, because the maintainers could not license what they did not own.
 
-### The Sikhi Gurbani Library (`Gurbani/SikhiLibrary/`)
+### 3. Sources, credits and their terms
 
-The database the **Sikhi app** (sikhi.io) ships, version 1.2.0: one SQLite file, ready to open, with the search indexes the app uses. It is a different shape from SikhiDB (not BaniDB's format): a `verses` table with one row per line (`g` Gurmukhi, `fl`/`fls` first letters, `en` English, `rm` transliteration, `writer`, `raag`, `ang`, `shabad`), the full records LZMA-compressed in `rz`, and FTS5 indexes (`tg_*`) for words, first letters, English and phonetic search.
+| Source | Legal owner / steward | What is used, and where | Terms we follow |
+| :--- | :--- | :--- | :--- |
+| **BaniDB** ([banidb.com](https://www.banidb.com))<br><img src="https://www.banidb.com/wp-content/uploads/2019/05/full-banidb-logo.png" alt="BaniDB" width="140"> | **Khalis Foundation**, a California non-profit | The BaniDB v2 database format and API shape; English and transliteration carried in SikhiDB (`Gurbani/GursevakDB/`) and in `sikhi-io-d1/` | **Used with the written permission of the Khalis Foundation.** BaniDB data stays under BaniDB's [Terms of Service](https://www.banidb.com/tos/) and the [Non-Profit Open Software License 3.0](https://www.banidb.com/nposl/) they reference; **anyone who uses BaniDB data from this dataset must follow those terms**, including written acknowledgement of BaniDB and its logo in their project. Credit: *"Gurbani data courtesy of BaniDB, Khalis Foundation."* `banidb_api.py` is an independent re-implementation and contains no BaniDB code. |
+| **GursevakDB / Gursevak** ([gursevak.com](https://www.gursevak.com)) | **Dear Father Brave Guru God's Slave Society** ("Gursevak"), a registered charity | Guru Granth Sahib and Dasam Granth text, pagination, shabad grouping, vishraams and pronunciation tips (SikhiDB and the Sikhi Gurbani Library); unmodified verse CSVs in `Gurbani/GursevakDB/source-csv/` | **Used with the written permission of Gursevak.** Gursevak has published no open license, so its data may not be reused outside this dataset without Gursevak's own permission. `Gurbani/GursevakDB/CREDITS.txt` is Gursevak's own acknowledgement and **must stay with any copy.** Gursevak credits Baba Darshan Singh Ji Mallehwal, Bhai Manraj Singh Ji (Akal Design), Siri Guru Granth Sahib Academy Malaysia, Bhai Binod Singh Ji, Bhai Sant Singh Khalsa Ji and Bibi Inderpreet Kaur Ji (Darer Designs), with their sevadaars. |
+| **Shabad OS** ([shabados.com](https://shabados.com)) | **Shabad OS Organization and Contributors** | Base Gurbani database (v5.0.0-next.0) of the Sikhi Gurbani Library; SGGS per-ang content in `sikhi-io-d1/sikhi-gurbani/` | Code: MIT License, © Shabad OS Organization and Contributors. Texts: marked public domain by Shabad OS. We honour its integrity condition: Gurbani is not added to, deleted from or altered in a way that distorts it. |
+| **GurmatVeechar.com** ([gurmatveechar.com](https://www.gurmatveechar.com)) | GurmatVeechar.com | 509 works whose file names carry `(GurmatVeechar.com)`, e.g. the *Amir Bhandar* teeka | No license published. The `(GurmatVeechar.com)` tag is kept in every file name as its credit. Underlying works keep their authors' and publishers' rights. |
+| **Sikhi.io** ([sikhi.io](https://sikhi.io)) | Sikhi.io | Digitized library, translations, `sikhi-io-library/`, `sikhi-io-d1/`, the Sikhi Gurbani Library, the Mahan Kosh packaging, the OCR pipeline | Contributed by the maintainers; covered by §1 except for the third-party works it carries. |
+| **Jatha Randhawa · Gurbani Arth Bhandar** | Sant Hari Singh Ji Randhawe Wale / Jatha Randhawa | Line-by-line SGGS commentary (`Commentary.sqlite`, SikhiDB `commentary_*`) | **Used with the written permission of Jatha Randhawa.** Not covered by §1; no reuse outside this dataset without Jatha Randhawa's permission. |
+| **Damdami Taksal · Sundar Gutka** | Damdami Taksal | 87 banis with vishraams from the Damdami Taksal *Sundar Gutka* app (SikhiDB `banis`), and works bearing its copyright notice | **Used with the written permission of Damdami Taksal.** Not covered by §1; no reuse outside this dataset without Damdami Taksal's permission. |
+| **Gian Singh (Chet)** | Gian Singh (Chet) | Full text of Sri Sarbloh Granth Sahib (Sikhi Gurbani Library); his help building the Sikhi app and cleaning up the English Faridkot Teeka (`a.ft_en` in the Sikhi Gurbani Library; `mahan-kosh-multilingual/data/reading-aids/faridkot/`) | **Used with his written permission.** Not covered by §1; no reuse of his Sarbloh Granth text outside this dataset without his permission. |
+| **Mahan Kosh** | Bhai Kahan Singh Nabha (1930, public domain); English edition **© Punjabi University, Patiala** | `Granths/Mahan_Kosh_Multilingual/`, `mahan-kosh-multilingual/`, `Granths/Mahan_Kosh_Dictionary/` | The 1930 Gurmukhi text is public domain. **The English text is Punjabi University, Patiala's, used with its written permission; it stays under Punjabi University's copyright** and is not under CC BY 4.0 or §1. Sikhi.io's own packaging, Hindi text and viewer are CC BY 4.0 (see each folder's `LICENSE`). |
+| **Translations & teekas** inside the Gurbani databases | Their translators and publishers | Faridkot Teeka; Prof. Sahib Singh's *Darpan*; Dr. Sant Singh Khalsa's English; Bhai Manmohan Singh's English (SGPC); Bhai Vir Singh; Dr. Ratan Singh Jaggi; Dr. Surinder Singh Kohli; Dr. Daljit Singh Jawa; and others named in each record | Credited by name in each record. Not covered by §1. Modern translations (e.g. Sant Singh Khalsa, Manmohan Singh) are in copyright. |
+| **Digitizers** | Panjab Digital Library; Sri Satguru Jagjit Singh Ji E-Library ("Namdhari E-Library"); Internet Archive; Google Books | Scans that were OCR'd into this corpus | Their imprints and watermarks are kept where they appear. Google Books scans: non-commercial use, keep the attribution, no automated querying, per Google's usage guidelines. |
+| **Punjabi University, Patiala** (Publication Bureau) | Punjabi University, Patiala | The Mahan Kosh English edition, and its publications in this corpus (≥358 works) | **Used with the written permission of Punjabi University, Patiala.** They stay under the University's copyright; no reuse outside this dataset without its permission. |
+| **Original publishers & copyright holders** | SGPC; Language Department Punjab; Bhai Vir Singh Sahit Sadan; Damdami Taksal; Bhai Sahib Randhir Singh Trust; Guru Nanak Foundation, Bhatinda; Oxford University Press; Human Rights Watch; ProQuest/UMI | Works bearing their notices (see the audit below) | Their notices are kept with each work. Not covered by §1. |
+| **Web sources** in `sikhi-io-d1/` | SikhiWiki; Gurbani.org; Sikh web archives | `sikhiwiki_articles`, `gurbani_org_posts`, `web_archive_entries`, `gallery_images` | Each site's own license applies; see `LICENSE.md` §4. |
+| **Named authors** | The 86 authors in the [index](#full-index-of-the-115-top-level-collections), their estates and publishers | Their folders | Their rights are reserved to them. |
 
-| Granth | Lines |
-| :--- | ---: |
-| Sri Dasam Granth Sahib | 68,949 |
-| Sri Guru Granth Sahib Ji | 60,610 |
-| Sri Sarbloh Granth Sahib (complete) | 35,994 |
-| Vaaran Bhai Gurdas Ji | 7,950 |
-| Kabit Savaiye Bhai Gurdas Ji | 2,762 |
-| Bhai Nand Lal Ji | 2,559 |
-| Bhai Gurdas Singh Ji | 352 |
-| Rehatname | 238 |
-| **Total** | **179,414** |
+**No endorsement.** The organizations and people above are credited because their work is used. None of them has reviewed, sponsored or endorsed SikhLibrary unless this page says so, and their names and marks (including *BaniDB*, *Shabad OS*, *Gursevak* and *GurmatVeechar*) belong to them. "BaniDB-compatible" and "BaniDB format" describe compatibility only.
 
-```python
-from huggingface_hub import hf_hub_download
-db = hf_hub_download("jsdosanj/SikhLibrary", "Gurbani/SikhiLibrary/GurbaniIndex.sqlite", repo_type="dataset")
-```
+### 4. Rights-holders identified in the corpus
 
-Its own [`README.md`](Gurbani/SikhiLibrary/README.md) lists the tables, what is new in 1.2.0, and the sources to credit.
+Most scanned books keep their original title and copyright page in the OCR'd text, so each work's publisher, digitizer or rights-holder can be read from the work itself. The table below comes from a corpus-wide scan (September 2026) of file-name source tags (complete) and of the opening pages of 9,086 of the 10,799 `.txt` files (so its figures are **lower bounds**).
+
+| Source (as printed in the work) | Role | Works found |
+| :--- | :--- | ---: |
+| GurmatVeechar.com | digitization / hosting (in filename) | 509 *(exact)* |
+| sikhi.io | production-library source tag (in filename) | 4 bulk archives *(exact)* |
+| Punjabi University, Patiala (Publication Bureau) | original publisher | ≥358 |
+| SGPC (Shiromani Gurdwara Parbandhak Committee) | original publisher | ≥194 |
+| Panjab Digital Library (panjabdigilib.org) | digitizer | ≥158 |
+| Bhai Vir Singh Sahit Sadan, New Delhi | copyright holder | ≥137 |
+| Damdami Taksal | publisher / copyright holder | ≥78 |
+| Sri Satguru Jagjit Singh Ji E-Library ("**Namdhari E-Library**," `NamdhariElibrary@gmail.com`) | digitizer | ≥40 |
+| Language Department, Punjab | original publisher | ≥37 |
+| Oxford University Press | copyright holder (modern academic monographs) | ≥32 |
+| Human Rights Watch | copyright holder (modern reports — see caution) | ≥32 |
+| Bhai Sahib Randhir Singh Trust | copyright holder | ≥26 |
+| Internet Archive | digitizer | ≥23 |
+| Google Books | digitizer | ≥20 |
+| Guru Nanak Foundation, Bhatinda | copyright holder | ≥11 |
+| ProQuest LLC / UMI Dissertation Publishing | copyright holder (doctoral dissertation) | ≥1 |
+
+This table records what is printed or embedded in the files themselves; it is not a legal opinion on the copyright status of any work.
+
+### 5. Your obligations, and the attribution requirement
+
+**Follow each organization's license.** This dataset is a gathering of many organizations' work. When you use data that came from an organization — BaniDB, Gursevak, Shabad OS, Jatha Randhawa, Damdami Taksal, Punjabi University, Gian Singh (Chet), a publisher or an author — you must follow **that organization's license or terms** (§3 and [`LICENSE.md`](LICENSE.md)) as well as this dataset's. The permissions listed above were given to the maintainers for this dataset; they do not pass to you. If you want to use an organization's data outside this dataset, ask that organization.
+
+Any use of this dataset must credit:
+- **SikhLibrary** (`jsdosanj/SikhLibrary`) on Hugging Face, with a link to this page and the license, and a note of any changes you made;
+- **Original dataset:** Bhai Jasvant Singh ਪੰਛੀ (Panchhi), whose personal library of over 1,200 books, and his translations of it, are the foundation of this corpus;
+- **Contributing sources:** Sikhi.io; **BaniDB (Khalis Foundation)**, with the BaniDB logo where its terms ask for it; **GursevakDB (Gursevak — Dear Father Brave Guru God's Slave Society)**; **Shabad OS**; **GurmatVeechar.com**; SGPC; Sri Satguru Jagjit Singh Ji E-Library ("Namdhari E-Library"); Punjabi University Patiala (Publication Bureau); Panjab Digital Library; Language Department Punjab; Internet Archive; Google Books;
+- **the original author, translator, publisher and digitizer of each individual work you use**, as printed in that work and listed in §3;
+- the folder-specific credits in §3 and in each folder's own `README.md`, `LICENSE` or `CREDITS.txt`.
+
+Suggested credit line: *"Contains material from SikhLibrary (huggingface.co/datasets/jsdosanj/SikhLibrary), compiled by Bhai Jasvant Singh Panchhi and Sukhjeet Singh Sodhi, LLB (Hons), with Gurbani data from GursevakDB (Gursevak), Shabad OS and BaniDB (Khalis Foundation). Compilation licensed CC BY-NC-ND 4.0; individual works © their respective owners."*
+
+### 6. No warranty
+
+The dataset is provided **as is**, without warranty of any kind, including any warranty that a work's copyright status is as described. To the extent the law allows, the maintainers are not liable for any use of it. This card is not legal advice.
+
+---
+
+## 📮 Rights-holders: Notice & Takedown
+
+**Any organization or author can ask for the removal of texts it owns** — or for a corrected credit or a license discussion — and we will act on it. **You do not need to send a formal legal notice**, and you may write privately.
+
+**Write to:** `akaal@sikhi.io` with *"SikhLibrary rights notice"* in the subject, or open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) if you prefer to raise it publicly. Please include:
+1. the work, and your relationship to it (owner, or authorized to act for the owner);
+2. where it is in this dataset (folder or file path, or a link);
+3. what you want: removal, a corrected credit, or a license discussion;
+4. how to contact you.
+
+A notice under the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512(c)(3)) is also accepted at the same address; it should add your physical or electronic signature, a statement of good-faith belief that the use is not authorized, and a statement, under penalty of perjury, that the notice is accurate and that you are authorized to act for the owner. You may instead notify Hugging Face, which hosts this dataset, through its own [content policy and DMCA process](https://huggingface.co/content-guidelines).
+
+**What we do:**
+- We acknowledge a notice within **3 business days**.
+- While we check it, we **restrict access** to the work (it is removed from the current revision and new access requests for it are not served).
+- If the claim is substantiated, the work is **deleted, including from the repository's history**, so that it cannot be fetched from an earlier commit, and we record the removal (work, date, reason) in the [Version History](#-version-history) without republishing the work.
+- If you uploaded something that was removed and believe that was a mistake, reply to the removal notice with your reasons; we will reconsider, and follow the counter-notice procedure of 17 U.S.C. § 512(g) where a DMCA notice was involved.
 
 ---
 
 ## 🔬 Data Quality & Known Limitations
 
-- **Word count methodology:** the ~1.07 billion figure is not a raw exact count — recomputing every file exactly was impractical at this scale — but a **ratio estimator**: the words-per-byte ratio measured on a random sample of 1,500 of the 10,797 `.txt` files (135.8M sampled words / 1.27 GB sampled bytes) was applied to the exact total byte size of all `.txt` files (9.43 GB), giving **~1.01 billion words** (95% bootstrap CI: 940M–1,087M) for the plain-text corpus, **plus ~60.9 million words** independently measured by fully parsing six representative Mahan Kosh JSON files and applying that ratio to the folder's exact 723 MB size. This method was used deliberately in place of the historical self-reported figure (758M → 808M), which — as the [Version History](#-version-history) documents — was never recomputed after two major content expansions and had become substantially stale.
+- **Word count methodology:** the ~1.07 billion figure is not a raw exact count — recomputing every file exactly was impractical at this scale — but a **ratio estimator**: the words-per-byte ratio measured on a random sample of 1,500 of the 10,797 `.txt` files (135.8M sampled words / 1.27 GB sampled bytes) was applied to the exact total byte size of all `.txt` files (9.43 GB), giving **~1.01 billion words** (95% bootstrap CI: 940M–1,087M) for the plain-text corpus, **plus ~60.9 million words** independently measured by fully parsing six representative Mahan Kosh JSON files and applying that ratio to the folder's exact 723 MB size. It replaces the earlier self-reported figure (808M), which predated the 2026 expansions.
 - **OCR artifacts:** most text was produced by an automated OCR/extraction pipeline (OpenRouter, Gemini and Gemma family models) and has not been manually proofread. Expect occasional misrecognized characters, broken diacritics, or page-break artifacts, especially in older scanned books.
 - **Machine translation:** non-English, non-Gurmukhi language editions in the Mahan Kosh (25 of 28 languages) are machine translations of the English spine, not independent scholarly translations — do not cite them as Bhai Kahan Singh Nabha's own words. Korean and Malay were fidelity-audited in September 2026; the rest have not been.
 - **Per-book JSON is not additional text:** each work's `extracted_pages.json` / `translated_pages.json` mirrors its sibling `.txt` file's content in a paginated structure — it is not independent text and was excluded from the word-count estimate to avoid double-counting.
-- **The copyright audit is a lower bound, not a ceiling:** the front-matter scan covered ~84% of `.txt` files (9,086 of 10,799); the true prevalence of each named source is at least as high as reported above.
-- **Sampled-value tags need double-checking**, not blind trust: thematic folders like "Historical Chronicles," "Research," or "Unknown Authors" mix material from many different original sources and copyright statuses — check the specific work's own front matter before assuming a folder-wide license status. Folder placement for the 730 works reclassified out of the former "General" bucket (see [Version History](#-version-history)) was assigned by an LLM reading each work's actual front matter, not by filename pattern-matching — high-precision but not infallible.
+- **Rights-holder counts are lower bounds:** the scan in [§4](#4-rights-holders-identified-in-the-corpus) read the opening pages of 84% of `.txt` files.
+- **Check each work, not its folder:** thematic folders such as "Historical Chronicles," "Research" and "Unknown Authors" hold works from many sources with different rights. Read a work's own front matter before relying on its status. 730 works were filed into folders by a language model reading their front matter; placement is accurate but not infallible.
 
 ---
 
-## 🤝 Future Collaboration & Contributions
+## 🕐 Version History
 
-This is a living dataset, actively synced from the sikhi.io / sikharchive.net production pipeline. We believe Sikh knowledge should be open and accessible to all.
+| Version | Date | Files | Highlights |
+| :--- | :--- | ---: | :--- |
+| **3.4.1** | 2026-11-23 | 28,165 | **Licensing, permissions & attribution.** Written permissions recorded for BaniDB (Khalis Foundation), Gursevak, Jatha Randhawa, Damdami Taksal, Gian Singh (Chet) and Punjabi University, Patiala; each organization's license stated in every README; new [`LICENSE.md`](LICENSE.md); [notice and takedown](#-rights-holders-notice--takedown). Removed `sikhi-io-d1/sikhi-scripture/sggs_sggsonline` (25,137 rows), whose source prohibits database extraction, including from stored history. |
+| **3.4** | 2026-11-19 | 28,165 | **The Sikhi Gurbani Library** (`Gurbani/SikhiLibrary/`): the Sikhi app's Gurbani database, 179,414 lines, with the complete Sri Sarbloh Granth Sahib, the Faridkot Teeka in English line by line, phonetic search, and Jatha Randhawa's *Gurbani Arth Bhandar*. |
+| **3.3** | 2026-11-11 | 28,159 | **SikhiDB** (`Gurbani/GursevakDB/`): a BaniDB-format SQLite of 190,238 lines on GursevakDB's text, with the *Gurbani Arth Bhandar* commentary, the Damdami Taksal *Sundar Gutka* banis and a BaniDB-compatible API server; Faridkot Teeka English mapped line by line. Gated access with an Access & AI Policy. |
+| **3.2** | 2026-10-29 | 28,131 | `sikhi-io-library/` (4,561 books from the sikhi.io library), `sikhi-io-d1/` (sikhi.io's public content tables) and a newer Mahan Kosh snapshot (`mahan-kosh-multilingual/`). |
+| **3.1** | 2026-09-16 | 23,366 | 2,475 works added from the sikhi.io library; corpus-wide word count and rights audit; every work filed under its author or subject. |
+| **3.0** | 2026-09-03 | 9,977 | The complete **Mahan Kosh** as structured JSON: 64,218 entries in 28 language and script editions, released in honour of Guru Tegh Bahadur Ji's 350th year of martyrdom. |
+| **2.1** | 2026-08-28 | 9,899 | Dasam Granth and Sarbloh Granth in 12 languages, the Faridkot Wala Teeka in 7, full text of *Sri Gur Pratap Suraj Granth* (11,180 pages), colonial-era histories, and reference corpora (Punjabi dictionary, katha transcripts, sakhis, Guru biographies). |
+| **2.0** | 2026-05-30 | 5,629 | Named-author archives: the library reorganized around the collected works of individual Sikh scholars, historians and saints. |
+| **2.0** | 2026-03-30 | 626 | First public release: Gurbani, steeks, granths, literature and research. |
 
-- **Continuous updates:** processing pipelines will keep adding `.txt` and `JSON` data as new manuscripts are localized and verified.
-- **Call for collaboration:** Panthic organizations, scholars, and developers are invited to contribute raw scans, new translations, unmapped historical teekas, or linguistic corpora — every contribution directly fuels the preservation effort at sikharchive.net.
-- **Corrections & rights concerns:** if you find an error in a text, want to contribute data, or are a rights-holder with a licensing concern, please open an [Issue or Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) on this repository.
+The dataset was published under CC BY 4.0 from 2026-03-30 to 2026-04-12 and has been under its current terms since; see [License, Copyright & Attribution](#-license-copyright--attribution).
 
 ---
 
-## 🙏 Acknowledgements & Gratitude
+## ❓ FAQ
+
+**Is SikhLibrary free?** Yes. Request access on this page; every request is read and approved by hand.
+
+**Can I use it to train or evaluate an AI model, or build a chatbot on it?** Not without written permission from the maintainers and from the organizations whose data you would use. Ask in the [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions).
+
+**Can I use SikhiDB in my Gurbani app?** Free, non-commercial apps can, under the terms in [Gurbani Databases for Apps](#-gurbani-databases-for-apps), including BaniDB's terms and each source's own permission for its text.
+
+**Whose license applies to a given text?** The license of the organization or author it came from, as listed in [`LICENSE.md`](LICENSE.md), plus this dataset's terms.
+
+**I own a work in this dataset. How do I have it removed?** Write to `akaal@sikhi.io`; see [Notice & Takedown](#-rights-holders-notice--takedown).
+
+**How do I cite it?** See [How to Cite](#-how-to-cite), and also credit the original source of each work you use.
+
+---
+
+## 🤝 Contributing
+
+SikhLibrary grows with the sikhi.io and sikharchive.net libraries. Panthic organizations, scholars and developers are welcome to contribute scans, translations, historical teekas and linguistic data, and to report errors in any text. Open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) to propose a contribution or a correction.
+
+---
+
+## 🙏 Acknowledgements
 
 This project is a culmination of decades of work by many organizations and individuals dedicated to digital preservation. We offer our deepest gratitude to:
 
@@ -578,9 +616,11 @@ This project is a culmination of decades of work by many organizations and indiv
 
 ---
 
-## 🔗 Companion / Upstream Repositories
+## 🔗 Related Resources
 
 - **[redroyals/mahan-kosh-multilingual](https://github.com/redroyals/mahan-kosh-multilingual)** (GitHub, by [Sikhi.io](https://sikhi.io)) — the canonical, actively-maintained home of the multilingual Mahan Kosh mirrored into this dataset at `Granths/Mahan_Kosh_Multilingual/`. Carries a live search viewer (`sikhi.io/dictionary`) and is where corrections, recovered Gurmukhi bodies, and real human translations should be contributed. The older English/Hindi-only Mahan Kosh text dump remains here under `Granths/Mahan_Kosh_Dictionary/`.
+- **[sikhi.io](https://sikhi.io)** — the Sikhi app and online library, where most of this corpus can be read, searched and listened to.
+- **[sikharchive.net](https://sikharchive.net)** — the Sikh Archive library and media project.
 
 ---
 
@@ -599,19 +639,13 @@ If you use this dataset in academic work, please cite it as:
 }
 ```
 
-And per the [Attribution requirement](#5-attribution-requirement) above, credit the specific original source(s) for any individual work you use.
+And per the [Attribution requirement](#5-your-obligations-and-the-attribution-requirement) above, credit the specific original source(s) for any individual work you use.
 
 ---
 
-## ✉️ Contact & Maintainers
+## 📬 Maintainers & Contact
 
 - **Bhai Jasvant Singh Panchhi (ਪੰਛੀ)** — Project Maintainer
 - **Sukhjeet Singh Sodhi, LLB (Hons)** — Sikhi.io, data & methodology
 
 For corrections and contributions, please use the [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions) tab on this repository. Rights-holders may write privately to `akaal@sikhi.io` — see [Notice & Takedown](#-rights-holders-notice--takedown).
-
----
-
-## 🗄️ sikhi.io D1 export (`sikhi-io-d1/`)
-
-Added 2026-10-29: public content tables exported from the Cloudflare D1 databases behind sikhi.io (gurbani-search, sikhi-colonial-archive, sikhi-gurbani, sikhi-io-prod, sikhi-scripture, sikhi-search, sikhidb), as Parquet (zstd) + JSONL.gz with Gurmukhi text unchanged; **54 tables, 6,054,868 rows** since `sggs_sggsonline` (25,137 rows) was removed in v3.4.1. Third-party content in these tables keeps its owners' rights (see [`LICENSE.md`](LICENSE.md) §4). This includes the **Faridkot Wala Teeka** exegesis shown on sikhi.io/exegesis (`sikhi-io-d1/sikhi-scripture/scripture_pages.*`, `text = 'faridkot'`), katha transcripts and glossary, SGGS multilingual pages, Mahan Kosh, Punjabi dictionary, library pages and search corpora. No user, account or analytics data is included. See [`sikhi-io-d1/README.md`](sikhi-io-d1/README.md) and [`sikhi-io-d1/manifest.json`](sikhi-io-d1/manifest.json) for per-table row counts and sources.
