@@ -25,6 +25,8 @@ license. If it differs from the dataset card, this file governs.
    ask that organization.
 3. **Keep the credits.** Keep every copyright notice, credit, `LICENSE` and `CREDITS.txt` file with any
    file you use, and credit the organization and the dataset as §6 describes.
+4. **Your use is your responsibility.** You are solely responsible for your use of the dataset and for
+   everything you build or publish with it. We are not liable for any use or misuse of it (§9–§11).
 
 ## 2. Our contributions: CC BY-NC-ND 4.0
 
@@ -36,8 +38,15 @@ Our contributions are licensed under the **Creative Commons Attribution-NonComme
    JSON layout, manifests, indexes);
 2. OCR transcriptions and extracted text we produced, to the extent they carry copyright of their own;
 3. translations, metadata, documentation and code written by us or by Sikhi.io for this dataset,
-   including `Gurbani/GursevakDB/merge_gursevakdb_v2.py`, `banidb_api.py` and `gurmukhi_ascii.py`;
+   including `Gurbani/GursevakDB/merge_gursevakdb_v2.py` and `gurmukhi_ascii.py`;
 4. the original works of Bhai Jasvant Singh Panchhi included here.
+
+**Additional AI permission.** As an additional permission beyond CC BY-NC-ND 4.0, we allow our
+contributions to be used, **non-commercially**, to train, fine-tune and evaluate AI models and to build
+embedding, search and retrieval (RAG) indexes and services, including ones that others can query, on
+the conditions in §7. Such models, indexes and services are not treated as modified or derived
+versions of our contributions. This permission covers only our contributions; it does not cover any
+work in §3 or §4, whose owners' licenses decide whether, and how, it may be used for AI.
 
 ## 3. Everything else: each owner's rights and license
 
@@ -102,8 +111,9 @@ Inc.) was removed on 2026-11-23, because its source prohibits database extractio
 
 Gurbani data courtesy of **BaniDB**, Khalis Foundation (<https://www.banidb.com>), used with permission. A copy of the BaniDB logo is kept at `assets/banidb-logo.png` so that it travels with the data.
 The BaniDB name and logo belong to the Khalis Foundation. Their use here acknowledges BaniDB as its
-terms require and does not mean that the Khalis Foundation endorses SikhLibrary. `banidb_api.py` is our
-independent re-implementation of BaniDB's public API for compatibility; it contains no BaniDB code.
+terms require and does not mean that the Khalis Foundation endorses SikhLibrary. For live Gurbani data,
+use BaniDB directly: its API is at `https://api.banidb.com/v2/`, under its Terms of Service
+(<https://www.banidb.com/tos/>); partnerships at <https://www.banidb.com/request-access/>.
 
 ## 6. How to credit
 
@@ -116,24 +126,81 @@ every organization whose data you use**, as named in §4 and in each folder's `R
 > (Gursevak), Shabad OS and BaniDB (Khalis Foundation). Compilation licensed CC BY-NC-ND 4.0; each
 > organization's data under its own license; individual works © their respective owners.
 
-## 7. Access terms
+## 7. Access and use terms
 
 Access is subject to the agreement accepted in the gated access form. It binds the person who
 accepts it, in addition to this file, and does not limit fair use, fair dealing or other exceptions in
 copyright law.
+
+**Permitted:** personal study, academic research, teaching, katha and parchar preparation,
+non-commercial Gurbani apps, and non-commercial AI and machine-learning use (training, fine-tuning and
+evaluating models; building embedding, search and retrieval indexes and services, including ones that
+others can query). Automated tools run under your own approved account are allowed.
+
+**Conditions on AI use:**
+1. it is non-commercial; commercial AI use needs written permission from us and from each organization
+   whose data you use;
+2. you follow the license or terms of every organization whose data you use; the written permissions
+   we hold (§4) were given for this dataset and do not extend to your model, index or service;
+3. your model, index or service does not make the corpus, or substantial parts of any work, available
+   for download, retrieval in bulk, or reproduction through its outputs;
+4. you do not present machine-generated text as Gurbani, or as the words of any author or organization
+   in this dataset, and you quote Gurbani exactly, with its source and ang;
+5. you credit SikhLibrary and your sources as §6 describes.
+
+**Not permitted** without written permission: commercial use; sharing your access or access token;
+re-hosting, mirroring or passing on the files.
 
 ## 8. Removal on request
 
 **Any organization, author or other rights-holder can ask for the removal of texts it owns**, a
 corrected credit, or a license discussion, by writing to **`akaal@sikhi.io`** (subject "SikhLibrary
 rights notice"), or in the dataset's Discussions. Notices under 17 U.S.C. § 512(c)(3) are accepted at the
-same address. We acknowledge within 3 business days, restrict access to the work while we check,
-and, if the claim is substantiated, delete it from the repository **including its stored history**.
-Hugging Face's own process is at <https://huggingface.co/content-guidelines>.
+same address. **We aim to respond to every notice, including DMCA notices, within 5 business days.**
+We may disable access to the work while we review the notice and, if the claim is substantiated, delete
+it from the repository **including its stored history**. Hugging Face's own process is at
+<https://huggingface.co/content-guidelines>.
 
-## 9. No warranty; no endorsement
+## 9. Disclaimer of warranties
 
-The dataset is provided **as is**, without warranty of any kind, including as to the copyright
-status of any work. To the extent the law allows, we are not liable for any use of it. The
-organizations and people named here are credited because their work is used; none has endorsed
-SikhLibrary unless stated, and their names and marks belong to them.
+The dataset, and everything in it, is provided **"as is" and "as available", without warranty of any
+kind**, express or implied, including warranties of accuracy (of Gurbani text, translations,
+transliterations, commentary, OCR, attributions or copyright status), completeness, merchantability,
+fitness for a particular purpose, title and non-infringement. This is in addition to the disclaimer in
+Section 5 of the CC BY-NC-ND 4.0 license.
+
+## 10. Limitation of liability
+
+To the fullest extent permitted by law, the maintainers, Sikhi.io, and the organizations and people who
+contributed to the dataset are **not liable** to you or to anyone else, under any theory (contract,
+tort including negligence, statute or otherwise), for any loss or damage of any kind (direct, indirect,
+incidental, special, consequential, exemplary or punitive, including loss of data, profits, goodwill or
+reputation) arising from or related to the dataset or **any use or misuse of it**, by you or by anyone
+who obtains data, models, indexes, apps, services or outputs from you, even if told such loss was
+possible. Where the law does not allow liability to be excluded, it is limited to the smallest amount
+the law allows.
+
+## 11. Your responsibility and indemnity
+
+You are solely responsible for your use of the dataset; for complying with this file, the dataset
+card, the license or terms of every organization whose data you use, and the law; and for everything
+you build or publish with it, including models, indexes, apps, services and their outputs. You agree to
+**defend, indemnify and hold harmless** the maintainers, Sikhi.io and the dataset's contributors against
+any claim, demand, loss, liability, damage, cost or expense (including reasonable legal fees) arising
+from your use or misuse of the dataset, from anything you build or publish with it, or from your breach
+of these terms or of any source's license.
+
+## 12. No endorsement; not a religious authority
+
+The organizations and people named here are credited because their work is used; none has endorsed
+SikhLibrary unless stated, and their names and marks belong to them. SikhLibrary is an independent
+research resource. It is not affiliated with, sponsored by or endorsed by the SGPC, the Akal Takht, any
+Takht or Gurdwara, or any other Sikh institution, and it is not a substitute for Sri Guru Granth Sahib
+Ji, the Panj Pyare, Granthis or qualified scholars.
+
+## 13. General
+
+These terms may be updated; the version in this file applies from its date, and continued use after an
+update means you accept it. If you breach them, your access ends, and your rights under the CC license
+end as its Section 6 provides. If any part of these terms is unenforceable, the rest still applies. A
+failure to enforce a term is not a waiver of it. This file is not legal advice.

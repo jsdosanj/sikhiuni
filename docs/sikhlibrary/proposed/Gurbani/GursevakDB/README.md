@@ -1,6 +1,6 @@
 # GursevakDB foundation, in BaniDB's format (SikhiDB)
 
-SikhiDB gathers the work of several organizations: GursevakDB (Gursevak), BaniDB (Khalis Foundation), Shabad OS, Jatha Randhawa and Damdami Taksal. **Each organization's data stays under its own licence, and you must follow the licence of every organization whose data you use** (see *Sources, credits and licences* at the end of this file, and the dataset's `LICENSE.md`). The maintainers' own work here (the merge, links, schema and scripts) is CC BY-NC-ND 4.0. Access is subject to the dataset's [Access & AI Policy](../../README.md#-access--ai-policy): no AI agents, scraping, AI training or public retrieval indexes without written permission. Using SikhiDB in a Gurbani app: see the main card's *Using SikhiDB in Gurbani Apps*.
+SikhiDB gathers the work of several organizations: GursevakDB (Gursevak), BaniDB (Khalis Foundation), Shabad OS, Jatha Randhawa and Damdami Taksal. **Each organization's data stays under its own licence, and you must follow the licence of every organization whose data you use** (see *Sources, credits and licences* at the end of this file, and the dataset's `LICENSE.md`). The maintainers' own work here (the merge, links, schema and scripts) is CC BY-NC-ND 4.0. Access and use, including non-commercial AI training, evaluation and retrieval, are subject to the dataset's [Access & Use Policy](../../README.md#-access--use-policy); the maintainers are not liable for any use or misuse of the data. Using SikhiDB in a Gurbani app: see the main card's *Gurbani Databases for Apps*. For a live, maintained Gurbani API, use [BaniDB](https://www.banidb.com) directly from the Khalis Foundation (`https://api.banidb.com/v2/`).
 
 ## Version 2 (2026-11-11): Randhawa commentary and banis merged in
 
@@ -57,9 +57,7 @@ The same rules are the Sikhi app's (GurmukhiAscii.swift); the two give the same 
 
 ## Version 1 (2026-10-29)
 
-`gursevakdb-banidb.sqlite` (v2: about 800 MB; v1 was 680 MB; called **SikhiDB** in the main dataset card) was built from github.com/gursevak/gursevakdb plus the BaniDB-format database. It speaks the BaniDB v2 API with the server in this folder (`banidb_api.py`, needs `gurmukhi_ascii.py` beside it; Python standard library only):
-
-    python3 banidb_api.py --db gursevakdb-banidb.sqlite --port 8787
+`gursevakdb-banidb.sqlite` (v2: about 800 MB; v1 was 680 MB; called **SikhiDB** in the main dataset card) was built from github.com/gursevak/gursevakdb plus the BaniDB-format database. It uses BaniDB's v2 database format, so its tables can be queried with SQL the same way. For BaniDB's own live API, see [banidb.com](https://www.banidb.com) (`https://api.banidb.com/v2/`).
 
 * Guru Granth Sahib (60,610 lines) and Dasam Granth (68,949) are GursevakDB's text, pagination, shabad grouping and pause marks. Other granths are carried over unchanged.
 * A GursevakDB line that matches an existing line keeps its BaniDB verse id and shabad id (60,342 of 60,610 SGGS lines; 60,793 of 68,949 Dasam lines). The rest get new ids (3,000,000+ SGGS, 4,000,000+ Dasam). Every line has `uid`, GursevakDB's own id.
@@ -75,7 +73,7 @@ The same rules are the Sikhi app's (GurmukhiAscii.swift); the two give the same 
 - `report-v2.json` — v2 merge counts.
 - `bani-links-review.csv` — every fuzzy/partial bani link (score, GursevakDB pankti, linked line) and every unlinked pankti.
 - `merge_gursevakdb_v2.py` — the v2 merge script.
-- `banidb_api.py`, `gurmukhi_ascii.py` — the BaniDB v2-compatible API server for this database.
+- `gurmukhi_ascii.py` — the Unicode-to-legacy-font (Gurbani Akhar) converter used to make the `gurmukhi` columns.
 - `report.json` — v1 build report (match/remap counts).
 - `source-csv/` — the unmodified GursevakDB verse CSVs from github.com/gursevak/gursevakdb that the database was built from.
 - `CREDITS.txt` — GursevakDB's acknowledgements; keep with any redistribution.
@@ -95,7 +93,7 @@ maintainers for SikhLibrary; they do not pass to you.
 | **Jatha Randhawa · Gurbani Arth Bhandar** (Sant Hari Singh Ji Randhawe Wale) | `commentary_entries`, `commentary_lines`, `randhawa` translations | All rights reserved; **used with Jatha Randhawa's written permission** |
 | **Damdami Taksal · Sundar Gutka** (the Sundar Gutka app) | `banis`, `bani_blocks`, `bani_verses` for the 87 Gutka banis | All rights reserved; **used with Damdami Taksal's written permission** |
 | **Translators** | Manmohan Singh (`ms`), the Dasam English, and the others named in `translations` | Each translator's or publisher's rights |
-| **Sikhi.io** | The merge, links, `banidb_api.py`, `gurmukhi_ascii.py`, `merge_gursevakdb_v2.py` | CC BY-NC-ND 4.0, as the dataset's `LICENSE.md` §2. `banidb_api.py` is an independent re-implementation of BaniDB's public API; it contains no BaniDB code and is not provided or endorsed by the Khalis Foundation. |
+| **Sikhi.io** | The merge, links, `gurmukhi_ascii.py`, `merge_gursevakdb_v2.py` | CC BY-NC-ND 4.0, as the dataset's `LICENSE.md` §2 |
 
 <img src="https://www.banidb.com/wp-content/uploads/2019/05/full-banidb-logo.png" alt="BaniDB" width="140"> Gurbani data courtesy of BaniDB, Khalis Foundation, used with permission.
 

@@ -68,28 +68,32 @@ tags:
 - research
 pretty_name: "SikhLibrary: The World's Largest Sikh Text Dataset (1B+ Words of Gurbani, History & Scholarship)"
 extra_gated_heading: "Request access to SikhLibrary"
-extra_gated_description: "Access is free, for people, and approved by hand. Read the Access & AI policy in the dataset card before you ask."
+extra_gated_description: "Access is free and approved by hand. Read the Access & Use Policy and the License section of the dataset card before you ask."
 extra_gated_prompt: >-
-  SikhLibrary is offered for personal study, academic research and seva. The maintainers' own contributions are licensed
-  under CC BY-NC-ND 4.0; every other work in it belongs to its own rights-holder and is not licensed to you by the maintainers
-  (see LICENSE.md). These terms are an agreement between you and the maintainers, in addition to those licenses, and do not
-  limit fair use or fair dealing. By requesting access you agree that: (1) you are a person, and you will not give AI agents, crawlers, bots or
-  automated pipelines access to these files or pass them on to anyone else; (2) you will not use any part of the dataset
-  to train, fine-tune or evaluate an AI model, or to build an embedding, search or retrieval (RAG) index that others can query,
-  without written permission from the maintainers; (3) you will not re-host or mirror the files; (4) you will credit
-  the dataset and its original sources as the card and LICENSE.md describe, and keep every copyright notice, credit and
-  CREDITS/LICENSE file with any file you use; and (5) you will follow the license or terms of every organization whose data
-  you use (for example BaniDB's Terms of Service), use third-party works only for non-commercial study and research, and get
-  the rights-holder's permission for anything more. Access that breaks these terms will be revoked.
+  SikhLibrary is offered for study, research, education, seva and non-commercial AI and software development. The
+  maintainers' own contributions are licensed under CC BY-NC-ND 4.0, with the additional AI permission stated in the
+  card; every other work in it belongs to its own organization or author, stays under that owner's license, and is not
+  licensed to you by the maintainers (see LICENSE.md). These terms are an agreement between you and the maintainers,
+  in addition to those licenses, and do not limit fair use or fair dealing. By requesting access you agree that:
+  (1) you will not share your access or access token, or re-host, mirror or pass on the files, and you will not
+  publish the corpus or substantial parts of any work through a download, an API or a model's outputs; (2) your use,
+  including any AI model, embedding, search or retrieval index, application or service you build, will be
+  non-commercial unless you have written permission, and will follow the license or terms of every organization whose
+  data you use; (3) you will not present machine-generated text as Gurbani or as the words of any author or
+  organization in this dataset; (4) you will credit the dataset and its sources as the card and LICENSE.md describe,
+  and keep every copyright notice, credit and CREDITS/LICENSE file; and (5) you are solely responsible for your use
+  and its results, the dataset is provided as is, the maintainers are not liable for any use or misuse of it, and you
+  will indemnify them against claims arising from your use, as LICENSE.md sets out. Access that breaks these terms
+  will be revoked.
 extra_gated_fields:
   "Full name": text
   "Affiliation (institution, organization, sangat, or independent)": text
   "How will you use the dataset?": text
-  "I am a person, not an automated agent, and I will not give AI agents, crawlers or bots access to these files": checkbox
-  "I will not use the dataset to train, fine-tune or evaluate AI models, or to build a retrieval index served to others, without written permission": checkbox
-  "I will not re-host, mirror or pass on the files to anyone else": checkbox
-  "I agree to the license terms in the dataset's LICENSE file (Creative Commons BY-NC-ND for the maintainers' contributions) and the attribution requirements in the card": checkbox
-  "I understand that each organization's data in this dataset stays under that organization's own license, which I must follow, and that third-party works are not licensed to me by the maintainers and are for non-commercial study and research only": checkbox
+  "I will not share my access or token, and will not re-host, mirror or pass on the files": checkbox
+  "My use, including any AI model, index or service, will be non-commercial unless I have written permission": checkbox
+  "I will follow the license or terms of every organization whose data I use, and credit the dataset and its sources": checkbox
+  "I will not present machine-generated text as Gurbani or as the words of any author or organization in this dataset": checkbox
+  "I am solely responsible for my use and its results; the dataset is provided as is; the maintainers are not liable for any use or misuse of it; and I will indemnify them against claims arising from my use": checkbox
 extra_gated_button_content: "Request access"
 ---
 
@@ -106,7 +110,7 @@ extra_gated_button_content: "Request access"
 [![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-SikhLibrary-yellow)](https://huggingface.co/datasets/jsdosanj/SikhLibrary)
 [![Version](https://img.shields.io/badge/Version-3.4.1-informational)](#-version-history)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0%20%2B%20source%20licenses-lightgrey)](LICENSE.md)
-[![Access](https://img.shields.io/badge/Access-Free%2C%20approved%20by%20hand-orange)](#-access--ai-policy)
+[![Access](https://img.shields.io/badge/Access-Free%2C%20approved%20by%20hand-orange)](#-access--use-policy)
 
 [![Words](https://img.shields.io/badge/Words-1.07%20billion-success)](#-at-a-glance)
 [![Works](https://img.shields.io/badge/Works-3%2C616%2B-success)](#-at-a-glance)
@@ -134,7 +138,7 @@ It was built so that Sikh scholars, students, educators, kathavachaks and Gurban
 
 > **A gathering of the Panth's khajana (ਖ਼ਜ਼ਾਨਾ).** SikhLibrary brings together texts, databases and translations made and kept by many Sikh organizations, scholars and digitizers. Each of them keeps its own rights and its own license. **If you use data from an organization through this dataset, you are bound by that organization's license or terms**, listed in [License, Copyright & Attribution](#-license-copyright--attribution) and in [`LICENSE.md`](LICENSE.md), as well as by this dataset's own terms. Any organization can ask for the removal of texts it owns by writing to **`akaal@sikhi.io`**.
 
-**Who it is for:** researchers in Sikh studies, religious studies and South Asian history; students and teachers of Gurbani and Punjabi; Gurbani and Sikh-education app developers; and the sangat. Access is free and approved by hand; AI training, AI agents and scraping require written permission (see [Access & AI Policy](#-access--ai-policy)).
+**Who it is for:** researchers in Sikh studies, religious studies and South Asian history; students and teachers of Gurbani and Punjabi; Gurbani and Sikh-education app developers; and the sangat. Access is free and approved by hand. Non-commercial AI training, evaluation and retrieval (RAG) are welcome, under the conditions in the [Access & Use Policy](#-access--use-policy).
 
 ### Contents
 - [At a Glance](#-at-a-glance)
@@ -144,7 +148,7 @@ It was built so that Sikh scholars, students, educators, kathavachaks and Gurban
 - [Gurbani Databases for Apps](#-gurbani-databases-for-apps)
 - [The sikhi.io Database Export](#-the-sikhiio-database-export)
 - [Access & Loading](#-access--loading)
-- [Access & AI Policy](#-access--ai-policy)
+- [Access & Use Policy](#-access--use-policy)
 - [License, Copyright & Attribution](#-license-copyright--attribution)
 - [Rights-holders: Notice & Takedown](#-rights-holders-notice--takedown)
 - [Data Quality & Known Limitations](#-data-quality--known-limitations)
@@ -171,7 +175,7 @@ It was built so that Sikh scholars, students, educators, kathavachaks and Gurban
 | **Formats** | UTF-8 `.txt`, structured OCR `JSON`, `JSONL`, Parquet, SQLite |
 | **Gurbani databases** | **SikhiDB** (BaniDB-compatible SQLite, 190,238 lines) and the **Sikhi Gurbani Library** (the Sikhi app's database, 179,414 lines incl. the complete Sri Sarbloh Granth Sahib); see [Gurbani Databases for Apps](#-gurbani-databases-for-apps) |
 | **License** | Maintainers' compilation: [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/); each organization's data under its own license; see [`LICENSE.md`](LICENSE.md) |
-| **Access** | Free, gated, approved by hand; no AI training, AI agents or scraping without written permission |
+| **Access** | Free, gated, approved by hand; non-commercial research, apps and AI use (training, evaluation, RAG) permitted under the [Access & Use Policy](#-access--use-policy) |
 | **Version** | 3.4.1 (November 23, 2026) |
 
 ---
@@ -300,21 +304,25 @@ FROM bani_blocks k LEFT JOIN bani_verses bv ON bv.bani_id = k.bani_id AND bv.pos
 WHERE k.bani_id = (SELECT bani_id FROM banis WHERE token = 'bani_comma_rehras') ORDER BY k.pos;
 ```
 
-#### 2b. Or serve BaniDB's API from it
+#### 2b. Or use BaniDB directly, from the Khalis Foundation
 
-`Gurbani/GursevakDB/banidb_api.py` (with `gurmukhi_ascii.py` beside it) is a single-file server, Python standard library only. It answers the same paths, parameters and JSON as `https://api.banidb.com/v2`: angs, shabads, random, sources, writers, raags, and search types 0–7. An app built on BaniDB can point at it by changing the base URL.
+If your app needs a live, maintained Gurbani API rather than a local file, use **BaniDB** itself. BaniDB is run by the **Khalis Foundation** (a California non-profit) and the BaniDB Alliance; it powers SikhiToTheMax, iGurbani and the captions broadcast from Sri Darbar Sahib, and every change to it is peer-reviewed.
 
-```bash
-python3 banidb_api.py --db gursevakdb-banidb.sqlite --port 8787
-curl "http://127.0.0.1:8787/v2/angs/1/G"
-curl "http://127.0.0.1:8787/v2/search/ssnh?searchtype=0"   # first letters, legacy-font or Unicode
-```
-
-Run it for your own app. A public endpoint that serves the database to others is a retrieval service, so it needs permission (see the [Access & AI Policy](#-access--ai-policy)). `banidb_api.py` is an independent re-implementation of BaniDB's public API shape for compatibility; it is not BaniDB's code and is not provided or endorsed by the Khalis Foundation.
+- **API:** `https://api.banidb.com/v2/`, for example:
+  ```bash
+  curl "https://api.banidb.com/v2/angs/1/G"                           # Ang 1 of Sri Guru Granth Sahib Ji
+  curl "https://api.banidb.com/v2/shabads/1"                          # a shabad by id
+  curl "https://api.banidb.com/v2/search/ssnh?searchtype=1&source=G"  # first-letter search
+  curl "https://api.banidb.com/v2/banis"                              # the list of banis
+  curl "https://api.banidb.com/v2/hukamnamas/today"                   # today's Hukamnama
+  ```
+  SikhiDB's `verse_id` and `shabad_id` match BaniDB's for 60,342 of 60,610 Sri Guru Granth Sahib lines, so an app can move between the two.
+- **Terms:** BaniDB's [Terms of Service](https://www.banidb.com/tos/) and [Non-Profit Open Software License 3.0](https://www.banidb.com/nposl/) govern its use, including credit to BaniDB with its logo in your project.
+- **Partnership and corrections:** [become a BaniDB partner](https://www.banidb.com/request-access/), read the API code at [github.com/KhalisFoundation/banidb-api](https://github.com/KhalisFoundation/banidb-api), or contact the Khalis Foundation through [banidb.com/contact](https://www.banidb.com/contact/). Corrections to Gurbani, transliterations and translations are best made in BaniDB, where every app that uses it benefits.
 
 #### 3. Shipping it in an app
 
-- **License:** SikhiDB is part of this dataset. The maintainers' work in it (the merge, links, schema and scripts) is CC BY-NC-ND 4.0, plus the Access & AI Policy; its Gurbani text, translations and commentary belong to the sources credited below and in [`LICENSE.md`](LICENSE.md), and their terms apply too, including [BaniDB's Terms of Service](https://www.banidb.com/tos/) for the BaniDB data it carries (an app that shows BaniDB data must acknowledge BaniDB and show its logo). The permissions Gursevak, Jatha Randhawa and Damdami Taksal gave the maintainers do not extend to your app: **to ship their text or commentary, ask them as well as us.** To ship a **trimmed or modified copy** (most mobile apps will want a smaller file), or for any commercial use, ask first in [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions); we want SikhiDB in Gurbani apps and will help.
+- **License:** SikhiDB is part of this dataset. The maintainers' work in it (the merge, links, schema and scripts) is CC BY-NC-ND 4.0, plus the Access & Use Policy; its Gurbani text, translations and commentary belong to the sources credited below and in [`LICENSE.md`](LICENSE.md), and their terms apply too, including [BaniDB's Terms of Service](https://www.banidb.com/tos/) for the BaniDB data it carries (an app that shows BaniDB data must acknowledge BaniDB and show its logo). The permissions Gursevak, Jatha Randhawa and Damdami Taksal gave the maintainers do not extend to your app: **to ship their text or commentary, ask them as well as us.** To ship a **trimmed or modified copy** (most mobile apps will want a smaller file), or for any commercial use, ask first in [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions); we want SikhiDB in Gurbani apps and will help.
 - **Credit in your app:** GursevakDB (Gursevak, gursevak.com), Shabad OS, BaniDB (Khalis Foundation), the translators of any translation you show, Jatha Randhawa · Gurbani Arth Bhandar (where you show the commentary), Damdami Taksal · Sundar Gutka (where you show its banis), and SikhLibrary. Ship `CREDITS.txt` with the file. Do not suggest that BaniDB, Gursevak or Shabad OS endorse your app.
 - **Size:** the FTS search indexes are a large part of the file. An app that searches with its own index or with SQL `LIKE` on `first_letters` can work from a smaller copy (ask, as above).
 - **Ids:** `verse_id` and `shabad_id` match BaniDB's wherever GursevakDB's line matches BaniDB's (60,342 of 60,610 SGGS lines). Every line also has `uid`, GursevakDB's own line id; use it as the key to follow a line from one SikhiDB version to the next.
@@ -404,27 +412,31 @@ hf download jsdosanj/SikhLibrary --repo-type dataset \
 
 ---
 
-## 🔒 Access & AI Policy
+## 🔒 Access & Use Policy
 
-SikhLibrary holds Gurbani, the life's work of Sikh scholars and saints, and copyrighted editions shared for study. It is offered **to people**, for study, research and seva.
+SikhLibrary holds Gurbani, the life's work of Sikh scholars and saints, and editions shared by their publishers. It is offered for study, research, education, seva, Gurbani apps and non-commercial AI work.
 
-**The access agreement.** To get access you accept the terms in the request form. They are a contract between you and the maintainers, and they apply **in addition to** the licenses described in [License, Copyright & Attribution](#-license-copyright--attribution). Where the agreement is narrower than a license, the agreement governs **your** use of the copy you obtained here. It does not limit what you may do with a work you obtain elsewhere under its owner's open license (for example the Mahan Kosh from [its GitHub home](https://github.com/redroyals/mahan-kosh-multilingual)), or what fair use, fair dealing or any other exception in copyright law allows.
+**The access agreement.** To get access you accept the terms in the request form. They are a contract between you and the maintainers, and they apply **in addition to** the licenses described in [License, Copyright & Attribution](#-license-copyright--attribution) and in [`LICENSE.md`](LICENSE.md). Where the agreement is narrower than a license, the agreement governs **your** use of the copy you obtained here. It does not limit what you may do with a work you obtain elsewhere under its owner's open license (for example the Mahan Kosh from [its GitHub home](https://github.com/redroyals/mahan-kosh-multilingual)), or what fair use, fair dealing or any other exception in copyright law allows.
 
-**Not permitted** without written permission from the maintainers:
-- access by **AI agents, crawlers, bots or automated pipelines**, including passing your access on to one;
-- **training, fine-tuning or evaluating AI models** on any part of the dataset;
-- building an **embedding, search or retrieval (RAG) index** of it that others can query;
-- **re-hosting, mirroring or passing on** the files to anyone else. Point people to this page instead, so that each person accepts these terms and every rights-holder's notice stays attached.
+**Permitted:** personal study, academic research, teaching, katha and parchar preparation, non-commercial Gurbani apps (see [Gurbani Databases for Apps](#-gurbani-databases-for-apps)), and **non-commercial AI and machine-learning use**: training, fine-tuning and evaluating AI models, and building embedding, search and retrieval (RAG) indexes and services, including ones that others can query. Automated tools that you run under your own approved account are allowed.
 
-**How this is enforced:**
-- Access is **gated and approved by hand**. Every request is read by a maintainer, and the request form asks who you are, why you want access, and for your agreement to the terms above.
-- The Hugging Face file viewer and Dataset Viewer show file contents only to approved accounts. File names and this card stay public.
-- There is no public copy elsewhere on Hugging Face. The former *SikhLibrarian* Space, a public AI search over the corpus, was retired on 2026-11-11, and its storage bucket (which held an index of the text) is private.
+**Conditions on AI use:**
+1. **Non-commercial.** Commercial AI use (a paid product or service, or a model or index licensed for a fee) needs written permission from the maintainers and from each organization whose data you use.
+2. **Each organization's license.** The maintainers' permission covers only the maintainers' own contributions. For data that belongs to an organization or author, **you are responsible for making sure that its license or terms allow your use.** The written permissions the maintainers hold (BaniDB, Gursevak, Jatha Randhawa, Damdami Taksal, Gian Singh (Chet), Punjabi University) were given for this dataset and **do not extend to your model, index or service.**
+3. **No republication through the back door.** A model, index or service must not make the corpus, or substantial parts of any work, available for download, retrieval in bulk, or reproduction through its outputs.
+4. **Faithfulness to Gurbani.** Do not present machine-generated text as Gurbani, or as the words of any author or organization in this dataset. Quote Gurbani exactly, with its source and ang.
+5. **Credit.** Name SikhLibrary and the sources you used in your model card, documentation or about page.
+
+**Not permitted** without written permission: commercial use; sharing your access or access token; and **re-hosting, mirroring or passing on** the files. Point people to this page instead, so that each person accepts these terms and every rights-holder's notice stays attached.
+
+**How access works:**
+- Access is **gated and approved by hand**. Every request is read by a maintainer, and the request form asks who you are, how you will use the dataset, and for your agreement to these terms.
+- The Hugging Face file viewer and Dataset Viewer show file contents only to approved accounts. File names and this card are public.
 - Access that breaks these terms is revoked, and the maintainers may report the breach to the affected rights-holders.
 
-**Scope:** no setting can stop an approved person from copying files they have downloaded, and Hugging Face does not let a dataset owner set `robots.txt` or crawler headers. These terms are a condition of access, and we act on breaches.
+**Your responsibility.** You are solely responsible for how you use the dataset and for everything you build or publish with it, including models, indexes, apps, services and their outputs. **The maintainers are not liable for any use or misuse of the dataset**; see [Disclaimer, Limitation of Liability & Indemnity](#6-disclaimer-limitation-of-liability--indemnity).
 
-To ask for permission (for example, for a Gurbani app or a research model), open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions). Permission from the maintainers covers only what the maintainers own; for third-party works you also need the rights-holder's permission (see below).
+To ask for permission (for example, for commercial use), open a [Discussion](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions). Permission from the maintainers covers only what the maintainers own; for third-party works you also need the rights-holder's permission.
 
 ---
 
@@ -437,10 +449,12 @@ To ask for permission (for example, for a Gurbani app or a research model), open
 The maintainers' own contributions are licensed under **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)** (Attribution–NonCommercial–NoDerivatives). These are:
 - the **selection, arrangement and structure** of the collection (folders, file naming, per-book JSON layout, manifests);
 - the **OCR transcriptions and extracted text** the maintainers produced, to the extent they carry any copyright of their own;
-- **translations, metadata, indexes, scripts and documentation** written by the maintainers or by Sikhi.io for this dataset (including this card, `merge_gursevakdb_v2.py`, `banidb_api.py` and `gurmukhi_ascii.py`);
+- **translations, metadata, indexes, scripts and documentation** written by the maintainers or by Sikhi.io for this dataset (including this card, `merge_gursevakdb_v2.py` and `gurmukhi_ascii.py`);
 - the original works of **Bhai Jasvant Singh Panchhi** included here.
 
-Within that scope, **you may** download the files unmodified and use them for personal study, academic research and other non-commercial purposes, subject to the [Access & AI Policy](#-access--ai-policy). **You may not** use them commercially, or distribute a modified or derived version.
+Within that scope, **you may** download the files unmodified and use them for personal study, academic research and other non-commercial purposes, subject to the [Access & Use Policy](#-access--use-policy). **You may not** use them commercially, or distribute a modified or derived version of the files.
+
+**Additional AI permission.** As an additional permission beyond CC BY-NC-ND 4.0, the maintainers allow their contributions to be used, non-commercially, to train, fine-tune and evaluate AI models and to build embedding, search and retrieval indexes, on the conditions in the [Access & Use Policy](#-access--use-policy). Such models and indexes are not treated as modified or derived versions of the maintainers' contributions. This permission does not cover any third-party work (§2).
 
 ### 2. What the maintainers do *not* license: third-party works
 
@@ -461,7 +475,7 @@ Gurbani itself (Sri Guru Granth Sahib Ji, Sri Dasam Granth Sahib, Sri Sarbloh Gr
 
 | Source | Legal owner / steward | What is used, and where | Terms we follow |
 | :--- | :--- | :--- | :--- |
-| **BaniDB** ([banidb.com](https://www.banidb.com))<br><img src="https://www.banidb.com/wp-content/uploads/2019/05/full-banidb-logo.png" alt="BaniDB" width="140"> | **Khalis Foundation**, a California non-profit | The BaniDB v2 database format and API shape; English and transliteration carried in SikhiDB (`Gurbani/GursevakDB/`) and in `sikhi-io-d1/` | **Used with the written permission of the Khalis Foundation.** BaniDB data stays under BaniDB's [Terms of Service](https://www.banidb.com/tos/) and the [Non-Profit Open Software License 3.0](https://www.banidb.com/nposl/) they reference; **anyone who uses BaniDB data from this dataset must follow those terms**, including written acknowledgement of BaniDB and its logo in their project. Credit: *"Gurbani data courtesy of BaniDB, Khalis Foundation."* `banidb_api.py` is an independent re-implementation and contains no BaniDB code. |
+| **BaniDB** ([banidb.com](https://www.banidb.com))<br><img src="https://www.banidb.com/wp-content/uploads/2019/05/full-banidb-logo.png" alt="BaniDB" width="140"> | **Khalis Foundation**, a California non-profit | The BaniDB v2 database format and API shape; English and transliteration carried in SikhiDB (`Gurbani/GursevakDB/`) and in `sikhi-io-d1/` | **Used with the written permission of the Khalis Foundation.** BaniDB data stays under BaniDB's [Terms of Service](https://www.banidb.com/tos/) and the [Non-Profit Open Software License 3.0](https://www.banidb.com/nposl/) they reference; **anyone who uses BaniDB data from this dataset must follow those terms**, including written acknowledgement of BaniDB and its logo in their project. Credit: *"Gurbani data courtesy of BaniDB, Khalis Foundation."* For live Gurbani data, use BaniDB's own API (see [Gurbani Databases for Apps](#-gurbani-databases-for-apps)). |
 | **GursevakDB / Gursevak** ([gursevak.com](https://www.gursevak.com)) | **Dear Father Brave Guru God's Slave Society** ("Gursevak"), a registered charity | Guru Granth Sahib and Dasam Granth text, pagination, shabad grouping, vishraams and pronunciation tips (SikhiDB and the Sikhi Gurbani Library); unmodified verse CSVs in `Gurbani/GursevakDB/source-csv/` | **Used with the written permission of Gursevak.** Gursevak has published no open license, so its data may not be reused outside this dataset without Gursevak's own permission. `Gurbani/GursevakDB/CREDITS.txt` is Gursevak's own acknowledgement and **must stay with any copy.** Gursevak credits Baba Darshan Singh Ji Mallehwal, Bhai Manraj Singh Ji (Akal Design), Siri Guru Granth Sahib Academy Malaysia, Bhai Binod Singh Ji, Bhai Sant Singh Khalsa Ji and Bibi Inderpreet Kaur Ji (Darer Designs), with their sevadaars. |
 | **Shabad OS** ([shabados.com](https://shabados.com)) | **Shabad OS Organization and Contributors** | Base Gurbani database (v5.0.0-next.0) of the Sikhi Gurbani Library; SGGS per-ang content in `sikhi-io-d1/sikhi-gurbani/` | Code: MIT License, © Shabad OS Organization and Contributors. Texts: marked public domain by Shabad OS. We honour its integrity condition: Gurbani is not added to, deleted from or altered in a way that distorts it. |
 | **GurmatVeechar.com** ([gurmatveechar.com](https://www.gurmatveechar.com)) | GurmatVeechar.com | 509 works whose file names carry `(GurmatVeechar.com)`, e.g. the *Amir Bhandar* teeka | No license published. The `(GurmatVeechar.com)` tag is kept in every file name as its credit. Underlying works keep their authors' and publishers' rights. |
@@ -517,9 +531,17 @@ Any use of this dataset must credit:
 
 Suggested credit line: *"Contains material from SikhLibrary (huggingface.co/datasets/jsdosanj/SikhLibrary), compiled by Bhai Jasvant Singh Panchhi and Sukhjeet Singh Sodhi, LLB (Hons), with Gurbani data from GursevakDB (Gursevak), Shabad OS and BaniDB (Khalis Foundation). Compilation licensed CC BY-NC-ND 4.0; individual works © their respective owners."*
 
-### 6. No warranty
+### 6. Disclaimer, limitation of liability & indemnity
 
-The dataset is provided **as is**, without warranty of any kind, including any warranty that a work's copyright status is as described. To the extent the law allows, the maintainers are not liable for any use of it. This card is not legal advice.
+**As is.** The dataset, and everything in it, is provided **"as is" and "as available", without warranty of any kind**, express or implied, including warranties of accuracy (of Gurbani text, translations, transliterations, commentary, OCR, attributions or copyright status), completeness, merchantability, fitness for a particular purpose, title and non-infringement. This is in addition to the disclaimer in Section 5 of the CC BY-NC-ND 4.0 license.
+
+**No liability.** To the fullest extent permitted by law, the maintainers, Sikhi.io, and the organizations and people who contributed to the dataset are **not liable** to you or to anyone else, under any theory (contract, tort including negligence, statute or otherwise), for any loss or damage of any kind (direct, indirect, incidental, special, consequential, exemplary or punitive, including loss of data, profits, goodwill or reputation) arising from or related to the dataset or **any use or misuse of it**, by you or by anyone who obtains data, models, indexes, apps, services or outputs from you, even if told such loss was possible. Where the law does not allow liability to be excluded, it is limited to the smallest amount the law allows.
+
+**Your responsibility and indemnity.** You are solely responsible for your use of the dataset; for complying with this card, `LICENSE.md`, the license or terms of every organization whose data you use, and the law; and for everything you build or publish with it. You agree to **defend, indemnify and hold harmless** the maintainers, Sikhi.io and the dataset's contributors against any claim, demand, loss, liability, damage, cost or expense (including reasonable legal fees) arising from your use or misuse of the dataset, from anything you build or publish with it, or from your breach of these terms or of any source's license.
+
+**Not a religious authority.** SikhLibrary is an independent research resource. It is not affiliated with, sponsored by or endorsed by the SGPC, the Akal Takht, any Takht or Gurdwara, or any other Sikh institution, and it is not a substitute for Sri Guru Granth Sahib Ji, the Panj Pyare, Granthis or qualified scholars. Verify Gurbani against authoritative sources.
+
+**General.** These terms may be updated; the version on this page applies from its date, and continued use after an update means you accept it. If you breach them, your access ends, and your rights under the CC license end as its Section 6 provides. If any part of these terms is unenforceable, the rest still applies. A failure to enforce a term is not a waiver of it. This card is not legal advice.
 
 ---
 
@@ -536,8 +558,8 @@ The dataset is provided **as is**, without warranty of any kind, including any w
 A notice under the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512(c)(3)) is also accepted at the same address; it should add your physical or electronic signature, a statement of good-faith belief that the use is not authorized, and a statement, under penalty of perjury, that the notice is accurate and that you are authorized to act for the owner. You may instead notify Hugging Face, which hosts this dataset, through its own [content policy and DMCA process](https://huggingface.co/content-guidelines).
 
 **What we do:**
-- We acknowledge a notice within **3 business days**.
-- While we check it, we **restrict access** to the work (it is removed from the current revision and new access requests for it are not served).
+- We aim to respond to every notice, including DMCA notices, within **5 business days**.
+- While we review it, we may **disable access** to the work by removing it from the current revision.
 - If the claim is substantiated, the work is **deleted, including from the repository's history**, so that it cannot be fetched from an earlier commit, and we record the removal (work, date, reason) in the [Version History](#-version-history) without republishing the work.
 - If you uploaded something that was removed and believe that was a mistake, reply to the removal notice with your reasons; we will reconsider, and follow the counter-notice procedure of 17 U.S.C. § 512(g) where a DMCA notice was involved.
 
@@ -558,7 +580,7 @@ A notice under the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512(c)(3)
 
 | Version | Date | Files | Highlights |
 | :--- | :--- | ---: | :--- |
-| **3.4.1** | 2026-11-23 | 28,165 | **Licensing, permissions & attribution.** Written permissions recorded for BaniDB (Khalis Foundation), Gursevak, Jatha Randhawa, Damdami Taksal, Gian Singh (Chet) and Punjabi University, Patiala; each organization's license stated in every README; new [`LICENSE.md`](LICENSE.md); [notice and takedown](#-rights-holders-notice--takedown). Removed `sikhi-io-d1/sikhi-scripture/sggs_sggsonline` (25,137 rows), whose source prohibits database extraction, including from stored history. |
+| **3.4.1** | 2026-11-23 | 28,165 | **Licensing, permissions & attribution.** Written permissions recorded for BaniDB (Khalis Foundation), Gursevak, Jatha Randhawa, Damdami Taksal, Gian Singh (Chet) and Punjabi University, Patiala; each organization's license stated in every README; new [`LICENSE.md`](LICENSE.md); [notice and takedown](#-rights-holders-notice--takedown). Removed `sikhi-io-d1/sikhi-scripture/sggs_sggsonline` (25,137 rows), whose source prohibits database extraction, including from stored history. Non-commercial AI training, evaluation and retrieval permitted under the [Access & Use Policy](#-access--use-policy); liability and indemnity terms added; `banidb_api.py` withdrawn in favour of BaniDB's own API. |
 | **3.4** | 2026-11-19 | 28,165 | **The Sikhi Gurbani Library** (`Gurbani/SikhiLibrary/`): the Sikhi app's Gurbani database, 179,414 lines, with the complete Sri Sarbloh Granth Sahib, the Faridkot Teeka in English line by line, phonetic search, and Jatha Randhawa's *Gurbani Arth Bhandar*. |
 | **3.3** | 2026-11-11 | 28,159 | **SikhiDB** (`Gurbani/GursevakDB/`): a BaniDB-format SQLite of 190,238 lines on GursevakDB's text, with the *Gurbani Arth Bhandar* commentary, the Damdami Taksal *Sundar Gutka* banis and a BaniDB-compatible API server; Faridkot Teeka English mapped line by line. Gated access with an Access & AI Policy. |
 | **3.2** | 2026-10-29 | 28,131 | `sikhi-io-library/` (4,561 books from the sikhi.io library), `sikhi-io-d1/` (sikhi.io's public content tables) and a newer Mahan Kosh snapshot (`mahan-kosh-multilingual/`). |
@@ -576,13 +598,13 @@ The dataset was published under CC BY 4.0 from 2026-03-30 to 2026-04-12 and has 
 
 **Is SikhLibrary free?** Yes. Request access on this page; every request is read and approved by hand.
 
-**Can I use it to train or evaluate an AI model, or build a chatbot on it?** Not without written permission from the maintainers and from the organizations whose data you would use. Ask in the [Discussions](https://huggingface.co/datasets/jsdosanj/SikhLibrary/discussions).
+**Can I train or evaluate an AI model on it, or build a RAG search or chatbot?** Yes, for non-commercial use, under the conditions in the [Access & Use Policy](#-access--use-policy): follow each source organization's license, don't republish the texts through your model or service, don't present generated text as Gurbani, and credit your sources. Commercial AI use needs written permission.
 
-**Can I use SikhiDB in my Gurbani app?** Free, non-commercial apps can, under the terms in [Gurbani Databases for Apps](#-gurbani-databases-for-apps), including BaniDB's terms and each source's own permission for its text.
+**Can I use SikhiDB in my Gurbani app?** Free, non-commercial apps can, under the terms in [Gurbani Databases for Apps](#-gurbani-databases-for-apps), including BaniDB's terms and each source's own permission for its text. For a live Gurbani API, use [BaniDB](https://www.banidb.com) directly from the Khalis Foundation.
 
 **Whose license applies to a given text?** The license of the organization or author it came from, as listed in [`LICENSE.md`](LICENSE.md), plus this dataset's terms.
 
-**I own a work in this dataset. How do I have it removed?** Write to `akaal@sikhi.io`; see [Notice & Takedown](#-rights-holders-notice--takedown).
+**I own a work in this dataset. How do I have it removed?** Write to `akaal@sikhi.io`; we aim to respond within 5 business days. See [Notice & Takedown](#-rights-holders-notice--takedown).
 
 **How do I cite it?** See [How to Cite](#-how-to-cite), and also credit the original source of each work you use.
 
