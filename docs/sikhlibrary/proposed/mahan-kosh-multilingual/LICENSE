@@ -1,0 +1,32 @@
+The 1930 Gurmukhi text of Gurushabad Ratnakar Mahan Kosh
+(Bhai Kahan Singh Nabha) is in the public domain.
+
+Sikhi.io's own contributions to this compiled dataset (the Hindi text,
+the machine translations, the JSON packaging, and the viewer in site/)
+are released under Creative Commons Attribution 4.0 International
+(CC BY 4.0).
+
+  https://creativecommons.org/licenses/by/4.0/
+
+You may use, share, and adapt those contributions, including
+commercially, if you give appropriate credit.
+
+NOT covered by CC BY 4.0: the English text (data/entries/en.json and
+its derivatives) follows the English edition of the Mahan Kosh
+published by Punjabi University, Patiala (2006–2011), which remains
+under Punjabi University's copyright. It is included for
+non-commercial study and research. For any other use, obtain
+permission from Punjabi University, Patiala (Publication Bureau).
+The machine translations are made from that English text, so the
+same caution applies to them until their status is confirmed.
+
+Suggested attribution:
+
+  Mahan Kosh multilingual dataset, from Bhai Kahan Singh Nabha,
+  Gurushabad Ratnakar Mahan Kosh (1930); English after Punjabi
+  University Patiala (2006–2011), © Punjabi University, Patiala.
+  Packaged by Sikhi.io (https://sikhi.io/dictionary), in honour of
+  Guru Tegh Bahadur Ji.
+
+Machine-translated languages have not been reviewed by native
+speakers or subject scholars.
