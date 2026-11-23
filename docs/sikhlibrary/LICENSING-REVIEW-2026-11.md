@@ -5,16 +5,37 @@ Review of the Hugging Face dataset [`jsdosanj/SikhLibrary`](https://huggingface.
 not legal advice.** Before relying on it, have a qualified copyright lawyer review it, as `site/legal.html`
 already notes for the platform's own terms.
 
+## Update, 2026-11-23: permissions confirmed, SGGS Online removed
+
+The maintainers confirmed **written permission** from BaniDB (Khalis Foundation), Gursevak (GursevakDB),
+Gian Singh (Chet), Jatha Randhawa, Damdami Taksal (Sundar Gutka app) and Punjabi University, Patiala.
+That resolves **C7, C8, C9 and H1** below, provided the permissions are kept on file (who, when, and that
+they cover public distribution on Hugging Face). **C6** (`sggs_sggsonline`) is removed: its data files were
+already gone from the current revision; `apply_to_hf.py` updates `manifest.json` and the folder README, and
+permanently deletes the stored files so older revisions can't serve them. Every document now states each
+organization's licence, that users must follow the licence of each organization whose data they use, that
+the dataset is a gathering of that khajana, and that any organization can ask `akaal@sikhi.io` for removal.
+The BaniDB logo is shown, as BaniDB's terms ask, from `assets/banidb-logo.png`.
+
+To apply: `python3 apply_to_hf.py prepare` (writes the two in-place-patched files into `proposed/` for
+review), review `proposed/`, then `python3 apply_to_hf.py upload --yes`.
+
+---
+
 The proposed files are in [`proposed/`](proposed/), laid out as they go in the dataset repository:
 
 | File | Goes to | Change |
 |---|---|---|
 | `proposed/README.md` | `README.md` (dataset card) | License scope, gate terms, credits, takedown procedure (details below) |
 | `proposed/LICENSE.md` | `LICENSE.md` (new) | Layered license + a notice for every source; referenced by the card's `license_link` |
-| `proposed/Granths/Mahan_Kosh_Multilingual/LICENSE`, `proposed/mahan-kosh-multilingual/LICENSE` | same paths | Carves Punjabi University's English out of the CC BY 4.0 grant |
+| `proposed/Granths/Mahan_Kosh_Multilingual/{LICENSE,README.md}`, `proposed/mahan-kosh-multilingual/{LICENSE,README.md}` | same paths | Punjabi University's English stated as © the University, used with permission, outside the CC BY 4.0 grant |
+| `proposed/mahan-kosh-multilingual/data/reading-aids/faridkot/README.md` | same path | Credits and licences, incl. Gian Singh (Chet) |
+| `proposed/Gurbani/SikhiLibrary/README.md` | same path | Credits and licences per source |
+| `proposed/sikhi-io-d1/README.md` | same path | `sggs_sggsonline` removed; 54 tables / 6,054,868 rows; licences per table |
+| `proposed/assets/banidb-logo.png` | same path | BaniDB logo (from banidb.com) |
+| `Gurbani/GursevakDB/README.md`, `sikhi-io-d1/manifest.json` | same paths | Produced by `apply_to_hf.py prepare` (patched in place from the live files) |
 
-They are **not uploaded**: this session has no Hugging Face write token. Upload them with
-`hf upload jsdosanj/SikhLibrary docs/sikhlibrary/proposed . --repo-type dataset` once the open points in §3 are settled.
+They are **not uploaded**: this session has no Hugging Face write token. Use `apply_to_hf.py` (above).
 
 ---
 
