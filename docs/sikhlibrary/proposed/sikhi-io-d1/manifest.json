@@ -1,0 +1,1415 @@
+{
+ "export_date_utc": "2026-10-29",
+ "source": "sikhi.io Cloudflare D1 (read via D1 REST query API, keyset-paginated by rowid/primary key; not a transactional snapshot)",
+ "formats": "Parquet (zstd) + gzip JSONL, UTF-8 text unchanged",
+ "tables": [
+  {
+   "database": "gurbani-search",
+   "d1_uuid": "3db55e39-8375-489e-90af-0735a85529d4",
+   "table": "gurbani_commentary",
+   "rows": 9509,
+   "columns": [
+    "id",
+    "source",
+    "ang",
+    "section_ref",
+    "source_code",
+    "source_name",
+    "lang",
+    "text"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/gurbani-search/gurbani_commentary.parquet",
+    "sikhi-io-d1/gurbani-search/gurbani_commentary.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/69b43cd9f8b23785836040a65b37d6031b157cf4",
+   "description": "Commentaries: Vaaran Steek (Bhai Vir Singh), Garab Ganjani, Dr Daljit Singh Jawa, Amrit Keertan.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "gurbani-search",
+   "d1_uuid": "3db55e39-8375-489e-90af-0735a85529d4",
+   "table": "gurbani_translations",
+   "rows": 461568,
+   "columns": [
+    "verse_id",
+    "lang",
+    "source_code",
+    "source_name",
+    "granularity",
+    "text"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/gurbani-search/gurbani_translations.parquet",
+    "sikhi-io-d1/gurbani-search/gurbani_translations.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/69b43cd9f8b23785836040a65b37d6031b157cf4",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "gurbani-search",
+   "d1_uuid": "3db55e39-8375-489e-90af-0735a85529d4",
+   "table": "gurbani_verses",
+   "rows": 186984,
+   "columns": [
+    "id",
+    "source",
+    "source_name",
+    "ang",
+    "line_no",
+    "shabad_id",
+    "gurmukhi",
+    "gurmukhi_clean",
+    "first_letters",
+    "main_letters",
+    "roman_first",
+    "transliteration",
+    "translation_en",
+    "translation_pa",
+    "writer",
+    "raag",
+    "section",
+    "source_ref",
+    "created_at",
+    "updated_at",
+    "visraam",
+    "length_flags"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/gurbani-search/gurbani_verses.parquet",
+    "sikhi-io-d1/gurbani-search/gurbani_verses.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/69b43cd9f8b23785836040a65b37d6031b157cf4",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "gurbani-search",
+   "d1_uuid": "3db55e39-8375-489e-90af-0735a85529d4",
+   "table": "sggs_lang_index",
+   "rows": 156056,
+   "columns": [
+    "lang",
+    "ang",
+    "off",
+    "len"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/gurbani-search/sggs_lang_index.parquet",
+    "sikhi-io-d1/gurbani-search/sggs_lang_index.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/69b43cd9f8b23785836040a65b37d6031b157cf4",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-colonial-archive",
+   "d1_uuid": "1c86e4e7-837f-4c13-a25c-61a64be7c5fa",
+   "table": "archive_active",
+   "rows": 1,
+   "columns": [
+    "id",
+    "release"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-colonial-archive/archive_active.parquet",
+    "sikhi-io-d1/sikhi-colonial-archive/archive_active.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/b480c4f65b6d9cdb01b434e8bcf1666f7780dd3b",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-colonial-archive",
+   "d1_uuid": "1c86e4e7-837f-4c13-a25c-61a64be7c5fa",
+   "table": "archive_chunks",
+   "rows": 1627,
+   "columns": [
+    "release",
+    "dataset",
+    "part",
+    "payload"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-colonial-archive/archive_chunks.parquet",
+    "sikhi-io-d1/sikhi-colonial-archive/archive_chunks.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/b480c4f65b6d9cdb01b434e8bcf1666f7780dd3b",
+   "description": "Chunked JSON payloads of the colonial archive catalogue release (reassemble by release/dataset/part).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-colonial-archive",
+   "d1_uuid": "1c86e4e7-837f-4c13-a25c-61a64be7c5fa",
+   "table": "archive_documents",
+   "rows": 11,
+   "columns": [
+    "release",
+    "dataset",
+    "sha256",
+    "parts",
+    "bytes"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-colonial-archive/archive_documents.parquet",
+    "sikhi-io-d1/sikhi-colonial-archive/archive_documents.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/b480c4f65b6d9cdb01b434e8bcf1666f7780dd3b",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-gurbani",
+   "d1_uuid": "e25c735b-e708-4a9b-93fc-ab87496b6eba",
+   "table": "sggs_shabados",
+   "rows": 1430,
+   "columns": [
+    "ang",
+    "content",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-gurbani/sggs_shabados.parquet",
+    "sikhi-io-d1/sikhi-gurbani/sggs_shabados.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/e8ed8b690189f187e943cc12bd134c98fad7858a",
+   "description": "SGGS per-ang content (ShabadOS source).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "encyclopedia_articles",
+   "rows": 3148,
+   "columns": [
+    "id",
+    "title",
+    "url",
+    "categories",
+    "content",
+    "license",
+    "source",
+    "scraped_date",
+    "filename",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/encyclopedia_articles.parquet",
+    "sikhi-io-d1/sikhi-io-prod/encyclopedia_articles.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "gallery_images",
+   "rows": 7951,
+   "columns": [
+    "id",
+    "filename",
+    "title",
+    "description",
+    "artist",
+    "date",
+    "date_year",
+    "date_circa",
+    "date_original",
+    "art_type",
+    "guru",
+    "period",
+    "style",
+    "source_url",
+    "arweave_url",
+    "thumbnail_url",
+    "width",
+    "height",
+    "tags",
+    "metadata",
+    "chunk_index",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/gallery_images.parquet",
+    "sikhi-io-d1/sikhi-io-prod/gallery_images.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "gurbani_org_posts",
+   "rows": 423,
+   "columns": [
+    "slug",
+    "title",
+    "simple_title",
+    "url",
+    "date",
+    "source",
+    "attribution",
+    "theme",
+    "content_text",
+    "content_html"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/gurbani_org_posts.parquet",
+    "sikhi-io-d1/sikhi-io-prod/gurbani_org_posts.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "guru_pages",
+   "rows": 3016,
+   "columns": [
+    "guru_id",
+    "page_number",
+    "title",
+    "content",
+    "raw",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/guru_pages.parquet",
+    "sikhi-io-d1/sikhi-io-prod/guru_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "hukamnama_log",
+   "rows": 21,
+   "columns": [
+    "date",
+    "shabad_id",
+    "source",
+    "raag",
+    "page",
+    "author",
+    "fetched_at",
+    "raw_json"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/hukamnama_log.parquet",
+    "sikhi-io-d1/sikhi-io-prod/hukamnama_log.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "katha_terms",
+   "rows": 5774,
+   "columns": [
+    "id",
+    "gurmukhi",
+    "transliteration",
+    "frequency",
+    "definition",
+    "definitions",
+    "categories",
+    "kathas",
+    "audio_id"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/katha_terms.parquet",
+    "sikhi-io-d1/sikhi-io-prod/katha_terms.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "Glossary of terms used in katha.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "katha_transcripts",
+   "rows": 1179,
+   "columns": [
+    "channel",
+    "language",
+    "video_id",
+    "title",
+    "summary",
+    "transcript",
+    "fetched_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/katha_transcripts.parquet",
+    "sikhi-io-d1/sikhi-io-prod/katha_transcripts.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "Katha (exegesis lecture) transcripts and summaries, multi-language.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "kirtan_curated_playlist_tracks",
+   "rows": 6263,
+   "columns": [
+    "playlist_id",
+    "track_id",
+    "position"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/kirtan_curated_playlist_tracks.parquet",
+    "sikhi-io-d1/sikhi-io-prod/kirtan_curated_playlist_tracks.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "kirtan_curated_playlists",
+   "rows": 47,
+   "columns": [
+    "id",
+    "slug",
+    "title",
+    "description",
+    "is_primary",
+    "cover_image",
+    "track_count",
+    "total_seconds",
+    "created_at",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/kirtan_curated_playlists.parquet",
+    "sikhi-io-d1/sikhi-io-prod/kirtan_curated_playlists.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "kirtan_tracks",
+   "rows": 5081,
+   "columns": [
+    "id",
+    "title",
+    "artist",
+    "category",
+    "source",
+    "r2_key",
+    "file_size_bytes",
+    "file_extension",
+    "duration_seconds",
+    "original_filename",
+    "original_path",
+    "featured",
+    "created_at",
+    "radio_eligible"
+   ],
+   "dropped_columns": [
+    "play_count",
+    "download_count"
+   ],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/kirtan_tracks.parquet",
+    "sikhi-io-d1/sikhi-io-prod/kirtan_tracks.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "Kirtan audio catalogue (play/download counts removed).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "library_books",
+   "rows": 947,
+   "columns": [
+    "id",
+    "title",
+    "author",
+    "year",
+    "language",
+    "category",
+    "total_pages",
+    "total_chunks",
+    "detail_url",
+    "added_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/library_books.parquet",
+    "sikhi-io-d1/sikhi-io-prod/library_books.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "library_pages",
+   "rows": 96561,
+   "columns": [
+    "book_id",
+    "page_number",
+    "heading",
+    "gurmukhi",
+    "english",
+    "explanation",
+    "content_hash",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/library_pages.parquet",
+    "sikhi-io-d1/sikhi-io-prod/library_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {
+    "updated_at": [
+     "int",
+     "str"
+    ]
+   }
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "literature_articles",
+   "rows": 543,
+   "columns": [
+    "id",
+    "title",
+    "source_text",
+    "category",
+    "content",
+    "fetched_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/literature_articles.parquet",
+    "sikhi-io-d1/sikhi-io-prod/literature_articles.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "mahan_kosh",
+   "rows": 64218,
+   "columns": [
+    "id",
+    "hw",
+    "hw_first",
+    "tr",
+    "vol",
+    "page",
+    "seq",
+    "sources"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/mahan_kosh.parquet",
+    "sikhi-io-d1/sikhi-io-prod/mahan_kosh.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "mahan_kosh_defs",
+   "rows": 128436,
+   "columns": [
+    "entry_id",
+    "lang",
+    "tr_local",
+    "defs",
+    "align"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/mahan_kosh_defs.parquet",
+    "sikhi-io-d1/sikhi-io-prod/mahan_kosh_defs.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "punjabi_dict",
+   "rows": 87636,
+   "columns": [
+    "id",
+    "hw",
+    "hw_first",
+    "tr",
+    "pos",
+    "definitions",
+    "sources"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/punjabi_dict.parquet",
+    "sikhi-io-d1/sikhi-io-prod/punjabi_dict.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "radio_schedule",
+   "rows": 24,
+   "columns": [
+    "hour_of_day",
+    "playlist_id",
+    "title"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/radio_schedule.parquet",
+    "sikhi-io-d1/sikhi-io-prod/radio_schedule.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "rag_chunks",
+   "rows": 597055,
+   "columns": [
+    "id",
+    "source_type",
+    "source_id",
+    "title",
+    "url",
+    "lang",
+    "heading",
+    "body",
+    "token_count",
+    "chunk_index",
+    "embedded",
+    "content_hash",
+    "created_at",
+    "updated_at",
+    "vec_id"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/rag_chunks.parquet",
+    "sikhi-io-d1/sikhi-io-prod/rag_chunks.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "Search/RAG text chunks over the whole library (incl. Faridkot, katha, books).",
+   "mixed_type_columns_stored_as_string": {
+    "created_at": [
+     "int",
+     "str"
+    ]
+   }
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "sakhi_stories",
+   "rows": 515,
+   "columns": [
+    "id",
+    "title",
+    "category",
+    "description",
+    "content",
+    "arweave_id",
+    "source",
+    "raw",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/sakhi_stories.parquet",
+    "sikhi-io-d1/sikhi-io-prod/sakhi_stories.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "scripture_pages",
+   "rows": 24660,
+   "columns": [
+    "text",
+    "lang",
+    "page",
+    "payload",
+    "arweave_tx",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/scripture_pages.parquet",
+    "sikhi-io-d1/sikhi-io-prod/scripture_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "Dasam / Sarbloh pages in 12 languages.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "sggs_pages",
+   "rows": 158730,
+   "columns": [
+    "lang",
+    "ang",
+    "content",
+    "arweave_tx",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/sggs_pages.parquet",
+    "sikhi-io-d1/sikhi-io-prod/sggs_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "SGGS per-ang content in 111 languages.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "sikhiwiki_articles",
+   "rows": 13636,
+   "columns": [
+    "id",
+    "title",
+    "url",
+    "categories",
+    "content",
+    "summary",
+    "thumbnail_url",
+    "source",
+    "scraped_date",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/sikhiwiki_articles.parquet",
+    "sikhi-io-d1/sikhi-io-prod/sikhiwiki_articles.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "surname_citations",
+   "rows": 6704,
+   "columns": [
+    "id",
+    "surname_slug",
+    "book_id",
+    "page_offset",
+    "context"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/surname_citations.parquet",
+    "sikhi-io-d1/sikhi-io-prod/surname_citations.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "timeline_events",
+   "rows": 27,
+   "columns": [
+    "id",
+    "title",
+    "description",
+    "year",
+    "year_end",
+    "date",
+    "category",
+    "importance",
+    "tags",
+    "references_json",
+    "raw",
+    "chunk_index",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/timeline_events.parquet",
+    "sikhi-io-d1/sikhi-io-prod/timeline_events.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "verse_explanations",
+   "rows": 125,
+   "columns": [
+    "ang",
+    "line",
+    "gurmukhi",
+    "english",
+    "text",
+    "multifaceted_json",
+    "internal_refs_json",
+    "external_refs_json",
+    "sources_json",
+    "model",
+    "fetched_at",
+    "footnotes_json"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/verse_explanations.parquet",
+    "sikhi-io-d1/sikhi-io-prod/verse_explanations.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-io-prod",
+   "d1_uuid": "f7872c23-d2e6-426f-9f7f-4c1a6f7f267e",
+   "table": "web_archive_entries",
+   "rows": 2327,
+   "columns": [
+    "id",
+    "url",
+    "title",
+    "description",
+    "category",
+    "sub_category",
+    "type",
+    "archive_date",
+    "archive_year",
+    "date",
+    "size",
+    "status",
+    "extracted",
+    "extraction_file",
+    "raw",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-io-prod/web_archive_entries.parquet",
+    "sikhi-io-d1/sikhi-io-prod/web_archive_entries.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/7f011000fcf296d4a39af20b71e74faac8dc4374",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-scripture",
+   "d1_uuid": "99700e1a-59a0-4c30-aae1-d77face6e1de",
+   "table": "library_pages",
+   "rows": 765137,
+   "columns": [
+    "book_id",
+    "page_number",
+    "heading",
+    "gurmukhi",
+    "english",
+    "explanation",
+    "content_hash",
+    "updated_at",
+    "punjabi"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-scripture/library_pages.parquet",
+    "sikhi-io-d1/sikhi-scripture/library_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/1471fc9b0c8a63ba9b02f5cc6414d23ebeaac65c",
+   "description": "Library book pages (book_id, page_number, gurmukhi, english, explanation, punjabi).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-scripture",
+   "d1_uuid": "99700e1a-59a0-4c30-aae1-d77face6e1de",
+   "table": "library_quotations",
+   "rows": 1978509,
+   "columns": [
+    "id",
+    "book_id",
+    "scan_page",
+    "source_hash",
+    "source_start",
+    "source_end",
+    "original",
+    "transliteration",
+    "translation",
+    "granth",
+    "citation",
+    "review_status",
+    "reviewed_at"
+   ],
+   "dropped_columns": [
+    "reviewer_id"
+   ],
+   "files": [
+    "sikhi-io-d1/sikhi-scripture/library_quotations.parquet",
+    "sikhi-io-d1/sikhi-scripture/library_quotations.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/1471fc9b0c8a63ba9b02f5cc6414d23ebeaac65c",
+   "description": "Scripture quotations detected in library books, with transliteration/translation/citation (reviewer_id column removed).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-scripture",
+   "d1_uuid": "99700e1a-59a0-4c30-aae1-d77face6e1de",
+   "table": "scripture_pages",
+   "rows": 55003,
+   "columns": [
+    "text",
+    "lang",
+    "page",
+    "payload",
+    "arweave_tx",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-scripture/scripture_pages.parquet",
+    "sikhi-io-d1/sikhi-scripture/scripture_pages.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/787c26848f0e18fa2711b55ea68e41c88032f142",
+   "description": "Exegesis/teeka pages: Faridkot Wala Teeka (text=\"faridkot\", Gurmukhi + 12 translations), Dasam and Sarbloh pages. payload is JSON with page text.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-scripture",
+   "d1_uuid": "99700e1a-59a0-4c30-aae1-d77face6e1de",
+   "table": "sggs_direct",
+   "rows": 1430,
+   "columns": [
+    "lang",
+    "ang",
+    "data",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-scripture/sggs_direct.parquet",
+    "sikhi-io-d1/sikhi-scripture/sggs_direct.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/1471fc9b0c8a63ba9b02f5cc6414d23ebeaac65c",
+   "description": "Sri Guru Granth Sahib per-ang data (direct source).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhi-search",
+   "d1_uuid": "30985bb5-76b8-47a4-8d21-63e9bb658d4c",
+   "table": "search_chunks",
+   "rows": 597030,
+   "columns": [
+    "id",
+    "source_type",
+    "source_id",
+    "title",
+    "url",
+    "heading",
+    "body",
+    "lang",
+    "trust_tier",
+    "created_at",
+    "updated_at"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhi-search/search_chunks.parquet",
+    "sikhi-io-d1/sikhi-search/search_chunks.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/66956a8ea962a2160f686e5a4b337a9ec33660d2",
+   "description": "Full-text search corpus chunks.",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "ak_chapters",
+   "rows": 113,
+   "columns": [
+    "id",
+    "gurmukhi",
+    "roman"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/ak_chapters.parquet",
+    "sikhi-io-d1/sikhidb/ak_chapters.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "ak_shabads",
+   "rows": 2573,
+   "columns": [
+    "shabad_id",
+    "chapter",
+    "page_no",
+    "first_line",
+    "ord"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/ak_shabads.parquet",
+    "sikhi-io-d1/sikhidb/ak_shabads.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "english",
+   "rows": 118687,
+   "columns": [
+    "verse_id",
+    "text"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/english.parquet",
+    "sikhi-io-d1/sikhidb/english.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "meta",
+   "rows": 5,
+   "columns": [
+    "k",
+    "v"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/meta.parquet",
+    "sikhi-io-d1/sikhidb/meta.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "raags",
+   "rows": 65,
+   "columns": [
+    "raag_id",
+    "gurmukhi",
+    "unicode",
+    "english",
+    "raag_with_page"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/raags.parquet",
+    "sikhi-io-d1/sikhidb/raags.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "rec",
+   "rows": 3024,
+   "columns": [
+    "rec_id",
+    "z"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/rec.parquet",
+    "sikhi-io-d1/sikhidb/rec.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "z is a binary blob (base64 in JSONL as {\"$base64\":...}).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "shabads",
+   "rows": 15102,
+   "columns": [
+    "shabad_id",
+    "shabad_name",
+    "source_id",
+    "page_no",
+    "writer_id",
+    "raag_id",
+    "line_count"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/shabads.parquet",
+    "sikhi-io-d1/sikhidb/shabads.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "sources",
+   "rows": 10,
+   "columns": [
+    "unique_id",
+    "source_id",
+    "gurmukhi",
+    "unicode",
+    "english"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/sources.parquet",
+    "sikhi-io-d1/sikhidb/sources.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "study_line",
+   "rows": 114045,
+   "columns": [
+    "verse_id",
+    "lang",
+    "unit_id",
+    "pos"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/study_line.parquet",
+    "sikhi-io-d1/sikhidb/study_line.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "study_text",
+   "rows": 9101,
+   "columns": [
+    "unit_id",
+    "reading",
+    "words",
+    "arth",
+    "translit",
+    "other"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/study_text.parquet",
+    "sikhi-io-d1/sikhidb/study_text.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "study_units",
+   "rows": 9101,
+   "columns": [
+    "unit_id",
+    "source_id",
+    "lang",
+    "title",
+    "version",
+    "status",
+    "page0",
+    "page1",
+    "n"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/study_units.parquet",
+    "sikhi-io-d1/sikhidb/study_units.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "study_z",
+   "rows": 9101,
+   "columns": [
+    "unit_id",
+    "part",
+    "z"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/study_z.parquet",
+    "sikhi-io-d1/sikhidb/study_z.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "z is a binary blob (base64 in JSONL as {\"$base64\":...}).",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "translit_en",
+   "rows": 155570,
+   "columns": [
+    "verse_id",
+    "text"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/translit_en.parquet",
+    "sikhi-io-d1/sikhidb/translit_en.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "verses",
+   "rows": 188992,
+   "columns": [
+    "verse_id",
+    "shabad_id",
+    "source_id",
+    "page_no",
+    "line_no",
+    "unicode",
+    "first_letters",
+    "main_letters",
+    "writer_id",
+    "raag_id",
+    "updated",
+    "rec_id"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/verses.parquet",
+    "sikhi-io-d1/sikhidb/verses.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  },
+  {
+   "database": "sikhidb",
+   "d1_uuid": "aa87fce8-e0fc-4d97-81f0-df0ae74a0f0f",
+   "table": "writers",
+   "rows": 37,
+   "columns": [
+    "writer_id",
+    "english",
+    "gurmukhi",
+    "unicode"
+   ],
+   "dropped_columns": [],
+   "files": [
+    "sikhi-io-d1/sikhidb/writers.parquet",
+    "sikhi-io-d1/sikhidb/writers.jsonl.gz"
+   ],
+   "commit": "https://huggingface.co/datasets/jsdosanj/SikhLibrary/commit/9b04b90419c723e5bbc82fc93df8a26a541c97f1",
+   "description": "",
+   "mixed_type_columns_stored_as_string": {}
+  }
+ ],
+ "skipped": {
+  "databases": {
+   "sikhi-accounts": "whole DB (accounts/auth)",
+   "sikhi-native-staging-accounts": "whole DB (accounts/auth)",
+   "sikhi-native-staging-studio": "whole DB (staging LMS: users, sessions, payments, messages, progress)",
+   "sikhi-archive-studio": "whole DB (users, sessions, tenants; course content is unpublished drafts)",
+   "punjabiuni-db": "whole DB (user/auth tables; content tables empty)",
+   "sikh-university": "whole DB (users, sessions, events, feedback, enrolments, drafts)",
+   "sikhi-sggs": "empty"
+  },
+  "tables": {
+   "sikhidb": [
+    "fts_study",
+    "fts_study_config",
+    "fts_study_data",
+    "fts_study_docsize",
+    "fts_study_idx",
+    "fts_translit",
+    "fts_translit_config",
+    "fts_translit_data",
+    "fts_translit_docsize",
+    "fts_translit_idx",
+    "fts_tri_en",
+    "fts_tri_en_config",
+    "fts_tri_en_data",
+    "fts_tri_en_docsize",
+    "fts_tri_en_idx",
+    "fts_tri_fl",
+    "fts_tri_fl_config",
+    "fts_tri_fl_data",
+    "fts_tri_fl_docsize",
+    "fts_tri_fl_idx",
+    "fts_tri_g",
+    "fts_tri_g_config",
+    "fts_tri_g_data",
+    "fts_tri_g_docsize",
+    "fts_tri_g_idx"
+   ],
+   "sikhi-colonial-archive": [],
+   "sikhi-search": [
+    "search_chunks_fts",
+    "search_chunks_fts_config",
+    "search_chunks_fts_data",
+    "search_chunks_fts_docsize",
+    "search_chunks_fts_idx",
+    "search_sync_state"
+   ],
+   "sikhi-scripture": [
+    "library_page_translations",
+    "library_quotation_reviews",
+    "library_quotation_scans",
+    "library_studio_books",
+    "radio_log"
+   ],
+   "sikhi-gurbani": [],
+   "gurbani-search": [
+    "_vec_state",
+    "gurbani_verses_fts",
+    "gurbani_verses_fts_config",
+    "gurbani_verses_fts_data",
+    "gurbani_verses_fts_docsize",
+    "gurbani_verses_fts_idx"
+   ],
+   "sikhi-io-prod": [
+    "account",
+    "ai_restoration_submissions",
+    "articles",
+    "assets",
+    "audit_log",
+    "bookmarks",
+    "content_overrides",
+    "content_suggestions",
+    "d1_migrations",
+    "darbar_filters",
+    "darbar_messages",
+    "darbar_moderation_log",
+    "darbar_pins",
+    "darbar_presence",
+    "darbar_rooms",
+    "darbar_timeouts",
+    "gurbani_org_posts_fts",
+    "gurbani_org_posts_fts_config",
+    "gurbani_org_posts_fts_content",
+    "gurbani_org_posts_fts_data",
+    "gurbani_org_posts_fts_docsize",
+    "gurbani_org_posts_fts_idx",
+    "katha_annotations",
+    "mahan_kosh_fts",
+    "mahan_kosh_fts_config",
+    "mahan_kosh_fts_content",
+    "mahan_kosh_fts_data",
+    "mahan_kosh_fts_docsize",
+    "mahan_kosh_fts_idx",
+    "messages",
+    "notifications",
+    "playlist_tracks",
+    "playlists",
+    "prayer_alignment_overrides",
+    "punjabi_dict_fts",
+    "punjabi_dict_fts_config",
+    "punjabi_dict_fts_data",
+    "punjabi_dict_fts_docsize",
+    "punjabi_dict_fts_idx",
+    "radio_log",
+    "rag_chat_usage",
+    "rag_history",
+    "rag_search_history",
+    "reserved_username",
+    "revisions",
+    "session",
+    "seva_assignments",
+    "seva_completions",
+    "seva_tasks",
+    "sevadaar_messages",
+    "subscribers",
+    "surnames",
+    "translation_suggestions",
+    "user",
+    "user_progress",
+    "verification"
+   ]
+  }
+ },
+ "total_rows": 6054868
+}
