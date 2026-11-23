@@ -88,7 +88,7 @@ extra_gated_fields:
   "I am a person, not an automated agent, and I will not give AI agents, crawlers or bots access to these files": checkbox
   "I will not use the dataset to train, fine-tune or evaluate AI models, or to build a retrieval index served to others, without written permission": checkbox
   "I will not re-host, mirror or pass on the files to anyone else": checkbox
-  "I agree to the license terms in LICENSE.md (CC BY-NC-ND 4.0 for the maintainers' contributions) and the attribution requirements in the card": checkbox
+  "I agree to the license terms in the dataset's LICENSE file (Creative Commons BY-NC-ND for the maintainers' contributions) and the attribution requirements in the card": checkbox
   "I understand that each organization's data in this dataset stays under that organization's own license, which I must follow, and that third-party works are not licensed to me by the maintainers and are for non-commercial study and research only": checkbox
 extra_gated_button_content: "Request access"
 ---
