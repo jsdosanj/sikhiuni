@@ -2,6 +2,7 @@
 import raw from '../../../site/assets/data/courses.json';
 import { publicCourseCatalogue } from '../../../functions/api/_course-access.js';
 import photos from '../../../site/assets/data/professors.json';
+import { profBio as profBioOf } from './prof-bios';
 
 export type Term = { t: string; m: string };
 export type Lesson = { title: string; summary?: string; html: string };
@@ -50,6 +51,12 @@ export function professorList() {
     .sort((a, b) => (a === 'Sikhi University' ? 1 : b === 'Sikhi University' ? -1 : map[b].length - map[a].length))
     .map((name) => ({ name, courses: map[name] }));
 }
+
+// A professor page with no biography and only one or two courses is a near-duplicate of the
+// course pages it lists. Those pages stay up for visitors but are noindex and left out of the
+// sitemap, so search engines spend their crawl on substantive pages. Writing real bios (scholar-
+// reviewed, never invented) lifts a page back into the index automatically.
+export const isThinProfessor = (name: string, courseCount: number) => !profBioOf(name) && courseCount < 3;
 
 const TITLES = /^(Prof\.|Dr\.|Bhai|Giani|Sant|Baba|Mahant|Pandit|Kavi|Swami|Sodhi|Subedar|Raja|Mata)\s+/i;
 export function profInitials(name: string): string {

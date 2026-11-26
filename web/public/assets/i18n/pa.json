@@ -533,5 +533,9 @@
   "verify.ph.certid": "SU-…",
   "verify.submit": "ਤਸਦੀਕ ਕਰੋ",
   "verify.valid": "ਪ੍ਰਮਾਣਿਕ ਸਰਟੀਫਿਕੇਟ",
-  "support.stayOnline": "ਸਾਨੂੰ ਆਨਲਾਈਨ ਬਣੇ ਰਹਿਣ ਵਿੱਚ ਮਦਦ ਕਰੋ"
+  "support.stayOnline": "ਸਾਨੂੰ ਆਨਲਾਈਨ ਬਣੇ ਰਹਿਣ ਵਿੱਚ ਮਦਦ ਕਰੋ",
+  "course.outline.h": "ਕੋਰਸ ਦੀ ਰੂਪਰੇਖਾ",
+  "course.related.h": "ਸੰਬੰਧਿਤ ਕੋਰਸ",
+  "course.outline.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed",
+  "course.related.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed"
 }

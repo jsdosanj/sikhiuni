@@ -286,6 +286,29 @@ const RATE_LIMITS = {
 };
 const RL_ENFORCE = true;
 
+// Crawl enforcement (matches /robots.txt, /ai.txt and /ai-policy; owner decision 2026-11-26,
+// aligned with Cloudflare's managed robots.txt): search engines and AI answer engines that
+// cite and link back are welcome; AI-training crawlers, site copiers, headless scrapers and
+// bare HTTP libraries are refused with a 403 on pages and content files. robots.txt alone is
+// voluntary, so the site enforces it. /api/ is left to its own auth + enforced rate limits
+// (our draft-import script uses Python's default user agent there), and robots.txt /
+// .well-known stay readable to everyone so crawlers can learn the rules.
+const TRAINING_UA = /\b(gptbot|claudebot|anthropic-ai|claude-web|ccbot|googleother|google-cloudvertexbot|amazonbot|bytespider|meta-externalagent|facebookbot|cohere-ai|cohere-training-data-crawler|mistralai-training|diffbot|omgili|ai2bot|ai2bot-dolma|pangubot|kimibot|timpibot|imagesiftbot|cotoyogi|icc-crawler)\b/i;
+const SCRAPER_UA = /httrack|webcopier|webzip|offline explorer|sitesnagger|teleport ?pro|webstripper|webreaper|sitesucker|\bwget\b|scrapy|python-requests|python-urllib|python-httpx|aiohttp|go-http-client|okhttp|^java\/|libwww-perl|apache-httpclient|node-fetch|undici|\bcolly\b|phantomjs|headlesschrome|puppeteer|playwright|selenium|zgrab|masscan|nikto|sqlmap|mj12bot|dotbot|blexbot|dataforseobot|barkrowler|megaindex|seekportbot|petalbot|magpie-crawler/i;
+// Never refuse the search engines this site depends on, or Google's page-speed tools.
+const ALWAYS_OK_UA = /googlebot|google-inspectiontool|bingbot|chrome-lighthouse|google page speed|duckduckbot|applebot\/|yandexbot/i;
+export function scraperBlock(request, pathname) {
+  if (pathname.startsWith('/api/') || pathname === '/robots.txt' || pathname.startsWith('/.well-known/')) return null;
+  const ua = (request.headers.get('user-agent') || '').trim();
+  if (!ua || ALWAYS_OK_UA.test(ua)) return null;
+  const training = TRAINING_UA.test(ua);
+  if (!training && !SCRAPER_UA.test(ua)) return null;
+  const msg = training
+    ? 'AI model training on this site is not allowed. Search engines and AI answer engines that cite and link back are welcome: see https://sikhiuni.com/ai-policy.'
+    : 'Automated copying of this site is not allowed. Crawlers that identify themselves and follow https://sikhiuni.com/robots.txt are welcome: see https://sikhiuni.com/ai-policy.';
+  return new Response(msg, { status: 403, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+}
+
 // Atomic fixed-window per-key limiter on D1. Strongly consistent, so a fast burst can't
 // slip through on stale reads the way a KV counter would. Fails OPEN on any error / no DB
 // so a limiter problem never locks out the mission's users. Creates its table lazily,
@@ -410,6 +433,8 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { pathname } = url;
+    const blocked = scraperBlock(request, pathname);
+    if (blocked) return blocked;
     if (pathname.startsWith('/media/')) {
       let key; try { key=decodeURIComponent(pathname.slice(7)); } catch { return new Response('Not found',{status:404}); }
       if (!key || key.includes('..') || !/^(santhya|audio|gurbani|media)\//.test(key)) return new Response('Not found',{status:404});
@@ -495,7 +520,12 @@ export default {
       // Single choke point: any handler exception returns a JSON 500 (never a raw
       // Cloudflare HTML error page) and is logged so failures are observable.
       try {
-        return await handler({ request, env: reqEnv, waitUntil: (p) => ctx && ctx.waitUntil(p) });
+        const res = await handler({ request, env: reqEnv, waitUntil: (p) => ctx && ctx.waitUntil(p) });
+        // API responses (JSON, iCal, unsubscribe pages) are never search results.
+        if (res && res.headers && !res.headers.has('x-robots-tag')) {
+          try { res.headers.set('x-robots-tag', 'noindex'); } catch { /* immutable headers (e.g. a proxied response): leave as is */ }
+        }
+        return res;
       } catch (err) {
         console.error("api_error", request.method, pathname, err && err.stack || String(err));
         return new Response(JSON.stringify({ error: "server_error" }), {
@@ -570,10 +600,10 @@ export default {
     const assetResp = privateLearning ? new Response(rawAssetResp.body,{status:rawAssetResp.status,headers:assetHeaders}) : rawAssetResp;
     const ct = assetResp.headers.get('content-type') || '';
     const h = new Headers(assetResp.headers);
-    // AI-crawler policy: all AI crawling is welcome, including AI answer/search
-    // engines and AI/ML training. Per-bot rules live in /robots.txt and /ai.txt;
-    // human-readable policy at /ai-policy. Search indexing is untouched (no
-    // noindex here) and never was restricted.
+    // AI-crawler policy: search and AI answer engines welcome; AI training and site
+    // copying refused (scraperBlock, top of fetch). Per-bot rules live in /robots.txt
+    // and /ai.txt; human-readable policy at /ai-policy. Search indexing is untouched
+    // (no noindex here) and never was restricted.
     // The Code Lab's sandboxed runner workers (Vite emits them to /_lab/,
     // routed here by run_worker_first). They execute learner code: the JS
     // runner does `new Function(snippet)` (needs 'unsafe-eval'); the Python

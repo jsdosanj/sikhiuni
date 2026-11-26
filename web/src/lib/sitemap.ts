@@ -1,9 +1,17 @@
 import { protectedLearningPath } from '../../../functions/api/_course-access.js';
+import { courseKey, courseFingerprint, professorKey, professorFingerprint, lastmodFor } from '../../scripts/lib/lastmod-core.mjs';
+import lastmodStore from '../data/lastmod.json';
 
 // Shared helpers for the sitemap index + child sitemaps under /sitemaps/.
 // The site is fully prerendered, so "last modified" is the build date — real,
 // not hand-maintained (the old sitemap hardcoded a date that went stale).
 export const BUILD_DATE = new Date().toISOString().slice(0, 10);
+
+// Per-page content dates (web/scripts/lib/lastmod-core.mjs): the date a page's own content
+// last changed, falling back to the build date when it changed since `npm run update-lastmod`.
+export const courseLastmod = (c: any): string => lastmodFor(lastmodStore, courseKey(c), courseFingerprint(c), BUILD_DATE);
+export const professorLastmod = (slug: string, bio: string, courses: any[]): string =>
+  lastmodFor(lastmodStore, professorKey(slug), professorFingerprint(bio, courses), BUILD_DATE);
 
 export type UrlEntry = {
   path: string;

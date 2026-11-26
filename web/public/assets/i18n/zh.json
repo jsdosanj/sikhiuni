@@ -536,5 +536,9 @@
   "verify.ph.certid": "SU-…",
   "verify.submit": "验证",
   "verify.valid": "有效证书",
-  "support.stayOnline": "帮助我们继续在线运营"
+  "support.stayOnline": "帮助我们继续在线运营",
+  "course.outline.h": "课程大纲",
+  "course.related.h": "相关课程",
+  "course.outline.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed",
+  "course.related.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed"
 }

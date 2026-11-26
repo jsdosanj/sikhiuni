@@ -30,18 +30,39 @@ response.
     `<script type="application/ld+json" set:html={ldJson(ld)} slot="head" />` — `ldJson`
     (from `web/src/lib/site.ts`) escapes `<` so free-text fields can't break out of the
     script element.
-- **`robots.txt`** (`web/public/robots.txt`) takes an open policy: `Allow: /` for
-  everyone, including named AI search/answer bots (OAI-SearchBot, ChatGPT-User,
-  Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Applebot,
-  Amzn-SearchBot/-User, meta-webindexer, meta-externalfetcher, MistralAI-Index/-User,
-  DuckAssistBot) and AI/ML training crawlers alike — we want to be cited in AI answers and
-  trained on. There are no `Disallow` rules. The human-readable rationale lives in
-  `web/public/ai.txt` and `/ai-policy`; keep both in sync with any future change here.
+- **`robots.txt`** (`web/public/robots.txt`). Policy (owner, 2026-11-26, aligned with
+  Cloudflare's managed robots.txt): search engines and AI answer/assistant engines that cite
+  and link back are welcome (Googlebot, Bingbot, Applebot, OAI-SearchBot, ChatGPT-User,
+  Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Amzn-SearchBot/-User,
+  meta-webindexer, meta-externalfetcher, MistralAI-Index/-User, DuckAssistBot); AI-training
+  crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Amazonbot,
+  Bytespider, meta-externalagent, cohere-ai …) and site copiers / aggressive data scrapers
+  are disallowed. `Content-Signal: search=yes,ai-train=no`; `/.well-known/tdmrep.json`
+  reserves TDM rights. Everyone is kept out of `/api/`, `/dashboard` and `/account`. The
+  human-readable versions are `web/public/ai.txt` and `/ai-policy`; keep all three in sync.
+  Cloudflare prepends its own managed block (same direction: training blocked).
+- **Enforcement** (`scraperBlock` in `worker.js`, top of `fetch`): robots.txt is voluntary,
+  so training crawlers, site copiers, headless scrapers and bare HTTP libraries get a 403 on
+  pages and content files. Googlebot, Bingbot, Lighthouse and the answer engines are never
+  refused. `/api/`, `/robots.txt` and `/.well-known/` are exempt, and every `/api/` response
+  carries `x-robots-tag: noindex`. A test keeps robots.txt's training list and the Worker's
+  list in agreement.
 - **Sitemap.** `https://sikhiuni.com/sitemap.xml` is a sitemap **index**, with child sitemaps
   at `/sitemaps/pages.xml`, `/sitemaps/courses.xml`, `/sitemaps/programs.xml`,
-  `/sitemaps/professors.xml`, and `/sitemaps/collections.xml`. Each child's `lastmod` is the
-  build date. Admin/auth/utility routes (login, dashboard, admin, verify, etc.) are
-  intentionally excluded — they are not indexable content.
+  `/sitemaps/professors.xml`, and `/sitemaps/collections.xml`. Course and professor URLs
+  carry the date their own content last changed (fingerprints in `web/src/data/lastmod.json`,
+  see `web/scripts/lib/lastmod-core.mjs`); after editing course content or bios run
+  `cd web && npm run update-lastmod` and commit the file (a test fails if it is stale).
+  Other URLs use the build date. Admin/auth/utility routes (login, dashboard, admin,
+  verify, etc.) are intentionally excluded — they are not indexable content.
+- **Thin pages.** A professor page with no bio and fewer than 3 courses is `noindex, follow`
+  and left out of the sitemap (`isThinProfessor` in `web/src/lib/data.ts`). Adding a real,
+  reviewed bio puts it back automatically. Never invent bios to get pages indexed.
+- **Course pages** show a public course outline (lesson titles + their one-line summaries,
+  which are already public in the catalogue JSON; lesson bodies stay private) and up to six
+  related courses (same professor, then same subject at a nearby stage). The `Course`
+  JSON-LD carries `educationalLevel` as Beginner/Intermediate/Advanced, `teaches` (the
+  outcomes) and `syllabusSections` (the outline).
 
 ## Domain migration checklist (one-time)
 

@@ -43,6 +43,13 @@ Supersedes: the 2026-09-10 "grace period" for teachers in docs/SECURITY.md.
   types resolved immediately via `subagent_type`, unlike the Baaz session's
   same-session install).
 
+## Decision: AI crawlers (owner, 2026-11-26, revised same day)
+Go with Cloudflare's managed robots.txt: search engines + AI answer engines (cite/link back)
+allowed; AI TRAINING crawlers blocked; site copiers/scrapers blocked. Enforced in worker.js
+`scraperBlock` (403), stated in robots.txt, ai.txt, /ai-policy, tdmrep.json (reservation=1).
+Supersedes PR #194's "training welcome". Cloudflare zone settings can't be changed from a
+session (the MCP only covers Workers/D1/R2/KV) — the owner does those in the dashboard.
+
 ## Current focus
 Feature: sikhiuni full multiscreen redesign, page-cluster wave 1 (tasks 5-8) in
 flight, self-recovered from a mid-wave concurrent-git-reset incident (see
