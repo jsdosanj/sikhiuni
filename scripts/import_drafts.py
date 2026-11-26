@@ -15,6 +15,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CATALOGUE = ROOT / "site/assets/data/courses.json"
 API_BASE = os.environ.get("SIKHIUNI_API_BASE", "https://sikhiuni.com")
 EXPORT_TOKEN = os.environ.get("EXPORT_TOKEN")
+# Cloudflare's Browser Integrity Check refuses Python's default "Python-urllib/x.y" user
+# agent (error 1010), so name the script like the uptime check does.
+HEADERS = {"User-Agent": "sikhiuni-import-drafts/1 (+github-actions)"}
 
 
 def fetch_approved():
@@ -25,7 +28,7 @@ def fetch_approved():
     offset, limit = 0, 50
     while True:
         url = f"{API_BASE}/api/admin/drafts-export?status=approved&limit={limit}&offset={offset}"
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {EXPORT_TOKEN}"})
+        req = urllib.request.Request(url, headers={**HEADERS, "Authorization": f"Bearer {EXPORT_TOKEN}"})
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read())
         drafts.extend(data["courses"])
@@ -40,7 +43,7 @@ def fetch_approved_archive_requests():
         print("::error::EXPORT_TOKEN is not set", file=sys.stderr)
         sys.exit(1)
     url = f"{API_BASE}/api/admin/archive-requests-export"
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {EXPORT_TOKEN}"})
+    req = urllib.request.Request(url, headers={**HEADERS, "Authorization": f"Bearer {EXPORT_TOKEN}"})
     with urllib.request.urlopen(req) as resp:
         data = json.loads(resp.read())
     return data["requests"]
