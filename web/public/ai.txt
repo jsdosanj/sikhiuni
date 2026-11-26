@@ -1,23 +1,23 @@
 # AI & content-usage policy — Sikhi University (sikhiuni.com)
 #
 # Sikhi University is a free, open online university teaching Sikhi and modern
-# skills. Our courses, lessons and reference content exist so people can learn
-# — including via AI answer engines and AI models, wherever people go looking.
+# skills. We want people to find it, including through AI answer engines that
+# cite and link back to the course.
 #
-# ALLOWED — crawling for search indexing, AI-answer/assistant citation, and
-# AI/ML model training. We welcome all AI crawlers — search and answer engines
-# (e.g. OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User,
-# PerplexityBot, Perplexity-User, Applebot, Amzn-SearchBot, Amzn-User,
-# meta-webindexer, meta-externalfetcher, MistralAI-Index, MistralAI-User,
-# DuckAssistBot) and training/dataset crawlers alike — to crawl, cite, quote
-# and train on this site's content. Attribution and a link back to
-# https://sikhiuni.com is appreciated, not required. See /robots.txt for the
-# machine-readable rules.
+# ALLOWED — search indexing and AI-answer/assistant citation: search engines
+# (Googlebot, Bingbot, DuckDuckBot, Applebot and others) and answer engines that
+# fetch a page to answer a question and link to it (OAI-SearchBot, ChatGPT-User,
+# Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Amzn-SearchBot,
+# Amzn-User, meta-webindexer, meta-externalfetcher, MistralAI-Index,
+# MistralAI-User, DuckAssistBot).
 #
-# NOT ALLOWED — anonymous or site-copying scrapers. Requests from site-copier
-# tools and bare HTTP libraries (HTTrack, wget, scrapy, python-requests and the
-# like) are refused on pages and content files. Name your crawler in its user
-# agent and follow /robots.txt.
+# NOT ALLOWED — AI/ML model training or fine-tuning on this site's content
+# (e.g. GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Amazonbot,
+# Bytespider, meta-externalagent, cohere-ai, MistralAI-Training), and copying
+# the site with scrapers (HTTrack, wget, scrapy, headless browsers,
+# python-requests and the like). Training crawlers and scrapers are refused by
+# the site, not only asked via /robots.txt. This is a reservation of rights for
+# text and data mining (see /.well-known/tdmrep.json).
 #
 # TWO CAVEATS:
 #

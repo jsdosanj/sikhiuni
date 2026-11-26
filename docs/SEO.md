@@ -30,22 +30,23 @@ response.
     `<script type="application/ld+json" set:html={ldJson(ld)} slot="head" />` — `ldJson`
     (from `web/src/lib/site.ts`) escapes `<` so free-text fields can't break out of the
     script element.
-- **`robots.txt`** (`web/public/robots.txt`) takes an open policy: `Allow: /` for
-  everyone, including named AI search/answer bots (OAI-SearchBot, ChatGPT-User,
-  Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Applebot,
-  Amzn-SearchBot/-User, meta-webindexer, meta-externalfetcher, MistralAI-Index/-User,
-  DuckAssistBot) and AI/ML training crawlers alike — we want to be cited in AI answers and
-  trained on. The only `Disallow` rules are `/api/`, `/dashboard` and `/account`. The
-  human-readable rationale lives in `web/public/ai.txt` and `/ai-policy`; keep both in sync
-  with any future change here.
-  - **Cloudflare's managed robots.txt** (dashboard setting) prepends its own block. As of
-    2026-11 it disallows GPTBot, ClaudeBot, CCBot and other training crawlers and declares
-    `ai-train=no`, which contradicts this policy. The owner's decision (2026-11-26) is that
-    training crawlers are allowed, so that dashboard setting should be switched off.
-- **Abusive scrapers are refused** (`scraperBlock` in `worker.js`): site-copier tools (HTTrack, wget, WebCopier…) and bare HTTP libraries
-  (python-requests, scrapy, Go-http-client…) get a 403 on pages and content files. Named
-  crawlers are unaffected. `/api/` is exempt (it has auth + enforced rate limits) and every
-  `/api/` response carries `x-robots-tag: noindex`.
+- **`robots.txt`** (`web/public/robots.txt`). Policy (owner, 2026-11-26, aligned with
+  Cloudflare's managed robots.txt): search engines and AI answer/assistant engines that cite
+  and link back are welcome (Googlebot, Bingbot, Applebot, OAI-SearchBot, ChatGPT-User,
+  Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Amzn-SearchBot/-User,
+  meta-webindexer, meta-externalfetcher, MistralAI-Index/-User, DuckAssistBot); AI-training
+  crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Amazonbot,
+  Bytespider, meta-externalagent, cohere-ai …) and site copiers / aggressive data scrapers
+  are disallowed. `Content-Signal: search=yes,ai-train=no`; `/.well-known/tdmrep.json`
+  reserves TDM rights. Everyone is kept out of `/api/`, `/dashboard` and `/account`. The
+  human-readable versions are `web/public/ai.txt` and `/ai-policy`; keep all three in sync.
+  Cloudflare prepends its own managed block (same direction: training blocked).
+- **Enforcement** (`scraperBlock` in `worker.js`, top of `fetch`): robots.txt is voluntary,
+  so training crawlers, site copiers, headless scrapers and bare HTTP libraries get a 403 on
+  pages and content files. Googlebot, Bingbot, Lighthouse and the answer engines are never
+  refused. `/api/`, `/robots.txt` and `/.well-known/` are exempt, and every `/api/` response
+  carries `x-robots-tag: noindex`. A test keeps robots.txt's training list and the Worker's
+  list in agreement.
 - **Sitemap.** `https://sikhiuni.com/sitemap.xml` is a sitemap **index**, with child sitemaps
   at `/sitemaps/pages.xml`, `/sitemaps/courses.xml`, `/sitemaps/programs.xml`,
   `/sitemaps/professors.xml`, and `/sitemaps/collections.xml`. Course and professor URLs
