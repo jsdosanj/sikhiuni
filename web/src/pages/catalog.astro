@@ -215,7 +215,7 @@ const catGroups = topicsAlpha
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-line/70"><div class="path-bar h-full rounded-full bg-saffron transition-all duration-700" data-path={p.id} style="width:0%"></div></div>
               <ol class="path-list mt-5">
                 {p.courseIds.map((id) => { const e = entryOf(id); return e && (
-                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={e.href} data-course={id}>{e.title}</a><div class="text-sm leading-snug text-muted">{e.summary}</div></li>
+                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={e.href} data-course={id}>{e.title}</a></li>
                 ); })}
               </ol>
             </div>
@@ -251,7 +251,7 @@ const catGroups = topicsAlpha
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-line/70"><div class="path-bar h-full rounded-full bg-saffron transition-all duration-700" data-path={p.id} style="width:0%"></div></div>
               <ol class="path-list mt-5">
                 {p.courseIds.map((id) => byId[id] && (
-                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a><div class="text-sm leading-snug text-muted">{byId[id].summary}</div></li>
+                  <li><a class="font-semibold text-navy hover:text-saffron-deep" href={`/course/${id}`} data-course={id}>{byId[id].title}</a></li>
                 ))}
               </ol>
             </div>

@@ -29,12 +29,28 @@ const archive = c.topic === 'modern-skills'
   ? { url: 'https://sikharchive.net/courses', label: 'Free AI courses on Sikh Archive' }
   : { url: 'https://sikharchive.net', label: 'Dig deeper in the Sikh Archive' };
 const lessons = c.lessons || [];
+// SEO: lesson summaries are already public in the catalogue JSON (only bodies are private),
+// so the outline below shows them as plain text. Tags are stripped; bodies are never used.
+const plain = (h: string | undefined) => (h || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+const outline = c.gated ? [] : lessons.map((l) => ({ title: l.title, summary: plain(l.summary) }));
+// Related courses: same professor first, then the same subject at a nearby stage. Gives every
+// course crawlable links to its neighbours instead of relying on the catalogue alone.
+const others = published.filter((x) => x.id !== c.id && !x.gated);
+const sameProf = others.filter((x) => x.professor === c.professor).slice(0, 3);
+const sameTopic = others
+  .filter((x) => x.topic === c.topic && !sameProf.includes(x))
+  .sort((a, b) => Math.abs(a.level - c.level) - Math.abs(b.level - c.level) || a.title.localeCompare(b.title))
+  .slice(0, 6 - sameProf.length);
+const related = [...sameProf, ...sameTopic];
+const levelName = c.level < 200 ? 'Beginner' : c.level < 400 ? 'Intermediate' : 'Advanced';
 const quiz = [];
 const nQuiz = c.nQuiz || 0;
 const ld = {
   '@context': 'https://schema.org', '@type': 'Course', name: c.title, description: c.summary,
   url: `${SITE}/course/${c.id}`,
-  inLanguage: 'en', isAccessibleForFree: true, educationalLevel: c.level,
+  inLanguage: 'en', isAccessibleForFree: true, educationalLevel: levelName,
+  ...(c.outcomes && c.outcomes.length ? { teaches: c.outcomes.map(plain) } : {}),
+  ...(outline.length ? { syllabusSections: outline.map((l) => ({ '@type': 'Syllabus', name: l.title, ...(l.summary ? { description: l.summary } : {}) })) } : {}),
   provider: { '@type': 'EducationalOrganization', name: 'Sikhi University', sameAs: SITE + '/' },
   author: { '@type': 'Person', name: c.professor },
   offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD', category: 'Free', availability: 'https://schema.org/InStock' },
@@ -166,6 +182,18 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         </section>
       )}
 
+      {outline.length > 0 && (
+        <section id="course-outline" class="mb-8">
+          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold" data-i18n="course.outline.h">Course outline</h2>
+          <ol class="mt-3 space-y-3 font-sans text-[15px]">
+            {outline.map((l, i) => (
+              <li class="flex gap-3"><span class="shrink-0 font-mono text-[11px] leading-6 text-muted" data-no-i18n>{String(i + 1).padStart(2, '0')}</span>
+                <div class="min-w-0"><strong class="text-navy" data-no-i18n>{l.title}</strong>{l.summary && <p class="mt-0.5 text-muted">{l.summary}</p>}</div></li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       <section id="private-terms" class="mb-8" hidden><h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold">Key terms</h2><div id="private-terms-list" class="mt-3 grid gap-3 sm:grid-cols-2"></div></section>
 
       <div id="course-ann" class="mb-8 empty:mb-0"></div>
@@ -261,6 +289,19 @@ const pageTitle = c.title.length > 46 ? c.title : `${c.title}, Sikhi University`
         <section class="mb-8">
           <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold" data-i18n="course.refs.h">References &amp; further reading</h2>
           <ol class="mt-3 list-decimal space-y-2 pl-5 font-sans text-sm text-muted">{c.references.map((r) => <li>{r}</li>)}</ol>
+        </section>
+      )}
+
+      {related.length > 0 && (
+        <section id="related-courses" class="mb-8">
+          <h2 class="border-b-2 border-saffron-soft pb-1 text-xl font-bold" data-i18n="course.related.h">Related courses</h2>
+          <ul class="mt-3 grid gap-3 sm:grid-cols-2">
+            {related.map((r) => (
+              <li><a class="card-lift block h-full p-4 hover:border-saffron" href={`/course/${r.id}`}>
+                <strong class="block text-navy" data-no-i18n>{r.title}</strong>
+                <span class="mt-1 block font-sans text-xs text-muted">{stageName(r.level)} · {topicName(r.topic)}{r.professor === c.professor ? ` · ${r.professor}` : ''}</span></a></li>
+            ))}
+          </ul>
         </section>
       )}
 

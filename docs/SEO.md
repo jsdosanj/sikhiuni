@@ -35,13 +35,33 @@ response.
   Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Applebot,
   Amzn-SearchBot/-User, meta-webindexer, meta-externalfetcher, MistralAI-Index/-User,
   DuckAssistBot) and AI/ML training crawlers alike — we want to be cited in AI answers and
-  trained on. There are no `Disallow` rules. The human-readable rationale lives in
-  `web/public/ai.txt` and `/ai-policy`; keep both in sync with any future change here.
+  trained on. The only `Disallow` rules are `/api/`, `/dashboard` and `/account`. The
+  human-readable rationale lives in `web/public/ai.txt` and `/ai-policy`; keep both in sync
+  with any future change here.
+  - **Cloudflare's managed robots.txt** (dashboard setting) prepends its own block. As of
+    2026-11 it disallows GPTBot, ClaudeBot, CCBot and other training crawlers and declares
+    `ai-train=no`, which contradicts this policy. The owner's decision (2026-11-26) is that
+    training crawlers are allowed, so that dashboard setting should be switched off.
+- **Abusive scrapers are refused** (`scraperBlock` in `worker.js`): site-copier tools (HTTrack, wget, WebCopier…) and bare HTTP libraries
+  (python-requests, scrapy, Go-http-client…) get a 403 on pages and content files. Named
+  crawlers are unaffected. `/api/` is exempt (it has auth + enforced rate limits) and every
+  `/api/` response carries `x-robots-tag: noindex`.
 - **Sitemap.** `https://sikhiuni.com/sitemap.xml` is a sitemap **index**, with child sitemaps
   at `/sitemaps/pages.xml`, `/sitemaps/courses.xml`, `/sitemaps/programs.xml`,
-  `/sitemaps/professors.xml`, and `/sitemaps/collections.xml`. Each child's `lastmod` is the
-  build date. Admin/auth/utility routes (login, dashboard, admin, verify, etc.) are
-  intentionally excluded — they are not indexable content.
+  `/sitemaps/professors.xml`, and `/sitemaps/collections.xml`. Course and professor URLs
+  carry the date their own content last changed (fingerprints in `web/src/data/lastmod.json`,
+  see `web/scripts/lib/lastmod-core.mjs`); after editing course content or bios run
+  `cd web && npm run update-lastmod` and commit the file (a test fails if it is stale).
+  Other URLs use the build date. Admin/auth/utility routes (login, dashboard, admin,
+  verify, etc.) are intentionally excluded — they are not indexable content.
+- **Thin pages.** A professor page with no bio and fewer than 3 courses is `noindex, follow`
+  and left out of the sitemap (`isThinProfessor` in `web/src/lib/data.ts`). Adding a real,
+  reviewed bio puts it back automatically. Never invent bios to get pages indexed.
+- **Course pages** show a public course outline (lesson titles + their one-line summaries,
+  which are already public in the catalogue JSON; lesson bodies stay private) and up to six
+  related courses (same professor, then same subject at a nearby stage). The `Course`
+  JSON-LD carries `educationalLevel` as Beginner/Intermediate/Advanced, `teaches` (the
+  outcomes) and `syllabusSections` (the outline).
 
 ## Domain migration checklist (one-time)
 

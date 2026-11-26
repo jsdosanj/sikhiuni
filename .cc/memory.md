@@ -43,6 +43,12 @@ Supersedes: the 2026-09-10 "grace period" for teachers in docs/SECURITY.md.
   types resolved immediately via `subagent_type`, unlike the Baaz session's
   same-session install).
 
+## Decision: AI crawlers (owner, 2026-11-26)
+AI training crawlers ARE allowed (keeps PR #194 policy: /ai-policy, /ai.txt, robots.txt).
+Only abusive scrapers are blocked (worker.js `scraperBlock`: site copiers, bare HTTP
+libs; /api exempt). Cloudflare's managed robots.txt blocking training bots contradicts this:
+the owner should switch that dashboard setting off. Don't re-add training blocks.
+
 ## Current focus
 Feature: sikhiuni full multiscreen redesign, page-cluster wave 1 (tasks 5-8) in
 flight, self-recovered from a mid-wave concurrent-git-reset incident (see

@@ -14,6 +14,11 @@
 # https://sikhiuni.com is appreciated, not required. See /robots.txt for the
 # machine-readable rules.
 #
+# NOT ALLOWED — anonymous or site-copying scrapers. Requests from site-copier
+# tools and bare HTTP libraries (HTTrack, wget, scrapy, python-requests and the
+# like) are refused on pages and content files. Name your crawler in its user
+# agent and follow /robots.txt.
+#
 # TWO CAVEATS:
 #
 # 1. Third-party-credited material stays with its owner. Some content on this

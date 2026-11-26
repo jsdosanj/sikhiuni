@@ -286,6 +286,21 @@ const RATE_LIMITS = {
 };
 const RL_ENFORCE = true;
 
+// Abusive scrapers (site-copier tools and bare HTTP libraries that don't say who they are)
+// are refused on pages and content files. Search engines, AI answer engines and AI training
+// crawlers identify themselves and are all welcome (robots.txt, /ai-policy), so they never
+// match. /api/ is left to its own auth + rate limits (our draft-import script uses Python's
+// default user agent there), and robots.txt / security.txt stay readable to everyone.
+const SCRAPER_UA = /httrack|webcopier|webzip|offline explorer|sitesnagger|teleport ?pro|webstripper|webreaper|sitesucker|\bwget\b|scrapy|python-requests|python-urllib|python-httpx|aiohttp|go-http-client|okhttp|^java\/|libwww-perl|apache-httpclient|node-fetch|undici|\bcolly\b|phantomjs|zgrab|masscan|nikto|sqlmap/i;
+export function scraperBlock(request, pathname) {
+  if (pathname.startsWith('/api/') || pathname === '/robots.txt' || pathname.startsWith('/.well-known/')) return null;
+  const ua = (request.headers.get('user-agent') || '').trim();
+  if (!SCRAPER_UA.test(ua)) return null;
+  return new Response('Automated copying of this site is not allowed. Search and AI crawlers that identify themselves are welcome: see https://sikhiuni.com/robots.txt and https://sikhiuni.com/ai-policy.', {
+    status: 403, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' },
+  });
+}
+
 // Atomic fixed-window per-key limiter on D1. Strongly consistent, so a fast burst can't
 // slip through on stale reads the way a KV counter would. Fails OPEN on any error / no DB
 // so a limiter problem never locks out the mission's users. Creates its table lazily,
@@ -410,6 +425,8 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { pathname } = url;
+    const blocked = scraperBlock(request, pathname);
+    if (blocked) return blocked;
     if (pathname.startsWith('/media/')) {
       let key; try { key=decodeURIComponent(pathname.slice(7)); } catch { return new Response('Not found',{status:404}); }
       if (!key || key.includes('..') || !/^(santhya|audio|gurbani|media)\//.test(key)) return new Response('Not found',{status:404});
@@ -495,7 +512,12 @@ export default {
       // Single choke point: any handler exception returns a JSON 500 (never a raw
       // Cloudflare HTML error page) and is logged so failures are observable.
       try {
-        return await handler({ request, env: reqEnv, waitUntil: (p) => ctx && ctx.waitUntil(p) });
+        const res = await handler({ request, env: reqEnv, waitUntil: (p) => ctx && ctx.waitUntil(p) });
+        // API responses (JSON, iCal, unsubscribe pages) are never search results.
+        if (res && res.headers && !res.headers.has('x-robots-tag')) {
+          try { res.headers.set('x-robots-tag', 'noindex'); } catch { /* immutable headers (e.g. a proxied response): leave as is */ }
+        }
+        return res;
       } catch (err) {
         console.error("api_error", request.method, pathname, err && err.stack || String(err));
         return new Response(JSON.stringify({ error: "server_error" }), {

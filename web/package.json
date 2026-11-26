@@ -14,6 +14,7 @@
     "validate-institute": "node scripts/validate-institute.mjs",
     "build-institute-quiz-keys": "node scripts/build-institute-quiz-keys.mjs",
     "sync-aisf": "node scripts/sync-aisf.mjs",
+    "update-lastmod": "node --experimental-strip-types --no-warnings scripts/update-lastmod.mjs",
     "build": "npm run sync-data && npm run build-institute-quiz-keys && npm run sync-institute && npm run build-index && npm run verify-gurbani && npm run check-i18n && npm run build-dataset && npm run validate-institute && astro build && node scripts/stamp-sw.mjs && node scripts/build-csp.mjs && node ../test/course-content-build.mjs && node ../test/no-reveal-on-content.mjs && node ../test/contrast-glass.mjs && node ../test/contrast-liquid.mjs",
     "preview": "astro preview",
     "build-public-data": "python3 ../scripts/build_public_data.py",

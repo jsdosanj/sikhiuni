@@ -533,5 +533,9 @@
   "verify.ph.certid": "SU-…",
   "verify.submit": "Vérifier",
   "verify.valid": "Certificat valide",
-  "support.stayOnline": "Aidez-nous à rester en ligne"
+  "support.stayOnline": "Aidez-nous à rester en ligne",
+  "course.outline.h": "Plan du cours",
+  "course.related.h": "Cours associés",
+  "course.outline.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed",
+  "course.related.h@TODO(native-review)": "machine draft, terminology checked against existing dictionary; human native-speaker sign-off still needed"
 }

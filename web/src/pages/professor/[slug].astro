@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { professorList, profBio, profSlug, professorPhotos, profInitials, avatarColor, topicName, published } from '../../lib/data';
+import { professorList, profBio, profSlug, professorPhotos, profInitials, avatarColor, topicName, published, isThinProfessor } from '../../lib/data';
 import { isVerified } from '../../lib/verification';
 export function getStaticPaths() {
   return professorList().map(({ name, courses }) => ({ params: { slug: profSlug(name) }, props: { name, courses } }));
@@ -65,7 +65,7 @@ const personLd = {
   },
 };
 ---
-<Base title={`${name}, Sikhi University`} description={metaDesc} ogType="profile" ambient="study">
+<Base title={`${name}, Sikhi University`} description={metaDesc} ogType="profile" ambient="study" noindex={isThinProfessor(name, courses.length)}>
   <script type="application/ld+json" set:html={ldJson(personLd)} slot="head" />
 
   <div class="band-navy">
